@@ -1,0 +1,26 @@
+plugins {
+    id 'java'
+}
+
+sourceCompatibility = 1.9
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile project (':examples-read')
+    compile project (':examples-singlebc-read')
+    compile project (':examples-singlebc-trade')
+    compile project (':examples-singlebc-write')
+    compile project (':examples-trade')
+    compile project (':examples-twochain')
+    compile project (':examples-write')
+
+    compile group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.12.0'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.12.0'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.12.0'
+
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+
+}

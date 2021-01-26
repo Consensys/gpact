@@ -1,0 +1,52 @@
+plugins {
+    id 'java'
+}
+
+sourceCompatibility = 1.9
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile project (':common')
+    compile project (':crypto')
+    compile project (':rlp')
+    compile project (':receipts')
+    compile project (':blockheader')
+    compile project (':lockablestorage')
+    compile project (':crossblockchaincontrol')
+    compile project (':registrar')
+
+    compile group: 'com.google.guava', name: 'guava', version: '14.0'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.12.0'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.12.0'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.12.0'
+
+
+    implementation files('../../../web3j-rlp/abi/build/libs/abi-4.7.0-SNAPSHOT.jar')
+    implementation files('../../../web3j-rlp/core/build/libs/core-4.7.0-SNAPSHOT.jar')
+    implementation files('../../../web3j-rlp/crypto/build/libs/crypto-4.7.0-SNAPSHOT.jar')
+    implementation files('../../../web3j-rlp/rlp/build/libs/rlp-4.7.0-SNAPSHOT.jar')
+    implementation files('../../../web3j-rlp/utils/build/libs/utils-4.7.0-SNAPSHOT.jar')
+//    compile "com.squareup.okhttp3:okhttp:4.3.1"
+//    compile "com.squareup.okhttp3:logging-interceptor:4.3.1"
+    compile "com.squareup.okhttp3:okhttp:4.9.0"
+    compile "com.squareup.okhttp3:logging-interceptor:4.9.0"
+
+    // compile ('org.web3j:core:4.6.3')
+}
+
+task generateSources {
+    def script = "examples/singlebc-write/gen.sh".execute()
+//    script.in.eachLine {line -> println line}
+//    script.err.eachLine {line -> println "ERROR: " + line}
+    script.waitForProcessOutput(System.out, System.err)
+    if (script.exitValue() != 0) {
+        throw new GradleException("Solidity compile error")
+    }
+}
+
+project.afterEvaluate {
+    build.dependsOn generateSources
+}
