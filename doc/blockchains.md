@@ -17,12 +17,12 @@ This will skip tests (they take very long) and unpack the distribution file (whi
 ### Prepare to run the helper scripts
 
 They are written in JavaScript for coherence with Truffle and such.  
-In macOS, it's currently recommended to use Node v10, not the latest v12. (Truffle suffers the same issue)
+In macOS, it's currently recommended to use Node v10, not the latest v12. 
 ```bash
 brew install node@10
 ``` 
 
-Then install the libraries needed by the scripts: inside of the sidechains-samples directory, run:
+Then install the libraries needed by the scripts: inside of the ./gpact directory, run:
 ```bash
 npm install scripts
 ```

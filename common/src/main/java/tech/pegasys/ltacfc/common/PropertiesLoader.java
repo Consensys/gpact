@@ -75,25 +75,25 @@ public class PropertiesLoader {
   }
 
   public BlockchainInfo getBlockchainInfo(String tag) {
-    String bcIdStr = this.properties.getProperty(tag + "_BC_ID");
+    String bcIdStr = getProperty(tag + "_BC_ID");
     LOG.info(" {}_BC_ID: 0x{}", tag, bcIdStr);
-    String uriStr = this.properties.getProperty(tag + "_URI");
+    String uriStr = getProperty(tag + "_URI");
     LOG.info(" {}_URI: {}", tag, uriStr);
-    String gasPriceStrategyStr = this.properties.getProperty(tag + "_GAS");
+    String gasPriceStrategyStr = getProperty(tag + "_GAS");
     LOG.info(" {}_GAS: {}", tag, gasPriceStrategyStr);
-    String blockPeriodStr = this.properties.getProperty(tag + "_PERIOD");
+    String blockPeriodStr = getProperty(tag + "_PERIOD");
     LOG.info(" {}_PERIOD: {}", tag, blockPeriodStr);
     return new BlockchainInfo(bcIdStr, uriStr, gasPriceStrategyStr, blockPeriodStr);
   }
 
   public CrossBlockchainConsensusType getConsensusMethodology() {
-    String consensus = this.properties.getProperty("CONSENSUS_METHODOLOGY");
+    String consensus = getProperty("CONSENSUS_METHODOLOGY");
     LOG.info(" CONSENSUS_METHODOLOGY: {}", consensus);
     return CrossBlockchainConsensusType.valueOf(consensus);
   }
 
   public ExecutionEngineType getExecutionEnngine() {
-    String engineType = this.properties.getProperty("EXECUTION_ENGINE");
+    String engineType = getProperty("EXECUTION_ENGINE");
     LOG.info(" EXECUTION_ENGINE: {}", engineType);
     return ExecutionEngineType.valueOf(engineType);
   }
