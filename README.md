@@ -3,7 +3,7 @@
 This repo contains the General Purpose Atomic Crosschain Transactions (GPACT) 
 protocol reference implementation. It contains Solidity contracts, Java library
 code, test code, and example code. This is an implementation 
-of this paper: https://arxiv.org/abs/2005.09790.
+of this paper: https://arxiv.org/abs/2011.12783.
 
 ## Introduction
 
@@ -16,7 +16,7 @@ on one blockchain from other blockchains. Unlike previous atomic crosschain prot
 that only offer atomic asset swaps, this protocol allows for general purpose application logic.
 
 
-![Trade Finance using GPACT protocol](https://raw.githubusercontent.com/ConsenSys/LTACFC/master/doc/images/trade.png "Trade Finance using GPACT protocol")
+![Trade Finance using GPACT protocol](https://raw.githubusercontent.com/ConsenSys/gpact/master/doc/images/trade.png "Trade Finance using GPACT protocol")
 
 The figure above shows a logical representation of a crosschain call graph using the protocol. 
 A trade finance application creates a crosschain function 
@@ -45,11 +45,11 @@ anonymous. A crosschain transaction capability is needed to meet these requireme
 ## More information
 [Protocol Description](https://arxiv.org/abs/2005.09790)
 
-[How to build](https://github.com/ConsenSys/LTACFC/blob/master/doc/build.md)
+[How to build](https://github.com/ConsenSys/gpact/blob/master/doc/build.md)
 
-[Reproducing Performance Results](https://github.com/ConsenSys/LTACFC/blob/master/doc/perf.md)
+[Reproducing Performance Results](https://github.com/ConsenSys/gpact/blob/master/doc/perf.md)
 
-[Directories in this Repo](https://github.com/ConsenSys/LTACFC/blob/master/doc/directories.md)
+[Directories in this Repo](https://github.com/ConsenSys/gpact/blob/master/doc/directories.md)
 
 
 

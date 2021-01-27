@@ -68,7 +68,7 @@ public class PropertiesLoader {
   }
 
   public Credentials getCredentials() {
-    return Credentials.create(this.properties.getProperty("PRIVATE_KEY"));
+    return Credentials.create(getProperty("PRIVATE_KEY"));
   }
   public Credentials getCredentials(String keyName) {
     return Credentials.create(this.properties.getProperty(keyName));
