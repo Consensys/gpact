@@ -19,7 +19,7 @@ const nodeNum = process.argv[3] || 0; // default to node 0
 
 const executable = process.env.BESUPATH || `../besu/build/install/besu/bin/besu`
 const resourcesPath = `scripts/resources`;
-const destPath = process.env.HOME+`/cltacfc_data`;
+const destPath = process.env.HOME+`/cgpact_data`;
 const chainPath = `${destPath}/chain${chainId}`;
 const nodePath = `${chainPath}/node${nodeNum}`;
 

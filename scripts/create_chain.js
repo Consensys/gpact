@@ -30,7 +30,7 @@ console.log("Creating a blockchain with chainID " + chainId + " and " + nodeCoun
 
 const besuPath = process.env.BESUPATH || `../besu/build/install/besu/bin/besu`
 const resourcesPath = `scripts/resources`;
-const destPath = process.env.HOME+`/cltacfc_data`;
+const destPath = process.env.HOME+`/cgpact_data`;
 const basePort = 8000;
 const baseP2PPort = 30000;
 const chainPath = `${destPath}/chain${chainId}`;

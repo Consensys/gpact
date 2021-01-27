@@ -31,10 +31,6 @@ site/
 /kubernetes/besu-*.tar.gz
 
 
-# Sidechains:
-sample*.properties
 **/node_modules
-package-lock.json
 
-*.props
 

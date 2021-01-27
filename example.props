@@ -1,18 +1,3 @@
-# Examples
-
-## Set-up Ethereum nodes
-The samples can be used with Ethereum MainNet, one of the test networks,
-or blockchain nodes that run locally on your computer. To run blockchain 
-nodes on your computer, see https://github.com/ConsenSys/gpact/blob/master/doc/blockchains.md
-
-## Private Key
-The example code needs a private key. Please use the utilpkey example to 
-generate a private key. ./example.props contains a private key that could 
-be used to test purposes.
-
-## Example properties file
-
-```$xslt
 # Properties file for example code.
 
 # This private key is used for the account submitting transactions on each blockchain.
@@ -69,4 +54,3 @@ BC5_BC_ID=23
 BC5_URI=http://127.0.0.1:8350/
 BC5_GAS=FREE
 BC5_PERIOD=2000
-```

@@ -1,22 +1,22 @@
-## General organization
+## Preparing Test Blockchains
 
 Assumptions:
- - The repos besu and LTACFC must reside together under a same directory.
- - Node configuration and data files go into ~/cltacfc_data.
+ - The repos besu and gpact must reside together under a same directory.
+ - Ethereum node configuration and data files go into ~/cgpact_data.
 
-## 1. Build Besu 
-
-Inside of the besu directory, build Besu with 
-
-```
+## 1. Get and build Hyperledger Besu 
+Look at https://wiki.hyperledger.org/display/BESU/Building+from+source for the 
+latest build information. At time of writing it was (assuming Mac OS build):
+```bash
+brew install libsodium
+git clone --recursive https://github.com/hyperledger/besu
+cd besu
 ./gradlew installDist
 ```
 
 This will skip tests (they take very long) and unpack the distribution file (which will leave the binary at  `besu/build/install/besu/bin/besu`).
 
 ### Prepare to run the helper scripts
-
-They are written in JavaScript for coherence with Truffle and such.  
 In macOS, it's currently recommended to use Node v10, not the latest v12. 
 ```bash
 brew install node@10
@@ -24,13 +24,15 @@ brew install node@10
 
 Then install the libraries needed by the scripts: inside of the ./gpact directory, run:
 ```bash
-npm install scripts
+npm install fs-extra
+npm install toml-j0.4 
+npm install tomlify-j0.4 
 ```
 
 ## 2. Configuration of blockchain nodes
 
 ### Quick start: 
-To create 1 blockchain with chainIds 11 with one node:
+To create a blockchain with chain ID 11 (0xb) with one node:
 ```bash
 scripts/create_chain.js 11 1 
 ```
@@ -41,15 +43,35 @@ Each node directory will contain the node's key and data directory.
 
 Each node will listen for RPC at port `8000 + chainId*10 + nodeN`. For example, node 0 of chain 22 will listen at port 8220. The script will remind you of this when it finishes.
 
+### Create nodes used by example code
+The following will create five blockchains with one node per blockchain:
+```$xslt
+scripts/create_chain.js 31 1
+scripts/create_chain.js 32 1
+scripts/create_chain.js 33 1
+scripts/create_chain.js 34 1
+scripts/create_chain.js 35 1
+```
 
 
 ## 3. Run each node with the prepared config files
 
 ### Quick start: 
-
 ```bash
-scripts/run_node.sh
+scripts/run_node.sh 11
 ```
+
+### Run nodes used by example code
+To start the blockchain nodes, in separate windows run:
+```$xslt
+./scripts/run_node.js 31
+./scripts/run_node.js 32
+./scripts/run_node.js 33
+./scripts/run_node.js 34
+./scripts/run_node.js 35
+```
+
+
 --------------------
 
 ## FYI: creating a Genesis File
