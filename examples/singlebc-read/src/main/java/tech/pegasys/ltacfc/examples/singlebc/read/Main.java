@@ -18,8 +18,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
-import tech.pegasys.ltacfc.common.PropertiesLoader;
-import tech.pegasys.ltacfc.common.StatsHolder;
+import net.consensys.gpact.common.PropertiesLoader;
+import net.consensys.gpact.common.StatsHolder;
 
 import java.math.BigInteger;
 

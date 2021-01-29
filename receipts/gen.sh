@@ -6,7 +6,7 @@ HERE=receipts
 BUILDDIR=$HERE/build
 CONTRACTSDIR=$HERE/src/test/solidity
 OUTPUTDIR=$HERE/src/test/java
-PACKAGE=tech.pegasys.ltacfc.receipts.soliditywrappers
+PACKAGE=net.consensys.gpact.receipts.soliditywrappers
 #WEB3J=web3j
 WEB3J=../web3j-rlp/codegen/build/distributions/codegen-4.7.0-SNAPSHOT/bin/codegen
 

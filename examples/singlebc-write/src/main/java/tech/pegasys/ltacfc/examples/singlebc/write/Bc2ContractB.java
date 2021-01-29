@@ -18,13 +18,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
-import tech.pegasys.ltacfc.cbc.AbstractBlockchain;
+import net.consensys.gpact.cbc.AbstractBlockchain;
 import tech.pegasys.ltacfc.examples.singlebc.write.soliditywrappers.ContractB;
-import tech.pegasys.ltacfc.examples.singlebc.write.soliditywrappers.ContractA;
 
 
 import java.io.IOException;
-import java.math.BigInteger;
 import java.util.List;
 
 public class Bc2ContractB extends AbstractBlockchain {

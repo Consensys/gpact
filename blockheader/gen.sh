@@ -8,8 +8,8 @@ CONTRACTSDIR=$HERE/src/main/solidity
 TESTCONTRACTSDIR=$HERE/src/test/solidity
 OUTPUTDIR=$HERE/src/main/java
 TESTOUTPUTDIR=$HERE/src/test/java
-PACKAGE=tech.pegasys.ltacfc.soliditywrappers
-TESTPACKAGE=tech.pegasys.ltacfc.test.blockheader.soliditywrappers
+PACKAGE=net.consensys.gpact.soliditywrappers
+TESTPACKAGE=net.consensys.gpact.test.blockheader.soliditywrappers
 # WEB3J=web3j
 WEB3J=../web3j-rlp/codegen/build/distributions/codegen-4.7.0-SNAPSHOT/bin/codegen
 

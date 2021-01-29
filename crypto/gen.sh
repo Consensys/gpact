@@ -5,8 +5,8 @@ rm -rf build
 HERE=crypto
 BUILDDIR=$HERE/build
 CONTRACTSDIR=$HERE/src/main/solidity
-OUTPUTDIR=$HERE/src/main/java
-PACKAGE=tech.pegasys.ltacfc.soliditywrappers
+OUTPUTDIR=$HERE/src/test/java
+PACKAGE=net.consensys.gpact.test.soliditywrappers
 #WEB3J=web3j
 WEB3J=../web3j-rlp/codegen/build/distributions/codegen-4.7.0-SNAPSHOT/bin/codegen
 

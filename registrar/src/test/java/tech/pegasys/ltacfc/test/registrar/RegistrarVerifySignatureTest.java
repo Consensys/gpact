@@ -18,9 +18,9 @@ import org.junit.Test;
 import org.web3j.crypto.Sign;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.exceptions.TransactionException;
-import tech.pegasys.ltacfc.common.RevertReason;
+import net.consensys.gpact.common.RevertReason;
 import tech.pegasys.ltacfc.registrar.RegistrarVoteTypes;
-import tech.pegasys.ltacfc.common.AnIdentity;
+import net.consensys.gpact.common.AnIdentity;
 
 import java.math.BigInteger;
 import java.util.ArrayList;

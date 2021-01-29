@@ -16,7 +16,7 @@ package net.consensys.gpact.examples.util;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import tech.pegasys.ltacfc.utils.crypto.KeyPairGen;
+import net.consensys.gpact.utils.crypto.KeyPairGen;
 
 
 public class Main {

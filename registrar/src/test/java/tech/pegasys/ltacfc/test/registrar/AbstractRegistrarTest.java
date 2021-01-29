@@ -19,7 +19,7 @@ import org.web3j.tx.TransactionManager;
 import tech.pegasys.ltacfc.registrar.RegistrarVoteTypes;
 import tech.pegasys.ltacfc.registrar.SigAlgorithmTypes;
 import tech.pegasys.ltacfc.soliditywrappers.Registrar;
-import tech.pegasys.ltacfc.test.AbstractWeb3Test;
+import net.consensys.gpact.common.test.AbstractWeb3Test;
 
 import java.math.BigInteger;
 

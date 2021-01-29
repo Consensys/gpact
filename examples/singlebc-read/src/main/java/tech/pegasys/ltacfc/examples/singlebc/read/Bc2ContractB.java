@@ -17,7 +17,7 @@ package tech.pegasys.ltacfc.examples.singlebc.read;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
-import tech.pegasys.ltacfc.cbc.AbstractBlockchain;
+import net.consensys.gpact.cbc.AbstractBlockchain;
 import tech.pegasys.ltacfc.examples.singlebc.read.soliditywrappers.ContractB;
 
 

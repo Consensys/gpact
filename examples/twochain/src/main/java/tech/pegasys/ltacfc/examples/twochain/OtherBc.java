@@ -17,10 +17,9 @@ package tech.pegasys.ltacfc.examples.twochain;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
-import tech.pegasys.ltacfc.cbc.AbstractBlockchain;
-import tech.pegasys.ltacfc.common.DynamicGasProvider;
+import net.consensys.gpact.cbc.AbstractBlockchain;
 import tech.pegasys.ltacfc.examples.twochain.soliditywrappers.OtherBlockchainContract;
-import tech.pegasys.ltacfc.lockablestorage.soliditywrappers.LockableStorage;
+import net.consensys.gpact.lockablestorage.soliditywrappers.LockableStorage;
 
 
 import java.io.IOException;
