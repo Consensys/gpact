@@ -16,7 +16,6 @@ pragma solidity >=0.7.1;
 pragma experimental ABIEncoderV2;
 
 import "./CbcLockableStorageInterface.sol";
-// import "./CrossBlockchainControlInterface.sol";
 import "../../../../blockheader/src/main/solidity/TxReceiptsRootStorageInterface.sol";
 import "../../../../receipts/src/main/solidity/Receipts.sol";
 import "../../../../registrar/src/main/solidity/Registrar.sol";
