@@ -10,7 +10,7 @@ repositories {
 }
 
 web3j {
-    generatedPackageName = 'tech.pegasys.ltacfc.soliditywrappers.{0}'
+    generatedPackageName = 'net.consensys.gpact.soliditywrappers.{0}'
     generatedFilesBaseDir = "$buildDir/custom/destination"
 }
 

@@ -40,9 +40,9 @@ import net.consensys.gpact.common.StatsHolder;
 import net.consensys.gpact.common.Tuple;
 import net.consensys.gpact.cbc.soliditywrappers.CbcTxRootTransfer;
 import net.consensys.gpact.soliditywrappers.TxReceiptsRootStorage;
-import tech.pegasys.poc.witnesscodeanalysis.trie.ethereum.trie.MerklePatriciaTrie;
-import tech.pegasys.poc.witnesscodeanalysis.trie.ethereum.trie.Proof;
-import tech.pegasys.poc.witnesscodeanalysis.trie.ethereum.trie.SimpleMerklePatriciaTrie;
+import net.consensys.gpact.trie.MerklePatriciaTrie;
+import net.consensys.gpact.trie.Proof;
+import net.consensys.gpact.trie.SimpleMerklePatriciaTrie;
 
 import java.io.IOException;
 import java.math.BigInteger;

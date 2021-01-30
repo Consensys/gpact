@@ -22,9 +22,9 @@ import org.web3j.crypto.Credentials;
 import org.web3j.protocol.core.methods.response.BaseEventResponse;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import net.consensys.gpact.common.AnIdentity;
-import tech.pegasys.ltacfc.registrar.RegistrarVoteTypes;
-import tech.pegasys.ltacfc.registrar.SigAlgorithmTypes;
-import tech.pegasys.ltacfc.soliditywrappers.Registrar;
+import net.consensys.gpact.registrar.RegistrarVoteTypes;
+import net.consensys.gpact.registrar.SigAlgorithmTypes;
+import net.consensys.gpact.registrar.soliditywrappers.Registrar;
 
 import java.io.IOException;
 import java.math.BigInteger;

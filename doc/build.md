@@ -15,14 +15,14 @@ a special version of Web3J to generate the Java wrapper code for the contracts.
 An additional function is added for each public or external function in the Solidity
 code to allow the RLP encoded function to be fetched.  
 
-The special version of Web3J needs to end up in the directory `./LTACFC/..`. To create the special version of Web3J:
+The special version of Web3J needs to end up in the directory `./gpact/..`. To create the special version of Web3J:
 * cd ..
 * git clone https://github.com/drinkcoffee/web3j-rlp
 * cd web3j-rlp
 * ./gradlew build
 * cd codegen/build/distributions
 * tar xvf codegen-4.7.0-SNAPSHOT.tar
-* cd ../../../../LTACFC
+* cd ../../../../gpact
 
 ## Creating a blockchain for test purposes
 To build:
