@@ -21,6 +21,7 @@ import "../../../../crossblockchaincontrol/src/main/solidity/CbcLockableStorageI
 contract MockCbcForLockableStorageTest is CbcLockableStorageInterface {
     uint256 private rootBlockchainId;
     uint256 private transactionId;
+    address[] activeCallLockedContracts;
 
     function setRootBlockchainId(uint256 _rootBcId) external {
         rootBlockchainId = _rootBcId;
@@ -30,7 +31,14 @@ contract MockCbcForLockableStorageTest is CbcLockableStorageInterface {
         transactionId = _txId;
     }
 
-
+    function wasLockedByThisCall() external override view returns (bool) {
+        for (uint256 i = 0; i < activeCallLockedContracts.length; i++) {
+            if (activeCallLockedContracts[i] == msg.sender) {
+                return true;
+            }
+        }
+        return false;
+    }
     /**
      * @return false if the current transaction execution is part of a cross-blockchain call\.
      */
@@ -60,7 +68,19 @@ contract MockCbcForLockableStorageTest is CbcLockableStorageInterface {
     }
 
     // Called by a provisional storage contract indicating the contract needs to be locked.
-    function addToListOfLockedContracts(address /* _contractToLock */ ) external override {
+    function addToListOfLockedContracts(address _contractToLock) external override {
+        // Don't add the same contract twice. So, check the contract isn't in
+        // the array first.
+        for (uint256 i = 0; i < activeCallLockedContracts.length; i++) {
+            if (activeCallLockedContracts[i] == _contractToLock) {
+                return;
+            }
+        }
+        activeCallLockedContracts.push(_contractToLock);
 
+    }
+
+    function clearListOfLockedContracts() external {
+        delete activeCallLockedContracts;
     }
 }

@@ -81,15 +81,28 @@ public class LockableStorageLockingBytesTest extends AbstractLockableStorageTest
     byte[] val1 = new byte[]{0x15};
     byte[] val2 = new byte[]{0x19};
 
-    // Any non-zero Root Blockchain Id is deemed to indicate an active Cross-Blockchain call.
-    this.mockCrossBlockchainControlContract.setRootBlockchainId(BigInteger.ONE).send();
-
+    assert(!this.lockableStorageContract.locked().send());
     this.storageWrapper.test_setBytes(key, val1).send();
 
-    // Simulate another cross-blockchain call by using a different Root Blockchain Id.
-    this.mockCrossBlockchainControlContract.setRootBlockchainId(BigInteger.TWO).send();
+    // Simulate the end of this cross-blockchain call by clearing the list of locked contracts.
+    this.mockCrossBlockchainControlContract.clearListOfLockedContracts().send();
 
-    // This will fail as the contract is locked.
+    // Ensure the lockable storage contract perceives it is in the midst of a cross-blockchain call.
+    this.mockCrossBlockchainControlContract.setRootBlockchainId(BigInteger.ONE).send();
+    // Set a variable. This will lock the contract.
+    this.storageWrapper.test_setBytes(key, val1).send();
+    assert(this.lockableStorageContract.locked().send());
+
+    // This will work because contract thinks it is in the same segment.
+    this.storageWrapper.test_setBytes(key, val2).send();
+    assert(this.storageWrapper.test_getBytes(key).send()[0] == val2[0]);
+
+    // Simulate the end of this cross-blockchain call by clearing the list of locked contracts.
+    this.mockCrossBlockchainControlContract.clearListOfLockedContracts().send();
+
+    // Attempt to set a value in the lockable storage contract. This should fail because the contract
+    // is locked, and the cross-blockchain control contract will indicate that the contract was not
+    // locked by this cross-blockchain segment.
     try {
       this.storageWrapper.test_setBytes(key, val1).send();
       throw new Exception("Unexpectedly, no revert thrown");
@@ -104,33 +117,6 @@ public class LockableStorageLockingBytesTest extends AbstractLockableStorageTest
     } catch (ContractCallException ex) {
       // thrown as expected
     }
-
-    // Same root blockchain, different transaction.
-    this.mockCrossBlockchainControlContract.setRootBlockchainId(BigInteger.ONE).send();
-    this.mockCrossBlockchainControlContract.setCrossBlockchainTransactionId(BigInteger.ONE).send();
-
-    // This will fail as the contract is locked.
-    try {
-      this.storageWrapper.test_setBytes(key, val1).send();
-      throw new Exception("Unexpectedly, no revert thrown");
-    } catch (TransactionException ex) {
-      System.out.println("Exception thrown as expected: " + ex.getTransactionReceipt().get().getRevertReason());
-    }
-
-    // This will fail as the contract is locked.
-    try {
-      this.storageWrapper.test_getBytes(key).send();
-      throw new Exception("Unexpectedly, no revert thrown");
-    } catch (ContractCallException ex) {
-      // Revert thrown as expected
-    }
-
-    // Same root blockchain and same transaction.
-    this.mockCrossBlockchainControlContract.setCrossBlockchainTransactionId(BigInteger.ZERO).send();
-
-    // Writing and reading should now work.
-    this.storageWrapper.test_setBytes(key, val2).send();
-    assert(this.storageWrapper.test_getBytes(key).send()[0] == val2[0]);
   }
 
   // Check that finalising with a commit = true works.

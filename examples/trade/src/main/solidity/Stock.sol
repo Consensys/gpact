@@ -13,7 +13,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 pragma solidity >=0.7.1;
-
 import "../../../../../lockablestorage/src/main/solidity/LockableStorageWrapper.sol";
 
 contract Stock is LockableStorageWrapper {
@@ -35,9 +34,7 @@ contract Stock is LockableStorageWrapper {
         setMapValue(KEY_MAP1, uint256(_to), toBalance + _amount);
     }
 
-
     function getStock(address _account) public view returns (uint256) {
         return getMapValue(KEY_MAP1, uint256(_account));
     }
-
 }

@@ -323,6 +323,17 @@ abstract contract CrossBlockchainControl is CbcLockableStorageInterface, Receipt
         return activeCallCrossBlockchainTransactionId;
     }
 
+    // Called by Lockable Storage contract to determine if the Lockable Storage contract
+    // is being locked by this call. That is, if the contract is in the list of locked contracts.
+    function wasLockedByThisCall() external override view returns (bool) {
+        for (uint256 i = 0; i < activeCallLockedContracts.length; i++) {
+            if (activeCallLockedContracts[i] == msg.sender) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     function makeCall(bytes memory _callGraph, uint256[] memory _callPath) private returns(bool, bytes memory) {
         (uint256 targetBlockchainId, address targetContract, bytes memory functionCall) = extractTargetFromCallGraph(_callGraph, _callPath);
         require(targetBlockchainId == myBlockchainId, "Target blockchain id does not match my blockchain id");
