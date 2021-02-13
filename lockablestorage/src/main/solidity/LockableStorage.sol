@@ -139,8 +139,8 @@ contract LockableStorage {
         // Else (this is a cross-blockchain call) {
         else {
             //   If locked {
-            //     Check Cross-Blockchain Control Contract: has this cross-blockchain call previously
-            //     locked the contract?
+            //     Check Cross-Blockchain Control Contract: has this segment of the cross-blockchain call
+            //      previously locked the contract?
             //     If no {throw an error}
             //     If yes {Write to provisional storage}
             if (locked) {
@@ -188,8 +188,8 @@ contract LockableStorage {
         // Else (this is a cross-blockchain call) {
         else {
             //   If locked {
-            //     Check Cross-Blockchain Control Contract: has this cross-blockchain call previously
-            //     locked the contract?
+            //     Check Cross-Blockchain Control Contract: has this segment of the cross-blockchain call
+            //      previously locked the contract?
             //     If no {throw an error}
             //     If yes {Write to provisional storage}
             if (locked) {
@@ -270,8 +270,8 @@ contract LockableStorage {
         // Else (this is a cross-blockchain call) {
         else {
             //   If locked {
-            //     Check Cross-Blockchain Control Contract: has this cross-blockchain call previously
-            //     locked the contract?
+            //     Check Cross-Blockchain Control Contract: has this segment of the cross-blockchain call
+            //      previously locked the contract?
             //     If no {throw an error}
             //     If yes {Allow the read. If the value isn’t available in provisional storage, return
             //       the value in normal storage.} }
@@ -307,8 +307,8 @@ contract LockableStorage {
         // Else (this is a cross-blockchain call) {
         else {
             //   If locked {
-            //     Check Cross-Blockchain Control Contract: has this cross-blockchain call previously
-            //     locked the contract?
+            //     Check Cross-Blockchain Control Contract: has this segment of the cross-blockchain call
+            //      previously locked the contract?
             //     If no {throw an error}
             //     If yes {Allow the read. If the value isn’t available in provisional storage, return
             //       the value in normal storage.} }
@@ -351,12 +351,7 @@ contract LockableStorage {
      *
      */
     function checkLocking() private view {
-        if (lockedByRootBlockchainId != crossBlockchainControl.getActiveCallRootBlockchainId()) {
-            revert("Contract locked by other root blockchain");
-        }
-        if (lockedByTransactionId != crossBlockchainControl.getActiveCallCrossBlockchainTransactionId()) {
-            revert("Contract locked by other cross-blockchain transaction");
-        }
+        require(crossBlockchainControl.wasLockedByThisCall(), "Contract locked by other cross-blockchain transaction");
     }
 
 }

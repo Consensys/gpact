@@ -78,15 +78,23 @@ public class LockableStorageLockingUint256Test extends AbstractLockableStorageTe
 
     BigInteger theUint = BigInteger.ZERO;
 
-    // Any non-zero Root Blockchain Id is deemed to indicate an active Cross-Blockchain call.
+    assert(!this.lockableStorageContract.locked().send());
+    // Ensure the lockable storage contract perceives it is in the midst of a cross-blockchain call.
     this.mockCrossBlockchainControlContract.setRootBlockchainId(BigInteger.ONE).send();
-
+    // Set a variable. This will lock the contract.
     this.storageWrapper.test_setUint256(theUint, BigInteger.ONE).send();
+    assert(this.lockableStorageContract.locked().send());
 
-    // Simulate another cross-blockchain call by using a different Root Blockchain Id.
-    this.mockCrossBlockchainControlContract.setRootBlockchainId(BigInteger.TWO).send();
+    // This will work because contract thinks it is in the same segment.
+    this.storageWrapper.test_setUint256(theUint, BigInteger.TWO).send();
+    assert(this.storageWrapper.test_getUint256(theUint).send().compareTo(BigInteger.TWO) == 0);
 
-    // This will fail as the contract is locked.
+    // Simulate the end of this cross-blockchain call by clearing the list of locked contracts.
+    this.mockCrossBlockchainControlContract.clearListOfLockedContracts().send();
+
+    // Attempt to set a value in the lockable storage contract. This should fail because the contract
+    // is locked, and the cross-blockchain control contract will indicate that the contract was not
+    // locked by this cross-blockchain segment.
     try {
       this.storageWrapper.test_setUint256(theUint, BigInteger.ONE).send();
       throw new Exception("Unexpectedly, no revert thrown");
@@ -101,33 +109,6 @@ public class LockableStorageLockingUint256Test extends AbstractLockableStorageTe
     } catch (ContractCallException ex) {
       // thrown as expected
     }
-
-    // Same root blockchain, different transaction.
-    this.mockCrossBlockchainControlContract.setRootBlockchainId(BigInteger.ONE).send();
-    this.mockCrossBlockchainControlContract.setCrossBlockchainTransactionId(BigInteger.ONE).send();
-
-    // This will fail as the contract is locked.
-    try {
-      this.storageWrapper.test_setUint256(theUint, BigInteger.ONE).send();
-      throw new Exception("Unexpectedly, no revert thrown");
-    } catch (TransactionException ex) {
-      System.out.println("Exception thrown as expected: " + ex.getTransactionReceipt().get().getRevertReason());
-    }
-
-    // This will fail as the contract is locked.
-    try {
-      this.storageWrapper.test_getUint256(theUint).send();
-      throw new Exception("Unexpectedly, no revert thrown");
-    } catch (ContractCallException ex) {
-      // Revert thrown as expected
-    }
-
-    // Same root blockchain and same transaction.
-    this.mockCrossBlockchainControlContract.setCrossBlockchainTransactionId(BigInteger.ZERO).send();
-
-    // Writing and reading should now work.
-    this.storageWrapper.test_setUint256(theUint, BigInteger.TWO).send();
-    assert(this.storageWrapper.test_getUint256(theUint).send().compareTo(BigInteger.TWO) == 0);
   }
 
   // Check that finalising with a commit = true works.
