@@ -37,16 +37,3 @@ dependencies {
 
 }
 
-task generateSources {
-    def script = "receipts/gen.sh".execute()
-//    script.in.eachLine {line -> println line}
-//    script.err.eachLine {line -> println "ERROR: " + line}
-    script.waitForProcessOutput(System.out, System.err)
-    if (script.exitValue() != 0) {
-        throw new GradleException("Solidity compile error")
-    }
-}
-
-project.afterEvaluate {
-    build.dependsOn generateSources
-}

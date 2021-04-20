@@ -14,7 +14,7 @@
  */
 pragma solidity >=0.7.1;
 
-import "../../../../../lockablestorage/src/main/solidity/LockableStorageWrapper.sol";
+import "../../../../../contracts/solidity/lockablestorage/src/main/solidity/LockableStorageWrapper.sol";
 
 
 contract ContractB is LockableStorageWrapper {

@@ -15,8 +15,8 @@
 pragma solidity >=0.7.1;
 
 import "./ContractB.sol";
-import "../../../../../crossblockchaincontrol/src/main/solidity/CbcLockableStorageInterface.sol";
-import "../../../../../lockablestorage/src/main/solidity/LockableStorageWrapper.sol";
+import "../../../../../contracts/solidity/crossblockchaincontrol/src/main/solidity/CbcLockableStorageInterface.sol";
+import "../../../../../contracts/solidity/lockablestorage/src/main/solidity/LockableStorageWrapper.sol";
 
 
 contract ContractA is LockableStorageWrapper {

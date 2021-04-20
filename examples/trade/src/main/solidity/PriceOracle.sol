@@ -14,7 +14,7 @@
  */
 pragma solidity >=0.7.1;
 
-import "../../../../../crossblockchaincontrol/src/main/solidity/CbcLockableStorageInterface.sol";
+import "../../../../../contracts/solidity/crossblockchaincontrol/src/main/solidity/CbcLockableStorageInterface.sol";
 
 contract PriceOracle {
     CbcLockableStorageInterface crossBlockchainControl;

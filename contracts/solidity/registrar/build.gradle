@@ -1,0 +1,58 @@
+plugins {
+    id 'java'
+}
+
+sourceCompatibility = 1.9
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testCompile project (path: ':common', configuration: 'testArtifacts')
+
+    testCompile project (':crypto')
+    testCompile project (':registrar')
+
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+
+    implementation files('../../web3j-rlp/abi/build/libs/abi-4.7.0-SNAPSHOT.jar')
+    implementation files('../../web3j-rlp/core/build/libs/core-4.7.0-SNAPSHOT.jar')
+    implementation files('../../web3j-rlp/crypto/build/libs/crypto-4.7.0-SNAPSHOT.jar')
+    testImplementation files('../../web3j-rlp/utils/build/libs/utils-4.7.0-SNAPSHOT.jar')
+    testImplementation files('../../web3j-rlp/rlp/build/libs/rlp-4.7.0-SNAPSHOT.jar')
+    testCompile "com.fasterxml.jackson.core:jackson-databind:2.8.11.6"
+    compile "io.reactivex.rxjava2:rxjava:2.2.2"
+
+
+    compile group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.12.0'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.12.0'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.12.0'
+}
+
+
+// Generate Solidity wrapper code before build.
+task generateSources {
+    def script = "contracts/solidity/registrar/gen.sh".execute()
+    script.in.eachLine {line -> println line}
+    script.err.eachLine {line -> println "ERROR: " + line}
+    if (script.exitValue() != 0) {
+        throw new GradleException("Solidity compile error")
+    }
+}
+project.afterEvaluate {
+    build.dependsOn generateSources
+}
+
+
+// Generate a test jar so other modules can use the test code, in particular AbstractRegistrarTest.
+configurations {
+    testArtifacts.extendsFrom testRuntime
+}
+task testJar(type: Jar) {
+    classifier "test"
+    from sourceSets.test.output
+}
+artifacts {
+    testArtifacts testJar
+}

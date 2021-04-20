@@ -14,7 +14,7 @@
  */
 pragma solidity >=0.7.1;
 
-import "../../../../../lockablestorage/src/main/solidity/LockableStorageWrapper.sol";
+import "../../../../../contracts/solidity/lockablestorage/src/main/solidity/LockableStorageWrapper.sol";
 
 contract Balances is LockableStorageWrapper {
     uint256 constant private KEY_MAP1 = 0;
@@ -23,7 +23,7 @@ contract Balances is LockableStorageWrapper {
     }
 
     function setBalance(address _account, uint256 _newBalance) external {
-        setMapValue(KEY_MAP1, uint256(_account), _newBalance);
+        setMapValue(KEY_MAP1, uint256(uint160(_account)), _newBalance);
     }
 
     function transfer(address _from, address _to, uint256 _amount) external {
@@ -31,13 +31,13 @@ contract Balances is LockableStorageWrapper {
         uint256 toBalance = getBalance(_to);
         require(fromBalance >= _amount, "Value transfer: insufficient balance");
 
-        setMapValue(KEY_MAP1, uint256(_from), fromBalance - _amount);
-        setMapValue(KEY_MAP1, uint256(_to), toBalance + _amount);
+        setMapValue(KEY_MAP1, uint256(uint160(_from)), fromBalance - _amount);
+        setMapValue(KEY_MAP1, uint256(uint160(_to)), toBalance + _amount);
     }
 
 
     function getBalance(address _account) public view returns (uint256) {
-        return getMapValue(KEY_MAP1, uint256(_account));
+        return getMapValue(KEY_MAP1, uint256(uint160(_account)));
     }
 
 }

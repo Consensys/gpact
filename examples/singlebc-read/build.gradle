@@ -13,8 +13,8 @@ dependencies {
     compile project (':crypto')
     compile project (':rlp')
     compile project (':receipts')
-    compile project (':blockheader')
-    compile project (':lockablestorage')
+    compile project (':sol-blockheader')
+    compile project (':sol-lockablestorage')
     compile project (':crossblockchaincontrol')
     compile project (':registrar')
 

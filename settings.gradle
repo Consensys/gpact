@@ -1,13 +1,17 @@
 rootProject.name = 'gpact'
 include 'crypto'
+include 'sol-crypto'
 include 'rlp'
 include 'trie'
 include 'receipts'
 include 'registrar'
-include 'blockheader'
+include 'sol-receipts'
+include 'sol-registrar'
+include 'sol-blockheader'
+include 'sol-crossblockchaincontrol'
 include 'crossblockchaincontrol'
 include 'common'
-include 'lockablestorage'
+include 'sol-lockablestorage'
 include 'examples-read'
 include 'examples-write'
 include 'examples-twochain'
@@ -17,6 +21,14 @@ include 'examples-singlebc-write'
 include 'examples-singlebc-trade'
 include 'examples-utilpkey'
 include 'examples-test'
+
+project(":sol-blockheader").projectDir = file("contracts/solidity/blockheader")
+project(":sol-crossblockchaincontrol").projectDir = file("contracts/solidity/crossblockchaincontrol")
+project(":sol-crypto").projectDir = file("contracts/solidity/crypto")
+project(":sol-lockablestorage").projectDir = file("contracts/solidity/lockablestorage")
+project(":sol-receipts").projectDir = file("contracts/solidity/receipts")
+project(":sol-registrar").projectDir = file("contracts/solidity/registrar")
+
 
 project(":examples-read").projectDir = file("examples/read")
 project(":examples-write").projectDir = file("examples/write")

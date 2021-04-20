@@ -13,8 +13,9 @@ dependencies {
     compile project (path: ':common')
     compile project (path: ':registrar')
     compile project (path: ':rlp')
-    compile project (path: ':blockheader')
+    compile project (path: ':sol-blockheader')
     compile project (path: ':receipts')
+    compile project (path: ':sol-crossblockchaincontrol')
 
 //    testCompile project (':crypto')
 
@@ -39,17 +40,3 @@ dependencies {
 
 }
 
-
-// Generate Solidity wrapper code before build.
-task generateSources {
-    def script = "crossblockchaincontrol/gen.sh".execute()
-//    script.in.eachLine {line -> println line}
-//    script.err.eachLine {line -> println "ERROR: " + line}
-    script.waitForProcessOutput(System.out, System.err)
-    if (script.exitValue() != 0) {
-        throw new GradleException("Solidity compile error")
-    }
-}
-project.afterEvaluate {
-    build.dependsOn generateSources
-}

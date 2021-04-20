@@ -38,15 +38,3 @@ dependencies {
     testImplementation files('../../web3j-rlp/utils/build/libs/utils-4.7.0-SNAPSHOT.jar')
 }
 
-task generateSources {
-    def script = "crypto/gen.sh".execute()
-    script.in.eachLine {line -> println line}
-    script.err.eachLine {line -> println "ERROR: " + line}
-    if (script.exitValue() != 0) {
-        throw new GradleException("Solidity compile error")
-    }
-}
-
-project.afterEvaluate {
-    build.dependsOn generateSources
-}

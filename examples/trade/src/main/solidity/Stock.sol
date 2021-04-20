@@ -13,7 +13,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 pragma solidity >=0.7.1;
-import "../../../../../lockablestorage/src/main/solidity/LockableStorageWrapper.sol";
+import "../../../../../contracts/solidity/lockablestorage/src/main/solidity/LockableStorageWrapper.sol";
 
 contract Stock is LockableStorageWrapper {
     uint256 constant private KEY_MAP1 = 0;
@@ -22,7 +22,7 @@ contract Stock is LockableStorageWrapper {
     }
 
     function setStock(address _account, uint256 _newBalance) external {
-        setMapValue(KEY_MAP1, uint256(_account), _newBalance);
+        setMapValue(KEY_MAP1, uint256(uint160(_account)), _newBalance);
     }
 
     function delivery(address _from, address _to, uint256 _amount) external {
@@ -30,11 +30,11 @@ contract Stock is LockableStorageWrapper {
         uint256 toBalance = getStock(_to);
         require(fromBalance >= _amount, "Stock transfer: insufficient balance");
 
-        setMapValue(KEY_MAP1, uint256(_from), fromBalance - _amount);
-        setMapValue(KEY_MAP1, uint256(_to), toBalance + _amount);
+        setMapValue(KEY_MAP1, uint256(uint160(_from)), fromBalance - _amount);
+        setMapValue(KEY_MAP1, uint256(uint160(_to)), toBalance + _amount);
     }
 
     function getStock(address _account) public view returns (uint256) {
-        return getMapValue(KEY_MAP1, uint256(_account));
+        return getMapValue(KEY_MAP1, uint256(uint160(_account)));
     }
 }
