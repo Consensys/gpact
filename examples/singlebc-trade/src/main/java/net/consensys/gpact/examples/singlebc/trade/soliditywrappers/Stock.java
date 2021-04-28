@@ -23,7 +23,7 @@ import org.web3j.tx.gas.ContractGasProvider;
  * or the org.web3j.codegen.SolidityFunctionWrapperGenerator in the 
  * <a href="https://github.com/web3j/web3j/tree/master/codegen">codegen module</a> to update.
  *
- * <p>Generated with web3j version 4.7.0-SNAPSHOT.
+ * <p>Generated with web3j version 4.8.5-SNAPSHOT.
  */
 @SuppressWarnings("rawtypes")
 public class Stock extends Contract {
@@ -63,29 +63,11 @@ public class Stock extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_delivery(String _from, String _to, BigInteger _amount) {
-        final Function function = new Function(
-                FUNC_DELIVERY, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, _from), 
-                new org.web3j.abi.datatypes.Address(160, _to), 
-                new org.web3j.abi.datatypes.generated.Uint256(_amount)), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
-    }
-
     public RemoteFunctionCall<BigInteger> getStock(String _account) {
         final Function function = new Function(FUNC_GETSTOCK, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, _account)), 
                 Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}));
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
-    }
-
-    public String getRLP_getStock(String _account) {
-        final Function function = new Function(
-                FUNC_GETSTOCK, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, _account)), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
     }
 
     public RemoteFunctionCall<TransactionReceipt> setStock(String _account, BigInteger _newBalance) {
@@ -95,15 +77,6 @@ public class Stock extends Contract {
                 new org.web3j.abi.datatypes.generated.Uint256(_newBalance)), 
                 Collections.<TypeReference<?>>emptyList());
         return executeRemoteCallTransaction(function);
-    }
-
-    public String getRLP_setStock(String _account, BigInteger _newBalance) {
-        final Function function = new Function(
-                FUNC_SETSTOCK, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, _account), 
-                new org.web3j.abi.datatypes.generated.Uint256(_newBalance)), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
     }
 
     @Deprecated

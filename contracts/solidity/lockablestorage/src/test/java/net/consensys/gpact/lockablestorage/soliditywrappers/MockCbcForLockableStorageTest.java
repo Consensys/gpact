@@ -24,7 +24,7 @@ import org.web3j.tx.gas.ContractGasProvider;
  * or the org.web3j.codegen.SolidityFunctionWrapperGenerator in the 
  * <a href="https://github.com/web3j/web3j/tree/master/codegen">codegen module</a> to update.
  *
- * <p>Generated with web3j version 4.7.0-SNAPSHOT.
+ * <p>Generated with web3j version 4.8.5-SNAPSHOT.
  */
 @SuppressWarnings("rawtypes")
 public class MockCbcForLockableStorageTest extends Contract {
@@ -76,28 +76,12 @@ public class MockCbcForLockableStorageTest extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_addToListOfLockedContracts(String _contractToLock) {
-        final Function function = new Function(
-                FUNC_ADDTOLISTOFLOCKEDCONTRACTS, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, _contractToLock)), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
-    }
-
     public RemoteFunctionCall<TransactionReceipt> clearListOfLockedContracts() {
         final Function function = new Function(
                 FUNC_CLEARLISTOFLOCKEDCONTRACTS, 
                 Arrays.<Type>asList(), 
                 Collections.<TypeReference<?>>emptyList());
         return executeRemoteCallTransaction(function);
-    }
-
-    public String getRLP_clearListOfLockedContracts() {
-        final Function function = new Function(
-                FUNC_CLEARLISTOFLOCKEDCONTRACTS, 
-                Arrays.<Type>asList(), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
     }
 
     public RemoteFunctionCall<TransactionReceipt> crossBlockchainCall(BigInteger param0, String param1, byte[] param2) {
@@ -110,16 +94,6 @@ public class MockCbcForLockableStorageTest extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_crossBlockchainCall(BigInteger param0, String param1, byte[] param2) {
-        final Function function = new Function(
-                FUNC_CROSSBLOCKCHAINCALL, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(param0), 
-                new org.web3j.abi.datatypes.Address(160, param1), 
-                new org.web3j.abi.datatypes.DynamicBytes(param2)), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
-    }
-
     public RemoteFunctionCall<BigInteger> crossBlockchainCallReturnsUint256(BigInteger param0, String param1, byte[] param2) {
         final Function function = new Function(FUNC_CROSSBLOCKCHAINCALLRETURNSUINT256, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(param0), 
@@ -129,29 +103,11 @@ public class MockCbcForLockableStorageTest extends Contract {
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
 
-    public String getRLP_crossBlockchainCallReturnsUint256(BigInteger param0, String param1, byte[] param2) {
-        final Function function = new Function(
-                FUNC_CROSSBLOCKCHAINCALLRETURNSUINT256, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(param0), 
-                new org.web3j.abi.datatypes.Address(160, param1), 
-                new org.web3j.abi.datatypes.DynamicBytes(param2)), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
-    }
-
     public RemoteFunctionCall<BigInteger> getActiveCallCrossBlockchainTransactionId() {
         final Function function = new Function(FUNC_GETACTIVECALLCROSSBLOCKCHAINTRANSACTIONID, 
                 Arrays.<Type>asList(), 
                 Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}));
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
-    }
-
-    public String getRLP_getActiveCallCrossBlockchainTransactionId() {
-        final Function function = new Function(
-                FUNC_GETACTIVECALLCROSSBLOCKCHAINTRANSACTIONID, 
-                Arrays.<Type>asList(), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
     }
 
     public RemoteFunctionCall<BigInteger> getActiveCallRootBlockchainId() {
@@ -161,27 +117,11 @@ public class MockCbcForLockableStorageTest extends Contract {
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
 
-    public String getRLP_getActiveCallRootBlockchainId() {
-        final Function function = new Function(
-                FUNC_GETACTIVECALLROOTBLOCKCHAINID, 
-                Arrays.<Type>asList(), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
-    }
-
     public RemoteFunctionCall<Boolean> isSingleBlockchainCall() {
         final Function function = new Function(FUNC_ISSINGLEBLOCKCHAINCALL, 
                 Arrays.<Type>asList(), 
                 Arrays.<TypeReference<?>>asList(new TypeReference<Bool>() {}));
         return executeRemoteCallSingleValueReturn(function, Boolean.class);
-    }
-
-    public String getRLP_isSingleBlockchainCall() {
-        final Function function = new Function(
-                FUNC_ISSINGLEBLOCKCHAINCALL, 
-                Arrays.<Type>asList(), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
     }
 
     public RemoteFunctionCall<TransactionReceipt> setCrossBlockchainTransactionId(BigInteger _txId) {
@@ -192,14 +132,6 @@ public class MockCbcForLockableStorageTest extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_setCrossBlockchainTransactionId(BigInteger _txId) {
-        final Function function = new Function(
-                FUNC_SETCROSSBLOCKCHAINTRANSACTIONID, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_txId)), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
-    }
-
     public RemoteFunctionCall<TransactionReceipt> setRootBlockchainId(BigInteger _rootBcId) {
         final Function function = new Function(
                 FUNC_SETROOTBLOCKCHAINID, 
@@ -208,27 +140,11 @@ public class MockCbcForLockableStorageTest extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_setRootBlockchainId(BigInteger _rootBcId) {
-        final Function function = new Function(
-                FUNC_SETROOTBLOCKCHAINID, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_rootBcId)), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
-    }
-
     public RemoteFunctionCall<Boolean> wasLockedByThisCall() {
         final Function function = new Function(FUNC_WASLOCKEDBYTHISCALL, 
                 Arrays.<Type>asList(), 
                 Arrays.<TypeReference<?>>asList(new TypeReference<Bool>() {}));
         return executeRemoteCallSingleValueReturn(function, Boolean.class);
-    }
-
-    public String getRLP_wasLockedByThisCall() {
-        final Function function = new Function(
-                FUNC_WASLOCKEDBYTHISCALL, 
-                Arrays.<Type>asList(), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
     }
 
     @Deprecated

@@ -23,7 +23,7 @@ import org.web3j.tx.gas.ContractGasProvider;
  * or the org.web3j.codegen.SolidityFunctionWrapperGenerator in the 
  * <a href="https://github.com/web3j/web3j/tree/master/codegen">codegen module</a> to update.
  *
- * <p>Generated with web3j version 4.7.0-SNAPSHOT.
+ * <p>Generated with web3j version 4.8.5-SNAPSHOT.
  */
 @SuppressWarnings("rawtypes")
 public class Balances extends Contract {
@@ -60,14 +60,6 @@ public class Balances extends Contract {
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
 
-    public String getRLP_getBalance(String _account) {
-        final Function function = new Function(
-                FUNC_GETBALANCE, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, _account)), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
-    }
-
     public RemoteFunctionCall<TransactionReceipt> setBalance(String _account, BigInteger _newBalance) {
         final Function function = new Function(
                 FUNC_SETBALANCE, 
@@ -75,15 +67,6 @@ public class Balances extends Contract {
                 new org.web3j.abi.datatypes.generated.Uint256(_newBalance)), 
                 Collections.<TypeReference<?>>emptyList());
         return executeRemoteCallTransaction(function);
-    }
-
-    public String getRLP_setBalance(String _account, BigInteger _newBalance) {
-        final Function function = new Function(
-                FUNC_SETBALANCE, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, _account), 
-                new org.web3j.abi.datatypes.generated.Uint256(_newBalance)), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
     }
 
     public RemoteFunctionCall<TransactionReceipt> transfer(String _from, String _to, BigInteger _amount) {
@@ -94,16 +77,6 @@ public class Balances extends Contract {
                 new org.web3j.abi.datatypes.generated.Uint256(_amount)), 
                 Collections.<TypeReference<?>>emptyList());
         return executeRemoteCallTransaction(function);
-    }
-
-    public String getRLP_transfer(String _from, String _to, BigInteger _amount) {
-        final Function function = new Function(
-                FUNC_TRANSFER, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, _from), 
-                new org.web3j.abi.datatypes.Address(160, _to), 
-                new org.web3j.abi.datatypes.generated.Uint256(_amount)), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
     }
 
     @Deprecated

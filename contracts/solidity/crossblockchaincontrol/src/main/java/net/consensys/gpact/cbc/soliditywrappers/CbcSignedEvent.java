@@ -39,7 +39,7 @@ import org.web3j.tx.gas.ContractGasProvider;
  * or the org.web3j.codegen.SolidityFunctionWrapperGenerator in the 
  * <a href="https://github.com/web3j/web3j/tree/master/codegen">codegen module</a> to update.
  *
- * <p>Generated with web3j version 4.7.0-SNAPSHOT.
+ * <p>Generated with web3j version 4.8.5-SNAPSHOT.
  */
 @SuppressWarnings("rawtypes")
 public class CbcSignedEvent extends Contract {
@@ -463,27 +463,11 @@ public class CbcSignedEvent extends Contract {
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
 
-    public String getRLP_activeCallCrossBlockchainTransactionId() {
-        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
-                FUNC_ACTIVECALLCROSSBLOCKCHAINTRANSACTIONID, 
-                Arrays.<Type>asList(), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
-    }
-
     public RemoteFunctionCall<byte[]> activeCallGraph() {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(FUNC_ACTIVECALLGRAPH, 
                 Arrays.<Type>asList(), 
                 Arrays.<TypeReference<?>>asList(new TypeReference<DynamicBytes>() {}));
         return executeRemoteCallSingleValueReturn(function, byte[].class);
-    }
-
-    public String getRLP_activeCallGraph() {
-        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
-                FUNC_ACTIVECALLGRAPH, 
-                Arrays.<Type>asList(), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
     }
 
     public RemoteFunctionCall<BigInteger> activeCallRootBlockchainId() {
@@ -493,28 +477,12 @@ public class CbcSignedEvent extends Contract {
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
 
-    public String getRLP_activeCallRootBlockchainId() {
-        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
-                FUNC_ACTIVECALLROOTBLOCKCHAINID, 
-                Arrays.<Type>asList(), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
-    }
-
     public RemoteFunctionCall<TransactionReceipt> addToListOfLockedContracts(String _contractToLock) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_ADDTOLISTOFLOCKEDCONTRACTS, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, _contractToLock)), 
                 Collections.<TypeReference<?>>emptyList());
         return executeRemoteCallTransaction(function);
-    }
-
-    public String getRLP_addToListOfLockedContracts(String _contractToLock) {
-        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
-                FUNC_ADDTOLISTOFLOCKEDCONTRACTS, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, _contractToLock)), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
     }
 
     public RemoteFunctionCall<TransactionReceipt> crossBlockchainCall(BigInteger _blockchainId, String _contract, byte[] _functionCallData) {
@@ -527,16 +495,6 @@ public class CbcSignedEvent extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_crossBlockchainCall(BigInteger _blockchainId, String _contract, byte[] _functionCallData) {
-        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
-                FUNC_CROSSBLOCKCHAINCALL, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_blockchainId), 
-                new org.web3j.abi.datatypes.Address(160, _contract), 
-                new org.web3j.abi.datatypes.DynamicBytes(_functionCallData)), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
-    }
-
     public RemoteFunctionCall<TransactionReceipt> crossBlockchainCallReturnsUint256(BigInteger _blockchainId, String _contract, byte[] _functionCallData) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_CROSSBLOCKCHAINCALLRETURNSUINT256, 
@@ -547,29 +505,11 @@ public class CbcSignedEvent extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_crossBlockchainCallReturnsUint256(BigInteger _blockchainId, String _contract, byte[] _functionCallData) {
-        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
-                FUNC_CROSSBLOCKCHAINCALLRETURNSUINT256, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_blockchainId), 
-                new org.web3j.abi.datatypes.Address(160, _contract), 
-                new org.web3j.abi.datatypes.DynamicBytes(_functionCallData)), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
-    }
-
     public RemoteFunctionCall<BigInteger> getActiveCallCrossBlockchainTransactionId() {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(FUNC_GETACTIVECALLCROSSBLOCKCHAINTRANSACTIONID, 
                 Arrays.<Type>asList(), 
                 Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}));
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
-    }
-
-    public String getRLP_getActiveCallCrossBlockchainTransactionId() {
-        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
-                FUNC_GETACTIVECALLCROSSBLOCKCHAINTRANSACTIONID, 
-                Arrays.<Type>asList(), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
     }
 
     public RemoteFunctionCall<BigInteger> getActiveCallRootBlockchainId() {
@@ -579,14 +519,6 @@ public class CbcSignedEvent extends Contract {
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
 
-    public String getRLP_getActiveCallRootBlockchainId() {
-        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
-                FUNC_GETACTIVECALLROOTBLOCKCHAINID, 
-                Arrays.<Type>asList(), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
-    }
-
     public RemoteFunctionCall<Boolean> isSingleBlockchainCall() {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(FUNC_ISSINGLEBLOCKCHAINCALL, 
                 Arrays.<Type>asList(), 
@@ -594,27 +526,11 @@ public class CbcSignedEvent extends Contract {
         return executeRemoteCallSingleValueReturn(function, Boolean.class);
     }
 
-    public String getRLP_isSingleBlockchainCall() {
-        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
-                FUNC_ISSINGLEBLOCKCHAINCALL, 
-                Arrays.<Type>asList(), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
-    }
-
     public RemoteFunctionCall<BigInteger> myBlockchainId() {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(FUNC_MYBLOCKCHAINID, 
                 Arrays.<Type>asList(), 
                 Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}));
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
-    }
-
-    public String getRLP_myBlockchainId() {
-        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
-                FUNC_MYBLOCKCHAINID, 
-                Arrays.<Type>asList(), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
     }
 
     public RemoteFunctionCall<TransactionReceipt> root(List<byte[]> _signedEventInfo, List<byte[]> _signature) {
@@ -630,32 +546,11 @@ public class CbcSignedEvent extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_root(List<byte[]> _signedEventInfo, List<byte[]> _signature) {
-        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
-                FUNC_ROOT, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.DynamicArray<org.web3j.abi.datatypes.DynamicBytes>(
-                        org.web3j.abi.datatypes.DynamicBytes.class,
-                        org.web3j.abi.Utils.typeMap(_signedEventInfo, org.web3j.abi.datatypes.DynamicBytes.class)), 
-                new org.web3j.abi.datatypes.DynamicArray<org.web3j.abi.datatypes.DynamicBytes>(
-                        org.web3j.abi.datatypes.DynamicBytes.class,
-                        org.web3j.abi.Utils.typeMap(_signature, org.web3j.abi.datatypes.DynamicBytes.class))), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
-    }
-
     public RemoteFunctionCall<BigInteger> rootTransactionInformation(BigInteger param0) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(FUNC_ROOTTRANSACTIONINFORMATION, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(param0)), 
                 Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}));
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
-    }
-
-    public String getRLP_rootTransactionInformation(BigInteger param0) {
-        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
-                FUNC_ROOTTRANSACTIONINFORMATION, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(param0)), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
     }
 
     public RemoteFunctionCall<TransactionReceipt> segment(List<byte[]> _signedEventInfo, List<byte[]> _signature, List<BigInteger> _callPath) {
@@ -674,35 +569,11 @@ public class CbcSignedEvent extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_segment(List<byte[]> _signedEventInfo, List<byte[]> _signature, List<BigInteger> _callPath) {
-        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
-                FUNC_SEGMENT, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.DynamicArray<org.web3j.abi.datatypes.DynamicBytes>(
-                        org.web3j.abi.datatypes.DynamicBytes.class,
-                        org.web3j.abi.Utils.typeMap(_signedEventInfo, org.web3j.abi.datatypes.DynamicBytes.class)), 
-                new org.web3j.abi.datatypes.DynamicArray<org.web3j.abi.datatypes.DynamicBytes>(
-                        org.web3j.abi.datatypes.DynamicBytes.class,
-                        org.web3j.abi.Utils.typeMap(_signature, org.web3j.abi.datatypes.DynamicBytes.class)), 
-                new org.web3j.abi.datatypes.DynamicArray<org.web3j.abi.datatypes.generated.Uint256>(
-                        org.web3j.abi.datatypes.generated.Uint256.class,
-                        org.web3j.abi.Utils.typeMap(_callPath, org.web3j.abi.datatypes.generated.Uint256.class))), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
-    }
-
     public RemoteFunctionCall<Boolean> segmentTransactionExecuted(byte[] param0) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(FUNC_SEGMENTTRANSACTIONEXECUTED, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(param0)), 
                 Arrays.<TypeReference<?>>asList(new TypeReference<Bool>() {}));
         return executeRemoteCallSingleValueReturn(function, Boolean.class);
-    }
-
-    public String getRLP_segmentTransactionExecuted(byte[] param0) {
-        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
-                FUNC_SEGMENTTRANSACTIONEXECUTED, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(param0)), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
     }
 
     public RemoteFunctionCall<TransactionReceipt> signalling(List<byte[]> _signedEventInfo, List<byte[]> _signature) {
@@ -718,19 +589,6 @@ public class CbcSignedEvent extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_signalling(List<byte[]> _signedEventInfo, List<byte[]> _signature) {
-        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
-                FUNC_SIGNALLING, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.DynamicArray<org.web3j.abi.datatypes.DynamicBytes>(
-                        org.web3j.abi.datatypes.DynamicBytes.class,
-                        org.web3j.abi.Utils.typeMap(_signedEventInfo, org.web3j.abi.datatypes.DynamicBytes.class)), 
-                new org.web3j.abi.datatypes.DynamicArray<org.web3j.abi.datatypes.DynamicBytes>(
-                        org.web3j.abi.datatypes.DynamicBytes.class,
-                        org.web3j.abi.Utils.typeMap(_signature, org.web3j.abi.datatypes.DynamicBytes.class))), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
-    }
-
     public RemoteFunctionCall<TransactionReceipt> start(BigInteger _crossBlockchainTransactionId, BigInteger _timeout, byte[] _callGraph) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_START, 
@@ -741,29 +599,11 @@ public class CbcSignedEvent extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_start(BigInteger _crossBlockchainTransactionId, BigInteger _timeout, byte[] _callGraph) {
-        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
-                FUNC_START, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_crossBlockchainTransactionId), 
-                new org.web3j.abi.datatypes.generated.Uint256(_timeout), 
-                new org.web3j.abi.datatypes.DynamicBytes(_callGraph)), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
-    }
-
     public RemoteFunctionCall<Boolean> wasLockedByThisCall() {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(FUNC_WASLOCKEDBYTHISCALL, 
                 Arrays.<Type>asList(), 
                 Arrays.<TypeReference<?>>asList(new TypeReference<Bool>() {}));
         return executeRemoteCallSingleValueReturn(function, Boolean.class);
-    }
-
-    public String getRLP_wasLockedByThisCall() {
-        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
-                FUNC_WASLOCKEDBYTHISCALL, 
-                Arrays.<Type>asList(), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
     }
 
     @Deprecated

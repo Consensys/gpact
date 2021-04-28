@@ -34,7 +34,7 @@ import org.web3j.tx.gas.ContractGasProvider;
  * or the org.web3j.codegen.SolidityFunctionWrapperGenerator in the 
  * <a href="https://github.com/web3j/web3j/tree/master/codegen">codegen module</a> to update.
  *
- * <p>Generated with web3j version 4.7.0-SNAPSHOT.
+ * <p>Generated with web3j version 4.8.5-SNAPSHOT.
  */
 @SuppressWarnings("rawtypes")
 public class TestReceipts extends Contract {
@@ -112,14 +112,6 @@ public class TestReceipts extends Contract {
         return executeRemoteCallSingleValueReturn(function, String.class);
     }
 
-    public String getRLP_emittingContractFirstLog(byte[] _receiptRlp) {
-        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
-                FUNC_EMITTINGCONTRACTFIRSTLOG, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.DynamicBytes(_receiptRlp)), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
-    }
-
     public RemoteFunctionCall<String> getEventSignatureFirstLog(byte[] _receiptRlp) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(FUNC_GETEVENTSIGNATUREFIRSTLOG, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.DynamicBytes(_receiptRlp)), 
@@ -127,27 +119,11 @@ public class TestReceipts extends Contract {
         return executeRemoteCallSingleValueReturn(function, String.class);
     }
 
-    public String getRLP_getEventSignatureFirstLog(byte[] _receiptRlp) {
-        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
-                FUNC_GETEVENTSIGNATUREFIRSTLOG, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.DynamicBytes(_receiptRlp)), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
-    }
-
     public RemoteFunctionCall<BigInteger> numLogsFound(byte[] _receiptRlp) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(FUNC_NUMLOGSFOUND, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.DynamicBytes(_receiptRlp)), 
                 Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}));
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
-    }
-
-    public String getRLP_numLogsFound(byte[] _receiptRlp) {
-        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
-                FUNC_NUMLOGSFOUND, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.DynamicBytes(_receiptRlp)), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
     }
 
     public RemoteFunctionCall<byte[]> retrieveALog(String _contractAddress, byte[] _eventFunctionSignature, byte[] _receiptRlp) {
@@ -159,16 +135,6 @@ public class TestReceipts extends Contract {
         return executeRemoteCallSingleValueReturn(function, byte[].class);
     }
 
-    public String getRLP_retrieveALog(String _contractAddress, byte[] _eventFunctionSignature, byte[] _receiptRlp) {
-        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
-                FUNC_RETRIEVEALOG, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, _contractAddress), 
-                new org.web3j.abi.datatypes.generated.Bytes32(_eventFunctionSignature), 
-                new org.web3j.abi.datatypes.DynamicBytes(_receiptRlp)), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
-    }
-
     public RemoteFunctionCall<byte[]> retrieveStartLog(String _contractAddress, byte[] _receiptRlp) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(FUNC_RETRIEVESTARTLOG, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, _contractAddress), 
@@ -177,29 +143,12 @@ public class TestReceipts extends Contract {
         return executeRemoteCallSingleValueReturn(function, byte[].class);
     }
 
-    public String getRLP_retrieveStartLog(String _contractAddress, byte[] _receiptRlp) {
-        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
-                FUNC_RETRIEVESTARTLOG, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, _contractAddress), 
-                new org.web3j.abi.datatypes.DynamicBytes(_receiptRlp)), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
-    }
-
     public RemoteFunctionCall<TransactionReceipt> triggerStartEvent(BigInteger _val) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_TRIGGERSTARTEVENT, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_val)), 
                 Collections.<TypeReference<?>>emptyList());
         return executeRemoteCallTransaction(function);
-    }
-
-    public String getRLP_triggerStartEvent(BigInteger _val) {
-        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
-                FUNC_TRIGGERSTARTEVENT, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_val)), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
     }
 
     @Deprecated

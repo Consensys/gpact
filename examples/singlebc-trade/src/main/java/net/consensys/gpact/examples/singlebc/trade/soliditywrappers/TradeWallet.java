@@ -34,7 +34,7 @@ import org.web3j.tx.gas.ContractGasProvider;
  * or the org.web3j.codegen.SolidityFunctionWrapperGenerator in the 
  * <a href="https://github.com/web3j/web3j/tree/master/codegen">codegen module</a> to update.
  *
- * <p>Generated with web3j version 4.7.0-SNAPSHOT.
+ * <p>Generated with web3j version 4.8.5-SNAPSHOT.
  */
 @SuppressWarnings("rawtypes")
 public class TradeWallet extends Contract {
@@ -108,15 +108,6 @@ public class TradeWallet extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_executeTrade(String _seller, BigInteger _quantity) {
-        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
-                FUNC_EXECUTETRADE, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, _seller), 
-                new org.web3j.abi.datatypes.generated.Uint256(_quantity)), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
-    }
-
     public RemoteFunctionCall<BigInteger> getNumTrades() {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(FUNC_GETNUMTRADES, 
                 Arrays.<Type>asList(), 
@@ -124,27 +115,11 @@ public class TradeWallet extends Contract {
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
 
-    public String getRLP_getNumTrades() {
-        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
-                FUNC_GETNUMTRADES, 
-                Arrays.<Type>asList(), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
-    }
-
     public RemoteFunctionCall<BigInteger> getTrade(BigInteger _index) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(FUNC_GETTRADE, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_index)), 
                 Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}));
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
-    }
-
-    public String getRLP_getTrade(BigInteger _index) {
-        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
-                FUNC_GETTRADE, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_index)), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
     }
 
     @Deprecated

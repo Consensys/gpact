@@ -19,10 +19,8 @@ The special version of Web3J needs to end up in the directory `./gpact/..`. To c
 * cd ..
 * git clone https://github.com/drinkcoffee/web3j-rlp
 * cd web3j-rlp
-* ./gradlew build
-* cd codegen/build/distributions
-* tar xvf codegen-4.7.0-SNAPSHOT.tar
-* cd ../../../../gpact
+* ./gradlew installDist
+* cd ../gpact
 
 ## Creating a blockchain for test purposes
 To build:

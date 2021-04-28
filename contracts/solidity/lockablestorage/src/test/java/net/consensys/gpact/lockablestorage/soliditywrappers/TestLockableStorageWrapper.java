@@ -27,7 +27,7 @@ import org.web3j.tx.gas.ContractGasProvider;
  * or the org.web3j.codegen.SolidityFunctionWrapperGenerator in the 
  * <a href="https://github.com/web3j/web3j/tree/master/codegen">codegen module</a> to update.
  *
- * <p>Generated with web3j version 4.7.0-SNAPSHOT.
+ * <p>Generated with web3j version 4.8.5-SNAPSHOT.
  */
 @SuppressWarnings("rawtypes")
 public class TestLockableStorageWrapper extends Contract {
@@ -90,14 +90,6 @@ public class TestLockableStorageWrapper extends Contract {
         return executeRemoteCallSingleValueReturn(function, String.class);
     }
 
-    public String getRLP_storageContract() {
-        final Function function = new Function(
-                FUNC_STORAGECONTRACT, 
-                Arrays.<Type>asList(), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
-    }
-
     public RemoteFunctionCall<String> test_getAddress(BigInteger _key) {
         final Function function = new Function(FUNC_TEST_GETADDRESS, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_key)), 
@@ -105,27 +97,11 @@ public class TestLockableStorageWrapper extends Contract {
         return executeRemoteCallSingleValueReturn(function, String.class);
     }
 
-    public String getRLP_test_getAddress(BigInteger _key) {
-        final Function function = new Function(
-                FUNC_TEST_GETADDRESS, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_key)), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
-    }
-
     public RemoteFunctionCall<BigInteger> test_getArrayLength(BigInteger _key) {
         final Function function = new Function(FUNC_TEST_GETARRAYLENGTH, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_key)), 
                 Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}));
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
-    }
-
-    public String getRLP_test_getArrayLength(BigInteger _key) {
-        final Function function = new Function(
-                FUNC_TEST_GETARRAYLENGTH, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_key)), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
     }
 
     public RemoteFunctionCall<BigInteger> test_getArrayValue(BigInteger _key, BigInteger _index) {
@@ -136,15 +112,6 @@ public class TestLockableStorageWrapper extends Contract {
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
 
-    public String getRLP_test_getArrayValue(BigInteger _key, BigInteger _index) {
-        final Function function = new Function(
-                FUNC_TEST_GETARRAYVALUE, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_key), 
-                new org.web3j.abi.datatypes.generated.Uint256(_index)), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
-    }
-
     public RemoteFunctionCall<Boolean> test_getBool(BigInteger _key) {
         final Function function = new Function(FUNC_TEST_GETBOOL, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_key)), 
@@ -152,27 +119,11 @@ public class TestLockableStorageWrapper extends Contract {
         return executeRemoteCallSingleValueReturn(function, Boolean.class);
     }
 
-    public String getRLP_test_getBool(BigInteger _key) {
-        final Function function = new Function(
-                FUNC_TEST_GETBOOL, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_key)), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
-    }
-
     public RemoteFunctionCall<byte[]> test_getBytes(BigInteger _key) {
         final Function function = new Function(FUNC_TEST_GETBYTES, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_key)), 
                 Arrays.<TypeReference<?>>asList(new TypeReference<DynamicBytes>() {}));
         return executeRemoteCallSingleValueReturn(function, byte[].class);
-    }
-
-    public String getRLP_test_getBytes(BigInteger _key) {
-        final Function function = new Function(
-                FUNC_TEST_GETBYTES, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_key)), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
     }
 
     public RemoteFunctionCall<BigInteger> test_getMapValue(BigInteger _key, BigInteger _mapKey) {
@@ -183,28 +134,11 @@ public class TestLockableStorageWrapper extends Contract {
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
 
-    public String getRLP_test_getMapValue(BigInteger _key, BigInteger _mapKey) {
-        final Function function = new Function(
-                FUNC_TEST_GETMAPVALUE, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_key), 
-                new org.web3j.abi.datatypes.generated.Uint256(_mapKey)), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
-    }
-
     public RemoteFunctionCall<BigInteger> test_getUint256(BigInteger _key) {
         final Function function = new Function(FUNC_TEST_GETUINT256, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_key)), 
                 Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}));
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
-    }
-
-    public String getRLP_test_getUint256(BigInteger _key) {
-        final Function function = new Function(
-                FUNC_TEST_GETUINT256, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_key)), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
     }
 
     public RemoteFunctionCall<TransactionReceipt> test_popArrayValue(BigInteger _key) {
@@ -213,14 +147,6 @@ public class TestLockableStorageWrapper extends Contract {
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_key)), 
                 Collections.<TypeReference<?>>emptyList());
         return executeRemoteCallTransaction(function);
-    }
-
-    public String getRLP_test_popArrayValue(BigInteger _key) {
-        final Function function = new Function(
-                FUNC_TEST_POPARRAYVALUE, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_key)), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
     }
 
     public RemoteFunctionCall<TransactionReceipt> test_pushArrayValue(BigInteger _key, BigInteger _val) {
@@ -232,15 +158,6 @@ public class TestLockableStorageWrapper extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_test_pushArrayValue(BigInteger _key, BigInteger _val) {
-        final Function function = new Function(
-                FUNC_TEST_PUSHARRAYVALUE, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_key), 
-                new org.web3j.abi.datatypes.generated.Uint256(_val)), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
-    }
-
     public RemoteFunctionCall<TransactionReceipt> test_setAddress(BigInteger _key, String _address) {
         final Function function = new Function(
                 FUNC_TEST_SETADDRESS, 
@@ -248,15 +165,6 @@ public class TestLockableStorageWrapper extends Contract {
                 new org.web3j.abi.datatypes.Address(160, _address)), 
                 Collections.<TypeReference<?>>emptyList());
         return executeRemoteCallTransaction(function);
-    }
-
-    public String getRLP_test_setAddress(BigInteger _key, String _address) {
-        final Function function = new Function(
-                FUNC_TEST_SETADDRESS, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_key), 
-                new org.web3j.abi.datatypes.Address(160, _address)), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
     }
 
     public RemoteFunctionCall<TransactionReceipt> test_setArrayValue(BigInteger _key, BigInteger _index, BigInteger _val) {
@@ -269,16 +177,6 @@ public class TestLockableStorageWrapper extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_test_setArrayValue(BigInteger _key, BigInteger _index, BigInteger _val) {
-        final Function function = new Function(
-                FUNC_TEST_SETARRAYVALUE, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_key), 
-                new org.web3j.abi.datatypes.generated.Uint256(_index), 
-                new org.web3j.abi.datatypes.generated.Uint256(_val)), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
-    }
-
     public RemoteFunctionCall<TransactionReceipt> test_setBool(BigInteger _key, Boolean _flag) {
         final Function function = new Function(
                 FUNC_TEST_SETBOOL, 
@@ -288,15 +186,6 @@ public class TestLockableStorageWrapper extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_test_setBool(BigInteger _key, Boolean _flag) {
-        final Function function = new Function(
-                FUNC_TEST_SETBOOL, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_key), 
-                new org.web3j.abi.datatypes.Bool(_flag)), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
-    }
-
     public RemoteFunctionCall<TransactionReceipt> test_setBytes(BigInteger _key, byte[] _val) {
         final Function function = new Function(
                 FUNC_TEST_SETBYTES, 
@@ -304,15 +193,6 @@ public class TestLockableStorageWrapper extends Contract {
                 new org.web3j.abi.datatypes.DynamicBytes(_val)), 
                 Collections.<TypeReference<?>>emptyList());
         return executeRemoteCallTransaction(function);
-    }
-
-    public String getRLP_test_setBytes(BigInteger _key, byte[] _val) {
-        final Function function = new Function(
-                FUNC_TEST_SETBYTES, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_key), 
-                new org.web3j.abi.datatypes.DynamicBytes(_val)), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
     }
 
     public RemoteFunctionCall<TransactionReceipt> test_setMapValue(BigInteger _key, BigInteger _mapKey, BigInteger _val) {
@@ -325,16 +205,6 @@ public class TestLockableStorageWrapper extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_test_setMapValue(BigInteger _key, BigInteger _mapKey, BigInteger _val) {
-        final Function function = new Function(
-                FUNC_TEST_SETMAPVALUE, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_key), 
-                new org.web3j.abi.datatypes.generated.Uint256(_mapKey), 
-                new org.web3j.abi.datatypes.generated.Uint256(_val)), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
-    }
-
     public RemoteFunctionCall<TransactionReceipt> test_setUint256(BigInteger _key, BigInteger _val) {
         final Function function = new Function(
                 FUNC_TEST_SETUINT256, 
@@ -342,15 +212,6 @@ public class TestLockableStorageWrapper extends Contract {
                 new org.web3j.abi.datatypes.generated.Uint256(_val)), 
                 Collections.<TypeReference<?>>emptyList());
         return executeRemoteCallTransaction(function);
-    }
-
-    public String getRLP_test_setUint256(BigInteger _key, BigInteger _val) {
-        final Function function = new Function(
-                FUNC_TEST_SETUINT256, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_key), 
-                new org.web3j.abi.datatypes.generated.Uint256(_val)), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
     }
 
     @Deprecated

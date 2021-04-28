@@ -27,7 +27,7 @@ import org.web3j.tx.gas.ContractGasProvider;
  * or the org.web3j.codegen.SolidityFunctionWrapperGenerator in the 
  * <a href="https://github.com/web3j/web3j/tree/master/codegen">codegen module</a> to update.
  *
- * <p>Generated with web3j version 4.7.0-SNAPSHOT.
+ * <p>Generated with web3j version 4.8.5-SNAPSHOT.
  */
 @SuppressWarnings("rawtypes")
 public class LockableStorage extends Contract {
@@ -78,28 +78,12 @@ public class LockableStorage extends Contract {
         return executeRemoteCallSingleValueReturn(function, String.class);
     }
 
-    public String getRLP_businessLogicContract() {
-        final Function function = new Function(
-                FUNC_BUSINESSLOGICCONTRACT, 
-                Arrays.<Type>asList(), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
-    }
-
     public RemoteFunctionCall<TransactionReceipt> finalise(Boolean _commit) {
         final Function function = new Function(
                 FUNC_FINALISE, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.Bool(_commit)), 
                 Collections.<TypeReference<?>>emptyList());
         return executeRemoteCallTransaction(function);
-    }
-
-    public String getRLP_finalise(Boolean _commit) {
-        final Function function = new Function(
-                FUNC_FINALISE, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.Bool(_commit)), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
     }
 
     public RemoteFunctionCall<byte[]> getBytes(BigInteger _key) {
@@ -109,27 +93,11 @@ public class LockableStorage extends Contract {
         return executeRemoteCallSingleValueReturn(function, byte[].class);
     }
 
-    public String getRLP_getBytes(BigInteger _key) {
-        final Function function = new Function(
-                FUNC_GETBYTES, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_key)), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
-    }
-
     public RemoteFunctionCall<BigInteger> getUint256(BigInteger _key) {
         final Function function = new Function(FUNC_GETUINT256, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_key)), 
                 Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}));
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
-    }
-
-    public String getRLP_getUint256(BigInteger _key) {
-        final Function function = new Function(
-                FUNC_GETUINT256, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_key)), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
     }
 
     public RemoteFunctionCall<Boolean> locked() {
@@ -139,27 +107,11 @@ public class LockableStorage extends Contract {
         return executeRemoteCallSingleValueReturn(function, Boolean.class);
     }
 
-    public String getRLP_locked() {
-        final Function function = new Function(
-                FUNC_LOCKED, 
-                Arrays.<Type>asList(), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
-    }
-
     public RemoteFunctionCall<BigInteger> lockedByRootBlockchainId() {
         final Function function = new Function(FUNC_LOCKEDBYROOTBLOCKCHAINID, 
                 Arrays.<Type>asList(), 
                 Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}));
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
-    }
-
-    public String getRLP_lockedByRootBlockchainId() {
-        final Function function = new Function(
-                FUNC_LOCKEDBYROOTBLOCKCHAINID, 
-                Arrays.<Type>asList(), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
     }
 
     public RemoteFunctionCall<BigInteger> lockedByTransactionId() {
@@ -169,28 +121,12 @@ public class LockableStorage extends Contract {
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
 
-    public String getRLP_lockedByTransactionId() {
-        final Function function = new Function(
-                FUNC_LOCKEDBYTRANSACTIONID, 
-                Arrays.<Type>asList(), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
-    }
-
     public RemoteFunctionCall<TransactionReceipt> setBusinessLogicContract(String _businessLogicContract) {
         final Function function = new Function(
                 FUNC_SETBUSINESSLOGICCONTRACT, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, _businessLogicContract)), 
                 Collections.<TypeReference<?>>emptyList());
         return executeRemoteCallTransaction(function);
-    }
-
-    public String getRLP_setBusinessLogicContract(String _businessLogicContract) {
-        final Function function = new Function(
-                FUNC_SETBUSINESSLOGICCONTRACT, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, _businessLogicContract)), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
     }
 
     public RemoteFunctionCall<TransactionReceipt> setBytes(BigInteger _key, byte[] _val) {
@@ -202,15 +138,6 @@ public class LockableStorage extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_setBytes(BigInteger _key, byte[] _val) {
-        final Function function = new Function(
-                FUNC_SETBYTES, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_key), 
-                new org.web3j.abi.datatypes.DynamicBytes(_val)), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
-    }
-
     public RemoteFunctionCall<TransactionReceipt> setUint256(BigInteger _key, BigInteger _val) {
         final Function function = new Function(
                 FUNC_SETUINT256, 
@@ -218,15 +145,6 @@ public class LockableStorage extends Contract {
                 new org.web3j.abi.datatypes.generated.Uint256(_val)), 
                 Collections.<TypeReference<?>>emptyList());
         return executeRemoteCallTransaction(function);
-    }
-
-    public String getRLP_setUint256(BigInteger _key, BigInteger _val) {
-        final Function function = new Function(
-                FUNC_SETUINT256, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_key), 
-                new org.web3j.abi.datatypes.generated.Uint256(_val)), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
     }
 
     @Deprecated

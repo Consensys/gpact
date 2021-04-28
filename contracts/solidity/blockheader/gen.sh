@@ -11,7 +11,7 @@ TESTOUTPUTDIR=$HERE/src/test/java
 PACKAGE=net.consensys.gpact.soliditywrappers
 TESTPACKAGE=net.consensys.gpact.test.blockheader.soliditywrappers
 # WEB3J=web3j
-WEB3J=../web3j-rlp/codegen/build/distributions/codegen-4.7.0-SNAPSHOT/bin/codegen
+WEB3J=../web3j-rlp/codegen/build/install/codegen/bin/codegen
 
 # compiling one file also compiles its dependendencies. We use overwrite to avoid the related warnings.
 solc $CONTRACTSDIR/TxReceiptsRootStorage.sol --allow-paths . --bin --abi --optimize -o $BUILDDIR --overwrite

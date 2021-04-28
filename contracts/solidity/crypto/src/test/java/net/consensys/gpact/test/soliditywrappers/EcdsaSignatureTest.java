@@ -2,7 +2,6 @@ package net.consensys.gpact.test.soliditywrappers;
 
 import java.math.BigInteger;
 import java.util.Arrays;
-import java.util.Collections;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Bool;
 import org.web3j.abi.datatypes.Function;
@@ -22,7 +21,7 @@ import org.web3j.tx.gas.ContractGasProvider;
  * or the org.web3j.codegen.SolidityFunctionWrapperGenerator in the 
  * <a href="https://github.com/web3j/web3j/tree/master/codegen">codegen module</a> to update.
  *
- * <p>Generated with web3j version 4.7.0-SNAPSHOT.
+ * <p>Generated with web3j version 4.8.5-SNAPSHOT.
  */
 @SuppressWarnings("rawtypes")
 public class EcdsaSignatureTest extends Contract {
@@ -59,16 +58,6 @@ public class EcdsaSignatureTest extends Contract {
         return executeRemoteCallSingleValueReturn(function, Boolean.class);
     }
 
-    public String getRLP_verify2(String _signer, byte[] _message, byte[] _signature) {
-        final Function function = new Function(
-                FUNC_VERIFY2, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, _signer), 
-                new org.web3j.abi.datatypes.DynamicBytes(_message), 
-                new org.web3j.abi.datatypes.DynamicBytes(_signature)), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
-    }
-
     public RemoteFunctionCall<Boolean> verifySigComponents2(String _signer, byte[] _message, byte[] _sigR, byte[] _sigS, BigInteger _sigV) {
         final Function function = new Function(FUNC_VERIFYSIGCOMPONENTS2, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, _signer), 
@@ -78,18 +67,6 @@ public class EcdsaSignatureTest extends Contract {
                 new org.web3j.abi.datatypes.generated.Uint8(_sigV)), 
                 Arrays.<TypeReference<?>>asList(new TypeReference<Bool>() {}));
         return executeRemoteCallSingleValueReturn(function, Boolean.class);
-    }
-
-    public String getRLP_verifySigComponents2(String _signer, byte[] _message, byte[] _sigR, byte[] _sigS, BigInteger _sigV) {
-        final Function function = new Function(
-                FUNC_VERIFYSIGCOMPONENTS2, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, _signer), 
-                new org.web3j.abi.datatypes.DynamicBytes(_message), 
-                new org.web3j.abi.datatypes.generated.Bytes32(_sigR), 
-                new org.web3j.abi.datatypes.generated.Bytes32(_sigS), 
-                new org.web3j.abi.datatypes.generated.Uint8(_sigV)), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
     }
 
     @Deprecated
