@@ -333,6 +333,20 @@ abstract contract CrossBlockchainControl is CbcLockableStorageInterface, Receipt
         return false;
     }
 
+    // TODO add to interface and put in override
+    function whoCalledMe() external view returns (uint256 targetBlockchainId, address targetContract) {
+        uint256[] memory parentCallPath = determineParentCallPath();
+        (uint256 parentBlockchainId, address parentContract, /* bytes memory parentFunctionCall */ ) =
+            extractTargetFromCallGraph(activeCallGraph, parentCallPath);
+        return (parentBlockchainId, parentContract);
+
+    }
+
+
+    // **************************** PRIVATE BELOW HERE ***************************
+    // **************************** PRIVATE BELOW HERE ***************************
+    // **************************** PRIVATE BELOW HERE ***************************
+
     function makeCall(bytes memory _callGraph, uint256[] memory _callPath) private returns(bool, bytes memory) {
         (uint256 targetBlockchainId, address targetContract, bytes memory functionCall) = extractTargetFromCallGraph(_callGraph, _callPath);
         require(targetBlockchainId == myBlockchainId, "Target blockchain id does not match my blockchain id");
@@ -374,6 +388,36 @@ abstract contract CrossBlockchainControl is CbcLockableStorageInterface, Receipt
         targetBlockchainId = RLP.toUint(func[0]);
         targetContract = RLP.toAddress(func[1]);
         functionCall = RLP.toData(func[2]);
+    }
+
+    /**
+     * Based on the active call path, determine the call path of parent of
+     * the function call.
+     */
+    function determineParentCallPath() private view returns (uint256[] memory) {
+        uint256[] memory callPathOfParent;
+        uint256 callPathLen = activeCallsCallPath.length;
+
+        if (callPathLen == 1 && activeCallsCallPath[0] == 0) {
+            // Return zero length array to indicate this is the root function call.
+            return callPathOfParent;
+        }
+
+        if (activeCallsCallPath[callPathLen - 1] != 0) {
+            callPathOfParent = new uint256[](callPathLen);
+            for (uint256 i = 0; i < callPathLen - 1; i++) {
+                callPathOfParent[i] = activeCallsCallPath[i];
+            }
+            callPathOfParent[callPathLen - 1] = 0;
+        }
+        else {
+            callPathOfParent = new uint256[](callPathLen - 1);
+            for (uint256 i = 0; i < callPathLen - 2; i++) {
+                callPathOfParent[i] = activeCallsCallPath[i];
+            }
+            callPathOfParent[callPathLen - 2] = 0;
+        }
+        return callPathOfParent;
     }
 
 
@@ -418,7 +462,7 @@ abstract contract CrossBlockchainControl is CbcLockableStorageInterface, Receipt
         }
 
         // Check that this function call should occur.
-        // First create the call path to the next function that should execute.`
+        // First create the call path to the next function that should execute.
         require(activeCallsCallPath.length != 0, "Active Calls call path length is zero");
         uint256[] memory callPath = new uint256[](activeCallsCallPath.length);
         for (uint i = 0; i < activeCallsCallPath.length - 1; i++) {
