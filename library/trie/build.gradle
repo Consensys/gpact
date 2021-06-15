@@ -10,7 +10,7 @@ repositories {
 }
 
 dependencies {
-    compile project (':crypto')
+    compile project (':common')
     compile project (':rlp')
 
     // https://mvnrepository.com/artifact/org.apache.tuweni/tuweni-bytes

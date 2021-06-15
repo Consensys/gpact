@@ -1,5 +1,4 @@
 rootProject.name = 'gpact'
-include 'crypto'
 include 'sol-crypto'
 include 'rlp'
 include 'trie'
@@ -31,7 +30,6 @@ project(":sol-registrar").projectDir = file("contracts/solidity/registrar")
 
 project(":common").projectDir = file("library/common")
 project(":crossblockchaincontrol").projectDir = file("library/crossblockchaincontrol")
-project(":crypto").projectDir = file("library/crypto")
 project(":receipts").projectDir = file("library/receipts")
 project(":registrar").projectDir = file("library/registrar")
 project(":rlp").projectDir = file("library/rlp")

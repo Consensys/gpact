@@ -1,10 +1,10 @@
 # Building
 ## Tools
 
-* Java: The code was built with Java 11. The code is likely to build with later versions of Java.
-* Solidity:  The code was build with solc 0.7.4+commit.3f05b770.Darwin.appleclang, though should work with any 
+* Java: The code was built with Java 16. The code is likely to build with later versions of Java.
+* Solidity:  The code was build with solc 0.8.5+commit.a4f2e591.Darwin.appleclang, though should work with any 
 version of Solidity after 0.7.1.
-* Gradle: The build system uses Gradle 6.6.1. This will download when the code is built.
+* Gradle: The build system uses Gradle 6.3. This will download when the code is built.
 * Node: Node is needed to run the scripts. v14.12.0 was used to execute the scripts.
  The following modules need to be installed to run the scripts: at-least-node,
  fs-extra, graceful-fs, jsonfile, toml-j0.4, tomlify-j0.4, universalify.

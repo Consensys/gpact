@@ -12,7 +12,7 @@ dependencies {
     testCompile project (path: ':common', configuration: 'testArtifacts')
     testCompile project (path: ':registrar', configuration: 'testArtifacts')
 
-    testCompile project (':crypto')
+    testCompile project (':common')
     testCompile project (':registrar')
     testCompile project (':receipts')
 

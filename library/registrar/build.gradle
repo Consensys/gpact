@@ -11,7 +11,7 @@ repositories {
 dependencies {
     testCompile project (path: ':common', configuration: 'testArtifacts')
 
-    testCompile project (':crypto')
+    testCompile project (':common')
 
     testCompile group: 'junit', name: 'junit', version: '4.12'
 

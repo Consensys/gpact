@@ -9,7 +9,7 @@ repositories {
 }
 
 dependencies {
-    compile project (':crypto')
+    compile project (':common')
     compile project (':trie')
     testCompile project (path: ':common', configuration: 'testArtifacts')
 

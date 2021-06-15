@@ -1,5 +1,5 @@
 plugins {
-    id 'org.web3j' version '4.5.11'
+//    id 'org.web3j' version '4.5.11'
     id 'java'
 }
 
@@ -9,12 +9,12 @@ repositories {
     mavenCentral()
 }
 
-web3j {
-    generatedPackageName = 'net.consensys.gpact.soliditywrappers.{0}'
-    generatedFilesBaseDir = "$buildDir/custom/destination"
-}
-
-solidity {
-    allowPaths = ['blockheader/src/main/solidity','registrar/contracts']
-    version = '0.7.1'
-}
+//web3j {
+//    generatedPackageName = 'net.consensys.gpact.soliditywrappers.{0}'
+//    generatedFilesBaseDir = "$buildDir/custom/destination"
+//}
+//
+//solidity {
+//    allowPaths = ['blockheader/src/main/solidity','registrar/contracts']
+//    version = '0.7.1'
+//}

@@ -10,7 +10,7 @@ repositories {
 }
 
 dependencies {
-    compile project (':crypto')
+    compile project (':common')
 
     // https://mvnrepository.com/artifact/org.apache.tuweni/tuweni-bytes
     compile group: 'org.apache.tuweni', name: 'tuweni-bytes', version: '1.0.0'

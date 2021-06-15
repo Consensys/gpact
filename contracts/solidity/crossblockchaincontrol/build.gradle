@@ -16,8 +16,6 @@ dependencies {
     compile project (path: ':sol-blockheader')
     compile project (path: ':receipts')
 
-//    testCompile project (':crypto')
-
 //    testCompile group: 'junit', name: 'junit', version: '4.12'
 //
     compile group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.12.0'
@@ -29,6 +27,7 @@ dependencies {
     implementation files('../../../../web3j-rlp/crypto/build/libs/crypto-4.8.5-SNAPSHOT.jar')
     implementation files('../../../../web3j-rlp/rlp/build/libs/rlp-4.8.5-SNAPSHOT.jar')
     implementation files('../../../../web3j-rlp/utils/build/libs/utils-4.8.5-SNAPSHOT.jar')
+    implementation files('../../../../web3j-rlp/tuples/build/libs/tuples-4.8.5-SNAPSHOT.jar')
     compile "io.reactivex.rxjava2:rxjava:2.2.2"
     //    compile ('org.web3j:core:4.6.3')
 

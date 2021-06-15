@@ -10,7 +10,7 @@ repositories {
 
 dependencies {
     testCompile project (path: ':common', configuration: 'testArtifacts')
-    testCompile project (path: ':crypto')
+    testCompile project (path: ':common')
 
 
 
