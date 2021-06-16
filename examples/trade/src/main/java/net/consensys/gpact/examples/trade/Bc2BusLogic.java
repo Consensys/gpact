@@ -14,12 +14,12 @@
  */
 package net.consensys.gpact.examples.trade;
 
+import net.consensys.gpact.examples.trade.soliditywrappers.BusLogic;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import net.consensys.gpact.cbc.AbstractBlockchain;
-import net.consensys.gpact.examples.trade.soliditywrappers.BusLogic;
 
 
 import java.io.IOException;
