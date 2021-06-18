@@ -13,7 +13,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 pragma solidity >=0.7.1;
-import "./LockableStorage.sol";
+import "./OldLockableStorage.sol";
 
 contract LockableStorageWrapper  {
     LockableStorage public storageContract;

@@ -19,7 +19,6 @@ import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
 import net.consensys.gpact.cbc.AbstractBlockchain;
 import net.consensys.gpact.examples.twochain.soliditywrappers.OtherBlockchainContract;
-import net.consensys.gpact.lockablestorage.soliditywrappers.LockableStorage;
 
 
 import java.io.IOException;
@@ -29,7 +28,6 @@ public class OtherBc extends AbstractBlockchain {
   static final Logger LOG = LogManager.getLogger(OtherBc.class);
 
   OtherBlockchainContract otherBlockchainContract;
-  LockableStorage lockableStorageContract;
 
   public OtherBc(Credentials credentials, String bcId, String uri, String gasPriceStrategy, String blockPeriod) throws IOException {
     super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
@@ -38,14 +36,9 @@ public class OtherBc extends AbstractBlockchain {
 
   public void deployContracts(String cbcContractAddress) throws Exception {
     LOG.info("Deploy Other Blockchain Contracts");
-    this.lockableStorageContract = LockableStorage.deploy(this.web3j, this.tm, this.gasProvider,
-        cbcContractAddress).send();
     this.otherBlockchainContract =
-        OtherBlockchainContract.deploy(this.web3j, this.tm, this.gasProvider,
-          this.lockableStorageContract.getContractAddress()).send();
-    this.lockableStorageContract.setBusinessLogicContract(this.otherBlockchainContract.getContractAddress()).send();
+        OtherBlockchainContract.deploy(this.web3j, this.tm, this.gasProvider, cbcContractAddress).send();
     LOG.info(" Other Blockchain Contract: {}", this.otherBlockchainContract.getContractAddress());
-    LOG.info(" Lockable Storage Contract: {}", this.lockableStorageContract.getContractAddress());
   }
 
   public void setVal(BigInteger val) throws Exception {
@@ -65,7 +58,7 @@ public class OtherBc extends AbstractBlockchain {
   }
 
   public boolean storageIsLocked() throws Exception {
-    return  this.lockableStorageContract.locked().send();
+    return this.otherBlockchainContract.isLocked(BigInteger.ZERO).send();
   }
 
   public void showValues() throws Exception {

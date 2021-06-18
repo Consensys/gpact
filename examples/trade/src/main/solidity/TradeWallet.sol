@@ -15,12 +15,10 @@
 pragma solidity >=0.7.1;
 
 import "../../../../../contracts/solidity/crossblockchaincontrol/src/main/solidity/CbcLockableStorageInterface.sol";
-import "../../../../../contracts/solidity/lockablestorage/src/main/solidity/LockableStorageWrapper.sol";
+import "../../../../../contracts/solidity/lockablestorage/src/main/solidity/LockableStorage.sol";
 import "./BusLogic.sol";
 
-contract TradeWallet is LockableStorageWrapper {
-    CbcLockableStorageInterface private crossBlockchainControl;
-
+contract TradeWallet is LockableStorage {
     uint256 busLogicBcId;
     BusLogic busLogicContract;
 
@@ -29,9 +27,8 @@ contract TradeWallet is LockableStorageWrapper {
 
     event Trade(bytes32 _tradeId);
 
-    constructor (address _cbc, uint256 _busLogicBcId, address _busLogicContract, address _storageContract)
-        LockableStorageWrapper(_storageContract) {
-        crossBlockchainControl = CbcLockableStorageInterface(_cbc);
+    constructor (address _cbc, uint256 _busLogicBcId, address _busLogicContract)
+        LockableStorage(_cbc) {
         busLogicBcId = _busLogicBcId;
         busLogicContract = BusLogic(_busLogicContract);
     }

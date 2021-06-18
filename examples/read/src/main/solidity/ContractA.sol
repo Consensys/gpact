@@ -16,20 +16,19 @@ pragma solidity >=0.7.1;
 
 import "./ContractB.sol";
 import "../../../../../contracts/solidity/crossblockchaincontrol/src/main/solidity/CbcLockableStorageInterface.sol";
-import "../../../../../contracts/solidity/lockablestorage/src/main/solidity/LockableStorageWrapper.sol";
+import "../../../../../contracts/solidity/lockablestorage/src/main/solidity/LockableStorage.sol";
 
 
-contract ContractA is LockableStorageWrapper {
+contract ContractA is LockableStorage {
     uint256 otherBcId;
     ContractB contractB;
-    CbcLockableStorageInterface crossBlockchainControl;
 
     uint256 constant private KEY_VAL = 0;
 
     event ValueRead(uint256 _val);
 
-    constructor (address _cbc, uint256 _otherBcId, address _contractBAddress, address _storageContract)
-        LockableStorageWrapper(_storageContract) {
+    constructor (address _cbc, uint256 _otherBcId, address _contractBAddress)
+        LockableStorage(_cbc) {
 
         crossBlockchainControl = CbcLockableStorageInterface(_cbc);
         otherBcId = _otherBcId;

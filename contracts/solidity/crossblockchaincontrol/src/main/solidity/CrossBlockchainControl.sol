@@ -213,7 +213,11 @@ abstract contract CrossBlockchainControl is CbcLockableStorageInterface, Receipt
         bool isSuccess;
         (isSuccess, ) = makeCall(callGraph, callPathForStart);
 
-        unlockContracts(isSuccess);
+        // Unlock contracts locked by the root transaction.
+        for (uint256 i = 0; i < activeCallLockedContracts.length; i++) {
+            LockableStorage lockableStorageContract = LockableStorage(activeCallLockedContracts[i]);
+            lockableStorageContract.finalise(isSuccess, activeCallRootBlockchainId, activeCallCrossBlockchainTransactionId);
+        }
         rootTransactionInformation[activeCallCrossBlockchainTransactionId] = isSuccess ? SUCCESS : FAILURE;
         emit Root(activeCallCrossBlockchainTransactionId, isSuccess);
         cleanupAfterCall();
@@ -257,11 +261,7 @@ abstract contract CrossBlockchainControl is CbcLockableStorageInterface, Receipt
                 address lockedContractAddr = BytesUtil.bytesToAddress1(_segmentEvents[i], locationOfLockedContracts + 0x20 + 0x20 * j);
                 //emit Dump(i * 100 + j, bytes32(0), lockedContractAddr, bytes(""));
                 LockableStorage lockedContract = LockableStorage(lockedContractAddr);
-                // Check that the contract really has been locked by this transaction.
-                require(lockedContract.locked());
-                require(lockedContract.lockedByRootBlockchainId() == _rootBlockchainId);
-                require(lockedContract.lockedByTransactionId() == rootEventCrossBlockchainTxId);
-                lockedContract.finalise(success != 0);
+                lockedContract.finalise(success != 0, _rootBlockchainId, rootEventCrossBlockchainTxId);
             }
         }
 
@@ -294,7 +294,11 @@ abstract contract CrossBlockchainControl is CbcLockableStorageInterface, Receipt
         return BytesUtil.bytesToUint256(returnValue, 0);
     }
 
-    // Called by a provisional storage contract indicating the contract needs to be locked.
+    /**
+     * Items in contracts are locked, but not contracts themselves. However, we only
+     * need to note which contracts are being locked for the purposes of Segment
+     * transactions / events.
+     */
     function addToListOfLockedContracts(address _contractToLock) external override {
         // Don't add the same contract twice. So, check the contract isn't in
         // the array first.
@@ -324,14 +328,14 @@ abstract contract CrossBlockchainControl is CbcLockableStorageInterface, Receipt
 
     // Called by Lockable Storage contract to determine if the Lockable Storage contract
     // is being locked by this call. That is, if the contract is in the list of locked contracts.
-    function wasLockedByThisCall() external override view returns (bool) {
-        for (uint256 i = 0; i < activeCallLockedContracts.length; i++) {
-            if (activeCallLockedContracts[i] == msg.sender) {
-                return true;
-            }
-        }
-        return false;
-    }
+//    function wasLockedByThisCall() external override view returns (bool) {
+//        for (uint256 i = 0; i < activeCallLockedContracts.length; i++) {
+//            if (activeCallLockedContracts[i] == msg.sender) {
+//                return true;
+//            }
+//        }
+//        return false;
+//    }
 
     // TODO add to interface and put in override
     function whoCalledMe() external view returns (uint256 targetBlockchainId, address targetContract) {
@@ -441,15 +445,6 @@ abstract contract CrossBlockchainControl is CbcLockableStorageInterface, Receipt
         delete activeCallReturnValues;
         delete activeCallReturnValuesIndex;
         delete activeCallFailed;
-    }
-
-    function unlockContracts(bool _commit) private {
-//        emit Dump(activeCallLockedContracts.length, bytes32(0), address(0), "");
-        for (uint256 i = 0; i < activeCallLockedContracts.length; i++) {
-  //          emit Dump(activeCallLockedContracts.length, bytes32(0), activeCallLockedContracts[i], "");
-            LockableStorage lockableStorageContract = LockableStorage(activeCallLockedContracts[i]);
-            lockableStorageContract.finalise(_commit);
-        }
     }
 
 

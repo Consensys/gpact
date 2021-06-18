@@ -14,12 +14,12 @@
  */
 pragma solidity >=0.7.1;
 import "./OtherBlockchainContractInterface.sol";
-import "../../../../../contracts/solidity/lockablestorage/src/main/solidity/LockableStorageWrapper.sol";
+import "../../../../../contracts/solidity/lockablestorage/src/main/solidity/LockableStorage.sol";
 
-contract OtherBlockchainContract is OtherBlockchainContractInterface, LockableStorageWrapper {
+contract OtherBlockchainContract is OtherBlockchainContractInterface, LockableStorage {
     uint256 constant private KEY_FOR_VAL = 1;
 
-    constructor (address _storageContract) LockableStorageWrapper(_storageContract) {
+    constructor (address _crossBlockchainControl) LockableStorage(_crossBlockchainControl) {
     }
 
 

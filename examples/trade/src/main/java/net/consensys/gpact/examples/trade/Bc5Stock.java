@@ -19,7 +19,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
 import net.consensys.gpact.cbc.AbstractBlockchain;
-import net.consensys.gpact.lockablestorage.soliditywrappers.LockableStorage;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -28,7 +27,6 @@ public class Bc5Stock extends AbstractBlockchain {
   private static final Logger LOG = LogManager.getLogger(Bc5Stock.class);
 
   Stock stockContract;
-  private LockableStorage lockableStorageContract;
 
   public Bc5Stock(Credentials credentials, String bcId, String uri, String gasPriceStrategy, String blockPeriod) throws IOException {
     super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
@@ -36,16 +34,10 @@ public class Bc5Stock extends AbstractBlockchain {
 
 
   public void deployContracts(String cbcContractAddress) throws Exception {
-    this.lockableStorageContract = LockableStorage.deploy(this.web3j, this.tm, this.gasProvider,
-        cbcContractAddress).send();
     this.stockContract =
-        Stock.deploy(this.web3j, this.tm, this.gasProvider,
-          this.lockableStorageContract.getContractAddress()).send();
-    this.lockableStorageContract.setBusinessLogicContract(this.stockContract.getContractAddress()).send();
+        Stock.deploy(this.web3j, this.tm, this.gasProvider, cbcContractAddress).send();
     LOG.info("Stock contract deployed to {} on blockchain 0x{}",
         this.stockContract.getContractAddress(), this.blockchainId.toString(16));
-    LOG.info("Lockable Storage contract for Stock deployed to {} on blockchain 0x{}",
-        this.lockableStorageContract.getContractAddress(), this.blockchainId.toString(16));
   }
 
   public void setStock(String account, BigInteger newAmount) throws Exception {
@@ -61,6 +53,6 @@ public class Bc5Stock extends AbstractBlockchain {
   }
 
   public boolean storageIsLocked() throws Exception {
-    return  this.lockableStorageContract.locked().send();
+    return  this.stockContract.isLocked(BigInteger.ZERO).send();
   }
 }

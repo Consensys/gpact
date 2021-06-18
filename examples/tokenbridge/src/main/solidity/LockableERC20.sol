@@ -5,9 +5,12 @@ pragma solidity ^0.8.0;
 import "./IERC20.sol";
 import "./extensions/IERC20Metadata.sol";
 import "../../utils/Context.sol";
+import "../../../../openzeppelin/src/main/solidity/utils/Context.sol";
+import "../../../../openzeppelin/src/main/solidity/token/ERC20/IERC20.sol";
+import "../../../../openzeppelin/src/main/solidity/token/ERC20/extensions/IERC20Metadata.sol";
 
 /**
- * @dev Implementation of the {IERC20} interface.
+ * @dev Implementation of the {IERC20} interface that provides lockable storage for use with GPACT.
  *
  * This implementation is agnostic to the way tokens are created. This means
  * that a supply mechanism has to be added in a derived contract using {_mint}.
@@ -30,13 +33,15 @@ import "../../utils/Context.sol";
  * functions have been added to mitigate the well-known issues around setting
  * allowances. See {IERC20-approve}.
  */
-contract ERC20 is Context, IERC20, IERC20Metadata {
+contract LockableERC20 is Context, IERC20, IERC20Metadata {
     mapping (address => uint256) private _balances;
 
     mapping (address => mapping (address => uint256)) private _allowances;
 
+    // TODO for the moment assume a fixed supply. That is, assume totalSupply can not be updated.
     uint256 private _totalSupply;
 
+    // Token name and symbol are immutable.
     string private _name;
     string private _symbol;
 
@@ -112,6 +117,34 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
         _transfer(_msgSender(), recipient, amount);
         return true;
     }
+
+    /**
+ * @dev See {IERC20-transfer}.
+ *
+ * Requirements:
+ *
+ * - `recipient` cannot be the zero address.
+ * - the caller must have a balance of at least `amount`.
+ */
+    function crosschainTransfer(uint256 blockchainId, address recipient, uint256 amount) public virtual override returns (bool) {
+        _burn(_msgSender(), amount);
+
+        // TODO do a look-up of contract on remote blockchain given blockchain id.
+        address remoteERC20Contract = //
+
+        crossBlockchainControl.crossBlockchainCall(blockchainId, address(busLogicContract),
+            abi.encodeWithSelector(this.crosschainReceiver.selector, recipient, amount));
+        return true;
+    }
+
+    function crosschainReceiver(address recipient, uint256 amount) public virtual override returns (bool) {
+        // TODO get source blockchain
+        // TODO check that source contract is the ERC20 given the source blockchain.
+
+        _mint(recipient, amount);
+        return true;
+    }
+
 
     /**
      * @dev See {IERC20-allowance}.

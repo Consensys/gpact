@@ -19,7 +19,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
 import net.consensys.gpact.cbc.AbstractBlockchain;
-import net.consensys.gpact.lockablestorage.soliditywrappers.LockableStorage;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -28,7 +27,6 @@ public class Bc3Balances extends AbstractBlockchain {
   private static final Logger LOG = LogManager.getLogger(Bc3Balances.class);
 
   Balances balancesContract;
-  private LockableStorage lockableStorageContract;
 
   public Bc3Balances(Credentials credentials, String bcId, String uri, String gasPriceStrategy, String blockPeriod) throws IOException {
     super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
@@ -36,16 +34,10 @@ public class Bc3Balances extends AbstractBlockchain {
 
 
   public void deployContracts(String cbcContractAddress) throws Exception {
-    this.lockableStorageContract = LockableStorage.deploy(this.web3j, this.tm, this.gasProvider,
-        cbcContractAddress).send();
     this.balancesContract =
-        Balances.deploy(this.web3j, this.tm, this.gasProvider,
-          this.lockableStorageContract.getContractAddress()).send();
-    this.lockableStorageContract.setBusinessLogicContract(this.balancesContract.getContractAddress()).send();
+        Balances.deploy(this.web3j, this.tm, this.gasProvider, cbcContractAddress).send();
     LOG.info("Balances contract deployed to {} on blockchain 0x{}",
         this.balancesContract.getContractAddress(), this.blockchainId.toString(16));
-    LOG.info("Lockable Storage contract for Balances deployed to {} on blockchain 0x{}",
-        this.lockableStorageContract.getContractAddress(), this.blockchainId.toString(16));
   }
 
   public void setBalance(String account, BigInteger newBalance) throws Exception {
@@ -61,6 +53,6 @@ public class Bc3Balances extends AbstractBlockchain {
   }
 
   public boolean storageIsLocked() throws Exception {
-    return  this.lockableStorageContract.locked().send();
+    return  this.balancesContract.isLocked(BigInteger.ZERO).send();
   }
 }

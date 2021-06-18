@@ -14,11 +14,11 @@
  */
 pragma solidity >=0.7.1;
 
-import "../../main/solidity/LockableStorageWrapper.sol";
+import "../../main/solidity/LockableStorage.sol";
 
-contract TestLockableStorageWrapper is LockableStorageWrapper {
+contract TestLockableStorageWrapper is LockableStorage {
 
-    constructor (address _storageContract) LockableStorageWrapper(_storageContract){
+    constructor (address _cbc) LockableStorage(_cbc){
     }
 
 
@@ -34,9 +34,9 @@ contract TestLockableStorageWrapper is LockableStorageWrapper {
         setAddress(_key, _address);
     }
 
-    function test_setBytes(uint256 _key, bytes calldata _val) external {
-        setBytes(_key, _val);
-    }
+//    function test_setBytes(uint256 _key, bytes calldata _val) external {
+//        setBytes(_key, _val);
+//    }
 
 
     function test_setArrayValue(uint256 _key, uint256 _index, uint256 _val) external {
@@ -68,9 +68,9 @@ contract TestLockableStorageWrapper is LockableStorageWrapper {
         return getAddress(_key);
     }
 
-    function test_getBytes(uint256 _key) external view returns(bytes memory) {
-        return getBytes(_key);
-    }
+//    function test_getBytes(uint256 _key) external view returns(bytes memory) {
+//        return getBytes(_key);
+//    }
 
     function test_getArrayLength(uint256 _key) external view returns(uint256) {
         return getArrayLength(_key);

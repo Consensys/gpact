@@ -14,16 +14,16 @@
  */
 pragma solidity >=0.7.1;
 
-import "../../../../../contracts/solidity/lockablestorage/src/main/solidity/LockableStorageWrapper.sol";
+import "../../../../../contracts/solidity/lockablestorage/src/main/solidity/LockableStorage.sol";
 
 
-contract ContractB is LockableStorageWrapper {
+contract ContractB is LockableStorage {
     uint256 constant private KEY_VAL = 0;
 
 
     event ValueWritten(uint256 _val);
 
-    constructor(address _storageContract) LockableStorageWrapper(_storageContract) {
+    constructor(address _crossBlockchainControl) LockableStorage(_crossBlockchainControl) {
     }
 
     function set(uint256 _val) external {

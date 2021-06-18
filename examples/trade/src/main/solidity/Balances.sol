@@ -14,12 +14,12 @@
  */
 pragma solidity >=0.7.1;
 
-import "../../../../../contracts/solidity/lockablestorage/src/main/solidity/LockableStorageWrapper.sol";
+import "../../../../../contracts/solidity/lockablestorage/src/main/solidity/LockableStorage.sol";
 
-contract Balances is LockableStorageWrapper {
+contract Balances is LockableStorage {
     uint256 constant private KEY_MAP1 = 0;
 
-    constructor (address _storageContract) LockableStorageWrapper(_storageContract) {
+    constructor (address _cbc) LockableStorage(_cbc) {
     }
 
     function setBalance(address _account, uint256 _newBalance) external {

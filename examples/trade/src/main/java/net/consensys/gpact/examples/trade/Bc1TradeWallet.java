@@ -19,7 +19,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
 import net.consensys.gpact.cbc.AbstractBlockchain;
-import net.consensys.gpact.lockablestorage.soliditywrappers.LockableStorage;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -29,25 +28,19 @@ public class Bc1TradeWallet extends AbstractBlockchain {
   private static final Logger LOG = LogManager.getLogger(Bc1TradeWallet.class);
 
   TradeWallet tradeWalletContract;
-  private LockableStorage lockableStorageContract;
 
   public Bc1TradeWallet(Credentials credentials, String bcId, String uri, String gasPriceStrategy, String blockPeriod) throws IOException {
     super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
   }
 
   public void deployContracts(String cbcContractAddress, BigInteger busLogicBlockchainId, String busLogicContractAddress) throws Exception {
-    this.lockableStorageContract = LockableStorage.deploy(this.web3j, this.tm, this.gasProvider, cbcContractAddress).send();
     this.tradeWalletContract =
         TradeWallet.deploy(this.web3j, this.tm, this.gasProvider,
             cbcContractAddress,
             busLogicBlockchainId,
-            busLogicContractAddress,
-            this.lockableStorageContract.getContractAddress()).send();
-    this.lockableStorageContract.setBusinessLogicContract(this.tradeWalletContract.getContractAddress()).send();
+            busLogicContractAddress).send();
     LOG.info("Trade Wallet contract deployed to {} on blockchain 0x{}",
         this.tradeWalletContract.getContractAddress(), this.blockchainId.toString(16));
-    LOG.info("Lockable Storage contract for Trade Wallet deployed to {} on blockchain 0x{}",
-        this.lockableStorageContract.getContractAddress(), this.blockchainId.toString(16));
   }
 
   public String getRlpFunctionSignature_ExecuteTrade(String buyFrom, BigInteger quantity) {
@@ -55,7 +48,7 @@ public class Bc1TradeWallet extends AbstractBlockchain {
   }
 
   public void showAllTrades() throws Exception {
-    boolean storageIsLocked = this.lockableStorageContract.locked().send();
+    boolean storageIsLocked = this.tradeWalletContract.isLocked(BigInteger.ZERO).send();
     if (storageIsLocked) {
       throw new Exception("Root contract lockable storage is locked");
     }
@@ -74,6 +67,6 @@ public class Bc1TradeWallet extends AbstractBlockchain {
   }
 
   public boolean storageIsLocked() throws Exception {
-    return  this.lockableStorageContract.locked().send();
+    return this.tradeWalletContract.isLocked(BigInteger.ZERO).send();
   }
 }

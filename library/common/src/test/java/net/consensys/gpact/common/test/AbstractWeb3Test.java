@@ -14,10 +14,13 @@
  */
 package net.consensys.gpact.common.test;
 
+import net.consensys.gpact.common.RevertReason;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.web3j.protocol.exceptions.TransactionException;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.tx.RawTransactionManager;
 import org.web3j.tx.TransactionManager;
@@ -27,6 +30,7 @@ import org.web3j.tx.gas.StaticGasProvider;
 import net.consensys.gpact.utils.crypto.KeyPairGen;
 
 import java.math.BigInteger;
+import java.util.Optional;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 public abstract class AbstractWeb3Test {
@@ -46,7 +50,7 @@ public abstract class AbstractWeb3Test {
   protected TransactionManager tm;
   protected Credentials credentials;
   // A gas provider which indicates no gas is charged for transactions.
-  protected ContractGasProvider freeGasProvider =  new StaticGasProvider(BigInteger.ZERO, DefaultGasProvider.GAS_LIMIT);
+  protected ContractGasProvider freeGasProvider = new StaticGasProvider(BigInteger.ZERO, DefaultGasProvider.GAS_LIMIT);
 
 
   public void setupWeb3() throws Exception {
@@ -69,4 +73,14 @@ public abstract class AbstractWeb3Test {
   }
 
 
+  public void processTransactionException(TransactionException ex) {
+    Optional<TransactionReceipt> otxr = ex.getTransactionReceipt();
+    if (otxr.isPresent()) {
+      String revertStr = otxr.get().getRevertReason();
+      System.out.println("Exception thrown as expected: Revert Reason: " +
+              RevertReason.decodeRevertReason(revertStr));
+    } else {
+      System.out.println("Exception thrown as expected, but not transaction receipt: " + ex.getMessage());
+    }
+  }
 }

@@ -16,6 +16,8 @@ package net.consensys.gpact.lockablestorage.test;
 
 import org.junit.Test;
 
+import java.math.BigInteger;
+
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -28,8 +30,7 @@ public class LockableStorageInitTest extends AbstractLockableStorageTest {
     setupWeb3();
     deployContracts();
 
-    assert(!this.lockableStorageContract.locked().send());
-    assertEquals(this.lockableStorageContract.businessLogicContract().send(), this.storageWrapper.getContractAddress());
+    assert(!this.lockableStorageContract.isLocked(BigInteger.ZERO).send());
   }
 
 }

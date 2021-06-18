@@ -20,7 +20,6 @@ import org.web3j.crypto.Credentials;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import net.consensys.gpact.cbc.AbstractBlockchain;
 import net.consensys.gpact.examples.write.soliditywrappers.ContractB;
-import net.consensys.gpact.lockablestorage.soliditywrappers.LockableStorage;
 
 
 import java.io.IOException;
@@ -31,20 +30,15 @@ public class Bc2ContractB extends AbstractBlockchain {
   private static final Logger LOG = LogManager.getLogger(Bc2ContractB.class);
 
   ContractB contractB;
-  LockableStorage lockableStorage;
 
   public Bc2ContractB(Credentials credentials, String bcId, String uri, String gasPriceStrategy, String blockPeriod) throws IOException {
     super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
   }
 
   public void deployContracts(String cbcContractAddress) throws Exception {
-    this.lockableStorage = LockableStorage.deploy(this.web3j, this.tm, this.gasProvider, cbcContractAddress).send();
-    this.contractB = ContractB.deploy(this.web3j, this.tm, this.gasProvider, this.lockableStorage.getContractAddress()).send();
-    this.lockableStorage.setBusinessLogicContract(this.contractB.getContractAddress()).send();
+    this.contractB = ContractB.deploy(this.web3j, this.tm, this.gasProvider, cbcContractAddress).send();
     LOG.info("ContractB deployed to {} on blockchain 0x{}",
         this.contractB.getContractAddress(), this.blockchainId.toString(16));
-    LOG.info("Lockable Storage for Contract deployed to {} on blockchain 0x{}",
-        this.lockableStorage.getContractAddress(), this.blockchainId.toString(16));
   }
 
   public String getRlpFunctionSignature_Set(BigInteger val) {
@@ -60,7 +54,7 @@ public class Bc2ContractB extends AbstractBlockchain {
   }
 
   public void showValueWritten() throws Exception {
-    boolean isLocked = this.lockableStorage.locked().send();
+    boolean isLocked = this.contractB.isLocked(BigInteger.ZERO).send();
     LOG.info("Contract B's lockable storage: locked: {}", isLocked);
     if (isLocked) {
       throw new RuntimeException("Contract B's lockable storage locked after end of crosschain transaction");

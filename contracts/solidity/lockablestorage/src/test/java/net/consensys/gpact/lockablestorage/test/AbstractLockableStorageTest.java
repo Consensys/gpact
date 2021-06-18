@@ -15,11 +15,12 @@
 package net.consensys.gpact.lockablestorage.test;
 
 import org.junit.Test;
-import net.consensys.gpact.lockablestorage.soliditywrappers.LockableStorage;
 import net.consensys.gpact.lockablestorage.soliditywrappers.MockCbcForLockableStorageTest;
 import net.consensys.gpact.lockablestorage.soliditywrappers.TestLockableStorageWrapper;
 import net.consensys.gpact.common.test.AbstractWeb3Test;
 
+
+import java.math.BigInteger;
 
 import static org.junit.Assert.assertEquals;
 
@@ -28,31 +29,13 @@ import static org.junit.Assert.assertEquals;
  * cross-blockchain) call.
  */
 public class AbstractLockableStorageTest extends AbstractWeb3Test {
-  TestLockableStorageWrapper storageWrapper;
-  LockableStorage lockableStorageContract;
+  TestLockableStorageWrapper lockableStorageContract;
   MockCbcForLockableStorageTest mockCrossBlockchainControlContract;
-
-
-
 
   protected void deployContracts() throws Exception {
     this.mockCrossBlockchainControlContract = MockCbcForLockableStorageTest.deploy(this.web3j, this.tm, this.freeGasProvider).send();
-    this.lockableStorageContract = LockableStorage.deploy(this.web3j, this.tm, this.freeGasProvider,
-        this.mockCrossBlockchainControlContract.getContractAddress()).send();
-    this.storageWrapper = TestLockableStorageWrapper.deploy(this.web3j, this.tm, this.freeGasProvider,
-        this.lockableStorageContract.getContractAddress()).send();
-    this.lockableStorageContract.setBusinessLogicContract(this.storageWrapper.getContractAddress()).send();
+    this.lockableStorageContract = TestLockableStorageWrapper.deploy(this.web3j, this.tm, this.freeGasProvider,
+            this.mockCrossBlockchainControlContract.getContractAddress()).send();
   }
-
-
-  @Test
-  public void checkDeployment() throws Exception {
-    setupWeb3();
-    deployContracts();
-
-    assert(!this.lockableStorageContract.locked().send());
-    assertEquals(this.lockableStorageContract.businessLogicContract().send(), this.storageWrapper.getContractAddress());
-  }
-
 }
 
