@@ -61,7 +61,7 @@ import "../../../../crossblockchaincontrol/src/main/solidity/CbcLockableStorageI
  *  the value in normal storage.} }
  * Else (not locked) {Read from normal storage}
  */
-contract LockableStorage {
+contract OldLockableStorage {
     address immutable deployer;
 
     // TODO be able to upgrade the business logic contract

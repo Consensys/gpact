@@ -19,9 +19,12 @@ import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.http.HttpService;
+import org.web3j.tx.FastRawTransactionManager;
 import org.web3j.tx.RawTransactionManager;
 import org.web3j.tx.TransactionManager;
 import net.consensys.gpact.common.DynamicGasProvider;
+import org.web3j.tx.response.PollingTransactionReceiptProcessor;
+import org.web3j.tx.response.TransactionReceiptProcessor;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -54,6 +57,10 @@ public abstract class AbstractBlockchain {
     this.credentials = credentials;
     this.web3j = Web3j.build(new HttpService(this.uri), this.pollingInterval, new ScheduledThreadPoolExecutor(5));
     this.tm = new RawTransactionManager(this.web3j, this.credentials, this.blockchainId.longValue(), RETRY, this.pollingInterval);
+//    TransactionReceiptProcessor sourceTxrProcessor = new PollingTransactionReceiptProcessor(this.web3j, this.pollingInterval, RETRY);
+//    this.tm = new FastRawTransactionManager(this.web3j, this.credentials, this.blockchainId.longValue(), sourceTxrProcessor);
+
+
     this.gasProvider = new DynamicGasProvider(this.web3j, uri, gasPriceStrategy);
   }
 

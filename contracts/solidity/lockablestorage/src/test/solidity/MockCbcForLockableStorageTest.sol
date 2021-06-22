@@ -68,6 +68,12 @@ contract MockCbcForLockableStorageTest is CbcLockableStorageInterface {
         return uint256(0);
     }
 
+    function whoCalledMe() external pure override returns (uint256 targetBlockchainId, address targetContract) {
+        return (0, address(0));
+
+    }
+
+
     function addToListOfLockedContracts(address _contractToLock) external override {
         // Don't add the same contract twice. So, check the contract isn't in
         // the array first.

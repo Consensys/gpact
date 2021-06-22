@@ -9,31 +9,35 @@ repositories {
 }
 
 dependencies {
-    compile project (':common')
-    compile project (':trie')
-    testCompile project (path: ':common', configuration: 'testArtifacts')
+    implementation project (':common')
+    implementation project (':rlp')
+    implementation project (':trie')
+    testImplementation project (path: ':common', configuration: 'testArtifacts')
 
 
     // https://mvnrepository.com/artifact/org.apache.tuweni/tuweni-bytes
-    compile group: 'org.apache.tuweni', name: 'tuweni-bytes', version: '1.0.0'
+    implementation group: 'org.apache.tuweni', name: 'tuweni-bytes', version: '1.0.0'
     // https://mvnrepository.com/artifact/org.apache.tuweni/tuweni-units
-    compile group: 'org.apache.tuweni', name: 'tuweni-units', version: '1.0.0'
+    implementation group: 'org.apache.tuweni', name: 'tuweni-units', version: '1.0.0'
 
 
-    testCompile group: 'junit', name: 'junit', version: '4.12'
+    testImplementation group: 'junit', name: 'junit', version: '4.12'
 
     testImplementation files('../../web3j-rlp/abi/build/libs/abi.jar')
     testImplementation files('../../web3j-rlp/core/build/libs/core.jar')
     testImplementation files('../../web3j-rlp/crypto/build/libs/crypto.jar')
     testImplementation files('../../web3j-rlp/utils/build/libs/utils.jar')
     testImplementation files('../../web3j-rlp/rlp/build/libs/rlp.jar')
-    compile "com.fasterxml.jackson.core:jackson-databind:2.8.11.6"
-    testCompile "io.reactivex.rxjava2:rxjava:2.2.2"
 
-    compile group: 'com.google.guava', name: 'guava', version: '14.0'
-    compile group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.12.0'
-    compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.12.0'
-    compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.12.0'
+    // https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.8.11.6'
+    // https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-annotations
+    //testImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.2.1'
+
+    implementation group: 'com.google.guava', name: 'guava', version: '14.0'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.12.0'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.12.0'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.12.0'
 
 }
 

@@ -15,11 +15,11 @@
 pragma solidity >=0.7.1;
 import "./OldLockableStorage.sol";
 
-contract LockableStorageWrapper  {
-    LockableStorage public storageContract;
+contract OldLockableStorageWrapper  {
+    OldLockableStorage public storageContract;
 
     constructor (address _storageContract) {
-        storageContract = LockableStorage(_storageContract);
+        storageContract = OldLockableStorage(_storageContract);
     }
 
 

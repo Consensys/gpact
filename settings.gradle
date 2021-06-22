@@ -20,8 +20,9 @@ include 'examples-singlebc-write'
 include 'examples-singlebc-trade'
 include 'examples-utilpkey'
 include 'examples-tokenbridge'
-include 'examples-openzeppelin'
 include 'examples-test'
+include 'app-openzeppelin'
+include 'app-erc20'
 
 project(":sol-blockheader").projectDir = file("contracts/solidity/blockheader")
 project(":sol-crossblockchaincontrol").projectDir = file("contracts/solidity/crossblockchaincontrol")
@@ -38,7 +39,6 @@ project(":rlp").projectDir = file("library/rlp")
 project(":trie").projectDir = file("library/trie")
 
 
-project(":examples-openzeppelin").projectDir = file("examples/openzeppelin")
 project(":examples-read").projectDir = file("examples/read")
 project(":examples-write").projectDir = file("examples/write")
 project(":examples-twochain").projectDir = file("examples/twochain")
@@ -49,3 +49,6 @@ project(":examples-singlebc-trade").projectDir = file("examples/singlebc-trade")
 project(":examples-test").projectDir = file("examples/test")
 project(":examples-tokenbridge").projectDir = file("examples/tokenbridge")
 project(":examples-utilpkey").projectDir = file("examples/utilpkey")
+
+project(":app-openzeppelin").projectDir = file("appcontracts/solidity/openzeppelin")
+project(":app-erc20").projectDir = file("appcontracts/solidity/erc20")

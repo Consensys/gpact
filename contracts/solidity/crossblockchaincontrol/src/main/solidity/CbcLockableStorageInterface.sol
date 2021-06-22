@@ -38,5 +38,7 @@ interface CbcLockableStorageInterface {
 
     function getActiveCallCrossBlockchainTransactionId() external view returns (uint256);
 
-//    function wasLockedByThisCall() external view returns (bool);
+    function whoCalledMe() external view returns (uint256 targetBlockchainId, address targetContract);
+
+        //    function wasLockedByThisCall() external view returns (bool);
 }

@@ -2,7 +2,7 @@
 set -e
 rm -rf build
 
-HERE=examples/openzeppelin
+HERE=appcontracts/solidity/openzeppelin
 BUILDDIR=$HERE/build
 CONTRACTSDIR=$HERE/src/main/solidity
 TESTCONTRACTSDIR=$HERE/src/test/solidity
@@ -13,7 +13,6 @@ PACKAGE=net.consensys.gpact.openzeppelin.soliditywrappers
 WEB3J=../web3j-rlp/codegen/build/install/codegen/bin/codegen
 
 
-# compiling one file also compiles its dependendencies. We use overwrite to avoid the related warnings.
 solc $CONTRACTSDIR/token/ERC20/presets/ERC20PresetFixedSupply.sol --allow-paths . --bin --abi --optimize -o $BUILDDIR --overwrite
 # solc $CONTRACTSDIR/proxy/transparent/ProxyAdmin.sol --allow-paths . --bin --abi --optimize -o $BUILDDIR --overwrite
 # solc $CONTRACTSDIR/proxy/transparent/TransparentUpgradeableProxy.sol --allow-paths . --bin --abi --optimize -o $BUILDDIR --overwrite
