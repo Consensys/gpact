@@ -3,7 +3,7 @@ jobs:
   all:
     docker:
       - image: circleci/openjdk:11.0.8-jdk-buster
-    working_directory: ~/project
+    working_directory: ~/gpact
     environment:
       # JVM_OPTS: -Xmx3200m
       GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.parallel=true -Dorg.gradle.workers.max=2
@@ -16,6 +16,14 @@ jobs:
             - v1-dependencies-{{ checksum "build.gradle" }}
             # fallback to using the latest cache if no exact match is found
             - v1-dependencies-
+
+      -run:
+         command: |
+            cd ..
+            git clone https://github.com/drinkcoffee/web3j-rlp
+            cd web3j-rlp
+            ./gradlew installDist
+            cd ../gpact
 
       - run: gradle dependencies
 
