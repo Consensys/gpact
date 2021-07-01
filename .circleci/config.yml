@@ -128,11 +128,11 @@ jobs:
             - ./gpact
             - ./web3j-rlp
             - ./besu/build/install
-      - store_artifacts:
-          name: Distribution artifacts
-          path:  build/distributions
-          destination: distributions
-          when: always
+#      - store_artifacts:
+#          name: Distribution artifacts
+#          path:  build/distributions
+#          destination: distributions
+#          when: always
 
   unitTests:
     docker:
