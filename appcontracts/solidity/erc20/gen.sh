@@ -8,7 +8,7 @@ CONTRACTSDIR=$HERE/src/main/solidity
 TESTCONTRACTSDIR=$HERE/src/test/solidity
 OUTPUTDIR=$HERE/src/main/java
 TESTOUTPUTDIR=$HERE/src/test/java
-PACKAGE=net.consensys.gpact.examples.trade.soliditywrappers
+PACKAGE=net.consensys.gpact.appcontracts.erc20.soliditywrappers
 #WEB3J=web3j
 WEB3J=../web3j-rlp/codegen/build/install/codegen/bin/codegen
 
