@@ -10,28 +10,12 @@ import "../../../../../../contracts/solidity/crossblockchaincontrol/src/main/sol
 import "../../../../../../contracts/solidity/lockablestorage/src/main/solidity/LockableStorage.sol";
 
 /**
- * @dev Implementation of the {IERC20} interface that provides lockable storage for use with GPACT.
+ * Implementation of the {IERC20} interface that provides lockable storage for
+ * use with GPACT. The implementation is based on the OpenZeppelin ERC20 contract.
  *
- * This implementation is agnostic to the way tokens are created. This means
- * that a supply mechanism has to be added in a derived contract using {mintInternal}.
- * For a generic mechanism see {ERC20PresetMinterPauser}.
- *
- * TIP: For a detailed writeup see our guide
- * https://forum.zeppelin.solutions/t/how-to-implement-erc20-supply-mechanisms/226[How
- * to implement supply mechanisms].
- *
- * We have followed general OpenZeppelin guidelines: functions revert instead
- * of returning `false` on failure. This behavior is nonetheless conventional
- * and does not conflict with the expectations of ERC20 applications.
- *
- * Additionally, an {Approval} event is emitted on calls to {transferFrom}.
- * This allows applications to reconstruct the allowance for all accounts just
- * by listening to said events. Other implementations of the EIP may not emit
- * these events, as it isn't required by the specification.
- *
- * Finally, the non-standard {decreaseAllowance} and {increaseAllowance}
- * functions have been added to mitigate the well-known issues around setting
- * allowances. See {IERC20-approve}.
+ * Lockable storage means that tokens in the contract can be part of a crosschain
+ * call. See CrosschainERC20 for additional functions that allow tokens to be
+ * transferred across blockchains.
  */
 contract LockableERC20 is Context, IERC20, IERC20Metadata, Ownable, LockableStorage {
     // Number of crosschain transfers to or from an account that can
@@ -67,10 +51,6 @@ contract LockableERC20 is Context, IERC20, IERC20Metadata, Ownable, LockableStor
     // Cross-blockchain Control Contract on this blockchain.
     CbcLockableStorageInterface public cbc;
 
-    // ERC 20 contracts for the token represented by this contract
-    // on remote blockchains.
-    mapping (uint256 => address) public remoteERC20s;
-
     /**
      * @dev Sets the values for {name} and {symbol}.
      *
@@ -89,68 +69,12 @@ contract LockableERC20 is Context, IERC20, IERC20Metadata, Ownable, LockableStor
         erc20PallelizationFactor = 10;
     }
 
-    /**
-    * Set the address of an ERC 20 contract on a remote blockchain that funds can be transferred to.
-    */
-    function setRemoteERC20(uint256 blockchainId, address erc20) onlyOwner external {
-        require(cbc.isSingleBlockchainCall(), "Must be single blockchain call");
-        remoteERC20s[blockchainId] = erc20;
-    }
-
     function increaseAccountParallelizartionFactor(uint256 amount) onlyOwner external {
         accountPallelizationFactor += amount;
     }
 
     function increaseERC20ParallelizartionFactor(uint256 amount) onlyOwner external {
         erc20PallelizationFactor += amount;
-    }
-
-    /**
-    * Crosschain transfer from account on this blockchain to an account on a remote blockchain.
-    *
-    * Requirements:
-    *
-    * - `recipient` cannot be the zero address.
-    * - the caller must have a balance of at least `amount`.
-    */
-    function crosschainTransfer(uint256 blockchainId, address recipient, uint256 amount) external {
-        // Determine the account to take funds from. If the account that called this function
-        // is the Cross-Blockchain Control Contract, then the spender is the EOA. Otherwise,
-        // the transfer is being instigated by another contract, probably a wallet.
-        address spender = _msgSender();
-        if (spender == address(cbc)) {
-            spender = tx.origin;
-        }
-
-        crosschainTransferInternal(blockchainId, spender, recipient, amount);
-    }
-
-    function crosschainTransferFrom(uint256 blockchainId, address sender, address recipient, uint256 amount) external {
-        // Determine the spender. If the account that called this function
-        // is the Cross-Blockchain Control Contract, then the spender is the EOA. Otherwise,
-        // the transfer is being instigated by another contract, probably a wallet.
-        address spender = _msgSender();
-        if (spender == address(cbc)) {
-            spender = tx.origin;
-        }
-
-        crosschainTransferInternal(blockchainId, sender, recipient, amount);
-
-        uint256 currentAllowance = allowanceMin(sender, spender);
-        require(currentAllowance >= amount, "ERC20: transfer amount exceeds allowance");
-        decreaseAllowanceInternal(sender, spender, amount);
-    }
-
-
-    function crosschainReceiver(address recipient, uint256 amount) external {
-        require(!cbc.isSingleBlockchainCall(), "Must be part of crosschain call");
-
-        // Check that the calling contract was the ERC 20 linked to this one from
-        // the source blockchain.
-        (uint256 sourceBlockchainId, address sourceContract) = cbc.whoCalledMe();
-        require(sourceContract == remoteERC20s[sourceBlockchainId], "Source is not correct ERC20");
-
-        mintInternal(recipient, amount);
     }
 
     /**
@@ -481,19 +405,6 @@ contract LockableERC20 is Context, IERC20, IERC20Metadata, Ownable, LockableStor
         decreaseBalance(sender, amount);
         increaseBalance(recipient, amount);
         emit Transfer(sender, recipient, amount);
-    }
-
-
-    function crosschainTransferInternal(uint256 blockchainId, address sender, address recipient, uint256 amount) internal {
-        require(!cbc.isSingleBlockchainCall(), "Must be part of crosschain call");
-
-        burnInternal(sender, amount);
-
-        address remoteERC20Contract = remoteERC20s[blockchainId];
-        require(remoteERC20Contract != address(0), "No ERC 20 registered for remote blockchain");
-
-        crossBlockchainControl.crossBlockchainCall(blockchainId, address(remoteERC20Contract),
-            abi.encodeWithSelector(this.crosschainReceiver.selector, recipient, amount));
     }
 
 
