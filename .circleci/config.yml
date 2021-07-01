@@ -16,7 +16,8 @@ jobs:
             - v1-dependencies-{{ checksum "build.gradle" }}
             # fallback to using the latest cache if no exact match is found
             - v1-dependencies-
-      -run:
+
+      - run:
          command: |
             cd ..
             git clone https://github.com/drinkcoffee/web3j-rlp
