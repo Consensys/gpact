@@ -34,7 +34,4 @@ workflows:
     jobs:
       - all
 
-      # Customize the JVM maximum heap limit
-      TERM: dumb
-
 
