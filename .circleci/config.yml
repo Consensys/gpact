@@ -1,57 +1,173 @@
 version: 2.1
-jobs:
-  all:
-    docker:
-      - image: circleci/openjdk:11.0.8-jdk-buster
-    working_directory: ~/gpact
-    environment:
-      # JVM_OPTS: -Xmx3200m
-      GRADLE_OPTS: -Dorg.gradle.daemon=false -Dorg.gradle.parallel=true -Dorg.gradle.workers.max=2
-    steps:
+commands:
+ prepare:
+   docker:
+     - image: circleci/openjdk:11.0.8-jdk-buster
+   working_directory: ~/gpact
+   description: "Prepare"
+   steps:
       - checkout
-
-      # Download and cache dependencies
-      - restore_cache:
-          keys:
-            - v1-dependencies-{{ checksum "build.gradle" }}
-            # fallback to using the latest cache if no exact match is found
-            - v1-dependencies-
-
-      # Install and build the custom version of Web3J
       - run:
-         command: |
-            cd ..
-            git clone https://github.com/drinkcoffee/web3j-rlp
-            cd web3j-rlp
-            ./gradlew installDist
-            cd ../gpact
+          name: Check out Web3j and Besu
+          command: |
+            git clone https://github.com/drinkcoffee/web3j-rlp.git ../web3j-rlp
+            git --git-dir=../web3j-rlp/.git rev-parse HEAD > ../web3j-rlp/headcommit
+            git clone https://github.com/hyperledger/besu.git ../besu
+            git --git-dir=../besu/.git rev-parse HEAD > ../besu/headcommit
+
+      - restore_cache:
+          name: Restore cached Besu gradle dependencies
+          keys:
+            - deps-besu-{{ checksum "../besu/gradle/versions.gradle" }}
+            - deps-besu
+
+      - restore_cache:
+          name: Restore cached Besu build products
+          keys:
+            - products-besu-{{ checksum "../besu/headcommit" }}
+            - products-besu
+
+      - restore_cache:
+          name: Restore cached Web3j gradle dependencies
+          keys:
+            - deps-web3j-{{ checksum "../web3j-rlp/build.gradle" }}
+            - deps-web3j
+
+      - restore_cache:
+          name: Restore cached GPACT gradle dependencies
+          keys:
+            - deps-gpact-{{ checksum "build.gradle" }}
+            - deps-gpact
+
+      - restore_cache:
+          name: Restore gradle build cache
+          keys: # by decreasing rate of change...
+            - build-cache-{{ checksum "../besu/headcommit" }}-{{ checksum "../web3j-rlp/headcommit" }}-{{ .Revision }}
+            - build-cache-{{ checksum "../besu/headcommit" }}-{{ checksum "../web3j-rlp/headcommit" }}
+            - build-cache-{{ checksum "../besu/headcommit" }}
+            - build-cache
+
 
       # Install Solidity
       - run:
          command: |
-            sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 1C52189C923F6CA9
-            sudo apt-get update
-            sudo apt-get -y install software-properties-common
-            sudo apt-get update
-            sudo add-apt-repository -y ppa:ethereum/ethereum
-            sudo apt-get update
-            sudo apt-get -y install solc
+           sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 1C52189C923F6CA9
+           sudo apt-get update
+           sudo apt-get -y install software-properties-common
+           sudo apt-get update
+           sudo add-apt-repository -y ppa:ethereum/ethereum
+           sudo apt-get update
+           sudo apt-get -y install solc
 
-      - run: gradle dependencies
+
+ capture_test_results:
+   docker:
+     - image: circleci/openjdk:11.0.8-jdk-buster
+   working_directory: ~/gpact
+   description: "Capture test results"
+   steps:
+      - run:
+          name: Gather test results
+          when: always
+          command: |
+            FILES=`find . -name test-results`
+            for FILE in $FILES
+            do
+              MODULE=`echo "$FILE" | sed -e 's@./\(.*\)/build/test-results@\1@'`
+              TARGET="build/test-results/$MODULE"
+              mkdir -p "$TARGET"
+              cp -rf ${FILE}/*/* "$TARGET"
+            done
+            # show what is being gathered
+            ls -R build/test-results
+      - store_test_results:
+          path: build/test-results
+
+
+jobs:
+  assemble:
+    docker:
+      - image: circleci/openjdk:11.0.8-jdk-buster
+    working_directory: ~/gpact
+    steps:
+      - prepare
+      - run:
+          name: Assemble
+          command: |
+            pushd .
+            # Build our Web3j
+            cd ../web3j-rlp
+            ./gradlew --parallel --stacktrace --info --build-cache installDist
+            # Build Besu
+            cd ../besu
+            ./gradlew --parallel --stacktrace --info --build-cache installDist
+            popd
+            # Build the gpact
+            ./gradlew --parallel --stacktrace --info --build-cache clean compileJava compileTestJava assemble
 
       - save_cache:
+          name: Caching Besu gradle dependencies
+          key: deps-besu-{{ checksum "../besu/gradle/versions.gradle" }}
+          paths:
+            - ../besu/.gradle
+      - save_cache:
+          name: Caching Web3j gradle dependencies
+          key: deps-web3j-{{ checksum "../web3j-rlp/build.gradle" }}
+          paths:
+            - ../web3j/.gradle
+      - save_cache:
+          name: Caching Samples gradle dependencies
+          key: deps-gpact-{{ checksum "build.gradle" }}
+          paths:
+            - .gradle
+      - save_cache:
+          name: Caching Besu build products
+          key: products-besu-{{ checksum "../besu/headcommit" }}
+          paths:
+            - ../besu/build/
+      - save_cache:
+          name: Caching gradle build cache
+          key: build-cache-{{ checksum "../besu/headcommit" }}-{{ checksum "../web3j-rlp/headcommit" }}-{{ .Revision }}
           paths:
             - ~/.gradle
-          key: v1-dependencies-{{ checksum "build.gradle" }}
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - ./gpact
+            - ./web3j-rlp
+            - ./besu/build/install
+      - store_artifacts:
+          name: Distribution artifacts
+          path:  build/distributions
+          destination: distributions
+          when: always
 
-      # run tests!
-      - run: gradle test
+  unitTests:
+    docker:
+      - image: circleci/openjdk:11.0.8-jdk-buster
+    working_directory: ~/gpact
+    steps:
+      - prepare
+      - attach_workspace:
+          at: ~/gpact
+      - run:
+          name: Build
+          no_output_timeout: 2m
+          command: |
+            ./gradlew --parallel build
+      - capture_test_results
+
+
+
 
 
 workflows:
   version: 2
   default:
     jobs:
-      - all
+      - assemble
+      - unitTests:
+          requires:
+            - assemble
 
 
