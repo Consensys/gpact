@@ -29,6 +29,7 @@ jobs:
       # Install Solidity
       - run:
          command: |
+            sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 1C52189C923F6CA9
             sudo apt-get update
             sudo apt-get -y install software-properties-common
             sudo apt-get update
