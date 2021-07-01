@@ -29,11 +29,11 @@ jobs:
       # Install Solidity
       - run:
          command: |
-            sudo snap install solc
-
-#            sudo add-apt-repository ppa:ethereum/ethereum
-#            sudo apt-get update
-#            sudo apt-get install solc
+            sudo apt-get install software-properties-common
+            sudo apt-get update
+            sudo add-apt-repository ppa:ethereum/ethereum
+            sudo apt-get update
+            sudo apt-get install solc
 
       - run: gradle dependencies
 
