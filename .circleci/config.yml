@@ -91,17 +91,17 @@ jobs:
             cd ../web3j-rlp
             ./gradlew --parallel --stacktrace --info --build-cache installDist
             # Build Besu
-            cd ../besu
-            ./gradlew --parallel --stacktrace --info --build-cache installDist
+#            cd ../besu
+#            ./gradlew --parallel --stacktrace --info --build-cache installDist
             popd
             # Build the gpact
             ./gradlew --parallel --stacktrace --info --build-cache clean compileJava compileTestJava assemble
 
-      - save_cache:
-          name: Caching Besu gradle dependencies
-          key: deps-besu-{{ checksum "../besu/gradle/versions.gradle" }}
-          paths:
-            - ../besu/.gradle
+ #     - save_cache:
+#          name: Caching Besu gradle dependencies
+#          key: deps-besu-{{ checksum "../besu/gradle/versions.gradle" }}
+#          paths:
+#            - ../besu/.gradle
       - save_cache:
           name: Caching Web3j gradle dependencies
           key: deps-web3j-{{ checksum "../web3j-rlp/build.gradle" }}
@@ -112,11 +112,11 @@ jobs:
           key: deps-gpact-{{ checksum "build.gradle" }}
           paths:
             - .gradle
-      - save_cache:
-          name: Caching Besu build products
-          key: products-besu-{{ checksum "../besu/headcommit" }}
-          paths:
-            - ../besu/build/
+#      - save_cache:
+#          name: Caching Besu build products
+#          key: products-besu-{{ checksum "../besu/headcommit" }}
+#          paths:
+#            - ../besu/build/
       - save_cache:
           name: Caching gradle build cache
           key: build-cache-{{ checksum "../besu/headcommit" }}-{{ checksum "../web3j-rlp/headcommit" }}-{{ .Revision }}
@@ -127,7 +127,7 @@ jobs:
           paths:
             - ./gpact
             - ./web3j-rlp
-            - ./besu/build/install
+ #           - ./besu/build/install
 #      - store_artifacts:
 #          name: Distribution artifacts
 #          path:  build/distributions
