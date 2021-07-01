@@ -17,6 +17,7 @@ jobs:
             # fallback to using the latest cache if no exact match is found
             - v1-dependencies-
 
+      # Install and build the custom version of Web3J
       - run:
          command: |
             cd ..
@@ -24,6 +25,13 @@ jobs:
             cd web3j-rlp
             ./gradlew installDist
             cd ../gpact
+
+      # Install Solidity
+      - run:
+         command: |
+            sudo add-apt-repository ppa:ethereum/ethereum
+            sudo apt-get update
+            sudo apt-get install solc
 
       - run: gradle dependencies
 
