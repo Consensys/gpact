@@ -1,6 +1,6 @@
 rootProject.name = 'gpact'
+include 'common'
 include 'sol-crypto'
-/*
 include 'rlp'
 include 'trie'
 include 'receipts'
@@ -8,9 +8,9 @@ include 'registrar'
 include 'sol-receipts'
 include 'sol-registrar'
 include 'sol-blockheader'
+/*
 include 'sol-crossblockchaincontrol'
 include 'crossblockchaincontrol'
-include 'common'
 include 'sol-lockablestorage'
 include 'examples-read'
 include 'examples-write'
