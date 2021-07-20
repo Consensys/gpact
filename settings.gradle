@@ -1,5 +1,6 @@
 rootProject.name = 'gpact'
 include 'sol-crypto'
+/*
 include 'rlp'
 include 'trie'
 include 'receipts'
@@ -52,3 +53,6 @@ project(":examples-utilpkey").projectDir = file("examples/utilpkey")
 
 project(":app-openzeppelin").projectDir = file("appcontracts/solidity/openzeppelin")
 project(":app-erc20").projectDir = file("appcontracts/solidity/erc20")
+
+
+ */
