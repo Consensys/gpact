@@ -8,15 +8,15 @@ include 'registrar'
 include 'sol-receipts'
 include 'sol-registrar'
 include 'sol-blockheader'
-
 include 'sol-crossblockchaincontrol'
 include 'crossblockchaincontrol'
 
-/*
 include 'sol-lockablestorage'
 include 'examples-read'
 include 'examples-write'
 include 'examples-twochain'
+
+/*
 include 'examples-trade'
 include 'examples-singlebc-read'
 include 'examples-singlebc-write'
