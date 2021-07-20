@@ -10,7 +10,6 @@ include 'sol-registrar'
 include 'sol-blockheader'
 include 'sol-crossblockchaincontrol'
 include 'crossblockchaincontrol'
-
 include 'sol-lockablestorage'
 include 'examples-read'
 include 'examples-write'
@@ -26,6 +25,7 @@ include 'examples-tokenbridge'
 include 'examples-test'
 include 'app-openzeppelin'
 include 'app-erc20'
+*/
 
 project(":sol-blockheader").projectDir = file("contracts/solidity/blockheader")
 project(":sol-crossblockchaincontrol").projectDir = file("contracts/solidity/crossblockchaincontrol")
@@ -57,4 +57,4 @@ project(":app-openzeppelin").projectDir = file("appcontracts/solidity/openzeppel
 project(":app-erc20").projectDir = file("appcontracts/solidity/erc20")
 
 
- */
+
