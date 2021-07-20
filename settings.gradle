@@ -8,9 +8,11 @@ include 'registrar'
 include 'sol-receipts'
 include 'sol-registrar'
 include 'sol-blockheader'
-/*
+
 include 'sol-crossblockchaincontrol'
 include 'crossblockchaincontrol'
+
+/*
 include 'sol-lockablestorage'
 include 'examples-read'
 include 'examples-write'
