@@ -90,9 +90,6 @@ jobs:
             # Build our Web3j
             cd ../web3j-rlp
             ./gradlew --parallel --stacktrace --info --build-cache installDist
-            # Build Besu
-            # cd ../besu
-            # ./gradlew --parallel --stacktrace --info --build-cache installDist
             popd
             # Build the gpact
             ./gradlew --parallel --stacktrace --info --build-cache clean compileJava compileTestJava assemble
@@ -122,11 +119,12 @@ jobs:
           key: build-cache-{{ checksum "../besu/headcommit" }}-{{ checksum "../web3j-rlp/headcommit" }}-{{ .Revision }}
           paths:
             - ~/.gradle
-      - persist_to_workspace:
-          root: ~/
-          paths:
-            - ./gpact
-            - ./web3j-rlp
+
+#      - persist_to_workspace:
+#          root: ~/
+#          paths:
+#            - ./gpact
+#            - ./web3j-rlp
             #           - ./besu/build/install
 #      - store_artifacts:
 #          name: Distribution artifacts
@@ -139,16 +137,34 @@ jobs:
       - image: circleci/openjdk:11.0.8-jdk-buster
     working_directory: ~/gpact
     steps:
-      # - prepare
-      - attach_workspace:
-          at: ~/
+      - prepare
       - run:
-          name: Check
+          name: Build web3j and besu
           command: |
-            ls -al
-            pwd
-            ls gpact
-            ls gpact/build
+            # Build our Web3j
+            cd ../web3j-rlp
+            ./gradlew --parallel --stacktrace --info --build-cache installDist
+            # Build Besu
+            cd ../besu
+            ./gradlew --parallel --stacktrace --info --build-cache installDist
+      - run:
+          name: Create blockchain
+          background: true
+          command: ./scripts/create_chain.js 31 1
+      - run:
+          name: Build and test
+          command: |
+            ./gradlew --parallel --stacktrace --info --build-cache test
+
+#      - attach_workspace:
+#          at: ~/
+#      - run:
+#          name: Check
+#          command: |
+#            ls -al
+#            pwd
+#            ls gpact
+#            ls gpact/build
 
 #      - run:
 #          name: Build
