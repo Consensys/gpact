@@ -15,6 +15,12 @@ dependencies {
     testImplementation project (':common')
     testImplementation project (':registrar')
     testImplementation project (':receipts')
+    testImplementation project (':trie')
+
+    // https://mvnrepository.com/artifact/org.apache.tuweni/tuweni-bytes
+    implementation group: 'org.apache.tuweni', name: 'tuweni-bytes', version: '1.0.0'
+    // https://mvnrepository.com/artifact/org.apache.tuweni/tuweni-units
+    implementation group: 'org.apache.tuweni', name: 'tuweni-units', version: '1.0.0'
 
     testImplementation group: 'junit', name: 'junit', version: '4.12'
 
