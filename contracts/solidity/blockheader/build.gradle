@@ -10,12 +10,14 @@ repositories {
 
 dependencies {
     testImplementation project (path: ':common', configuration: 'testArtifacts')
-    testImplementation project (path: ':registrar', configuration: 'testArtifacts')
+    testImplementation project (path: ':sol-registrar', configuration: 'testArtifacts')
 
     testImplementation project (':common')
     testImplementation project (':registrar')
     testImplementation project (':receipts')
     testImplementation project (':trie')
+    testImplementation project (':rlp')
+    testImplementation project (':sol-registrar')
 
     // https://mvnrepository.com/artifact/org.apache.tuweni/tuweni-bytes
     implementation group: 'org.apache.tuweni', name: 'tuweni-bytes', version: '1.0.0'
@@ -27,6 +29,8 @@ dependencies {
     implementation group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.12.0'
     implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.12.0'
     implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.12.0'
+
+    implementation "io.reactivex.rxjava2:rxjava:2.2.2"
 
     implementation files('../../../../web3j-rlp/abi/build/libs/abi-4.8.5-SNAPSHOT.jar')
     implementation files('../../../../web3j-rlp/core/build/libs/core-4.8.5-SNAPSHOT.jar')
