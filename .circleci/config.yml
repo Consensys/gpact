@@ -139,15 +139,23 @@ jobs:
       - image: circleci/openjdk:11.0.8-jdk-buster
     working_directory: ~/gpact
     steps:
-      - prepare
+      # - prepare
       - attach_workspace:
-          at: ~/gpact
+          at: ~/
       - run:
-          name: Build
-          no_output_timeout: 2m
+          name: Check
           command: |
-            ./gradlew --parallel build
-      - capture_test_results
+            ls -al
+            pwd
+            ls gpact
+            ls gpact/build
+
+#      - run:
+#          name: Build
+#          no_output_timeout: 2m
+#          command: |
+#            ./gradlew --parallel build
+#      - capture_test_results
 
 
 
