@@ -23,7 +23,7 @@ dependencies {
     implementation files('../../../../web3j-rlp/utils/build/libs/utils-4.8.5-SNAPSHOT.jar')
 
     // https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind
-//    testImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.8.11.6'
+    testImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.8.11.6'
 
     implementation "io.reactivex.rxjava2:rxjava:2.2.2"
 

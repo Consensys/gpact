@@ -11,8 +11,8 @@ include 'sol-blockheader'
 include 'sol-crossblockchaincontrol'
 include 'crossblockchaincontrol'
 
-/*
 include 'sol-lockablestorage'
+/*
 include 'examples-read'
 include 'examples-write'
 include 'examples-twochain'
@@ -42,9 +42,8 @@ project(":sol-blockheader").projectDir = file("contracts/solidity/blockheader")
 project(":sol-crossblockchaincontrol").projectDir = file("contracts/solidity/crossblockchaincontrol")
 project(":crossblockchaincontrol").projectDir = file("library/crossblockchaincontrol")
 
-/*
 project(":sol-lockablestorage").projectDir = file("contracts/solidity/lockablestorage")
-
+/*
 project(":examples-read").projectDir = file("examples/read")
 project(":examples-write").projectDir = file("examples/write")
 project(":examples-twochain").projectDir = file("examples/twochain")
