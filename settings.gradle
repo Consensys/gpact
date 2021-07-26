@@ -15,7 +15,6 @@ include 'sol-lockablestorage'
 include 'examples-read'
 include 'examples-write'
 include 'examples-twochain'
-/*
 include 'examples-trade'
 include 'examples-singlebc-read'
 include 'examples-singlebc-write'
@@ -25,7 +24,6 @@ include 'examples-tokenbridge'
 include 'examples-test'
 include 'app-openzeppelin'
 include 'app-erc20'
-*/
 
 project(":common").projectDir = file("library/common")
 project(":sol-crypto").projectDir = file("contracts/solidity/crypto")
@@ -42,7 +40,6 @@ project(":sol-lockablestorage").projectDir = file("contracts/solidity/lockablest
 project(":examples-read").projectDir = file("examples/read")
 project(":examples-write").projectDir = file("examples/write")
 project(":examples-twochain").projectDir = file("examples/twochain")
-/*
 project(":examples-trade").projectDir = file("examples/trade")
 project(":examples-singlebc-read").projectDir = file("examples/singlebc-read")
 project(":examples-singlebc-write").projectDir = file("examples/singlebc-write")
@@ -50,10 +47,7 @@ project(":examples-singlebc-trade").projectDir = file("examples/singlebc-trade")
 project(":examples-test").projectDir = file("examples/test")
 project(":examples-tokenbridge").projectDir = file("examples/tokenbridge")
 project(":examples-utilpkey").projectDir = file("examples/utilpkey")
-
 project(":app-openzeppelin").projectDir = file("appcontracts/solidity/openzeppelin")
 project(":app-erc20").projectDir = file("appcontracts/solidity/erc20")
-
-*/
 
 
