@@ -26,7 +26,7 @@ dependencies {
     testImplementation files('../../../../web3j-rlp/crypto/build/libs/crypto-4.8.5-SNAPSHOT.jar')
     testImplementation files('../../../../web3j-rlp/rlp/build/libs/rlp-4.8.5-SNAPSHOT.jar')
     testImplementation files('../../../../web3j-rlp/utils/build/libs/utils-4.8.5-SNAPSHOT.jar')
-    testImplementation files('../../../../web3j-rlp/utils/build/libs/tuples-4.8.5-SNAPSHOT.jar')
+    testImplementation files('../../../../web3j-rlp/tuples/build/libs/tuples-4.8.5-SNAPSHOT.jar')
 
     testImplementation "com.fasterxml.jackson.core:jackson-databind:2.8.11.6"
     testImplementation "io.reactivex.rxjava2:rxjava:2.2.2"
