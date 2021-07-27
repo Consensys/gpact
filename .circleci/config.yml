@@ -148,9 +148,10 @@ jobs:
             cd ../besu
             ./gradlew --parallel --stacktrace --info --build-cache installDist
       - run:
-          name: Create blockchain
+          name: Create blockchains
           background: true
-          command: ./scripts/create_chain.js 31 1
+          working_directory: ~/gpact/test-blockchains
+          command: docker compose up
       - run:
           name: Build and test
           command: |
