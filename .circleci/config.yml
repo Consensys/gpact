@@ -139,19 +139,16 @@ jobs:
     steps:
       - prepare
       - run:
-          name: Build web3j and besu
+          name: Build web3j
           command: |
             # Build our Web3j
             cd ../web3j-rlp
-            ./gradlew --parallel --stacktrace --info --build-cache installDist
-            # Build Besu
-            cd ../besu
             ./gradlew --parallel --stacktrace --info --build-cache installDist
       - run:
           name: Create blockchains
           background: true
           working_directory: ~/gpact/test-blockchains
-          command: docker compose up
+          command: docker-compose up
       - run:
           name: Build and test
           command: |
