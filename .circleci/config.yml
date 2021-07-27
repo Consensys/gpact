@@ -155,8 +155,9 @@ jobs:
       - run:
           name: Build and test
           command: |
-            ./gradlew --parallel --stacktrace --info --build-cache test
+            ./gradlew test
 
+#            ./gradlew --parallel --stacktrace --info --build-cache test
 #      - attach_workspace:
 #          at: ~/
 #      - run:

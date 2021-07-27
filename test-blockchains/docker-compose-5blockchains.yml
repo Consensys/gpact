@@ -57,6 +57,60 @@ services:
       gpact-test:
         ipv4_address: 172.16.239.12
 
+  bc33node1:
+    << : *besu-bootnode-def
+    environment:
+      - OTEL_RESOURCE_ATTRIBUTES=service.name=bc33node1,service.version=${BESU_VERSION:-latest}
+    volumes:
+      - public-keys:/tmp/
+      - ./bc33/config.toml:/config/config.toml
+      - ./bc33/static-nodes.json:/config/static-nodes.json
+      - ./bc33/log-config.xml:/config/log-config.xml
+      - ./logs/besu:/tmp/besu
+      - ./bc33/cliqueGenesis.json:/config/genesis.json
+      - ./bc33/keys:/opt/besu/keys
+    ports:
+      - 8330:8545/tcp
+    networks:
+      gpact-test:
+        ipv4_address: 172.16.239.13
+
+  bc34node1:
+    << : *besu-bootnode-def
+    environment:
+      - OTEL_RESOURCE_ATTRIBUTES=service.name=bc34node1,service.version=${BESU_VERSION:-latest}
+    volumes:
+      - public-keys:/tmp/
+      - ./bc34/config.toml:/config/config.toml
+      - ./bc34/static-nodes.json:/config/static-nodes.json
+      - ./bc34/log-config.xml:/config/log-config.xml
+      - ./logs/besu:/tmp/besu
+      - ./bc34/cliqueGenesis.json:/config/genesis.json
+      - ./bc34/keys:/opt/besu/keys
+    ports:
+      - 8340:8545/tcp
+    networks:
+      gpact-test:
+        ipv4_address: 172.16.239.14
+
+
+  bc35node1:
+    << : *besu-bootnode-def
+    environment:
+      - OTEL_RESOURCE_ATTRIBUTES=service.name=bc35node1,service.version=${BESU_VERSION:-latest}
+    volumes:
+      - public-keys:/tmp/
+      - ./bc35/config.toml:/config/config.toml
+      - ./bc35/static-nodes.json:/config/static-nodes.json
+      - ./bc35/log-config.xml:/config/log-config.xml
+      - ./logs/besu:/tmp/besu
+      - ./bc35/cliqueGenesis.json:/config/genesis.json
+      - ./bc35/keys:/opt/besu/keys
+    ports:
+      - 8350:8545/tcp
+    networks:
+      gpact-test:
+        ipv4_address: 172.16.239.15
 
 volumes:
   public-keys:
