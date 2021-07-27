@@ -79,7 +79,7 @@ commands:
 jobs:
   assemble:
     docker:
-      - image: cimg/openjdk:16.0.1
+      - image: cimg/openjdk:11.0.11
 #      docker:
 #      - image: circleci/openjdk:11.0.8-jdk-buster
     working_directory: ~/gpact
@@ -136,7 +136,7 @@ jobs:
 
   unitTests:
     docker:
-      - image: cimg/openjdk:16.0.1
+      - image: cimg/openjdk:11.0.11
     working_directory: ~/gpact
     steps:
       - prepare
