@@ -1,0 +1,58 @@
+
+logging="INFO"
+#logging="DEBUG"
+data-path="/opt/besu/data"
+# host-whitelist=["*"]
+
+# rpc
+rpc-http-enabled=true
+# rpc-http-host="0.0.0.0"
+rpc-http-port=8545
+# rpc-http-cors-origins=["*"]
+rpc-http-api = ["ETH", "NET", "WEB3"]
+#rpc-http-api = ["ETH", "NET", "WEB3", "EEA", "PERM", "IBFT"]
+
+
+# ws
+#rpc-ws-enabled=true
+#rpc-ws-host="0.0.0.0"
+#rpc-ws-port=8546
+#rpc-ws-api = ["ETH", "NET", "WEB3", "EEA", "PERM", "IBFT"]
+
+# graphql
+#graphql-http-enabled=true
+#graphql-http-host="0.0.0.0"
+#graphql-http-port=8547
+#graphql-http-cors-origins=["*"]
+
+# metrics
+#metrics-enabled=true
+#metrics-host="0.0.0.0"
+#metrics-port=9545
+
+# permissions
+#permissions-nodes-config-file-enabled=true
+#permissions-nodes-config-file="/config/permissions_config.toml"
+
+# bootnodes
+bootnodes=["enode://c1979a8a48693db804316b5acebe35e11731e1fb1c9c21ff7268ab25db6f6e03390a429b83cf0ec0865a7205f2669ec1ace652a3def11e2e01571c74939cbe22@172.16.239.14:30303"]
+
+
+# Discovery at boot is set to a list of static files, but will also discover new nodes should they be added
+# static nodes
+static-nodes-file="/config/static-nodes.json"
+
+discovery-enabled=false
+
+
+#p2p-enabled = true
+#p2p-port = 30303
+
+
+min-gas-price = "0"
+miner-extra-data = "0x0000000000000000000000000000000000000000000000000000000000003100"
+
+
+# Improve ability to debug by enabling revert reasons / require reasons.
+revert-reason-enabled=true
+
