@@ -149,7 +149,10 @@ jobs:
           name: Create blockchains
           background: true
           working_directory: ~/gpact/test-blockchains
-          command: docker-compose up
+          command: |
+            pwd
+            ls
+            docker-compose up
       - run:
           name: Build and test
           command: |
