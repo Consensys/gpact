@@ -145,14 +145,13 @@ jobs:
             # Build our Web3j
             cd ../web3j-rlp
             ./gradlew --parallel --stacktrace --info --build-cache installDist
+      - setup_remote_docker:
+        version: 19.03.13
       - run:
           name: Create blockchains
           background: true
           working_directory: ~/gpact/test-blockchains
-          command: |
-            pwd
-            ls
-            docker-compose up
+          command: docker-compose up
       - run:
           name: Build and test
           command: |
