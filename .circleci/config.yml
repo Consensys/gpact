@@ -155,7 +155,7 @@ jobs:
       - run:
           name: Copy log-config.xml
           working_directory: ~/gpact/test-blockchains
-          command: docker cp ./bc31/log-config.xml bc31node1:/config/log-config.xml
+          command: docker cp ./bc31/log-config.xml public-keys:/config/log-config.xml
       - run:
           name: Create blockchains
           background: true
