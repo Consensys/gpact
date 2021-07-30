@@ -151,7 +151,16 @@ jobs:
           name: Create blockchains
           background: true
           working_directory: ~/gpact/test-blockchains
-          command: docker-compose up
+          command: docker-compose create
+      - run:
+          name: Copy log-config.xml
+          working_directory: ~/gpact/test-blockchains
+          command: docker cp ./bc31/log-config.xml bc31node1:/config/log-config.xml
+      - run:
+          name: Create blockchains
+          background: true
+          working_directory: ~/gpact/test-blockchains
+          command: docker-compose start
       - run:
           name: Build and test
           command: |
