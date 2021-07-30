@@ -146,7 +146,7 @@ jobs:
             cd ../web3j-rlp
             ./gradlew --parallel --stacktrace --info --build-cache installDist
       - setup_remote_docker:
-          version: 19.03.13
+          version: 20.10.6
       - run:
           name: Create blockchains
           background: true
