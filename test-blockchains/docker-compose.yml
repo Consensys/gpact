@@ -29,7 +29,7 @@ services:
       - public-keys:/tmp/
       - ./bc31/config.toml:/config/config.toml
       - ./bc31/static-nodes.json:/config/static-nodes.json
-      - ./bc31/log-config.xml:/config/log-config.xml
+      - ./bc31/config.toml:/config/log-config.xml
       - ./logs/besu:/tmp/besu
       - ./bc31/cliqueGenesis.json:/config/genesis.json
       - ./bc31/keys:/opt/besu/keys
