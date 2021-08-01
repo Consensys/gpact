@@ -31,7 +31,7 @@ services:
       - ./bc31/static-nodes.json:/config/static-nodes.json
       - ./bc31/log-config.xml:/config/log-config.xml
       - ./logs/besu:/tmp/besu
-      - ./bc31/cliqueGenesis.json:/config/genesis.json
+      - ./bc31/genesis.json:/config/genesis.json
       - ./bc31/keys:/opt/besu/keys
     ports:
       - 8310:8545/tcp
@@ -49,7 +49,7 @@ services:
       - ./bc32/static-nodes.json:/config/static-nodes.json
       - ./bc32/log-config.xml:/config/log-config.xml
       - ./logs/besu:/tmp/besu
-      - ./bc32/cliqueGenesis.json:/config/genesis.json
+      - ./bc32/genesis.json:/config/genesis.json
       - ./bc32/keys:/opt/besu/keys
     ports:
       - 8320:8545/tcp
@@ -67,7 +67,7 @@ services:
       - ./bc33/static-nodes.json:/config/static-nodes.json
       - ./bc33/log-config.xml:/config/log-config.xml
       - ./logs/besu:/tmp/besu
-      - ./bc33/cliqueGenesis.json:/config/genesis.json
+      - ./bc33/genesis.json:/config/genesis.json
       - ./bc33/keys:/opt/besu/keys
     ports:
       - 8330:8545/tcp
@@ -85,7 +85,7 @@ services:
       - ./bc34/static-nodes.json:/config/static-nodes.json
       - ./bc34/log-config.xml:/config/log-config.xml
       - ./logs/besu:/tmp/besu
-      - ./bc34/cliqueGenesis.json:/config/genesis.json
+      - ./bc34/genesis.json:/config/genesis.json
       - ./bc34/keys:/opt/besu/keys
     ports:
       - 8340:8545/tcp
@@ -104,7 +104,7 @@ services:
       - ./bc35/static-nodes.json:/config/static-nodes.json
       - ./bc35/log-config.xml:/config/log-config.xml
       - ./logs/besu:/tmp/besu
-      - ./bc35/cliqueGenesis.json:/config/genesis.json
+      - ./bc35/genesis.json:/config/genesis.json
       - ./bc35/keys:/opt/besu/keys
     ports:
       - 8350:8545/tcp

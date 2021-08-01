@@ -153,9 +153,9 @@ jobs:
           working_directory: ~/gpact/test-blockchains
           command: docker-compose create
       - run:
-          name: Copy log-config.xml
+          name: Copy config directory
           working_directory: ~/gpact/test-blockchains
-          command: docker cp bc31node1:./bc31/log-config.xml /config/log-config.xml
+          command: docker cp bc31node1:./bc31 /config
       - run:
           name: Create blockchains
           background: true
