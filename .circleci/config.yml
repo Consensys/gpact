@@ -152,6 +152,7 @@ jobs:
           background: true
           working_directory: ~/gpact/test-blockchains
           command: docker-compose create
+      - run: docker container ls -a
       - run:
           name: Copy config directory
           working_directory: ~/gpact/test-blockchains
