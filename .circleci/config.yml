@@ -149,9 +149,8 @@ jobs:
           version: 20.10.6
       - run:
           name: Create blockchains
-          background: true
           working_directory: ~/gpact/test-blockchains
-          command: docker-compose create
+          command: docker-compose up --no-start
       - run: docker container ls -a
       - run:
           name: Copy config directory
