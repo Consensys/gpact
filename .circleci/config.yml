@@ -155,7 +155,7 @@ jobs:
       - run:
           name: Copy log-config.xml
           working_directory: ~/gpact/test-blockchains
-          command: docker cp ./bc31/log-config.xml public-keys:/config/log-config.xml
+          command: docker cp bc31node1:./bc31/log-config.xml /config/log-config.xml
       - run:
           name: Create blockchains
           background: true
@@ -165,6 +165,8 @@ jobs:
           name: Build and test
           command: |
             ./gradlew test
+
+
 
 #            ./gradlew --parallel --stacktrace --info --build-cache test
 #      - attach_workspace:
