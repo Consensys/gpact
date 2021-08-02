@@ -163,16 +163,16 @@ jobs:
           background: true
           working_directory: ~/gpact/test-blockchains
           command: docker-compose start
+      - run: sleep 10
       - run:
           name: Build and test
-          command: |
-            ./gradlew test
+          command: ./gradlew test
       - run:
           name: Stop blockchains
           working_directory: ~/gpact/test-blockchains
           command: docker-compose stop
       - run:
-          name: Copy log files!
+          name: Copy log files
           working_directory: ~/gpact/test-blockchains
           command: |
             docker cp test-blockchains_bc31node1_1:/tmp/besu logsbc31
@@ -182,7 +182,7 @@ jobs:
           working_directory: ~/gpact/test-blockchains
           command: docker-compose down
       - run:
-          name: Save test results!
+          name: Save test results
           command: |
             mkdir -p ~/test-results/junit/
             find . -type f -regex ".*/build/test-results/.*xml" -exec cp {} ~/test-results/junit/ \;
