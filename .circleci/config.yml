@@ -128,12 +128,15 @@ jobs:
             docker cp ./empty/. test-blockchains_bc31node1_1:/tmp/besu
             docker cp ./bc32/. test-blockchains_bc32node1_1:/config
             docker cp ./keys/. test-blockchains_bc32node1_1:/opt/besu/keys
-            docker cp -a ./empty/. test-blockchains_bc32node1_1:/tmp/besu
+            docker cp ./empty/. test-blockchains_bc32node1_1:/tmp/besu
       - run:
           name: Start blockchains
-          # background: true
+          background: true
           working_directory: ~/gpact/test-blockchains
           command: docker-compose up --no-recreate
+      - run: docker container exec test-blockchains_bc31node1_1 ls -al /tmp/besu
+      - run: docker container exec test-blockchains_bc31node1_1 chmod 777 /tmp/besu
+      - run: docker container exec test-blockchains_bc31node1_1 ls -al /tmp/besu
       - run: docker container exec test-blockchains_bc31node1_1 ls -al /config
       - run: sleep 10
       #- run:
