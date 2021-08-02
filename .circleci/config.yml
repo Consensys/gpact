@@ -21,9 +21,8 @@ commands:
       - restore_cache:
           name: Restore gradle build cache
           keys: # by decreasing rate of change...
-            - build-cache-{{ checksum "../besu/headcommit" }}-{{ checksum "../web3j-rlp/headcommit" }}-{{ .Revision }}
-            - build-cache-{{ checksum "../besu/headcommit" }}-{{ checksum "../web3j-rlp/headcommit" }}
-            - build-cache-{{ checksum "../besu/headcommit" }}
+            - build-cache-{{ checksum "../web3j-rlp/headcommit" }}-{{ .Revision }}
+            - build-cache-{{ checksum "../web3j-rlp/headcommit" }}
             - build-cache
       - run:
          name: Install Solidity
@@ -147,6 +146,9 @@ jobs:
           command: |
             docker cp test-blockchains_bc31node1_1:/tmp/besu logsbc31
             docker cp test-blockchains_bc32node1_1:/tmp/besu logsbc32
+            ls -al
+            ls logsbc31 -al
+            ls logsbc32 -sl
       - run:
           name: Remove blockchains
           working_directory: ~/gpact/test-blockchains
