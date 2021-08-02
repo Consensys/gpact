@@ -129,6 +129,16 @@ jobs:
             docker cp ./bc32/. test-blockchains_bc32node1_1:/config
             docker cp ./keys/. test-blockchains_bc32node1_1:/opt/besu/keys
             docker cp ./empty/. test-blockchains_bc32node1_1:/tmp/besu
+      - run: docker container exec test-blockchains_bc31node1_1 ls -al /tmp/besu
+      - run:
+          command: docker container exec test-blockchains_bc31node1_1 ls -al /tmp/besu
+          when: always
+      - run:
+          command: docker container exec test-blockchains_bc31node1_1 chmod 777 /tmp/besu
+          when: always
+      - run:
+          command: docker container exec test-blockchains_bc31node1_1 ls -al /tmp/besu
+          when: always
       - run:
           name: Start blockchains
           # background: true
