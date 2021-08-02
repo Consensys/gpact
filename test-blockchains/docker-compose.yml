@@ -26,10 +26,7 @@ services:
     environment:
       - OTEL_RESOURCE_ATTRIBUTES=service.name=bc31node1,service.version=${BESU_VERSION:-latest}
     volumes:
-      - ./bc31/config.toml:/config/config.toml
-      - ./bc31/static-nodes.json:/config/static-nodes.json
-      - ./bc31/log-config.xml:/config/log-config.xml
-      - ./bc31/genesis.json:/config/genesis.json
+      - ./bc31:/config
       - ./keys:/opt/besu/keys
       - ./logs/bc31:/tmp/besu
     ports:
@@ -43,10 +40,7 @@ services:
     environment:
       - OTEL_RESOURCE_ATTRIBUTES=service.name=bc32node1,service.version=${BESU_VERSION:-latest}
     volumes:
-      - ./bc32/config.toml:/config/config.toml
-      - ./bc32/static-nodes.json:/config/static-nodes.json
-      - ./bc32/log-config.xml:/config/log-config.xml
-      - ./bc32/genesis.json:/config/genesis.json
+      - ./bc32:/config
       - ./keys:/opt/besu/keys
       - ./logs/bc32:/tmp/besu
     ports:
