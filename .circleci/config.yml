@@ -120,13 +120,15 @@ jobs:
           working_directory: ~/gpact/test-blockchains
           command: docker-compose up --no-start --force-recreate
       - run:
-          name: Copy config and keys
+          name: Copy config and keys. Create log directory.
           working_directory: ~/gpact/test-blockchains
           command: |
             docker cp ./bc31/. test-blockchains_bc31node1_1:/config
             docker cp ./keys/. test-blockchains_bc31node1_1:/opt/besu/keys
+            docker cp ./empty/. test-blockchains_bc31node1_1:/tmp/besu
             docker cp ./bc32/. test-blockchains_bc32node1_1:/config
             docker cp ./keys/. test-blockchains_bc32node1_1:/opt/besu/keys
+            docker cp ./empty/. test-blockchains_bc32node1_1:/tmp/besu
       - run:
           name: Start blockchains
           # background: true
