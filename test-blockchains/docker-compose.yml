@@ -56,8 +56,6 @@ services:
         ipv4_address: 172.16.239.12
 
 
-volumes:
-
 
 networks:
   gpact-test:
