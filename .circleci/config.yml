@@ -120,8 +120,8 @@ jobs:
           # These need to be set-up because they are used in docker-compose.yml
           working_directory: ~/gpact/test-blockchains
           command: |
-            - mkdir -p logs/bc31
-            - mkdir -p logs/bc32
+            mkdir -p logs/bc31
+            mkdir -p logs/bc32
       - run:
           name: Create blockchains
           working_directory: ~/gpact/test-blockchains
@@ -147,6 +147,7 @@ jobs:
           name: Stop blockchains
           working_directory: ~/gpact/test-blockchains
           command: docker-compose stop
+          when: always
       - run:
           name: Copy log files
           working_directory: ~/gpact/test-blockchains
@@ -156,10 +157,12 @@ jobs:
             ls -al
             ls logsbc31 -al
             ls logsbc32 -sl
+          when: always
       - run:
           name: Remove blockchains
           working_directory: ~/gpact/test-blockchains
           command: docker-compose down
+          when: always
       - run:
           name: Save test results
           command: |
