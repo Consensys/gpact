@@ -186,9 +186,9 @@ jobs:
       - store_artifacts:
           path: ~/test-results/junit
       - store_artifacts:
-          path: logsbc31
+          path: ~/gpact/test-blockchains/logsbc31
       - store_artifacts:
-          path: logsbc32
+          path: ~/gpact/test-blockchains/logsbc32
 
 
 #            ./gradlew --parallel --stacktrace --info --build-cache test
