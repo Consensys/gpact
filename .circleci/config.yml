@@ -159,7 +159,7 @@ jobs:
             docker cp ./bc32 test-blockchains_bc32node1_1:/config
             docker cp ./keys test-blockchains_bc32node1_1:/opt/besu/keys
       - run:
-          name: Create blockchains
+          name: Start blockchains
           background: true
           working_directory: ~/gpact/test-blockchains
           command: docker-compose start
@@ -168,11 +168,19 @@ jobs:
           command: |
             ./gradlew test
       - run:
+          name: Stop blockchains
+          working_directory: ~/gpact/test-blockchains
+          command: docker-compose stop
+      - run:
           name: Copy log files!
           working_directory: ~/gpact/test-blockchains
           command: |
             docker cp test-blockchains_bc31node1_1:/tmp/besu logsbc31
             docker cp test-blockchains_bc32node1_1:/tmp/besu logsbc32
+      - run:
+          name: Remove blockchains
+          working_directory: ~/gpact/test-blockchains
+          command: docker-compose down
       - run:
           name: Save test results!
           command: |
