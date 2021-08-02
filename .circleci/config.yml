@@ -128,7 +128,7 @@ jobs:
             docker cp ./empty/. test-blockchains_bc31node1_1:/tmp/besu
             docker cp ./bc32/. test-blockchains_bc32node1_1:/config
             docker cp ./keys/. test-blockchains_bc32node1_1:/opt/besu/keys
-            docker cp ./empty/. test-blockchains_bc32node1_1:/tmp/besu
+            docker cp -a ./empty/. test-blockchains_bc32node1_1:/tmp/besu
       - run:
           name: Start blockchains
           # background: true
