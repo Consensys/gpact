@@ -28,7 +28,7 @@ services:
     volumes:
       - ./bc31:/config
       - ./keys:/opt/besu/keys
-      - ./logs/bc31:/tmp/besu
+      #- ./logs/bc31:/tmp/besu
     ports:
       - 8310:8545/tcp
     networks:
@@ -42,7 +42,7 @@ services:
     volumes:
       - ./bc32:/config
       - ./keys:/opt/besu/keys
-      - ./logs/bc32:/tmp/besu
+      #- ./logs/bc32:/tmp/besu
     ports:
       - 8320:8545/tcp
     networks:
