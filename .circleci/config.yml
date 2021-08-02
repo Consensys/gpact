@@ -150,7 +150,6 @@ jobs:
           name: Create blockchains
           working_directory: ~/gpact/test-blockchains
           command: docker-compose up --no-start
-      - run: docker container ls -a
       - run:
           name: Copy config and keys
           working_directory: ~/gpact/test-blockchains
@@ -169,13 +168,13 @@ jobs:
           command: |
             ./gradlew test
       - run:
-          name: Copy log files
+          name: Copy log files!
           working_directory: ~/gpact/test-blockchains
           command: |
             docker cp test-blockchains_bc31node1_1:/tmp/besu logsbc31
             docker cp test-blockchains_bc32node1_1:/tmp/besu logsbc32
       - run:
-          name: Save test results
+          name: Save test results!
           command: |
             mkdir -p ~/test-results/junit/
             find . -type f -regex ".*/build/test-results/.*xml" -exec cp {} ~/test-results/junit/ \;
