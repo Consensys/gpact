@@ -155,7 +155,7 @@ jobs:
       - run:
           name: Copy config directory
           working_directory: ~/gpact/test-blockchains
-          command: docker cp test-blockchains_bc31node1_1:./bc31 /config
+          command: docker cp ./bc31 test-blockchains_bc31node1_1:/config
       - run:
           name: Create blockchains
           background: true
