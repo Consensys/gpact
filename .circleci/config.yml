@@ -4,37 +4,20 @@ commands:
    steps:
       - checkout
       - run:
-          name: Check out Web3j and Besu
+          name: Check out Web3j
           command: |
             git clone https://github.com/drinkcoffee/web3j-rlp.git ../web3j-rlp
             git --git-dir=../web3j-rlp/.git rev-parse HEAD > ../web3j-rlp/headcommit
-            git clone https://github.com/hyperledger/besu.git ../besu
-            git --git-dir=../besu/.git rev-parse HEAD > ../besu/headcommit
-
-      - restore_cache:
-          name: Restore cached Besu gradle dependencies
-          keys:
-            - deps-besu-{{ checksum "../besu/gradle/versions.gradle" }}
-            - deps-besu
-
-      - restore_cache:
-          name: Restore cached Besu build products
-          keys:
-            - products-besu-{{ checksum "../besu/headcommit" }}
-            - products-besu
-
       - restore_cache:
           name: Restore cached Web3j gradle dependencies
           keys:
             - deps-web3j-{{ checksum "../web3j-rlp/build.gradle" }}
             - deps-web3j
-
       - restore_cache:
           name: Restore cached GPACT gradle dependencies
           keys:
             - deps-gpact-{{ checksum "build.gradle" }}
             - deps-gpact
-
       - restore_cache:
           name: Restore gradle build cache
           keys: # by decreasing rate of change...
@@ -42,10 +25,8 @@ commands:
             - build-cache-{{ checksum "../besu/headcommit" }}-{{ checksum "../web3j-rlp/headcommit" }}
             - build-cache-{{ checksum "../besu/headcommit" }}
             - build-cache
-
-
-      # Install Solidity
       - run:
+         name: Install Solidity
          command: |
            sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 1C52189C923F6CA9
            sudo apt-get update
@@ -93,27 +74,16 @@ jobs:
             popd
             # Build the gpact
             ./gradlew --parallel --stacktrace --info --build-cache clean compileJava compileTestJava assemble
-
-      #     - save_cache:
-      #          name: Caching Besu gradle dependencies
-      #          key: deps-besu-{{ checksum "../besu/gradle/versions.gradle" }}
-      #          paths:
-      #            - ../besu/.gradle
       - save_cache:
           name: Caching Web3j gradle dependencies
           key: deps-web3j-{{ checksum "../web3j-rlp/build.gradle" }}
           paths:
             - ../web3j/.gradle
       - save_cache:
-          name: Caching Samples gradle dependencies
+          name: Caching GPACT gradle dependencies
           key: deps-gpact-{{ checksum "build.gradle" }}
           paths:
             - .gradle
-      #      - save_cache:
-      #          name: Caching Besu build products
-      #          key: products-besu-{{ checksum "../besu/headcommit" }}
-      #          paths:
-      #            - ../besu/build/
       - save_cache:
           name: Caching gradle build cache
           key: build-cache-{{ checksum "../besu/headcommit" }}-{{ checksum "../web3j-rlp/headcommit" }}-{{ .Revision }}
@@ -164,9 +134,9 @@ jobs:
           working_directory: ~/gpact/test-blockchains
           command: docker-compose start
       - run: sleep 10
-      - run:
-          name: Build and test
-          command: ./gradlew test
+      #- run:
+      #    name: Build and test
+      #    command: ./gradlew test
       - run:
           name: Stop blockchains
           working_directory: ~/gpact/test-blockchains
