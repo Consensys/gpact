@@ -130,7 +130,7 @@ jobs:
             docker cp ./keys/. test-blockchains_bc32node1_1:/opt/besu/keys
       - run:
           name: Start blockchains
-          #background: true
+          background: true
           working_directory: ~/gpact/test-blockchains
           command: docker-compose up --no-recreate
       - run:
