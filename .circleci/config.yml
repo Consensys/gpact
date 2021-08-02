@@ -135,7 +135,6 @@ jobs:
   unitTests:
     docker:
       - image: cimg/openjdk:11.0.11
-    resource_class: xlarge
     working_directory: ~/gpact
     steps:
       - prepare
