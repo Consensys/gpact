@@ -131,7 +131,7 @@ jobs:
           name: Start blockchains
           # background: true
           working_directory: ~/gpact/test-blockchains
-          command: docker-compose start
+          command: docker-compose up --no-recreate
       - run: sleep 10
       #- run:
       #    name: Build and test
