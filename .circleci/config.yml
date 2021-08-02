@@ -116,6 +116,13 @@ jobs:
       - setup_remote_docker:
           version: 20.10.6
       - run:
+          name: Create log directories if they don't exist
+          # These need to be set-up because they are used in docker-compose.yml
+          working_directory: ~/gpact/test-blockchains
+          command: |
+            - mkdir -p logs/bc31
+            - mkdir -p logs/bc32
+      - run:
           name: Create blockchains
           working_directory: ~/gpact/test-blockchains
           command: docker-compose up --no-start

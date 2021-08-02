@@ -31,7 +31,7 @@ services:
       - ./bc31/log-config.xml:/config/log-config.xml
       - ./bc31/genesis.json:/config/genesis.json
       - ./keys:/opt/besu/keys
-      - ./logs/besu:/tmp/besu
+      - ./logs/bc31:/tmp/besu
     ports:
       - 8310:8545/tcp
     networks:
@@ -48,7 +48,7 @@ services:
       - ./bc32/log-config.xml:/config/log-config.xml
       - ./bc32/genesis.json:/config/genesis.json
       - ./keys:/opt/besu/keys
-      - ./logs/besu:/tmp/besu
+      - ./logs/bc32:/tmp/besu
     ports:
       - 8320:8545/tcp
     networks:
