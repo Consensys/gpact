@@ -123,10 +123,10 @@ jobs:
           name: Copy config and keys
           working_directory: ~/gpact/test-blockchains
           command: |
-            docker cp ./bc31 test-blockchains_bc31node1_1:/config
-            docker cp ./keys test-blockchains_bc31node1_1:/opt/besu/keys
-            docker cp ./bc32 test-blockchains_bc32node1_1:/config
-            docker cp ./keys test-blockchains_bc32node1_1:/opt/besu/keys
+            docker cp ./bc31/. test-blockchains_bc31node1_1:/config
+            docker cp ./keys/. test-blockchains_bc31node1_1:/opt/besu/keys
+            docker cp ./bc32/. test-blockchains_bc32node1_1:/config
+            docker cp ./keys/. test-blockchains_bc32node1_1:/opt/besu/keys
       - run:
           name: Start blockchains
           # background: true
