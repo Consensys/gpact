@@ -184,7 +184,7 @@ jobs:
 
   unitTestsMachine:
     machine:
-      - image: ubuntu-2004:202107-02
+      image: ubuntu-2004:202107-02
     steps:
       - run: pwd
       - run: ls -al
