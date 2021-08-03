@@ -42,7 +42,7 @@ public abstract class AbstractWeb3Test {
 
 
   // Have the polling interval equal to the block time.
-  protected static final int POLLING_INTERVAL = 2000;
+  protected static final int POLLING_INTERVAL = 1000;
   // Retry requests to Ethereum Clients up to five times.
   protected static final int RETRY = 5;
 

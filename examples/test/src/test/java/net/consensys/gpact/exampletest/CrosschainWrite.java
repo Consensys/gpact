@@ -1,28 +1,33 @@
 package net.consensys.gpact.exampletest;
 
 import net.consensys.gpact.examples.write.Main;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class CrosschainWrite extends AbstractExampleTest {
 
+  @Ignore
   @Test
   public void directSignSerialSingleBlockchain() throws Exception {
     String tempPropsFile = createPropertiesFile(true, true, true);
     Main.main(new String[]{tempPropsFile});
   }
 
+  @Ignore
   @Test
   public void directSignParallelSingleBlockchain() throws Exception {
     String tempPropsFile = createPropertiesFile(true, false, true);
     Main.main(new String[]{tempPropsFile});
   }
 
+  @Ignore
   @Test
   public void transferSerialSingleBlockchain() throws Exception {
     String tempPropsFile = createPropertiesFile(false, true, true);
     Main.main(new String[]{tempPropsFile});
   }
 
+  @Ignore
   @Test
   public void transferParallelSingleBlockchain() throws Exception {
     String tempPropsFile = createPropertiesFile(false, false, true);

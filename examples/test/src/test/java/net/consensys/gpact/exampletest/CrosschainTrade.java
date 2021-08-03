@@ -13,6 +13,7 @@ public class CrosschainTrade extends AbstractExampleTest {
     Main.main(new String[]{tempPropsFile});
   }
 
+  // Does not work
   @Ignore
   @Test
   public void directSignParallelSingleBlockchain() throws Exception {
@@ -20,12 +21,14 @@ public class CrosschainTrade extends AbstractExampleTest {
     Main.main(new String[]{tempPropsFile});
   }
 
+  @Ignore
   @Test
   public void transferSerialSingleBlockchain() throws Exception {
     String tempPropsFile = createPropertiesFile(false, true, true);
     Main.main(new String[]{tempPropsFile});
   }
 
+  // Does not work
   @Ignore
   @Test
   public void transferParallelSingleBlockchain() throws Exception {
@@ -33,24 +36,31 @@ public class CrosschainTrade extends AbstractExampleTest {
     Main.main(new String[]{tempPropsFile});
   }
 
+  // Needs five blockchains configured
+  @Ignore
   @Test
   public void directSignSerialMultiBlockchain() throws Exception {
     String tempPropsFile = createPropertiesFile(true, true, false);
     Main.main(new String[]{tempPropsFile});
   }
 
+  // Needs five blockchains configured
+  @Ignore
   @Test
   public void directSignParallelMultiBlockchain() throws Exception {
     String tempPropsFile = createPropertiesFile(true, false, false);
     Main.main(new String[]{tempPropsFile});
   }
 
+  // Needs five blockchains configured
+  @Ignore
   @Test
   public void transferSerialMultiBlockchain() throws Exception {
     String tempPropsFile = createPropertiesFile(false, true, false);
     Main.main(new String[]{tempPropsFile});
   }
 
+  // Does not currently work.
   @Ignore
   @Test
   public void transferParallelMultiBlockchain() throws Exception {
