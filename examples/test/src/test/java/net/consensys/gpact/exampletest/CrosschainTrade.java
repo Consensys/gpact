@@ -1,5 +1,6 @@
 package net.consensys.gpact.exampletest;
 
+
 import net.consensys.gpact.examples.trade.Main;
 import org.junit.Ignore;
 import org.junit.Test;

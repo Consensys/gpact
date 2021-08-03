@@ -9,17 +9,19 @@ repositories {
 }
 
 dependencies {
-    implementation project (':examples-read')
-    implementation project (':examples-singlebc-read')
-    implementation project (':examples-singlebc-trade')
-    implementation project (':examples-singlebc-write')
-    implementation project (':examples-trade')
-    implementation project (':examples-twochain')
-    implementation project (':examples-write')
+    testImplementation project (path: ':common', configuration: 'testArtifacts')
 
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.12.0'
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.12.0'
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.12.0'
+    testImplementation project (':examples-read')
+    testImplementation project (':examples-singlebc-read')
+    testImplementation project (':examples-singlebc-trade')
+    testImplementation project (':examples-singlebc-write')
+    testImplementation project (':examples-trade')
+    testImplementation project (':examples-twochain')
+    testImplementation project (':examples-write')
+
+    testImplementation group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.12.0'
+    testImplementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.12.0'
+    testImplementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.12.0'
 
     testImplementation group: 'junit', name: 'junit', version: '4.12'
 
