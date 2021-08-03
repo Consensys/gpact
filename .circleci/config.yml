@@ -101,7 +101,7 @@ jobs:
 #          destination: distributions
 #          when: always
 
-  unitTests:
+  unitTestsDocker:
     docker:
       - image: cimg/openjdk:11.0.11
     working_directory: ~/gpact
@@ -180,28 +180,19 @@ jobs:
       - store_artifacts:
           path: ~/test-results/junit
 
+  unitTestsMachine:
+    machine:
+      - image: ubuntu-2004:202107-02
+    working_directory: ~/gpact
+    steps:
+      - prepare
+      - run:
+          name: Build web3j
+          command: |
+            # Build our Web3j
+            cd ../web3j-rlp
+            ./gradlew --parallel --stacktrace --info --build-cache installDist
 
-#  docker cp ./empty/. test-blockchains_bc31node1_1:/tmp/besu
-# docker cp ./empty/. test-blockchains_bc32node1_1:/tmp/besu
-
-
-#            ./gradlew --parallel --stacktrace --info --build-cache test
-#      - attach_workspace:
-#          at: ~/
-#      - run:
-#          name: Check
-#          command: |
-#            ls -al
-#            pwd
-#            ls gpact
-#            ls gpact/build
-
-#      - run:
-#          name: Build
-#          no_output_timeout: 2m
-#          command: |
-#            ./gradlew --parallel build
-#      - capture_test_results
 
 
 
@@ -211,7 +202,7 @@ workflows:
   version: 2
   default:
     jobs:
-      - unitTests
+      - unitTestsMachine
       #- assemble
       #- unitTests:
       #    requires:
