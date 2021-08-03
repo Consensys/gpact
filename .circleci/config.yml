@@ -186,6 +186,9 @@ jobs:
     machine:
       image: ubuntu-2004:202107-02
     steps:
+      # The home directory is: /home/circleci/project
+      # gpact is cloned to: /home/circleci/project/.
+      # web3j is cloned to: /home/circleci/web3j-rlp
       - prepare
       - run:
           name: Build web3j
@@ -193,12 +196,9 @@ jobs:
             # Build our Web3j
             cd ../web3j-rlp
             ./gradlew --parallel --stacktrace --info --build-cache installDist
-      - run: pwd
-      - run: ls -al
-      - run: ls -al ..
       - run:
           name: Create and Start blockchains
-          working_directory: ../gpact/test-blockchains
+          working_directory: test-blockchains
           background: true
           command: docker-compose up
       - run: sleep 10
