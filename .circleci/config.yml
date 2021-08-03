@@ -57,7 +57,7 @@ commands:
 
 
 jobs:
-  assemble:
+  build:
     docker:
       - image: cimg/openjdk:11.0.11
     working_directory: ~/gpact
@@ -101,6 +101,8 @@ jobs:
 #          destination: distributions
 #          when: always
 
+  # This job does not work as the remote docker runs out of memory when trying to run
+  # the Besu container.
   unitTestsDocker:
     docker:
       - image: cimg/openjdk:11.0.11
@@ -183,8 +185,9 @@ jobs:
   unitTestsMachine:
     machine:
       - image: ubuntu-2004:202107-02
-    working_directory: ~/gpact
     steps:
+      - run: pwd
+      - run: ls -al
       - prepare
       - run:
           name: Build web3j
@@ -204,8 +207,8 @@ workflows:
     jobs:
       - unitTestsMachine
       #- assemble
-      #- unitTests:
+      #- unitTestsMachine:
       #    requires:
-      #      - assemble
+      #      - build
 
 
