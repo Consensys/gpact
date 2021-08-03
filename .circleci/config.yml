@@ -186,8 +186,6 @@ jobs:
     machine:
       image: ubuntu-2004:202107-02
     steps:
-      - run: pwd
-      - run: ls -al
       - prepare
       - run:
           name: Build web3j
@@ -195,6 +193,9 @@ jobs:
             # Build our Web3j
             cd ../web3j-rlp
             ./gradlew --parallel --stacktrace --info --build-cache installDist
+      - run: pwd
+      - run: ls -al
+      - run: ls -al ..
 
 
 
