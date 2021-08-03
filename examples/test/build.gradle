@@ -26,3 +26,9 @@ dependencies {
     testImplementation group: 'junit', name: 'junit', version: '4.12'
 
 }
+
+test {
+    testLogging {
+        events "PASSED", "SKIPPED", "FAILED"
+    }
+}

@@ -52,3 +52,9 @@ task generateSources {
 project.afterEvaluate {
     build.dependsOn generateSources
 }
+
+test {
+    testLogging {
+        events "PASSED", "SKIPPED", "FAILED"
+    }
+}

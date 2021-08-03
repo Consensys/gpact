@@ -59,3 +59,9 @@ task testJar(type: Jar) {
 artifacts {
     testArtifacts testJar
 }
+
+test {
+    testLogging {
+        events "PASSED", "SKIPPED", "FAILED"
+    }
+}
