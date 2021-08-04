@@ -33,6 +33,13 @@ public class LockableStorageLockingUint256Test extends AbstractLockableStorageTe
     BigInteger theUint = BigInteger.ZERO;
     BigInteger val = BigInteger.TEN;
 
+    // Check starting conditions
+    assert(this.mockCrossBlockchainControlContract.isSingleBlockchainCall().send());
+    assert(!this.lockableStorageContract.isLocked(theUint).send());
+    assert(this.lockableStorageContract.test_getUint256Provisional(theUint).send().compareTo(BigInteger.ZERO) == 0);
+    assert(this.lockableStorageContract.test_getUint256Committed(theUint).send().compareTo(BigInteger.ZERO) == 0);
+    assert(this.lockableStorageContract.test_getUint256(theUint).send().compareTo(BigInteger.ZERO) == 0);
+
     // Any non-zero Root Blockchain Id is deemed to indicate an active Cross-Blockchain call.
     this.mockCrossBlockchainControlContract.setRootBlockchainId(BigInteger.ONE).send();
     // The mock CrossBlockchainControlContract should now indicate a cross-blockchain call.
@@ -43,9 +50,17 @@ public class LockableStorageLockingUint256Test extends AbstractLockableStorageTe
     // The contract item should now be locked.
     assert(this.lockableStorageContract.isLocked(theUint).send());
 
-    // Even when the value is in provisional storage, should be able to return the value.
-    assert(this.lockableStorageContract.test_getUint256(theUint).send().compareTo(val) == 0);
+    // Once locked, values can no longer be read via the get method. See get committed and get provisional.
+    // This will fail as the contract is locked.
+    try {
+      this.lockableStorageContract.test_getUint256(theUint).send();
+      throw new Exception("Unexpectedly, no revert thrown");
+    } catch (ContractCallException ex) {
+      // Do nothing
+    }
 
+    assert(this.lockableStorageContract.test_getUint256Provisional(theUint).send().compareTo(val) == 0);
+    assert(this.lockableStorageContract.test_getUint256Committed(theUint).send().compareTo(BigInteger.ZERO) == 0);
   }
 
   // An exception is thrown if a locked contract item is to be written to by a single blockchain call.

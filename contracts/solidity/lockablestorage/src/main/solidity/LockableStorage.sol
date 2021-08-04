@@ -165,7 +165,7 @@ abstract contract LockableStorage {
     }
     function getUint256Provisional(uint256 _key) internal view returns(uint256) {
         if (isLocked[_key]) {
-            provisionalUpdates[_key];
+            return provisionalUpdates[_key];
         }
         return dataStore[_key];
     }

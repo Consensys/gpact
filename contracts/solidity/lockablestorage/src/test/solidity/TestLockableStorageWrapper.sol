@@ -68,6 +68,15 @@ contract TestLockableStorageWrapper is LockableStorage {
         return getAddress(_key);
     }
 
+    function test_getUint256Committed(uint256 _key) external view returns(uint256) {
+        return getUint256Committed(_key);
+    }
+
+    function test_getUint256Provisional(uint256 _key) external view returns(uint256) {
+        return getUint256Provisional(_key);
+    }
+
+
 //    function test_getBytes(uint256 _key) external view returns(bytes memory) {
 //        return getBytes(_key);
 //    }
