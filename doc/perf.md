@@ -7,24 +7,11 @@ The version of Hyperledger Besu version used was the git tag: 52814d537eb7ae9f20
 Any version of Hyperledger Besu after January 2020 should work equally well.
 
 
-## Creating Blockchains
-The following will create five blockchains with one node per blockchain:
-```$xslt
-scripts/create_chain.js 31 1
-scripts/create_chain.js 32 1
-scripts/create_chain.js 33 1
-scripts/create_chain.js 34 1
-scripts/create_chain.js 35 1
-```
-
 ## Run Blockchains
-To start the blockchain nodes, in separate windows run:
+To create and start the blockchains:
 ```$xslt
-./scripts/run_node.js 31
-./scripts/run_node.js 32
-./scripts/run_node.js 33
-./scripts/run_node.js 34
-./scripts/run_node.js 35
+cd test-blockchains
+docker compose up
 ```
 
 ## Config file

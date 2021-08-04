@@ -1,13 +1,10 @@
 # Building
 ## Tools
 
-* Java: The code was built with Java 16. The code is likely to build with later versions of Java.
+* Java: The code was built with Java 11. The code is likely to build with later versions of Java.
 * Solidity:  The code was build with solc 0.8.5+commit.a4f2e591.Darwin.appleclang, though should work with any 
 version of Solidity after 0.7.1.
-* Gradle: The build system uses Gradle 6.3. This will download when the code is built.
-* Node: Node is needed to run the scripts. v14.12.0 was used to execute the scripts.
- The following modules need to be installed to run the scripts: at-least-node,
- fs-extra, graceful-fs, jsonfile, toml-j0.4, tomlify-j0.4, universalify.
+* Gradle: The build system uses Gradle 7.1. This will download when the code is built.
 
 ## Web3J
 Solidity code that is to be compiled for use in crosschain calls needs to use
@@ -22,25 +19,14 @@ The special version of Web3J needs to end up in the directory `./gpact/..`. To c
 * ./gradlew installDist
 * cd ../gpact
 
-## Creating a blockchain for test purposes
-To build:
-```$xslt
-scripts/create_chain.js 32 1
-```
-
-
 ## Building Solidity, Wrapper code and Test Code
-To build:
+Start blockchain nodes:
 ```$xslt
-./gradlew 
+cd test-blockchains
+docker compose up
 ```
 
 To build and test:
 ```$xslt
-./scripts/run_node.js 32
-```
-and then in another command window:
-```
 ./gradlew test
 ```
-
