@@ -30,6 +30,11 @@ dependencies {
     implementation files('../../../../web3j-rlp/utils/build/libs/utils-4.8.5-SNAPSHOT.jar')
     implementation files('../../../../web3j-rlp/tuples/build/libs/tuples-4.8.5-SNAPSHOT.jar')
     implementation "io.reactivex.rxjava2:rxjava:2.2.2"
+
+    testImplementation project (path: ':common', configuration: 'testArtifacts')
+    testImplementation project (path: ':common')
+    testImplementation group: 'junit', name: 'junit', version: '4.12'
+
     //    compile ('org.web3j:core:4.6.3')
 
 //    // https://mvnrepository.com/artifact/org.apache.tuweni/tuweni-bytes
