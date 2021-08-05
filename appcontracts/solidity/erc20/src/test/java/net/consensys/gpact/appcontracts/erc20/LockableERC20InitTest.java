@@ -29,7 +29,9 @@ public class LockableERC20InitTest extends AbstractERC20Test {
     deployContracts();
 
     assert(this.lockableERC20.totalSupply().send().compareTo(INITIAL_SUPPLY_BIG) == 0);
-    assert(this.lockableERC20.totalSupplyProvisional().send().compareTo(BigInteger.ZERO) == 0);
+    assert(this.lockableERC20.totalSupplyProvisional().send().compareTo(INITIAL_SUPPLY_BIG) == 0);
+    assert(this.lockableERC20.totalSupplyMin().send().compareTo(INITIAL_SUPPLY_BIG) == 0);
+    assert(this.lockableERC20.totalSupplyMax().send().compareTo(INITIAL_SUPPLY_BIG) == 0);
 
     assert(this.lockableERC20.balanceOf(this.owner).send().compareTo(INITIAL_SUPPLY_BIG) == 0);
     assert(this.lockableERC20.balanceOfMin(this.owner).send().compareTo(INITIAL_SUPPLY_BIG) == 0);

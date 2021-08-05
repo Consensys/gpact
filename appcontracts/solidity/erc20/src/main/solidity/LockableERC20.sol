@@ -260,6 +260,42 @@ contract LockableERC20 is Context, IERC20, IERC20Metadata, Ownable, LockableStor
     }
 
     /**
+    * Returns the total supply, assuming all negative provisional updates are applied.
+    */
+    function totalSupplyMin() public view returns (uint256) {
+        uint256 total = 0;
+
+        for (uint256 i=0; i < erc20PallelizationFactor; i++) {
+            total += getMapValueCommitted(TOTAL_SUPPLY_ADD, i);
+        }
+        // There is no checks for totalSupply going negative. It should be
+        // impossible for total supply to go negative, as it is only adjusted
+        // in line with balances being burned.
+        for (uint256 i=0; i < erc20PallelizationFactor; i++) {
+            total -= getMapValueProvisional(TOTAL_SUPPLY_SUB, i);
+        }
+        return total;
+    }
+
+    /**
+     * Returns the total supply, assuming all positive provisional updates are applied.
+     */
+    function totalSupplyMax() public view returns (uint256) {
+        uint256 total = 0;
+
+        for (uint256 i=0; i < erc20PallelizationFactor; i++) {
+            total += getMapValueProvisional(TOTAL_SUPPLY_ADD, i);
+        }
+        // There is no checks for totalSupply going negative. It should be
+        // impossible for total supply to go negative, as it is only adjusted
+        // in line with balances being burned.
+        for (uint256 i=0; i < erc20PallelizationFactor; i++) {
+            total -= getMapValueCommitted(TOTAL_SUPPLY_SUB, i);
+        }
+        return total;
+    }
+
+    /**
      * Balance assuming no provisional updates are applied.
      */
     function balanceOf(address account) public view virtual override returns (uint256) {
