@@ -98,7 +98,6 @@ contract LockableERC20 is Context, IERC20, IERC20Metadata, Ownable, LockableStor
      * - the caller must have a balance of at least `amount`.
      */
     function transfer(address recipient, uint256 amount) public virtual override returns (bool) {
-        require(cbc.isSingleBlockchainCall(), "Must be single blockchain call");
         transferInternal(_msgSender(), recipient, amount);
         return true;
     }
