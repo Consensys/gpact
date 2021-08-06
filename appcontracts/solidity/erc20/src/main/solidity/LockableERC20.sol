@@ -154,7 +154,6 @@ contract LockableERC20 is Context, IERC20, IERC20Metadata, Ownable, LockableStor
      * - `spender` cannot be the zero address.
      */
     function increaseAllowance(address spender, uint256 addedValue) public virtual returns (bool) {
-        require(cbc.isSingleBlockchainCall(), "Must be single blockchain call");
         increaseAllowanceInternal(_msgSender(), spender, addedValue);
         return true;
     }
@@ -174,7 +173,6 @@ contract LockableERC20 is Context, IERC20, IERC20Metadata, Ownable, LockableStor
      * `subtractedValue`.
      */
     function decreaseAllowance(address spender, uint256 subtractedValue) public virtual returns (bool) {
-        require(cbc.isSingleBlockchainCall(), "Must be single blockchain call");
         uint256 currentAllowance = allowanceMin(_msgSender(), spender);
         require(currentAllowance >= subtractedValue, "ERC20: decreased allowance below zero");
         decreaseAllowanceInternal(_msgSender(), spender, subtractedValue);

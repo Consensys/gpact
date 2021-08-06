@@ -43,6 +43,7 @@ public class LockableERC20Test extends AbstractERC20Test {
     assert(this.lockableERC20.balanceOf(this.owner).send().compareTo(INITIAL_SUPPLY_BIG) == 0);
     assert(this.lockableERC20.balanceOfMin(this.owner).send().compareTo(INITIAL_SUPPLY_BIG) == 0);
     assert(this.lockableERC20.balanceOfProvisional(this.owner).send().compareTo(INITIAL_SUPPLY_BIG) == 0);
+    assert(this.lockableERC20.allowance(this.owner, this.otherAccount).send().compareTo(BigInteger.ZERO) == 0);
 
     assert(this.lockableERC20.balanceOf(this.otherAccount).send().compareTo(BigInteger.ZERO) == 0);
     assert(this.lockableERC20.balanceOfMin(this.otherAccount).send().compareTo(BigInteger.ZERO) == 0);
@@ -179,6 +180,154 @@ public class LockableERC20Test extends AbstractERC20Test {
     assert(this.lockableERC20.balanceOf(this.otherAccount).send().compareTo(total) == 0);
     assert(this.lockableERC20.balanceOfProvisional(this.otherAccount).send().compareTo(total) == 0);
   }
+
+  @Test
+  public void approveLockingAndNoLocking() throws Exception {
+    setupWeb3();
+    deployContracts();
+
+    BigInteger amount1 = BigInteger.valueOf(7);
+    BigInteger amount2 = BigInteger.valueOf(11);
+
+    BigInteger rootBlockchainId = BigInteger.ONE;
+    BigInteger crosschainTransactionId = BigInteger.TEN;
+
+    this.lockableERC20.approve(this.otherAccount, amount1).send();
+    assert (this.lockableERC20.allowance(this.owner, this.otherAccount).send().compareTo(amount1) == 0);
+    this.lockableERC20.approve(this.otherAccount, amount2).send();
+    assert (this.lockableERC20.allowance(this.owner, this.otherAccount).send().compareTo(amount2) == 0);
+
+    // Make the contract think a lockable transaction is in progress.
+    this.mockCrossBlockchainControlContract.setRootBlockchainId(rootBlockchainId).send();
+    this.mockCrossBlockchainControlContract.setCrossBlockchainTransactionId(crosschainTransactionId).send();
+
+    try {
+      this.lockableERC20.approve(this.otherAccount, BigInteger.ZERO).send();
+      throw new Error("Unexpectedly no revert when approve called while locked");
+    } catch (TransactionException ex) {
+      System.err.println(" Revert Reason: " + RevertReason.decodeRevertReason(ex.getTransactionReceipt().get().getRevertReason()));
+    }
+  }
+
+
+  @Test
+  public void incDecAllowanceNotLocked() throws Exception {
+    setupWeb3();
+    deployContracts();
+
+    BigInteger amount1 = BigInteger.valueOf(7);
+    BigInteger amount2 = BigInteger.valueOf(11);
+    BigInteger amount3 = BigInteger.valueOf(13);
+
+    this.lockableERC20.increaseAllowance(this.otherAccount, amount2).send();
+    assert (this.lockableERC20.allowance(this.owner, this.otherAccount).send().compareTo(amount2) == 0);
+    this.lockableERC20.decreaseAllowance(this.otherAccount, amount1).send();
+    assert (this.lockableERC20.allowance(this.owner, this.otherAccount).send()
+            .compareTo(amount2.subtract(amount1)) == 0);
+    try {
+      this.lockableERC20.decreaseAllowance(this.otherAccount, amount3).send();
+      throw new Error("Unexpectedly no revert when decreased allowance below zero");
+    } catch (TransactionException ex) {
+      System.err.println(" Revert Reason: " + RevertReason.decodeRevertReason(ex.getTransactionReceipt().get().getRevertReason()));
+    }
+    assert (this.lockableERC20.allowance(this.owner, this.otherAccount).send()
+            .compareTo(amount2.subtract(amount1)) == 0);
+  }
+
+  @Test
+  public void incDecAllowanceLocked() throws Exception {
+    setupWeb3();
+    deployContracts();
+
+    BigInteger amount1 = BigInteger.valueOf(7);
+    BigInteger amount2 = BigInteger.valueOf(11);
+    BigInteger amount3 = BigInteger.valueOf(13);
+    BigInteger amount4 = BigInteger.valueOf(17);
+    BigInteger amount5 = BigInteger.valueOf(19);
+    BigInteger amount6 = BigInteger.valueOf(23);
+    BigInteger amount7 = BigInteger.valueOf(29);
+    BigInteger amount8 = BigInteger.valueOf(31);
+    BigInteger amount9 = BigInteger.valueOf(37);
+    BigInteger amount10 = BigInteger.valueOf(41);
+    BigInteger amount11 = BigInteger.valueOf(43);
+
+    BigInteger rootBlockchainId = BigInteger.ONE;
+    BigInteger crosschainTransactionId = BigInteger.TEN;
+
+    // Make the contract think a lockable transaction is in progress.
+    this.mockCrossBlockchainControlContract.setRootBlockchainId(rootBlockchainId).send();
+    this.mockCrossBlockchainControlContract.setCrossBlockchainTransactionId(crosschainTransactionId).send();
+
+    // Should be able to do up to the parallelization factor for increases during a crosschain
+    // transaction.
+    this.lockableERC20.increaseAllowance(this.otherAccount, amount6).send();
+    this.lockableERC20.increaseAllowance(this.otherAccount, amount7).send();
+    this.lockableERC20.increaseAllowance(this.otherAccount, amount8).send();
+    this.lockableERC20.increaseAllowance(this.otherAccount, amount9).send();
+    this.lockableERC20.increaseAllowance(this.otherAccount, amount10).send();
+    try {
+      this.lockableERC20.increaseAllowance(this.otherAccount, amount11).send();
+      throw new Error("Unexpectedly no revert when increaseAllowance called in excess of parallelization factor");
+    } catch (TransactionException ex) {
+      System.err.println(" Revert Reason: " + RevertReason.decodeRevertReason(ex.getTransactionReceipt().get().getRevertReason()));
+    }
+    BigInteger totalAdd = amount6.add(amount7).add(amount8).add(amount9).add(amount10);
+
+    assert(this.lockableERC20.allowance(this.owner, this.otherAccount).send().compareTo(BigInteger.ZERO) == 0);
+    assert(this.lockableERC20.allowanceProvisional(this.owner, this.otherAccount).send().compareTo(totalAdd) == 0);
+    assert(this.lockableERC20.allowanceMax(this.owner, this.otherAccount).send().compareTo(totalAdd) == 0);
+    assert(this.lockableERC20.allowanceMin(this.owner, this.otherAccount).send().compareTo(BigInteger.ZERO) == 0);
+
+    // Any decrease will fail at the moment as the minimum allowance is zero.
+    try {
+      this.lockableERC20.decreaseAllowance(this.otherAccount, amount11).send();
+      throw new Error("Unexpectedly no revert when decreaseAllowance called that could make allowance negative");
+    } catch (TransactionException ex) {
+      System.err.println(" Revert Reason: " + RevertReason.decodeRevertReason(ex.getTransactionReceipt().get().getRevertReason()));
+    }
+
+    // Make the contract think a lockable transaction is no longer in progress.
+    this.mockCrossBlockchainControlContract.setRootBlockchainId(BigInteger.ZERO).send();
+    this.mockCrossBlockchainControlContract.setCrossBlockchainTransactionId(BigInteger.ZERO).send();
+
+    // Unlock the contracts and apply the updates.
+    this.lockableERC20.finalise(true, rootBlockchainId, crosschainTransactionId).send();
+
+    assert(this.lockableERC20.allowance(this.owner, this.otherAccount).send().compareTo(totalAdd) == 0);
+    assert(this.lockableERC20.allowanceProvisional(this.owner, this.otherAccount).send().compareTo(totalAdd) == 0);
+    assert(this.lockableERC20.allowanceMax(this.owner, this.otherAccount).send().compareTo(totalAdd) == 0);
+    assert(this.lockableERC20.allowanceMin(this.owner, this.otherAccount).send().compareTo(totalAdd) == 0);
+
+    // Make the contract think a lockable transaction is in progress.
+    this.mockCrossBlockchainControlContract.setRootBlockchainId(rootBlockchainId).send();
+    this.mockCrossBlockchainControlContract.setCrossBlockchainTransactionId(crosschainTransactionId).send();
+
+    this.lockableERC20.decreaseAllowance(this.otherAccount, amount1).send();
+    this.lockableERC20.decreaseAllowance(this.otherAccount, amount2).send();
+    this.lockableERC20.decreaseAllowance(this.otherAccount, amount3).send();
+    this.lockableERC20.decreaseAllowance(this.otherAccount, amount4).send();
+    this.lockableERC20.decreaseAllowance(this.otherAccount, amount5).send();
+
+    // Any decrease will fail at the moment as more than parallelization factor number of simultaneous decreases.
+    try {
+      this.lockableERC20.decreaseAllowance(this.otherAccount, amount1).send();
+      throw new Error("Unexpectedly no revert when decreaseAllowance called that could make allowance negative");
+    } catch (TransactionException ex) {
+      System.err.println(" Revert Reason: " + RevertReason.decodeRevertReason(ex.getTransactionReceipt().get().getRevertReason()));
+    }
+
+    this.lockableERC20.increaseAllowance(this.otherAccount, amount11).send();
+
+    BigInteger start = totalAdd;
+    totalAdd = amount11;
+    BigInteger totalDecrease = amount1.add(amount2).add(amount3).add(amount4).add(amount5);
+
+    assert(this.lockableERC20.allowance(this.owner, this.otherAccount).send().compareTo(start) == 0);
+    assert(this.lockableERC20.allowanceProvisional(this.owner, this.otherAccount).send().compareTo(start.add(totalAdd).subtract(totalDecrease)) == 0);
+    assert(this.lockableERC20.allowanceMax(this.owner, this.otherAccount).send().compareTo(start.add(totalAdd)) == 0);
+    assert(this.lockableERC20.allowanceMin(this.owner, this.otherAccount).send().compareTo(start.subtract(totalDecrease)) == 0);
+  }
+
 
 
 
