@@ -25,6 +25,10 @@ import java.math.BigInteger;
  * cross-blockchain) call.
  */
 public class AbstractERC20Test extends AbstractWeb3Test {
+  public static final int DEFAULT_ACCOUNT_PARALLELIZATION_FACTOR = 5;
+  public static final int DEFAULT_ERC20_PARALLELIZATION_FACTOR = 10;
+
+
   LockableERC20PresetFixedSupply lockableERC20;
   MockCbcForERC20Test mockCrossBlockchainControlContract;
 

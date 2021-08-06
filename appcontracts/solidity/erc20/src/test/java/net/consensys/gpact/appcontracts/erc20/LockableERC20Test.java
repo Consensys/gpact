@@ -47,6 +47,9 @@ public class LockableERC20Test extends AbstractERC20Test {
     assert(this.lockableERC20.balanceOf(this.otherAccount).send().compareTo(BigInteger.ZERO) == 0);
     assert(this.lockableERC20.balanceOfMin(this.otherAccount).send().compareTo(BigInteger.ZERO) == 0);
     assert(this.lockableERC20.balanceOfProvisional(this.otherAccount).send().compareTo(BigInteger.ZERO) == 0);
+
+    assert(this.lockableERC20.accountPallelizationFactor().send().compareTo(BigInteger.valueOf(DEFAULT_ACCOUNT_PARALLELIZATION_FACTOR)) == 0);
+    assert(this.lockableERC20.erc20PallelizationFactor().send().compareTo(BigInteger.valueOf(DEFAULT_ERC20_PARALLELIZATION_FACTOR)) == 0);
   }
 
   @Test
@@ -112,9 +115,71 @@ public class LockableERC20Test extends AbstractERC20Test {
     assert(this.lockableERC20.balanceOf(this.otherAccount).send().compareTo(amount) == 0);
     assert(this.lockableERC20.balanceOf(this.otherAccount).send().compareTo(amount) == 0);
     assert(this.lockableERC20.balanceOfProvisional(this.otherAccount).send().compareTo(amount) == 0);
-
-
   }
+
+
+  @Test
+  public void multipleParallelTransfersLocking() throws Exception {
+    setupWeb3();
+    deployContracts();
+
+    BigInteger amount1 = BigInteger.valueOf(7);
+    BigInteger amount2 = BigInteger.valueOf(11);
+    BigInteger amount3 = BigInteger.valueOf(13);
+    BigInteger amount4 = BigInteger.valueOf(17);
+    BigInteger amount5 = BigInteger.valueOf(19);
+    BigInteger amount6 = BigInteger.valueOf(23);
+    BigInteger total = amount1.add(amount2).add(amount3).add(amount4).add(amount5);
+    BigInteger remainder = INITIAL_SUPPLY_BIG.subtract(total);
+
+    BigInteger rootBlockchainId = BigInteger.ONE;
+    BigInteger crosschainTransactionId = BigInteger.TEN;
+
+    // Make the contract think a lockable transaction is in progress.
+    this.mockCrossBlockchainControlContract.setRootBlockchainId(rootBlockchainId).send();
+    this.mockCrossBlockchainControlContract.setCrossBlockchainTransactionId(crosschainTransactionId).send();
+
+    this.lockableERC20.transfer(this.otherAccount, amount1).send();
+    this.lockableERC20.transfer(this.otherAccount, amount2).send();
+    this.lockableERC20.transfer(this.otherAccount, amount3).send();
+    this.lockableERC20.transfer(this.otherAccount, amount4).send();
+    this.lockableERC20.transfer(this.otherAccount, amount5).send();
+
+    assert(this.lockableERC20.balanceOf(this.owner).send().compareTo(INITIAL_SUPPLY_BIG) == 0);
+    assert(this.lockableERC20.balanceOfMin(this.owner).send().compareTo(remainder) == 0);
+    assert(this.lockableERC20.balanceOfProvisional(this.owner).send().compareTo(remainder) == 0);
+
+    assert(this.lockableERC20.balanceOf(this.otherAccount).send().compareTo(BigInteger.ZERO) == 0);
+    assert(this.lockableERC20.balanceOf(this.otherAccount).send().compareTo(BigInteger.ZERO) == 0);
+    assert(this.lockableERC20.balanceOfProvisional(this.otherAccount).send().compareTo(total) == 0);
+
+    try {
+      this.lockableERC20.transfer(this.otherAccount, amount6).send();
+      throw new Error("Unexpectedly no revert when account parallelization factor exceeded");
+    } catch (TransactionException ex) {
+      System.err.println(" Revert Reason: " + RevertReason.decodeRevertReason(ex.getTransactionReceipt().get().getRevertReason()));
+    }
+
+    // Make sure the provisional values have not changed
+    assert(this.lockableERC20.balanceOfProvisional(this.owner).send().compareTo(remainder) == 0);
+    assert(this.lockableERC20.balanceOfProvisional(this.otherAccount).send().compareTo(total) == 0);
+
+    // Make the contract think a lockable transaction is no longer in progress.
+    this.mockCrossBlockchainControlContract.setRootBlockchainId(BigInteger.ZERO).send();
+    this.mockCrossBlockchainControlContract.setCrossBlockchainTransactionId(BigInteger.ZERO).send();
+
+    // Unlock the contracts and apply the updates.
+    this.lockableERC20.finalise(true, rootBlockchainId, crosschainTransactionId).send();
+
+    assert(this.lockableERC20.balanceOf(this.owner).send().compareTo(remainder) == 0);
+    assert(this.lockableERC20.balanceOfMin(this.owner).send().compareTo(remainder) == 0);
+    assert(this.lockableERC20.balanceOfProvisional(this.owner).send().compareTo(remainder) == 0);
+
+    assert(this.lockableERC20.balanceOf(this.otherAccount).send().compareTo(total) == 0);
+    assert(this.lockableERC20.balanceOf(this.otherAccount).send().compareTo(total) == 0);
+    assert(this.lockableERC20.balanceOfProvisional(this.otherAccount).send().compareTo(total) == 0);
+  }
+
 
 
 }
