@@ -43,8 +43,10 @@ task generateSources {
     def script = "contracts/solidity/crypto/gen.sh".execute()
     script.in.eachLine {line -> println line}
     script.err.eachLine {line -> println "ERROR: " + line}
-    if (script.exitValue() != 0) {
-        throw new GradleException("Solidity compile error")
+    doLast {
+        if(execResult.getExitValue() != 0) {
+            throw new GradleException("Solidity compile error")
+        }
     }
 }
 
