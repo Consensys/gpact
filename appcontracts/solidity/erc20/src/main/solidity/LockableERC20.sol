@@ -129,7 +129,6 @@ contract LockableERC20 is Context, IERC20, IERC20Metadata, Ownable, LockableStor
      * `amount`.
      */
     function transferFrom(address sender, address recipient, uint256 amount) public virtual override returns (bool) {
-        require(cbc.isSingleBlockchainCall(), "Must be single blockchain call");
         transferInternal(sender, recipient, amount);
 
         address spender = _msgSender();

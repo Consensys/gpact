@@ -338,14 +338,20 @@ public class LockableERC20Test extends AbstractERC20Test {
     BigInteger amount3 = BigInteger.valueOf(7);
 
     this.lockableERC20.transfer(otherAccount, amount1).send();
-    this.otherLockableERC20.approve(this.owner, amount2);
+    this.otherLockableERC20.approve(this.owner, amount2).send();
+    assert(this.lockableERC20.allowance(this.otherAccount, this.owner).send().compareTo(amount2) == 0);
     try {
       this.lockableERC20.transferFrom(otherAccount, this.owner, amount1).send();
       throw new Error("Unexpectedly no revert when transferFrom greater than allowance");
     } catch (TransactionException ex) {
       System.err.println(" Revert Reason: " + RevertReason.decodeRevertReason(ex.getTransactionReceipt().get().getRevertReason()));
     }
-    this.lockableERC20.transferFrom(otherAccount, this.owner, amount3).send();
+    try {
+    this.lockableERC20.transferFrom(this.otherAccount, this.owner, amount3).send();
+    } catch (TransactionException ex) {
+      System.err.println(" Revert ReasonX: " + RevertReason.decodeRevertReason(ex.getTransactionReceipt().get().getRevertReason()));
+      throw ex;
+    }
 
     BigInteger balOther = amount1.subtract(amount3);
     BigInteger balOwner = INITIAL_SUPPLY_BIG.subtract(balOther);
@@ -379,7 +385,7 @@ public class LockableERC20Test extends AbstractERC20Test {
     this.mockCrossBlockchainControlContract.setRootBlockchainId(rootBlockchainId).send();
     this.mockCrossBlockchainControlContract.setCrossBlockchainTransactionId(crosschainTransactionId).send();
 
-    this.otherLockableERC20.increaseAllowance(this.owner, amount2);
+    this.otherLockableERC20.increaseAllowance(this.owner, amount2).send();
     try {
       this.lockableERC20.transferFrom(otherAccount, this.owner, amount3).send();
       throw new Error("Unexpectedly no revert when transferFrom greater than min allowance");
