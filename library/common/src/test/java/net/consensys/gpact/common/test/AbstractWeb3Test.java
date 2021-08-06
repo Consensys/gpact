@@ -41,10 +41,10 @@ public abstract class AbstractWeb3Test {
   private static final String URI = "http://" + IP_PORT + "/";
 
 
-  // Have the polling interval equal to the block time.
-  protected static final int POLLING_INTERVAL = 1000;
-  // Retry requests to Ethereum Clients up to five times.
-  protected static final int RETRY = 5;
+  // Have the polling interval half of the block time to have quicker test time.
+  protected static final int POLLING_INTERVAL = 500;
+  // Retry requests to Ethereum Clients many times. The servers may be slow to respond during parallel testing.
+  protected static final int RETRY = 100;
 
   protected Web3j web3j;
   protected TransactionManager tm;
