@@ -185,6 +185,7 @@ jobs:
   unitTestsMachine:
     machine:
       image: ubuntu-2004:202107-02
+    resource_class: large
     steps:
       # The home directory is: /home/circleci/project
       # gpact is cloned to: /home/circleci/project/.
@@ -204,7 +205,7 @@ jobs:
       - run: sleep 30
       - run:
           name: Build and test
-          command: ./gradlew test
+          command: ./gradlew --parallel test
       - run:
           name: Stop blockchains
           working_directory: test-blockchains
