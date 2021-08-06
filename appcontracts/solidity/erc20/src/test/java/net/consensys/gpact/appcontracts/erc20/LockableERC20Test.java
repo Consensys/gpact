@@ -15,7 +15,6 @@
 package net.consensys.gpact.appcontracts.erc20;
 
 import net.consensys.gpact.common.RevertReason;
-import net.consensys.gpact.common.StatsHolder;
 import org.junit.Test;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.exceptions.TransactionException;
@@ -328,6 +327,83 @@ public class LockableERC20Test extends AbstractERC20Test {
     assert(this.lockableERC20.allowanceMin(this.owner, this.otherAccount).send().compareTo(start.subtract(totalDecrease)) == 0);
   }
 
+  @Test
+  public void transferFromNotLocked() throws Exception {
+    setupWeb3();
+    deployContracts();
+    loadOtherCredentialsContract();
+
+    BigInteger amount1 = BigInteger.valueOf(100);
+    BigInteger amount2 = BigInteger.valueOf(11);
+    BigInteger amount3 = BigInteger.valueOf(7);
+
+    this.lockableERC20.transfer(otherAccount, amount1).send();
+    this.otherLockableERC20.approve(this.owner, amount2);
+    try {
+      this.lockableERC20.transferFrom(otherAccount, this.owner, amount1).send();
+      throw new Error("Unexpectedly no revert when transferFrom greater than allowance");
+    } catch (TransactionException ex) {
+      System.err.println(" Revert Reason: " + RevertReason.decodeRevertReason(ex.getTransactionReceipt().get().getRevertReason()));
+    }
+    this.lockableERC20.transferFrom(otherAccount, this.owner, amount3).send();
+
+    BigInteger balOther = amount1.subtract(amount3);
+    BigInteger balOwner = INITIAL_SUPPLY_BIG.subtract(balOther);
+
+    assert(this.lockableERC20.balanceOf(this.owner).send().compareTo(balOwner) == 0);
+    assert(this.lockableERC20.balanceOfMin(this.owner).send().compareTo(balOwner) == 0);
+    assert(this.lockableERC20.balanceOfProvisional(this.owner).send().compareTo(balOwner) == 0);
+
+    assert(this.lockableERC20.balanceOf(this.otherAccount).send().compareTo(balOther) == 0);
+    assert(this.lockableERC20.balanceOfMin(this.otherAccount).send().compareTo(balOther) == 0);
+    assert(this.lockableERC20.balanceOfProvisional(this.otherAccount).send().compareTo(balOther) == 0);
+  }
+
+
+  @Test
+  public void transferFromLocked() throws Exception {
+    setupWeb3();
+    deployContracts();
+    loadOtherCredentialsContract();
+
+    BigInteger amount1 = BigInteger.valueOf(100);
+    BigInteger amount2 = BigInteger.valueOf(11);
+    BigInteger amount3 = BigInteger.valueOf(7);
+
+    BigInteger rootBlockchainId = BigInteger.ONE;
+    BigInteger crosschainTransactionId = BigInteger.TEN;
+
+    this.lockableERC20.transfer(otherAccount, amount1).send();
+
+    // Make the contract think a lockable transaction is in progress.
+    this.mockCrossBlockchainControlContract.setRootBlockchainId(rootBlockchainId).send();
+    this.mockCrossBlockchainControlContract.setCrossBlockchainTransactionId(crosschainTransactionId).send();
+
+    this.otherLockableERC20.increaseAllowance(this.owner, amount2);
+    try {
+      this.lockableERC20.transferFrom(otherAccount, this.owner, amount3).send();
+      throw new Error("Unexpectedly no revert when transferFrom greater than min allowance");
+    } catch (TransactionException ex) {
+      System.err.println(" Revert Reason: " + RevertReason.decodeRevertReason(ex.getTransactionReceipt().get().getRevertReason()));
+    }
+
+    // Unlock the contracts and apply the updates.
+    this.lockableERC20.finalise(true, rootBlockchainId, crosschainTransactionId).send();
+    // The contract will still detect a crosschain transaction because the cbc is still indicating this.
+
+    this.lockableERC20.transferFrom(otherAccount, this.owner, amount3).send();
+
+    BigInteger balOther = amount1.subtract(amount3);
+    BigInteger balOwner = INITIAL_SUPPLY_BIG.subtract(balOther);
+
+    assert(this.lockableERC20.balanceOf(this.owner).send().compareTo(INITIAL_SUPPLY_BIG.subtract(amount1)) == 0);
+    assert(this.lockableERC20.balanceOfMin(this.owner).send().compareTo(INITIAL_SUPPLY_BIG.subtract(amount1)) == 0);
+    assert(this.lockableERC20.balanceOfProvisional(this.owner).send().compareTo(balOwner) == 0);
+
+    assert(this.lockableERC20.balanceOf(this.otherAccount).send().compareTo(amount1) == 0);
+    assert(this.lockableERC20.balanceOfMin(this.otherAccount).send().compareTo(balOther) == 0);
+    assert(this.lockableERC20.balanceOfProvisional(this.otherAccount).send().compareTo(balOther) == 0);
+  }
 
 
 

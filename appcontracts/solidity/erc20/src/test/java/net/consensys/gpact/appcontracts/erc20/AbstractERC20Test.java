@@ -17,6 +17,9 @@ package net.consensys.gpact.appcontracts.erc20;
 import net.consensys.gpact.appcontracts.erc20.soliditywrappers.LockableERC20PresetFixedSupply;
 import net.consensys.gpact.common.test.AbstractWeb3Test;
 import net.consensys.gpact.appcontracts.erc20.soliditywrappers.MockCbcForERC20Test;
+import org.web3j.crypto.Credentials;
+import org.web3j.tx.RawTransactionManager;
+import org.web3j.tx.TransactionManager;
 
 import java.math.BigInteger;
 
@@ -29,18 +32,20 @@ public class AbstractERC20Test extends AbstractWeb3Test {
   public static final int DEFAULT_ERC20_PARALLELIZATION_FACTOR = 10;
 
 
-  LockableERC20PresetFixedSupply lockableERC20;
+  LockableERC20PresetFixedSupply lockableERC20, otherLockableERC20;
   MockCbcForERC20Test mockCrossBlockchainControlContract;
 
   public static final int INITIAL_SUPPLY = 1000000;
   static final BigInteger INITIAL_SUPPLY_BIG = BigInteger.valueOf(INITIAL_SUPPLY);
   public String owner;
+  public Credentials otherCredentials;
   public String otherAccount;
 
 
   protected void deployContracts() throws Exception {
     this.owner = this.credentials.getAddress();
-    this.otherAccount = createNewIdentity().getAddress();
+    this.otherCredentials = createNewIdentity();
+    this.otherAccount = this.otherCredentials.getAddress();
 
     this.mockCrossBlockchainControlContract = MockCbcForERC20Test.deploy(this.web3j, this.tm, this.freeGasProvider).send();
     this.lockableERC20 = LockableERC20PresetFixedSupply.deploy(this.web3j, this.tm, this.freeGasProvider,
@@ -49,5 +54,13 @@ public class AbstractERC20Test extends AbstractWeb3Test {
             INITIAL_SUPPLY_BIG, this.owner
             ).send();
   }
+
+  protected void loadOtherCredentialsContract() {
+    TransactionManager otherTm = new RawTransactionManager(this.web3j, this.otherCredentials, BLOCKCHAIN_ID.longValue(), RETRY, POLLING_INTERVAL);
+    this.otherLockableERC20 = LockableERC20PresetFixedSupply.load(
+            this.lockableERC20.getContractAddress(),
+            this.web3j, otherTm, this.freeGasProvider);
+  }
+
 }
 
