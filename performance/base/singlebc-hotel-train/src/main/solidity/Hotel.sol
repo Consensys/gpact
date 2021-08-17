@@ -30,6 +30,7 @@ contract Hotel {
     // Map: booking reference to date
     mapping(uint256 => uint256) bookingRefToDate;
 
+    mapping(address => address) approvedTravelAgencies;
 
     address owner;
     IERC20 erc20;
@@ -44,6 +45,10 @@ contract Hotel {
         erc20 = IERC20(_erc20);
     }
 
+    function addApprovedTravelAgency(address _travelAgencyContract, address spendingAccount) onlyOwner external {
+        approvedTravelAgencies[_travelAgencyContract] = spendingAccount;
+    }
+
     function addRooms(uint256 _roomRate, uint256 _numberOfRooms) onlyOwner external {
         for (uint i=0; i < _numberOfRooms; i++) {
             HotelRoom storage room = rooms[numRooms++];
@@ -51,14 +56,14 @@ contract Hotel {
         }
     }
 
-    function changeRoomRate(uint256 _roomNumber, uint256 _roomRate) external {
+    function changeRoomRate(uint256 _roomNumber, uint256 _roomRate) onlyOwner external {
         rooms[_roomNumber].roomRate = _roomRate;
     }
 
 
     // TODO improve data structures so for loop not needed.
     function bookRoom(uint256 _date, uint256 _uniqueId, uint256 _maxAmountToPay) external {
-        // TODO only allow calling from approved travel agency contracts. This is super important given the use of tx.origin below.
+        require(approvedTravelAgencies[msg.sender] != address(0), "Sender is not an approved travel agency");
 
         require(_date != 0, "Date can not be zero");
         for (uint i = 0; i < numRooms; i++) {
@@ -70,7 +75,7 @@ contract Hotel {
                 bookingRefToRoomNumber[_uniqueId] = i;
                 bookingRefToDate[_uniqueId] = _date;
                 // Pay for room.
-                erc20.transferFrom(tx.origin, owner, rate);
+                erc20.transferFrom(approvedTravelAgencies[msg.sender], owner, rate);
                 return;
             }
         }

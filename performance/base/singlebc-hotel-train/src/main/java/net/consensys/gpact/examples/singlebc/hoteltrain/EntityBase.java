@@ -74,6 +74,10 @@ public class EntityBase extends AbstractBlockchain {
         LOG.info(" New balance of account {}: {}", account, balance1);
     }
 
+    public void addTravelAgency(String contractAddress, String tokenHoldingAccount) throws Exception {
+        this.hotelContract.addApprovedTravelAgency(contractAddress, tokenHoldingAccount).send();
+    }
+
     public void showErc20Balances(String[] accounts) throws Exception {
         LOG.info(" {} ERC 20 Balances", this.entity);
         BigInteger myBal = this.erc20.balanceOf(this.credentials.getAddress()).send();

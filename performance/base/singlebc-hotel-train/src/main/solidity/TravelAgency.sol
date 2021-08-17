@@ -18,6 +18,8 @@ import "./Hotel.sol";
 
 
 contract TravelAgency  {
+    address owner;
+
     uint256 public hotelBlockchainId;
     Hotel public hotelContract;
 
@@ -31,6 +33,7 @@ contract TravelAgency  {
 
 
     constructor(uint256 _hotelBlockchainId, address _hotelContract, uint256 _trainBlockchainId, address _trainContract) {
+        owner = msg.sender;
         hotelBlockchainId = _hotelBlockchainId;
         hotelContract = Hotel(_hotelContract);
         trainBlockchainId = _trainBlockchainId;
@@ -38,12 +41,14 @@ contract TravelAgency  {
     }
 
     function bookHotelAndTrain(uint256 _date, uint256 _uniqueId) public {
+        require(msg.sender == owner, "Only owner can do bookings");
         hotelContract.bookRoom(_date, _uniqueId, 100);
         trainContract.bookRoom(_date, _uniqueId, 100);
 
         confirmedBookingIds.push(_uniqueId);
         confirmedBookingDates.push(_date);
     }
+
 
     function bookingConfirmed(uint256 _bookingId) public view returns (bool) {
         // TODO use a maps as well as array

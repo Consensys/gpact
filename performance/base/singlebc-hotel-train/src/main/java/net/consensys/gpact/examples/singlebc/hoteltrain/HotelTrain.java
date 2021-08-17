@@ -57,8 +57,10 @@ public class HotelTrain {
 
         hotel.buyTokens(travelAgency.getTravelAgencyAccount(), 200);
         travelAgency.grantAllowance(hotel, 200);
+        hotel.addTravelAgency(travelAgency.getTravelContractAddress(), travelAgency.getTravelAgencyAccount());
         train.buyTokens(travelAgency.getTravelAgencyAccount(), 200);
         travelAgency.grantAllowance(train, 200);
+        train.addTravelAgency(travelAgency.getTravelContractAddress(), travelAgency.getTravelAgencyAccount());
 
         int date = 1;
 

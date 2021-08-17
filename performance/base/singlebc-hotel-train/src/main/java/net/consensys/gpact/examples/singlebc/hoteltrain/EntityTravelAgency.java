@@ -22,15 +22,12 @@ import net.consensys.gpact.openzeppelin.soliditywrappers.ERC20PresetFixedSupply;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
-import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.exceptions.TransactionException;
-import org.web3j.protocol.http.HttpService;
 import org.web3j.tx.RawTransactionManager;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 
 /**
@@ -81,5 +78,8 @@ public class EntityTravelAgency extends AbstractBlockchain {
 
     public String getTravelAgencyAccount() {
         return this.credentials.getAddress();
+    }
+    public String getTravelContractAddress() {
+        return this.travelAgency.getContractAddress();
     }
 }
