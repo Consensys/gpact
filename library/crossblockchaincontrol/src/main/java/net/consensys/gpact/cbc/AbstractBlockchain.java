@@ -44,9 +44,9 @@ public abstract class AbstractBlockchain {
   protected String uri;
   // Polling interval should be equal to the block time.
   protected int pollingInterval;
-  protected DynamicGasProvider gasProvider;
+  public DynamicGasProvider gasProvider;
 
-  protected Web3j web3j;
+  public Web3j web3j;
   protected TransactionManager tm;
 
 
@@ -71,6 +71,10 @@ public abstract class AbstractBlockchain {
 
   public BigInteger getBlockchainId() {
     return this.blockchainId;
+  }
+
+  public String getUri() {
+    return this.uri;
   }
 
 }

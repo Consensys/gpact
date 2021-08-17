@@ -15,6 +15,7 @@ dependencies {
     testImplementation project (':examples-singlebc-read')
     testImplementation project (':examples-singlebc-trade')
     testImplementation project (':examples-singlebc-write')
+    testImplementation project (':examples-singlebc-hoteltrain')
     testImplementation project (':examples-trade')
     testImplementation project (':examples-twochain')
     testImplementation project (':examples-write')

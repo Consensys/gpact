@@ -19,6 +19,7 @@ include 'examples-trade'
 include 'examples-singlebc-read'
 include 'examples-singlebc-write'
 include 'examples-singlebc-trade'
+include 'examples-singlebc-hoteltrain'
 include 'examples-utilpkey'
 include 'examples-tokenbridge'
 include 'examples-test'
@@ -44,6 +45,7 @@ project(":examples-trade").projectDir = file("examples/trade")
 project(":examples-singlebc-read").projectDir = file("performance/base/singlebc-read")
 project(":examples-singlebc-write").projectDir = file("performance/base/singlebc-write")
 project(":examples-singlebc-trade").projectDir = file("performance/base/singlebc-trade")
+project(":examples-singlebc-hoteltrain").projectDir = file("performance/base/singlebc-hotel-train")
 project(":examples-test").projectDir = file("examples/test")
 project(":examples-tokenbridge").projectDir = file("examples/tokenbridge")
 project(":examples-utilpkey").projectDir = file("examples/utilpkey")

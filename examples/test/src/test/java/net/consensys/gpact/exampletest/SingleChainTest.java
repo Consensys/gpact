@@ -26,5 +26,11 @@ public class SingleChainTest extends AbstractExampleTest {
     net.consensys.gpact.examples.singlebc.trade.Main.main(new String[]{tempPropsFile});
   }
 
+  @Test
+  public void singlebcHotelTrain() throws Exception {
+    String tempPropsFile = createPropertiesFile(true, true, true);
+    net.consensys.gpact.examples.singlebc.hoteltrain.HotelTrain.main(new String[]{tempPropsFile});
+  }
+
 
 }
