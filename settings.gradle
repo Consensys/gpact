@@ -16,6 +16,7 @@ include 'examples-read'
 include 'examples-write'
 include 'examples-twochain'
 include 'examples-trade'
+include 'examples-hoteltrain'
 include 'examples-singlebc-read'
 include 'examples-singlebc-write'
 include 'examples-singlebc-trade'
@@ -42,6 +43,7 @@ project(":examples-read").projectDir = file("examples/read")
 project(":examples-write").projectDir = file("examples/write")
 project(":examples-twochain").projectDir = file("examples/twochain")
 project(":examples-trade").projectDir = file("examples/trade")
+project(":examples-hoteltrain").projectDir = file("examples/hotel-train")
 project(":examples-singlebc-read").projectDir = file("performance/base/singlebc-read")
 project(":examples-singlebc-write").projectDir = file("performance/base/singlebc-write")
 project(":examples-singlebc-trade").projectDir = file("performance/base/singlebc-trade")

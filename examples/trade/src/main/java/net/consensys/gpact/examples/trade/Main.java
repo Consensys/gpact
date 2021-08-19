@@ -69,20 +69,26 @@ public class Main {
     ExecutionEngineType engineType = propsLoader.getExecutionEnngine();
     StatsHolder.log(engineType.name());
 
-    Bc1TradeWallet bc1TradeWalletBlockchain = new Bc1TradeWallet(creds, root.bcId, root.uri, root.gasPriceStrategy, root.period);
-    Bc2BusLogic bc2BusLogicBlockchain = new Bc2BusLogic(creds, bc2.bcId, bc2.uri, bc2.gasPriceStrategy, bc2.period);
-    Bc3Balances bc3BalancesBlockchain = new Bc3Balances(creds, bc3.bcId, bc3.uri, bc3.gasPriceStrategy, bc3.period);
-    Bc4Oracle bc4OracleBlockchain = new Bc4Oracle(creds, bc4.bcId, bc4.uri, bc4.gasPriceStrategy, bc4.period);
-    Bc5Stock bc5StockBlockchain = new Bc5Stock(creds, bc5.bcId, bc5.uri, bc5.gasPriceStrategy, bc5.period);
-
+    // Set-up GPACT contracts: Deploy Crosschain Control and Registrar contracts on
+    // each blockchain.
     CbcManager cbcManager = new CbcManager(consensusMethodology);
     cbcManager.addBlockchainAndDeployContracts(creds, root);
     cbcManager.addBlockchainAndDeployContracts(creds, bc2);
     cbcManager.addBlockchainAndDeployContracts(creds, bc3);
     cbcManager.addBlockchainAndDeployContracts(creds, bc4);
     cbcManager.addBlockchainAndDeployContracts(creds, bc5);
-
+    // Have each Crosschain Control contract trust the Crosschain Control
+    // contracts on the other blockchains.
     cbcManager.setupCrosschainTrust();
+    // To keep the example simple, just have one signer for all blockchains.
+    cbcManager.registerSignerOnAllBlockchains(new AnIdentity());
+
+    // Set-up classes to manage blockchains.
+    Bc1TradeWallet bc1TradeWalletBlockchain = new Bc1TradeWallet(creds, root.bcId, root.uri, root.gasPriceStrategy, root.period);
+    Bc2BusLogic bc2BusLogicBlockchain = new Bc2BusLogic(creds, bc2.bcId, bc2.uri, bc2.gasPriceStrategy, bc2.period);
+    Bc3Balances bc3BalancesBlockchain = new Bc3Balances(creds, bc3.bcId, bc3.uri, bc3.gasPriceStrategy, bc3.period);
+    Bc4Oracle bc4OracleBlockchain = new Bc4Oracle(creds, bc4.bcId, bc4.uri, bc4.gasPriceStrategy, bc4.period);
+    Bc5Stock bc5StockBlockchain = new Bc5Stock(creds, bc5.bcId, bc5.uri, bc5.gasPriceStrategy, bc5.period);
 
     // Set-up client side and deploy contracts on the blockchains.
     BigInteger bc3BcId = bc3BalancesBlockchain.getBlockchainId();
@@ -106,8 +112,6 @@ public class Main {
     bc1TradeWalletBlockchain.deployContracts(cbcManager.getCbcAddress(rootBcId), bc2BcId, businessLogicContractAddress);
     String tradeWalletContractAddress = bc1TradeWalletBlockchain.tradeWalletContract.getContractAddress();
 
-    // To keep the example simple, just have one signer for all blockchains.
-    cbcManager.registerSignerOnAllBlockchains(new AnIdentity());
 
     // Create simulators
     SimStockContract simStockContract = new SimStockContract(bc5StockBlockchain);

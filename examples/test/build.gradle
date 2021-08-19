@@ -11,6 +11,7 @@ repositories {
 dependencies {
     testImplementation project (path: ':common', configuration: 'testArtifacts')
 
+    testImplementation project (':examples-hoteltrain')
     testImplementation project (':examples-read')
     testImplementation project (':examples-singlebc-read')
     testImplementation project (':examples-singlebc-trade')
