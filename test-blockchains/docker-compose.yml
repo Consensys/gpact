@@ -49,6 +49,19 @@ services:
       gpact-test:
         ipv4_address: 172.16.239.12
 
+  bc33node1:
+    << : *besu-bootnode-def
+    environment:
+      - OTEL_RESOURCE_ATTRIBUTES=service.name=bc33node1,service.version=${BESU_VERSION:-latest}
+    volumes:
+      - ./bc33:/config
+      - ./keys:/opt/besu/keys
+      #- ./logs/bc33:/tmp/besu
+    ports:
+      - 8330:8545/tcp
+    networks:
+      gpact-test:
+        ipv4_address: 172.16.239.13
 
 
 networks:
