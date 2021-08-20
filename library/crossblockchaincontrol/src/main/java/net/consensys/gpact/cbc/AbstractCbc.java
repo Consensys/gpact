@@ -55,7 +55,7 @@ public abstract class AbstractCbc extends AbstractBlockchain {
 
   protected void deployContracts() throws Exception {
     this.registrarContract = Registrar.deploy(this.web3j, this.tm, this.gasProvider).send();
-    LOG.info(" Registrar Contract: {}", this.registrarContract.getContractAddress());
+    LOG.debug(" Registrar Contract: {}", this.registrarContract.getContractAddress());
   }
 
   public void addBlockchain(BigInteger bcId, String cbcContractAddress) throws Exception {
@@ -76,7 +76,7 @@ public abstract class AbstractCbc extends AbstractBlockchain {
   }
 
   public void registerSigner(AnIdentity signer, BigInteger bcId) throws Exception {
-    LOG.info("Registering signer 0x{} as signer for blockchain 0x{} in registration contract on blockchain 0x{}",
+    LOG.debug("Registering signer 0x{} as signer for blockchain 0x{} in registration contract on blockchain 0x{}",
         signer.getAddress(), bcId.toString(16), this.blockchainId.toString(16));
     TransactionReceipt receipt1 = this.registrarContract.proposeVote(
         RegistrarVoteTypes.VOTE_ADD_SIGNER.asBigInt(), bcId, signer.getAddressAsBigInt(), BigInteger.ZERO).send();
@@ -208,68 +208,68 @@ public abstract class AbstractCbc extends AbstractBlockchain {
   }
 
   protected void showBadCallEvents(List<BadCallEventResponse> badCallEventRespons) {
-    LOG.info("Bad Call Events");
+    LOG.debug("Bad Call Events");
     if (badCallEventRespons.isEmpty()) {
-      LOG.info(" None");
+      LOG.debug(" None");
     }
     for (BadCallEventResponse badCallEventResponse : badCallEventRespons) {
-      LOG.info(" Event:");
-      LOG.info("   Expected Blockchain Id: 0x{}", badCallEventResponse._expectedBlockchainId.toString(16));
-      LOG.info("   Actual Blockchain Id: 0x{}", badCallEventResponse._actualBlockchainId.toString(16));
-      LOG.info("   Expected Contract: {}", badCallEventResponse._expectedContract);
-      LOG.info("   Actual Contract: {}", badCallEventResponse._actualContract);
-      LOG.info("   Expected Function Call: {}", new BigInteger(1, badCallEventResponse._expectedFunctionCall).toString(16));
-      LOG.info("   Actual Function Call: {}", new BigInteger(1, badCallEventResponse._actualFunctionCall).toString(16));
+      LOG.debug(" Event:");
+      LOG.debug("   Expected Blockchain Id: 0x{}", badCallEventResponse._expectedBlockchainId.toString(16));
+      LOG.debug("   Actual Blockchain Id: 0x{}", badCallEventResponse._actualBlockchainId.toString(16));
+      LOG.debug("   Expected Contract: {}", badCallEventResponse._expectedContract);
+      LOG.debug("   Actual Contract: {}", badCallEventResponse._actualContract);
+      LOG.debug("   Expected Function Call: {}", new BigInteger(1, badCallEventResponse._expectedFunctionCall).toString(16));
+      LOG.debug("   Actual Function Call: {}", new BigInteger(1, badCallEventResponse._actualFunctionCall).toString(16));
     }
   }
 
   protected void showCallFailureEvents(List<CallFailureEventResponse> callFailureEventResponses) {
-    LOG.info("Call Failure Events");
+    LOG.debug("Call Failure Events");
     if (callFailureEventResponses.isEmpty()) {
-      LOG.info(" None");
+      LOG.debug(" None");
     }
     for (CallFailureEventResponse callFailureEventResponse : callFailureEventResponses) {
-      LOG.info(" Revert Reason: {}", callFailureEventResponse._revertReason);
+      LOG.debug(" Revert Reason: {}", callFailureEventResponse._revertReason);
     }
   }
 
   protected void showCallResultEvents(List<CallResultEventResponse> callResultEventResponses) {
-    LOG.info("Call Result Events");
+    LOG.debug("Call Result Events");
     if (callResultEventResponses.isEmpty()) {
-      LOG.info(" None");
+      LOG.debug(" None");
     }
     for (CallResultEventResponse callResultEventResponse : callResultEventResponses) {
-      LOG.info(" Event:");
-      LOG.info("   Blockchain Id: 0x{}", callResultEventResponse.blockchainId.toString(16));
-      LOG.info("   Contract: {}", callResultEventResponse.contract);
-      LOG.info("   Function Call: {}", new BigInteger(1, callResultEventResponse.functionCall).toString(16));
-      LOG.info("   Result: 0x{}", new BigInteger(1, callResultEventResponse.result).toString(16));
+      LOG.debug(" Event:");
+      LOG.debug("   Blockchain Id: 0x{}", callResultEventResponse.blockchainId.toString(16));
+      LOG.debug("   Contract: {}", callResultEventResponse.contract);
+      LOG.debug("   Function Call: {}", new BigInteger(1, callResultEventResponse.functionCall).toString(16));
+      LOG.debug("   Result: 0x{}", new BigInteger(1, callResultEventResponse.result).toString(16));
     }
   }
 
   protected void showDumpEvents(List<DumpEventResponse> dumpEventResponses) {
-    LOG.info("Dump Events");
+    LOG.debug("Dump Events");
     if (dumpEventResponses.isEmpty()) {
-      LOG.info(" None");
+      LOG.debug(" None");
     }
     for (DumpEventResponse dumpEventResponse : dumpEventResponses) {
-      LOG.info(" Event:");
-      LOG.info("  Uint256: {}", dumpEventResponse._val1.toString(16));
-      LOG.info("  Bytes32: {}", new BigInteger(1, dumpEventResponse._val2).toString(16));
-      LOG.info("  Address: {}", dumpEventResponse._val3);
-      LOG.info("  Bytes: {}", new BigInteger(1, dumpEventResponse._val4).toString(16));
+      LOG.debug(" Event:");
+      LOG.debug("  Uint256: {}", dumpEventResponse._val1.toString(16));
+      LOG.debug("  Bytes32: {}", new BigInteger(1, dumpEventResponse._val2).toString(16));
+      LOG.debug("  Address: {}", dumpEventResponse._val3);
+      LOG.debug("  Bytes: {}", new BigInteger(1, dumpEventResponse._val4).toString(16));
     }
   }
 
   protected void showNotEnoughCallsEvents(List<NotEnoughCallsEventResponse> notEnoughCallsEventResponses) {
-    LOG.info("Not Enough Call Events");
+    LOG.debug("Not Enough Call Events");
     if (notEnoughCallsEventResponses.isEmpty()) {
-      LOG.info(" None");
+      LOG.debug(" None");
     }
     for (NotEnoughCallsEventResponse notEnoughCallsEventResponse: notEnoughCallsEventResponses) {
-      LOG.info("  Event:");
-      LOG.info("   Actual Number of Calls: {}", notEnoughCallsEventResponse._actualNumberOfCalls);
-      LOG.info("   Expected Number of Calls: {}", notEnoughCallsEventResponse._expectedNumberOfCalls);
+      LOG.debug("  Event:");
+      LOG.debug("   Actual Number of Calls: {}", notEnoughCallsEventResponse._actualNumberOfCalls);
+      LOG.debug("   Expected Number of Calls: {}", notEnoughCallsEventResponse._expectedNumberOfCalls);
     }
   }
 
@@ -277,10 +277,10 @@ public abstract class AbstractCbc extends AbstractBlockchain {
     if (rootEventResponses.size() != 1) {
       LOG.error("Unexpected number of root events emitted: {}", rootEventResponses.size());
     }
-    LOG.info("Root Event:");
+    LOG.debug("Root Event:");
     for (RootEventResponse rootEventResponse: rootEventResponses) {
-      LOG.info(" _crossBlockchainTransactionId: 0x{}", rootEventResponse._crossBlockchainTransactionId.toString(16));
-      LOG.info(" _success: {}", rootEventResponse._success);
+      LOG.debug(" _crossBlockchainTransactionId: 0x{}", rootEventResponse._crossBlockchainTransactionId.toString(16));
+      LOG.debug(" _success: {}", rootEventResponse._success);
     }
     if (rootEventResponses.size() != 1) {
       throw new RuntimeException("Undexpected number of root events: " + rootEventResponses.size());
@@ -291,26 +291,26 @@ public abstract class AbstractCbc extends AbstractBlockchain {
     if (segmentEventResponses.size() != 1) {
       LOG.error("Unexpected number of segment events emitted: {}", segmentEventResponses.size());
     }
-    LOG.info("Segment Event:");
+    LOG.debug("Segment Event:");
     for (SegmentEventResponse segmentEventResponse : segmentEventResponses) {
-      LOG.info(" Cross-Blockchain Transaction Id: 0x{}", segmentEventResponse._crossBlockchainTransactionId.toString(16));
+      LOG.debug(" Cross-Blockchain Transaction Id: 0x{}", segmentEventResponse._crossBlockchainTransactionId.toString(16));
       StringBuilder calls = new StringBuilder();
       for (BigInteger partOfCallPath : segmentEventResponse._callPath) {
         calls.append("[");
         calls.append(partOfCallPath);
         calls.append("] ");
       }
-      LOG.info(" Call Path: {}", calls);
-      LOG.info(" Hash Of Call Graph: {}", new BigInteger(1, segmentEventResponse._hashOfCallGraph).toString(16));
-      LOG.info(" Success: {}", segmentEventResponse._success);
-      LOG.info(" Return Value: {}", new BigInteger(1, segmentEventResponse._returnValue).toString(16));
+      LOG.debug(" Call Path: {}", calls);
+      LOG.debug(" Hash Of Call Graph: {}", new BigInteger(1, segmentEventResponse._hashOfCallGraph).toString(16));
+      LOG.debug(" Success: {}", segmentEventResponse._success);
+      LOG.debug(" Return Value: {}", new BigInteger(1, segmentEventResponse._returnValue).toString(16));
       StringBuilder lockedContracts = new StringBuilder();
       for (String lockedContract: segmentEventResponse._lockedContracts) {
         calls.append("[");
         calls.append(lockedContract);
         calls.append("] ");
       }
-      LOG.info(" Locked Contracts: [{}]", lockedContracts);
+      LOG.debug(" Locked Contracts: [{}]", lockedContracts);
     }
     if (segmentEventResponses.size() != 1) {
       throw new RuntimeException("Undexpected number of segment events: " + segmentEventResponses.size());

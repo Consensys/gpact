@@ -29,7 +29,7 @@ public class CbcManager {
     if (this.blockchains.containsKey(blockchainId)) {
       return;
     }
-    LOG.info("Deploying Cross-Blockchain Control contracts for blockchain id 0x{}",blockchainId.toString(16));
+    LOG.debug("Deploying Cross-Blockchain Control contracts for blockchain id 0x{}",blockchainId.toString(16));
 
     BcHolder holder = new BcHolder();
     switch (this.consensusMethodology) {

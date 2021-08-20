@@ -20,6 +20,7 @@ import net.consensys.gpact.examples.hoteltrain.soliditywrappers.Hotel;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
+import org.web3j.tuples.generated.Tuple3;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -91,6 +92,16 @@ public class EntityBase extends AbstractBlockchain {
         LOG.info(" {}: Owner {}: Spender: {}: Allowance: {}", this.entity, owner, spender, allowance);
 
     }
+
+    public void showBookingInformation(BigInteger bookingId) throws Exception {
+        Tuple3<BigInteger, BigInteger, BigInteger> retVal = this.hotelContract.getBookingInformation(bookingId).send();
+        BigInteger amountPaid = retVal.component1();
+        BigInteger roomId = retVal.component2();
+        BigInteger date = retVal.component3();
+
+        LOG.info(" {} Booking: Date: {}, Room/Seat: {}, Amount: {}", this.entity, date, roomId, amountPaid);
+    }
+
 
     public void showBookings(int date) throws Exception {
         LOG.info(" Hotel Bookings for date: {}", date);

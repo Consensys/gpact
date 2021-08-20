@@ -113,6 +113,7 @@ contract Hotel is LockableStorage {
         date = getMapValue(BOOKING_REF_TO_DATE, _uniqueId);
         if (date == 0) {
             amountPaid = 0;
+            roomId = 0;
         }
         else {
             roomId = getMapValue(BOOKING_REF_TO_ROOM_NUMBER, _uniqueId);

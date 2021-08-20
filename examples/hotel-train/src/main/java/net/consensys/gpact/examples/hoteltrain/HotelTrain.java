@@ -46,8 +46,7 @@ public class HotelTrain {
         Credentials creds = propsLoader.getCredentials();
         PropertiesLoader.BlockchainInfo root = propsLoader.getBlockchainInfo("ROOT");
         PropertiesLoader.BlockchainInfo bc2 = propsLoader.getBlockchainInfo("BC2");
-        // TODO just run train and hotel on same bc as test system currently only spins up two blockchains
-        PropertiesLoader.BlockchainInfo bc3 = propsLoader.getBlockchainInfo("BC2");
+        PropertiesLoader.BlockchainInfo bc3 = propsLoader.getBlockchainInfo("BC3");
         CrossBlockchainConsensusType consensusMethodology = propsLoader.getConsensusMethodology();
         StatsHolder.log(consensusMethodology.name());
         ExecutionEngineType engineType = propsLoader.getExecutionEnngine();
@@ -97,27 +96,26 @@ public class HotelTrain {
 
         String[] accounts = new String[]{travelAgency.getTravelAgencyAccount(), hotel.getHotelContractAddress(), train.getHotelContractAddress()};
 
+        hotel.showErc20Balances(accounts);
+        train.showErc20Balances(accounts);
+        hotel.showErc20Allowance(travelAgency.getTravelAgencyAccount(), hotel.getHotelContractAddress());
+        train.showErc20Allowance(travelAgency.getTravelAgencyAccount(), train.getHotelContractAddress());
+
+
         for (int numExecutions = 0; numExecutions <= NUM_TIMES_EXECUTE; numExecutions++) {
             LOG.info("Execution: {}  *****************", numExecutions);
             StatsHolder.log("Execution: " + numExecutions + " **************************");
 
-            hotel.showErc20Balances(accounts);
-            train.showErc20Balances(accounts);
-            hotel.showErc20Allowance(travelAgency.getTravelAgencyAccount(), hotel.getHotelContractAddress());
-            train.showErc20Allowance(travelAgency.getTravelAgencyAccount(), train.getHotelContractAddress());
-            // TODO show availability
-            travelAgency.book(date, consensusMethodology,engineType, cbcManager);
+            BigInteger bookingId = travelAgency.book(date, consensusMethodology,engineType, cbcManager);
 
+            hotel.showBookingInformation(bookingId);
+            train.showBookingInformation(bookingId);
             hotel.showErc20Balances(accounts);
             train.showErc20Balances(accounts);
             hotel.showErc20Allowance(travelAgency.getTravelAgencyAccount(), hotel.getHotelContractAddress());
             train.showErc20Allowance(travelAgency.getTravelAgencyAccount(), train.getHotelContractAddress());
-            travelAgency.book(date, consensusMethodology,engineType, cbcManager);
 
-            hotel.showErc20Balances(accounts);
-            train.showErc20Balances(accounts);
-            hotel.showErc20Allowance(travelAgency.getTravelAgencyAccount(), hotel.getHotelContractAddress());
-            train.showErc20Allowance(travelAgency.getTravelAgencyAccount(), train.getHotelContractAddress());
+            travelAgency.book(date, consensusMethodology,engineType, cbcManager);
             travelAgency.book(date, consensusMethodology,engineType, cbcManager);
 
             hotel.showErc20Balances(accounts);

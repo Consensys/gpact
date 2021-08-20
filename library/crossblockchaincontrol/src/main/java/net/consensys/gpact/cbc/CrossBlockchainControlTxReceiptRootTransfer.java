@@ -75,8 +75,8 @@ public class CrossBlockchainControlTxReceiptRootTransfer extends AbstractCbc {
     this.crossBlockchainControlContract =
         CbcTxRootTransfer.deploy(this.web3j, this.tm, this.gasProvider,
             this.blockchainId, this.txReceiptsRootStorageContract.getContractAddress()).send();
-    LOG.info(" TxReceiptRoot Contract: {}", this.txReceiptsRootStorageContract.getContractAddress());
-    LOG.info(" Cross Blockchain Contract Contract: {}", this.crossBlockchainControlContract.getContractAddress());
+    LOG.debug(" TxReceiptRoot Contract: {}", this.txReceiptsRootStorageContract.getContractAddress());
+    LOG.debug(" Cross Blockchain Contract Contract: {}", this.crossBlockchainControlContract.getContractAddress());
   }
 
 
@@ -140,7 +140,7 @@ public class CrossBlockchainControlTxReceiptRootTransfer extends AbstractCbc {
     }
 
     long now = System.currentTimeMillis() / 1000;
-    LOG.info(" Current time on this computer: {}; Transaction time-out: {}", now, this.crossBlockchainTransactionTimeout);
+    LOG.debug(" Current time on this computer: {}; Transaction time-out: {}", now, this.crossBlockchainTransactionTimeout);
     if (this.crossBlockchainTransactionTimeout < now) {
       LOG.warn(" Cross-Blockchain transaction will fail as transaction has timed-out");
     }
@@ -201,9 +201,9 @@ public class CrossBlockchainControlTxReceiptRootTransfer extends AbstractCbc {
 
     List<CbcTxRootTransfer.SignallingEventResponse> sigEventResponses = this.crossBlockchainControlContract.getSignallingEvents(txR);
     CbcTxRootTransfer.SignallingEventResponse sigEventResponse = sigEventResponses.get(0);
-    LOG.info("Signalling Event:");
-    LOG.info(" Root Blockchain Id: 0x{}", sigEventResponse._rootBcId.toString(16));
-    LOG.info(" Cross-Blockchain Transaction Id: {}", sigEventResponse._crossBlockchainTransactionId.toString(16));
+    LOG.debug("Signalling Event:");
+    LOG.debug(" Root Blockchain Id: 0x{}", sigEventResponse._rootBcId.toString(16));
+    LOG.debug(" Cross-Blockchain Transaction Id: {}", sigEventResponse._crossBlockchainTransactionId.toString(16));
 
     showDumpEvents(convertDump(this.crossBlockchainControlContract.getDumpEvents(txR)));
   }
@@ -228,9 +228,9 @@ public class CrossBlockchainControlTxReceiptRootTransfer extends AbstractCbc {
 
     List<CbcTxRootTransfer.SignallingEventResponse> sigEventResponses = this.crossBlockchainControlContract.getSignallingEvents(txR);
     CbcTxRootTransfer.SignallingEventResponse sigEventResponse = sigEventResponses.get(0);
-    LOG.info("Signalling Event:");
-    LOG.info(" Root Blockchain Id: 0x{}", sigEventResponse._rootBcId.toString(16));
-    LOG.info(" Cross-Blockchain Transaction Id: {}", sigEventResponse._crossBlockchainTransactionId.toString(16));
+    LOG.debug("Signalling Event:");
+    LOG.debug(" Root Blockchain Id: 0x{}", sigEventResponse._rootBcId.toString(16));
+    LOG.debug(" Cross-Blockchain Transaction Id: {}", sigEventResponse._crossBlockchainTransactionId.toString(16));
 
     showDumpEvents(convertDump(this.crossBlockchainControlContract.getDumpEvents(txR)));
   }
@@ -302,7 +302,7 @@ public class CrossBlockchainControlTxReceiptRootTransfer extends AbstractCbc {
       sigV.add(BigInteger.valueOf(signatureData.getV()[0]));
     }
 
-    LOG.info("txReceiptsRootStorageContract.addTxReceiptRoot: publishing to BC ID {}, from BC ID: {}", this.blockchainId, sourceBlockchainId);
+    LOG.debug("txReceiptsRootStorageContract.addTxReceiptRoot: publishing to BC ID {}, from BC ID: {}", this.blockchainId, sourceBlockchainId);
     return this.txReceiptsRootStorageContract.addTxReceiptRoot(sourceBlockchainId, theSigners, sigR, sigS, sigV, transactionReceiptRoot).sendAsync();
   }
 
@@ -428,7 +428,7 @@ public class CrossBlockchainControlTxReceiptRootTransfer extends AbstractCbc {
 ////    }
 //              out.endList();
 //            }));
-//    LOG.info("Block Hash Calculated***: {} should be: {}", blockHash1.toHexString(), blockHash);
+//    LOG.debug("Block Hash Calculated***: {} should be: {}", blockHash1.toHexString(), blockHash);
 
 
     // TODO end remove

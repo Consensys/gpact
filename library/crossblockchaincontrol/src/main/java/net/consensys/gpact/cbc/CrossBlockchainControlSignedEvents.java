@@ -53,20 +53,20 @@ public class CrossBlockchainControlSignedEvents extends AbstractCbc {
     super.deployContracts();
     this.crossBlockchainControlContract =
         CbcSignedEvent.deploy(this.web3j, this.tm, this.gasProvider, this.blockchainId, this.registrarContract.getContractAddress()).send();
-    LOG.info(" Cross Blockchain Contract Contract: {}", this.crossBlockchainControlContract.getContractAddress());
+    LOG.debug(" Cross Blockchain Contract Contract: {}", this.crossBlockchainControlContract.getContractAddress());
   }
 
 
 
   public byte[] start(BigInteger transactionId, BigInteger timeout, byte[] callGraph) throws Exception {
-    LOG.info("Start Transaction on blockchain 0x{}", this.blockchainId.toString(16));
+    LOG.debug("Start Transaction on blockchain 0x{}", this.blockchainId.toString(16));
     StatsHolder.log("Start call now");
     TransactionReceipt txR = this.crossBlockchainControlContract.start(transactionId, timeout, callGraph).send();
     StatsHolder.logGas("Start Transaction", txR.getGasUsed());
     List<CbcSignedEvent.StartEventResponse> startEvents = this.crossBlockchainControlContract.getStartEvents(txR);
     CbcSignedEvent.StartEventResponse startEvent = startEvents.get(0);
     this.crossBlockchainTransactionTimeout = startEvent._timeout.longValue();
-    // LOG.info("Start Event: {}", new BigInteger(getEventData(txR, AbstractCbc.START_EVENT_SIGNATURE_BYTES)).toString(16));
+    // LOG.debug("Start Event: {}", new BigInteger(getEventData(txR, AbstractCbc.START_EVENT_SIGNATURE_BYTES)).toString(16));
     return getEventData(txR, AbstractCbc.START_EVENT_SIGNATURE_BYTES);
   }
 
@@ -83,16 +83,16 @@ public class CrossBlockchainControlSignedEvents extends AbstractCbc {
       encodedSignatures.add(segEvent.getEncodedSignatures());
     }
 
-    LOG.info("Call Path Len: {}", callPath.size());
+    LOG.debug("Call Path Len: {}", callPath.size());
     for (int i = 0; i < callPath.size(); i++) {
-      LOG.info("Call Path[{}]: {}", i, callPath.get(i));
+      LOG.debug("Call Path[{}]: {}", i, callPath.get(i));
     }
 
 
     //RlpDumper.dump(RLP.input(Bytes.wrap(encodedSignatures.get(0))));
     TransactionReceipt txR;
     try {
-      LOG.info("Segment Transaction on blockchain 0x{}", this.blockchainId.toString(16));
+      LOG.debug("Segment Transaction on blockchain 0x{}", this.blockchainId.toString(16));
       txR = this.crossBlockchainControlContract.segment(encodedEvents, encodedSignatures, callPath).send();
       StatsHolder.logGas("Segment Transaction", txR.getGasUsed());
     } catch (TransactionException ex) {
@@ -131,7 +131,7 @@ public class CrossBlockchainControlSignedEvents extends AbstractCbc {
     }
 
     long now = System.currentTimeMillis() / 1000;
-    LOG.info(" Current time on this computer: {}; Transaction time-out: {}", now, this.crossBlockchainTransactionTimeout);
+    LOG.debug(" Current time on this computer: {}; Transaction time-out: {}", now, this.crossBlockchainTransactionTimeout);
     if (this.crossBlockchainTransactionTimeout < now) {
       LOG.warn(" Cross-Blockchain transaction will fail as transaction has timed-out");
     }
@@ -141,7 +141,7 @@ public class CrossBlockchainControlSignedEvents extends AbstractCbc {
 
     TransactionReceipt txR;
     try {
-      LOG.info("Root Transaction on blockchain 0x{}", this.blockchainId.toString(16));
+      LOG.debug("Root Transaction on blockchain 0x{}", this.blockchainId.toString(16));
       txR = this.crossBlockchainControlContract.root(encodedEvents, encodedSignatures).send();
       StatsHolder.logGas("Root Transaction", txR.getGasUsed());
       if (!txR.isStatusOK()) {
@@ -180,7 +180,7 @@ public class CrossBlockchainControlSignedEvents extends AbstractCbc {
     }
 
 
-    LOG.info("Signalling Transaction on blockchain 0x{}", this.blockchainId.toString(16));
+    LOG.debug("Signalling Transaction on blockchain 0x{}", this.blockchainId.toString(16));
     TransactionReceipt txR = this.crossBlockchainControlContract.signalling(encodedEvents, encodedSignatures).send();
     StatsHolder.logGas("Signalling Transaction", txR.getGasUsed());
     if (!txR.isStatusOK()) {
@@ -189,9 +189,9 @@ public class CrossBlockchainControlSignedEvents extends AbstractCbc {
 
     List<CbcSignedEvent.SignallingEventResponse> sigEventResponses = this.crossBlockchainControlContract.getSignallingEvents(txR);
     CbcSignedEvent.SignallingEventResponse sigEventResponse = sigEventResponses.get(0);
-    LOG.info("Signalling Event:");
-    LOG.info(" _rootBlockchainId: {}", sigEventResponse._rootBcId.toString(16));
-    LOG.info(" _crossBlockchainTransactionId: {}", sigEventResponse._crossBlockchainTransactionId.toString(16));
+    LOG.debug("Signalling Event:");
+    LOG.debug(" _rootBlockchainId: {}", sigEventResponse._rootBcId.toString(16));
+    LOG.debug(" _crossBlockchainTransactionId: {}", sigEventResponse._crossBlockchainTransactionId.toString(16));
 
     showDumpEvents(this.convertDump(this.crossBlockchainControlContract.getDumpEvents(txR)));
   }
@@ -206,7 +206,7 @@ public class CrossBlockchainControlSignedEvents extends AbstractCbc {
       encodedSignatures.add(segEvent.getEncodedSignatures());
     }
 
-    LOG.info("Signalling Transaction on blockchain 0x{}", this.blockchainId.toString(16));
+    LOG.debug("Signalling Transaction on blockchain 0x{}", this.blockchainId.toString(16));
     return this.crossBlockchainControlContract.signalling(encodedEvents, encodedSignatures).sendAsync();
   }
 
@@ -219,9 +219,9 @@ public class CrossBlockchainControlSignedEvents extends AbstractCbc {
 
     List<CbcSignedEvent.SignallingEventResponse> sigEventResponses = this.crossBlockchainControlContract.getSignallingEvents(txR);
     CbcSignedEvent.SignallingEventResponse sigEventResponse = sigEventResponses.get(0);
-    LOG.info("Signalling Event:");
-    LOG.info(" _rootBlockchainId: {}", sigEventResponse._rootBcId.toString(16));
-    LOG.info(" _crossBlockchainTransactionId: {}", sigEventResponse._crossBlockchainTransactionId.toString(16));
+    LOG.debug("Signalling Event:");
+    LOG.debug(" _rootBlockchainId: {}", sigEventResponse._rootBcId.toString(16));
+    LOG.debug(" _crossBlockchainTransactionId: {}", sigEventResponse._crossBlockchainTransactionId.toString(16));
 
     showDumpEvents(this.convertDump(this.crossBlockchainControlContract.getDumpEvents(txR)));
   }
