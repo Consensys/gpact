@@ -34,7 +34,7 @@ public class HotelTrain {
     static int NUM_TIMES_EXECUTE = 1;
 
     public static void main(String[] args) throws Exception {
-        StatsHolder.log("Example: Single Blockchain: Read");
+        StatsHolder.log("Example: Single Blockchain: Hotel Train");
         LOG.info("Started");
 
         if (args.length != 1) {
@@ -73,7 +73,7 @@ public class HotelTrain {
         // Deploy application contracts.
         BigInteger hotelBcId = hotel.getBlockchainId();
         hotel.deployContracts(cbcManager.getCbcAddress(hotelBcId));
-        BigInteger trainBcId = hotel.getBlockchainId();
+        BigInteger trainBcId = train.getBlockchainId();
         train.deployContracts(cbcManager.getCbcAddress(trainBcId));
         BigInteger travelBcId = travelAgency.getBlockchainId();
         travelAgency.deploy(cbcManager.getCbcAddress(travelBcId), hotel.getBlockchainId(), hotel.getHotelContractAddress(), train.getBlockchainId(), train.getHotelContractAddress());
