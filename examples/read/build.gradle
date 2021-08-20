@@ -9,6 +9,9 @@ repositories {
 }
 
 dependencies {
+    testImplementation project (path: ':common', configuration: 'testArtifacts')
+    testImplementation group: 'junit', name: 'junit', version: '4.12'
+
     implementation project (':common')
     implementation project (':rlp')
     implementation project (':receipts')

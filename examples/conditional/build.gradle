@@ -42,7 +42,7 @@ dependencies {
 }
 
 task generateSources {
-    def script = "examples/write/gen.sh".execute()
+    def script = "examples/conditional/gen.sh".execute()
 //    script.in.eachLine {line -> println line}
 //    script.err.eachLine {line -> println "ERROR: " + line}
     script.waitForProcessOutput(System.out, System.err)

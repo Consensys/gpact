@@ -10,22 +10,23 @@ include 'sol-registrar'
 include 'sol-blockheader'
 include 'sol-crossblockchaincontrol'
 include 'crossblockchaincontrol'
-
 include 'sol-lockablestorage'
-include 'examples-read'
-include 'examples-write'
-include 'examples-twochain'
-include 'examples-trade'
-include 'examples-hoteltrain'
-include 'examples-singlebc-read'
-include 'examples-singlebc-write'
-include 'examples-singlebc-trade'
-include 'examples-singlebc-hoteltrain'
-include 'examples-utilpkey'
-include 'examples-tokenbridge'
-include 'examples-test'
+
 include 'app-openzeppelin'
 include 'app-erc20'
+
+include 'examples-conditional'
+include 'examples-hoteltrain'
+include 'examples-read'
+include 'examples-tokenbridge'
+include 'examples-trade'
+include 'examples-utilpkey'
+include 'examples-write'
+include 'examples-singlebc-hoteltrain'
+include 'examples-singlebc-read'
+include 'examples-singlebc-trade'
+include 'examples-singlebc-write'
+
 
 project(":common").projectDir = file("library/common")
 project(":sol-crypto").projectDir = file("contracts/solidity/crypto")
@@ -39,19 +40,20 @@ project(":sol-blockheader").projectDir = file("contracts/solidity/blockheader")
 project(":sol-crossblockchaincontrol").projectDir = file("contracts/solidity/crossblockchaincontrol")
 project(":crossblockchaincontrol").projectDir = file("library/crossblockchaincontrol")
 project(":sol-lockablestorage").projectDir = file("contracts/solidity/lockablestorage")
-project(":examples-read").projectDir = file("examples/read")
-project(":examples-write").projectDir = file("examples/write")
-project(":examples-twochain").projectDir = file("examples/twochain")
-project(":examples-trade").projectDir = file("examples/trade")
-project(":examples-hoteltrain").projectDir = file("examples/hotel-train")
-project(":examples-singlebc-read").projectDir = file("performance/base/singlebc-read")
-project(":examples-singlebc-write").projectDir = file("performance/base/singlebc-write")
-project(":examples-singlebc-trade").projectDir = file("performance/base/singlebc-trade")
-project(":examples-singlebc-hoteltrain").projectDir = file("performance/base/singlebc-hotel-train")
-project(":examples-test").projectDir = file("examples/test")
-project(":examples-tokenbridge").projectDir = file("examples/tokenbridge")
-project(":examples-utilpkey").projectDir = file("examples/utilpkey")
+
 project(":app-openzeppelin").projectDir = file("appcontracts/solidity/openzeppelin")
 project(":app-erc20").projectDir = file("appcontracts/solidity/erc20")
+
+project(":examples-conditional").projectDir = file("examples/conditional")
+project(":examples-hoteltrain").projectDir = file("examples/hotel-train")
+project(":examples-read").projectDir = file("examples/read")
+project(":examples-tokenbridge").projectDir = file("examples/tokenbridge")
+project(":examples-trade").projectDir = file("examples/trade")
+project(":examples-utilpkey").projectDir = file("examples/utilpkey")
+project(":examples-write").projectDir = file("examples/write")
+project(":examples-singlebc-hoteltrain").projectDir = file("performance/base/singlebc-hotel-train")
+project(":examples-singlebc-read").projectDir = file("performance/base/singlebc-read")
+project(":examples-singlebc-trade").projectDir = file("performance/base/singlebc-trade")
+project(":examples-singlebc-write").projectDir = file("performance/base/singlebc-write")
 
 
