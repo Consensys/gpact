@@ -53,12 +53,42 @@ public class CbcManager {
     this.blockchains.put(blockchainId, holder);
   }
 
+  public void addBlockchain(Credentials creds, PropertiesLoader.BlockchainInfo bcInfo, String cbcContractAddress) throws Exception {
+    BigInteger blockchainId = new BigInteger(bcInfo.bcId, 16);
+    if (this.blockchains.containsKey(blockchainId)) {
+      return;
+    }
+
+    BcHolder holder = new BcHolder();
+    switch (this.consensusMethodology) {
+      case TRANSACTION_RECEIPT_SIGNING:
+        holder.cbcTxRootTransfer = new CrossBlockchainControlTxReceiptRootTransfer(
+                creds, bcInfo.bcId, bcInfo.uri, bcInfo.gasPriceStrategy, bcInfo.period);
+        holder.cbc = holder.cbcTxRootTransfer;
+        break;
+      case EVENT_SIGNING:
+        holder.cbcSignedEvents = new CrossBlockchainControlSignedEvents(
+                creds, bcInfo.bcId, bcInfo.uri, bcInfo.gasPriceStrategy, bcInfo.period);
+        holder.cbc = holder.cbcSignedEvents;
+        break;
+      default:
+        throw new RuntimeException("Not supported yet: " + this.consensusMethodology);
+    }
+
+    holder.cbc.loadContract(cbcContractAddress);
+    holder.cbcContractAddress = cbcContractAddress;
+
+    this.blockchains.put(blockchainId, holder);
+  }
+
+
   public void registerSignerOnAllBlockchains(AnIdentity signer) throws Exception {
     for (BigInteger bcId1: this.blockchains.keySet()) {
       registerSigner(signer, bcId1);
     }
   }
 
+  // TODO: Replace the signers in the BcHolder when the Attestor code is written
   public void registerSigner(AnIdentity signer, BigInteger bcId1) throws Exception {
     // Add the signer (their private key) to app for the blockchain
     BcHolder holder = this.blockchains.get(bcId1);
@@ -70,6 +100,18 @@ public class CbcManager {
       holder2.cbc.registerSigner(signer, bcId1);
     }
   }
+
+  public void addSignerOnAllBlockchains(AnIdentity signer) throws Exception {
+    for (BigInteger bcId1: this.blockchains.keySet()) {
+      addSigner(signer, bcId1);
+    }
+  }
+  public void addSigner(AnIdentity signer, BigInteger bcId1) throws Exception {
+    // Add the signer (their private key) to app for the blockchain
+    BcHolder holder = this.blockchains.get(bcId1);
+    holder.signers.add(signer);
+  }
+
 
 
   public AbstractCbc getCbcContract(BigInteger bcId) {

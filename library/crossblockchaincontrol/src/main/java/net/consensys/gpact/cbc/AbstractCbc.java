@@ -14,6 +14,7 @@
  */
 package net.consensys.gpact.cbc;
 
+import net.consensys.gpact.cbc.soliditywrappers.CbcSignedEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
@@ -57,6 +58,9 @@ public abstract class AbstractCbc extends AbstractBlockchain {
     this.registrarContract = Registrar.deploy(this.web3j, this.tm, this.gasProvider).send();
     LOG.debug(" Registrar Contract: {}", this.registrarContract.getContractAddress());
   }
+
+  protected abstract void loadContract(String address);
+
 
   public void addBlockchain(BigInteger bcId, String cbcContractAddress) throws Exception {
     BigInteger cbcContract = new BigInteger(cbcContractAddress.substring(2), 16);

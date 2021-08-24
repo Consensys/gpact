@@ -56,6 +56,10 @@ public class CrossBlockchainControlSignedEvents extends AbstractCbc {
     LOG.debug(" Cross Blockchain Contract Contract: {}", this.crossBlockchainControlContract.getContractAddress());
   }
 
+  public void loadContract(String address) {
+    this.crossBlockchainControlContract =
+            CbcSignedEvent.load(address, this.web3j, this.tm, this.gasProvider);
+  }
 
 
   public byte[] start(BigInteger transactionId, BigInteger timeout, byte[] callGraph) throws Exception {

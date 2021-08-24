@@ -342,7 +342,6 @@ abstract contract CrossBlockchainControl is CbcLockableStorageInterface, Receipt
         (uint256 parentBlockchainId, address parentContract, /* bytes memory parentFunctionCall */ ) =
             extractTargetFromCallGraph(activeCallGraph, parentCallPath);
         return (parentBlockchainId, parentContract);
-
     }
 
 

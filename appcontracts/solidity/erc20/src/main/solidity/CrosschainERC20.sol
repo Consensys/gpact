@@ -57,7 +57,7 @@ contract CrosschainERC20 is LockableERC20 {
         crosschainTransferInternal(blockchainId, spender, recipient, amount);
     }
 
-    function crosschainTransferFrom(uint256 blockchainId, address sender, address recipient, uint256 amount) external {
+    function crosschainTransferFrom(address sender, uint256 recipientBlockchainId, address recipient, uint256 amount) external {
         // Determine the spender. If the account that called this function
         // is the Cross-Blockchain Control Contract, then the spender is the EOA. Otherwise,
         // the transfer is being instigated by another contract, probably a wallet.
@@ -66,7 +66,7 @@ contract CrosschainERC20 is LockableERC20 {
             spender = tx.origin;
         }
 
-        crosschainTransferInternal(blockchainId, sender, recipient, amount);
+        crosschainTransferInternal(recipientBlockchainId, sender, recipient, amount);
 
         uint256 currentAllowance = allowanceMin(sender, spender);
         require(currentAllowance >= amount, "ERC20: transfer amount exceeds allowance");
@@ -81,8 +81,6 @@ contract CrosschainERC20 is LockableERC20 {
         // the source blockchain.
         (uint256 sourceBlockchainId, address sourceContract) = cbc.whoCalledMe();
         require(sourceContract == remoteERC20s[sourceBlockchainId], "Source is not correct ERC20");
-
-        // TODO check Root Blockchain and CBC to make sure they are trusted.
 
         mintInternal(recipient, amount);
     }
