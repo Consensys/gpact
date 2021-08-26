@@ -18,4 +18,11 @@ public class CrosschainHotelTrain extends AbstractExampleTest {
     String tempPropsFile = createPropertiesFile(true, true, false);
     HotelTrain.main(new String[]{tempPropsFile});
   }
+
+  @Test
+  public void transferSerialMultiBlockchain() throws Exception {
+    String tempPropsFile = createPropertiesFile(false, true, false);
+    HotelTrain.main(new String[]{tempPropsFile});
+  }
+
 }

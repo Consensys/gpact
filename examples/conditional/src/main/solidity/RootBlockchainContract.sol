@@ -14,7 +14,6 @@
  */
 pragma solidity >=0.7.1;
 
-import "../../../../../contracts/solidity/crossblockchaincontrol/src/main/solidity/CrossBlockchainControl.sol";
 import "./OtherBlockchainContractInterface.sol";
 import "../../../../../contracts/solidity/lockablestorage/src/main/solidity/LockableStorage.sol";
 

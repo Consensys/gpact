@@ -43,7 +43,10 @@ abstract contract CbcDecVer {
         for (uint256 i = 0; i < numEvents; i++) {
             uint256 bcId = _blockchainIds[i];
             bytes memory signedEventInfo = _signedEventInfo[i];
-            bytes memory signature = _signatures[i];
+            bytes memory signature;
+            if (_signatures.length != 0) {
+                signature = _signatures[i];
+            }
 
             CrosschainVerifier verifier = verifiers[bcId];
             require(address(verifier) != address(0), "No registered verifier for blockchain");
