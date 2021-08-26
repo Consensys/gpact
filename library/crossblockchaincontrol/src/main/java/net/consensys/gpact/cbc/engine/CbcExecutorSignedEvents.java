@@ -59,7 +59,7 @@ public class CbcExecutorSignedEvents extends AbstractCbcExecutor {
 
   protected void segment(BigInteger blockchainId, BigInteger callerBlockchainId, List<BigInteger> callPath) throws Exception {
     if (callPath.size() == 0) {
-      throw new Exception("Invalid call path length for segment: " + callPath.size());
+      throw new Exception("Invalid call path length for segment: " + 0);
     }
 
     BigInteger mapKey = callPathToMapKey(callPath);

@@ -32,10 +32,12 @@ import static net.consensys.gpact.common.FormatConversion.addressStringToBytes;
  * Information to allow a transaction receipt to be verified within a Solidity contract.
  */
 public class SignedEvent {
+  private BigInteger bcId;
   private byte[] encodedEventInformation;
   private byte[] encodedSignatures;
 
   public SignedEvent(AnIdentity[] signers, BigInteger blockchainId, String cbcContract, byte[] eventSignature, byte[] eventData) {
+    this.bcId = blockchainId;
     this.encodedEventInformation = RlpEncoder.encode(encodeEvent(blockchainId, cbcContract, eventSignature, eventData));
 
     // Add the transaction receipt root for the blockchain
@@ -61,6 +63,10 @@ public class SignedEvent {
 
   public byte[] getEncodedSignatures() {
     return encodedSignatures;
+  }
+
+  public BigInteger getBcId() {
+    return this.bcId;
   }
 
   private static RlpList encodeEvent(BigInteger blockchainId, String cbcContractAddress, byte[] eventSignature, byte[] eventData) {

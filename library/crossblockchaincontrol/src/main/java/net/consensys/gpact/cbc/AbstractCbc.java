@@ -14,7 +14,6 @@
  */
 package net.consensys.gpact.cbc;
 
-import net.consensys.gpact.cbc.soliditywrappers.CbcSignedEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
@@ -72,7 +71,11 @@ public abstract class AbstractCbc extends AbstractBlockchain {
           bcId.toString(16), cbcContractAddress, this.blockchainId.toString(16));
       throw new Exception("Transaction to add trusted blockchain and CBC contract failed");
     }
+
+    addVerifier(bcId);
   }
+
+  protected abstract void addVerifier(BigInteger bcId) throws Exception;
 
 
   public void registerSignerThisBlockchain(AnIdentity signer) throws Exception {

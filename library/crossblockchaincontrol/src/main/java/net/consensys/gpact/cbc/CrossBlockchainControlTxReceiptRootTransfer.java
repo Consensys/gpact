@@ -14,7 +14,6 @@
  */
 package net.consensys.gpact.cbc;
 
-import net.consensys.gpact.cbc.soliditywrappers.CbcSignedEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
@@ -83,6 +82,10 @@ public class CrossBlockchainControlTxReceiptRootTransfer extends AbstractCbc {
   public void loadContract(String address) {
     this.crossBlockchainControlContract =
             CbcTxRootTransfer.load(address, this.web3j, this.tm, this.gasProvider);
+  }
+
+  protected void addVerifier(BigInteger bcId) {
+    // TODO
   }
 
 
