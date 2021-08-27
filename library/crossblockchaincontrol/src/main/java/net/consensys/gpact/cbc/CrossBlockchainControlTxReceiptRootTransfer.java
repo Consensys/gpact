@@ -14,7 +14,9 @@
  */
 package net.consensys.gpact.cbc;
 
+import net.consensys.gpact.cbc.soliditywrappers.CrosschainVerifierSign;
 import net.consensys.gpact.cbc.soliditywrappers.CrosschainVerifierTxRoot;
+import net.consensys.gpact.common.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
@@ -35,10 +37,6 @@ import org.web3j.protocol.core.methods.response.Log;
 import org.web3j.protocol.core.methods.response.Transaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.exceptions.TransactionException;
-import net.consensys.gpact.common.AnIdentity;
-import net.consensys.gpact.common.RevertReason;
-import net.consensys.gpact.common.StatsHolder;
-import net.consensys.gpact.common.Tuple;
 import net.consensys.gpact.cbc.soliditywrappers.CrosschainControl;
 import net.consensys.gpact.soliditywrappers.TxReceiptsRootStorage;
 import net.consensys.gpact.trie.MerklePatriciaTrie;
@@ -61,7 +59,6 @@ public class CrossBlockchainControlTxReceiptRootTransfer extends AbstractCbc {
   private boolean rootEventSuccess;
 
   private TxReceiptsRootStorage txReceiptsRootStorageContract;
-  private CrosschainControl crossBlockchainControlContract;
   private CrosschainVerifierTxRoot verifier;
 
   public CrossBlockchainControlTxReceiptRootTransfer(Credentials credentials, String bcId, String uri, String gasPriceStrategy, String blockPeriod) throws IOException {
@@ -74,20 +71,26 @@ public class CrossBlockchainControlTxReceiptRootTransfer extends AbstractCbc {
     this.txReceiptsRootStorageContract =
         TxReceiptsRootStorage.deploy(this.web3j, this.tm, this.gasProvider,
             this.registrarContract.getContractAddress()).send();
-    this.crossBlockchainControlContract =
-            CrosschainControl.deploy(this.web3j, this.tm, this.gasProvider,
-            this.blockchainId).send();
     this.verifier =
             CrosschainVerifierTxRoot.deploy(this.web3j, this.tm, this.gasProvider, this.registrarContract.getContractAddress(), this.txReceiptsRootStorageContract.getContractAddress()).send();
 
     LOG.debug(" TxReceiptRoot Contract: {}", this.txReceiptsRootStorageContract.getContractAddress());
-    LOG.debug(" Cross Blockchain Contract Contract: {}", this.crossBlockchainControlContract.getContractAddress());
   }
 
-  public void loadContract(String address) {
-    this.crossBlockchainControlContract =
-            CrosschainControl.load(address, this.web3j, this.tm, this.gasProvider);
+  public List<String> getContractAddresses() {
+    List<String> addresses = super.getContractAddresses();
+    addresses.add(this.txReceiptsRootStorageContract.getContractAddress());
+    addresses.add(this.verifier.getContractAddress());
+    return addresses;
   }
+
+  public void loadContracts(List<String> addresses) {
+    super.loadContracts(addresses);
+    this.txReceiptsRootStorageContract = TxReceiptsRootStorage.load(addresses.get(2), this.web3j, this.tm, this.gasProvider);
+    this.verifier = CrosschainVerifierTxRoot.load(addresses.get(3), this.web3j, this.tm, this.gasProvider);
+  }
+
+
 
   protected void addVerifier(BigInteger bcId) throws Exception {
     this.crossBlockchainControlContract.addVerifier(bcId, this.verifier.getContractAddress()).send();
@@ -118,11 +121,6 @@ public class CrossBlockchainControlTxReceiptRootTransfer extends AbstractCbc {
     for (TxReceiptRootTransferEventProof segProof: segProofs) {
       allProofs.add(segProof.getEncodedProof());
       bcIds.add(segProof.getBlockchainId());
-    }
-
-
-    for (TxReceiptRootTransferEventProof proofInfo: segProofs) {
-      allProofs.add(proofInfo.getEncodedProof());
     }
 
     TransactionReceipt txR;

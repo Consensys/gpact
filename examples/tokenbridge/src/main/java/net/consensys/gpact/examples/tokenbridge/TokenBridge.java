@@ -62,7 +62,7 @@ public class TokenBridge {
     final int CHAIN_B_TOKEN_SUPPLY = 2000;
 
     // Set-up classes to manage blockchains.
-    Credentials erc20OwnerCreds = propsLoader.getCredentials();
+    Credentials erc20OwnerCreds = CredentialsCreator.createCredentials();
     SourceAndDestinationBlockchain chainA = new SourceAndDestinationBlockchain(
             "ChainA", BigInteger.valueOf(CHAIN_A_TOKEN_SUPPLY),
             erc20OwnerCreds, root.bcId, root.uri, root.gasPriceStrategy, root.period);
@@ -84,31 +84,31 @@ public class TokenBridge {
       // Create some users and give them some tokens.
     Erc20User user1 = new Erc20User(
             "User1",
-            root.bcId, root.uri, root.gasPriceStrategy, root.period, chainA.getErc20ContractAddress(),
-            bc2.bcId, bc2.uri, bc2.gasPriceStrategy, bc2.period, chainB.getErc20ContractAddress());
+            root.bcId, chainA.getErc20ContractAddress(),
+            bc2.bcId, chainB.getErc20ContractAddress());
     Erc20User user2 = new Erc20User(
             "User2",
-            root.bcId, root.uri, root.gasPriceStrategy, root.period, chainA.getErc20ContractAddress(),
-            bc2.bcId, bc2.uri, bc2.gasPriceStrategy, bc2.period, chainB.getErc20ContractAddress());
+            root.bcId, chainA.getErc20ContractAddress(),
+            bc2.bcId, chainB.getErc20ContractAddress());
     Erc20User user3 = new Erc20User(
             "User3",
-            root.bcId, root.uri, root.gasPriceStrategy, root.period, chainA.getErc20ContractAddress(),
-            bc2.bcId, bc2.uri, bc2.gasPriceStrategy, bc2.period, chainB.getErc20ContractAddress());
+            root.bcId, chainA.getErc20ContractAddress(),
+            bc2.bcId, chainB.getErc20ContractAddress());
 
     user1.createCbcManager(
             consensusMethodology,
-            root, cbcManager.getCbcAddress(chainABcId),
-            bc2, cbcManager.getCbcAddress(chainBBcId),
+            root, cbcManager.getInfrastructureAddresses(chainABcId),
+            bc2, cbcManager.getInfrastructureAddresses(chainBBcId),
             globalSigner);
     user2.createCbcManager(
             consensusMethodology,
-            root, cbcManager.getCbcAddress(chainABcId),
-            bc2, cbcManager.getCbcAddress(chainBBcId),
+            root, cbcManager.getInfrastructureAddresses(chainABcId),
+            bc2, cbcManager.getInfrastructureAddresses(chainBBcId),
             globalSigner);
     user3.createCbcManager(
             consensusMethodology,
-            root, cbcManager.getCbcAddress(chainABcId),
-            bc2, cbcManager.getCbcAddress(chainBBcId),
+            root, cbcManager.getInfrastructureAddresses(chainABcId),
+            bc2, cbcManager.getInfrastructureAddresses(chainBBcId),
             globalSigner);
 
 
@@ -130,19 +130,10 @@ public class TokenBridge {
 
       chainA.showErc20Balances(users);
       chainB.showErc20Balances(users);
-
-//      try {
-//        throw new Exception("Exception now thrown as expected");
-//      } catch (Exception ex) {
-//        LOG.info("Exception thrown as expected: not enough train seats");
-//      }
     }
 
     chainA.shutdown();
     chainB.shutdown();
-    user1.shutdown();
-    user2.shutdown();
-    user3.shutdown();
 
     StatsHolder.log("End");
     StatsHolder.print();

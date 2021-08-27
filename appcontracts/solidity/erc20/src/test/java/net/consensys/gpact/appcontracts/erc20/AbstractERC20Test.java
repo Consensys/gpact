@@ -15,11 +15,14 @@
 package net.consensys.gpact.appcontracts.erc20;
 
 import net.consensys.gpact.appcontracts.erc20.soliditywrappers.LockableERC20PresetFixedSupply;
+import net.consensys.gpact.common.FastTxManager;
+import net.consensys.gpact.common.TxManagerCache;
 import net.consensys.gpact.common.test.AbstractWeb3Test;
 import net.consensys.gpact.appcontracts.erc20.soliditywrappers.MockCbcForERC20Test;
 import org.web3j.crypto.Credentials;
-import org.web3j.tx.RawTransactionManager;
 import org.web3j.tx.TransactionManager;
+import org.web3j.tx.response.PollingTransactionReceiptProcessor;
+import org.web3j.tx.response.TransactionReceiptProcessor;
 
 import java.math.BigInteger;
 
@@ -56,7 +59,8 @@ public class AbstractERC20Test extends AbstractWeb3Test {
   }
 
   protected void loadOtherCredentialsContract() {
-    TransactionManager otherTm = new RawTransactionManager(this.web3j, this.otherCredentials, BLOCKCHAIN_ID.longValue(), RETRY, POLLING_INTERVAL);
+    TransactionReceiptProcessor txrProcessor = new PollingTransactionReceiptProcessor(this.web3j, POLLING_INTERVAL, RETRY);
+    TransactionManager otherTm = TxManagerCache.getOrCreate(this.web3j, this.otherCredentials, BLOCKCHAIN_ID.longValue(), txrProcessor);
     this.otherLockableERC20 = LockableERC20PresetFixedSupply.load(
             this.lockableERC20.getContractAddress(),
             this.web3j, otherTm, this.freeGasProvider);

@@ -14,13 +14,13 @@
  */
 package net.consensys.gpact.cbc;
 
+import net.consensys.gpact.common.FastTxManager;
+import net.consensys.gpact.common.TxManagerCache;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.http.HttpService;
-import org.web3j.tx.FastRawTransactionManager;
-import org.web3j.tx.RawTransactionManager;
 import org.web3j.tx.TransactionManager;
 import net.consensys.gpact.common.DynamicGasProvider;
 import org.web3j.tx.response.PollingTransactionReceiptProcessor;
@@ -47,7 +47,7 @@ public abstract class AbstractBlockchain {
   public DynamicGasProvider gasProvider;
 
   public Web3j web3j;
-  protected TransactionManager tm;
+  protected FastTxManager tm;
 
 
   protected AbstractBlockchain(Credentials credentials, String bcId, String uri, String gasPriceStrategy, String blockPeriod) throws IOException {
@@ -56,11 +56,9 @@ public abstract class AbstractBlockchain {
     this.pollingInterval = Integer.parseInt(blockPeriod);
     this.credentials = credentials;
     this.web3j = Web3j.build(new HttpService(this.uri), this.pollingInterval, new ScheduledThreadPoolExecutor(5));
-    this.tm = new RawTransactionManager(this.web3j, this.credentials, this.blockchainId.longValue(), RETRY, this.pollingInterval);
-//    TransactionReceiptProcessor sourceTxrProcessor = new PollingTransactionReceiptProcessor(this.web3j, this.pollingInterval, RETRY);
-//    this.tm = new FastRawTransactionManager(this.web3j, this.credentials, this.blockchainId.longValue(), sourceTxrProcessor);
 
-
+    TransactionReceiptProcessor txrProcessor = new PollingTransactionReceiptProcessor(this.web3j, this.pollingInterval, RETRY);
+    this.tm = TxManagerCache.getOrCreate(this.web3j, this.credentials, this.blockchainId.longValue(), txrProcessor);
     this.gasProvider = new DynamicGasProvider(this.web3j, uri, gasPriceStrategy);
   }
 

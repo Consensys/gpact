@@ -53,7 +53,7 @@ public class CbcManager {
     this.blockchains.put(blockchainId, holder);
   }
 
-  public void addBlockchain(Credentials creds, PropertiesLoader.BlockchainInfo bcInfo, String cbcContractAddress) throws Exception {
+  public void addBlockchain(Credentials creds, PropertiesLoader.BlockchainInfo bcInfo, List<String> addresses) throws Exception {
     BigInteger blockchainId = new BigInteger(bcInfo.bcId, 16);
     if (this.blockchains.containsKey(blockchainId)) {
       return;
@@ -75,8 +75,8 @@ public class CbcManager {
         throw new RuntimeException("Not supported yet: " + this.consensusMethodology);
     }
 
-    holder.cbc.loadContract(cbcContractAddress);
-    holder.cbcContractAddress = cbcContractAddress;
+    holder.cbc.loadContracts(addresses);
+    holder.cbcContractAddress = addresses.get(0);
 
     this.blockchains.put(blockchainId, holder);
   }
@@ -141,6 +141,14 @@ public class CbcManager {
     }
     return this.blockchains.get(bcId).cbcContractAddress;
   }
+
+  public List<String> getInfrastructureAddresses(BigInteger bcId) {
+    if (!this.blockchains.containsKey(bcId)) {
+      throw new RuntimeException("Unknown blockchain: 0x" + bcId.toString(16));
+    }
+    return this.blockchains.get(bcId).cbc.getContractAddresses();
+  }
+
 
   public AnIdentity[] getSigners(BigInteger bcId) {
     check(bcId);

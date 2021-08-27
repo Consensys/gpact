@@ -11,9 +11,10 @@ import org.web3j.protocol.Web3j;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.rlp.RlpList;
 import org.web3j.rlp.RlpType;
-import org.web3j.tx.RawTransactionManager;
 import org.web3j.tx.TransactionManager;
 import org.web3j.tx.gas.ContractGasProvider;
+import org.web3j.tx.response.PollingTransactionReceiptProcessor;
+import org.web3j.tx.response.TransactionReceiptProcessor;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -33,55 +34,38 @@ public class Erc20User {
 
     protected Credentials creds;
 
-    private BigInteger bcIdA;
-    private Web3j web3jA;
-    private CrosschainERC20 crosschainERC20A;
+    private final BigInteger bcIdA;
+    private final BigInteger bcIdB;
 
-    private BigInteger bcIdB;
-    private Web3j web3jB;
-    private CrosschainERC20 crosschainERC20B;
+    private final String addressOfCrosschainERCA;
+    private final String addressOfCrosschainERCB;
 
     private CbcManager cbcManager;
 
     protected Erc20User(
             String name,
-            String bcIdStrA, String uriA, String gasPriceStrategyA, String blockPeriodA, String erc20AddressA,
-            String bcIdStrB, String uriB, String gasPriceStrategyB, String blockPeriodB, String erc20AddressB) throws Exception {
+            String bcIdStrA, String erc20AddressA,
+            String bcIdStrB, String erc20AddressB) throws Exception {
 
         this.name = name;
         this.creds = CredentialsCreator.createCredentials();
+        this.addressOfCrosschainERCA = erc20AddressA;
+        this.addressOfCrosschainERCB = erc20AddressB;
 
         this.bcIdA = new BigInteger(bcIdStrA, 16);
-        int pollingIntervalA = Integer.parseInt(blockPeriodA);
-        this.web3jA = Web3j.build(new HttpService(uriA), pollingIntervalA, new ScheduledThreadPoolExecutor(5));
-        TransactionManager tmA = new RawTransactionManager(this.web3jA, this.creds, this.bcIdA.longValue(), RETRY, pollingIntervalA);
-        ContractGasProvider gasProviderA = new DynamicGasProvider(this.web3jA, uriA, gasPriceStrategyA);
-        this.crosschainERC20A = CrosschainERC20.load(erc20AddressA, this.web3jA, tmA, gasProviderA);
-
         this.bcIdB = new BigInteger(bcIdStrB, 16);
-        int pollingIntervalB = Integer.parseInt(blockPeriodB);
-        this.web3jB = Web3j.build(new HttpService(uriB), pollingIntervalB, new ScheduledThreadPoolExecutor(5));
-        TransactionManager tmB = new RawTransactionManager(this.web3jB, this.creds, this.bcIdB.longValue(), RETRY, pollingIntervalB);
-        ContractGasProvider gasProviderB = new DynamicGasProvider(this.web3jB, uriB, gasPriceStrategyB);
-        this.crosschainERC20B = CrosschainERC20.load(erc20AddressB, this.web3jB, tmB, gasProviderB);
-    }
-
-    public void shutdown() {
-        this.web3jA.shutdown();
-        this.web3jB.shutdown();
     }
 
     public void createCbcManager(
             CrossBlockchainConsensusType consensusMethodology,
-            PropertiesLoader.BlockchainInfo bcInfoA, String cbcContractAddressOnBcA,
-            PropertiesLoader.BlockchainInfo bcInfoB, String cbcContractAddressOnBcB,
+            PropertiesLoader.BlockchainInfo bcInfoA, List<String> infrastructureContractAddressOnBcA,
+            PropertiesLoader.BlockchainInfo bcInfoB, List<String> infrastructureContractAddressOnBcB,
             AnIdentity globalSigner) throws Exception {
         this.cbcManager = new CbcManager(consensusMethodology);
-        this.cbcManager.addBlockchain(this.creds, bcInfoA, cbcContractAddressOnBcA);
-        this.cbcManager.addBlockchain(this.creds, bcInfoB, cbcContractAddressOnBcB);
+        this.cbcManager.addBlockchain(this.creds, bcInfoA, infrastructureContractAddressOnBcA);
+        this.cbcManager.addBlockchain(this.creds, bcInfoB, infrastructureContractAddressOnBcB);
         this.cbcManager.addSignerOnAllBlockchains(globalSigner);
     }
-
 
     public String getName() {
         return this.name;
@@ -99,12 +83,13 @@ public class Erc20User {
         BigInteger amount = BigInteger.valueOf(amountInt);
         BigInteger destinationBlockchainId = fromAToB ? this.bcIdB : this.bcIdA;
         BigInteger sourceBlockchainId = fromAToB ? this.bcIdA : this.bcIdB;
-        String destinationContractAddress = fromAToB ? this.crosschainERC20B.getContractAddress() : this.crosschainERC20A.getContractAddress();
-        String sourceContractAddress = fromAToB ? this.crosschainERC20A.getContractAddress() : this.crosschainERC20B.getContractAddress();
+        String destinationContractAddress = fromAToB ? this.addressOfCrosschainERCB : this.addressOfCrosschainERCA;
+        String sourceContractAddress = fromAToB ? this.addressOfCrosschainERCA : this.addressOfCrosschainERCB;
 
         // Build the call execution tree.
-        String rlpRoot = this.crosschainERC20A.getRLP_crosschainTransfer(destinationBlockchainId, this.creds.getAddress(), amount);
-        String rlpSegment = this.crosschainERC20A.getRLP_crosschainReceiver(this.creds.getAddress(), amount);
+        CrosschainERC20 dummy = CrosschainERC20.load(null, null, this.creds, null);
+        String rlpRoot = dummy.getRLP_crosschainTransfer(destinationBlockchainId, this.creds.getAddress(), amount);
+        String rlpSegment = dummy.getRLP_crosschainReceiver(this.creds.getAddress(), amount);
 
         RlpList segment = createLeafFunctionCall(destinationBlockchainId, destinationContractAddress, rlpSegment);
         List<RlpType> rootCalls = new ArrayList<>();

@@ -14,6 +14,8 @@
  */
 package net.consensys.gpact.test.blockheader;
 
+import net.consensys.gpact.common.FastTxManager;
+import net.consensys.gpact.common.TxManagerCache;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
@@ -33,7 +35,6 @@ import org.web3j.protocol.core.methods.response.Log;
 import org.web3j.protocol.core.methods.response.Transaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.exceptions.TransactionException;
-import org.web3j.tx.RawTransactionManager;
 import org.web3j.tx.exceptions.ContractCallException;
 import net.consensys.gpact.common.RevertReason;
 import net.consensys.gpact.registrar.RegistrarVoteTypes;
@@ -45,6 +46,8 @@ import net.consensys.gpact.utils.crypto.KeyPairGen;
 import net.consensys.gpact.trie.MerklePatriciaTrie;
 import net.consensys.gpact.trie.Proof;
 import net.consensys.gpact.trie.SimpleMerklePatriciaTrie;
+import org.web3j.tx.response.PollingTransactionReceiptProcessor;
+import org.web3j.tx.response.TransactionReceiptProcessor;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -175,13 +178,14 @@ public class TxRootAddTest extends AbstractRegistrarTest {
     // Have a separate EOA (and hence credentials) for each signer. In this way, the nonce
     // management can be done by web3j automatically.
     Credentials[] creds = new Credentials[numTransactionsPerBlock];
-    RawTransactionManager[] tms = new RawTransactionManager[numTransactionsPerBlock];
+    FastTxManager[] tms = new FastTxManager[numTransactionsPerBlock];
     TestEvents[] testContracts = new TestEvents[numTransactionsPerBlock];
     for (int i = 0; i < numTransactionsPerBlock; i++) {
       String privateKey0 = new KeyPairGen().generateKeyPairGetPrivateKey();
       creds[i] = Credentials.create(privateKey0);
 
-      tms[i] = new RawTransactionManager(this.web3j, creds[i], BLOCKCHAIN_ID.longValue(), RETRY, POLLING_INTERVAL);
+      TransactionReceiptProcessor txrProcessor = new PollingTransactionReceiptProcessor(this.web3j, POLLING_INTERVAL, RETRY);
+      tms[i] = TxManagerCache.getOrCreate(this.web3j, creds[i], BLOCKCHAIN_ID.longValue(), txrProcessor);
       testContracts[i] = TestEvents.load(testContractAddress, this.web3j, tms[i], this.freeGasProvider);
     }
 

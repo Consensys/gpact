@@ -14,6 +14,7 @@
  */
 package net.consensys.gpact.cbc;
 
+import net.consensys.gpact.cbc.soliditywrappers.CrosschainControl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
@@ -31,6 +32,7 @@ import java.math.BigInteger;
 import java.security.DrbgParameters;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.List;
 
 import static java.security.DrbgParameters.Capability.RESEED_ONLY;
@@ -47,6 +49,8 @@ public abstract class AbstractCbc extends AbstractBlockchain {
 
 
   Registrar registrarContract;
+  protected CrosschainControl crossBlockchainControlContract;
+
 
 
   protected AbstractCbc(Credentials credentials, String bcId, String uri, String gasPriceStrategy, String blockPeriod) throws IOException {
@@ -55,10 +59,27 @@ public abstract class AbstractCbc extends AbstractBlockchain {
 
   protected void deployContracts() throws Exception {
     this.registrarContract = Registrar.deploy(this.web3j, this.tm, this.gasProvider).send();
+    this.crossBlockchainControlContract =
+            CrosschainControl.deploy(this.web3j, this.tm, this.gasProvider,
+                    this.blockchainId).send();
     LOG.debug(" Registrar Contract: {}", this.registrarContract.getContractAddress());
+    LOG.debug(" Cross Blockchain Contract Contract: {}", this.crossBlockchainControlContract.getContractAddress());
   }
 
-  protected abstract void loadContract(String address);
+  public List<String> getContractAddresses() {
+    List<String> addresses = new ArrayList<>();
+    addresses.add(this.crossBlockchainControlContract.getContractAddress());
+    addresses.add(this.registrarContract.getContractAddress());
+    return addresses;
+  }
+
+
+  public void loadContracts(List<String> addresses) {
+    this.crossBlockchainControlContract =
+            CrosschainControl.load(addresses.get(0), this.web3j, this.tm, this.gasProvider);
+    this.registrarContract =
+            Registrar.load(addresses.get(1), this.web3j, this.tm, this.gasProvider);
+  }
 
 
   public void addBlockchain(BigInteger bcId, String cbcContractAddress) throws Exception {

@@ -43,7 +43,6 @@ public class CrossBlockchainControlSignedEvents extends AbstractCbc {
   private long crossBlockchainTransactionTimeout;
   private boolean rootEventSuccess;
 
-  private CrosschainControl crossBlockchainControlContract;
   private CrosschainVerifierSign verifier;
 
   public CrossBlockchainControlSignedEvents(Credentials credentials, String bcId, String uri, String gasPriceStrategy, String blockPeriod) throws IOException {
@@ -53,16 +52,19 @@ public class CrossBlockchainControlSignedEvents extends AbstractCbc {
 
   public void deployContracts() throws Exception {
     super.deployContracts();
-    this.crossBlockchainControlContract =
-            CrosschainControl.deploy(this.web3j, this.tm, this.gasProvider, this.blockchainId).send();
     this.verifier =
             CrosschainVerifierSign.deploy(this.web3j, this.tm, this.gasProvider, this.registrarContract.getContractAddress()).send();
-    LOG.debug(" Cross Blockchain Contract Contract: {}", this.crossBlockchainControlContract.getContractAddress());
   }
 
-  public void loadContract(String address) {
-    this.crossBlockchainControlContract =
-            CrosschainControl.load(address, this.web3j, this.tm, this.gasProvider);
+  public List<String> getContractAddresses() {
+    List<String> addresses = super.getContractAddresses();
+    addresses.add(this.verifier.getContractAddress());
+    return addresses;
+  }
+
+  public void loadContracts(List<String> addresses) {
+    super.loadContracts(addresses);
+    this.verifier = CrosschainVerifierSign.load(addresses.get(2), this.web3j, this.tm, this.gasProvider);
   }
 
   protected void addVerifier(BigInteger bcId) throws Exception {

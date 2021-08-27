@@ -15,8 +15,10 @@
 package net.consensys.gpact.examples.singlebc.hoteltrain;
 
 import net.consensys.gpact.cbc.AbstractBlockchain;
+import net.consensys.gpact.common.FastTxManager;
 import net.consensys.gpact.common.RevertReason;
 import net.consensys.gpact.common.StatsHolder;
+import net.consensys.gpact.common.TxManagerCache;
 import net.consensys.gpact.examples.singlebc.hoteltrain.soliditywrappers.TravelAgency;
 import net.consensys.gpact.openzeppelin.soliditywrappers.ERC20PresetFixedSupply;
 import org.apache.logging.log4j.LogManager;
@@ -24,7 +26,8 @@ import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.exceptions.TransactionException;
-import org.web3j.tx.RawTransactionManager;
+import org.web3j.tx.response.PollingTransactionReceiptProcessor;
+import org.web3j.tx.response.TransactionReceiptProcessor;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -70,7 +73,8 @@ public class EntityTravelAgency extends AbstractBlockchain {
     }
 
     public void grantAllowance(EntityBase entity, int amount) throws Exception {
-        RawTransactionManager atm = new RawTransactionManager(entity.web3j, this.credentials, entity.getBlockchainId().longValue(), RETRY, this.pollingInterval);
+        TransactionReceiptProcessor txrProcessor = new PollingTransactionReceiptProcessor(entity.web3j, this.pollingInterval, RETRY);
+        FastTxManager atm = TxManagerCache.getOrCreate(entity.web3j, this.credentials, entity.getBlockchainId().longValue(), txrProcessor);
         ERC20PresetFixedSupply erc20 = ERC20PresetFixedSupply.load(entity.getErc20ContractAddress(), entity.web3j, atm, entity.gasProvider);
         erc20.increaseAllowance(entity.getHotelContractAddress(), BigInteger.valueOf(amount)).send();
         LOG.info(" Increased allowance of {} contract for account {} by {}", entity.entity, this.credentials.getAddress(), amount);

@@ -84,6 +84,14 @@ public abstract class AbstractCbcExecutor {
   }
 
 
+  /**
+   * Return the transaction receipt for part of the call path. This allows applications
+   * to see what events have been emitted across the call execution tree.
+   *
+   * @param callPath Part of the call execution tree to get the transaction receipt for.
+   * @return the transaction receipt that was returned with callPath part of the
+   *  call execution tree was executed.
+   */
   public TransactionReceipt getTransationReceipt(List<BigInteger> callPath) {
     return this.transactionReceipts.get(callPathToMapKey(callPath));
   }

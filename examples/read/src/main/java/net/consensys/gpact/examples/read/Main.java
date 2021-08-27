@@ -14,6 +14,7 @@
  */
 package net.consensys.gpact.examples.read;
 
+import net.consensys.gpact.common.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
@@ -27,11 +28,6 @@ import net.consensys.gpact.cbc.engine.CbcExecutorTxReceiptRootTransfer;
 import net.consensys.gpact.cbc.engine.ExecutionEngine;
 import net.consensys.gpact.cbc.engine.ParallelExecutionEngine;
 import net.consensys.gpact.cbc.engine.SerialExecutionEngine;
-import net.consensys.gpact.common.AnIdentity;
-import net.consensys.gpact.common.CrossBlockchainConsensusType;
-import net.consensys.gpact.common.ExecutionEngineType;
-import net.consensys.gpact.common.PropertiesLoader;
-import net.consensys.gpact.common.StatsHolder;
 import net.consensys.gpact.examples.read.sim.SimContractA;
 import net.consensys.gpact.examples.read.sim.SimContractB;
 
@@ -65,15 +61,22 @@ public class Main {
     ExecutionEngineType engineType = propsLoader.getExecutionEnngine();
     StatsHolder.log(engineType.name());
 
-
-    Bc1ContractA bc1ContractABlockchain = new Bc1ContractA(creds, root.bcId, root.uri, root.gasPriceStrategy, root.period);
-    Bc2ContractB bc2ContractBBlockchain = new Bc2ContractB(creds, bc2.bcId, bc2.uri, bc2.gasPriceStrategy, bc2.period);
-
+    // Set-up GPACT contracts: Deploy Crosschain Control and Registrar contracts on
+    // each blockchain.
     CbcManager cbcManager = new CbcManager(consensusMethodology);
     cbcManager.addBlockchainAndDeployContracts(creds, root);
     cbcManager.addBlockchainAndDeployContracts(creds, bc2);
-
+    // Have each Crosschain Control contract trust the Crosschain Control
+    // contracts on the other blockchains.
     cbcManager.setupCrosschainTrust();
+    // To keep the example simple, just have one signer for all blockchains.
+    AnIdentity globalSigner = new AnIdentity();
+    cbcManager.registerSignerOnAllBlockchains(globalSigner);
+
+    // Set-up classes to manage blockchains.
+    Credentials appCreds = CredentialsCreator.createCredentials();
+    Bc1ContractA bc1ContractABlockchain = new Bc1ContractA(appCreds, root.bcId, root.uri, root.gasPriceStrategy, root.period);
+    Bc2ContractB bc2ContractBBlockchain = new Bc2ContractB(appCreds, bc2.bcId, bc2.uri, bc2.gasPriceStrategy, bc2.period);
 
     BigInteger val = BigInteger.valueOf(7);
 
@@ -86,11 +89,6 @@ public class Main {
     bc1ContractABlockchain.deployContracts(cbcManager.getCbcAddress(rootBcId), bc2BcId, contractBContractAddress);
     String contractAContractAddress = bc1ContractABlockchain.contractA.getContractAddress();
 
-    // To make the example simple, just have one signer, and have the same signer for all blockchains.
-    // Note that signers only need to be registered against blockchains that they will consume
-    // events from.
-    AnIdentity signer = new AnIdentity();
-    cbcManager.registerSignerOnAllBlockchains(signer);
 
     // Create simulators
     // Note that no simulation is needed, as there are no parameter values.

@@ -61,13 +61,14 @@ public class HotelTrain {
         // contracts on the other blockchains.
         cbcManager.setupCrosschainTrust();
         // To keep the example simple, just have one signer for all blockchains.
-        cbcManager.registerSignerOnAllBlockchains(new AnIdentity());
+        AnIdentity globalSigner = new AnIdentity();
+        cbcManager.registerSignerOnAllBlockchains(globalSigner);
 
 
         // Set-up classes to manage blockchains.
         EntityHotel hotel = new EntityHotel(bc2.bcId, bc2.uri, bc2.gasPriceStrategy, bc2.period);
         EntityTrain train = new EntityTrain(bc3.bcId, bc3.uri, bc3.gasPriceStrategy, bc3.period);
-        EntityTravelAgency travelAgency = new EntityTravelAgency(creds, root.bcId, root.uri, root.gasPriceStrategy, root.period);
+        EntityTravelAgency travelAgency = new EntityTravelAgency(root.bcId, root.uri, root.gasPriceStrategy, root.period);
 
         // Deploy application contracts.
         BigInteger hotelBcId = hotel.getBlockchainId();
@@ -76,6 +77,14 @@ public class HotelTrain {
         train.deployContracts(cbcManager.getCbcAddress(trainBcId));
         BigInteger travelBcId = travelAgency.getBlockchainId();
         travelAgency.deploy(cbcManager.getCbcAddress(travelBcId), hotel.getBlockchainId(), hotel.getHotelContractAddress(), train.getBlockchainId(), train.getHotelContractAddress());
+
+        travelAgency.createCbcManager(
+                consensusMethodology,
+                root, cbcManager.getInfrastructureAddresses(travelBcId),
+                bc2, cbcManager.getInfrastructureAddresses(hotelBcId),
+                bc3, cbcManager.getInfrastructureAddresses(trainBcId),
+                globalSigner);
+
 
         // Set-up application contracts.
         hotel.addRooms();
@@ -105,7 +114,7 @@ public class HotelTrain {
             LOG.info("Execution: {}  *****************", numExecutions);
             StatsHolder.log("Execution: " + numExecutions + " **************************");
 
-            BigInteger bookingId = travelAgency.book(date, consensusMethodology,engineType, cbcManager);
+            BigInteger bookingId = travelAgency.book(date, consensusMethodology,engineType);
 
             hotel.showBookingInformation(bookingId);
             train.showBookingInformation(bookingId);
@@ -114,15 +123,15 @@ public class HotelTrain {
             hotel.showErc20Allowance(travelAgency.getTravelAgencyAccount(), hotel.getHotelContractAddress());
             train.showErc20Allowance(travelAgency.getTravelAgencyAccount(), train.getHotelContractAddress());
 
-            travelAgency.book(date, consensusMethodology,engineType, cbcManager);
-            travelAgency.book(date, consensusMethodology,engineType, cbcManager);
+            travelAgency.book(date, consensusMethodology,engineType);
+            travelAgency.book(date, consensusMethodology,engineType);
 
             hotel.showErc20Balances(accounts);
             train.showErc20Balances(accounts);
             hotel.showErc20Allowance(travelAgency.getTravelAgencyAccount(), hotel.getHotelContractAddress());
             train.showErc20Allowance(travelAgency.getTravelAgencyAccount(), train.getHotelContractAddress());
             try {
-                travelAgency.book(date, consensusMethodology,engineType, cbcManager);
+                travelAgency.book(date, consensusMethodology,engineType);
                 throw new Exception("Exception now thrown as expected");
             } catch (Exception ex) {
                 LOG.info("Exception thrown as expected: not enough train seats");

@@ -14,7 +14,9 @@
  */
 package net.consensys.gpact.common.test;
 
+import net.consensys.gpact.common.FastTxManager;
 import net.consensys.gpact.common.RevertReason;
+import net.consensys.gpact.common.TxManagerCache;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
@@ -22,12 +24,13 @@ import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.exceptions.TransactionException;
 import org.web3j.protocol.http.HttpService;
-import org.web3j.tx.RawTransactionManager;
 import org.web3j.tx.TransactionManager;
 import org.web3j.tx.gas.ContractGasProvider;
 import org.web3j.tx.gas.DefaultGasProvider;
 import org.web3j.tx.gas.StaticGasProvider;
 import net.consensys.gpact.utils.crypto.KeyPairGen;
+import org.web3j.tx.response.PollingTransactionReceiptProcessor;
+import org.web3j.tx.response.TransactionReceiptProcessor;
 
 import java.math.BigInteger;
 import java.util.Optional;
@@ -59,7 +62,8 @@ public abstract class AbstractWeb3Test {
     this.credentials = Credentials.create(privateKey);
 
     this.web3j = Web3j.build(new HttpService(URI), POLLING_INTERVAL, new ScheduledThreadPoolExecutor(5));
-    this.tm = new RawTransactionManager(this.web3j, this.credentials, BLOCKCHAIN_ID.longValue(), RETRY, POLLING_INTERVAL);
+    TransactionReceiptProcessor txrProcessor = new PollingTransactionReceiptProcessor(this.web3j, POLLING_INTERVAL, RETRY);
+    this.tm = TxManagerCache.getOrCreate(this.web3j, this.credentials, BLOCKCHAIN_ID.longValue(), txrProcessor);
   }
 
 
@@ -69,7 +73,8 @@ public abstract class AbstractWeb3Test {
   }
 
   public TransactionManager createTransactionManager(Credentials creds) {
-    return new RawTransactionManager(this.web3j, creds, BLOCKCHAIN_ID.longValue(), RETRY, POLLING_INTERVAL);
+    TransactionReceiptProcessor txrProcessor = new PollingTransactionReceiptProcessor(this.web3j, POLLING_INTERVAL, RETRY);
+    return TxManagerCache.getOrCreate(this.web3j, creds, BLOCKCHAIN_ID.longValue(), txrProcessor);
   }
 
 

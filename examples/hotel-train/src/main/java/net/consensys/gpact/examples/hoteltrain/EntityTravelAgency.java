@@ -18,19 +18,15 @@ import net.consensys.gpact.appcontracts.erc20.soliditywrappers.LockableERC20Pres
 import net.consensys.gpact.cbc.AbstractBlockchain;
 import net.consensys.gpact.cbc.CbcManager;
 import net.consensys.gpact.cbc.engine.*;
-import net.consensys.gpact.common.CrossBlockchainConsensusType;
-import net.consensys.gpact.common.ExecutionEngineType;
-import net.consensys.gpact.common.RevertReason;
-import net.consensys.gpact.common.StatsHolder;
+import net.consensys.gpact.common.*;
 import net.consensys.gpact.examples.hoteltrain.soliditywrappers.TravelAgency;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
-import org.web3j.protocol.core.methods.response.TransactionReceipt;
-import org.web3j.protocol.exceptions.TransactionException;
 import org.web3j.rlp.RlpList;
 import org.web3j.rlp.RlpType;
-import org.web3j.tx.RawTransactionManager;
+import org.web3j.tx.response.PollingTransactionReceiptProcessor;
+import org.web3j.tx.response.TransactionReceiptProcessor;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -47,7 +43,7 @@ public class EntityTravelAgency extends AbstractBlockchain {
     private static final Logger LOG = LogManager.getLogger(EntityTravelAgency.class);
 
     private BigInteger notRandom = BigInteger.ONE;
-    TravelAgency travelAgency;
+    String travelAgencyAddress;
     private static final String PKEY = "40000000000000000000000000000000000000000000000000000000003";
 
     Simulator sim = new Simulator();
@@ -57,18 +53,21 @@ public class EntityTravelAgency extends AbstractBlockchain {
     BigInteger trainBcId;
     String trainContractAddress;
 
-    public EntityTravelAgency(Credentials creds, String bcId, String uri, String gasPriceStrategy, String blockPeriod) throws IOException {
-        super(creds, bcId, uri, gasPriceStrategy, blockPeriod);
+    CbcManager cbcManager;
+
+    public EntityTravelAgency(String bcId, String uri, String gasPriceStrategy, String blockPeriod) throws IOException {
+        super(Credentials.create(PKEY), bcId, uri, gasPriceStrategy, blockPeriod);
     }
 
     public void deploy(final String cbcAddress,
                        final BigInteger hotelBcId, final String hotelContractAddress,
                        final BigInteger trainBcId, final String trainContractAddress) throws Exception {
         LOG.info(" Deploying travel agency contract");
-        this.travelAgency = TravelAgency.deploy(this.web3j, this.tm, this.gasProvider,
+        TravelAgency travelAgency = TravelAgency.deploy(this.web3j, this.tm, this.gasProvider,
                 hotelBcId, hotelContractAddress, trainBcId, trainContractAddress, cbcAddress).send();
+        this.travelAgencyAddress = travelAgency.getContractAddress();
         LOG.info("  Travel Agency Contract deployed on blockchain {}, at address: {}",
-            this.blockchainId, this.travelAgency.getContractAddress());
+            this.blockchainId, this.travelAgencyAddress);
 
         this.hotelBcId = hotelBcId;
         this.hotelContractAddress = hotelContractAddress;
@@ -76,10 +75,22 @@ public class EntityTravelAgency extends AbstractBlockchain {
         this.trainContractAddress = trainContractAddress;
     }
 
+    public void createCbcManager(
+            CrossBlockchainConsensusType consensusMethodology,
+            PropertiesLoader.BlockchainInfo bcInfoTravel, List<String> infratructureContractAddressOnBcTravel,
+            PropertiesLoader.BlockchainInfo bcInfoHotel, List<String> infrastructureContractAddressOnBcHotel,
+            PropertiesLoader.BlockchainInfo bcInfoTrain, List<String> infrastructureContractAddressOnBcTrain,
+            AnIdentity globalSigner) throws Exception {
+        this.cbcManager = new CbcManager(consensusMethodology);
+        this.cbcManager.addBlockchain(this.credentials, bcInfoTravel, infratructureContractAddressOnBcTravel);
+        this.cbcManager.addBlockchain(this.credentials, bcInfoHotel, infrastructureContractAddressOnBcHotel);
+        this.cbcManager.addBlockchain(this.credentials, bcInfoTrain, infrastructureContractAddressOnBcTrain);
+        this.cbcManager.addSignerOnAllBlockchains(globalSigner);
+    }
+
     public BigInteger book(final int dateInt,
             CrossBlockchainConsensusType consensusMethodology,
-            ExecutionEngineType engineType,
-            CbcManager cbcManager) throws Exception {
+            ExecutionEngineType engineType) throws Exception {
         LOG.info(" Book for date: {} ", dateInt);
         BigInteger date = BigInteger.valueOf(dateInt);
         BigInteger uniqueBookingId = this.notRandom;
@@ -102,7 +113,7 @@ public class EntityTravelAgency extends AbstractBlockchain {
         List<RlpType> rootCalls = new ArrayList<>();
         rootCalls.add(hotelBookRoom);
         rootCalls.add(trainBookRoom);
-        RlpList callTree = createRootFunctionCall(this.blockchainId, this.travelAgency.getContractAddress(), rlpBookHotelAndTrain, rootCalls);
+        RlpList callTree = createRootFunctionCall(this.blockchainId, this.travelAgencyAddress, rlpBookHotelAndTrain, rootCalls);
 
         AbstractCbcExecutor executor;
         switch (consensusMethodology) {
@@ -139,7 +150,8 @@ public class EntityTravelAgency extends AbstractBlockchain {
     }
 
     public void grantAllowance(EntityBase entity, int amount) throws Exception {
-        RawTransactionManager atm = new RawTransactionManager(entity.web3j, this.credentials, entity.getBlockchainId().longValue(), RETRY, this.pollingInterval);
+        TransactionReceiptProcessor txrProcessor = new PollingTransactionReceiptProcessor(entity.web3j, this.pollingInterval, RETRY);
+        FastTxManager atm = TxManagerCache.getOrCreate(entity.web3j, this.credentials, entity.getBlockchainId().longValue(), txrProcessor);
         LockableERC20PresetFixedSupply erc20 = LockableERC20PresetFixedSupply.load(entity.getErc20ContractAddress(), entity.web3j, atm, entity.gasProvider);
         erc20.increaseAllowance(entity.getHotelContractAddress(), BigInteger.valueOf(amount)).send();
         LOG.info(" Increased allowance of {} contract for account {} by {}", entity.entity, this.credentials.getAddress(), amount);
@@ -149,6 +161,6 @@ public class EntityTravelAgency extends AbstractBlockchain {
         return this.credentials.getAddress();
     }
     public String getTravelContractAddress() {
-        return this.travelAgency.getContractAddress();
+        return this.travelAgencyAddress;
     }
 }
