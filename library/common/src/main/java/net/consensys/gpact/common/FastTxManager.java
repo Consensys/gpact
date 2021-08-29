@@ -21,7 +21,7 @@ public class FastTxManager extends RawTransactionManager {
 
     private volatile BigInteger nonce = BigInteger.valueOf(-1L);
 
-    public FastTxManager(Web3j web3j, Credentials credentials, long chainId, TransactionReceiptProcessor transactionReceiptProcessor) {
+    FastTxManager(Web3j web3j, Credentials credentials, long chainId, TransactionReceiptProcessor transactionReceiptProcessor) {
         super(web3j, credentials, chainId, transactionReceiptProcessor);
         this.address = credentials.getAddress();
         this.chainId = chainId;

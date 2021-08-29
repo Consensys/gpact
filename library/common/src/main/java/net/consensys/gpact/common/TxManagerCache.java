@@ -12,12 +12,14 @@ public class TxManagerCache {
     private static Map<String, FastTxManager> txManagers = new HashMap();
 
     public static FastTxManager getOrCreate(Web3j web3j, Credentials credentials, long chainId, TransactionReceiptProcessor transactionReceiptProcessor) {
-        String key = credentials.getAddress()  + chainId;
-        FastTxManager txManager = txManagers.get(key);
-        if (txManager == null) {
-            txManager = new FastTxManager(web3j, credentials, chainId, transactionReceiptProcessor);
-            txManagers.put(key, txManager);
+        synchronized(TxManagerCache.class) {
+            String key = credentials.getAddress()  + chainId;
+            FastTxManager txManager = txManagers.get(key);
+            if (txManager == null) {
+                txManager = new FastTxManager(web3j, credentials, chainId, transactionReceiptProcessor);
+                txManagers.put(key, txManager);
+            }
+            return txManager;
         }
-        return txManager;
     }
 }
