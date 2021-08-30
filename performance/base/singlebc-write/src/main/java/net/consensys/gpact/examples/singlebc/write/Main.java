@@ -14,6 +14,7 @@
  */
 package net.consensys.gpact.examples.singlebc.write;
 
+import net.consensys.gpact.common.CredentialsCreator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
@@ -39,7 +40,7 @@ public class Main {
     }
 
     PropertiesLoader propsLoader = new PropertiesLoader(args[0]);
-    Credentials creds = propsLoader.getCredentials();
+    Credentials creds = CredentialsCreator.createCredentials();
     PropertiesLoader.BlockchainInfo root = propsLoader.getBlockchainInfo("ROOT");
 
     Bc1ContractA bc1ContractABlockchain = new Bc1ContractA(creds, root.bcId, root.uri, root.gasPriceStrategy, root.period);

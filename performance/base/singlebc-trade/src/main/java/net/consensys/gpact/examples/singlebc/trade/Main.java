@@ -43,7 +43,7 @@ public class Main {
     }
 
     PropertiesLoader propsLoader = new PropertiesLoader(args[0]);
-    Credentials creds = propsLoader.getCredentials();
+    Credentials creds = CredentialsCreator.createCredentials();
     PropertiesLoader.BlockchainInfo root = propsLoader.getBlockchainInfo("ROOT");
 
     Bc1TradeWallet bc1TradeWalletBlockchain = new Bc1TradeWallet(creds, root.bcId, root.uri, root.gasPriceStrategy, root.period);

@@ -67,12 +67,14 @@ public class PropertiesLoader {
     return this.properties.getProperty(prop);
   }
 
-  public Credentials getCredentials() {
-    return Credentials.create(getProperty("PRIVATE_KEY"));
-  }
-  public Credentials getCredentials(String keyName) {
-    return Credentials.create(this.properties.getProperty(keyName));
-  }
+  // Static credentials don't work for testing as multiple tests are run in parallel.
+  // The nonce values end up being wrong and the test fail.
+//  public Credentials getCredentials() {
+//    return Credentials.create(getProperty("PRIVATE_KEY"));
+//  }
+//  public Credentials getCredentials(String keyName) {
+//    return Credentials.create(this.properties.getProperty(keyName));
+//  }
 
   public BlockchainInfo getBlockchainInfo(String tag) {
     String bcIdStr = getProperty(tag + "_BC_ID");

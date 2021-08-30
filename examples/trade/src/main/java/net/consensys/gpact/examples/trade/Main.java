@@ -58,7 +58,7 @@ public class Main {
     }
 
     PropertiesLoader propsLoader = new PropertiesLoader(args[0]);
-    Credentials creds = propsLoader.getCredentials();
+    Credentials creds = CredentialsCreator.createCredentials();
     PropertiesLoader.BlockchainInfo root = propsLoader.getBlockchainInfo("ROOT");
     PropertiesLoader.BlockchainInfo bc2 = propsLoader.getBlockchainInfo("BC2");
     PropertiesLoader.BlockchainInfo bc3 = propsLoader.getBlockchainInfo("BC3");

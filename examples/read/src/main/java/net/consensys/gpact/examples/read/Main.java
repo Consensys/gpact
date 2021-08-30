@@ -53,7 +53,7 @@ public class Main {
     }
 
     PropertiesLoader propsLoader = new PropertiesLoader(args[0]);
-    Credentials creds = propsLoader.getCredentials();
+    Credentials creds = CredentialsCreator.createCredentials();
     PropertiesLoader.BlockchainInfo root = propsLoader.getBlockchainInfo("ROOT");
     PropertiesLoader.BlockchainInfo bc2 = propsLoader.getBlockchainInfo("BC2");
     CrossBlockchainConsensusType consensusMethodology = propsLoader.getConsensusMethodology();

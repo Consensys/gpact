@@ -14,6 +14,7 @@
  */
 package net.consensys.gpact.examples.write;
 
+import net.consensys.gpact.common.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
@@ -27,11 +28,6 @@ import net.consensys.gpact.cbc.engine.CbcExecutorTxReceiptRootTransfer;
 import net.consensys.gpact.cbc.engine.ExecutionEngine;
 import net.consensys.gpact.cbc.engine.ParallelExecutionEngine;
 import net.consensys.gpact.cbc.engine.SerialExecutionEngine;
-import net.consensys.gpact.common.AnIdentity;
-import net.consensys.gpact.common.CrossBlockchainConsensusType;
-import net.consensys.gpact.common.ExecutionEngineType;
-import net.consensys.gpact.common.PropertiesLoader;
-import net.consensys.gpact.common.StatsHolder;
 import net.consensys.gpact.examples.write.sim.SimContractA;
 import net.consensys.gpact.examples.write.sim.SimContractB;
 
@@ -57,7 +53,7 @@ public class Main {
     }
 
     PropertiesLoader propsLoader = new PropertiesLoader(args[0]);
-    Credentials creds = propsLoader.getCredentials();
+    Credentials creds = CredentialsCreator.createCredentials();
     PropertiesLoader.BlockchainInfo root = propsLoader.getBlockchainInfo("ROOT");
     PropertiesLoader.BlockchainInfo bc2 = propsLoader.getBlockchainInfo("BC2");
     CrossBlockchainConsensusType consensusMethodology = propsLoader.getConsensusMethodology();
