@@ -19,17 +19,11 @@ import "../../../../crossblockchaincontrol/src/main/solidity/CbcLockableStorageI
 
 
 contract MockCbcForLockableStorageTest is CbcLockableStorageInterface {
-    uint256 private rootBlockchainId;
-    uint256 private transactionId;
+    bytes32 private rootTxId;
     address[] activeCallLockedContracts;
 
-
-    function setRootBlockchainId(uint256 _rootBcId) external {
-        rootBlockchainId = _rootBcId;
-    }
-
-    function setCrossBlockchainTransactionId(uint256 _txId) external {
-        transactionId = _txId;
+    function setCrosschainRootTxId(bytes32 _txId) external {
+        rootTxId = _txId;
     }
 
 //    function wasLockedByThisCall() external override view returns (bool) {
@@ -44,15 +38,11 @@ contract MockCbcForLockableStorageTest is CbcLockableStorageInterface {
      * @return false if the current transaction execution is part of a cross-blockchain call\.
      */
     function isSingleBlockchainCall() external override view returns (bool) {
-        return rootBlockchainId == 0;
+        return rootTxId == bytes32(0);
     }
 
-    function getActiveCallRootBlockchainId() external override view returns (uint256) {
-        return rootBlockchainId;
-    }
-
-    function getActiveCallCrossBlockchainTransactionId() external override view returns (uint256) {
-        return transactionId;
+    function getActiveCallCrosschainRootTxId() external override view returns (bytes32) {
+        return rootTxId;
     }
 
 
@@ -68,8 +58,8 @@ contract MockCbcForLockableStorageTest is CbcLockableStorageInterface {
         return uint256(0);
     }
 
-    function whoCalledMe() external pure override returns (uint256 targetBlockchainId, address targetContract) {
-        return (0, address(0));
+    function whoCalledMe() external pure override returns (uint256 theRootBlockchainId, uint256 parentBlockchainId, address parentContract) {
+        return (0, 0, address(0));
 
     }
 

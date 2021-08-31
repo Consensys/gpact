@@ -25,6 +25,16 @@ import java.math.BigInteger;
  * Test for LockableERC20.
  */
 public class LockableERC20Test extends AbstractERC20Test {
+  static byte[] crosschainRootTxId;
+  static byte[] zero;
+
+  static {
+    crosschainRootTxId = new byte[32];
+    crosschainRootTxId[0] = 10;
+    zero = new byte[32];
+  }
+
+
   /**
    * Check operation of the contract prior to any data being added to the contract.
    * That is, check the default configuration immediately after deployment.
@@ -79,12 +89,8 @@ public class LockableERC20Test extends AbstractERC20Test {
     BigInteger amount = BigInteger.valueOf(7);
     BigInteger remainder = INITIAL_SUPPLY_BIG.subtract(amount);
 
-    BigInteger rootBlockchainId = BigInteger.ONE;
-    BigInteger crosschainTransactionId = BigInteger.TEN;
-
     // Make the contract think a lockable transaction is in progress.
-    this.mockCrossBlockchainControlContract.setRootBlockchainId(rootBlockchainId).send();
-    this.mockCrossBlockchainControlContract.setCrossBlockchainTransactionId(crosschainTransactionId).send();
+    this.mockCrossBlockchainControlContract.setCrosschainRootTxId(crosschainRootTxId).send();
 
     try {
       this.lockableERC20.transfer(this.otherAccount, amount).send();
@@ -102,11 +108,10 @@ public class LockableERC20Test extends AbstractERC20Test {
     assert(this.lockableERC20.balanceOfProvisional(this.otherAccount).send().compareTo(amount) == 0);
 
     // Make the contract think a lockable transaction is no longer in progress.
-    this.mockCrossBlockchainControlContract.setRootBlockchainId(BigInteger.ZERO).send();
-    this.mockCrossBlockchainControlContract.setCrossBlockchainTransactionId(BigInteger.ZERO).send();
+    this.mockCrossBlockchainControlContract.setCrosschainRootTxId(zero).send();
 
     // Unlock the contracts and apply the updates.
-    this.lockableERC20.finalise(true, rootBlockchainId, crosschainTransactionId).send();
+    this.lockableERC20.finalise(true, crosschainRootTxId).send();
 
     assert(this.lockableERC20.balanceOf(this.owner).send().compareTo(remainder) == 0);
     assert(this.lockableERC20.balanceOfMin(this.owner).send().compareTo(remainder) == 0);
@@ -132,12 +137,9 @@ public class LockableERC20Test extends AbstractERC20Test {
     BigInteger total = amount1.add(amount2).add(amount3).add(amount4).add(amount5);
     BigInteger remainder = INITIAL_SUPPLY_BIG.subtract(total);
 
-    BigInteger rootBlockchainId = BigInteger.ONE;
-    BigInteger crosschainTransactionId = BigInteger.TEN;
 
     // Make the contract think a lockable transaction is in progress.
-    this.mockCrossBlockchainControlContract.setRootBlockchainId(rootBlockchainId).send();
-    this.mockCrossBlockchainControlContract.setCrossBlockchainTransactionId(crosschainTransactionId).send();
+    this.mockCrossBlockchainControlContract.setCrosschainRootTxId(crosschainRootTxId).send();
 
     this.lockableERC20.transfer(this.otherAccount, amount1).send();
     this.lockableERC20.transfer(this.otherAccount, amount2).send();
@@ -165,11 +167,10 @@ public class LockableERC20Test extends AbstractERC20Test {
     assert(this.lockableERC20.balanceOfProvisional(this.otherAccount).send().compareTo(total) == 0);
 
     // Make the contract think a lockable transaction is no longer in progress.
-    this.mockCrossBlockchainControlContract.setRootBlockchainId(BigInteger.ZERO).send();
-    this.mockCrossBlockchainControlContract.setCrossBlockchainTransactionId(BigInteger.ZERO).send();
+    this.mockCrossBlockchainControlContract.setCrosschainRootTxId(zero).send();
 
     // Unlock the contracts and apply the updates.
-    this.lockableERC20.finalise(true, rootBlockchainId, crosschainTransactionId).send();
+    this.lockableERC20.finalise(true, crosschainRootTxId).send();
 
     assert(this.lockableERC20.balanceOf(this.owner).send().compareTo(remainder) == 0);
     assert(this.lockableERC20.balanceOfMin(this.owner).send().compareTo(remainder) == 0);
@@ -188,17 +189,13 @@ public class LockableERC20Test extends AbstractERC20Test {
     BigInteger amount1 = BigInteger.valueOf(7);
     BigInteger amount2 = BigInteger.valueOf(11);
 
-    BigInteger rootBlockchainId = BigInteger.ONE;
-    BigInteger crosschainTransactionId = BigInteger.TEN;
-
     this.lockableERC20.approve(this.otherAccount, amount1).send();
     assert (this.lockableERC20.allowance(this.owner, this.otherAccount).send().compareTo(amount1) == 0);
     this.lockableERC20.approve(this.otherAccount, amount2).send();
     assert (this.lockableERC20.allowance(this.owner, this.otherAccount).send().compareTo(amount2) == 0);
 
     // Make the contract think a lockable transaction is in progress.
-    this.mockCrossBlockchainControlContract.setRootBlockchainId(rootBlockchainId).send();
-    this.mockCrossBlockchainControlContract.setCrossBlockchainTransactionId(crosschainTransactionId).send();
+    this.mockCrossBlockchainControlContract.setCrosschainRootTxId(crosschainRootTxId).send();
 
     try {
       this.lockableERC20.approve(this.otherAccount, BigInteger.ZERO).send();
@@ -250,12 +247,8 @@ public class LockableERC20Test extends AbstractERC20Test {
     BigInteger amount10 = BigInteger.valueOf(41);
     BigInteger amount11 = BigInteger.valueOf(43);
 
-    BigInteger rootBlockchainId = BigInteger.ONE;
-    BigInteger crosschainTransactionId = BigInteger.TEN;
-
     // Make the contract think a lockable transaction is in progress.
-    this.mockCrossBlockchainControlContract.setRootBlockchainId(rootBlockchainId).send();
-    this.mockCrossBlockchainControlContract.setCrossBlockchainTransactionId(crosschainTransactionId).send();
+    this.mockCrossBlockchainControlContract.setCrosschainRootTxId(crosschainRootTxId).send();
 
     // Should be able to do up to the parallelization factor for increases during a crosschain
     // transaction.
@@ -286,11 +279,10 @@ public class LockableERC20Test extends AbstractERC20Test {
     }
 
     // Make the contract think a lockable transaction is no longer in progress.
-    this.mockCrossBlockchainControlContract.setRootBlockchainId(BigInteger.ZERO).send();
-    this.mockCrossBlockchainControlContract.setCrossBlockchainTransactionId(BigInteger.ZERO).send();
+    this.mockCrossBlockchainControlContract.setCrosschainRootTxId(zero).send();
 
     // Unlock the contracts and apply the updates.
-    this.lockableERC20.finalise(true, rootBlockchainId, crosschainTransactionId).send();
+    this.lockableERC20.finalise(true, crosschainRootTxId).send();
 
     assert(this.lockableERC20.allowance(this.owner, this.otherAccount).send().compareTo(totalAdd) == 0);
     assert(this.lockableERC20.allowanceProvisional(this.owner, this.otherAccount).send().compareTo(totalAdd) == 0);
@@ -298,8 +290,7 @@ public class LockableERC20Test extends AbstractERC20Test {
     assert(this.lockableERC20.allowanceMin(this.owner, this.otherAccount).send().compareTo(totalAdd) == 0);
 
     // Make the contract think a lockable transaction is in progress.
-    this.mockCrossBlockchainControlContract.setRootBlockchainId(rootBlockchainId).send();
-    this.mockCrossBlockchainControlContract.setCrossBlockchainTransactionId(crosschainTransactionId).send();
+    this.mockCrossBlockchainControlContract.setCrosschainRootTxId(crosschainRootTxId).send();
 
     this.lockableERC20.decreaseAllowance(this.otherAccount, amount1).send();
     this.lockableERC20.decreaseAllowance(this.otherAccount, amount2).send();
@@ -376,14 +367,10 @@ public class LockableERC20Test extends AbstractERC20Test {
     BigInteger amount2 = BigInteger.valueOf(11);
     BigInteger amount3 = BigInteger.valueOf(7);
 
-    BigInteger rootBlockchainId = BigInteger.ONE;
-    BigInteger crosschainTransactionId = BigInteger.TEN;
-
     this.lockableERC20.transfer(otherAccount, amount1).send();
 
     // Make the contract think a lockable transaction is in progress.
-    this.mockCrossBlockchainControlContract.setRootBlockchainId(rootBlockchainId).send();
-    this.mockCrossBlockchainControlContract.setCrossBlockchainTransactionId(crosschainTransactionId).send();
+    this.mockCrossBlockchainControlContract.setCrosschainRootTxId(crosschainRootTxId).send();
 
     this.otherLockableERC20.increaseAllowance(this.owner, amount2).send();
     try {
@@ -394,7 +381,7 @@ public class LockableERC20Test extends AbstractERC20Test {
     }
 
     // Unlock the contracts and apply the updates.
-    this.lockableERC20.finalise(true, rootBlockchainId, crosschainTransactionId).send();
+    this.lockableERC20.finalise(true, crosschainRootTxId).send();
     // The contract will still detect a crosschain transaction because the cbc is still indicating this.
 
     this.lockableERC20.transferFrom(otherAccount, this.owner, amount3).send();

@@ -3,7 +3,7 @@
 
 * Java: The code was built with Java 11. The code is likely to build with later versions of Java.
 * Solidity:  The code was build with solc 0.8.5+commit.a4f2e591.Darwin.appleclang, though should work with any 
-version of Solidity after 0.7.1.
+version of Solidity after 0.8.
 * Gradle: The build system uses Gradle 7.1. This will download when the code is built.
 
 ## Web3J

@@ -14,21 +14,16 @@
  */
 package net.consensys.gpact.lockablestorage.test;
 
-import org.junit.Test;
+import net.consensys.gpact.common.test.AbstractWeb3Test;
 import net.consensys.gpact.lockablestorage.soliditywrappers.MockCbcForLockableStorageTest;
 import net.consensys.gpact.lockablestorage.soliditywrappers.TestLockableStorageWrapper;
-import net.consensys.gpact.common.test.AbstractWeb3Test;
-
-
-import java.math.BigInteger;
-
-import static org.junit.Assert.assertEquals;
+import net.consensys.gpact.lockablestorage.soliditywrappers.TestLockableStorageWrapperAllValues;
 
 /**
  * Check operation, assuming the calls are single blockchain (that is not part of a
  * cross-blockchain) call.
  */
-public class AbstractLockableStorageTest extends AbstractWeb3Test {
+public class AbstractLockableStorageAllValuesTest extends AbstractWeb3Test {
   static byte[] crosschainRootTxId;
   static byte[] zero;
 
@@ -38,12 +33,13 @@ public class AbstractLockableStorageTest extends AbstractWeb3Test {
     zero = new byte[32];
   }
 
-  TestLockableStorageWrapper lockableStorageContract;
+
+  TestLockableStorageWrapperAllValues lockableStorageContract;
   MockCbcForLockableStorageTest mockCrossBlockchainControlContract;
 
   protected void deployContracts() throws Exception {
     this.mockCrossBlockchainControlContract = MockCbcForLockableStorageTest.deploy(this.web3j, this.tm, this.freeGasProvider).send();
-    this.lockableStorageContract = TestLockableStorageWrapper.deploy(this.web3j, this.tm, this.freeGasProvider,
+    this.lockableStorageContract = TestLockableStorageWrapperAllValues.deploy(this.web3j, this.tm, this.freeGasProvider,
             this.mockCrossBlockchainControlContract.getContractAddress()).send();
   }
 }
