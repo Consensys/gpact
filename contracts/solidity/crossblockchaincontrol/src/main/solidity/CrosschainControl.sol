@@ -172,32 +172,28 @@ contract CrosschainControl is CbcLockableStorageInterface, Receipts, CbcDecVer {
 
 
     function root(uint256[] calldata _blockchainIds, bytes[] calldata _signedEventInfo, bytes[] calldata _signatures) external {
-        uint256 rootBlockchainId;
-        address startCbcContract;
+        // Extract and verify information.
+        uint256 startEventBlockchainId;
+        address startEventCbcContract;
         bytes memory startEvent;
         bytes[] memory segmentEvents;
-        (rootBlockchainId, startCbcContract, startEvent, segmentEvents) =
-        decodeAndVerifyEvents(_blockchainIds, _signedEventInfo, _signatures, true);
-        rootProcessing(rootBlockchainId, startCbcContract, startEvent, segmentEvents);
-    }
+        (startEventBlockchainId, startEventCbcContract, startEvent, segmentEvents) =
+            decodeAndVerifyEvents(_blockchainIds, _signedEventInfo, _signatures, true);
 
-    function rootProcessing(
-        uint256 _startEventBlockchainId, address _startEventCbcContract,
-        bytes memory _startEventData, bytes[] memory _segmentEvents) internal {
         //Check that tx.origin == msg.sender. This call must be issued by an EOA. This is required so
         // that we can check that the tx.origin for this call matches what is in the start event.
         require(tx.origin == msg.sender, "Transaction must be instigated by an EOA");
 
         //Check that the blockchain Id that can be used with the transaction receipt for verification matches this
         // blockchain. That is, check that this is the root blockchain.
-        require(myBlockchainId == _startEventBlockchainId, "This is not the root blockchain");
-        activeCallRootBlockchainId = myBlockchainId;
+        require(myBlockchainId == startEventBlockchainId, "This is not the root blockchain");
+        activeCallRootBlockchainId = startEventBlockchainId;
 
-        // Ensure this is the cross-blockchain contract contract that generated the start event.
-        require(address(this) == _startEventCbcContract, "Root blockchain CBC contract was not this one");
+        // Ensure this is the crosschain control contract that generated the start event.
+        require(address(this) == startEventCbcContract, "Root blockchain CBC contract was not this one");
 
         // Check that Cross-blockchain Transaction Id as shown in the Start Event is still active.
-        uint256 crosschainTransactionId = BytesUtil.bytesToUint256(_startEventData, 0);
+        uint256 crosschainTransactionId = BytesUtil.bytesToUint256(startEvent, 0);
         uint256 timeoutForCall = rootTransactionInformation[crosschainTransactionId];
         require(timeoutForCall != NOT_USED, "Call not active");
         require(timeoutForCall != SUCCESS, "Call ended (success)");
@@ -214,13 +210,13 @@ contract CrosschainControl is CbcLockableStorageInterface, Receipts, CbcDecVer {
         // by checking the Start Event. Exit if it doesn’t.
         // This means that only the initiator of the cross-blockchain transaction can call this
         // function call prior to the time-out.
-        address startCaller = BytesUtil.bytesToAddress1(_startEventData, 0x20);
+        address startCaller = BytesUtil.bytesToAddress1(startEvent, 0x20);
         require(startCaller == tx.origin, "EOA does not match start event");
 
         // Determine the hash of the call graph described in the start event. This is needed to check the segment
         // event information.
-        uint256 lenOfActiveCallGraph = BytesUtil.bytesToUint256(_startEventData, 0x80);
-        bytes memory callGraph = BytesUtil.slice(_startEventData, 0xA0, lenOfActiveCallGraph);
+        uint256 lenOfActiveCallGraph = BytesUtil.bytesToUint256(startEvent, 0x80);
+        bytes memory callGraph = BytesUtil.slice(startEvent, 0xA0, lenOfActiveCallGraph);
         activeCallGraph = callGraph;
         bytes32 hashOfCallGraph = keccak256(callGraph);
 
@@ -228,13 +224,13 @@ contract CrosschainControl is CbcLockableStorageInterface, Receipts, CbcDecVer {
         uint256[] memory callPathForStart = new uint256[](1);
         activeCallsCallPath = callPathForStart;
 
-        if (verifySegmentEvents(_segmentEvents, callPathForStart, hashOfCallGraph, crosschainTransactionId)) {
+        if (verifySegmentEvents(segmentEvents, callPathForStart, hashOfCallGraph, crosschainTransactionId)) {
             return;
         }
 
         // Set-up root blockchain / crosschain transaction value used for locking.
         // Store a copy in memory so that storage isn't read from in the code further below.
-        bytes32 crosschainRootTxId = calcRootTxId(_startEventBlockchainId, crosschainTransactionId);
+        bytes32 crosschainRootTxId = calcRootTxId(startEventBlockchainId, crosschainTransactionId);
         activeCallCrosschainRootTxId = crosschainRootTxId;
 
         bool isSuccess;
