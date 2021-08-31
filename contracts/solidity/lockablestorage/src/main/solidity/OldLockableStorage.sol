@@ -73,8 +73,7 @@ contract OldLockableStorage {
     // True when this contract is locked.
     bool public locked;
     // Which root blockchain / transaction id locked this contract.
-    uint256 public lockedByRootBlockchainId;
-    uint256 public lockedByTransactionId;
+    uint256 public lockedByRootTxId;
 
     mapping(uint256=>uint256) private dataStoreUint256;
     mapping(uint256=>uint256) private provisionalUpdatesUint256;
@@ -337,8 +336,7 @@ contract OldLockableStorage {
      */
     function lockContract() private {
         locked = true;
-        lockedByRootBlockchainId = crossBlockchainControl.getActiveCallRootBlockchainId();
-        lockedByTransactionId = crossBlockchainControl.getActiveCallCrossBlockchainTransactionId();
+        lockedByRootTxId = crossBlockchainControl.getActiveCallCrosschainRootTxId();
         crossBlockchainControl.addToListOfLockedContracts(address(this));
     }
 

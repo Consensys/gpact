@@ -87,7 +87,8 @@ contract Hotel is LockableStorage {
 
         // Check that the calling contract was the travel agency linked to this one from
         // the source blockchain.
-        (uint256 sourceBlockchainId, address sourceContract) = crossBlockchainControl.whoCalledMe();
+        // TODO check that the root blockchain is trusted
+        (, uint256 sourceBlockchainId, address sourceContract) = crossBlockchainControl.whoCalledMe();
         require(sourceContract == approvedTravelAgencies[sourceBlockchainId], "Sender is not an approved travel agency");
 
         require(_date != 0, "Date can not be zero");

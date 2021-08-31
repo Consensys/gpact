@@ -26,7 +26,7 @@ import java.math.BigInteger;
 public class TokenBridge {
   static final Logger LOG = LogManager.getLogger(TokenBridge.class);
 
-  public static final int NUM_TIMES_EXECUTE = 10;
+  public static final int NUM_TIMES_EXECUTE = 2;
 
   public static void main(String[] args) throws Exception {
     StatsHolder.log("Example: Token Bridge");

@@ -79,7 +79,8 @@ contract CrosschainERC20 is LockableERC20 {
 
         // Check that the calling contract was the ERC 20 linked to this one from
         // the source blockchain.
-        (uint256 sourceBlockchainId, address sourceContract) = cbc.whoCalledMe();
+        // TODO only allow approved Root Blockchains
+        (, uint256 sourceBlockchainId, address sourceContract) = cbc.whoCalledMe();
         require(sourceContract == remoteERC20s[sourceBlockchainId], "Source is not correct ERC20");
 
         mintInternal(recipient, amount);

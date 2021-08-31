@@ -10,13 +10,14 @@ import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.Bool;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Type;
+import org.web3j.abi.datatypes.generated.Bytes32;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.RemoteCall;
 import org.web3j.protocol.core.RemoteFunctionCall;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
-import org.web3j.tuples.generated.Tuple2;
+import org.web3j.tuples.generated.Tuple3;
 import org.web3j.tx.Contract;
 import org.web3j.tx.TransactionManager;
 import org.web3j.tx.gas.ContractGasProvider;
@@ -32,7 +33,7 @@ import org.web3j.tx.gas.ContractGasProvider;
  */
 @SuppressWarnings("rawtypes")
 public class MockCbcForLockableStorageTest extends Contract {
-    public static final String BINARY = "608060405234801561001057600080fd5b506103a0806100206000396000f3fe608060405234801561001057600080fd5b506004361061009e5760003560e01c80638eaf89d8116100665780638eaf89d81461010257806392b2c33514610116578063b4c3b7561461012a578063bae3cdc81461013c578063bd682e451461014f57600080fd5b8063336d5b09146100a357806339ce107e146100ba57806366b79f5a146100cf5780637c5fc7f5146100d75780638e22d534146100ea575b600080fd5b6000545b6040519081526020015b60405180910390f35b6100cd6100c8366004610269565b610157565b005b6001546100a7565b6100cd6100e536600461028b565b600155565b6100a76100f83660046102a4565b6000949350505050565b6040805160008082526020820152016100b1565b6100cd6101243660046102a4565b50505050565b600054604051901581526020016100b1565b6100cd61014a36600461028b565b600055565b6100cd610205565b60005b6002548110156101b257816001600160a01b03166002828154811061018157610181610354565b6000918252602090912001546001600160a01b031614156101a0575050565b806101aa8161032b565b91505061015a565b50600280546001810182556000919091527f405787fa12a823e0f2b7631cc41b3ba8828b3321ca811111fa75cd3aa3bb5ace0180546001600160a01b0319166001600160a01b0392909216919091179055565b61021160026000610213565b565b50805460008255906000526020600020908101906102319190610234565b50565b5b808211156102495760008155600101610235565b5090565b80356001600160a01b038116811461026457600080fd5b919050565b60006020828403121561027b57600080fd5b6102848261024d565b9392505050565b60006020828403121561029d57600080fd5b5035919050565b600080600080606085870312156102ba57600080fd5b843593506102ca6020860161024d565b9250604085013567ffffffffffffffff808211156102e757600080fd5b818701915087601f8301126102fb57600080fd5b81358181111561030a57600080fd5b88602082850101111561031c57600080fd5b95989497505060200194505050565b600060001982141561034d57634e487b7160e01b600052601160045260246000fd5b5060010190565b634e487b7160e01b600052603260045260246000fdfea2646970667358221220258857d60f3db69cd9e7bce873f2cc4c5769b57745879c07b95b65c9b77e70b264736f6c63430008050033";
+    public static final String BINARY = "608060405234801561001057600080fd5b50610379806100206000396000f3fe608060405234801561001057600080fd5b50600436106100885760003560e01c806392b2c3351161005b57806392b2c335146100f0578063b4c3b75614610104578063bd682e4514610116578063ef3adc4a1461011e57600080fd5b806339ce107e1461008d5780637bf37a09146100a25780638e22d534146100b95780638eaf89d8146100d1575b600080fd5b6100a061009b366004610242565b610131565b005b6000545b6040519081526020015b60405180910390f35b6100a66100c736600461027d565b6000949350505050565b60408051600080825260208201819052918101919091526060016100b0565b6100a06100fe36600461027d565b50505050565b600054604051901581526020016100b0565b6100a06101de565b6100a061012c366004610264565b600055565b60005b60015481101561018c57816001600160a01b03166001828154811061015b5761015b61032d565b6000918252602090912001546001600160a01b0316141561017a575050565b8061018481610304565b915050610134565b506001805480820182556000919091527fb10e2d527612073b26eecdfd717e6a320cf44b4afac2b0732d9fcbe2b7fa0cf60180546001600160a01b0319166001600160a01b0392909216919091179055565b6101ea600160006101ec565b565b508054600082559060005260206000209081019061020a919061020d565b50565b5b80821115610222576000815560010161020e565b5090565b80356001600160a01b038116811461023d57600080fd5b919050565b60006020828403121561025457600080fd5b61025d82610226565b9392505050565b60006020828403121561027657600080fd5b5035919050565b6000806000806060858703121561029357600080fd5b843593506102a360208601610226565b9250604085013567ffffffffffffffff808211156102c057600080fd5b818701915087601f8301126102d457600080fd5b8135818111156102e357600080fd5b8860208285010111156102f557600080fd5b95989497505060200194505050565b600060001982141561032657634e487b7160e01b600052601160045260246000fd5b5060010190565b634e487b7160e01b600052603260045260246000fdfea2646970667358221220f4d607d1d2e386baff7db30d09bda8eb6685f39947c8d6752d026697ef075c2564736f6c63430008050033";
 
     public static final String FUNC_ADDTOLISTOFLOCKEDCONTRACTS = "addToListOfLockedContracts";
 
@@ -42,15 +43,11 @@ public class MockCbcForLockableStorageTest extends Contract {
 
     public static final String FUNC_CROSSBLOCKCHAINCALLRETURNSUINT256 = "crossBlockchainCallReturnsUint256";
 
-    public static final String FUNC_GETACTIVECALLCROSSBLOCKCHAINTRANSACTIONID = "getActiveCallCrossBlockchainTransactionId";
-
-    public static final String FUNC_GETACTIVECALLROOTBLOCKCHAINID = "getActiveCallRootBlockchainId";
+    public static final String FUNC_GETACTIVECALLCROSSCHAINROOTTXID = "getActiveCallCrosschainRootTxId";
 
     public static final String FUNC_ISSINGLEBLOCKCHAINCALL = "isSingleBlockchainCall";
 
-    public static final String FUNC_SETCROSSBLOCKCHAINTRANSACTIONID = "setCrossBlockchainTransactionId";
-
-    public static final String FUNC_SETROOTBLOCKCHAINID = "setRootBlockchainId";
+    public static final String FUNC_SETCROSSCHAINROOTTXID = "setCrosschainRootTxId";
 
     public static final String FUNC_WHOCALLEDME = "whoCalledMe";
 
@@ -107,18 +104,11 @@ public class MockCbcForLockableStorageTest extends Contract {
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
 
-    public RemoteFunctionCall<BigInteger> getActiveCallCrossBlockchainTransactionId() {
-        final Function function = new Function(FUNC_GETACTIVECALLCROSSBLOCKCHAINTRANSACTIONID, 
+    public RemoteFunctionCall<byte[]> getActiveCallCrosschainRootTxId() {
+        final Function function = new Function(FUNC_GETACTIVECALLCROSSCHAINROOTTXID, 
                 Arrays.<Type>asList(), 
-                Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}));
-        return executeRemoteCallSingleValueReturn(function, BigInteger.class);
-    }
-
-    public RemoteFunctionCall<BigInteger> getActiveCallRootBlockchainId() {
-        final Function function = new Function(FUNC_GETACTIVECALLROOTBLOCKCHAINID, 
-                Arrays.<Type>asList(), 
-                Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}));
-        return executeRemoteCallSingleValueReturn(function, BigInteger.class);
+                Arrays.<TypeReference<?>>asList(new TypeReference<Bytes32>() {}));
+        return executeRemoteCallSingleValueReturn(function, byte[].class);
     }
 
     public RemoteFunctionCall<Boolean> isSingleBlockchainCall() {
@@ -128,34 +118,27 @@ public class MockCbcForLockableStorageTest extends Contract {
         return executeRemoteCallSingleValueReturn(function, Boolean.class);
     }
 
-    public RemoteFunctionCall<TransactionReceipt> setCrossBlockchainTransactionId(BigInteger _txId) {
+    public RemoteFunctionCall<TransactionReceipt> setCrosschainRootTxId(byte[] _txId) {
         final Function function = new Function(
-                FUNC_SETCROSSBLOCKCHAINTRANSACTIONID, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_txId)), 
+                FUNC_SETCROSSCHAINROOTTXID, 
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(_txId)), 
                 Collections.<TypeReference<?>>emptyList());
         return executeRemoteCallTransaction(function);
     }
 
-    public RemoteFunctionCall<TransactionReceipt> setRootBlockchainId(BigInteger _rootBcId) {
-        final Function function = new Function(
-                FUNC_SETROOTBLOCKCHAINID, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_rootBcId)), 
-                Collections.<TypeReference<?>>emptyList());
-        return executeRemoteCallTransaction(function);
-    }
-
-    public RemoteFunctionCall<Tuple2<BigInteger, String>> whoCalledMe() {
+    public RemoteFunctionCall<Tuple3<BigInteger, BigInteger, String>> whoCalledMe() {
         final Function function = new Function(FUNC_WHOCALLEDME, 
                 Arrays.<Type>asList(), 
-                Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}, new TypeReference<Address>() {}));
-        return new RemoteFunctionCall<Tuple2<BigInteger, String>>(function,
-                new Callable<Tuple2<BigInteger, String>>() {
+                Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}, new TypeReference<Uint256>() {}, new TypeReference<Address>() {}));
+        return new RemoteFunctionCall<Tuple3<BigInteger, BigInteger, String>>(function,
+                new Callable<Tuple3<BigInteger, BigInteger, String>>() {
                     @Override
-                    public Tuple2<BigInteger, String> call() throws Exception {
+                    public Tuple3<BigInteger, BigInteger, String> call() throws Exception {
                         List<Type> results = executeCallMultipleValueReturn(function);
-                        return new Tuple2<BigInteger, String>(
+                        return new Tuple3<BigInteger, BigInteger, String>(
                                 (BigInteger) results.get(0).getValue(), 
-                                (String) results.get(1).getValue());
+                                (BigInteger) results.get(1).getValue(), 
+                                (String) results.get(2).getValue());
                     }
                 });
     }

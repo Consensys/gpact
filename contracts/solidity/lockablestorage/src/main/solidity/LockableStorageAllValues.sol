@@ -22,28 +22,26 @@ import "../../../../crossblockchaincontrol/src/main/solidity/CbcLockableStorageI
  *  - lockable per item.
  *  - designed to be integrated directly into another contract.
  *  - uint256 based storage only.
+ *  - all possible values of uint256.
  *
  */
-abstract contract LockableStorage {
-    // A value added to all values stored in provisional storage so that
-    // lock detection can happen without using an extra memory location.
-    uint256 constant private NOT_USED_OFFSET = 0x1;
-    // The value that provisional storage will be if it is not being used.
-    uint256 constant private NOT_LOCKED_INDICATOR = 0;
-
+abstract contract LockableStorageAllValues {
     // The Cross-Blockchain Control Contract used for cross-blockchain transaction locking.
     CbcLockableStorageInterface internal crossBlockchainControl;
 
     // Data storage keys to values stored.
     mapping(uint256=>uint256) private dataStore;
     // Provisional updates for data storage keys to values stored.
-    // Values are offset by the NOT_USED_OFFSET value so that locked storage can be
-    // detected without using an extra memory location.
     mapping(uint256=>uint256) private provisionalUpdates;
 
     // Map of list of keys for values that have been updated / are locked.
     // Map key is keccak256(root bc id, transaction id)
     mapping(bytes32=>uint256[]) private provisionalUpdatesLists;
+
+    // Map of data storage key to blockchain / transaction id that locked this item.
+    // If the mapping shows that the blockchain / transaction id is zero, this indicates
+    // that the location is not locked.
+    mapping(uint256=>bytes32) public lockedByRootBlockchainIdTransactionId;
 
 
     constructor (address _crossBlockchainControl) {
@@ -67,12 +65,11 @@ abstract contract LockableStorage {
             dataStore[_key] = _val;
         }
         else {
-            bytes32 crossRootTxId = crossBlockchainControl.getActiveCallCrosschainRootTxId();
+            bytes32 crossTxId = crossBlockchainControl.getActiveCallCrosschainRootTxId();
+            lockedByRootBlockchainIdTransactionId[_key] = crossTxId;
             crossBlockchainControl.addToListOfLockedContracts(address(this));
-            provisionalUpdatesLists[crossRootTxId].push(_key);
-            // Note, the following addition is unchecked. If the value being stored
-            // is 2**256-1 then this will overflow and revert.
-            provisionalUpdates[_key] = _val + NOT_USED_OFFSET;
+            provisionalUpdatesLists[crossTxId].push(_key);
+            provisionalUpdates[_key] = _val;
         }
     }
 
@@ -134,10 +131,12 @@ abstract contract LockableStorage {
             uint256 key = provisionalUpdatesLists[_crossRootTxId][i];
             if (_commit) {
                 // Copy provisional updates to data stores.
-                dataStore[key] = provisionalUpdates[key] - NOT_USED_OFFSET;
+                dataStore[key] = provisionalUpdates[key];
             }
             // Delete provisional updates.
             delete provisionalUpdates[key];
+            // Delete locked by indicator.
+            delete lockedByRootBlockchainIdTransactionId[key];
         }
         // Delete the list of updates.
         delete provisionalUpdatesLists[_crossRootTxId];
@@ -162,7 +161,7 @@ abstract contract LockableStorage {
     }
     function getUint256Provisional(uint256 _key) internal view returns(uint256) {
         if (isLocked(_key)) {
-            return provisionalUpdates[_key] - NOT_USED_OFFSET;
+            return provisionalUpdates[_key];
         }
         return dataStore[_key];
     }
@@ -240,6 +239,6 @@ abstract contract LockableStorage {
     }
 
     function isLocked(uint256 _key) public view returns (bool) {
-        return provisionalUpdates[_key] != NOT_LOCKED_INDICATOR;
+        return lockedByRootBlockchainIdTransactionId[_key] != 0;
     }
 }

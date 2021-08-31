@@ -1,15 +1,13 @@
 package net.consensys.gpact.lockablestorage.test;
 
-import net.consensys.gpact.common.RevertReason;
 import org.junit.Test;
-import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.exceptions.TransactionException;
 import org.web3j.tx.exceptions.ContractCallException;
 
 import java.math.BigInteger;
-import java.util.Optional;
 
-public class LockableStorageLockingUint256Test extends AbstractLockableStorageTest {
+public class LockableStorageLockingUint256AllValuesTest extends AbstractLockableStorageAllValuesTest {
+
 
 
   // By default, locking is off. As such, setting a uint256 will not encounter any locks.
