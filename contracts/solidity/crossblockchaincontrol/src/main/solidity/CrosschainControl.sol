@@ -95,7 +95,9 @@ contract CrosschainControl is CbcLockableStorageInterface, Receipts, CbcDecVer {
     // Indicates the current call segment has failed.
     bool private activeCallFailed;
 
-
+    // Contract that called the target function.
+    uint256 private activeCallParentBlockchainId;
+    address private activeCallParentContract;
 
     constructor(uint256 _myBlockchainId) {
         myBlockchainId = _myBlockchainId;
@@ -147,18 +149,24 @@ contract CrosschainControl is CbcLockableStorageInterface, Receipts, CbcDecVer {
         segmentTransactionExecuted[mapKey] == true;
 
         bytes memory callGraph = BytesUtil.slice(_startEventData, 0xA0, lenOfActiveCallGraph);
-        activeCallGraph = callGraph;
         bytes32 hashOfCallGraph = keccak256(callGraph);
 
         activeCallRootBlockchainId = _rootBlockchainId;
-        activeCallsCallPath = _callPath;
 
-        if (verifySegmentEvents(_segmentEvents, _callPath, hashOfCallGraph, crosschainTransactionId)) {
-            return;
+        // No need to store call graph or call path if this is a leaf segment / function
+        if (_segmentEvents.length != 0) {
+            activeCallGraph = callGraph;
+            activeCallsCallPath = _callPath;
+            if (verifySegmentEvents(_segmentEvents, _callPath, hashOfCallGraph, crosschainTransactionId)) {
+                return;
+            }
         }
+
 
         // Set-up root blockchain / crosschain transaction value used for locking.
         activeCallCrosschainRootTxId = calcRootTxId(_rootBlockchainId, crosschainTransactionId);
+        // Set-up values to be returned if whoCalledMe is called
+        prepareForWhoCalledMe(callGraph, _callPath);
 
         bool isSuccess;
         bytes memory returnValueEncoded;
@@ -167,7 +175,13 @@ contract CrosschainControl is CbcLockableStorageInterface, Receipts, CbcDecVer {
         // TODO emit segments understanding of root blockhain id
         emit Segment(crosschainTransactionId, hashOfCallGraph, _callPath, activeCallLockedContracts, isSuccess, returnValueEncoded);
 
-        cleanupAfterCall();
+        // Only delete locations used.
+        if (_segmentEvents.length != 0) {
+            cleanupAfterCallSegment();
+        }
+        else {
+            cleanupAfterCallLeafSegment();
+        }
     }
 
 
@@ -202,7 +216,7 @@ contract CrosschainControl is CbcLockableStorageInterface, Receipts, CbcDecVer {
         //Check if the cross-blockchain transaction has timed-out.
         if (block.timestamp > timeoutForCall) {
             failRootTransaction(crosschainTransactionId);
-            cleanupAfterCall();
+            cleanupAfterCallRoot();
             return;
         }
 
@@ -243,7 +257,7 @@ contract CrosschainControl is CbcLockableStorageInterface, Receipts, CbcDecVer {
         }
         rootTransactionInformation[crosschainTransactionId] = isSuccess ? SUCCESS : FAILURE;
         emit Root(crosschainTransactionId, isSuccess);
-        cleanupAfterCall();
+        cleanupAfterCallRoot();
     }
 
 
@@ -362,24 +376,9 @@ contract CrosschainControl is CbcLockableStorageInterface, Receipts, CbcDecVer {
         return activeCallCrosschainRootTxId;
     }
 
-    // Called by Lockable Storage contract to determine if the Lockable Storage contract
-    // is being locked by this call. That is, if the contract is in the list of locked contracts.
-//    function wasLockedByThisCall() external override view returns (bool) {
-//        for (uint256 i = 0; i < activeCallLockedContracts.length; i++) {
-//            if (activeCallLockedContracts[i] == msg.sender) {
-//                return true;
-//            }
-//        }
-//        return false;
-//    }
-
     function whoCalledMe() external view override returns (uint256 rootBlockchainId, uint256 parentBlockchainId, address parentContract) {
-        uint256[] memory parentCallPath = determineParentCallPath();
-        (parentBlockchainId, parentContract, /* bytes memory parentFunctionCall */ ) =
-            extractTargetFromCallGraph(activeCallGraph, parentCallPath);
-        return (activeCallRootBlockchainId, parentBlockchainId, parentContract);
+        return (activeCallRootBlockchainId, activeCallParentBlockchainId, activeCallParentContract);
     }
-
 
     // **************************** PRIVATE BELOW HERE ***************************
     // **************************** PRIVATE BELOW HERE ***************************
@@ -428,36 +427,36 @@ contract CrosschainControl is CbcLockableStorageInterface, Receipts, CbcDecVer {
         functionCall = RLP.toData(func[2]);
     }
 
-    /**
-     * Based on the active call path, determine the call path of parent of
-     * the function call.
-     */
-    function determineParentCallPath() private view returns (uint256[] memory) {
+    function prepareForWhoCalledMe(bytes memory _callGraph, uint256[] memory _callPath) private {
+        uint256[] memory parentCallPath = determineParentCallPath(_callPath);
+        (activeCallParentBlockchainId, activeCallParentContract, /* bytes memory parentFunctionCall */ ) =
+            extractTargetFromCallGraph(_callGraph, parentCallPath);
+    }
+
+
+    function determineParentCallPath(uint256[] memory _callPath) private view returns (uint256[] memory) {
         uint256[] memory callPathOfParent;
-        uint256 callPathLen = activeCallsCallPath.length;
+        uint256 callPathLen = _callPath.length;
 
-        if (callPathLen == 1 && activeCallsCallPath[0] == 0) {
-            // Return zero length array to indicate this is the root function call.
-            return callPathOfParent;
-        }
+        // Don't call from root function
+        assert(!(callPathLen == 1 && _callPath[0] == 0));
 
-        if (activeCallsCallPath[callPathLen - 1] != 0) {
+        if (_callPath[callPathLen - 1] != 0) {
             callPathOfParent = new uint256[](callPathLen);
             for (uint256 i = 0; i < callPathLen - 1; i++) {
-                callPathOfParent[i] = activeCallsCallPath[i];
+                callPathOfParent[i] = _callPath[i];
             }
             callPathOfParent[callPathLen - 1] = 0;
         }
         else {
             callPathOfParent = new uint256[](callPathLen - 1);
             for (uint256 i = 0; i < callPathLen - 2; i++) {
-                callPathOfParent[i] = activeCallsCallPath[i];
+                callPathOfParent[i] = _callPath[i];
             }
             callPathOfParent[callPathLen - 2] = 0;
         }
         return callPathOfParent;
     }
-
 
 
     function failRootTransaction(uint256 _crosschainTxId) private {
@@ -468,8 +467,34 @@ contract CrosschainControl is CbcLockableStorageInterface, Receipts, CbcDecVer {
 
     /**
      * Clean-up temporary storage after a Segment or Root call.
+     * The three similar functions below only delete storage locations
+     * that could have been set given the scenario.
      */
-    function cleanupAfterCall() private {
+    function cleanupAfterCallSegment() private {
+        delete activeCallCrosschainRootTxId;
+        delete activeCallRootBlockchainId;
+        delete activeCallGraph;
+        delete activeCallsCallPath;
+        delete activeCallLockedContracts;
+        delete activeCallReturnValues;
+        delete activeCallReturnValuesIndex;
+        delete activeCallFailed;
+        delete activeCallParentBlockchainId;
+        delete activeCallParentContract;
+    }
+    function cleanupAfterCallLeafSegment() private {
+        // Clean-up active call temporary storage.
+        delete activeCallCrosschainRootTxId;
+        delete activeCallRootBlockchainId;
+        delete activeCallLockedContracts;
+        delete activeCallReturnValues;
+        delete activeCallReturnValuesIndex;
+        delete activeCallFailed;
+        delete activeCallParentBlockchainId;
+        delete activeCallParentContract;
+    }
+
+    function cleanupAfterCallRoot() private {
         // Clean-up active call temporary storage.
         delete activeCallCrosschainRootTxId;
         delete activeCallRootBlockchainId;
@@ -552,7 +577,7 @@ contract CrosschainControl is CbcLockableStorageInterface, Receipts, CbcDecVer {
             // Fail the root transaction is one of the segments failed.
             if (success == 0) {
                 failRootTransaction(_crosschainTxId);
-                cleanupAfterCall();
+                cleanupAfterCallSegment();
                 return true;
             }
 
