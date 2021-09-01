@@ -68,10 +68,9 @@ contract CrosschainControl is CbcLockableStorageInterface, Receipts, CbcDecVer {
     // contract.
     uint256 public activeCallRootBlockchainId;
 
-    // The cross-blockchain transaction id of the currently executing cross-blokchain call. Used to determine
-    // the transaction id causing a contract to be locked.
-    //uint256 public activeCallCrossBlockchainTransactionId;
-
+    // Combination of root blockchain id and crosschain transaction id of the
+    // currently executing crosschain call. Used for locking. Provisional
+    // values are stored against this id.
     bytes32 public activeCallCrosschainRootTxId;
 
     // The call graph currently being executed. This is needed to determine whether any
@@ -471,39 +470,73 @@ contract CrosschainControl is CbcLockableStorageInterface, Receipts, CbcDecVer {
      * that could have been set given the scenario.
      */
     function cleanupAfterCallSegment() private {
-        delete activeCallCrosschainRootTxId;
-        delete activeCallRootBlockchainId;
         delete activeCallGraph;
         delete activeCallsCallPath;
+        delete activeCallCrosschainRootTxId;
         delete activeCallLockedContracts;
         delete activeCallReturnValues;
         delete activeCallReturnValuesIndex;
-        delete activeCallFailed;
+
+        // Indicates a failure happened in a call out to another segment.
+        if (activeCallFailed) {
+            // Save gas by only writing to the location is it is not the default value.
+            delete activeCallFailed;
+        }
+
+        // Used in whoCalledMe
         delete activeCallParentBlockchainId;
         delete activeCallParentContract;
+        delete activeCallRootBlockchainId;
     }
     function cleanupAfterCallLeafSegment() private {
-        // Clean-up active call temporary storage.
+        // Indicates a failure happened in a call out to another segment. This
+        // should never happen for a leaf segment. However, it would be set
+        // if a segment that was supposed to be a "leaf segment" called out
+        // to another blockchain.
+        if (activeCallFailed) {
+            // Save gas by only writing to the location is it is not the default value.
+            delete activeCallFailed;
+        }
+
+        // Used for contract locking
         delete activeCallCrosschainRootTxId;
-        delete activeCallRootBlockchainId;
         delete activeCallLockedContracts;
-        delete activeCallReturnValues;
-        delete activeCallReturnValuesIndex;
-        delete activeCallFailed;
+
+        // Used in whoCalledMe
+        delete activeCallRootBlockchainId;
         delete activeCallParentBlockchainId;
         delete activeCallParentContract;
+
+        // Not used by leaf calls:
+        //        delete activeCallGraph;
+        //        delete activeCallsCallPath;
+        //        delete activeCallReturnValues;
+        //        delete activeCallReturnValuesIndex;
     }
 
     function cleanupAfterCallRoot() private {
-        // Clean-up active call temporary storage.
-        delete activeCallCrosschainRootTxId;
+        // Used in whoCalledMe
         delete activeCallRootBlockchainId;
+
+        // Used for calling segments
         delete activeCallGraph;
         delete activeCallsCallPath;
-        delete activeCallLockedContracts;
         delete activeCallReturnValues;
         delete activeCallReturnValuesIndex;
-        delete activeCallFailed;
+
+        // Indicates a failure happened in a call out to another segment.
+        if (activeCallFailed) {
+            // Save gas by only writing to the location is it is not the default value.
+            delete activeCallFailed;
+        }
+
+        // Used for contract locking
+        delete activeCallCrosschainRootTxId;
+        delete activeCallLockedContracts;
+
+        // Not used by root calls:
+        //        delete activeCallParentBlockchainId;
+        //        delete activeCallParentContract;
     }
 
 
