@@ -68,10 +68,9 @@ contract CrosschainControl is CbcLockableStorageInterface, Receipts, CbcDecVer {
     // contract.
     uint256 public activeCallRootBlockchainId;
 
-    // The cross-blockchain transaction id of the currently executing cross-blokchain call. Used to determine
-    // the transaction id causing a contract to be locked.
-    //uint256 public activeCallCrossBlockchainTransactionId;
-
+    // Combination of root blockchain id and crosschain transaction id of the
+    // currently executing crosschain call. Used for locking. Provisional
+    // values are stored against this id.
     bytes32 public activeCallCrosschainRootTxId;
 
     // The call graph currently being executed. This is needed to determine whether any
@@ -95,7 +94,9 @@ contract CrosschainControl is CbcLockableStorageInterface, Receipts, CbcDecVer {
     // Indicates the current call segment has failed.
     bool private activeCallFailed;
 
-
+    // Contract that called the target function.
+    uint256 private activeCallParentBlockchainId;
+    address private activeCallParentContract;
 
     constructor(uint256 _myBlockchainId) {
         myBlockchainId = _myBlockchainId;
@@ -123,42 +124,41 @@ contract CrosschainControl is CbcLockableStorageInterface, Receipts, CbcDecVer {
 
         (rootBlockchainId, /* rootCbcContract */, startEvent, segmentEvents) =
             decodeAndVerifyEvents(_blockchainIds, _signedEventInfo, _signatures, true);
-        segmentProcessing(rootBlockchainId, startEvent, segmentEvents, _callPath);
-    }
-
-
-    function segmentProcessing(
-        uint256 _rootBlockchainId, bytes memory _startEventData, bytes[] memory _segmentEvents,
-        uint256[] calldata _callPath) internal {
 
         // The tx.origin needs to be the same on all blockchains that are party to the
         // cross-blockchain transaction. As such, ensure start is only called from an
         // EOA.
         require(tx.origin == msg.sender, "Segment must be called from an EOA");
 
-        uint256 crosschainTransactionId = BytesUtil.bytesToUint256(_startEventData, 0);
-        address startCaller = BytesUtil.bytesToAddress1(_startEventData, 0x20);
+        uint256 crosschainTransactionId = BytesUtil.bytesToUint256(startEvent, 0);
+        address startCaller = BytesUtil.bytesToAddress1(startEvent, 0x20);
         require(startCaller == tx.origin, "EOA does not match start event");
-        uint256 lenOfActiveCallGraph = BytesUtil.bytesToUint256(_startEventData, 0x80);
+        uint256 lenOfActiveCallGraph = BytesUtil.bytesToUint256(startEvent, 0x80);
 
         // Stop replay of transaction segments.
-        bytes32 mapKey = keccak256(abi.encodePacked(_rootBlockchainId, crosschainTransactionId, _callPath));
+        bytes32 mapKey = keccak256(abi.encodePacked(rootBlockchainId, crosschainTransactionId, _callPath));
         require(segmentTransactionExecuted[mapKey] == false, "Segment transaction already executed");
         segmentTransactionExecuted[mapKey] == true;
 
-        bytes memory callGraph = BytesUtil.slice(_startEventData, 0xA0, lenOfActiveCallGraph);
-        activeCallGraph = callGraph;
+        bytes memory callGraph = BytesUtil.slice(startEvent, 0xA0, lenOfActiveCallGraph);
         bytes32 hashOfCallGraph = keccak256(callGraph);
 
-        activeCallRootBlockchainId = _rootBlockchainId;
-        activeCallsCallPath = _callPath;
+        activeCallRootBlockchainId = rootBlockchainId;
 
-        if (verifySegmentEvents(_segmentEvents, _callPath, hashOfCallGraph, crosschainTransactionId)) {
-            return;
+        // No need to store call graph or call path if this is a leaf segment / function
+        if (segmentEvents.length != 0) {
+            activeCallGraph = callGraph;
+            activeCallsCallPath = _callPath;
+            if (verifySegmentEvents(segmentEvents, _callPath, hashOfCallGraph, crosschainTransactionId)) {
+                return;
+            }
         }
 
+
         // Set-up root blockchain / crosschain transaction value used for locking.
-        activeCallCrosschainRootTxId = calcRootTxId(_rootBlockchainId, crosschainTransactionId);
+        activeCallCrosschainRootTxId = calcRootTxId(rootBlockchainId, crosschainTransactionId);
+        // Set-up values to be returned if whoCalledMe is called
+        prepareForWhoCalledMe(callGraph, _callPath);
 
         bool isSuccess;
         bytes memory returnValueEncoded;
@@ -167,7 +167,13 @@ contract CrosschainControl is CbcLockableStorageInterface, Receipts, CbcDecVer {
         // TODO emit segments understanding of root blockhain id
         emit Segment(crosschainTransactionId, hashOfCallGraph, _callPath, activeCallLockedContracts, isSuccess, returnValueEncoded);
 
-        cleanupAfterCall();
+        // Only delete locations used.
+        if (segmentEvents.length != 0) {
+            cleanupAfterCallSegment();
+        }
+        else {
+            cleanupAfterCallLeafSegment();
+        }
     }
 
 
@@ -202,7 +208,7 @@ contract CrosschainControl is CbcLockableStorageInterface, Receipts, CbcDecVer {
         //Check if the cross-blockchain transaction has timed-out.
         if (block.timestamp > timeoutForCall) {
             failRootTransaction(crosschainTransactionId);
-            cleanupAfterCall();
+            cleanupAfterCallRoot();
             return;
         }
 
@@ -243,7 +249,7 @@ contract CrosschainControl is CbcLockableStorageInterface, Receipts, CbcDecVer {
         }
         rootTransactionInformation[crosschainTransactionId] = isSuccess ? SUCCESS : FAILURE;
         emit Root(crosschainTransactionId, isSuccess);
-        cleanupAfterCall();
+        cleanupAfterCallRoot();
     }
 
 
@@ -256,34 +262,34 @@ contract CrosschainControl is CbcLockableStorageInterface, Receipts, CbcDecVer {
         bytes[] memory segmentEvents;
 
         (rootBlockchainId, /* rootCbcContract */, rootEvent, segmentEvents) =
-        decodeAndVerifyEvents(_blockchainIds, _signedEventInfo, _signatures, false);
-        signallingProcessing(rootBlockchainId, rootEvent, segmentEvents);
-    }
-
-
-    /**
-     * Signalling call: Commit or ignore updates + unlock any locked contracts.
-     *
-     * The parameter should be an array of Info[], with the array offset 0 being the root event,
-     * and the other array elements being for segment events that have locked contracts.
-     *
-     * User rootPrep to set-up the parameters
-     **/
-    function signallingProcessing(uint256 _rootBlockchainId, bytes memory _rootEventData, bytes[] memory _segmentEvents) internal {
+            decodeAndVerifyEvents(_blockchainIds, _signedEventInfo, _signatures, false);
+//        signallingProcessing(rootBlockchainId, rootEvent, segmentEvents);
+//    }
+//
+//
+//    /**
+//     * Signalling call: Commit or ignore updates + unlock any locked contracts.
+//     *
+//     * The parameter should be an array of Info[], with the array offset 0 being the root event,
+//     * and the other array elements being for segment events that have locked contracts.
+//     *
+//     * User rootPrep to set-up the parameters
+//     **/
+//    function signallingProcessing(uint256 rootBlockchainId, bytes memory rootEvent, bytes[] memory segmentEvents) internal {
 
         // Extract information from the root event.
-        uint256 rootEventCrossBlockchainTxId = BytesUtil.bytesToUint256(_rootEventData, 0);
-        uint256 success = BytesUtil.bytesToUint256(_rootEventData, 0x20);
+        uint256 rootEventCrossBlockchainTxId = BytesUtil.bytesToUint256(rootEvent, 0);
+        uint256 success = BytesUtil.bytesToUint256(rootEvent, 0x20);
 
         // Set-up root blockchain / crosschain transaction value for unlocking.
-        bytes32 crosschainRootTxId = calcRootTxId(_rootBlockchainId, rootEventCrossBlockchainTxId);
+        bytes32 crosschainRootTxId = calcRootTxId(rootBlockchainId, rootEventCrossBlockchainTxId);
 
         // Check that all of the Segment Events are for the same transaction id, and are for this blockchain.
-        for (uint256 i = 0; i < _segmentEvents.length; i++) {
+        for (uint256 i = 0; i < segmentEvents.length; i++) {
             // Recall Segment event is defined as:
             // event Segment(uint256 _crossBlockchainTransactionId, bytes32 _hashOfCallGraph, uint256[] _callPath,
             //        address[] _lockedContracts, bool _success, bytes _returnValue);
-            uint256 segmentEventCrossBlockchainTxId = BytesUtil.bytesToUint256(_segmentEvents[i], 0);
+            uint256 segmentEventCrossBlockchainTxId = BytesUtil.bytesToUint256(segmentEvents[i], 0);
             // Check that the cross blockchain transaction id is the same for the root and the segment event.
             require(rootEventCrossBlockchainTxId == segmentEventCrossBlockchainTxId);
             // TODO check the Root Blockchain id indicated in the segment matches the one from the root transaction.
@@ -293,19 +299,19 @@ contract CrosschainControl is CbcLockableStorageInterface, Receipts, CbcDecVer {
 
             // For each address indicated in the Segment Event as being locked, Commit or Ignore updates
             // according to what the Root Event says.
-            uint256 locationOfLockedContracts = BytesUtil.bytesToUint256(_segmentEvents[i], 0x60);
+            uint256 locationOfLockedContracts = BytesUtil.bytesToUint256(segmentEvents[i], 0x60);
 //            emit Dump(locationOfLockedContracts, bytes32(0), address(0), _segmentEvents[i]);
-            uint256 numElementsOfArray = BytesUtil.bytesToUint256(_segmentEvents[i], locationOfLockedContracts);
+            uint256 numElementsOfArray = BytesUtil.bytesToUint256(segmentEvents[i], locationOfLockedContracts);
             //emit Dump(numElementsOfArray, bytes32(0), address(0), _segmentEvents[i]);
             for (uint256 j = 0; j < numElementsOfArray; j++) {
-                address lockedContractAddr = BytesUtil.bytesToAddress1(_segmentEvents[i], locationOfLockedContracts + 0x20 + 0x20 * j);
+                address lockedContractAddr = BytesUtil.bytesToAddress1(segmentEvents[i], locationOfLockedContracts + 0x20 + 0x20 * j);
                 //emit Dump(i * 100 + j, bytes32(0), lockedContractAddr, bytes(""));
                 LockableStorage lockedContract = LockableStorage(lockedContractAddr);
                 lockedContract.finalise(success != 0, crosschainRootTxId);
             }
         }
 
-        emit Signalling(_rootBlockchainId, rootEventCrossBlockchainTxId);
+        emit Signalling(rootBlockchainId, rootEventCrossBlockchainTxId);
     }
 
 
@@ -362,24 +368,9 @@ contract CrosschainControl is CbcLockableStorageInterface, Receipts, CbcDecVer {
         return activeCallCrosschainRootTxId;
     }
 
-    // Called by Lockable Storage contract to determine if the Lockable Storage contract
-    // is being locked by this call. That is, if the contract is in the list of locked contracts.
-//    function wasLockedByThisCall() external override view returns (bool) {
-//        for (uint256 i = 0; i < activeCallLockedContracts.length; i++) {
-//            if (activeCallLockedContracts[i] == msg.sender) {
-//                return true;
-//            }
-//        }
-//        return false;
-//    }
-
     function whoCalledMe() external view override returns (uint256 rootBlockchainId, uint256 parentBlockchainId, address parentContract) {
-        uint256[] memory parentCallPath = determineParentCallPath();
-        (parentBlockchainId, parentContract, /* bytes memory parentFunctionCall */ ) =
-            extractTargetFromCallGraph(activeCallGraph, parentCallPath);
-        return (activeCallRootBlockchainId, parentBlockchainId, parentContract);
+        return (activeCallRootBlockchainId, activeCallParentBlockchainId, activeCallParentContract);
     }
-
 
     // **************************** PRIVATE BELOW HERE ***************************
     // **************************** PRIVATE BELOW HERE ***************************
@@ -428,36 +419,36 @@ contract CrosschainControl is CbcLockableStorageInterface, Receipts, CbcDecVer {
         functionCall = RLP.toData(func[2]);
     }
 
-    /**
-     * Based on the active call path, determine the call path of parent of
-     * the function call.
-     */
-    function determineParentCallPath() private view returns (uint256[] memory) {
+    function prepareForWhoCalledMe(bytes memory _callGraph, uint256[] memory _callPath) private {
+        uint256[] memory parentCallPath = determineParentCallPath(_callPath);
+        (activeCallParentBlockchainId, activeCallParentContract, /* bytes memory parentFunctionCall */ ) =
+            extractTargetFromCallGraph(_callGraph, parentCallPath);
+    }
+
+
+    function determineParentCallPath(uint256[] memory _callPath) private view returns (uint256[] memory) {
         uint256[] memory callPathOfParent;
-        uint256 callPathLen = activeCallsCallPath.length;
+        uint256 callPathLen = _callPath.length;
 
-        if (callPathLen == 1 && activeCallsCallPath[0] == 0) {
-            // Return zero length array to indicate this is the root function call.
-            return callPathOfParent;
-        }
+        // Don't call from root function
+        assert(!(callPathLen == 1 && _callPath[0] == 0));
 
-        if (activeCallsCallPath[callPathLen - 1] != 0) {
+        if (_callPath[callPathLen - 1] != 0) {
             callPathOfParent = new uint256[](callPathLen);
             for (uint256 i = 0; i < callPathLen - 1; i++) {
-                callPathOfParent[i] = activeCallsCallPath[i];
+                callPathOfParent[i] = _callPath[i];
             }
             callPathOfParent[callPathLen - 1] = 0;
         }
         else {
             callPathOfParent = new uint256[](callPathLen - 1);
             for (uint256 i = 0; i < callPathLen - 2; i++) {
-                callPathOfParent[i] = activeCallsCallPath[i];
+                callPathOfParent[i] = _callPath[i];
             }
             callPathOfParent[callPathLen - 2] = 0;
         }
         return callPathOfParent;
     }
-
 
 
     function failRootTransaction(uint256 _crosschainTxId) private {
@@ -468,17 +459,77 @@ contract CrosschainControl is CbcLockableStorageInterface, Receipts, CbcDecVer {
 
     /**
      * Clean-up temporary storage after a Segment or Root call.
+     * The three similar functions below only delete storage locations
+     * that could have been set given the scenario.
      */
-    function cleanupAfterCall() private {
-        // Clean-up active call temporary storage.
-        delete activeCallCrosschainRootTxId;
-        delete activeCallRootBlockchainId;
+    function cleanupAfterCallSegment() private {
         delete activeCallGraph;
         delete activeCallsCallPath;
+        delete activeCallCrosschainRootTxId;
         delete activeCallLockedContracts;
         delete activeCallReturnValues;
         delete activeCallReturnValuesIndex;
-        delete activeCallFailed;
+
+        // Indicates a failure happened in a call out to another segment.
+        if (activeCallFailed) {
+            // Save gas by only writing to the location is it is not the default value.
+            delete activeCallFailed;
+        }
+
+        // Used in whoCalledMe
+        delete activeCallParentBlockchainId;
+        delete activeCallParentContract;
+        delete activeCallRootBlockchainId;
+    }
+    function cleanupAfterCallLeafSegment() private {
+        // Indicates a failure happened in a call out to another segment. This
+        // should never happen for a leaf segment. However, it would be set
+        // if a segment that was supposed to be a "leaf segment" called out
+        // to another blockchain.
+        if (activeCallFailed) {
+            // Save gas by only writing to the location is it is not the default value.
+            delete activeCallFailed;
+        }
+
+        // Used for contract locking
+        delete activeCallCrosschainRootTxId;
+        delete activeCallLockedContracts;
+
+        // Used in whoCalledMe
+        delete activeCallRootBlockchainId;
+        delete activeCallParentBlockchainId;
+        delete activeCallParentContract;
+
+        // Not used by leaf calls:
+        //        delete activeCallGraph;
+        //        delete activeCallsCallPath;
+        //        delete activeCallReturnValues;
+        //        delete activeCallReturnValuesIndex;
+    }
+
+    function cleanupAfterCallRoot() private {
+        // Used in whoCalledMe
+        delete activeCallRootBlockchainId;
+
+        // Used for calling segments
+        delete activeCallGraph;
+        delete activeCallsCallPath;
+        delete activeCallReturnValues;
+        delete activeCallReturnValuesIndex;
+
+        // Indicates a failure happened in a call out to another segment.
+        if (activeCallFailed) {
+            // Save gas by only writing to the location is it is not the default value.
+            delete activeCallFailed;
+        }
+
+        // Used for contract locking
+        delete activeCallCrosschainRootTxId;
+        delete activeCallLockedContracts;
+
+        // Not used by root calls:
+        //        delete activeCallParentBlockchainId;
+        //        delete activeCallParentContract;
     }
 
 
@@ -552,7 +603,7 @@ contract CrosschainControl is CbcLockableStorageInterface, Receipts, CbcDecVer {
             // Fail the root transaction is one of the segments failed.
             if (success == 0) {
                 failRootTransaction(_crosschainTxId);
-                cleanupAfterCall();
+                cleanupAfterCallSegment();
                 return true;
             }
 
