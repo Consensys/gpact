@@ -38,13 +38,12 @@ contract CrosschainVerifierTxRoot is CrosschainVerifier,  Receipts {
     }
 
 
-    function decodeAndVerifyEvent(uint256 _expectedBlockchainId, bytes32 _expectedEventSignature,
-        bytes calldata _signedEventInfo, bytes calldata /*_signature */)
-        external view override returns(EventInfo memory _eventInfo) {
+    function decodeAndVerifyEvent(uint256 _expectedBlockchainId, bytes32 _eventSig, bytes calldata _encodedEvent, bytes calldata _proof)
+        external view override {
 
         address cbcContract = registrar.getApprovedContract(_expectedBlockchainId);
 
-        EventProof memory eventProof = toEventProof(_signedEventInfo);
+        EventProof memory eventProof = toEventProof(_proof);
         txReceiptRootStorage.verify(
             eventProof.blockchainId,
             eventProof.cbcContract,
@@ -58,12 +57,12 @@ contract CrosschainVerifierTxRoot is CrosschainVerifier,  Receipts {
         RLP.RLPItem[] memory keyAndReceipt = RLP.toList(RLP.toRLPItem(eventProof.encodedTxReceipt));
         bytes memory receiptBytes = RLP.toData(keyAndReceipt[1]);
 
-        EventInfo memory eventInfo;
-        eventInfo.cbcContract = cbcContract;
+        bytes memory eventData;
         // If the CBC Contract is incorrect, extractEvent will fail.
-        (, eventInfo.eventData) = extractEvent(cbcContract, _expectedEventSignature, receiptBytes);
+        (, eventData) = extractEvent(eventProof.cbcContract, _eventSig, receiptBytes);
 
-        return(eventInfo);
+        bytes memory calculatedEncoded = abi.encodePacked(_expectedBlockchainId, eventProof.cbcContract, _eventSig, eventData);
+        require(compare(calculatedEncoded, _encodedEvent), "Expected event does not match event in proof");
     }
 
     function toEventProof(bytes memory _encodedEventProof) private pure returns(EventProof memory){

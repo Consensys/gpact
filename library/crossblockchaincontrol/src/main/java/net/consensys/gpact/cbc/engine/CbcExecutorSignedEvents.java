@@ -34,15 +34,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public class CbcExecutorSignedEvents extends AbstractCbcExecutor {
   static final Logger LOG = LogManager.getLogger(CbcExecutorSignedEvents.class);
 
-  SignedEvent signedStartEvent;
-  SignedEvent signedRootEvent;
-
-
-  // Key for this map is the call path of the caller.
-  Map<BigInteger, List<SignedEvent>> signedSegmentEvents = new ConcurrentHashMap<>();
-
-  // Key for this map is the blockchain id that the segment occurred on.
-  Map<BigInteger, List<SignedEvent>> signedSegmentEventsWithLockedContracts = new ConcurrentHashMap<>();
 
   public CbcExecutorSignedEvents(CbcManager cbcManager) throws Exception {
     super(CrossBlockchainConsensusType.EVENT_SIGNING, cbcManager);
@@ -52,7 +43,8 @@ public class CbcExecutorSignedEvents extends AbstractCbcExecutor {
   protected void startCall() throws Exception {
     CrossBlockchainControlSignedEvents rootCbcContract = this.cbcManager.getCbcContractSignedEvents(this.rootBcId);
 
-    byte[] startEventData = rootCbcContract.start(this.crossBlockchainTransactionId, this.timeout, this.callGraph);
+    Tuple<TransactionReceipt, byte[], Boolean> result = rootCbcContract.start(this.crossBlockchainTransactionId, this.timeout, this.callGraph);
+    byte[] startEventData = result.getSecond();
     this.signedStartEvent = new SignedEvent(this.cbcManager.getSigners(this.rootBcId),
           rootBcId, this.cbcManager.getCbcAddress(this.rootBcId), AbstractCbc.START_EVENT_SIGNATURE, startEventData);
   }
@@ -67,11 +59,10 @@ public class CbcExecutorSignedEvents extends AbstractCbcExecutor {
     CrossBlockchainControlSignedEvents segmentCbcContract = this.cbcManager.getCbcContractSignedEvents(blockchainId);
 
     List<SignedEvent> signedEvents = this.signedSegmentEvents.computeIfAbsent(mapKey, k -> new ArrayList<>());
-    Tuple<byte[], Boolean, TransactionReceipt> result = segmentCbcContract.segment(this.signedStartEvent, signedEvents, callPath);
-    byte[] segEventData = result.getFirst();
-    boolean noLockedContracts = result.getSecond();
-    TransactionReceipt transactionReceipt = result.getThird();
-    //boolean success = result.getThird();
+    Tuple<TransactionReceipt, byte[], Boolean> result = segmentCbcContract.segment(this.signedStartEvent, signedEvents, callPath);
+    TransactionReceipt transactionReceipt = result.getFirst();
+    byte[] segEventData = result.getSecond();
+    boolean noLockedContracts = result.getThird();
     SignedEvent signedSegEvent = new SignedEvent(this.cbcManager.getSigners(blockchainId),
             blockchainId, this.cbcManager.getCbcAddress(blockchainId), AbstractCbc.SEGMENT_EVENT_SIGNATURE, segEventData);
     this.transactionReceipts.put(mapKey, transactionReceipt);
@@ -93,22 +84,13 @@ public class CbcExecutorSignedEvents extends AbstractCbcExecutor {
   protected void root() throws Exception {
     CrossBlockchainControlSignedEvents rootCbcContract = this.cbcManager.getCbcContractSignedEvents(this.rootBcId);
     List<SignedEvent> signedSegEvents = this.signedSegmentEvents.get(ROOT_CALL_MAP_KEY);
-    Tuple<byte[], TransactionReceipt, Boolean> result = rootCbcContract.root(this.signedStartEvent, signedSegEvents);
-    byte[] rootEventData = result.getFirst();
-    TransactionReceipt rootTxReceipt = result.getSecond();
+    Tuple<TransactionReceipt, byte[], Boolean> result = rootCbcContract.root(this.signedStartEvent, signedSegEvents);
+    TransactionReceipt rootTxReceipt = result.getFirst();
+    byte[] rootEventData = result.getSecond();
     this.signedRootEvent = new SignedEvent(this.cbcManager.getSigners(this.rootBcId),
           this.rootBcId, this.cbcManager.getCbcAddress(this.rootBcId), AbstractCbc.ROOT_EVENT_SIGNATURE, rootEventData);
     this.transactionReceipts.put(ROOT_CALL_MAP_KEY, rootTxReceipt);
     this.success = rootCbcContract.getRootEventSuccess();
-  }
-
-  protected void doSignallingCallsOldSerial() throws Exception {
-    for (BigInteger blockchainId: this.signedSegmentEventsWithLockedContracts.keySet()) {
-      List<SignedEvent> signedSegEventsLockedContractsCurrentBlockchain =
-          this.signedSegmentEventsWithLockedContracts.get(blockchainId);
-      CrossBlockchainControlSignedEvents cbcContract = this.cbcManager.getCbcContractSignedEvents(blockchainId);
-      cbcContract.signallingOldSerial(this.signedRootEvent, signedSegEventsLockedContractsCurrentBlockchain);
-    }
   }
 
   /**

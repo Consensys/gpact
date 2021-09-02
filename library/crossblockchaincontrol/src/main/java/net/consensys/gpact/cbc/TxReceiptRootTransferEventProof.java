@@ -36,6 +36,8 @@ public class TxReceiptRootTransferEventProof {
   byte[] transactionReceipt;
   List<BigInteger> proofOffsets;
   List<byte[]> proofs;
+  byte[] eventFunctionSignature;
+  byte[] eventData;
 
   /**
    * Create new proof.
@@ -54,7 +56,9 @@ public class TxReceiptRootTransferEventProof {
       byte[] transactionReceiptRoot,
       byte[] transactionReceipt,
       List<BigInteger> proofOffsets,
-      List<byte[]> proofs) {
+      List<byte[]> proofs,
+      byte[] eventSignature,
+      byte[] eventData) {
 
     this.blockchainId = blockchainId;
     this.crossBlockchainControlContract = crossBlockchainControlContract;
@@ -62,6 +66,8 @@ public class TxReceiptRootTransferEventProof {
     this.transactionReceipt = transactionReceipt;
     this.proofOffsets = proofOffsets;
     this.proofs = proofs;
+    this.eventFunctionSignature = eventSignature;
+    this.eventData = eventData;
   }
 
   public BigInteger getBlockchainId() {
@@ -95,7 +101,7 @@ public class TxReceiptRootTransferEventProof {
 //  }
 
 
-  public byte[] getEncodedProof() {
+  private byte[] getEncodedProof() {
     UInt256 blockchainIdUint256 = UInt256.valueOf(this.blockchainId);
     byte[] blockchainIdBytes = blockchainIdUint256.toBytes().toArray();
 
@@ -118,5 +124,14 @@ public class TxReceiptRootTransferEventProof {
         new RlpList(proofRlp));
 
     return RlpEncoder.encode(overallProofRlp);
+  }
+
+  public SignedEvent toSignedEvent() {
+    return new SignedEvent(
+            this.blockchainId,
+            this.crossBlockchainControlContract,
+            this.eventFunctionSignature,
+            this.eventData,
+            getEncodedProof());
   }
 }

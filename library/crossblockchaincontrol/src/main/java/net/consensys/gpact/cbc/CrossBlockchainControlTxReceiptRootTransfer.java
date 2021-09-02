@@ -97,189 +97,6 @@ public class CrossBlockchainControlTxReceiptRootTransfer extends AbstractCbc {
   }
 
 
-
-  public TransactionReceipt start(BigInteger transactionId, BigInteger timeout, byte[] callGraph) throws Exception {
-    StatsHolder.log("Start call now");
-    TransactionReceipt txR = this.crossBlockchainControlContract.start(transactionId, timeout, callGraph).send();
-    StatsHolder.logGas("Start Transaction", txR.getGasUsed());
-    List<CrosschainControl.StartEventResponse> startEvents = this.crossBlockchainControlContract.getStartEvents(txR);
-    CrosschainControl.StartEventResponse startEvent = startEvents.get(0);
-    this.crossBlockchainTransactionTimeout = startEvent._timeout.longValue();
-    return txR;
-  }
-
-  public Tuple<TransactionReceipt, Boolean, Boolean> segment(
-      TxReceiptRootTransferEventProof startProof,
-      List<TxReceiptRootTransferEventProof> segProofs,
-      List<BigInteger> callPath) throws Exception {
-
-    List<BigInteger> bcIds = new ArrayList<>();
-    List<byte[]> allProofs = new ArrayList<>();
-    List<byte[]> encodedSignatures = new ArrayList<>();
-    allProofs.add(startProof.getEncodedProof());
-    bcIds.add(startProof.getBlockchainId());
-    for (TxReceiptRootTransferEventProof segProof: segProofs) {
-      allProofs.add(segProof.getEncodedProof());
-      bcIds.add(segProof.getBlockchainId());
-    }
-
-    TransactionReceipt txR;
-    try {
-      txR = this.crossBlockchainControlContract.segment(bcIds, allProofs, encodedSignatures, callPath).send();
-      StatsHolder.logGas("Segment Transaction", txR.getGasUsed());
-    }
-    catch (TransactionException ex) {
-      LOG.error(" Revert Reason: {}", RevertReason.decodeRevertReason(ex.getTransactionReceipt().get().getRevertReason()));
-      throw ex;
-    }
-    if (!txR.isStatusOK()) {
-      throw new Exception("Segment transaction failed");
-    }
-
-    showSegmentEvents(convertSegment(this.crossBlockchainControlContract.getSegmentEvents(txR)));
-    showBadCallEvents(convertBadCall(this.crossBlockchainControlContract.getBadCallEvents(txR)));
-    showNotEnoughCallsEvents(convertNotEnoughCalls(this.crossBlockchainControlContract.getNotEnoughCallsEvents(txR)));
-    showCallFailureEvents(convertCallFailure(this.crossBlockchainControlContract.getCallFailureEvents(txR)));
-    showCallResultEvents(convertCallResult(this.crossBlockchainControlContract.getCallResultEvents(txR)));
-    showDumpEvents(convertDump(this.crossBlockchainControlContract.getDumpEvents(txR)));
-
-    List<CrosschainControl.SegmentEventResponse> segmentEventResponses = this.crossBlockchainControlContract.getSegmentEvents(txR);
-    CrosschainControl.SegmentEventResponse segmentEventResponse = segmentEventResponses.get(0);
-
-    return new Tuple<TransactionReceipt, Boolean, Boolean>
-        (txR, segmentEventResponse._lockedContracts.isEmpty(), segmentEventResponse._success);
-  }
-
-
-  public TransactionReceipt root(TxReceiptRootTransferEventProof startProof, List<TxReceiptRootTransferEventProof> segProofs) throws Exception {
-    List<BigInteger> bcIds = new ArrayList<>();
-    List<byte[]> allProofs = new ArrayList<>();
-    List<byte[]> encodedSignatures = new ArrayList<>();
-    allProofs.add(startProof.getEncodedProof());
-    bcIds.add(startProof.getBlockchainId());
-    for (TxReceiptRootTransferEventProof segProof: segProofs) {
-      allProofs.add(segProof.getEncodedProof());
-      bcIds.add(segProof.getBlockchainId());
-    }
-
-    long now = System.currentTimeMillis() / 1000;
-    LOG.debug(" Current time on this computer: {}; Transaction time-out: {}", now, this.crossBlockchainTransactionTimeout);
-    if (this.crossBlockchainTransactionTimeout < now) {
-      LOG.warn(" Cross-Blockchain transaction will fail as transaction has timed-out");
-    }
-    else if (this.crossBlockchainTransactionTimeout < (now - 10)) {
-      LOG.warn(" Cross-Blockchain transaction might fail as transaction time-out is soon");
-    }
-
-    TransactionReceipt txR;
-    try {
-      txR = this.crossBlockchainControlContract.root(bcIds, allProofs, encodedSignatures).send();
-      StatsHolder.logGas("Root Transaction", txR.getGasUsed());
-      if (!txR.isStatusOK()) {
-        throw new Exception("Root transaction failed");
-      }
-    }
-    catch (TransactionException ex) {
-      LOG.error(" Revert Reason: {}", RevertReason.decodeRevertReason(ex.getTransactionReceipt().get().getRevertReason()));
-      throw ex;
-    }
-
-    showRootEvents(convertRoot(this.crossBlockchainControlContract.getRootEvents(txR)));
-    showBadCallEvents(convertBadCall(this.crossBlockchainControlContract.getBadCallEvents(txR)));
-    showNotEnoughCallsEvents(convertNotEnoughCalls(this.crossBlockchainControlContract.getNotEnoughCallsEvents(txR)));
-    showCallFailureEvents(convertCallFailure(this.crossBlockchainControlContract.getCallFailureEvents(txR)));
-    showCallResultEvents(convertCallResult(this.crossBlockchainControlContract.getCallResultEvents(txR)));
-    showDumpEvents(convertDump(this.crossBlockchainControlContract.getDumpEvents(txR)));
-
-    List<CrosschainControl.RootEventResponse> rootEventResponses = this.crossBlockchainControlContract.getRootEvents(txR);
-    CrosschainControl.RootEventResponse rootEventResponse = rootEventResponses.get(0);
-    this.rootEventSuccess = rootEventResponse._success;
-
-    return txR;
-  }
-
-
-
-
-  public void signallingSerial(TxReceiptRootTransferEventProof rootProof, List<TxReceiptRootTransferEventProof> segProofs) throws Exception {
-    List<BigInteger> bcIds = new ArrayList<>();
-    List<byte[]> allProofs = new ArrayList<>();
-    List<byte[]> encodedSignatures = new ArrayList<>();
-    allProofs.add(rootProof.getEncodedProof());
-    bcIds.add(rootProof.getBlockchainId());
-    for (TxReceiptRootTransferEventProof segProof: segProofs) {
-      allProofs.add(segProof.getEncodedProof());
-      bcIds.add(segProof.getBlockchainId());
-    }
-
-    for (TxReceiptRootTransferEventProof proofInfo: segProofs) {
-      allProofs.add(proofInfo.getEncodedProof());
-    }
-
-    TransactionReceipt txR;
-    try {
-      txR = this.crossBlockchainControlContract.signalling(bcIds, allProofs, encodedSignatures).send();
-      StatsHolder.logGas("Signalling Transaction", txR.getGasUsed());
-    }
-    catch (TransactionException ex) {
-      LOG.error(" Revert Reason: {}", RevertReason.decodeRevertReason(ex.getTransactionReceipt().get().getRevertReason()));
-      throw ex;
-    }
-    if (!txR.isStatusOK()) {
-      throw new Exception("Signalling transaction failed");
-    }
-
-    List<CrosschainControl.SignallingEventResponse> sigEventResponses = this.crossBlockchainControlContract.getSignallingEvents(txR);
-    CrosschainControl.SignallingEventResponse sigEventResponse = sigEventResponses.get(0);
-    LOG.debug("Signalling Event:");
-    LOG.debug(" Root Blockchain Id: 0x{}", sigEventResponse._rootBcId.toString(16));
-    LOG.debug(" Cross-Blockchain Transaction Id: {}", sigEventResponse._crossBlockchainTransactionId.toString(16));
-
-    showDumpEvents(convertDump(this.crossBlockchainControlContract.getDumpEvents(txR)));
-  }
-
-  public CompletableFuture<TransactionReceipt> signallingAsyncPart1(TxReceiptRootTransferEventProof rootProof, List<TxReceiptRootTransferEventProof> segProofs) throws Exception {
-    List<BigInteger> bcIds = new ArrayList<>();
-    List<byte[]> allProofs = new ArrayList<>();
-    List<byte[]> encodedSignatures = new ArrayList<>();
-    allProofs.add(rootProof.getEncodedProof());
-    bcIds.add(rootProof.getBlockchainId());
-    for (TxReceiptRootTransferEventProof segProof: segProofs) {
-      allProofs.add(segProof.getEncodedProof());
-      bcIds.add(segProof.getBlockchainId());
-    }
-
-    return this.crossBlockchainControlContract.signalling(bcIds, allProofs, encodedSignatures).sendAsync();
-  }
-
-  public void signallingAsyncPart2(TransactionReceipt txR) throws Exception {
-    StatsHolder.logGas("Signalling Transaction", txR.getGasUsed());
-    if (!txR.isStatusOK()) {
-      LOG.error(" Revert Reason: {}", RevertReason.decodeRevertReason(txR.getRevertReason()));
-      throw new Exception("Signalling transaction failed");
-    }
-
-    List<CrosschainControl.SignallingEventResponse> sigEventResponses = this.crossBlockchainControlContract.getSignallingEvents(txR);
-    CrosschainControl.SignallingEventResponse sigEventResponse = sigEventResponses.get(0);
-    LOG.debug("Signalling Event:");
-    LOG.debug(" Root Blockchain Id: 0x{}", sigEventResponse._rootBcId.toString(16));
-    LOG.debug(" Cross-Blockchain Transaction Id: {}", sigEventResponse._crossBlockchainTransactionId.toString(16));
-
-    showDumpEvents(convertDump(this.crossBlockchainControlContract.getDumpEvents(txR)));
-  }
-
-
-
-  public String getCbcContractAddress() {
-    return this.crossBlockchainControlContract.getContractAddress();
-  }
-
-  public boolean getRootEventSuccess() {
-    return this.rootEventSuccess;
-  }
-
-
-
   public byte[] getTransactionReceiptRoot(TransactionReceipt transactionReceipt) throws Exception {
     EthBlock block = this.web3j.ethGetBlockByHash(transactionReceipt.getBlockHash(), false).send();
     EthBlock.Block b1 = block.getBlock();
@@ -351,7 +168,10 @@ public class CrossBlockchainControlTxReceiptRootTransfer extends AbstractCbc {
 
 
 
-  public TxReceiptRootTransferEventProof getProofForTxReceipt(BigInteger blockchainId, String cbcContractAddress, TransactionReceipt aReceipt) throws Exception {
+  public TxReceiptRootTransferEventProof getProofForTxReceipt(
+          BigInteger blockchainId, String cbcContractAddress, TransactionReceipt aReceipt,
+          byte[] eventData,
+          byte[] eventFunctionSignature) throws Exception {
     // Calculate receipt root based on logs for all receipts of all transactions in the block.
     String blockHash = aReceipt.getBlockHash();
     EthGetBlockTransactionCountByHash transactionCountByHash = this.web3j.ethGetBlockTransactionCountByHash(blockHash).send();
@@ -490,13 +310,16 @@ public class CrossBlockchainControlTxReceiptRootTransfer extends AbstractCbc {
     if (!besuCalculatedReceiptsRoot.toHexString().equalsIgnoreCase(nodeHash.toHexString())) {
       throw new Error("Transaction receipt root calculated using proof did not match actual receipt root");
     }
+
     return new TxReceiptRootTransferEventProof(
         blockchainId,
         cbcContractAddress,
         getTransactionReceiptRoot(aReceipt),
         encodedTransactionReceipt.toArray(),
         proofOffsets,
-        proofs);
+        proofs,
+        eventFunctionSignature,
+        eventData);
   }
 
 
@@ -531,14 +354,13 @@ public class CrossBlockchainControlTxReceiptRootTransfer extends AbstractCbc {
     return RLP.encodeOne(UInt256.valueOf(i).toBytes().trimLeadingZeros());
   }
 
-  public TxReceiptRootTransferEventProof getStartEventProof(TransactionReceipt startTxReceipt) throws Exception {
-    return getProofForTxReceipt(this.blockchainId, this.crossBlockchainControlContract.getContractAddress(), startTxReceipt);
-  }
-  public TxReceiptRootTransferEventProof getRootEventProof(TransactionReceipt rootTxReceipt) throws Exception {
-    return getProofForTxReceipt(this.blockchainId, this.crossBlockchainControlContract.getContractAddress(), rootTxReceipt);
-  }
-  public TxReceiptRootTransferEventProof getSegmentEventProof(TransactionReceipt segmentTxReceipt) throws Exception {
-    return getProofForTxReceipt(this.blockchainId, this.crossBlockchainControlContract.getContractAddress(), segmentTxReceipt);
+  public TxReceiptRootTransferEventProof getEventProof(TransactionReceipt startTxReceipt, byte[] eventData,
+                                                       byte[] eventFunctionSignature) throws Exception {
+    return getProofForTxReceipt(this.blockchainId,
+            this.crossBlockchainControlContract.getContractAddress(),
+            startTxReceipt,
+            eventData,
+            eventFunctionSignature);
   }
 
 

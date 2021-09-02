@@ -15,60 +15,66 @@
 pragma solidity >=0.8;
 
 import "./CrosschainVerifier.sol";
+import "../../../../registrar/src/main/solidity/Registrar.sol";
+
 
 abstract contract CbcDecVer {
+    // 	0x77dab611
     bytes32 constant internal START_EVENT_SIGNATURE = keccak256("Start(uint256,address,uint256,bytes)");
+    // 0xb01557f1
     bytes32 constant internal SEGMENT_EVENT_SIGNATURE = keccak256("Segment(uint256,bytes32,uint256[],address[],bool,bytes)");
+    // 0xe6763dd9
     bytes32 constant internal ROOT_EVENT_SIGNATURE = keccak256("Root(uint256,bool)");
 
     mapping (uint256 => CrosschainVerifier) private verifiers;
+
+    Registrar private reg;
+
+    constructor(address _registrar) {
+        reg = Registrar(_registrar);
+    }
 
     // TODO this must be only owner
     function addVerifier(uint256 _blockchainId, address verifier) external {
         verifiers[_blockchainId] = CrosschainVerifier(verifier);
     }
 
+    function decodeAndVerifyEvents(
+        uint256[] calldata _blockchainIds,
+        address[] calldata _cbcAddresses,
+        bytes32[] calldata _eventFunctionSignatures,
+        bytes[] calldata _eventData,
+        bytes[] calldata _signatures,
+        bool _expectStart) internal view {
 
-    function decodeAndVerifyEvents(uint256[] calldata _blockchainIds, bytes[] calldata _signedEventInfo, bytes[] calldata _signatures, bool _expectStart)
-        internal view returns(uint256 _rootBlockchainId, address _rootCbcContract, bytes memory _startOrRootEvent, bytes[] memory _segmentEvents) {
         // The minimum number of events is 1: start and no segment, used to end a timed-out
         // crosschain transactions.
-        uint256 numEvents = _signedEventInfo.length;
+        uint256 numEvents = _blockchainIds.length;
         require(numEvents > 0, "Must be at least one event");
-        require(numEvents == _blockchainIds.length, "Number of blockchain Ids and events must match");
-        require(numEvents == _signatures.length || _signatures.length == 0, "Number of events and signatures match, or number of signatures must be zero");
+        require(numEvents == _cbcAddresses.length, "Number of blockchain Ids and cbcAddresses must match");
+        require(numEvents == _eventFunctionSignatures.length, "Number of blockchain Ids and event function signatures must match");
+        require(numEvents == _eventData.length, "Number of blockchain Ids and event data must match");
+        require(numEvents == _signatures.length, "Number of events and signatures match");
 
-
-        _segmentEvents = new bytes[](numEvents - 1);
         for (uint256 i = 0; i < numEvents; i++) {
             uint256 bcId = _blockchainIds[i];
-            bytes memory signedEventInfo = _signedEventInfo[i];
-            bytes memory signature;
-            if (_signatures.length != 0) {
-                signature = _signatures[i];
-            }
 
             CrosschainVerifier verifier = verifiers[bcId];
             require(address(verifier) != address(0), "No registered verifier for blockchain");
 
-            bytes32 eventSig;
+            reg.verifyContract(bcId, _cbcAddresses[i]);
+
             if (i == 0) {
-                eventSig = _expectStart ? START_EVENT_SIGNATURE : ROOT_EVENT_SIGNATURE;
+                bytes32 eventSig = _expectStart ? START_EVENT_SIGNATURE : ROOT_EVENT_SIGNATURE;
+                require(eventSig == _eventFunctionSignatures[i], "Unexpected first event function signature");
             }
             else {
-                eventSig = SEGMENT_EVENT_SIGNATURE;
+                require(SEGMENT_EVENT_SIGNATURE == _eventFunctionSignatures[i], "Event function signature not for a segment");
             }
 
-            CrosschainVerifier.EventInfo memory eventInfo = verifier.decodeAndVerifyEvent(
-                bcId, eventSig, signedEventInfo, signature);
-            if (i == 0) {
-                _rootCbcContract = eventInfo.cbcContract;
-                _startOrRootEvent = eventInfo.eventData;
-            }
-            else {
-                _segmentEvents[i-1] = eventInfo.eventData;
-            }
+            bytes memory encodedEvent = abi.encodePacked(bcId, _cbcAddresses[i], _eventFunctionSignatures[i], _eventData[i]);
+            verifier.decodeAndVerifyEvent(
+                bcId, _eventFunctionSignatures[i], encodedEvent, _signatures[i]);
         }
-        _rootBlockchainId = _blockchainIds[0];
     }
 }
