@@ -41,6 +41,7 @@ public class Erc20User {
     private final String addressOfCrosschainERCB;
 
     private CbcManager cbcManager;
+    private CrossBlockchainConsensusType consensusMethodology;
 
     protected Erc20User(
             String name,
@@ -61,6 +62,7 @@ public class Erc20User {
             PropertiesLoader.BlockchainInfo bcInfoA, List<String> infrastructureContractAddressOnBcA,
             PropertiesLoader.BlockchainInfo bcInfoB, List<String> infrastructureContractAddressOnBcB,
             AnIdentity globalSigner) throws Exception {
+        this.consensusMethodology = consensusMethodology;
         this.cbcManager = new CbcManager(consensusMethodology);
         this.cbcManager.addBlockchain(this.creds, bcInfoA, infrastructureContractAddressOnBcA);
         this.cbcManager.addBlockchain(this.creds, bcInfoB, infrastructureContractAddressOnBcB);
@@ -96,8 +98,17 @@ public class Erc20User {
         rootCalls.add(segment);
         RlpList callTree = createRootFunctionCall(sourceBlockchainId, sourceContractAddress, rlpRoot, rootCalls);
 
-        AbstractCbcExecutor executor = new CbcExecutorSignedEvents(this.cbcManager);
-
+        AbstractCbcExecutor executor;
+        switch (this.consensusMethodology) {
+            case TRANSACTION_RECEIPT_SIGNING:
+                executor = new CbcExecutorTxReceiptRootTransfer(this.cbcManager);
+                break;
+            case EVENT_SIGNING:
+                executor = new CbcExecutorSignedEvents(this.cbcManager);
+                break;
+            default:
+                throw new RuntimeException("Not implemented yet");
+        }
         ExecutionEngine executionEngine = new SerialExecutionEngine(executor);
         boolean success = executionEngine.execute(callTree, 300);
 

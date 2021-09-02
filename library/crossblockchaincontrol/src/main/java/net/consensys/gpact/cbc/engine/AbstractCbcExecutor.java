@@ -14,6 +14,7 @@
  */
 package net.consensys.gpact.cbc.engine;
 
+import net.consensys.gpact.cbc.SignedEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
@@ -25,6 +26,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class AbstractCbcExecutor {
   static final Logger LOG = LogManager.getLogger(AbstractCbcExecutor.class);
@@ -43,6 +45,18 @@ public abstract class AbstractCbcExecutor {
   }
 
   protected Map<BigInteger, TransactionReceipt> transactionReceipts = new HashMap<>();
+
+  SignedEvent signedStartEvent;
+  SignedEvent signedRootEvent;
+
+
+  // Key for this map is the call path of the caller.
+  Map<BigInteger, List<SignedEvent>> signedSegmentEvents = new ConcurrentHashMap<>();
+
+  // Key for this map is the blockchain id that the segment occurred on.
+  Map<BigInteger, List<SignedEvent>> signedSegmentEventsWithLockedContracts = new ConcurrentHashMap<>();
+
+
 
   private CrossBlockchainConsensusType consensusMethodology;
 

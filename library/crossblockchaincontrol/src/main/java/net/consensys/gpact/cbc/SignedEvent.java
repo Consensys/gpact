@@ -33,12 +33,18 @@ import static net.consensys.gpact.common.FormatConversion.addressStringToBytes;
  */
 public class SignedEvent {
   private BigInteger bcId;
-  private byte[] encodedEventInformation;
+  private String cbcContract;
+  private byte[] eventFunctionSignature;
+  private byte[] eventData;
   private byte[] encodedSignatures;
 
-  public SignedEvent(AnIdentity[] signers, BigInteger blockchainId, String cbcContract, byte[] eventSignature, byte[] eventData) {
+  public SignedEvent(AnIdentity[] signers, BigInteger blockchainId, String cbcContract, byte[] eventFunctionSignature, byte[] eventData) {
     this.bcId = blockchainId;
-    this.encodedEventInformation = RlpEncoder.encode(encodeEvent(blockchainId, cbcContract, eventSignature, eventData));
+    this.cbcContract = cbcContract;
+    this.eventFunctionSignature = eventFunctionSignature;
+    this.eventData = eventData;
+
+    byte[] encodedEventInformation = abiEncodePackedEvent(blockchainId, cbcContract, eventFunctionSignature, eventData);
 
     // Add the transaction receipt root for the blockchain
     // Sign the txReceiptRoot
@@ -47,7 +53,7 @@ public class SignedEvent {
     List<byte[]> sigS = new ArrayList<>();
     List<BigInteger> sigV = new ArrayList<>();
     for (AnIdentity signer: signers) {
-      Sign.SignatureData signatureData = signer.sign(this.encodedEventInformation);
+      Sign.SignatureData signatureData = signer.sign(encodedEventInformation);
       theSigners.add(signer.getAddress());
       sigR.add(signatureData.getR());
       sigS.add(signatureData.getS());
@@ -57,8 +63,26 @@ public class SignedEvent {
     this.encodedSignatures = RlpEncoder.encode(encodeSignatures(theSigners, sigR, sigS, sigV));
   }
 
-  public byte[] getEncodedEventInformation() {
-    return encodedEventInformation;
+  public SignedEvent(BigInteger blockchainId, String cbcContract, byte[] eventFunctionSignature,
+                     byte[] eventData, byte[] encodedSignatures) {
+    this.bcId = blockchainId;
+    this.cbcContract = cbcContract;
+    this.eventFunctionSignature = eventFunctionSignature;
+    this.eventData = eventData;
+    this.encodedSignatures = encodedSignatures;
+  }
+
+
+    public String getCbcContract() {
+    return cbcContract;
+  }
+
+  public byte[] getEventFunctionSignature() {
+    return eventFunctionSignature;
+  }
+
+  public byte[] getEventData() {
+    return eventData;
   }
 
   public byte[] getEncodedSignatures() {
@@ -69,17 +93,24 @@ public class SignedEvent {
     return this.bcId;
   }
 
-  private static RlpList encodeEvent(BigInteger blockchainId, String cbcContractAddress, byte[] eventSignature, byte[] eventData) {
+  private static byte[] abiEncodePackedEvent(BigInteger blockchainId, String cbcContractAddress,
+                                             byte[] eventSignature, byte[] eventData) {
     UInt256 blockchainIdUint256 = UInt256.valueOf(blockchainId);
     byte[] blockchainIdBytes = blockchainIdUint256.toBytes().toArray();
 
-    return new RlpList(
-        RlpString.create(blockchainIdBytes),
-        RlpString.create(addressStringToBytes(cbcContractAddress)),
-        RlpString.create(eventSignature),
-        RlpString.create(eventData)
-    );
+    byte[] address = addressStringToBytes(cbcContractAddress);
+
+    byte[] abiEncodePacked = new byte[blockchainIdBytes.length + address.length + eventSignature.length + eventData.length];
+    System.arraycopy(blockchainIdBytes, 0, abiEncodePacked, 0, blockchainIdBytes.length);
+    System.arraycopy(address, 0, abiEncodePacked, blockchainIdBytes.length, address.length);
+    System.arraycopy(eventSignature, 0, abiEncodePacked, blockchainIdBytes.length + address.length, eventSignature.length);
+    System.arraycopy(eventData, 0, abiEncodePacked,
+            blockchainIdBytes.length + address.length + eventSignature.length, eventData.length);
+
+    return abiEncodePacked;
   }
+
+
 
 
   private static RlpList encodeSignatures(List<String> theSigners, List<byte[]> sigR, List<byte[]> sigS, List<BigInteger> sigV) {

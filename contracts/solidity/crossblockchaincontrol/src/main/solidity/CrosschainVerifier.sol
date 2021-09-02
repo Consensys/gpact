@@ -16,11 +16,7 @@ pragma solidity >=0.8;
 
 interface CrosschainVerifier {
 
-    struct EventInfo {
-        address cbcContract;
-        bytes eventData;
-    }
-
-    function decodeAndVerifyEvent(uint256 _expectedBlockchainId, bytes32 _expectedEventSignature, bytes calldata _signedEventInfo, bytes calldata _signature)
-         external view returns(EventInfo memory _eventInfo);
+    function decodeAndVerifyEvent(uint256 _expectedBlockchainId, bytes32 _eventSig,
+        bytes calldata _signedEventInfo, bytes calldata _signature)
+         external view;
 }

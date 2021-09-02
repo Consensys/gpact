@@ -27,27 +27,10 @@ contract CrosschainVerifierSign is CrosschainVerifier,  RLP, BytesUtil{
     }
 
 
-    function decodeAndVerifyEvent(uint256 _expectedBlockchainId, bytes32 _expectedEventSignature,
-            bytes calldata _signedEventInfo, bytes calldata _signature)
-        external view override returns(EventInfo memory _eventInfo) {
+    function decodeAndVerifyEvent(uint256 _blockchainId, bytes32 /* _eventSig */,
+            bytes calldata _encodedEvent, bytes calldata _signature)
+        external view override {
 
-        RLP.RLPItem[] memory signedEventInfo = RLP.toList(RLP.toRLPItem(_signedEventInfo));
-        EventInfo memory eventInfo;
-        uint256 decodedBlockchainId = BytesUtil.bytesToUint256(RLP.toData(signedEventInfo[0]), 0);
-        require(_expectedBlockchainId == decodedBlockchainId, "Event not emitted by expected blockchain");
-        eventInfo.cbcContract = BytesUtil.bytesToAddress(RLP.toData(signedEventInfo[1]));
-        bytes32 decodedEventSignature = BytesUtil.bytesToBytes32(RLP.toData(signedEventInfo[2]), 0);
-        require(_expectedEventSignature == decodedEventSignature, "Event does not have expected event signature");
-        eventInfo.eventData = RLP.toData(signedEventInfo[3]);
-
-        verifyEventSignature(_expectedBlockchainId, _signedEventInfo, _signature);
-        registrar.verifyContract(_expectedBlockchainId, eventInfo.cbcContract);
-        return(eventInfo);
-    }
-
-
-
-    function verifyEventSignature(uint256 _blockchainId, bytes memory _eventInfo, bytes memory _signature) private view {
         // The code is arranged a little unusually to reduce the number of in-scope local variables so code will compile.
         address[] memory signers;
         bytes32[] memory sigRs;
@@ -79,6 +62,6 @@ contract CrosschainVerifierSign is CrosschainVerifier,  RLP, BytesUtil{
             }
         }
 
-        registrar.verify(_blockchainId, signers, sigRs, sigSs, sigVs, _eventInfo);
+        registrar.verify(_blockchainId, signers, sigRs, sigSs, sigVs, _encodedEvent);
     }
 }
