@@ -23,6 +23,13 @@ abstract contract BytesUtil {
         }
     }
 
+    function bytesToAddress2(bytes memory _b, uint256 _startOffset) internal pure returns (address addr) {
+        assembly {
+            addr := mload(add(_b, add(20, _startOffset)))
+        }
+    }
+
+
     function bytesToAddress(bytes memory _b) internal pure returns (address addr) {
         assembly {
             addr := mload(add(_b, 20))
@@ -67,6 +74,15 @@ abstract contract BytesUtil {
             x := mload(add(_b, add(8, _startOffset)))
         }
         return uint64(x);
+    }
+
+    function bytesToUint32(bytes memory _b, uint256 _startOffset) internal pure returns (uint32) {
+        require(_b.length >= _startOffset + 4, "slicing out of range (uint32)");
+        uint256 x;
+        assembly {
+            x := mload(add(_b, add(4, _startOffset)))
+        }
+        return uint32(x);
     }
 
     function bytesToUint8(bytes memory _b, uint256 _startOffset) internal pure returns (uint8) {
