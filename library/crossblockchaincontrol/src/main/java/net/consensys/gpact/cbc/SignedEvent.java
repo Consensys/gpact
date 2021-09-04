@@ -14,6 +14,7 @@
  */
 package net.consensys.gpact.cbc;
 
+import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.units.bigints.UInt256;
 import org.web3j.crypto.Sign;
 import org.web3j.rlp.RlpEncoder;
@@ -23,6 +24,7 @@ import org.web3j.rlp.RlpType;
 import net.consensys.gpact.common.AnIdentity;
 
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,16 +53,17 @@ public class SignedEvent {
     List<String> theSigners = new ArrayList<>();
     List<byte[]> sigR = new ArrayList<>();
     List<byte[]> sigS = new ArrayList<>();
-    List<BigInteger> sigV = new ArrayList<>();
+    List<Byte> sigV = new ArrayList<>();
+//    List<BigInteger> sigV = new ArrayList<>();
     for (AnIdentity signer: signers) {
       Sign.SignatureData signatureData = signer.sign(encodedEventInformation);
       theSigners.add(signer.getAddress());
       sigR.add(signatureData.getR());
       sigS.add(signatureData.getS());
-      sigV.add(BigInteger.valueOf(signatureData.getV()[0]));
+      sigV.add(signatureData.getV()[0]);
     }
 
-    this.encodedSignatures = RlpEncoder.encode(encodeSignatures(theSigners, sigR, sigS, sigV));
+    this.encodedSignatures = abiEncodePackedSignatures(theSigners, sigR, sigS, sigV);
   }
 
   public SignedEvent(BigInteger blockchainId, String cbcContract, byte[] eventFunctionSignature,
@@ -111,25 +114,21 @@ public class SignedEvent {
   }
 
 
+  private byte[] abiEncodePackedSignatures(List<String> theSigners, List<byte[]> sigR, List<byte[]> sigS, List<Byte> sigV) {
+    final int LEN_OF_LEN = 4;
+    final int LEN_OF_SIG = 20 + 32 + 32 + 1;
 
+    int len = theSigners.size();
 
-  private static RlpList encodeSignatures(List<String> theSigners, List<byte[]> sigR, List<byte[]> sigS, List<BigInteger> sigV) {
-    List<RlpType> theSignersRlp = new ArrayList<>();
-    List<RlpType> sigRRlp = new ArrayList<>();
-    List<RlpType> sigSRlp = new ArrayList<>();
-    List<RlpType> sigVRlp = new ArrayList<>();
+    ByteBuffer bb = ByteBuffer.allocate(LEN_OF_LEN + LEN_OF_SIG * len);
+    bb.putInt(len);
 
-    for (int i = 0; i < theSigners.size(); i++) {
-      theSignersRlp.add(RlpString.create(addressStringToBytes(theSigners.get(i))));
-      sigRRlp.add(RlpString.create(sigR.get(i)));
-      sigSRlp.add(RlpString.create(sigS.get(i)));
-      sigVRlp.add(RlpString.create(sigV.get(i)));
+    for (int i = 0; i < len; i++) {
+      bb.put(addressStringToBytes(theSigners.get(i)));
+      bb.put(sigR.get(i));
+      bb.put(sigS.get(i));
+      bb.put(sigV.get(i));
     }
-
-    return new RlpList(
-        new RlpList(theSignersRlp),
-        new RlpList(sigRRlp),
-        new RlpList(sigSRlp),
-        new RlpList(sigVRlp));
+    return bb.array();
   }
 }

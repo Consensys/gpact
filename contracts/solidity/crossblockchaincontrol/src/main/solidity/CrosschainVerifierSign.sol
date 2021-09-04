@@ -26,42 +26,41 @@ contract CrosschainVerifierSign is CrosschainVerifier,  RLP, BytesUtil{
         registrar = Registrar(_registrar);
     }
 
+    uint256 constant LEN_OF_LEN = 4;
+    uint256 constant LEN_OF_SIG = 20 + 32 + 32 + 1;
+
 
     function decodeAndVerifyEvent(uint256 _blockchainId, bytes32 /* _eventSig */,
-            bytes calldata _encodedEvent, bytes calldata _signature)
-        external view override {
+        bytes calldata _encodedEvent, bytes calldata _signature)
+            external view override {
 
-        // The code is arranged a little unusually to reduce the number of in-scope local variables so code will compile.
         address[] memory signers;
         bytes32[] memory sigRs;
         bytes32[] memory sigSs;
         uint8[] memory sigVs;
 
         {
-            RLP.RLPItem[] memory signature = RLP.toList(RLP.toRLPItem(_signature));
-            RLP.RLPItem[] memory signersRlp = RLP.toList(signature[0]);
-            uint256 length = signersRlp.length;
+            uint32 len = BytesUtil.bytesToUint32(_signature, 0);
+            require(_signature.length == LEN_OF_LEN + len * LEN_OF_SIG, "Signature incorrect length");
 
-            signers = new address[](length);
-            RLP.RLPItem[] memory sigRsRlp = RLP.toList(signature[1]);
-            sigRs = new bytes32[](length);
-            RLP.RLPItem[] memory sigSsRlp = RLP.toList(signature[2]);
-            sigSs = new bytes32[](length);
-            RLP.RLPItem[] memory sigVsRlp = RLP.toList(signature[3]);
-            sigVs = new uint8[](length);
+            signers = new address[](len);
+            sigRs = new bytes32[](len);
+            sigSs = new bytes32[](len);
+            sigVs = new uint8[](len);
 
-            require(length == sigRs.length, "Length of sigR and signers does not match");
-            require(length == sigSs.length, "Length of sigS and signers does not match");
-            require(length == sigVs.length, "Length of sigV and signers does not match");
-
-            for (uint256 i = 0; i < length; i++) {
-                signers[i] = BytesUtil.bytesToAddress(RLP.toData(signersRlp[i]));
-                sigRs[i] = BytesUtil.bytesToBytes32(RLP.toData(sigRsRlp[i]), 0);
-                sigSs[i] = BytesUtil.bytesToBytes32(RLP.toData(sigSsRlp[i]), 0);
-                sigVs[i] = BytesUtil.bytesToUint8(RLP.toData(sigVsRlp[i]), 0);
+            uint256 offset = LEN_OF_LEN;
+            for (uint256 i = 0; i < len; i++) {
+                signers[i] = BytesUtil.bytesToAddress2(_signature, offset);
+                offset += 20;
+                sigRs[i] = BytesUtil.bytesToBytes32(_signature, offset);
+                offset += 32;
+                sigSs[i] = BytesUtil.bytesToBytes32(_signature, offset);
+                offset += 32;
+                sigVs[i] = BytesUtil.bytesToUint8(_signature, offset);
+                offset += 1;
             }
         }
-
         registrar.verify(_blockchainId, signers, sigRs, sigSs, sigVs, _encodedEvent);
     }
+
 }
