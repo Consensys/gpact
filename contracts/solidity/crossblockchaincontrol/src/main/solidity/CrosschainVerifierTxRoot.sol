@@ -52,6 +52,7 @@ contract CrosschainVerifierTxRoot is CrosschainVerifier,  Receipts {
             eventProof.proofOffsets,
             eventProof.proof);
         require(_expectedBlockchainId == eventProof.blockchainId, "Event not emitted by expected blockchain");
+        require(cbcContract == eventProof.cbcContract, "Event not emitted by expected contract");
 
         // Extract from the encoded transaction receipt the Patricia Merkle Trie key and the receipt.
         RLP.RLPItem[] memory keyAndReceipt = RLP.toList(RLP.toRLPItem(eventProof.encodedTxReceipt));

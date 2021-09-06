@@ -15,6 +15,9 @@
 package net.consensys.gpact.common;
 
 import org.apache.tuweni.bytes.Bytes;
+import org.apache.tuweni.units.bigints.UInt256;
+
+import java.math.BigInteger;
 
 
 public class FormatConversion {
@@ -41,5 +44,13 @@ public class FormatConversion {
     return eventDataBytes.toArray();
   }
 
+  public static byte[] bigIntegerToByteArray(BigInteger b) {
+    UInt256 blockchainIdUint256 = UInt256.valueOf(b);
+    return blockchainIdUint256.toBytes().toArray();
+  }
+
+  public static String byteArrayToString(byte[] bytes) {
+    return Bytes.wrap(bytes).toHexString();
+  }
 
 }

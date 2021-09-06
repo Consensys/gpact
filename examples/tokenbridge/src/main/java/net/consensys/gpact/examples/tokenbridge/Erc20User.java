@@ -2,6 +2,7 @@ package net.consensys.gpact.examples.tokenbridge;
 
 import net.consensys.gpact.appcontracts.erc20.soliditywrappers.CrosschainERC20;
 import net.consensys.gpact.cbc.CbcManager;
+import net.consensys.gpact.cbc.calltree.CallTreeFunction;
 import net.consensys.gpact.cbc.engine.*;
 import net.consensys.gpact.common.*;
 import org.apache.logging.log4j.LogManager;
@@ -97,6 +98,13 @@ public class Erc20User {
         List<RlpType> rootCalls = new ArrayList<>();
         rootCalls.add(segment);
         RlpList callTree = createRootFunctionCall(sourceBlockchainId, sourceContractAddress, rlpRoot, rootCalls);
+
+        CallTreeFunction seg = new CallTreeFunction(destinationBlockchainId, destinationContractAddress, rlpSegment);
+        ArrayList<CallTreeFunction> rootCalls1 = new ArrayList<>();
+        rootCalls1.add(seg);
+        CallTreeFunction root = new CallTreeFunction(sourceBlockchainId, sourceContractAddress, rlpRoot, rootCalls1);
+        byte[] encoded = root.encode();
+        LOG.info(CallTreeFunction.dump(encoded));
 
         AbstractCbcExecutor executor;
         switch (this.consensusMethodology) {
