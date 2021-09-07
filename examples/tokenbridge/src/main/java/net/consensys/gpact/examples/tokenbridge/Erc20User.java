@@ -2,26 +2,18 @@ package net.consensys.gpact.examples.tokenbridge;
 
 import net.consensys.gpact.appcontracts.erc20.soliditywrappers.CrosschainERC20;
 import net.consensys.gpact.cbc.CbcManager;
-import net.consensys.gpact.cbc.calltree.CallTreeFunction;
+import net.consensys.gpact.cbc.calltree.CallExecutionTree;
 import net.consensys.gpact.cbc.engine.*;
 import net.consensys.gpact.common.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
-import org.web3j.protocol.Web3j;
-import org.web3j.protocol.http.HttpService;
 import org.web3j.rlp.RlpList;
 import org.web3j.rlp.RlpType;
-import org.web3j.tx.TransactionManager;
-import org.web3j.tx.gas.ContractGasProvider;
-import org.web3j.tx.response.PollingTransactionReceiptProcessor;
-import org.web3j.tx.response.TransactionReceiptProcessor;
 
-import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import static net.consensys.gpact.cbc.CallGraphHelper.createLeafFunctionCall;
 import static net.consensys.gpact.cbc.CallGraphHelper.createRootFunctionCall;
@@ -99,12 +91,12 @@ public class Erc20User {
         rootCalls.add(segment);
         RlpList callTree = createRootFunctionCall(sourceBlockchainId, sourceContractAddress, rlpRoot, rootCalls);
 
-        CallTreeFunction seg = new CallTreeFunction(destinationBlockchainId, destinationContractAddress, rlpSegment);
-        ArrayList<CallTreeFunction> rootCalls1 = new ArrayList<>();
+        CallExecutionTree seg = new CallExecutionTree(destinationBlockchainId, destinationContractAddress, rlpSegment);
+        ArrayList<CallExecutionTree> rootCalls1 = new ArrayList<>();
         rootCalls1.add(seg);
-        CallTreeFunction root = new CallTreeFunction(sourceBlockchainId, sourceContractAddress, rlpRoot, rootCalls1);
+        CallExecutionTree root = new CallExecutionTree(sourceBlockchainId, sourceContractAddress, rlpRoot, rootCalls1);
         byte[] encoded = root.encode();
-        LOG.info(CallTreeFunction.dump(encoded));
+        LOG.info(CallExecutionTree.dump(encoded));
 
         AbstractCbcExecutor executor;
         switch (this.consensusMethodology) {
