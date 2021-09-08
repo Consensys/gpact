@@ -1,6 +1,7 @@
 package net.consensys.gpact.cbc.calltree;
 
 import net.consensys.gpact.common.FormatConversion;
+import net.consensys.gpact.common.Tuple;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
@@ -10,6 +11,18 @@ import java.util.List;
 import static net.consensys.gpact.common.FormatConversion.addressStringToBytes;
 
 public class CallExecutionTree {
+    private static final int NUM_FUNCS_CALLED_SIZE = 1;
+    private static final int OFFSET_SIZE = 4;
+    private static final int BLOCKCHAIN_ID_SIZE = 32;
+    private static final int ADDRESS_SIZE = 20;
+    private static final int DATA_LEN_SIZE_SIZE = 2;
+
+    public static final byte LEAF_FUNCTION = 0;
+    public static final int MAX_CALL_EX_TREE_SIZE = 1000000;
+    public static final int MAX_CALLED_FUNCTIONS = 255;
+
+
+
     BigInteger blockchainId;
     String contractAddress;
     String functionCallData;
@@ -68,10 +81,6 @@ public class CallExecutionTree {
     }
 
 
-    public static final byte LEAF_FUNCTION = 0;
-    public static final int MAX_CALL_EX_TREE_SIZE = 1000000;
-    public static final int BYTES_PER_LENGTH = 4;
-    public static final int MAX_CALLED_FUNCTIONS = 255;
 
 
     private byte[] encodeRecursive(CallExecutionTree function) throws CallTreeException {
@@ -95,7 +104,7 @@ public class CallExecutionTree {
                 throw new CallTreeException("Too many called functions: " + calledFunctions.size());
             }
             buf.put((byte) numCalledFunctions);
-            int offset = numCalledFunctions * BYTES_PER_LENGTH;
+            int offset = (numCalledFunctions + 1) * OFFSET_SIZE + NUM_FUNCS_CALLED_SIZE;
             for (byte[] encodedCalledFunc : encodedCalledFunctions) {
                 buf.putInt(offset);
                 offset += encodedCalledFunc.length;
@@ -168,14 +177,13 @@ public class CallExecutionTree {
         }
     }
 
+
     private static int processRecursive(StringBuilder out, ByteBuffer buf, int level) throws CallTreeException {
         int size = 0;
-        final int NUM_FUNCS_CALLED_SIZE = 1;
         size += NUM_FUNCS_CALLED_SIZE;
         int numFuncsCalled = uint8(buf.get());
 
         if (numFuncsCalled > 0) {
-            final int OFFSET_SIZE = 4;
             int[] offsets = new int[numFuncsCalled + 1];
             for (int i = 0; i < numFuncsCalled + 1; i++) {
                 size += OFFSET_SIZE;
@@ -214,16 +222,13 @@ public class CallExecutionTree {
     }
 
     private static int decodeFunction(StringBuilder out, ByteBuffer buf, int level) throws CallTreeException {
-        final int BLOCKCHAIN_ID_SIZE = 32;
         byte[] blockchainId = new byte[BLOCKCHAIN_ID_SIZE];
         buf.get(blockchainId);
 
-        final int ADDRESS_SIZE = 20;
         byte[] address = new byte[ADDRESS_SIZE];
         buf.get(address);
 
         // Length is an unsigned short (uint16)
-        final int DATA_LEN_SIZE_SIZE = 2;
         int len = uint16(buf.getShort());
         if (len > buf.remaining()) {
             throw new CallTreeException(
@@ -270,5 +275,60 @@ public class CallExecutionTree {
             valInt += (Byte.MAX_VALUE + 1) * 2;
         }
         return valInt;
+    }
+
+    public static Tuple<BigInteger, String, String> extractFunction(byte[] callExecutionTree, int[] callPath) throws CallTreeException {
+        int index = 0;
+        ByteBuffer buf = ByteBuffer.wrap(callExecutionTree);
+
+        for (int i = 0; i < callPath.length; i++) {
+            buf.position(index);
+            int offset = 0;
+            int numFuncsCalled = uint8(buf.get());
+            if (numFuncsCalled == 0) {
+                if (i < callPath.length - 1) {
+                    throw new CallTreeException("Reached leaf function but there is more call path.");
+                }
+            }
+            else {
+                // Jump to the location of the offset of the function
+                int functionCalled = callPath[i];
+                buf.position(index + functionCalled * OFFSET_SIZE + NUM_FUNCS_CALLED_SIZE);
+                offset = buf.getInt();
+            }
+
+            // Jump to the function
+            index = index + offset;
+        }
+
+        if (callPath[callPath.length-1] != 0) {
+            buf.position(index);
+            int numFuncsCalled = uint8(buf.get());
+            if (numFuncsCalled != 0) {
+                throw new CallTreeException("Expected leaf function.");
+            }
+            index++;
+        }
+
+        buf.position(index);
+        byte[] blockchainId = new byte[BLOCKCHAIN_ID_SIZE];
+        buf.get(blockchainId);
+
+        byte[] address = new byte[ADDRESS_SIZE];
+        buf.get(address);
+
+        // Length is an unsigned short (uint16)
+        int len = uint16(buf.getShort());
+        if (len > buf.remaining()) {
+            throw new CallTreeException(
+                    "Decoded length " + len + " bytes, longer than remaining space " + buf.remaining() + " bytes");
+        }
+        byte[] data = new byte[len];
+        buf.get(data);
+
+        BigInteger bcId = new BigInteger(1, blockchainId);
+        String addr = FormatConversion.byteArrayToString(address);
+        String funcData = FormatConversion.byteArrayToString(data);
+        return new Tuple<>(bcId, addr, funcData);
     }
 }

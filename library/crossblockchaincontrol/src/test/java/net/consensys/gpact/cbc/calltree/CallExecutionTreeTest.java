@@ -2,10 +2,14 @@ package net.consensys.gpact.cbc.calltree;
 
 
 
+import net.consensys.gpact.common.Tuple;
 import org.junit.Test;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+
+import static junit.framework.TestCase.assertEquals;
+
 
 public class CallExecutionTreeTest {
     public static byte[] BIG32 = new byte[] {
@@ -22,7 +26,7 @@ public class CallExecutionTreeTest {
     BigInteger blockchainId7 = blockchainId6.add(BigInteger.ONE);
     BigInteger blockchainId8 = blockchainId7.add(BigInteger.ONE);
 
-    public static String BIG19 = "0102030405060708090A0B0C0D0E0F10111213";
+    public static String BIG19 = "0x0102030405060708090a0b0c0d0e0f10111213";
     String contract1 = BIG19 + "01";
     String contract2 = BIG19 + "02";
     String contract3 = BIG19 + "03";
@@ -33,21 +37,28 @@ public class CallExecutionTreeTest {
     String contract8 = BIG19 + "08";
 
     String noFuncData = "";
-    String onlyFunctionSelection = "31323334";
-    String function1 = "410203040A";
-    String function2 = "410203040A010203040506070809AABB";
-    String function3 = "410203040A010203040506070809AABC";
-    String function4 = "410203040A010203040506070809AABD";
-    String function5 = "410203040A010203040506070809AA02";
-    String function6 = "410203040A010203040506070809AA03";
-    String function7 = "410203040A010203040506070809AA05";
-    String function8 = "410203040A010203040506070809AA09";
+    String onlyFunctionSelection = "0x31323334";
+    String function1 = "0x410203040a";
+    String function2 = "0x410203040a010203040506070809aabb";
+    String function3 = "0x410203040a010203040506070809aabc";
+    String function4 = "0x410203040a010203040506070809aabd";
+    String function5 = "0x410203040a010203040506070809aa02";
+    String function6 = "0x410203040a010203040506070809aa03";
+    String function7 = "0x410203040a010203040506070809aa05";
+    String function8 = "0x410203040a010203040506070809aa09";
 
 
     @Test
     public void singleFunc() throws CallTreeException {
         CallExecutionTree seg = new CallExecutionTree(blockchainId1, contract1, function1);
         seg.dump();
+
+        byte[] encoded = seg.encode();
+        int[] callPath = new int[1];
+        Tuple<BigInteger, String, String> func = CallExecutionTree.extractFunction(encoded, callPath);
+        assertEquals(func.getFirst().toString(16), blockchainId1.toString(16));
+        assertEquals(func.getSecond(), contract1);
+        assertEquals(func.getThird(), function1);
     }
     @Test
     public void singleFuncNoFuncData() throws CallTreeException {
@@ -67,6 +78,19 @@ public class CallExecutionTreeTest {
         rootCalls1.add(seg);
         CallExecutionTree root = new CallExecutionTree(blockchainId1, contract1, function1, rootCalls1);
         root.dump();
+
+        byte[] encoded = root.encode();
+        int[] callPath = new int[1];
+        Tuple<BigInteger, String, String> func = CallExecutionTree.extractFunction(encoded, callPath);
+        assertEquals(func.getFirst().toString(16), blockchainId1.toString(16));
+        assertEquals(func.getSecond(), contract1);
+        assertEquals(func.getThird(), function1);
+
+        callPath[0] = 1;
+        func = CallExecutionTree.extractFunction(encoded, callPath);
+        assertEquals(func.getFirst().toString(16), blockchainId2.toString(16));
+        assertEquals(func.getSecond(), contract2);
+        assertEquals(func.getThird(), function2);
     }
 
     @Test
@@ -78,6 +102,25 @@ public class CallExecutionTreeTest {
         rootCalls1.add(seg2);
         CallExecutionTree root = new CallExecutionTree(blockchainId1, contract1, function1, rootCalls1);
         root.dump();
+
+        byte[] encoded = root.encode();
+        int[] callPath = new int[1];
+        Tuple<BigInteger, String, String> func = CallExecutionTree.extractFunction(encoded, callPath);
+        assertEquals(func.getFirst().toString(16), blockchainId1.toString(16));
+        assertEquals(func.getSecond(), contract1);
+        assertEquals(func.getThird(), function1);
+
+        callPath[0] = 1;
+        func = CallExecutionTree.extractFunction(encoded, callPath);
+        assertEquals(func.getFirst().toString(16), blockchainId2.toString(16));
+        assertEquals(func.getSecond(), contract2);
+        assertEquals(func.getThird(), function2);
+
+        callPath[0] = 2;
+        func = CallExecutionTree.extractFunction(encoded, callPath);
+        assertEquals(func.getFirst().toString(16), blockchainId3.toString(16));
+        assertEquals(func.getSecond(), contract3);
+        assertEquals(func.getThird(), function3);
     }
 
     @Test
@@ -103,6 +146,48 @@ public class CallExecutionTreeTest {
         rootCalls1.add(seg7);
         CallExecutionTree root = new CallExecutionTree(blockchainId1, contract1, function1, rootCalls1);
         root.dump();
+
+
+        byte[] encoded = root.encode();
+        Tuple<BigInteger, String, String> func = CallExecutionTree.extractFunction(encoded, new int[]{0});
+        assertEquals(func.getFirst().toString(16), blockchainId1.toString(16));
+        assertEquals(func.getSecond(), contract1);
+        assertEquals(func.getThird(), function1);
+
+        func = CallExecutionTree.extractFunction(encoded, new int[]{1});
+        assertEquals(func.getFirst().toString(16), blockchainId5.toString(16));
+        assertEquals(func.getSecond(), contract5);
+        assertEquals(func.getThird(), function5);
+
+        func = CallExecutionTree.extractFunction(encoded, new int[]{2, 0});
+        assertEquals(func.getFirst().toString(16), blockchainId6.toString(16));
+        assertEquals(func.getSecond(), contract6);
+        assertEquals(func.getThird(), function6);
+
+        func = CallExecutionTree.extractFunction(encoded, new int[]{2, 1, 0});
+        assertEquals(func.getFirst().toString(16), blockchainId4.toString(16));
+        assertEquals(func.getSecond(), contract4);
+        assertEquals(func.getThird(), function4);
+
+        func = CallExecutionTree.extractFunction(encoded, new int[]{2, 1, 1});
+        assertEquals(func.getFirst().toString(16), blockchainId2.toString(16));
+        assertEquals(func.getSecond(), contract2);
+        assertEquals(func.getThird(), function2);
+
+        func = CallExecutionTree.extractFunction(encoded, new int[]{2, 1, 2});
+        assertEquals(func.getFirst().toString(16), blockchainId3.toString(16));
+        assertEquals(func.getSecond(), contract3);
+        assertEquals(func.getThird(), function3);
+
+        func = CallExecutionTree.extractFunction(encoded, new int[]{3});
+        assertEquals(func.getFirst().toString(16), blockchainId7.toString(16));
+        assertEquals(func.getSecond(), contract7);
+        assertEquals(func.getThird(), function7);
+
+        func = CallExecutionTree.extractFunction(encoded, new int[]{4});
+        assertEquals(func.getFirst().toString(16), blockchainId8.toString(16));
+        assertEquals(func.getSecond(), contract8);
+        assertEquals(func.getThird(), function8);
     }
 
 }
