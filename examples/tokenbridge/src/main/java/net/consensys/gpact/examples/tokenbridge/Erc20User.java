@@ -86,10 +86,10 @@ public class Erc20User {
         String rlpRoot = dummy.getRLP_crosschainTransfer(destinationBlockchainId, this.creds.getAddress(), amount);
         String rlpSegment = dummy.getRLP_crosschainReceiver(this.creds.getAddress(), amount);
 
-        RlpList segment = createLeafFunctionCall(destinationBlockchainId, destinationContractAddress, rlpSegment);
-        List<RlpType> rootCalls = new ArrayList<>();
-        rootCalls.add(segment);
-        RlpList callTree = createRootFunctionCall(sourceBlockchainId, sourceContractAddress, rlpRoot, rootCalls);
+//        RlpList segment = createLeafFunctionCall(destinationBlockchainId, destinationContractAddress, rlpSegment);
+//        List<RlpType> rootCalls = new ArrayList<>();
+//        rootCalls.add(segment);
+//        RlpList callTree = createRootFunctionCall(sourceBlockchainId, sourceContractAddress, rlpRoot, rootCalls);
 
         CallExecutionTree seg = new CallExecutionTree(destinationBlockchainId, destinationContractAddress, rlpSegment);
         ArrayList<CallExecutionTree> rootCalls1 = new ArrayList<>();
@@ -110,7 +110,7 @@ public class Erc20User {
                 throw new RuntimeException("Not implemented yet");
         }
         ExecutionEngine executionEngine = new SerialExecutionEngine(executor);
-        boolean success = executionEngine.execute(callTree, 300);
+        boolean success = executionEngine.execute(root, 300);
 
         LOG.info("Success: {}", success);
 

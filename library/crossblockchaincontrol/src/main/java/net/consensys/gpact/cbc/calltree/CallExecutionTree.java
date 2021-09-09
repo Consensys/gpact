@@ -58,6 +58,11 @@ public class CallExecutionTree {
         return calledFunctions;
     }
 
+    public boolean isLeaf() {
+        return this.calledFunctions == null || this.calledFunctions.isEmpty();
+    }
+
+
     public byte[] encode() throws CallTreeException {
         return encodeRecursive(this);
 
@@ -277,6 +282,7 @@ public class CallExecutionTree {
         return valInt;
     }
 
+    // This code will only work for call trees with at least two functions in them.
     public static Tuple<BigInteger, String, String> extractFunction(byte[] callExecutionTree, int[] callPath) throws CallTreeException {
         int index = 0;
         ByteBuffer buf = ByteBuffer.wrap(callExecutionTree);

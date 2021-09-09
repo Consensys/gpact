@@ -17,13 +17,13 @@ pragma experimental ABIEncoderV2;
 
 import "./CbcLockableStorageInterface.sol";
 import "../../../../blockheader/src/main/solidity/TxReceiptsRootStorageInterface.sol";
-import "../../../../receipts/src/main/solidity/Receipts.sol";
 import "../../../../registrar/src/main/solidity/Registrar.sol";
 import "../../../../lockablestorage/src/main/solidity/LockableStorage.sol";
 import "./CbcDecVer.sol";
+import "./CallPathCallExecutionTree.sol";
 
 
-contract CrosschainControl is CbcLockableStorageInterface, Receipts, CbcDecVer {
+contract CrosschainControl is CbcLockableStorageInterface, CbcDecVer, CallPathCallExecutionTree {
 
 
     event Start(uint256 _crossBlockchainTransactionId, address _caller, uint256 _timeout, bytes _callGraph);
@@ -387,22 +387,22 @@ contract CrosschainControl is CbcLockableStorageInterface, Receipts, CbcDecVer {
     }
 
 
-    function extractTargetFromCallGraph(bytes memory _callGraph, uint256[] memory _callPath) private pure
-        returns (uint256 targetBlockchainId, address targetContract, bytes memory functionCall) {
-
-        RLP.RLPItem[] memory functions = RLP.toList(RLP.toRLPItem(_callGraph));
-
-        for (uint i=0; i < _callPath.length - 1; i++) {
-            functions = RLP.toList(functions[_callPath[i]]);
-        }
-        RLP.RLPItem[] memory func = RLP.toList(functions[_callPath[_callPath.length - 1]]);
-        if (RLP.isList(func[0])) {
-            func = RLP.toList(func[0]);
-        }
-        targetBlockchainId = RLP.toUint(func[0]);
-        targetContract = RLP.toAddress(func[1]);
-        functionCall = RLP.toData(func[2]);
-    }
+//    function extractTargetFromCallGraph(bytes memory _callGraph, uint256[] memory _callPath) private pure
+//        returns (uint256 targetBlockchainId, address targetContract, bytes memory functionCall) {
+//
+//        RLP.RLPItem[] memory functions = RLP.toList(RLP.toRLPItem(_callGraph));
+//
+//        for (uint i=0; i < _callPath.length - 1; i++) {
+//            functions = RLP.toList(functions[_callPath[i]]);
+//        }
+//        RLP.RLPItem[] memory func = RLP.toList(functions[_callPath[_callPath.length - 1]]);
+//        if (RLP.isList(func[0])) {
+//            func = RLP.toList(func[0]);
+//        }
+//        targetBlockchainId = RLP.toUint(func[0]);
+//        targetContract = RLP.toAddress(func[1]);
+//        functionCall = RLP.toData(func[2]);
+//    }
 
     function prepareForWhoCalledMe(bytes memory _callGraph, uint256[] memory _callPath) private {
         uint256[] memory parentCallPath = determineParentCallPath(_callPath);
@@ -411,29 +411,29 @@ contract CrosschainControl is CbcLockableStorageInterface, Receipts, CbcDecVer {
     }
 
 
-    function determineParentCallPath(uint256[] memory _callPath) private pure returns (uint256[] memory) {
-        uint256[] memory callPathOfParent;
-        uint256 callPathLen = _callPath.length;
-
-        // Don't call from root function
-        assert(!(callPathLen == 1 && _callPath[0] == 0));
-
-        if (_callPath[callPathLen - 1] != 0) {
-            callPathOfParent = new uint256[](callPathLen);
-            for (uint256 i = 0; i < callPathLen - 1; i++) {
-                callPathOfParent[i] = _callPath[i];
-            }
-            callPathOfParent[callPathLen - 1] = 0;
-        }
-        else {
-            callPathOfParent = new uint256[](callPathLen - 1);
-            for (uint256 i = 0; i < callPathLen - 2; i++) {
-                callPathOfParent[i] = _callPath[i];
-            }
-            callPathOfParent[callPathLen - 2] = 0;
-        }
-        return callPathOfParent;
-    }
+//    function determineParentCallPath(uint256[] memory _callPath) private pure returns (uint256[] memory) {
+//        uint256[] memory callPathOfParent;
+//        uint256 callPathLen = _callPath.length;
+//
+//        // Don't call from root function
+//        assert(!(callPathLen == 1 && _callPath[0] == 0));
+//
+//        if (_callPath[callPathLen - 1] != 0) {
+//            callPathOfParent = new uint256[](callPathLen);
+//            for (uint256 i = 0; i < callPathLen - 1; i++) {
+//                callPathOfParent[i] = _callPath[i];
+//            }
+//            callPathOfParent[callPathLen - 1] = 0;
+//        }
+//        else {
+//            callPathOfParent = new uint256[](callPathLen - 1);
+//            for (uint256 i = 0; i < callPathLen - 2; i++) {
+//                callPathOfParent[i] = _callPath[i];
+//            }
+//            callPathOfParent[callPathLen - 2] = 0;
+//        }
+//        return callPathOfParent;
+//    }
 
 
     function failRootTransaction(uint256 _crosschainTxId) private {
