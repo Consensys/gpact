@@ -17,14 +17,13 @@ package net.consensys.gpact.examples.hoteltrain;
 import net.consensys.gpact.appcontracts.erc20.soliditywrappers.LockableERC20PresetFixedSupply;
 import net.consensys.gpact.cbc.AbstractBlockchain;
 import net.consensys.gpact.cbc.CbcManager;
+import net.consensys.gpact.cbc.calltree.CallExecutionTree;
 import net.consensys.gpact.cbc.engine.*;
 import net.consensys.gpact.common.*;
 import net.consensys.gpact.examples.hoteltrain.soliditywrappers.TravelAgency;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
-import org.web3j.rlp.RlpList;
-import org.web3j.rlp.RlpType;
 import org.web3j.tx.response.PollingTransactionReceiptProcessor;
 import org.web3j.tx.response.TransactionReceiptProcessor;
 
@@ -32,8 +31,6 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-
-import static net.consensys.gpact.cbc.CallGraphHelper.*;
 
 
 /**
@@ -108,12 +105,12 @@ public class EntityTravelAgency extends AbstractBlockchain {
         String rlpTrainBookRoom = sim.getTrainBookRoomRLP();
         LOG.info(" Train: bookRoom: {}", rlpTrainBookRoom);
 
-        RlpList trainBookRoom = createLeafFunctionCall(trainBcId, trainContractAddress, rlpTrainBookRoom);
-        RlpList hotelBookRoom = createLeafFunctionCall(hotelBcId, hotelContractAddress, rlpHotelBookRoom);
-        List<RlpType> rootCalls = new ArrayList<>();
+        ArrayList<CallExecutionTree> rootCalls = new ArrayList<>();
+        CallExecutionTree trainBookRoom = new CallExecutionTree(trainBcId, trainContractAddress, rlpTrainBookRoom);
+        CallExecutionTree hotelBookRoom = new CallExecutionTree(hotelBcId, hotelContractAddress, rlpHotelBookRoom);
         rootCalls.add(hotelBookRoom);
         rootCalls.add(trainBookRoom);
-        RlpList callTree = createRootFunctionCall(this.blockchainId, this.travelAgencyAddress, rlpBookHotelAndTrain, rootCalls);
+        CallExecutionTree rootCall = new CallExecutionTree(this.blockchainId, this.travelAgencyAddress, rlpBookHotelAndTrain, rootCalls);
 
         AbstractCbcExecutor executor;
         switch (consensusMethodology) {
@@ -138,7 +135,7 @@ public class EntityTravelAgency extends AbstractBlockchain {
             default:
                 throw new RuntimeException("Not implemented yet");
         }
-        boolean success = executionEngine.execute(callTree, 300);
+        boolean success = executionEngine.execute(rootCall, 300);
 
         LOG.info("Success: {}", success);
 

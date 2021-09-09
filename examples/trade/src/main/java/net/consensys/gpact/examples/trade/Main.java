@@ -14,12 +14,11 @@
  */
 package net.consensys.gpact.examples.trade;
 
+import net.consensys.gpact.cbc.calltree.CallExecutionTree;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
-import org.web3j.rlp.RlpList;
-import org.web3j.rlp.RlpType;
 import net.consensys.gpact.cbc.CbcManager;
 import net.consensys.gpact.cbc.engine.AbstractCbcExecutor;
 import net.consensys.gpact.cbc.engine.CbcExecutorSignedEvents;
@@ -42,8 +41,6 @@ import net.consensys.gpact.examples.trade.sim.SimStockContract;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-
-import static net.consensys.gpact.cbc.CallGraphHelper.*;
 
 public class Main {
   static final Logger LOG = LogManager.getLogger(Main.class);
@@ -155,17 +152,17 @@ public class Main {
     String rlpStockDelivery = simStockContract.getRlpFunctionSignature_delivery();
     LOG.info(" Stock: Delivery: {}", rlpStockDelivery);
 
-    RlpList getPrice = createLeafFunctionCall(bc4BcId, priceOracleContractAddress, rlpPriceOracleGetPrice);
-    RlpList balanceTransfer = createLeafFunctionCall(bc3BcId, balancesContractAddress, rlpBalancesTransfer);
-    RlpList stockDelivery = createLeafFunctionCall(bc5BcId, stockContractAddress, rlpStockDelivery);
-    List<RlpType> busLogicCalls = new ArrayList<>();
+    CallExecutionTree getPrice = new CallExecutionTree(bc4BcId, priceOracleContractAddress, rlpPriceOracleGetPrice);
+    CallExecutionTree balanceTransfer = new CallExecutionTree(bc3BcId, balancesContractAddress, rlpBalancesTransfer);
+    CallExecutionTree stockDelivery = new CallExecutionTree(bc5BcId, stockContractAddress, rlpStockDelivery);
+    ArrayList<CallExecutionTree> busLogicCalls = new ArrayList<>();
     busLogicCalls.add(getPrice);
     busLogicCalls.add(balanceTransfer);
     busLogicCalls.add(stockDelivery);
-    RlpList businessLogic = createIntermediateFunctionCall(bc2BcId, businessLogicContractAddress, rlpBusLogicStockShipment, busLogicCalls);
-    List<RlpType> rootCalls = new ArrayList<>();
+    CallExecutionTree businessLogic = new CallExecutionTree(bc2BcId, businessLogicContractAddress, rlpBusLogicStockShipment, busLogicCalls);
+    ArrayList<CallExecutionTree> rootCalls = new ArrayList<>();
     rootCalls.add(businessLogic);
-    RlpList callGraph = createRootFunctionCall(rootBcId, tradeWalletContractAddress, rlpRootExecuteTrade, rootCalls);
+    CallExecutionTree callGraph = new CallExecutionTree(rootBcId, tradeWalletContractAddress, rlpRootExecuteTrade, rootCalls);
 
     AbstractCbcExecutor executor;
     switch (consensusMethodology) {

@@ -15,8 +15,6 @@
 package net.consensys.gpact.cbc.engine;
 
 import net.consensys.gpact.cbc.calltree.CallExecutionTree;
-import org.web3j.rlp.RlpList;
-import org.web3j.rlp.RlpType;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -29,21 +27,9 @@ public class SerialExecutionEngine extends AbstractExecutionEngine {
     super(executor);
   }
 
-  protected void executeCalls1(List<RlpType> calls, List<BigInteger> callPath, BigInteger theCallerBlockchainId) throws Exception {
-    BigInteger callOffset = BigInteger.ONE;
-    for (int i = 1; i < calls.size(); i++) {
-      RlpList segCall = (RlpList) calls.get(i);
-      List<BigInteger> nextCallPath = new ArrayList<>(callPath);
-      nextCallPath.add(callOffset);
-      callSegmentsAndRoot(segCall, nextCallPath, theCallerBlockchainId);
-      callOffset = callOffset.add(BigInteger.ONE);
-    }
-  }
-
   protected void executeCalls(List<CallExecutionTree> calls, List<BigInteger> callPath, BigInteger theCallerBlockchainId) throws Exception {
     BigInteger callOffset = BigInteger.ONE;
-    for (int i = 1; i < calls.size(); i++) {
-      CallExecutionTree segCall = calls.get(i);
+    for (CallExecutionTree segCall: calls) {
       List<BigInteger> nextCallPath = new ArrayList<>(callPath);
       nextCallPath.add(callOffset);
       callSegmentsAndRoot(segCall, nextCallPath, theCallerBlockchainId);

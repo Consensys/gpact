@@ -8,15 +8,11 @@ import net.consensys.gpact.common.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
-import org.web3j.rlp.RlpList;
-import org.web3j.rlp.RlpType;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-import static net.consensys.gpact.cbc.CallGraphHelper.createLeafFunctionCall;
-import static net.consensys.gpact.cbc.CallGraphHelper.createRootFunctionCall;
 
 public class Erc20User {
     private static final Logger LOG = LogManager.getLogger(Erc20User.class);
@@ -85,11 +81,6 @@ public class Erc20User {
         CrosschainERC20 dummy = CrosschainERC20.load(null, null, this.creds, null);
         String rlpRoot = dummy.getRLP_crosschainTransfer(destinationBlockchainId, this.creds.getAddress(), amount);
         String rlpSegment = dummy.getRLP_crosschainReceiver(this.creds.getAddress(), amount);
-
-//        RlpList segment = createLeafFunctionCall(destinationBlockchainId, destinationContractAddress, rlpSegment);
-//        List<RlpType> rootCalls = new ArrayList<>();
-//        rootCalls.add(segment);
-//        RlpList callTree = createRootFunctionCall(sourceBlockchainId, sourceContractAddress, rlpRoot, rootCalls);
 
         CallExecutionTree seg = new CallExecutionTree(destinationBlockchainId, destinationContractAddress, rlpSegment);
         ArrayList<CallExecutionTree> rootCalls1 = new ArrayList<>();

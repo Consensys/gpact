@@ -15,9 +15,7 @@
 package net.consensys.gpact.cbc.engine;
 
 import net.consensys.gpact.cbc.calltree.CallExecutionTree;
-import org.web3j.rlp.RlpList;
 
 public interface ExecutionEngine {
-  boolean execute(RlpList callGraph, long timeout) throws Exception;
   boolean execute(CallExecutionTree callGraph, long timeout) throws Exception;
 }
