@@ -24,7 +24,7 @@ contract CallPathCallExecutionTree is BytesUtil {
     uint256 constant private ADDRESS_SIZE = 20;
     uint256 constant private DATA_LEN_SIZE_SIZE = 2;
 
-    function extractTargetFromCallGraph(bytes memory _callGraph, uint256[] memory _callPath) internal pure
+    function extractTargetFromCallGraph(bytes memory _callGraph, uint256[] memory _callPath, bool getFunction) internal pure
         returns (uint256 targetBlockchainId, address targetContract, bytes memory functionCall) {
 
         uint256 index = 0;
@@ -55,10 +55,15 @@ contract CallPathCallExecutionTree is BytesUtil {
         targetBlockchainId = BytesUtil.bytesToUint256(_callGraph, index);
         index += BLOCKCHAIN_ID_SIZE;
         targetContract = BytesUtil.bytesToAddress2(_callGraph, index);
-        index += ADDRESS_SIZE;
-        uint16 functionDataLen = BytesUtil.bytesToUint16(_callGraph, index);
-        index += DATA_LEN_SIZE_SIZE;
-        functionCall = BytesUtil.slice(_callGraph, index, functionDataLen);
+        if (getFunction) {
+            index += ADDRESS_SIZE;
+            uint16 functionDataLen = BytesUtil.bytesToUint16(_callGraph, index);
+            index += DATA_LEN_SIZE_SIZE;
+            functionCall = BytesUtil.sliceAsm(_callGraph, index, functionDataLen);
+        }
+        else {
+            functionCall = "";
+        }
     }
 
     function determineParentCallPath(uint256[] memory _callPath) internal pure returns (uint256[] memory) {

@@ -17,6 +17,7 @@ public class CallExecutionTree {
     private static final int ADDRESS_SIZE = 20;
     private static final int DATA_LEN_SIZE_SIZE = 2;
 
+
     public static final byte LEAF_FUNCTION = 0;
     public static final int MAX_CALL_EX_TREE_SIZE = 1000000;
     public static final int MAX_CALLED_FUNCTIONS = 255;
@@ -127,7 +128,7 @@ public class CallExecutionTree {
 
     private byte[] encodeFunctionCall() {
         ByteBuffer buf = ByteBuffer.allocate(MAX_CALL_EX_TREE_SIZE);
-        byte[] blockchainIdBytes = FormatConversion.bigIntegerToByteArray(this.blockchainId);
+        byte[] blockchainIdBytes = FormatConversion.bigIntegerToUint256ByteArray(this.blockchainId);
         byte[] address = addressStringToBytes(this.contractAddress);
         buf.put(blockchainIdBytes);
         buf.put(address);

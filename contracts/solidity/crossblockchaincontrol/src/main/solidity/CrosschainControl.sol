@@ -362,7 +362,7 @@ contract CrosschainControl is CbcLockableStorageInterface, CbcDecVer, CallPathCa
     // **************************** PRIVATE BELOW HERE ***************************
 
     function makeCall(bytes memory _callGraph, uint256[] memory _callPath) private returns(bool, bytes memory) {
-        (uint256 targetBlockchainId, address targetContract, bytes memory functionCall) = extractTargetFromCallGraph(_callGraph, _callPath);
+        (uint256 targetBlockchainId, address targetContract, bytes memory functionCall) = extractTargetFromCallGraph(_callGraph, _callPath, true);
         require(targetBlockchainId == myBlockchainId, "Target blockchain id does not match my blockchain id");
 
         bool isSuccess;
@@ -407,7 +407,7 @@ contract CrosschainControl is CbcLockableStorageInterface, CbcDecVer, CallPathCa
     function prepareForWhoCalledMe(bytes memory _callGraph, uint256[] memory _callPath) private {
         uint256[] memory parentCallPath = determineParentCallPath(_callPath);
         (activeCallParentBlockchainId, activeCallParentContract, /* bytes memory parentFunctionCall */ ) =
-            extractTargetFromCallGraph(_callGraph, parentCallPath);
+            extractTargetFromCallGraph(_callGraph, parentCallPath, false);
     }
 
 
@@ -534,7 +534,7 @@ contract CrosschainControl is CbcLockableStorageInterface, CbcDecVer, CallPathCa
             callPath[i] = activeCallsCallPath[i];
         }
         callPath[callPath.length - 1] = activeCallReturnValuesIndex + 1;
-        (uint256 targetBlockchainId, address targetContract, bytes memory functionCall) = extractTargetFromCallGraph(activeCallGraph, callPath);
+        (uint256 targetBlockchainId, address targetContract, bytes memory functionCall) = extractTargetFromCallGraph(activeCallGraph, callPath, true);
 
         // Fail if what was called doesn't match what was expected to be called.
         if (_blockchainId != targetBlockchainId ||
