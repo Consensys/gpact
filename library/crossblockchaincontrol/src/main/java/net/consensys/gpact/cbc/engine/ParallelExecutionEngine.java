@@ -40,8 +40,7 @@ public class ParallelExecutionEngine extends AbstractExecutionEngine {
     Executor executor = Executors.newFixedThreadPool(numCalls);
     CompletionService<String> completionService = new ExecutorCompletionService<String>(executor);
     BigInteger callOffset = BigInteger.ONE;
-    for (int i = 1; i < numCalls; i++) {
-      CallExecutionTree segCall = (CallExecutionTree) calls.get(i);
+    for (CallExecutionTree segCall: calls) {
       List<BigInteger> nextCallPath = new ArrayList<>(callPath);
       nextCallPath.add(callOffset);
       completionService.submit(new Callable<String>() {
@@ -53,7 +52,7 @@ public class ParallelExecutionEngine extends AbstractExecutionEngine {
       callOffset = callOffset.add(BigInteger.ONE);
     }
     int received = 0;
-    while(received < numCalls - 1) {
+    while(received < numCalls) {
       Future<String> resultFuture = completionService.take(); //blocks if none available
       try {
         String result = resultFuture.get();
