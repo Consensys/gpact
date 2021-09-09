@@ -14,13 +14,12 @@
  */
 package net.consensys.gpact.examples.read;
 
+import net.consensys.gpact.cbc.calltree.CallExecutionTree;
 import net.consensys.gpact.common.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
-import org.web3j.rlp.RlpList;
-import org.web3j.rlp.RlpType;
 import net.consensys.gpact.cbc.CbcManager;
 import net.consensys.gpact.cbc.engine.AbstractCbcExecutor;
 import net.consensys.gpact.cbc.engine.CbcExecutorSignedEvents;
@@ -34,8 +33,6 @@ import net.consensys.gpact.examples.read.sim.SimContractB;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-
-import static net.consensys.gpact.cbc.CallGraphHelper.*;
 
 public class Main {
   static final Logger LOG = LogManager.getLogger(Main.class);
@@ -106,10 +103,10 @@ public class Main {
       String rlpCrosschainRead = simContractA.getRlpFunctionSignature_DoCrosschainRead();
       LOG.info(" ContractA: DoCrosschainRead: {}", rlpCrosschainRead);
 
-      RlpList getFunction = createLeafFunctionCall(bc2BcId, contractBContractAddress, rlpGet);
-      List<RlpType> rootCalls = new ArrayList<>();
+      ArrayList<CallExecutionTree> rootCalls = new ArrayList<>();
+      CallExecutionTree getFunction = new CallExecutionTree(bc2BcId, contractBContractAddress, rlpGet);
       rootCalls.add(getFunction);
-      RlpList callGraph = createRootFunctionCall(rootBcId, contractAContractAddress, rlpCrosschainRead, rootCalls);
+      CallExecutionTree callGraph = new CallExecutionTree(rootBcId, contractAContractAddress, rlpCrosschainRead, rootCalls);
 
       AbstractCbcExecutor executor;
       switch (consensusMethodology) {

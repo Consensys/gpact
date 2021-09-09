@@ -14,6 +14,7 @@
  */
 package net.consensys.gpact.examples.conditional;
 
+import net.consensys.gpact.cbc.calltree.CallExecutionTree;
 import net.consensys.gpact.common.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -34,8 +35,6 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-import static net.consensys.gpact.cbc.CallGraphHelper.createLeafFunctionCall;
-import static net.consensys.gpact.cbc.CallGraphHelper.createRootFunctionCall;
 
 public class Main {
   static final Logger LOG = LogManager.getLogger(Main.class);
@@ -123,25 +122,21 @@ public class Main {
       LOG.info("rlpFunctionCall_SetVal: {}", rlpFunctionCall_SetVal);
     }
 
-    RlpList callGraph;
+    ArrayList<CallExecutionTree> rootCalls = new ArrayList<>();
+    CallExecutionTree getValSeg = new CallExecutionTree(otherBcId, otherBlockchainContractAddress, rlpFunctionCall_GetVal);
+    rootCalls.add(getValSeg);
     if (simRootContract.someComplexBusinessLogicIfTrue) {
-      RlpList getVal = createLeafFunctionCall(otherBcId, otherBlockchainContractAddress, rlpFunctionCall_GetVal);
-      RlpList setValues = createLeafFunctionCall(otherBcId, otherBlockchainContractAddress, rlpFunctionCall_SetValues);
-      List<RlpType> calls = new ArrayList<>();
-      calls.add(getVal);
-      calls.add(setValues);
-      callGraph = createRootFunctionCall(
-          rootBcId, rootBlockchain.rootBlockchainContract.getContractAddress(), rlpFunctionCall_SomeComplexBusinessLogic, calls);
+      CallExecutionTree setValuesSeg = new CallExecutionTree(otherBcId, otherBlockchainContractAddress, rlpFunctionCall_SetValues);
+      rootCalls.add(setValuesSeg);
     }
     else {
-      RlpList getVal = createLeafFunctionCall(otherBcId, otherBlockchainContractAddress, rlpFunctionCall_GetVal);
-      RlpList setVal = createLeafFunctionCall(otherBcId, otherBlockchainContractAddress, rlpFunctionCall_SetVal);
-      List<RlpType> calls = new ArrayList<>();
-      calls.add(getVal);
-      calls.add(setVal);
-      callGraph = createRootFunctionCall(
-          rootBcId, rootBlockchain.rootBlockchainContract.getContractAddress(), rlpFunctionCall_SomeComplexBusinessLogic, calls);
+      CallExecutionTree setValSeg = new CallExecutionTree(otherBcId, otherBlockchainContractAddress, rlpFunctionCall_SetVal);
+      rootCalls.add(setValSeg);
     }
+    CallExecutionTree rootCall = new CallExecutionTree(rootBcId, rootBlockchain.rootBlockchainContract.getContractAddress(),
+            rlpFunctionCall_SomeComplexBusinessLogic, rootCalls);
+    byte[] encoded = rootCall.encode();
+    LOG.info(CallExecutionTree.dump(encoded));
 
 
     AbstractCbcExecutor executor;
@@ -168,7 +163,7 @@ public class Main {
       default:
         throw new RuntimeException("Not implemented yet");
     }
-    boolean success = executionEngine.execute(callGraph, 300);
+    boolean success = executionEngine.execute(rootCall, 300);
 
     LOG.info("Success: {}", success);
     if (success) {

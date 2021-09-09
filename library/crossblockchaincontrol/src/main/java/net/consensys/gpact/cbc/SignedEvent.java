@@ -14,13 +14,8 @@
  */
 package net.consensys.gpact.cbc;
 
-import org.apache.tuweni.bytes.Bytes;
-import org.apache.tuweni.units.bigints.UInt256;
+import net.consensys.gpact.common.FormatConversion;
 import org.web3j.crypto.Sign;
-import org.web3j.rlp.RlpEncoder;
-import org.web3j.rlp.RlpList;
-import org.web3j.rlp.RlpString;
-import org.web3j.rlp.RlpType;
 import net.consensys.gpact.common.AnIdentity;
 
 import java.math.BigInteger;
@@ -98,8 +93,7 @@ public class SignedEvent {
 
   private static byte[] abiEncodePackedEvent(BigInteger blockchainId, String cbcContractAddress,
                                              byte[] eventSignature, byte[] eventData) {
-    UInt256 blockchainIdUint256 = UInt256.valueOf(blockchainId);
-    byte[] blockchainIdBytes = blockchainIdUint256.toBytes().toArray();
+    byte[] blockchainIdBytes = FormatConversion.bigIntegerToUint256ByteArray(blockchainId);
 
     byte[] address = addressStringToBytes(cbcContractAddress);
 

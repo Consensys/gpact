@@ -14,12 +14,9 @@
  */
 package net.consensys.gpact.cbc.engine;
 
+import net.consensys.gpact.cbc.calltree.CallExecutionTree;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.web3j.rlp.RlpEncoder;
-import org.web3j.rlp.RlpList;
-import org.web3j.rlp.RlpString;
-import org.web3j.rlp.RlpType;
 import net.consensys.gpact.cbc.AbstractCbc;
 
 import java.math.BigInteger;
@@ -35,16 +32,16 @@ public abstract class AbstractExecutionEngine implements ExecutionEngine {
     this.executor = executor;
   }
 
-  public boolean execute(RlpList callGraph, long timeout) throws Exception {
+  public boolean execute(CallExecutionTree callGraph, long timeout) throws Exception {
     LOG.info("start");
     BigInteger crossBlockchainTransactionId = AbstractCbc.generateRandomCrossBlockchainTransactionId();
     BigInteger timeoutBig = BigInteger.valueOf(timeout);
 
 
     BigInteger rootBlockchainId = callRootBlockchainId(callGraph);
-    this.executor.init(RlpEncoder.encode(callGraph), timeoutBig, crossBlockchainTransactionId, rootBlockchainId);
+    this.executor.init(callGraph.encode(), timeoutBig, crossBlockchainTransactionId, rootBlockchainId);
     this.executor.startCall();
-    callSegments(callGraph, new ArrayList<>(), rootBlockchainId);
+    callSegmentsAndRoot(callGraph, new ArrayList<>(), rootBlockchainId);
 
     this.executor.doSignallingCalls();
 
@@ -52,44 +49,32 @@ public abstract class AbstractExecutionEngine implements ExecutionEngine {
   }
 
 
-  protected void callSegments(RlpList callGraph, List<BigInteger> callPath, BigInteger callerBlockchainId) throws Exception {
-    List<RlpType> calls = callGraph.getValues();
-    if (calls.get(0) instanceof  RlpList) {
-      RlpList callerCall = (RlpList) calls.get(0);
-      RlpString blockchainIdRlp = (RlpString) callerCall.getValues().get(0);
-      BigInteger theCallerBlockchainId = blockchainIdRlp.asPositiveBigInteger();
-
-      executeCalls(calls, callPath, theCallerBlockchainId);
+  protected void callSegmentsAndRoot(CallExecutionTree callGraph, List<BigInteger> callPath, BigInteger callerBlockchainId) throws Exception {
+    BigInteger thisCallsBcId = callGraph.getBlockchainId();
+    if (!callGraph.isLeaf()) {
+      executeCalls(callGraph.getCalledFunctions(), callPath, thisCallsBcId);
 
       // Now call the segment call that called all of the other segments.
-      RlpList segCall = (RlpList) calls.get(0);
-      List<BigInteger> nextCallPath = new ArrayList<>(callPath);
-      nextCallPath.add(BigInteger.ZERO);
-      callSegments(segCall, nextCallPath, callerBlockchainId);
-    }
-    else {
-      if (callPath.size() == 1 && callPath.get(0).compareTo(BigInteger.ZERO) == 0) {
+      if (callPath.size() == 0) {
         this.executor.root();
       }
       else {
-        RlpString blockchainIdRlp = (RlpString) calls.get(0);
-        BigInteger blockchainId = blockchainIdRlp.asPositiveBigInteger();
-
-        this.executor.segment(blockchainId, callerBlockchainId, callPath);
+        List<BigInteger> nextCallPath = new ArrayList<>(callPath);
+        nextCallPath.add(BigInteger.ZERO);
+        this.executor.segment(thisCallsBcId, callerBlockchainId, nextCallPath);
       }
+    }
+    else {
+      this.executor.segment(thisCallsBcId, callerBlockchainId, callPath);
     }
   }
 
-
-  private static BigInteger callRootBlockchainId(RlpList callGraph) {
-    List<RlpType> calls = callGraph.getValues();
-    RlpList rootCall = (RlpList)calls.get(0);
-    RlpString bcIdRlp = (RlpString) rootCall.getValues().get(0);
-    BigInteger rootBcId = bcIdRlp.asPositiveBigInteger();
+  private static BigInteger callRootBlockchainId(CallExecutionTree callGraph) {
+    BigInteger rootBcId = callGraph.getBlockchainId();
     LOG.info("Root blockchain detected as: 0x{}", rootBcId.toString(16));
     return rootBcId;
   }
 
-  protected abstract void executeCalls(List<RlpType> calls, List<BigInteger> callPath, BigInteger theCallerBlockchainId) throws Exception;
+  protected abstract void executeCalls(List<CallExecutionTree> calls, List<BigInteger> callPath, BigInteger theCallerBlockchainId) throws Exception;
 
 }

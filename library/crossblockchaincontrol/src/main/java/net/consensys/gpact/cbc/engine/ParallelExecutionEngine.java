@@ -14,10 +14,9 @@
  */
 package net.consensys.gpact.cbc.engine;
 
+import net.consensys.gpact.cbc.calltree.CallExecutionTree;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.web3j.rlp.RlpList;
-import org.web3j.rlp.RlpType;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -36,25 +35,24 @@ public class ParallelExecutionEngine extends AbstractExecutionEngine {
     super(executor);
   }
 
-  protected void executeCalls(List<RlpType> calls, List<BigInteger> callPath, BigInteger theCallerBlockchainId) throws Exception {
+  protected void executeCalls(List<CallExecutionTree> calls, List<BigInteger> callPath, BigInteger theCallerBlockchainId) throws Exception {
     int numCalls = calls.size();
     Executor executor = Executors.newFixedThreadPool(numCalls);
     CompletionService<String> completionService = new ExecutorCompletionService<String>(executor);
     BigInteger callOffset = BigInteger.ONE;
-    for (int i = 1; i < numCalls; i++) {
-      RlpList segCall = (RlpList) calls.get(i);
+    for (CallExecutionTree segCall: calls) {
       List<BigInteger> nextCallPath = new ArrayList<>(callPath);
       nextCallPath.add(callOffset);
       completionService.submit(new Callable<String>() {
         public String call() throws Exception {
-          callSegments(segCall, nextCallPath, theCallerBlockchainId);
+          callSegmentsAndRoot(segCall, nextCallPath, theCallerBlockchainId);
           return "Not used";
         }
       });
       callOffset = callOffset.add(BigInteger.ONE);
     }
     int received = 0;
-    while(received < numCalls - 1) {
+    while(received < numCalls) {
       Future<String> resultFuture = completionService.take(); //blocks if none available
       try {
         String result = resultFuture.get();

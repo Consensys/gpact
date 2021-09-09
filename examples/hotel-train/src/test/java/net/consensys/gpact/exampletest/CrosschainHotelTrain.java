@@ -25,4 +25,10 @@ public class CrosschainHotelTrain extends AbstractExampleTest {
     HotelTrain.main(new String[]{tempPropsFile});
   }
 
+  @Test
+  public void directParallelMultiBlockchain() throws Exception {
+    String tempPropsFile = createPropertiesFile(true, false, false);
+    HotelTrain.main(new String[]{tempPropsFile});
+  }
+
 }

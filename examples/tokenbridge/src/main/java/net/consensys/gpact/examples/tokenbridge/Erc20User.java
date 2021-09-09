@@ -2,28 +2,17 @@ package net.consensys.gpact.examples.tokenbridge;
 
 import net.consensys.gpact.appcontracts.erc20.soliditywrappers.CrosschainERC20;
 import net.consensys.gpact.cbc.CbcManager;
+import net.consensys.gpact.cbc.calltree.CallExecutionTree;
 import net.consensys.gpact.cbc.engine.*;
 import net.consensys.gpact.common.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
-import org.web3j.protocol.Web3j;
-import org.web3j.protocol.http.HttpService;
-import org.web3j.rlp.RlpList;
-import org.web3j.rlp.RlpType;
-import org.web3j.tx.TransactionManager;
-import org.web3j.tx.gas.ContractGasProvider;
-import org.web3j.tx.response.PollingTransactionReceiptProcessor;
-import org.web3j.tx.response.TransactionReceiptProcessor;
 
-import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 
-import static net.consensys.gpact.cbc.CallGraphHelper.createLeafFunctionCall;
-import static net.consensys.gpact.cbc.CallGraphHelper.createRootFunctionCall;
 
 public class Erc20User {
     private static final Logger LOG = LogManager.getLogger(Erc20User.class);
@@ -93,10 +82,12 @@ public class Erc20User {
         String rlpRoot = dummy.getRLP_crosschainTransfer(destinationBlockchainId, this.creds.getAddress(), amount);
         String rlpSegment = dummy.getRLP_crosschainReceiver(this.creds.getAddress(), amount);
 
-        RlpList segment = createLeafFunctionCall(destinationBlockchainId, destinationContractAddress, rlpSegment);
-        List<RlpType> rootCalls = new ArrayList<>();
-        rootCalls.add(segment);
-        RlpList callTree = createRootFunctionCall(sourceBlockchainId, sourceContractAddress, rlpRoot, rootCalls);
+        CallExecutionTree seg = new CallExecutionTree(destinationBlockchainId, destinationContractAddress, rlpSegment);
+        ArrayList<CallExecutionTree> rootCalls1 = new ArrayList<>();
+        rootCalls1.add(seg);
+        CallExecutionTree root = new CallExecutionTree(sourceBlockchainId, sourceContractAddress, rlpRoot, rootCalls1);
+        byte[] encoded = root.encode();
+        LOG.info(CallExecutionTree.dump(encoded));
 
         AbstractCbcExecutor executor;
         switch (this.consensusMethodology) {
@@ -110,7 +101,7 @@ public class Erc20User {
                 throw new RuntimeException("Not implemented yet");
         }
         ExecutionEngine executionEngine = new SerialExecutionEngine(executor);
-        boolean success = executionEngine.execute(callTree, 300);
+        boolean success = executionEngine.execute(root, 300);
 
         LOG.info("Success: {}", success);
 
