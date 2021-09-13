@@ -14,7 +14,6 @@
  */
 package net.consensys.gpact.examples.singlebc.hoteltrain;
 
-import net.consensys.gpact.cbc.AbstractBlockchain;
 import net.consensys.gpact.common.FastTxManager;
 import net.consensys.gpact.common.RevertReason;
 import net.consensys.gpact.common.StatsHolder;

@@ -14,7 +14,7 @@
  */
 pragma solidity >=0.8;
 
-import "../../../../../../appcontracts/solidity/openzeppelin/src/main/solidity/token/ERC20/IERC20.sol";
+import "../../../../../../application/appcontracts/openzeppelin/src/main/solidity/token/ERC20/IERC20.sol";
 
 contract Hotel {
     struct HotelRoom {
