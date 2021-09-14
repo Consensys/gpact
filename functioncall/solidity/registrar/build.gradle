@@ -36,13 +36,12 @@ dependencies {
 
 // Generate Solidity wrapper code before build.
 task generateSources {
-    def script = "functioncall/solidity/registrar/gen.sh".execute()
-    script.in.eachLine {line -> println line}
-    script.err.eachLine {line -> println "ERROR: " + line}
-    doLast {
-        if(execResult.getExitValue() != 0) {
-            throw new GradleException("Solidity compile error")
-        }
+    def script = "functioncall/gpact/gen.sh".execute()
+//    script.in.eachLine {line -> println line}
+//    script.err.eachLine {line -> println "ERROR: " + line}
+    script.waitForProcessOutput(System.out, System.err)
+    if (script.exitValue() != 0) {
+        throw new GradleException("Solidity compile error")
     }
 }
 project.afterEvaluate {
