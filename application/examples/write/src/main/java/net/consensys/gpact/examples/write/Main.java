@@ -66,7 +66,11 @@ public class Main {
     cbcManager.addBlockchainAndDeployContracts(creds, root);
     cbcManager.addBlockchainAndDeployContracts(creds, bc2);
 
-    cbcManager.setupCrosschainTrust();
+    // Have each Crosschain Control contract trust the Crosschain Control
+    // contracts on the other blockchains.
+    // To keep the example simple, just have one signer for all blockchains.
+    AnIdentity globalSigner = new AnIdentity();
+    cbcManager.setupCrosschainTrust(globalSigner);
 
     // Set-up client side and deploy contracts on the blockchains.
     BigInteger bc2BcId = bc2ContractBBlockchain.getBlockchainId();
@@ -77,17 +81,9 @@ public class Main {
     bc1ContractABlockchain.deployContracts(cbcManager.getCbcAddress(rootBcId), bc2BcId, contractBContractAddress);
     String contractAContractAddress = bc1ContractABlockchain.contractA.getContractAddress();
 
-    // To make the example simple, just have one signer, and have the same signer for all blockchains.
-    // Note that signers only need to be registered against blockchains that they will consume
-    // events from.
-    AnIdentity signer = new AnIdentity();
-    cbcManager.registerSignerOnAllBlockchains(signer);
-
     // Create simulators
     SimContractB simContractB = new SimContractB(bc2ContractBBlockchain);
     SimContractA simContractA = new SimContractA(bc1ContractABlockchain, simContractB);
-
-
 
 
     int numExecutions = 0;

@@ -53,10 +53,9 @@ public class TokenBridge {
     cbcManager.addBlockchainAndDeployContracts(creds, bc2);
     // Have each Crosschain Control contract trust the Crosschain Control
     // contracts on the other blockchains.
-    cbcManager.setupCrosschainTrust();
     // To keep the example simple, just have one signer for all blockchains.
     AnIdentity globalSigner = new AnIdentity();
-    cbcManager.registerSignerOnAllBlockchains(globalSigner);
+    cbcManager.setupCrosschainTrust(globalSigner);
 
     final int CHAIN_A_TOKEN_SUPPLY = 1000;
     final int CHAIN_B_TOKEN_SUPPLY = 2000;

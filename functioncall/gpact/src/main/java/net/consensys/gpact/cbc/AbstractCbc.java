@@ -14,6 +14,7 @@
  */
 package net.consensys.gpact.cbc;
 
+import net.consensys.gpact.attestorsign.soliditywrappers.AttestorSignRegistrar;
 import net.consensys.gpact.cbc.soliditywrappers.CrosschainControl;
 import net.consensys.gpact.common.RevertReason;
 import net.consensys.gpact.common.StatsHolder;
@@ -29,9 +30,6 @@ import org.web3j.protocol.core.methods.response.BaseEventResponse;
 import org.web3j.protocol.core.methods.response.Log;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import net.consensys.gpact.common.AnIdentity;
-import net.consensys.gpact.registrar.RegistrarVoteTypes;
-import net.consensys.gpact.registrar.SigAlgorithmTypes;
-import net.consensys.gpact.registrar.soliditywrappers.Registrar;
 import org.web3j.protocol.exceptions.TransactionException;
 
 import java.io.IOException;
@@ -56,7 +54,7 @@ public abstract class AbstractCbc extends AbstractBlockchain {
   public static Bytes ROOT_EVENT_SIGNAUTRE_BYTES = Bytes.wrap(ROOT_EVENT_SIGNATURE);
 
 
-  Registrar registrarContract;
+  AttestorSignRegistrar registrarContract;
   protected CrosschainControl crossBlockchainControlContract;
 
   // TODO put this into a map for the current transaction id, so many transactions can be handled in parallel
@@ -70,7 +68,7 @@ public abstract class AbstractCbc extends AbstractBlockchain {
   }
 
   protected void deployContracts() throws Exception {
-    this.registrarContract = Registrar.deploy(this.web3j, this.tm, this.gasProvider).send();
+    this.registrarContract = AttestorSignRegistrar.deploy(this.web3j, this.tm, this.gasProvider).send();
     this.crossBlockchainControlContract =
             CrosschainControl.deploy(this.web3j, this.tm, this.gasProvider,
                     this.blockchainId).send();
@@ -90,22 +88,18 @@ public abstract class AbstractCbc extends AbstractBlockchain {
     this.crossBlockchainControlContract =
             CrosschainControl.load(addresses.get(0), this.web3j, this.tm, this.gasProvider);
     this.registrarContract =
-            Registrar.load(addresses.get(1), this.web3j, this.tm, this.gasProvider);
+            AttestorSignRegistrar.load(addresses.get(1), this.web3j, this.tm, this.gasProvider);
   }
 
 
-  public void addBlockchain(BigInteger bcId, String cbcContractAddress) throws Exception {
-    BigInteger cbcContract = new BigInteger(cbcContractAddress.substring(2), 16);
-    BigInteger sigAlgorithm = SigAlgorithmTypes.ALG_ECDSA_KECCAK256_SECP256K1.asBigInt();
-    TransactionReceipt receipt1 = this.registrarContract.proposeVote(
-        RegistrarVoteTypes.VOTE_ADD_BLOCKCHAIN.asBigInt(), bcId, cbcContract, sigAlgorithm).send();
-    if (!receipt1.isStatusOK()) {
-      LOG.error("Transaction to add trusted blockchain 0x{} and CBC contract {} for blockchain 0x{} failed",
-          bcId.toString(16), cbcContractAddress, this.blockchainId.toString(16));
-      throw new Exception("Transaction to add trusted blockchain and CBC contract failed");
-    }
+  public void addBlockchain(BigInteger bcId, String cbcContractAddress, String initialSigner) throws Exception {
+    List<String> signers = new ArrayList<>();
+    signers.add(initialSigner);
+    TransactionReceipt txr = this.registrarContract.addBlockchain(bcId, BigInteger.ONE, signers).send();
+    assert(txr.isStatusOK());
 
-    this.crossBlockchainControlContract.addRemoteCrosschainControl(bcId, cbcContractAddress).send();
+    txr = this.crossBlockchainControlContract.addRemoteCrosschainControl(bcId, cbcContractAddress).send();
+    assert(txr.isStatusOK());
 
     addVerifier(bcId);
   }
@@ -113,18 +107,11 @@ public abstract class AbstractCbc extends AbstractBlockchain {
   protected abstract void addVerifier(BigInteger bcId) throws Exception;
 
 
-  public void registerSignerThisBlockchain(AnIdentity signer) throws Exception {
-    registerSigner(signer, this.blockchainId);
-  }
-
   public void registerSigner(AnIdentity signer, BigInteger bcId) throws Exception {
     LOG.debug("Registering signer 0x{} as signer for blockchain 0x{} in registration contract on blockchain 0x{}",
         signer.getAddress(), bcId.toString(16), this.blockchainId.toString(16));
-    TransactionReceipt receipt1 = this.registrarContract.proposeVote(
-        RegistrarVoteTypes.VOTE_ADD_SIGNER.asBigInt(), bcId, signer.getAddressAsBigInt(), BigInteger.ZERO).send();
-    if (!receipt1.isStatusOK()) {
-      throw new Exception("Transaction to register signer failed");
-    }
+    TransactionReceipt txr = this.registrarContract.addSigner(bcId, signer.getAddress()).send();
+    assert(txr.isStatusOK());
   }
 
   public static BigInteger generateRandomCrossBlockchainTransactionId() throws NoSuchAlgorithmException {

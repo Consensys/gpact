@@ -13,7 +13,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 pragma solidity >=0.8;
-import "../../../../../common/src/main/solidity/ERC165.sol";
+import "../../../../../common/common/src/main/solidity/ERC165.sol";
 
 
 

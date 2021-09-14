@@ -15,7 +15,7 @@
 pragma solidity >=0.7.1;
 
 import "./RLP.sol";
-import "../../../../../common/src/main/solidity/BytesUtil.sol";
+import "../../../../../common/common/src/main/solidity/BytesUtil.sol";
 
 /**
  * Transaction receipt processing.

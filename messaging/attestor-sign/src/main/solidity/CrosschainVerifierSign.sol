@@ -15,8 +15,8 @@
 pragma solidity >=0.8;
 
 import "../../../../interface/src/main/solidity/CrosschainVerifier.sol";
-import "../../../../../common/src/main/solidity/BytesUtil.sol";
 import "./AttestorSignRegistrar.sol";
+import "../../../../../common/common/src/main/solidity/BytesUtil.sol";
 
 
 contract CrosschainVerifierSign is CrosschainVerifier, BytesUtil{

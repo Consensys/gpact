@@ -32,7 +32,7 @@ dependencies {
 
     // compile ('org.web3j:core:4.6.3')
 
-    testImplementation project (path: ':common', configuration: 'testArtifacts')
+    testImplementation project(':commontest')
     testImplementation group: 'junit', name: 'junit', version: '4.12'
 }
 

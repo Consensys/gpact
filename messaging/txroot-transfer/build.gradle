@@ -10,19 +10,12 @@ repositories {
 
 dependencies {
     implementation project (':common')
-    testImplementation project (path: ':common', configuration: 'testArtifacts')
-
-    implementation project (':registrar')
-    testImplementation project (':sol-registrar')
-    testImplementation project (path: ':sol-registrar', configuration: 'testArtifacts')
+    implementation project (':mes-attestor-sign')
 
     // https://mvnrepository.com/artifact/org.apache.tuweni/tuweni-bytes
     implementation group: 'org.apache.tuweni', name: 'tuweni-bytes', version: '1.0.0'
     // https://mvnrepository.com/artifact/org.apache.tuweni/tuweni-units
     implementation group: 'org.apache.tuweni', name: 'tuweni-units', version: '1.0.0'
-
-
-    testImplementation group: 'junit', name: 'junit', version: '4.12'
 
     implementation files('../../../web3j-rlp/abi/build/libs/abi-4.8.5-SNAPSHOT.jar')
     implementation files('../../../web3j-rlp/core/build/libs/core-4.8.5-SNAPSHOT.jar')
@@ -42,6 +35,8 @@ dependencies {
     implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.12.0'
     implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.12.0'
 
+    testImplementation project(':commontest')
+    testImplementation group: 'junit', name: 'junit', version: '4.12'
 }
 
 task generateSources {

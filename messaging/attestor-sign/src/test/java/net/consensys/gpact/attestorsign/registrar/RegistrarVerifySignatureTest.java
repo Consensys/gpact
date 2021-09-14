@@ -16,7 +16,6 @@ package net.consensys.gpact.attestorsign.registrar;
 
 import net.consensys.gpact.common.AnIdentity;
 import net.consensys.gpact.common.RevertReason;
-import net.consensys.gpact.registrar.RegistrarVoteTypes;
 import org.junit.Test;
 import org.web3j.crypto.Sign;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;

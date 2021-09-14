@@ -31,8 +31,8 @@ dependencies {
     implementation files('../../../../web3j-rlp/tuples/build/libs/tuples-4.8.5-SNAPSHOT.jar')
     implementation "io.reactivex.rxjava2:rxjava:2.2.2"
 
-    testImplementation project (path: ':common', configuration: 'testArtifacts')
     testImplementation project (path: ':common')
+    testImplementation project (path: ':commontest')
     testImplementation group: 'junit', name: 'junit', version: '4.12'
     testImplementation "com.fasterxml.jackson.core:jackson-databind:2.8.11.6"
 

@@ -1,13 +1,13 @@
 rootProject.name = 'gpact'
 include 'common'
-include 'registrar'
-include 'sol-registrar'
+include 'commontest'
+include 'openzeppelin'
+
 include 'mes-attestor-sign'
 include 'mes-txroot-transfer'
+
 include 'gpact'
 
-
-include 'app-openzeppelin'
 include 'app-erc20'
 
 include 'examples-conditional'
@@ -23,15 +23,15 @@ include 'examples-singlebc-trade'
 include 'examples-singlebc-write'
 
 
-project(":common").projectDir = file("common")
-project(":registrar").projectDir = file("library/registrar")
-project(":sol-registrar").projectDir = file("functioncall/solidity/registrar")
+project(":common").projectDir = file("common/common")
+project(":commontest").projectDir = file("common/commontest")
+project(":openzeppelin").projectDir = file("common/openzeppelin")
+
 project(":mes-attestor-sign").projectDir = file("messaging/attestor-sign")
 project(":mes-txroot-transfer").projectDir = file("messaging/txroot-transfer")
 project(":gpact").projectDir = file("functioncall/gpact")
 
 
-project(":app-openzeppelin").projectDir = file("application/appcontracts/openzeppelin")
 project(":app-erc20").projectDir = file("application/appcontracts/erc20")
 
 project(":examples-conditional").projectDir = file("application/examples/conditional")

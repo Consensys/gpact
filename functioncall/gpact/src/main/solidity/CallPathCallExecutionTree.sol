@@ -14,7 +14,8 @@
  */
 pragma solidity >=0.8;
 
-import "../../../../../common/src/main/solidity/BytesUtil.sol";
+import "../../../../../common/common/src/main/solidity/BytesUtil.sol";
+
 
 contract CallPathCallExecutionTree is BytesUtil {
 

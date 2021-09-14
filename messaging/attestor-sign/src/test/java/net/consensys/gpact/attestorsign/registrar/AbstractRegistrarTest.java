@@ -15,6 +15,7 @@
 package net.consensys.gpact.attestorsign.registrar;
 
 import net.consensys.gpact.attestorsign.soliditywrappers.AttestorSignRegistrar;
+import net.consensys.gpact.common.test.AbstractWeb3Test;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.tx.TransactionManager;
 

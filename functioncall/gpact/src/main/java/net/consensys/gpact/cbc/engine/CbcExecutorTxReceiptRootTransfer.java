@@ -60,9 +60,9 @@ public class CbcExecutorTxReceiptRootTransfer extends AbstractCbcExecutor {
 
     CrossBlockchainControlTxReceiptRootTransfer segmentCbcContract = this.cbcManager.getCbcContractTxRootTransfer(blockchainId);
 
-    List<SignedEvent> proofs = this.signedSegmentEvents.computeIfAbsent(mapKey, k -> new ArrayList<>());
+    List<SignedEvent> segmentEvents = this.signedSegmentEvents.computeIfAbsent(mapKey, k -> new ArrayList<>());
     Tuple<TransactionReceipt, byte[], Boolean> result = segmentCbcContract.segment(
-            this.signedStartEvent, proofs, callPath);
+            this.signedStartEvent, segmentEvents, callPath);
     TransactionReceipt segTxReceipt = result.getFirst();
     byte[] eventData = result.getSecond();
     boolean noContractsLocked = result.getThird();
@@ -71,8 +71,8 @@ public class CbcExecutorTxReceiptRootTransfer extends AbstractCbcExecutor {
 
     // Add the proof for the call that has just occurred to the map so it can be accessed when the next
     BigInteger parentMapKey = determineMapKeyOfCaller(callPath);
-    proofs = this.signedSegmentEvents.computeIfAbsent(parentMapKey, k -> new ArrayList<>());
-    proofs.add(segProof.toSignedEvent());
+    segmentEvents = this.signedSegmentEvents.computeIfAbsent(parentMapKey, k -> new ArrayList<>());
+    segmentEvents.add(segProof.toSignedEvent());
 
     // Add the proof if there were locked contracts as a result of the segment.
     if (!noContractsLocked) {

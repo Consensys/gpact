@@ -14,7 +14,7 @@
  */
 package net.consensys.gpact.cbc;
 
-import net.consensys.gpact.cbc.soliditywrappers.CrosschainVerifierSign;
+import net.consensys.gpact.attestorsign.soliditywrappers.CrosschainVerifierSign;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;

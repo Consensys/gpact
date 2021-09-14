@@ -17,12 +17,11 @@ pragma solidity >=0.8;
 import "../../../../interface/src/main/solidity/CrosschainVerifier.sol";
 import "./Receipts.sol";
 import "./TxReceiptsRootStorageInterface.sol";
-import "../../../../../functioncall/solidity/registrar/src/main/solidity/Registrar.sol";
+import "../../../../attestor-sign/src/main/solidity/AttestorSignRegistrar.sol";
 
 
 contract CrosschainVerifierTxRoot is CrosschainVerifier,  Receipts {
     TxReceiptsRootStorageInterface private txReceiptRootStorage;
-    Registrar private registrar;
 
     struct EventProof {
         uint256 blockchainId;
@@ -33,16 +32,17 @@ contract CrosschainVerifierTxRoot is CrosschainVerifier,  Receipts {
         bytes[] proof;
     }
 
-    constructor(address _registrar, address _txReceiptRootStorage) {
-        registrar = Registrar(_registrar);
+    constructor(address _txReceiptRootStorage) {
         txReceiptRootStorage = TxReceiptsRootStorageInterface(_txReceiptRootStorage);
     }
 
+//    function decodeAndVerifyEvent(uint256, bytes32 , bytes calldata, bytes calldata)
+//        external view override {
+//
+//    }
 
     function decodeAndVerifyEvent(uint256 _expectedBlockchainId, bytes32 _eventSig, bytes calldata _encodedEvent, bytes calldata _proof)
         external view override {
-
-        address cbcContract = registrar.getApprovedContract(_expectedBlockchainId);
 
         EventProof memory eventProof = toEventProof(_proof);
         txReceiptRootStorage.verify(
@@ -53,7 +53,8 @@ contract CrosschainVerifierTxRoot is CrosschainVerifier,  Receipts {
             eventProof.proofOffsets,
             eventProof.proof);
         require(_expectedBlockchainId == eventProof.blockchainId, "Event not emitted by expected blockchain");
-        require(cbcContract == eventProof.cbcContract, "Event not emitted by expected contract");
+        // TODO need to pass in CBC address
+        //        require(cbcContract == eventProof.cbcContract, "Event not emitted by expected contract");
 
         // Extract from the encoded transaction receipt the Patricia Merkle Trie key and the receipt.
         RLP.RLPItem[] memory keyAndReceipt = RLP.toList(RLP.toRLPItem(eventProof.encodedTxReceipt));

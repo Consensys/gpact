@@ -14,8 +14,10 @@
  */
 package net.consensys.gpact.txroot;
 
+import net.consensys.gpact.attestorsign.soliditywrappers.AttestorSignRegistrar;
 import net.consensys.gpact.common.FastTxManager;
 import net.consensys.gpact.common.TxManagerCache;
+import net.consensys.gpact.common.test.AbstractWeb3Test;
 import net.consensys.gpact.txroot.soliditywrappers.TxReceiptsRootStorage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -36,12 +38,11 @@ import org.web3j.protocol.core.methods.response.Log;
 import org.web3j.protocol.core.methods.response.Transaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.exceptions.TransactionException;
+import org.web3j.tx.TransactionManager;
 import org.web3j.tx.exceptions.ContractCallException;
 import net.consensys.gpact.common.RevertReason;
-import net.consensys.gpact.registrar.RegistrarVoteTypes;
 import net.consensys.gpact.common.AnIdentity;
 import net.consensys.gpact.txroot.soliditywrappers.TestEvents;
-import net.consensys.gpact.test.registrar.AbstractRegistrarTest;
 import net.consensys.gpact.utils.crypto.KeyPairGen;
 import net.consensys.gpact.trie.MerklePatriciaTrie;
 import net.consensys.gpact.trie.Proof;
@@ -58,12 +59,37 @@ import java.util.concurrent.CompletableFuture;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertFalse;
 
-public class TxRootAddTest extends AbstractRegistrarTest {
+public class TxRootAddTest extends AbstractWeb3Test {
   static final Logger LOG = LogManager.getLogger(TxRootAddTest.class);
 
   final byte[] txReceiptRoot = new byte[32];
 
   TxReceiptsRootStorage txReceiptRootStorageContract;
+
+  protected AttestorSignRegistrar registrarContract;
+
+  protected void deployRegistrarContract() throws Exception {
+    this.registrarContract = AttestorSignRegistrar.deploy(this.web3j, this.tm, this.freeGasProvider).send();
+  }
+
+  protected AttestorSignRegistrar deployRegistrarContract(TransactionManager tm1) throws Exception {
+    return AttestorSignRegistrar.deploy(this.web3j, tm1, this.freeGasProvider).send();
+  }
+
+  protected AttestorSignRegistrar loadContract(TransactionManager tm1) throws Exception {
+    return AttestorSignRegistrar.load(this.registrarContract.getContractAddress(), this.web3j, tm1, this.freeGasProvider);
+  }
+
+  protected void addBlockchain(BigInteger blockchainId, String initialSigner) throws Exception {
+    List<String> signers = new ArrayList<>();
+    signers.add(initialSigner);
+    addBlockchain(blockchainId, signers);
+  }
+
+  protected void addBlockchain(BigInteger blockchainId, List<String> signers) throws Exception {
+    TransactionReceipt receipt = this.registrarContract.addBlockchain(blockchainId, BigInteger.ONE, signers).send();
+    assert(receipt.isStatusOK());
+  }
 
   protected void deployTxReceiptRootStorageContract() throws Exception {
     this.txReceiptRootStorageContract = TxReceiptsRootStorage.deploy(this.web3j, this.tm, this.freeGasProvider,
@@ -76,13 +102,8 @@ public class TxRootAddTest extends AbstractRegistrarTest {
     setupWeb3();
     deployRegistrarContract();
     BigInteger blockchainId = BigInteger.TEN;
-    addBlockchain(blockchainId);
-
-    // Set-up one signer for the blockchain
     AnIdentity newSigner = new AnIdentity();
-    TransactionReceipt receipt = this.registrarContract.proposeVote(
-        RegistrarVoteTypes.VOTE_ADD_SIGNER.asBigInt(), blockchainId, newSigner.getAddressAsBigInt(), BigInteger.ZERO).send();
-    assert(receipt.isStatusOK());
+    addBlockchain(blockchainId, newSigner.getAddress());
 
     deployTxReceiptRootStorageContract();
 
@@ -103,7 +124,7 @@ public class TxRootAddTest extends AbstractRegistrarTest {
 
     // This will revert if the signature does not verify
     try {
-      receipt = this.txReceiptRootStorageContract.addTxReceiptRoot(blockchainId, signers, sigR, sigS, sigV, this.txReceiptRoot).send();
+      TransactionReceipt receipt = this.txReceiptRootStorageContract.addTxReceiptRoot(blockchainId, signers, sigR, sigS, sigV, this.txReceiptRoot).send();
       assert(receipt.isStatusOK());
     } catch (TransactionException ex) {
       LOG.error(" Revert Reason: {}", RevertReason.decodeRevertReason(ex.getTransactionReceipt().get().getRevertReason()));
@@ -160,13 +181,8 @@ public class TxRootAddTest extends AbstractRegistrarTest {
     // for the sake of the test, assume they are on a different blockchain, and assume that blockchain
     // has blockchain id 10.
     BigInteger sourceBlockchainId = BigInteger.TEN;
-    addBlockchain(sourceBlockchainId);
-
-    // Set-up one signer for the blockchain
     AnIdentity newSigner = new AnIdentity();
-    TransactionReceipt receipt1 = this.registrarContract.proposeVote(
-        RegistrarVoteTypes.VOTE_ADD_SIGNER.asBigInt(), sourceBlockchainId, newSigner.getAddressAsBigInt(), BigInteger.ZERO).send();
-    assert(receipt1.isStatusOK());
+    addBlockchain(sourceBlockchainId, newSigner.getAddress());
 
     deployTxReceiptRootStorageContract();
 

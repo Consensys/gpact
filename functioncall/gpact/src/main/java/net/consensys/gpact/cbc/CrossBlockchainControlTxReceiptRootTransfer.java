@@ -14,10 +14,10 @@
  */
 package net.consensys.gpact.cbc;
 
-import net.consensys.gpact.cbc.soliditywrappers.CrosschainVerifierTxRoot;
 import net.consensys.gpact.common.AnIdentity;
 import net.consensys.gpact.common.RevertReason;
 import net.consensys.gpact.common.StatsHolder;
+import net.consensys.gpact.txroot.soliditywrappers.CrosschainVerifierTxRoot;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
@@ -73,7 +73,7 @@ public class CrossBlockchainControlTxReceiptRootTransfer extends AbstractCbc {
         TxReceiptsRootStorage.deploy(this.web3j, this.tm, this.gasProvider,
             this.registrarContract.getContractAddress()).send();
     this.verifier =
-            CrosschainVerifierTxRoot.deploy(this.web3j, this.tm, this.gasProvider, this.registrarContract.getContractAddress(), this.txReceiptsRootStorageContract.getContractAddress()).send();
+            CrosschainVerifierTxRoot.deploy(this.web3j, this.tm, this.gasProvider, this.txReceiptsRootStorageContract.getContractAddress()).send();
 
     LOG.debug(" TxReceiptRoot Contract: {}", this.txReceiptsRootStorageContract.getContractAddress());
   }

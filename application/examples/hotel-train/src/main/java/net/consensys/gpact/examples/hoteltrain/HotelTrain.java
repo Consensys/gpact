@@ -59,10 +59,9 @@ public class HotelTrain {
         cbcManager.addBlockchainAndDeployContracts(creds, bc3);
         // Have each Crosschain Control contract trust the Crosschain Control
         // contracts on the other blockchains.
-        cbcManager.setupCrosschainTrust();
         // To keep the example simple, just have one signer for all blockchains.
         AnIdentity globalSigner = new AnIdentity();
-        cbcManager.registerSignerOnAllBlockchains(globalSigner);
+        cbcManager.setupCrosschainTrust(globalSigner);
 
 
         // Set-up classes to manage blockchains.

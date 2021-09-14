@@ -15,7 +15,6 @@
 pragma solidity >=0.8;
 
 import "../../../../../messaging/interface/src/main/solidity/CrosschainVerifier.sol";
-import "../../../../solidity/registrar/src/main/solidity/Registrar.sol";
 
 
 abstract contract CbcDecVer {
@@ -58,6 +57,7 @@ abstract contract CbcDecVer {
         require(numEvents == _eventFunctionSignatures.length, "Number of blockchain Ids and event function signatures must match");
         require(numEvents == _eventData.length, "Number of blockchain Ids and event data must match");
         require(numEvents == _signatures.length, "Number of events and signatures match");
+
 
         for (uint256 i = 0; i < numEvents; i++) {
             uint256 bcId = _blockchainIds[i];

@@ -14,11 +14,11 @@
  */
 pragma solidity ^0.8.0;
 
-import "../../../../openzeppelin/src/main/solidity/access/Ownable.sol";
-import "../../../../openzeppelin/src/main/solidity/utils/Context.sol";
-import "../../../../openzeppelin/src/main/solidity/token/ERC20/IERC20.sol";
-import "../../../../openzeppelin/src/main/solidity/token/ERC20/extensions/IERC20Metadata.sol";
 import "../../../../../../functioncall/gpact/src/main/solidity/LockableStorage.sol";
+import "../../../../../../common/openzeppelin/src/main/solidity/utils/Context.sol";
+import "../../../../../../common/openzeppelin/src/main/solidity/token/ERC20/IERC20.sol";
+import "../../../../../../common/openzeppelin/src/main/solidity/token/ERC20/extensions/IERC20Metadata.sol";
+import "../../../../../../common/openzeppelin/src/main/solidity/access/Ownable.sol";
 
 /**
  * Implementation of the {IERC20} interface that provides lockable storage for

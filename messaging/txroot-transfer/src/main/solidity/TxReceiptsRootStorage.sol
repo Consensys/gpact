@@ -15,13 +15,13 @@
 pragma solidity >=0.8;
 
 import "./TxReceiptsRootStorageInterface.sol";
-import "../../../../../common/src/main/solidity/ERC165MappingImplementation.sol";
-import "../../../../../common/src/main/solidity/BytesUtil.sol";
-import "../../../../../functioncall/solidity/registrar/src/main/solidity/Registrar.sol";
+import "../../../../attestor-sign/src/main/solidity/AttestorSignRegistrar.sol";
+import "../../../../../common/common/src/main/solidity/ERC165MappingImplementation.sol";
+import "../../../../../common/common/src/main/solidity/BytesUtil.sol";
 
 
 contract TxReceiptsRootStorage is TxReceiptsRootStorageInterface, ERC165MappingImplementation, BytesUtil {
-    Registrar registrar;
+    AttestorSignRegistrar registrar;
 
     // Mapping (blockchain Id => mapping(transaction receipt root) => bool)
     // The bool is true if the transaction receipt root exists for the blockchain
@@ -29,7 +29,7 @@ contract TxReceiptsRootStorage is TxReceiptsRootStorageInterface, ERC165MappingI
 
 
     constructor(address _registrar) {
-        registrar = Registrar(_registrar);
+        registrar = AttestorSignRegistrar(_registrar);
 
         supportedInterfaces[type(TxReceiptsRootStorageInterface).interfaceId] = true;
     }
@@ -49,7 +49,7 @@ contract TxReceiptsRootStorage is TxReceiptsRootStorageInterface, ERC165MappingI
 
     function verify(
         uint256 _blockchainId,
-        address _cbcContract,
+        address , // _cbcContract
         bytes32 _txReceiptsRoot,
         bytes calldata _txReceipt,
         uint256[] calldata _proofOffsets,
@@ -57,7 +57,8 @@ contract TxReceiptsRootStorage is TxReceiptsRootStorageInterface, ERC165MappingI
     ) external view override(TxReceiptsRootStorageInterface) returns (bool) {
         require(txReceiptsRoots[_blockchainId][_txReceiptsRoot], "Transaction receipt root does not exist for blockchain id");
         require(_proof.length == _proofOffsets.length, "Length of proofs and proofsOffsets does not match");
-        registrar.verifyContract(_blockchainId, _cbcContract);
+        // Check the CBC contract is done in the CrosschainControl.
+        //registrar.verifyContract(_blockchainId, _cbcContract);
 
         bytes32 hash = keccak256(_txReceipt);
         for (uint256 i = 0; i < _proof.length; i++) {

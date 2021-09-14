@@ -10,10 +10,6 @@ repositories {
 
 dependencies {
     implementation project (':common')
-
-    testImplementation project (path: ':common', configuration: 'testArtifacts')
-    testImplementation group: 'junit', name: 'junit', version: '4.12'
-
     implementation project (':gpact')
 
     implementation group: 'com.google.guava', name: 'guava', version: '14.0'
@@ -35,6 +31,8 @@ dependencies {
     implementation group: 'io.reactivex.rxjava2', name: 'rxjava', version: '2.2.2'
 
     // compile ('org.web3j:core:4.6.3')
+    testImplementation project(':commontest')
+    testImplementation group: 'junit', name: 'junit', version: '4.12'
 }
 
 task generateSources {
