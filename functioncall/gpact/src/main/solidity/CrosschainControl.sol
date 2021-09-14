@@ -16,9 +16,9 @@ pragma solidity >=0.7.1;
 pragma experimental ABIEncoderV2;
 
 import "./CbcLockableStorageInterface.sol";
-import "./LockableStorage.sol";
 import "./CbcDecVer.sol";
 import "./CallPathCallExecutionTree.sol";
+import "../../../../../application/appcontracts/lockablestorage/src/main/solidity/LockableStorage.sol";
 
 
 contract CrosschainControl is CbcLockableStorageInterface, CbcDecVer, CallPathCallExecutionTree {

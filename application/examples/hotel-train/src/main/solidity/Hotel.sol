@@ -14,8 +14,8 @@
  */
 pragma solidity >=0.8;
 
-import "../../../../../../functioncall/gpact/src/main/solidity/LockableStorage.sol";
 import "../../../../../../common/openzeppelin/src/main/solidity/token/ERC20/IERC20.sol";
+import "../../../../../appcontracts/lockablestorage/src/main/solidity/LockableStorage.sol";
 
 contract Hotel is LockableStorage {
     // Room rate.

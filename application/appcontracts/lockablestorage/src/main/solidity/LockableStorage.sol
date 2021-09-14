@@ -14,7 +14,7 @@
  */
 pragma solidity >=0.7.1;
 
-import "./CbcLockableStorageInterface.sol";
+import "../../../../../../functioncall/gpact/src/main/solidity/CbcLockableStorageInterface.sol";
 
 
 /**

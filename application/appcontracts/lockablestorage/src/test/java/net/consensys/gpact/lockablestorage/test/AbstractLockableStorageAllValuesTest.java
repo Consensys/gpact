@@ -16,7 +16,6 @@ package net.consensys.gpact.lockablestorage.test;
 
 import net.consensys.gpact.common.test.AbstractWeb3Test;
 import net.consensys.gpact.lockablestorage.soliditywrappers.MockCbcForLockableStorageTest;
-import net.consensys.gpact.lockablestorage.soliditywrappers.TestLockableStorageWrapper;
 import net.consensys.gpact.lockablestorage.soliditywrappers.TestLockableStorageWrapperAllValues;
 
 /**

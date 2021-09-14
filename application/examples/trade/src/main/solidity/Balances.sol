@@ -14,7 +14,7 @@
  */
 pragma solidity >=0.7.1;
 
-import "../../../../../../functioncall/gpact/src/main/solidity/LockableStorage.sol";
+import "../../../../../appcontracts/lockablestorage/src/main/solidity/LockableStorage.sol";
 
 contract Balances is LockableStorage {
     uint256 constant private KEY_MAP1 = 0;

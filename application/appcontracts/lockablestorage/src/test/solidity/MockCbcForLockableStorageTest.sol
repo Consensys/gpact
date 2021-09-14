@@ -15,7 +15,7 @@
 pragma solidity >=0.7.1;
 pragma experimental ABIEncoderV2;
 
-import "../../main/solidity/CbcLockableStorageInterface.sol";
+import "../../../../../../functioncall/gpact/src/main/solidity/CbcLockableStorageInterface.sol";
 
 
 contract MockCbcForLockableStorageTest is CbcLockableStorageInterface {

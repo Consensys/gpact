@@ -14,7 +14,7 @@
  */
 pragma solidity >=0.7.1;
 
-import "../../../../../../functioncall/gpact/src/main/solidity/LockableStorage.sol";
+import "../../../../../appcontracts/lockablestorage/src/main/solidity/LockableStorage.sol";
 
 
 contract Stock is LockableStorage {

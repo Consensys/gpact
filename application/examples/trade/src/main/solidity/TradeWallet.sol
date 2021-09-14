@@ -15,7 +15,6 @@
 pragma solidity >=0.7.1;
 
 import "./BusLogic.sol";
-import "../../../../../../functioncall/gpact/src/main/solidity/LockableStorage.sol";
 
 contract TradeWallet is LockableStorage {
     uint256 busLogicBcId;

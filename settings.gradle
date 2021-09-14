@@ -9,6 +9,7 @@ include 'mes-txroot-transfer'
 include 'gpact'
 
 include 'app-erc20'
+include 'app-lockablestorage'
 
 include 'examples-conditional'
 include 'examples-hoteltrain'
@@ -33,6 +34,7 @@ project(":gpact").projectDir = file("functioncall/gpact")
 
 
 project(":app-erc20").projectDir = file("application/appcontracts/erc20")
+project(":app-lockablestorage").projectDir = file("application/appcontracts/lockablestorage")
 
 project(":examples-conditional").projectDir = file("application/examples/conditional")
 project(":examples-hoteltrain").projectDir = file("application/examples/hotel-train")
