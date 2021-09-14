@@ -13,6 +13,7 @@ dependencies {
     testImplementation group: 'junit', name: 'junit', version: '4.12'
 
     implementation project (':common')
+    implementation project (':gpact')
     implementation project (':app-openzeppelin')
 
     implementation group: 'com.google.guava', name: 'guava', version: '14.0'
