@@ -16,14 +16,14 @@ pragma solidity >=0.8;
 
 import "../../../../interface/src/main/solidity/CrosschainVerifier.sol";
 import "../../../../../common/src/main/solidity/BytesUtil.sol";
-import "../../../../../functioncall/solidity/registrar/src/main/solidity/Registrar.sol";
+import "./AttestorSignRegistrar.sol";
 
 
-contract CrosschainVerifierSign is CrosschainVerifier,  BytesUtil{
-    Registrar registrar;
+contract CrosschainVerifierSign is CrosschainVerifier, BytesUtil{
+    AttestorSignRegistrar registrar;
 
     constructor(address _registrar) {
-        registrar = Registrar(_registrar);
+        registrar = AttestorSignRegistrar(_registrar);
     }
 
     uint256 constant LEN_OF_LEN = 4;

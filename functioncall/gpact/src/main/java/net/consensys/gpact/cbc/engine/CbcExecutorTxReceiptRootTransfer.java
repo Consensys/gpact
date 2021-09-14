@@ -177,15 +177,4 @@ public class CbcExecutorTxReceiptRootTransfer extends AbstractCbcExecutor {
       cbcContract.addTransactionReceiptRootToBlockchainAsyncPart2(receipt);
     }
   }
-
-
-
-  private void publishReceiptRootSync(BigInteger publishingFrom,  byte[] transactionReceiptRoot, Set<BigInteger> blockchainsToPublishTo) throws Exception {
-    for (BigInteger bcId: blockchainsToPublishTo) {
-      CrossBlockchainControlTxReceiptRootTransfer cbcContract = this.cbcManager.getCbcContractTxRootTransfer(bcId);
-      AnIdentity[] signers = this.cbcManager.getSigners(bcId);
-      cbcContract.addTransactionReceiptRootToBlockchain(signers, publishingFrom, transactionReceiptRoot);
-    }
-  }
-
 }

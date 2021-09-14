@@ -73,7 +73,7 @@ public abstract class AbstractCbc extends AbstractBlockchain {
     this.registrarContract = Registrar.deploy(this.web3j, this.tm, this.gasProvider).send();
     this.crossBlockchainControlContract =
             CrosschainControl.deploy(this.web3j, this.tm, this.gasProvider,
-                    this.blockchainId, registrarContract.getContractAddress()).send();
+                    this.blockchainId).send();
     LOG.debug(" Registrar Contract: {}", this.registrarContract.getContractAddress());
     LOG.debug(" Cross Blockchain Contract Contract: {}", this.crossBlockchainControlContract.getContractAddress());
   }
@@ -104,6 +104,8 @@ public abstract class AbstractCbc extends AbstractBlockchain {
           bcId.toString(16), cbcContractAddress, this.blockchainId.toString(16));
       throw new Exception("Transaction to add trusted blockchain and CBC contract failed");
     }
+
+    this.crossBlockchainControlContract.addRemoteCrosschainControl(bcId, cbcContractAddress).send();
 
     addVerifier(bcId);
   }

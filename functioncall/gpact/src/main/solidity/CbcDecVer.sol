@@ -26,17 +26,20 @@ abstract contract CbcDecVer {
     // 0xe6763dd9
     bytes32 constant internal ROOT_EVENT_SIGNATURE = keccak256("Root(uint256,bool)");
 
+    // Address of verifier contract to be used for a certain blockchain id.
     mapping (uint256 => CrosschainVerifier) private verifiers;
 
-    Registrar private reg;
+    // Address of Crosschain Control Contract on another blockchain.
+    mapping (uint256 => address) private remoteCrosschainControlContracts;
 
-    constructor(address _registrar) {
-        reg = Registrar(_registrar);
+    // TODO this must be only owner
+    function addVerifier(uint256 _blockchainId, address _verifier) external {
+        verifiers[_blockchainId] = CrosschainVerifier(_verifier);
     }
 
     // TODO this must be only owner
-    function addVerifier(uint256 _blockchainId, address verifier) external {
-        verifiers[_blockchainId] = CrosschainVerifier(verifier);
+    function addRemoteCrosschainControl(uint256 _blockchainId, address _cbc) external {
+        remoteCrosschainControlContracts[_blockchainId] = _cbc;
     }
 
     function decodeAndVerifyEvents(
@@ -62,7 +65,8 @@ abstract contract CbcDecVer {
             CrosschainVerifier verifier = verifiers[bcId];
             require(address(verifier) != address(0), "No registered verifier for blockchain");
 
-            reg.verifyContract(bcId, _cbcAddresses[i]);
+            require(_cbcAddresses[i] == remoteCrosschainControlContracts[bcId],
+                "Data not emitted by approved contract");
 
             if (i == 0) {
                 bytes32 eventSig = _expectStart ? START_EVENT_SIGNATURE : ROOT_EVENT_SIGNATURE;

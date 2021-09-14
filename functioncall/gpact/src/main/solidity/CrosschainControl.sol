@@ -96,7 +96,7 @@ contract CrosschainControl is CbcLockableStorageInterface, CbcDecVer, CallPathCa
     uint256 private activeCallParentBlockchainId;
     address private activeCallParentContract;
 
-    constructor(uint256 _myBlockchainId, address _registrar) CbcDecVer(_registrar){
+    constructor(uint256 _myBlockchainId) {
         myBlockchainId = _myBlockchainId;
     }
 

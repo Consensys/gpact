@@ -106,37 +106,6 @@ public class CrossBlockchainControlTxReceiptRootTransfer extends AbstractCbc {
     return receiptsRootBytes32.toArray();
   }
 
-
-  public void addTransactionReceiptRootToBlockchain(
-          AnIdentity[] signers, BigInteger sourceBlockchainId, byte[] transactionReceiptRoot) throws Exception {
-    // Add the transaction receipt root for the blockchain
-    // Sign the txReceiptRoot
-    List<String> theSigners = new ArrayList<>();
-    List<byte[]> sigR = new ArrayList<>();
-    List<byte[]> sigS = new ArrayList<>();
-    List<BigInteger> sigV = new ArrayList<>();
-    for (AnIdentity signer: signers) {
-      Sign.SignatureData signatureData = signer.sign(transactionReceiptRoot);
-      theSigners.add(signer.getAddress());
-      sigR.add(signatureData.getR());
-      sigS.add(signatureData.getS());
-      sigV.add(BigInteger.valueOf(signatureData.getV()[0]));
-    }
-
-    // This will revert if the signature does not verify
-    try {
-      TransactionReceipt txR = this.txReceiptsRootStorageContract.addTxReceiptRoot(sourceBlockchainId, theSigners, sigR, sigS, sigV, transactionReceiptRoot).send();
-      StatsHolder.logGas("AddTxReceiptRoot Transaction", txR.getGasUsed());
-      if (!txR.isStatusOK()) {
-        throw new Exception("Transaction to add transaction receipt root failed");
-      }
-    } catch (TransactionException txe) {
-      String revertReason = txe.getTransactionReceipt().get().getRevertReason();
-      LOG.error("Revert Reason: {}", RevertReason.decodeRevertReason(revertReason));
-      throw txe;
-    }
-  }
-
   public CompletableFuture<TransactionReceipt> addTransactionReceiptRootToBlockchainAsyncPart1(
       AnIdentity[] signers, BigInteger sourceBlockchainId, byte[] transactionReceiptRoot) throws Exception {
     // Add the transaction receipt root for the blockchain
