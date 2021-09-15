@@ -25,12 +25,12 @@ contract BusLogic {
     PriceOracle priceOracleContract;
     uint256 stockBcId;
     Stock stockContract;
-    CbcLockableStorageInterface crossBlockchainControl;
+    CrosschainFunctionCallInterface crossBlockchainControl;
 
     event StockShipment(address _seller, address _buyer, uint256 _quantity, uint256 _price);
 
     constructor (address _cbc, uint256 _balancesBcId, address _balances, uint256 _oracleBcId, address _oracle, uint256 _stockBcId, address _stock) {
-        crossBlockchainControl = CbcLockableStorageInterface(_cbc);
+        crossBlockchainControl = CrosschainFunctionCallInterface(_cbc);
         balancesBcId = _balancesBcId;
         balancesContract = Balances(_balances);
         priceBcId = _oracleBcId;

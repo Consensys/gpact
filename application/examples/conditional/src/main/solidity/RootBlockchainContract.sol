@@ -16,7 +16,7 @@ pragma solidity >=0.7.1;
 
 import "./OtherBlockchainContractInterface.sol";
 import "../../../../../appcontracts/lockablestorage/src/main/solidity/LockableStorage.sol";
-import "../../../../../../functioncall/gpact/src/main/solidity/CbcLockableStorageInterface.sol";
+import "../../../../../../functioncall/interface/src/main/solidity/CrosschainFunctionCallInterface.sol";
 
 
 contract RootBlockchainContract is LockableStorage {
@@ -35,18 +35,18 @@ contract RootBlockchainContract is LockableStorage {
     function someComplexBusinessLogic(uint256 _val) external {
         // Use the value on the other blockchain as a threshold
         uint256 valueFromOtherBlockchain =
-            CbcLockableStorageInterface(address(crossBlockchainControl)).crossBlockchainCallReturnsUint256(
+            CrosschainFunctionCallInterface(address(crossBlockchainControl)).crossBlockchainCallReturnsUint256(
             otherBlockchainId, address(otherContract), abi.encodeWithSelector(otherContract.getVal.selector));
         setVal2(valueFromOtherBlockchain);
 
         if (_val > valueFromOtherBlockchain) {
-            CbcLockableStorageInterface(address(crossBlockchainControl)).crossBlockchainCall(otherBlockchainId, address(otherContract),
+            CrosschainFunctionCallInterface(address(crossBlockchainControl)).crossBlockchainCall(otherBlockchainId, address(otherContract),
                 abi.encodeWithSelector(otherContract.setValues.selector, _val, valueFromOtherBlockchain));
             setVal1(valueFromOtherBlockchain);
         }
         else {
             uint256 valueToSet = _val + 13;
-            CbcLockableStorageInterface(address(crossBlockchainControl)).crossBlockchainCall(otherBlockchainId, address(otherContract),
+            CrosschainFunctionCallInterface(address(crossBlockchainControl)).crossBlockchainCall(otherBlockchainId, address(otherContract),
                 abi.encodeWithSelector(otherContract.setVal.selector, valueToSet));
             setVal1(_val);
         }

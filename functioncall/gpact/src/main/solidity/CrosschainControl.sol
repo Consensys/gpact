@@ -15,14 +15,14 @@
 pragma solidity >=0.7.1;
 pragma experimental ABIEncoderV2;
 
-import "./CbcLockableStorageInterface.sol";
 import "./CbcDecVer.sol";
 import "./CallPathCallExecutionTree.sol";
 import "../../../../interface/src/main/solidity/LockableStorageInterface.sol";
 import "../../../../interface/src/main/solidity/CrosschainLockingInterface.sol";
+import "../../../../interface/src/main/solidity/CrosschainFunctionCallInterface.sol";
 
 
-contract CrosschainControl is CbcLockableStorageInterface, CbcDecVer, CallPathCallExecutionTree,
+contract CrosschainControl is CrosschainFunctionCallInterface, CbcDecVer, CallPathCallExecutionTree,
     CrosschainLockingInterface {
 
 

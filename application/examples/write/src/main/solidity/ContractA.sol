@@ -15,15 +15,15 @@
 pragma solidity >=0.7.1;
 
 import "./ContractB.sol";
-import "../../../../../../functioncall/gpact/src/main/solidity/CbcLockableStorageInterface.sol";
+import "../../../../../../functioncall/interface/src/main/solidity/CrosschainFunctionCallInterface.sol";
 
 contract ContractA {
     uint256 otherBcId;
     ContractB contractB;
-    CbcLockableStorageInterface crossBlockchainControl;
+    CrosschainFunctionCallInterface crossBlockchainControl;
 
     constructor (address _cbc, uint256 _otherBcId, address _contractBAddress) {
-        crossBlockchainControl = CbcLockableStorageInterface(_cbc);
+        crossBlockchainControl = CrosschainFunctionCallInterface(_cbc);
         otherBcId = _otherBcId;
         contractB = ContractB(_contractBAddress);
     }

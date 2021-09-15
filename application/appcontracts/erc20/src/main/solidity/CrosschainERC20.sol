@@ -95,7 +95,7 @@ contract CrosschainERC20 is LockableERC20 {
         address remoteERC20Contract = remoteERC20s[blockchainId];
         require(remoteERC20Contract != address(0), "No ERC 20 registered for remote blockchain");
 
-        CbcLockableStorageInterface(address(crossBlockchainControl)).crossBlockchainCall(blockchainId, address(remoteERC20Contract),
+        CrosschainFunctionCallInterface(address(crossBlockchainControl)).crossBlockchainCall(blockchainId, address(remoteERC20Contract),
             abi.encodeWithSelector(this.crosschainReceiver.selector, recipient, amount));
     }
 }

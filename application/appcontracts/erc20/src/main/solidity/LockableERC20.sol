@@ -19,7 +19,7 @@ import "../../../../../../common/openzeppelin/src/main/solidity/token/ERC20/IERC
 import "../../../../../../common/openzeppelin/src/main/solidity/token/ERC20/extensions/IERC20Metadata.sol";
 import "../../../../../../common/openzeppelin/src/main/solidity/access/Ownable.sol";
 import "../../../../lockablestorage/src/main/solidity/LockableStorage.sol";
-import "../../../../../../functioncall/gpact/src/main/solidity/CbcLockableStorageInterface.sol";
+import "../../../../../../functioncall/interface/src/main/solidity/CrosschainFunctionCallInterface.sol";
 
 /**
  * Implementation of the {IERC20} interface that provides lockable storage for
@@ -61,7 +61,7 @@ contract LockableERC20 is Context, IERC20, IERC20Metadata, Ownable, LockableStor
     string private erc20Symbol;
 
     // Cross-blockchain Control Contract on this blockchain.
-    CbcLockableStorageInterface public cbc;
+    CrosschainFunctionCallInterface public cbc;
 
     /**
      * @dev Sets the values for {name} and {symbol}.
@@ -75,7 +75,7 @@ contract LockableERC20 is Context, IERC20, IERC20Metadata, Ownable, LockableStor
     constructor (string memory _name, string memory _symbol, address _cbc) LockableStorage(_cbc) {
         erc20Name = _name;
         erc20Symbol = _symbol;
-        cbc = CbcLockableStorageInterface(_cbc);
+        cbc = CrosschainFunctionCallInterface(_cbc);
 
         accountPallelizationFactor = 5;
         erc20PallelizationFactor = 10;
@@ -110,7 +110,7 @@ contract LockableERC20 is Context, IERC20, IERC20Metadata, Ownable, LockableStor
      * - `spender` cannot be the zero address.
      */
     function approve(address spender, uint256 amount) public virtual override returns (bool) {
-        require(CbcLockableStorageInterface(address(crossBlockchainControl)).isSingleBlockchainCall(), "Must be single blockchain call");
+        require(CrosschainFunctionCallInterface(address(crossBlockchainControl)).isSingleBlockchainCall(), "Must be single blockchain call");
         approveInternal(_msgSender(), spender, amount);
         return true;
     }

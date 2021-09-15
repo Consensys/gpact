@@ -16,7 +16,7 @@ pragma solidity >=0.8;
 
 import "../../../../../../common/openzeppelin/src/main/solidity/token/ERC20/IERC20.sol";
 import "../../../../../appcontracts/lockablestorage/src/main/solidity/LockableStorage.sol";
-import "../../../../../../functioncall/gpact/src/main/solidity/CbcLockableStorageInterface.sol";
+import "../../../../../../functioncall/interface/src/main/solidity/CrosschainFunctionCallInterface.sol";
 
 contract Hotel is LockableStorage {
     // Room rate.
@@ -83,12 +83,12 @@ contract Hotel is LockableStorage {
 
 
     function bookRoom(uint256 _date, uint256 _uniqueId, uint256 _maxAmountToPay) external {
-        require(!CbcLockableStorageInterface(address(crossBlockchainControl)).isSingleBlockchainCall(), "Must be crosschain call");
+        require(!CrosschainFunctionCallInterface(address(crossBlockchainControl)).isSingleBlockchainCall(), "Must be crosschain call");
 
         // Check that the calling contract was the travel agency linked to this one from
         // the source blockchain.
         // TODO check that the root blockchain is trusted
-        (, uint256 sourceBlockchainId, address sourceContract) = CbcLockableStorageInterface(address(crossBlockchainControl)).whoCalledMe();
+        (, uint256 sourceBlockchainId, address sourceContract) = CrosschainFunctionCallInterface(address(crossBlockchainControl)).whoCalledMe();
         require(sourceContract == approvedTravelAgencies[sourceBlockchainId], "Sender is not an approved travel agency");
 
         require(_date != 0, "Date can not be zero");

@@ -14,7 +14,7 @@
  */
 pragma solidity >=0.7.1;
 
-import "../../../../../../functioncall/gpact/src/main/solidity/CbcLockableStorageInterface.sol";
+import "../../../../../../functioncall/interface/src/main/solidity/CrosschainFunctionCallInterface.sol";
 
 
 /**
@@ -68,7 +68,7 @@ contract OldLockableStorage {
     // Address of the contract that this contract is supplying storage for.
     address public businessLogicContract;
     // The Cross-Blockchain Control Contract used for cross-blockchain transaction locking.
-    CbcLockableStorageInterface private crossBlockchainControl;
+    CrosschainFunctionCallInterface private crossBlockchainControl;
 
     // True when this contract is locked.
     bool public locked;
@@ -101,7 +101,7 @@ contract OldLockableStorage {
 
     constructor (address _crossBlockchainControl) {
         deployer = msg.sender;
-        crossBlockchainControl = CbcLockableStorageInterface(_crossBlockchainControl);
+        crossBlockchainControl = CrosschainFunctionCallInterface(_crossBlockchainControl);
     }
 
     /**

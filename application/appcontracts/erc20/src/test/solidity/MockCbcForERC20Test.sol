@@ -14,11 +14,11 @@
  */
 pragma solidity >=0.8;
 
-import "../../../../../../functioncall/gpact/src/main/solidity/CbcLockableStorageInterface.sol";
+import "../../../../../../functioncall/interface/src/main/solidity/CrosschainFunctionCallInterface.sol";
 import "../../../../../../functioncall/interface/src/main/solidity/CrosschainLockingInterface.sol";
 
 
-contract MockCbcForERC20Test is CbcLockableStorageInterface, CrosschainLockingInterface {
+contract MockCbcForERC20Test is CrosschainFunctionCallInterface, CrosschainLockingInterface {
     bytes32 private crossRootTxId;
     address[] activeCallLockedContracts;
 

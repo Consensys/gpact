@@ -15,7 +15,7 @@
 pragma solidity >=0.7.1;
 
 import "../../../../../appcontracts/lockablestorage/src/main/solidity/LockableStorage.sol";
-import "../../../../../../functioncall/gpact/src/main/solidity/CbcLockableStorageInterface.sol";
+import "../../../../../../functioncall/interface/src/main/solidity/CrosschainFunctionCallInterface.sol";
 
 contract Stock is LockableStorage {
     uint256 constant private KEY_MAP1 = 0;

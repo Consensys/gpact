@@ -14,15 +14,15 @@
  */
 pragma solidity >=0.7.1;
 
-import "../../../../../../functioncall/gpact/src/main/solidity/CbcLockableStorageInterface.sol";
+import "../../../../../../functioncall/interface/src/main/solidity/CrosschainFunctionCallInterface.sol";
 
 
 contract PriceOracle {
-    CbcLockableStorageInterface crossBlockchainControl;
+    CrosschainFunctionCallInterface crossBlockchainControl;
     uint256 price;
 
     constructor (address _cbcContract) {
-        crossBlockchainControl = CbcLockableStorageInterface(_cbcContract);
+        crossBlockchainControl = CrosschainFunctionCallInterface(_cbcContract);
     }
 
     function setPrice(uint256 _newPrice) external {
