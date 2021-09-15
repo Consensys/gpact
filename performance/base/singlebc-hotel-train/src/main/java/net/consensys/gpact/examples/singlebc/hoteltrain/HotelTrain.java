@@ -18,10 +18,7 @@ import net.consensys.gpact.common.PropertiesLoader;
 import net.consensys.gpact.common.StatsHolder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.web3j.crypto.Credentials;
 import org.web3j.protocol.exceptions.TransactionException;
-
-import java.math.BigInteger;
 
 /**
  * Main Class for sample code.

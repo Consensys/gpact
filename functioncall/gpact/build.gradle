@@ -1,0 +1,55 @@
+plugins {
+    id 'java'
+}
+
+sourceCompatibility = 1.9
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation project (':common')
+    implementation project (':mes-txroot-transfer')
+    implementation project (':mes-attestor-sign')
+
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.12.0'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.12.0'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.12.0'
+
+    implementation files('../../../web3j-rlp/abi/build/libs/abi-4.8.5-SNAPSHOT.jar')
+    implementation files('../../../web3j-rlp/core/build/libs/core-4.8.5-SNAPSHOT.jar')
+    implementation files('../../../web3j-rlp/crypto/build/libs/crypto-4.8.5-SNAPSHOT.jar')
+    implementation files('../../../web3j-rlp/rlp/build/libs/rlp-4.8.5-SNAPSHOT.jar')
+    implementation files('../../../web3j-rlp/utils/build/libs/utils-4.8.5-SNAPSHOT.jar')
+    implementation files('../../../web3j-rlp/tuples/build/libs/tuples-4.8.5-SNAPSHOT.jar')
+    implementation "io.reactivex.rxjava2:rxjava:2.2.2"
+    //    compile ('org.web3j:core:4.6.3')
+
+    implementation "com.squareup.okhttp3:okhttp:4.9.0"
+    implementation "com.squareup.okhttp3:logging-interceptor:4.9.0"
+
+
+    // https://mvnrepository.com/artifact/org.apache.tuweni/tuweni-bytes
+    implementation group: 'org.apache.tuweni', name: 'tuweni-bytes', version: '1.0.0'
+    // https://mvnrepository.com/artifact/org.apache.tuweni/tuweni-units
+    implementation group: 'org.apache.tuweni', name: 'tuweni-units', version: '1.0.0'
+
+    testImplementation project(':commontest')
+    testImplementation group: 'junit', name: 'junit', version: '4.12'
+}
+
+
+// Generate Solidity wrapper code before build.
+task generateSources {
+    def script = "functioncall/gpact/gen.sh".execute()
+//    script.in.eachLine {line -> println line}
+//    script.err.eachLine {line -> println "ERROR: " + line}
+    script.waitForProcessOutput(System.out, System.err)
+    if (script.exitValue() != 0) {
+        throw new GradleException("Solidity compile error")
+    }
+}
+project.afterEvaluate {
+    build.dependsOn generateSources
+}

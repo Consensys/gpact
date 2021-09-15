@@ -1,11 +1,35 @@
 # General Purpose Atomic Crosschain Transactions Protocol
 
 This repo contains the General Purpose Atomic Crosschain Transactions (GPACT) 
-protocol reference implementation. It contains Solidity contracts, Java library
-code, test code, and example code. This is an implementation 
-of this paper: https://arxiv.org/abs/2011.12783.
+protocol implementation and associated protocols. It contains Solidity contracts, Java library
+code, test code, and example code. It contains Docker files to run multiple blockchains using 
+Hyperledger Besu so that the entire system can be run on a laptop computer. 
+The GPACT Protocol is described in this paper: https://arxiv.org/abs/2011.12783.
 
-## Introduction
+## Crosschain Protocol Layers
+GPACT forms part of an overall crosschain protocol stack as shown in the diagram below.
+
+![Crosschain Protocol Layers](https://raw.githubusercontent.com/ConsenSys/gpact/master/doc/images/layers.png "Crosschain Protocol Layers")
+
+Applications use the Crosschain Function Call code to execute function calls across blockchains.
+Crosschain Function Call code uses Crosschain Message Verification to ensure information from
+one blockchain is trusted on another blockchain. The layers of the protocol stack are separated
+by interfaces. Using common interfaces allows applications to use a variety of crosschain 
+function call implementations, and for crosschain function call implementations to use a variety
+of crosschain message verificaiton implementations. Importantly, this allows for different
+crosschain message verification systems to be used for different blockchains and rollups. It
+allows applications to choose use lighter weight non-atomic function call approaches 
+(which may be less costly and have lower latency) for low cost and less important transactions
+and fully atomic protocols such as GPACT for more important business critical transactions.
+
+The code is arranged in the following main directories:
+* application: Example code plus "appcontracts" that provide example
+  implementations for lockable storage and crosschain ERC20.
+* functioncall: GPACT, other function call protocols, and interfaces. 
+* messaging: Crosschain message verification protocols and interfaces.
+
+
+## GPACT
 
 The General Purpose Atomic Crosschain Transaction protocol is a blockchain technology
 that allows function calls across blockchains that either updates state on all 
@@ -43,8 +67,6 @@ anonymous. A crosschain transaction capability is needed to meet these requireme
 
 
 ## More information
-[Protocol Description](https://arxiv.org/abs/2005.09790)
-
 [How to build](https://github.com/ConsenSys/gpact/blob/master/doc/build.md)
 
 [Reproducing Performance Results](https://github.com/ConsenSys/gpact/blob/master/doc/perf.md)
