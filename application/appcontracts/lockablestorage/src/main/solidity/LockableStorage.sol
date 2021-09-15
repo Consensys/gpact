@@ -14,7 +14,8 @@
  */
 pragma solidity >=0.7.1;
 
-import "../../../../../../functioncall/gpact/src/main/solidity/CbcLockableStorageInterface.sol";
+import "../../../../../../functioncall/interface/src/main/solidity/LockableStorageInterface.sol";
+import "../../../../../../functioncall/interface/src/main/solidity/CrosschainLockingInterface.sol";
 
 
 /**
@@ -22,9 +23,10 @@ import "../../../../../../functioncall/gpact/src/main/solidity/CbcLockableStorag
  *  - lockable per item.
  *  - designed to be integrated directly into another contract.
  *  - uint256 based storage only.
+ *  - Can not store max uint256 value - 1.
  *
  */
-abstract contract LockableStorage {
+abstract contract LockableStorage is LockableStorageInterface {
     // A value added to all values stored in provisional storage so that
     // lock detection can happen without using an extra memory location.
     uint256 constant private NOT_USED_OFFSET = 0x1;
@@ -32,7 +34,7 @@ abstract contract LockableStorage {
     uint256 constant private NOT_LOCKED_INDICATOR = 0;
 
     // The Cross-Blockchain Control Contract used for cross-blockchain transaction locking.
-    CbcLockableStorageInterface internal crossBlockchainControl;
+    CrosschainLockingInterface internal crossBlockchainControl;
 
     // Data storage keys to values stored.
     mapping(uint256=>uint256) private dataStore;
@@ -47,7 +49,7 @@ abstract contract LockableStorage {
 
 
     constructor (address _crossBlockchainControl) {
-        crossBlockchainControl = CbcLockableStorageInterface(_crossBlockchainControl);
+        crossBlockchainControl = CrosschainLockingInterface(_crossBlockchainControl);
     }
 
 
@@ -63,11 +65,12 @@ abstract contract LockableStorage {
             revert("Contract item locked");
         }
 
-        if (crossBlockchainControl.isSingleBlockchainCall()) {
+        bytes32 crossRootTxId = crossBlockchainControl.getActiveCallCrosschainRootTxId();
+        if (crossRootTxId == bytes32(0)) {
+            // Single blockchain call
             dataStore[_key] = _val;
         }
         else {
-            bytes32 crossRootTxId = crossBlockchainControl.getActiveCallCrosschainRootTxId();
             crossBlockchainControl.addToListOfLockedContracts(address(this));
             provisionalUpdatesLists[crossRootTxId].push(_key);
             // Note, the following addition is unchecked. If the value being stored
@@ -129,7 +132,7 @@ abstract contract LockableStorage {
      * @param _commit True if the provisional updates should be committed. False indicates the
      *         provisional updates should be discarded.
      */
-    function finalise(bool _commit, bytes32 _crossRootTxId) external {
+    function finalise(bool _commit, bytes32 _crossRootTxId) external override(LockableStorageInterface) {
         for (uint256 i = 0; i < provisionalUpdatesLists[_crossRootTxId].length; i++) {
             uint256 key = provisionalUpdatesLists[_crossRootTxId][i];
             if (_commit) {

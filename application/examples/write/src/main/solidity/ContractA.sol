@@ -15,6 +15,7 @@
 pragma solidity >=0.7.1;
 
 import "./ContractB.sol";
+import "../../../../../../functioncall/gpact/src/main/solidity/CbcLockableStorageInterface.sol";
 
 contract ContractA {
     uint256 otherBcId;

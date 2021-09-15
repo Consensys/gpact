@@ -15,10 +15,10 @@
 pragma solidity >=0.7.1;
 pragma experimental ABIEncoderV2;
 
-import "../../../../../../functioncall/gpact/src/main/solidity/CbcLockableStorageInterface.sol";
+import "../../../../../../functioncall/interface/src/main/solidity/CrosschainLockingInterface.sol";
 
 
-contract MockCbcForLockableStorageTest is CbcLockableStorageInterface {
+contract MockCbcForLockableStorageTest is CrosschainLockingInterface {
     bytes32 private rootTxId;
     address[] activeCallLockedContracts;
 
@@ -26,20 +26,12 @@ contract MockCbcForLockableStorageTest is CbcLockableStorageInterface {
         rootTxId = _txId;
     }
 
-//    function wasLockedByThisCall() external override view returns (bool) {
-//        for (uint256 i = 0; i < activeCallLockedContracts.length; i++) {
-//            if (activeCallLockedContracts[i] == msg.sender) {
-//                return true;
-//            }
-//        }
-//        return false;
-//    }
     /**
      * @return false if the current transaction execution is part of a cross-blockchain call\.
      */
-    function isSingleBlockchainCall() external override view returns (bool) {
-        return rootTxId == bytes32(0);
-    }
+//    function isSingleBlockchainCall() external override view returns (bool) {
+//        return rootTxId == bytes32(0);
+//    }
 
     function getActiveCallCrosschainRootTxId() external override view returns (bytes32) {
         return rootTxId;
@@ -49,19 +41,19 @@ contract MockCbcForLockableStorageTest is CbcLockableStorageInterface {
 
     // ****** Functions below here not used in this test ****
 
-    function crossBlockchainCall(uint256 /* _blockchain */, address /* _contract */, bytes calldata /* _functionCallData */) external override {
+//    function crossBlockchainCall(uint256 /* _blockchain */, address /* _contract */, bytes calldata /* _functionCallData */) external override {
+//
+//    }
 
-    }
 
+//    function crossBlockchainCallReturnsUint256(uint256 /* _blockchain */, address /* _contract */, bytes calldata /* _functionCallData */) external override pure returns (uint256) {
+//        return uint256(0);
+//    }
 
-    function crossBlockchainCallReturnsUint256(uint256 /* _blockchain */, address /* _contract */, bytes calldata /* _functionCallData */) external override pure returns (uint256) {
-        return uint256(0);
-    }
-
-    function whoCalledMe() external pure override returns (uint256 theRootBlockchainId, uint256 parentBlockchainId, address parentContract) {
-        return (0, 0, address(0));
-
-    }
+//    function whoCalledMe() external pure override returns (uint256 theRootBlockchainId, uint256 parentBlockchainId, address parentContract) {
+//        return (0, 0, address(0));
+//
+//    }
 
 
     function addToListOfLockedContracts(address _contractToLock) external override {

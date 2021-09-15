@@ -16,7 +16,7 @@ pragma solidity >=0.7.1;
 
 import "./ContractB.sol";
 import "../../../../../appcontracts/lockablestorage/src/main/solidity/LockableStorage.sol";
-
+import "../../../../../../functioncall/gpact/src/main/solidity/CbcLockableStorageInterface.sol";
 
 contract ContractA is LockableStorage {
     uint256 otherBcId;
@@ -29,13 +29,12 @@ contract ContractA is LockableStorage {
     constructor (address _cbc, uint256 _otherBcId, address _contractBAddress)
         LockableStorage(_cbc) {
 
-        crossBlockchainControl = CbcLockableStorageInterface(_cbc);
         otherBcId = _otherBcId;
         contractB = ContractB(_contractBAddress);
     }
 
     function doCrosschainRead() external {
-        uint256 val = crossBlockchainControl.crossBlockchainCallReturnsUint256(
+        uint256 val = CbcLockableStorageInterface(address(crossBlockchainControl)).crossBlockchainCallReturnsUint256(
             otherBcId, address(contractB), abi.encodeWithSelector(contractB.get.selector));
         setUint256(KEY_VAL, val);
         emit ValueRead(val);

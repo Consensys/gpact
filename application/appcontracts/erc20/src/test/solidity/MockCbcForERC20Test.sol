@@ -15,9 +15,10 @@
 pragma solidity >=0.8;
 
 import "../../../../../../functioncall/gpact/src/main/solidity/CbcLockableStorageInterface.sol";
+import "../../../../../../functioncall/interface/src/main/solidity/CrosschainLockingInterface.sol";
 
 
-contract MockCbcForERC20Test is CbcLockableStorageInterface {
+contract MockCbcForERC20Test is CbcLockableStorageInterface, CrosschainLockingInterface {
     bytes32 private crossRootTxId;
     address[] activeCallLockedContracts;
 
@@ -26,14 +27,6 @@ contract MockCbcForERC20Test is CbcLockableStorageInterface {
         crossRootTxId = _txId;
     }
 
-//    function wasLockedByThisCall() external override view returns (bool) {
-//        for (uint256 i = 0; i < activeCallLockedContracts.length; i++) {
-//            if (activeCallLockedContracts[i] == msg.sender) {
-//                return true;
-//            }
-//        }
-//        return false;
-//    }
     /**
      * @return false if the current transaction execution is part of a cross-blockchain call\.
      */

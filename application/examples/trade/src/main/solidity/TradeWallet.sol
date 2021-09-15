@@ -32,7 +32,7 @@ contract TradeWallet is LockableStorage {
     }
 
     function executeTrade(address _seller, uint256 _quantity) public {
-        crossBlockchainControl.crossBlockchainCall(busLogicBcId, address(busLogicContract),
+        CbcLockableStorageInterface(address(crossBlockchainControl)).crossBlockchainCall(busLogicBcId, address(busLogicContract),
             abi.encodeWithSelector(busLogicContract.stockShipment.selector, _seller, tx.origin, _quantity));
 
         bytes32 tradeId = keccak256(abi.encodePacked(_seller, tx.origin, _quantity));

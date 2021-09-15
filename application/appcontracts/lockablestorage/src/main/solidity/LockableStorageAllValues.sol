@@ -14,7 +14,8 @@
  */
 pragma solidity >=0.7.1;
 
-import "../../../../../../functioncall/gpact/src/main/solidity/CbcLockableStorageInterface.sol";
+import "../../../../../../functioncall/interface/src/main/solidity/LockableStorageInterface.sol";
+import "../../../../../../functioncall/interface/src/main/solidity/CrosschainLockingInterface.sol";
 
 
 /**
@@ -25,9 +26,9 @@ import "../../../../../../functioncall/gpact/src/main/solidity/CbcLockableStorag
  *  - all possible values of uint256.
  *
  */
-abstract contract LockableStorageAllValues {
+abstract contract LockableStorageAllValues is LockableStorageInterface {
     // The Cross-Blockchain Control Contract used for cross-blockchain transaction locking.
-    CbcLockableStorageInterface internal crossBlockchainControl;
+    CrosschainLockingInterface internal crossBlockchainControl;
 
     // Data storage keys to values stored.
     mapping(uint256=>uint256) private dataStore;
@@ -45,7 +46,7 @@ abstract contract LockableStorageAllValues {
 
 
     constructor (address _crossBlockchainControl) {
-        crossBlockchainControl = CbcLockableStorageInterface(_crossBlockchainControl);
+        crossBlockchainControl = CrosschainLockingInterface(_crossBlockchainControl);
     }
 
 
@@ -61,11 +62,12 @@ abstract contract LockableStorageAllValues {
             revert("Contract item locked");
         }
 
-        if (crossBlockchainControl.isSingleBlockchainCall()) {
+        bytes32 crossTxId = crossBlockchainControl.getActiveCallCrosschainRootTxId();
+        if (crossTxId == bytes32(0)) {
+            // Single blockchain call
             dataStore[_key] = _val;
         }
         else {
-            bytes32 crossTxId = crossBlockchainControl.getActiveCallCrosschainRootTxId();
             lockedByRootBlockchainIdTransactionId[_key] = crossTxId;
             crossBlockchainControl.addToListOfLockedContracts(address(this));
             provisionalUpdatesLists[crossTxId].push(_key);
@@ -126,7 +128,7 @@ abstract contract LockableStorageAllValues {
      * @param _commit True if the provisional updates should be committed. False indicates the
      *         provisional updates should be discarded.
      */
-    function finalise(bool _commit, bytes32 _crossRootTxId) external {
+    function finalise(bool _commit, bytes32 _crossRootTxId) external override(LockableStorageInterface) {
         for (uint256 i = 0; i < provisionalUpdatesLists[_crossRootTxId].length; i++) {
             uint256 key = provisionalUpdatesLists[_crossRootTxId][i];
             if (_commit) {

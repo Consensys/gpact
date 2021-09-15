@@ -18,10 +18,12 @@ pragma experimental ABIEncoderV2;
 import "./CbcLockableStorageInterface.sol";
 import "./CbcDecVer.sol";
 import "./CallPathCallExecutionTree.sol";
-import "../../../../../application/appcontracts/lockablestorage/src/main/solidity/LockableStorage.sol";
+import "../../../../interface/src/main/solidity/LockableStorageInterface.sol";
+import "../../../../interface/src/main/solidity/CrosschainLockingInterface.sol";
 
 
-contract CrosschainControl is CbcLockableStorageInterface, CbcDecVer, CallPathCallExecutionTree {
+contract CrosschainControl is CbcLockableStorageInterface, CbcDecVer, CallPathCallExecutionTree,
+    CrosschainLockingInterface {
 
 
     event Start(uint256 _crossBlockchainTransactionId, address _caller, uint256 _timeout, bytes _callGraph);
@@ -243,7 +245,7 @@ contract CrosschainControl is CbcLockableStorageInterface, CbcDecVer, CallPathCa
 
         // Unlock contracts locked by the root transaction.
         for (uint256 i = 0; i < activeCallLockedContracts.length; i++) {
-            LockableStorage lockableStorageContract = LockableStorage(activeCallLockedContracts[i]);
+            LockableStorageInterface lockableStorageContract = LockableStorageInterface(activeCallLockedContracts[i]);
             lockableStorageContract.finalise(isSuccess, crosschainRootTxId);
         }
         rootTransactionInformation[crosschainTransactionId] = isSuccess ? SUCCESS : FAILURE;
@@ -289,7 +291,7 @@ contract CrosschainControl is CbcLockableStorageInterface, CbcDecVer, CallPathCa
             for (uint256 j = 0; j < numElementsOfArray; j++) {
                 address lockedContractAddr = BytesUtil.bytesToAddress1(_eventData[i], locationOfLockedContracts + 0x20 + 0x20 * j);
                 //emit Dump(i * 100 + j, bytes32(0), lockedContractAddr, bytes(""));
-                LockableStorage lockedContract = LockableStorage(lockedContractAddr);
+                LockableStorageInterface lockedContract = LockableStorageInterface(lockedContractAddr);
                 lockedContract.finalise(success != 0, crosschainRootTxId);
             }
         }

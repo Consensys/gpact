@@ -19,6 +19,7 @@ import "../../../../../../common/openzeppelin/src/main/solidity/token/ERC20/IERC
 import "../../../../../../common/openzeppelin/src/main/solidity/token/ERC20/extensions/IERC20Metadata.sol";
 import "../../../../../../common/openzeppelin/src/main/solidity/access/Ownable.sol";
 import "../../../../lockablestorage/src/main/solidity/LockableStorage.sol";
+import "../../../../../../functioncall/gpact/src/main/solidity/CbcLockableStorageInterface.sol";
 
 /**
  * Implementation of the {IERC20} interface that provides lockable storage for
@@ -109,7 +110,7 @@ contract LockableERC20 is Context, IERC20, IERC20Metadata, Ownable, LockableStor
      * - `spender` cannot be the zero address.
      */
     function approve(address spender, uint256 amount) public virtual override returns (bool) {
-        require(cbc.isSingleBlockchainCall(), "Must be single blockchain call");
+        require(CbcLockableStorageInterface(address(crossBlockchainControl)).isSingleBlockchainCall(), "Must be single blockchain call");
         approveInternal(_msgSender(), spender, amount);
         return true;
     }

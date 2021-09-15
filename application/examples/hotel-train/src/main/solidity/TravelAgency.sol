@@ -43,9 +43,9 @@ contract TravelAgency is LockableStorage {
         require(msg.sender == address(crossBlockchainControl), "Should only be called by Crosschain Control Contract");
         require(tx.origin == owner, "Only owner can do bookings");
 
-        crossBlockchainControl.crossBlockchainCall(hotelBlockchainId, address(hotelContract),
+        CbcLockableStorageInterface(address(crossBlockchainControl)).crossBlockchainCall(hotelBlockchainId, address(hotelContract),
             abi.encodeWithSelector(hotelContract.bookRoom.selector, _date, _bookingId, 100));
-        crossBlockchainControl.crossBlockchainCall(trainBlockchainId, address(trainContract),
+        CbcLockableStorageInterface(address(crossBlockchainControl)).crossBlockchainCall(trainBlockchainId, address(trainContract),
             abi.encodeWithSelector(trainContract.bookRoom.selector, _date, _bookingId, 100));
 
         setMapValue(CONFIRMED_BOOKINGS_MAP, _bookingId, _date);

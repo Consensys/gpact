@@ -26,15 +26,11 @@ interface CbcLockableStorageInterface {
 
     function crossBlockchainCallReturnsUint256(uint256 /* _blockchain */, address /* _contract */, bytes calldata /* _functionCallData */) external returns (uint256);
 
-    // Called by a lockable storage contract a _key in the contract is locked.
-    function addToListOfLockedContracts(address _contractToLock) external;
 
     /**
      * @return false if the current transaction execution is part of a cross-blockchain call\.
      */
     function isSingleBlockchainCall() external view returns (bool);
-
-    function getActiveCallCrosschainRootTxId() external view returns (bytes32);
 
     function whoCalledMe() external view returns (uint256 rootBlockchainId, uint256 parentBlockchainId, address parentContract);
 }
