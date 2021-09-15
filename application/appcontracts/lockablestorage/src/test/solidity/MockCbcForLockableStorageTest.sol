@@ -29,9 +29,9 @@ contract MockCbcForLockableStorageTest is CrosschainLockingInterface {
     /**
      * @return false if the current transaction execution is part of a cross-blockchain call\.
      */
-//    function isSingleBlockchainCall() external override view returns (bool) {
-//        return rootTxId == bytes32(0);
-//    }
+    function isSingleBlockchainCall() external view returns (bool) {
+        return rootTxId == bytes32(0);
+    }
 
     function getActiveCallCrosschainRootTxId() external override view returns (bytes32) {
         return rootTxId;
