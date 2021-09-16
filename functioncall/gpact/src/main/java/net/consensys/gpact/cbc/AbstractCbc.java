@@ -19,6 +19,7 @@ import net.consensys.gpact.cbc.soliditywrappers.CrosschainControl;
 import net.consensys.gpact.common.RevertReason;
 import net.consensys.gpact.common.StatsHolder;
 import net.consensys.gpact.common.Tuple;
+import net.consensys.gpact.messaging.SignedEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;

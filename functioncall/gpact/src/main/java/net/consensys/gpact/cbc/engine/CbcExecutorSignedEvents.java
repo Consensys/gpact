@@ -20,7 +20,7 @@ import org.apache.logging.log4j.Logger;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import net.consensys.gpact.cbc.AbstractCbc;
 import net.consensys.gpact.cbc.CbcManager;
-import net.consensys.gpact.cbc.SignedEvent;
+import net.consensys.gpact.messaging.SignedEvent;
 import net.consensys.gpact.common.CrossBlockchainConsensusType;
 import net.consensys.gpact.common.Tuple;
 

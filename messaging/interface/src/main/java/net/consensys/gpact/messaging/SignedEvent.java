@@ -12,7 +12,7 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package net.consensys.gpact.cbc;
+package net.consensys.gpact.messaging;
 
 import net.consensys.gpact.common.FormatConversion;
 import org.web3j.crypto.Sign;

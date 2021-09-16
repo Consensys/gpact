@@ -10,6 +10,7 @@ repositories {
 
 dependencies {
     implementation project (':common')
+    implementation project (':mes-interface')
     implementation project (':mes-txroot-transfer')
     implementation project (':mes-attestor-sign')
 

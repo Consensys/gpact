@@ -54,11 +54,6 @@ import java.util.concurrent.CompletableFuture;
 public class CrossBlockchainControlTxReceiptRootTransfer extends AbstractCbc {
   private static final Logger LOG = LogManager.getLogger(CrossBlockchainControlTxReceiptRootTransfer.class);
 
-  // TODO put this into a map for the current transaction id, so many transactions can be handled in parallel
-  // The time-out for the current transaction.
-  private long crossBlockchainTransactionTimeout;
-  private boolean rootEventSuccess;
-
   private TxReceiptsRootStorage txReceiptsRootStorageContract;
   private CrosschainVerifierTxRoot verifier;
 

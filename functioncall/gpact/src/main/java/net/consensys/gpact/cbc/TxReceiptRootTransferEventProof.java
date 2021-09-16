@@ -14,6 +14,7 @@
  */
 package net.consensys.gpact.cbc;
 
+import net.consensys.gpact.messaging.SignedEvent;
 import org.apache.tuweni.units.bigints.UInt256;
 import org.web3j.rlp.RlpEncoder;
 import org.web3j.rlp.RlpList;
