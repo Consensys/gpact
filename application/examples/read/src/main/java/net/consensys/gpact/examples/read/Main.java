@@ -51,8 +51,8 @@ public class Main {
 
     PropertiesLoader propsLoader = new PropertiesLoader(args[0]);
     Credentials creds = CredentialsCreator.createCredentials();
-    PropertiesLoader.BlockchainInfo root = propsLoader.getBlockchainInfo("ROOT");
-    PropertiesLoader.BlockchainInfo bc2 = propsLoader.getBlockchainInfo("BC2");
+    BlockchainInfo root = propsLoader.getBlockchainInfo("ROOT");
+    BlockchainInfo bc2 = propsLoader.getBlockchainInfo("BC2");
     CrossBlockchainConsensusType consensusMethodology = propsLoader.getConsensusMethodology();
     StatsHolder.log(consensusMethodology.name());
     ExecutionEngineType engineType = propsLoader.getExecutionEnngine();
@@ -77,12 +77,12 @@ public class Main {
     BigInteger val = BigInteger.valueOf(7);
 
     // Set-up client side and deploy contracts on the blockchains.
-    BigInteger bc2BcId = bc2ContractBBlockchain.getBlockchainId();
+    BlockchainId bc2BcId = bc2ContractBBlockchain.getBlockchainId();
     bc2ContractBBlockchain.deployContracts(val);
     String contractBContractAddress = bc2ContractBBlockchain.contractB.getContractAddress();
 
-    BigInteger rootBcId = bc1ContractABlockchain.getBlockchainId();
-    bc1ContractABlockchain.deployContracts(cbcManager.getCbcAddress(rootBcId), bc2BcId, contractBContractAddress);
+    BlockchainId rootBcId = bc1ContractABlockchain.getBlockchainId();
+    bc1ContractABlockchain.deployContracts(cbcManager.getCbcAddress(rootBcId), bc2BcId.asBigInt(), contractBContractAddress);
     String contractAContractAddress = bc1ContractABlockchain.contractA.getContractAddress();
 
 

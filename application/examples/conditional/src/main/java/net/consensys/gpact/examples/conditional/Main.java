@@ -19,8 +19,6 @@ import net.consensys.gpact.common.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
-import org.web3j.rlp.RlpList;
-import org.web3j.rlp.RlpType;
 import net.consensys.gpact.cbc.CbcManager;
 import net.consensys.gpact.cbc.engine.AbstractCbcExecutor;
 import net.consensys.gpact.cbc.engine.CbcExecutorSignedEvents;
@@ -33,7 +31,6 @@ import net.consensys.gpact.examples.conditional.sim.SimRootContract;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.List;
 
 
 public class Main {
@@ -50,8 +47,8 @@ public class Main {
 
     PropertiesLoader propsLoader = new PropertiesLoader(args[0]);
     Credentials creds = CredentialsCreator.createCredentials();
-    PropertiesLoader.BlockchainInfo root = propsLoader.getBlockchainInfo("ROOT");
-    PropertiesLoader.BlockchainInfo bc2 = propsLoader.getBlockchainInfo("BC2");
+    BlockchainInfo root = propsLoader.getBlockchainInfo("ROOT");
+    BlockchainInfo bc2 = propsLoader.getBlockchainInfo("BC2");
     CrossBlockchainConsensusType consensusMethodology = propsLoader.getConsensusMethodology();
     StatsHolder.log(consensusMethodology.name());
     ExecutionEngineType engineType = propsLoader.getExecutionEnngine();
@@ -77,10 +74,10 @@ public class Main {
     OtherBc otherBlockchain = new OtherBc(appCreds, bc2.bcId, bc2.uri, bc2.gasPriceStrategy, bc2.period);
 
     // Deploy application contracts.
-    BigInteger otherBcId = otherBlockchain.getBlockchainId();
+    BlockchainId otherBcId = otherBlockchain.getBlockchainId();
     otherBlockchain.deployContracts(cbcManager.getCbcAddress(otherBcId));
     String otherBlockchainContractAddress = otherBlockchain.otherBlockchainContract.getContractAddress();
-    BigInteger rootBcId = rootBlockchain.getBlockchainId();
+    BlockchainId rootBcId = rootBlockchain.getBlockchainId();
     rootBlockchain.deployContracts(cbcManager.getCbcAddress(rootBcId), otherBcId, otherBlockchainContractAddress);
 
     // Create simulators

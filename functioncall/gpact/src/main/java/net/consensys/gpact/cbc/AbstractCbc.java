@@ -16,9 +16,7 @@ package net.consensys.gpact.cbc;
 
 import net.consensys.gpact.attestorsign.soliditywrappers.AttestorSignRegistrar;
 import net.consensys.gpact.cbc.soliditywrappers.CrosschainControl;
-import net.consensys.gpact.common.RevertReason;
-import net.consensys.gpact.common.StatsHolder;
-import net.consensys.gpact.common.Tuple;
+import net.consensys.gpact.common.*;
 import net.consensys.gpact.messaging.SignedEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -30,7 +28,6 @@ import org.web3j.crypto.Credentials;
 import org.web3j.protocol.core.methods.response.BaseEventResponse;
 import org.web3j.protocol.core.methods.response.Log;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
-import net.consensys.gpact.common.AnIdentity;
 import org.web3j.protocol.exceptions.TransactionException;
 
 import java.io.IOException;
@@ -64,7 +61,7 @@ public abstract class AbstractCbc extends AbstractBlockchain {
   private boolean rootEventSuccess;
 
 
-  protected AbstractCbc(Credentials credentials, String bcId, String uri, String gasPriceStrategy, String blockPeriod) throws IOException {
+  protected AbstractCbc(Credentials credentials, BlockchainId bcId, String uri, String gasPriceStrategy, String blockPeriod) throws IOException {
       super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
   }
 
@@ -72,7 +69,7 @@ public abstract class AbstractCbc extends AbstractBlockchain {
     this.registrarContract = AttestorSignRegistrar.deploy(this.web3j, this.tm, this.gasProvider).send();
     this.crossBlockchainControlContract =
             CrosschainControl.deploy(this.web3j, this.tm, this.gasProvider,
-                    this.blockchainId).send();
+                    this.blockchainId.asBigInt()).send();
     LOG.debug(" Registrar Contract: {}", this.registrarContract.getContractAddress());
     LOG.debug(" Cross Blockchain Contract Contract: {}", this.crossBlockchainControlContract.getContractAddress());
   }
@@ -93,25 +90,25 @@ public abstract class AbstractCbc extends AbstractBlockchain {
   }
 
 
-  public void addBlockchain(BigInteger bcId, String cbcContractAddress, String initialSigner) throws Exception {
+  public void addBlockchain(BlockchainId bcId, String cbcContractAddress, String initialSigner) throws Exception {
     List<String> signers = new ArrayList<>();
     signers.add(initialSigner);
-    TransactionReceipt txr = this.registrarContract.addBlockchain(bcId, BigInteger.ONE, signers).send();
+    TransactionReceipt txr = this.registrarContract.addBlockchain(bcId.asBigInt(), BigInteger.ONE, signers).send();
     assert(txr.isStatusOK());
 
-    txr = this.crossBlockchainControlContract.addRemoteCrosschainControl(bcId, cbcContractAddress).send();
+    txr = this.crossBlockchainControlContract.addRemoteCrosschainControl(bcId.asBigInt(), cbcContractAddress).send();
     assert(txr.isStatusOK());
 
     addVerifier(bcId);
   }
 
-  protected abstract void addVerifier(BigInteger bcId) throws Exception;
+  protected abstract void addVerifier(BlockchainId bcId) throws Exception;
 
 
-  public void registerSigner(AnIdentity signer, BigInteger bcId) throws Exception {
-    LOG.debug("Registering signer 0x{} as signer for blockchain 0x{} in registration contract on blockchain 0x{}",
-        signer.getAddress(), bcId.toString(16), this.blockchainId.toString(16));
-    TransactionReceipt txr = this.registrarContract.addSigner(bcId, signer.getAddress()).send();
+  public void registerSigner(AnIdentity signer, BlockchainId bcId) throws Exception {
+    LOG.debug("Registering signer 0x{} as signer for blockchain {} in registration contract on blockchain {}",
+        signer.getAddress(), bcId, this.blockchainId);
+    TransactionReceipt txr = this.registrarContract.addSigner(bcId.asBigInt(), signer.getAddress()).send();
     assert(txr.isStatusOK());
   }
 
@@ -123,7 +120,7 @@ public abstract class AbstractCbc extends AbstractBlockchain {
   }
 
   public Tuple<TransactionReceipt, byte[], Boolean> start(BigInteger transactionId, BigInteger timeout, byte[] callGraph) throws Exception {
-    LOG.debug("Start Transaction on blockchain 0x{}", this.blockchainId.toString(16));
+    LOG.debug("Start Transaction on blockchain {}", this.blockchainId);
     StatsHolder.log("Start call now");
     TransactionReceipt txR = this.crossBlockchainControlContract.start(transactionId, timeout, callGraph).send();
     StatsHolder.logGas("Start Transaction", txR.getGasUsed());
@@ -148,13 +145,13 @@ public abstract class AbstractCbc extends AbstractBlockchain {
     List<byte[]> eventData = new ArrayList<>();
     List<byte[]> encodedSignatures = new ArrayList<>();
 
-    bcIds.add(startEvent.getBcId());
+    bcIds.add(startEvent.getBcId().asBigInt());
     cbcAddresses.add(startEvent.getCbcContract());
     eventFunctionSignatures.add(startEvent.getEventFunctionSignature());
     eventData.add(startEvent.getEventData());
     encodedSignatures.add(startEvent.getEncodedSignatures());
     for (SignedEvent segEvent: segEvents) {
-      bcIds.add(segEvent.getBcId());
+      bcIds.add(segEvent.getBcId().asBigInt());
       cbcAddresses.add(segEvent.getCbcContract());
       eventFunctionSignatures.add(segEvent.getEventFunctionSignature());
       eventData.add(segEvent.getEventData());
@@ -170,7 +167,7 @@ public abstract class AbstractCbc extends AbstractBlockchain {
     //RlpDumper.dump(RLP.input(Bytes.wrap(encodedSignatures.get(0))));
     TransactionReceipt txR;
     try {
-      LOG.debug("Segment Transaction on blockchain 0x{}", this.blockchainId.toString(16));
+      LOG.debug("Segment Transaction on blockchain {}", this.blockchainId);
       txR = this.crossBlockchainControlContract.segment(bcIds, cbcAddresses, eventFunctionSignatures, eventData, encodedSignatures, callPath).send();
       StatsHolder.logGas("Segment Transaction", txR.getGasUsed());
     } catch (TransactionException ex) {
@@ -205,13 +202,13 @@ public abstract class AbstractCbc extends AbstractBlockchain {
     List<byte[]> eventData = new ArrayList<>();
     List<byte[]> encodedSignatures = new ArrayList<>();
 
-    bcIds.add(startEvent.getBcId());
+    bcIds.add(startEvent.getBcId().asBigInt());
     cbcAddresses.add(startEvent.getCbcContract());
     eventFunctionSignatures.add(startEvent.getEventFunctionSignature());
     eventData.add(startEvent.getEventData());
     encodedSignatures.add(startEvent.getEncodedSignatures());
     for (SignedEvent segEvent: segEvents) {
-      bcIds.add(segEvent.getBcId());
+      bcIds.add(segEvent.getBcId().asBigInt());
       cbcAddresses.add(segEvent.getCbcContract());
       eventFunctionSignatures.add(segEvent.getEventFunctionSignature());
       eventData.add(segEvent.getEventData());
@@ -229,7 +226,7 @@ public abstract class AbstractCbc extends AbstractBlockchain {
 
     TransactionReceipt txR;
     try {
-      LOG.debug("Root Transaction on blockchain 0x{}", this.blockchainId.toString(16));
+      LOG.debug("Root Transaction on blockchain {}", this.blockchainId);
       txR = this.crossBlockchainControlContract.root(bcIds, cbcAddresses, eventFunctionSignatures, eventData, encodedSignatures).send();
       StatsHolder.logGas("Root Transaction", txR.getGasUsed());
       if (!txR.isStatusOK()) {
@@ -266,20 +263,20 @@ public abstract class AbstractCbc extends AbstractBlockchain {
     List<byte[]> eventData = new ArrayList<>();
     List<byte[]> encodedSignatures = new ArrayList<>();
 
-    bcIds.add(rootEvent.getBcId());
+    bcIds.add(rootEvent.getBcId().asBigInt());
     cbcAddresses.add(rootEvent.getCbcContract());
     eventFunctionSignatures.add(rootEvent.getEventFunctionSignature());
     eventData.add(rootEvent.getEventData());
     encodedSignatures.add(rootEvent.getEncodedSignatures());
     for (SignedEvent segEvent: segEvents) {
-      bcIds.add(segEvent.getBcId());
+      bcIds.add(segEvent.getBcId().asBigInt());
       cbcAddresses.add(segEvent.getCbcContract());
       eventFunctionSignatures.add(segEvent.getEventFunctionSignature());
       eventData.add(segEvent.getEventData());
       encodedSignatures.add(segEvent.getEncodedSignatures());
     }
 
-    LOG.debug("Signalling Transaction on blockchain 0x{}", this.blockchainId.toString(16));
+    LOG.debug("Signalling Transaction on blockchain {}", this.blockchainId);
     return this.crossBlockchainControlContract.signalling(bcIds, cbcAddresses, eventFunctionSignatures, eventData, encodedSignatures).sendAsync();
   }
 

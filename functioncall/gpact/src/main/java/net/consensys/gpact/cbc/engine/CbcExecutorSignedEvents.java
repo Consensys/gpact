@@ -15,6 +15,7 @@
 package net.consensys.gpact.cbc.engine;
 
 import net.consensys.gpact.cbc.CrossBlockchainControlSignedEvents;
+import net.consensys.gpact.common.BlockchainId;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
@@ -47,7 +48,7 @@ public class CbcExecutorSignedEvents extends AbstractCbcExecutor {
           rootBcId, this.cbcManager.getCbcAddress(this.rootBcId), AbstractCbc.START_EVENT_SIGNATURE, startEventData);
   }
 
-  protected void segment(BigInteger blockchainId, BigInteger callerBlockchainId, List<BigInteger> callPath) throws Exception {
+  protected void segment(BlockchainId blockchainId, BlockchainId callerBlockchainId, List<BigInteger> callPath) throws Exception {
     if (callPath.size() == 0) {
       throw new Exception("Invalid call path length for segment: " + 0);
     }
@@ -105,7 +106,7 @@ public class CbcExecutorSignedEvents extends AbstractCbcExecutor {
 
     CompletableFuture<?>[] transactionReceiptCompletableFutures = new CompletableFuture<?>[numSignalsToSend];
     int i = 0;
-    for (BigInteger blockchainId: this.signedSegmentEventsWithLockedContracts.keySet()) {
+    for (BlockchainId blockchainId: this.signedSegmentEventsWithLockedContracts.keySet()) {
       List<SignedEvent> signedSegEventsLockedContractsCurrentBlockchain =
           this.signedSegmentEventsWithLockedContracts.get(blockchainId);
       CrossBlockchainControlSignedEvents cbcContract = this.cbcManager.getCbcContractSignedEvents(blockchainId);
@@ -115,7 +116,7 @@ public class CbcExecutorSignedEvents extends AbstractCbcExecutor {
     combinedFuture.get();
 
     i = 0;
-    for (BigInteger blockchainId: this.signedSegmentEventsWithLockedContracts.keySet()) {
+    for (BlockchainId blockchainId: this.signedSegmentEventsWithLockedContracts.keySet()) {
       TransactionReceipt receipt = (TransactionReceipt) transactionReceiptCompletableFutures[i++].get();
       CrossBlockchainControlSignedEvents cbcContract = this.cbcManager.getCbcContractSignedEvents(blockchainId);
       cbcContract.signallingAsyncPart2(receipt);

@@ -15,6 +15,7 @@
 package net.consensys.gpact.cbc;
 
 import net.consensys.gpact.common.AnIdentity;
+import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.common.RevertReason;
 import net.consensys.gpact.common.StatsHolder;
 import net.consensys.gpact.txroot.soliditywrappers.CrosschainVerifierTxRoot;
@@ -57,7 +58,7 @@ public class CrossBlockchainControlTxReceiptRootTransfer extends AbstractCbc {
   private TxReceiptsRootStorage txReceiptsRootStorageContract;
   private CrosschainVerifierTxRoot verifier;
 
-  public CrossBlockchainControlTxReceiptRootTransfer(Credentials credentials, String bcId, String uri, String gasPriceStrategy, String blockPeriod) throws IOException {
+  public CrossBlockchainControlTxReceiptRootTransfer(Credentials credentials, BlockchainId bcId, String uri, String gasPriceStrategy, String blockPeriod) throws IOException {
     super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
   }
 
@@ -88,8 +89,8 @@ public class CrossBlockchainControlTxReceiptRootTransfer extends AbstractCbc {
 
 
 
-  protected void addVerifier(BigInteger bcId) throws Exception {
-    this.crossBlockchainControlContract.addVerifier(bcId, this.verifier.getContractAddress()).send();
+  protected void addVerifier(BlockchainId bcId) throws Exception {
+    this.crossBlockchainControlContract.addVerifier(bcId.asBigInt(), this.verifier.getContractAddress()).send();
   }
 
 
@@ -102,7 +103,7 @@ public class CrossBlockchainControlTxReceiptRootTransfer extends AbstractCbc {
   }
 
   public CompletableFuture<TransactionReceipt> addTransactionReceiptRootToBlockchainAsyncPart1(
-      AnIdentity[] signers, BigInteger sourceBlockchainId, byte[] transactionReceiptRoot) throws Exception {
+      AnIdentity[] signers, BlockchainId sourceBlockchainId, byte[] transactionReceiptRoot) throws Exception {
     // Add the transaction receipt root for the blockchain
     // Sign the txReceiptRoot
     List<String> theSigners = new ArrayList<>();
@@ -118,7 +119,7 @@ public class CrossBlockchainControlTxReceiptRootTransfer extends AbstractCbc {
     }
 
     LOG.debug("txReceiptsRootStorageContract.addTxReceiptRoot: publishing to BC ID {}, from BC ID: {}", this.blockchainId, sourceBlockchainId);
-    return this.txReceiptsRootStorageContract.addTxReceiptRoot(sourceBlockchainId, theSigners, sigR, sigS, sigV, transactionReceiptRoot).sendAsync();
+    return this.txReceiptsRootStorageContract.addTxReceiptRoot(sourceBlockchainId.asBigInt(), theSigners, sigR, sigS, sigV, transactionReceiptRoot).sendAsync();
   }
 
 
@@ -134,7 +135,7 @@ public class CrossBlockchainControlTxReceiptRootTransfer extends AbstractCbc {
 
 
   public TxReceiptRootTransferEventProof getProofForTxReceipt(
-          BigInteger blockchainId, String cbcContractAddress, TransactionReceipt aReceipt,
+          BlockchainId blockchainId, String cbcContractAddress, TransactionReceipt aReceipt,
           byte[] eventData,
           byte[] eventFunctionSignature) throws Exception {
     // Calculate receipt root based on logs for all receipts of all transactions in the block.

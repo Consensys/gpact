@@ -45,7 +45,7 @@ public interface MessagingManagementInterface {
   void loadContracts(ArrayList<String> addresses);
 
 
-  void addBlockchain(BigInteger bcId, String cbcContractAddress, String initialSigner) throws Exception;
+  void addBlockchain(BigInteger bcId, String initialSigner) throws Exception;
 
   void registerSigner(AnIdentity signer, BigInteger bcId) throws Exception;
 }

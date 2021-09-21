@@ -14,6 +14,7 @@
  */
 package net.consensys.gpact.examples.singlebc.trade;
 
+import net.consensys.gpact.common.BlockchainInfo;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
@@ -44,7 +45,7 @@ public class Main {
 
     PropertiesLoader propsLoader = new PropertiesLoader(args[0]);
     Credentials creds = CredentialsCreator.createCredentials();
-    PropertiesLoader.BlockchainInfo root = propsLoader.getBlockchainInfo("ROOT");
+    BlockchainInfo root = propsLoader.getBlockchainInfo("ROOT");
 
     Bc1TradeWallet bc1TradeWalletBlockchain = new Bc1TradeWallet(creds, root.bcId, root.uri, root.gasPriceStrategy, root.period);
     bc1TradeWalletBlockchain.deployContracts();

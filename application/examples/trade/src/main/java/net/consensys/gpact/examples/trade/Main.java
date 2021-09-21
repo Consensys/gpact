@@ -15,6 +15,7 @@
 package net.consensys.gpact.examples.trade;
 
 import net.consensys.gpact.cbc.calltree.CallExecutionTree;
+import net.consensys.gpact.common.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
@@ -26,12 +27,6 @@ import net.consensys.gpact.cbc.engine.CbcExecutorTxReceiptRootTransfer;
 import net.consensys.gpact.cbc.engine.ExecutionEngine;
 import net.consensys.gpact.cbc.engine.ParallelExecutionEngine;
 import net.consensys.gpact.cbc.engine.SerialExecutionEngine;
-import net.consensys.gpact.common.AnIdentity;
-import net.consensys.gpact.common.CredentialsCreator;
-import net.consensys.gpact.common.CrossBlockchainConsensusType;
-import net.consensys.gpact.common.ExecutionEngineType;
-import net.consensys.gpact.common.PropertiesLoader;
-import net.consensys.gpact.common.StatsHolder;
 import net.consensys.gpact.examples.trade.sim.SimBalancesContract;
 import net.consensys.gpact.examples.trade.sim.SimBusLogicContract;
 import net.consensys.gpact.examples.trade.sim.SimPriceOracleContract;
@@ -56,11 +51,11 @@ public class Main {
 
     PropertiesLoader propsLoader = new PropertiesLoader(args[0]);
     Credentials creds = CredentialsCreator.createCredentials();
-    PropertiesLoader.BlockchainInfo root = propsLoader.getBlockchainInfo("ROOT");
-    PropertiesLoader.BlockchainInfo bc2 = propsLoader.getBlockchainInfo("BC2");
-    PropertiesLoader.BlockchainInfo bc3 = propsLoader.getBlockchainInfo("BC3");
-    PropertiesLoader.BlockchainInfo bc4 = propsLoader.getBlockchainInfo("BC4");
-    PropertiesLoader.BlockchainInfo bc5 = propsLoader.getBlockchainInfo("BC5");
+    BlockchainInfo root = propsLoader.getBlockchainInfo("ROOT");
+    BlockchainInfo bc2 = propsLoader.getBlockchainInfo("BC2");
+    BlockchainInfo bc3 = propsLoader.getBlockchainInfo("BC3");
+    BlockchainInfo bc4 = propsLoader.getBlockchainInfo("BC4");
+    BlockchainInfo bc5 = propsLoader.getBlockchainInfo("BC5");
     CrossBlockchainConsensusType consensusMethodology = propsLoader.getConsensusMethodology();
     StatsHolder.log(consensusMethodology.name());
     ExecutionEngineType engineType = propsLoader.getExecutionEnngine();
@@ -88,24 +83,24 @@ public class Main {
     Bc5Stock bc5StockBlockchain = new Bc5Stock(creds, bc5.bcId, bc5.uri, bc5.gasPriceStrategy, bc5.period);
 
     // Set-up client side and deploy contracts on the blockchains.
-    BigInteger bc3BcId = bc3BalancesBlockchain.getBlockchainId();
+    BlockchainId bc3BcId = bc3BalancesBlockchain.getBlockchainId();
     bc3BalancesBlockchain.deployContracts(cbcManager.getCbcAddress(bc3BcId));
     String balancesContractAddress = bc3BalancesBlockchain.balancesContract.getContractAddress();
 
-    BigInteger bc4BcId = bc4OracleBlockchain.getBlockchainId();
+    BlockchainId bc4BcId = bc4OracleBlockchain.getBlockchainId();
     bc4OracleBlockchain.deployContracts(cbcManager.getCbcAddress(bc4BcId));
     String priceOracleContractAddress = bc4OracleBlockchain.priceOracleContract.getContractAddress();
 
-    BigInteger bc5BcId = bc5StockBlockchain.getBlockchainId();
+    BlockchainId bc5BcId = bc5StockBlockchain.getBlockchainId();
     bc5StockBlockchain.deployContracts(cbcManager.getCbcAddress(bc5BcId));
     String stockContractAddress = bc5StockBlockchain.stockContract.getContractAddress();
 
-    BigInteger bc2BcId = bc2BusLogicBlockchain.getBlockchainId();
+    BlockchainId bc2BcId = bc2BusLogicBlockchain.getBlockchainId();
     bc2BusLogicBlockchain.deployContracts(cbcManager.getCbcAddress(bc2BcId),
         bc3BcId, balancesContractAddress, bc4BcId, priceOracleContractAddress, bc5BcId, stockContractAddress);
     String businessLogicContractAddress = bc2BusLogicBlockchain.busLogicContract.getContractAddress();
 
-    BigInteger rootBcId = bc1TradeWalletBlockchain.getBlockchainId();
+    BlockchainId rootBcId = bc1TradeWalletBlockchain.getBlockchainId();
     bc1TradeWalletBlockchain.deployContracts(cbcManager.getCbcAddress(rootBcId), bc2BcId, businessLogicContractAddress);
     String tradeWalletContractAddress = bc1TradeWalletBlockchain.tradeWalletContract.getContractAddress();
 

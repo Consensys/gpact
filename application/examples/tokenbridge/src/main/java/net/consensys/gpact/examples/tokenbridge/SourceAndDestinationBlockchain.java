@@ -15,7 +15,8 @@
 package net.consensys.gpact.examples.tokenbridge;
 
 import net.consensys.gpact.appcontracts.erc20.soliditywrappers.CrosschainERC20PresetFixedSupply;
-import net.consensys.gpact.cbc.AbstractBlockchain;
+import net.consensys.gpact.common.AbstractBlockchain;
+import net.consensys.gpact.common.BlockchainId;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
@@ -34,7 +35,7 @@ public class SourceAndDestinationBlockchain extends AbstractBlockchain {
 
 
     public SourceAndDestinationBlockchain(final String entity, BigInteger tokenSupply,
-                Credentials credentials, String bcId, String uri, String gasPriceStrategy, String blockPeriod) throws IOException {
+                Credentials credentials, BlockchainId bcId, String uri, String gasPriceStrategy, String blockPeriod) throws IOException {
         super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
         this.entity = entity;
         this.tokenSupply = tokenSupply;
@@ -57,10 +58,10 @@ public class SourceAndDestinationBlockchain extends AbstractBlockchain {
         this.erc20.transfer(user.getAddress(), BigInteger.valueOf(number)).send();
     }
 
-    public void addRemoteERC20(BigInteger remoteBcId, String remoteERC20ContractAddress) throws Exception {
+    public void addRemoteERC20(BlockchainId remoteBcId, String remoteERC20ContractAddress) throws Exception {
 //        LOG.info(" Setting Remote ERC20: Local BcId: {}, Remote BcId: {}, Remote ERC20: {}",
 //                this.blockchainId, remoteBcId, remoteERC20ContractAddress);
-        this.erc20.setRemoteERC20(remoteBcId, remoteERC20ContractAddress).send();
+        this.erc20.setRemoteERC20(remoteBcId.asBigInt(), remoteERC20ContractAddress).send();
     }
 
     public void showErc20Balances(Erc20User[] users) throws Exception {

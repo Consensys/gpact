@@ -15,15 +15,12 @@
 package net.consensys.gpact.cbc.engine;
 
 import net.consensys.gpact.cbc.*;
-import net.consensys.gpact.common.AnIdentity;
+import net.consensys.gpact.common.*;
 import net.consensys.gpact.messaging.SignedEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.exceptions.TransactionException;
-import net.consensys.gpact.common.CrossBlockchainConsensusType;
-import net.consensys.gpact.common.RevertReason;
-import net.consensys.gpact.common.Tuple;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -52,7 +49,7 @@ public class CbcExecutorTxReceiptRootTransfer extends AbstractCbcExecutor {
     publishReceiptRootToAll(this.rootBcId, proof.getTransactionReceiptRoot());
   }
 
-  protected void segment(BigInteger blockchainId, BigInteger callerBlockchainId, List<BigInteger> callPath) throws Exception {
+  protected void segment(BlockchainId blockchainId, BlockchainId callerBlockchainId, List<BigInteger> callPath) throws Exception {
     if (callPath.size() == 0) {
       throw new Exception("Invalid call path length for segment: " + callPath.size());
     }
@@ -85,7 +82,7 @@ public class CbcExecutorTxReceiptRootTransfer extends AbstractCbcExecutor {
     // Segments proofs need to be available on the blockchain they executed on (for the
     // Signalling call), and on the blockchain that the contract that called this contract
     // resides on (for the Root or Segment call).
-    Set<BigInteger> blockchainsToPublishTo = new HashSet<>();
+    Set<BlockchainId> blockchainsToPublishTo = new HashSet<>();
     blockchainsToPublishTo.add(blockchainId);
     blockchainsToPublishTo.add(callerBlockchainId);
     publishReceiptRoot(blockchainId, segProof.getTransactionReceiptRoot(), blockchainsToPublishTo);
@@ -120,7 +117,7 @@ public class CbcExecutorTxReceiptRootTransfer extends AbstractCbcExecutor {
 
     CompletableFuture<?>[] transactionReceiptCompletableFutures = new CompletableFuture<?>[numSignalsToSend];
     int i = 0;
-    for (BigInteger blockchainId: this.signedSegmentEventsWithLockedContracts.keySet()) {
+    for (BlockchainId blockchainId: this.signedSegmentEventsWithLockedContracts.keySet()) {
       List<SignedEvent> segProofsLockedContractsCurrentBlockchain =
           this.signedSegmentEventsWithLockedContracts.get(blockchainId);
       CrossBlockchainControlTxReceiptRootTransfer cbcContract = this.cbcManager.getCbcContractTxRootTransfer(blockchainId);
@@ -130,7 +127,7 @@ public class CbcExecutorTxReceiptRootTransfer extends AbstractCbcExecutor {
     combinedFuture.get();
 
     i = 0;
-    for (BigInteger blockchainId: this.signedSegmentEventsWithLockedContracts.keySet()) {
+    for (BlockchainId blockchainId: this.signedSegmentEventsWithLockedContracts.keySet()) {
       TransactionReceipt receipt = (TransactionReceipt) transactionReceiptCompletableFutures[i++].get();
       CrossBlockchainControlTxReceiptRootTransfer cbcContract = this.cbcManager.getCbcContractTxRootTransfer(blockchainId);
       cbcContract.signallingAsyncPart2(receipt);
@@ -138,13 +135,13 @@ public class CbcExecutorTxReceiptRootTransfer extends AbstractCbcExecutor {
   }
 
 
-  private void publishReceiptRootToAll(BigInteger publishingFrom,  byte[] transactionReceiptRoot) throws Exception {
-    Set<BigInteger> blockchainIdsToPublishTo = this.cbcManager.getAllBlockchainIds();
+  private void publishReceiptRootToAll(BlockchainId publishingFrom,  byte[] transactionReceiptRoot) throws Exception {
+    Set<BlockchainId> blockchainIdsToPublishTo = this.cbcManager.getAllBlockchainIds();
     publishReceiptRoot(publishingFrom, transactionReceiptRoot, blockchainIdsToPublishTo);
   }
 
   // Add tx receipt root so event will be trusted.
-  private void publishReceiptRoot(BigInteger publishingFrom,  byte[] transactionReceiptRoot, Set<BigInteger> blockchainsToPublishTo) throws Exception {
+  private void publishReceiptRoot(BlockchainId publishingFrom,  byte[] transactionReceiptRoot, Set<BlockchainId> blockchainsToPublishTo) throws Exception {
     int numToShareWith =  blockchainsToPublishTo.size();
     if (numToShareWith == 0) {
       throw new RuntimeException("Unexpectedly, zero blockchains to publish to");
@@ -152,7 +149,7 @@ public class CbcExecutorTxReceiptRootTransfer extends AbstractCbcExecutor {
 
     CompletableFuture<?>[] transactionReceiptCompletableFutures = new CompletableFuture<?>[numToShareWith];
     int i = 0;
-    for (BigInteger bcId: blockchainsToPublishTo) {
+    for (BlockchainId bcId: blockchainsToPublishTo) {
       CrossBlockchainControlTxReceiptRootTransfer cbcContract = this.cbcManager.getCbcContractTxRootTransfer(bcId);
       AnIdentity[] signers = this.cbcManager.getSigners(publishingFrom);
       transactionReceiptCompletableFutures[i++] = cbcContract.addTransactionReceiptRootToBlockchainAsyncPart1(signers, publishingFrom, transactionReceiptRoot);
@@ -172,7 +169,7 @@ public class CbcExecutorTxReceiptRootTransfer extends AbstractCbcExecutor {
 
 
     i = 0;
-    for (BigInteger bcId: blockchainsToPublishTo) {
+    for (BlockchainId bcId: blockchainsToPublishTo) {
       TransactionReceipt receipt = (TransactionReceipt) transactionReceiptCompletableFutures[i++].get();
       CrossBlockchainControlTxReceiptRootTransfer cbcContract = this.cbcManager.getCbcContractTxRootTransfer(bcId);
       cbcContract.addTransactionReceiptRootToBlockchainAsyncPart2(receipt);

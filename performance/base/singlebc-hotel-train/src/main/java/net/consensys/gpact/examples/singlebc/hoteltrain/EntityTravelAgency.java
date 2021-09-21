@@ -14,11 +14,7 @@
  */
 package net.consensys.gpact.examples.singlebc.hoteltrain;
 
-import net.consensys.gpact.cbc.AbstractBlockchain;
-import net.consensys.gpact.common.FastTxManager;
-import net.consensys.gpact.common.RevertReason;
-import net.consensys.gpact.common.StatsHolder;
-import net.consensys.gpact.common.TxManagerCache;
+import net.consensys.gpact.common.*;
 import net.consensys.gpact.examples.singlebc.hoteltrain.soliditywrappers.TravelAgency;
 import net.consensys.gpact.openzeppelin.soliditywrappers.ERC20PresetFixedSupply;
 import org.apache.logging.log4j.LogManager;
@@ -44,15 +40,15 @@ public class EntityTravelAgency extends AbstractBlockchain {
     private static final String PKEY = "40000000000000000000000000000000000000000000000000000000003";
 
 
-    public EntityTravelAgency(String bcId, String uri, String gasPriceStrategy, String blockPeriod) throws IOException {
+    public EntityTravelAgency(BlockchainId bcId, String uri, String gasPriceStrategy, String blockPeriod) throws IOException {
         super(Credentials.create(PKEY), bcId, uri, gasPriceStrategy, blockPeriod);
     }
 
-    public void deploy(final BigInteger hotelBcId, final String hotelContractAddress,
-                       final BigInteger trainBcId, final String trainContractAddress) throws Exception {
+    public void deploy(final BlockchainId hotelBcId, final String hotelContractAddress,
+                       final BlockchainId trainBcId, final String trainContractAddress) throws Exception {
         LOG.info(" Deploying travel agency contract");
         this.travelAgency = TravelAgency.deploy(this.web3j, this.tm, this.gasProvider,
-                hotelBcId, hotelContractAddress, trainBcId, trainContractAddress).send();
+                hotelBcId.asBigInt(), hotelContractAddress, trainBcId.asBigInt(), trainContractAddress).send();
         LOG.info("  Travel Agency Contract deployed on blockchain {}, at address: {}",
             this.blockchainId, this.travelAgency.getContractAddress());
     }
@@ -74,7 +70,7 @@ public class EntityTravelAgency extends AbstractBlockchain {
 
     public void grantAllowance(EntityBase entity, int amount) throws Exception {
         TransactionReceiptProcessor txrProcessor = new PollingTransactionReceiptProcessor(entity.web3j, this.pollingInterval, RETRY);
-        FastTxManager atm = TxManagerCache.getOrCreate(entity.web3j, this.credentials, entity.getBlockchainId().longValue(), txrProcessor);
+        FastTxManager atm = TxManagerCache.getOrCreate(entity.web3j, this.credentials, entity.getBlockchainId().asLong(), txrProcessor);
         ERC20PresetFixedSupply erc20 = ERC20PresetFixedSupply.load(entity.getErc20ContractAddress(), entity.web3j, atm, entity.gasProvider);
         erc20.increaseAllowance(entity.getHotelContractAddress(), BigInteger.valueOf(amount)).send();
         LOG.info(" Increased allowance of {} contract for account {} by {}", entity.entity, this.credentials.getAddress(), amount);

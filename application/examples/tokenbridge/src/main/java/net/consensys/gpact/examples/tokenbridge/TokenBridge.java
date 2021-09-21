@@ -39,8 +39,8 @@ public class TokenBridge {
 
     PropertiesLoader propsLoader = new PropertiesLoader(args[0]);
     Credentials creds = CredentialsCreator.createCredentials();
-    PropertiesLoader.BlockchainInfo root = propsLoader.getBlockchainInfo("ROOT");
-    PropertiesLoader.BlockchainInfo bc2 = propsLoader.getBlockchainInfo("BC2");
+    BlockchainInfo root = propsLoader.getBlockchainInfo("ROOT");
+    BlockchainInfo bc2 = propsLoader.getBlockchainInfo("BC2");
     CrossBlockchainConsensusType consensusMethodology = propsLoader.getConsensusMethodology();
     StatsHolder.log(consensusMethodology.name());
     ExecutionEngineType engineType = propsLoader.getExecutionEnngine();
@@ -70,9 +70,9 @@ public class TokenBridge {
             erc20OwnerCreds, bc2.bcId, bc2.uri, bc2.gasPriceStrategy, bc2.period);
 
     // Deploy application contracts.
-    BigInteger chainABcId = chainA.getBlockchainId();
+    BlockchainId chainABcId = chainA.getBlockchainId();
     chainA.deployContract(cbcManager.getCbcAddress(chainABcId));
-    BigInteger chainBBcId = chainB.getBlockchainId();
+    BlockchainId chainBBcId = chainB.getBlockchainId();
     chainB.deployContract(cbcManager.getCbcAddress(chainBBcId));
 
     // Register the ERC20 contracts with each other.

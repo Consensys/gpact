@@ -14,12 +14,13 @@
  */
 package net.consensys.gpact.examples.trade;
 
+import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.examples.trade.soliditywrappers.BusLogic;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
-import net.consensys.gpact.cbc.AbstractBlockchain;
+import net.consensys.gpact.common.AbstractBlockchain;
 
 
 import java.io.IOException;
@@ -31,19 +32,19 @@ public class Bc2BusLogic extends AbstractBlockchain {
 
   BusLogic busLogicContract;
 
-  public Bc2BusLogic(Credentials credentials, String bcId, String uri, String gasPriceStrategy, String blockPeriod) throws IOException {
+  public Bc2BusLogic(Credentials credentials, BlockchainId bcId, String uri, String gasPriceStrategy, String blockPeriod) throws IOException {
     super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
   }
 
   public void deployContracts(
       String cbc,
-      BigInteger balancesBcId, String balances,
-      BigInteger oracleBcId, String oracle,
-      BigInteger stockBcId, String stock) throws Exception {
+      BlockchainId balancesBcId, String balances,
+      BlockchainId oracleBcId, String oracle,
+      BlockchainId stockBcId, String stock) throws Exception {
     this.busLogicContract = BusLogic.deploy(this.web3j, this.tm, this.gasProvider,
-        cbc, balancesBcId, balances, oracleBcId, oracle, stockBcId, stock).send();
-    LOG.info("Business Logic contract deployed to {} on blockchain 0x{}",
-        this.busLogicContract.getContractAddress(), this.blockchainId.toString(16));
+        cbc, balancesBcId.asBigInt(), balances, oracleBcId.asBigInt(), oracle, stockBcId.asBigInt(), stock).send();
+    LOG.info("Business Logic contract deployed to {} on blockchain {}",
+        this.busLogicContract.getContractAddress(), this.blockchainId);
   }
 
   public String getRlpFunctionSignature_StockShipment(String seller, String buyer, BigInteger quantity) {

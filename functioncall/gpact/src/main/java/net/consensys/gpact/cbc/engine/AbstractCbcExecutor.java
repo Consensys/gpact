@@ -14,6 +14,7 @@
  */
 package net.consensys.gpact.cbc.engine;
 
+import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.messaging.SignedEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -54,7 +55,7 @@ public abstract class AbstractCbcExecutor {
   Map<BigInteger, List<SignedEvent>> signedSegmentEvents = new ConcurrentHashMap<>();
 
   // Key for this map is the blockchain id that the segment occurred on.
-  Map<BigInteger, List<SignedEvent>> signedSegmentEventsWithLockedContracts = new ConcurrentHashMap<>();
+  Map<BlockchainId, List<SignedEvent>> signedSegmentEventsWithLockedContracts = new ConcurrentHashMap<>();
 
 
 
@@ -67,7 +68,7 @@ public abstract class AbstractCbcExecutor {
 
   protected BigInteger timeout;
   protected BigInteger crossBlockchainTransactionId;
-  protected BigInteger rootBcId;
+  protected BlockchainId rootBcId;
 
   boolean success = false;
 
@@ -78,7 +79,7 @@ public abstract class AbstractCbcExecutor {
   }
 
 
-  public void init(byte[] callGraph, BigInteger timeout, BigInteger transactionId, BigInteger rootBcId) {
+  public void init(byte[] callGraph, BigInteger timeout, BigInteger transactionId, BlockchainId rootBcId) {
     this.callGraph = callGraph;
     this.timeout = timeout;
     this.crossBlockchainTransactionId = transactionId;
@@ -87,7 +88,7 @@ public abstract class AbstractCbcExecutor {
 
   protected abstract void startCall()throws Exception;
 
-  protected abstract void segment(BigInteger blockchainId, BigInteger callerBlockchainId, List<BigInteger> callPath) throws Exception;
+  protected abstract void segment(BlockchainId blockchainId, BlockchainId callerBlockchainId, List<BigInteger> callPath) throws Exception;
 
   protected abstract void root() throws Exception;
 

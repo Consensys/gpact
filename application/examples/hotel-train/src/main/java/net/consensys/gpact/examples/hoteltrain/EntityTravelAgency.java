@@ -15,7 +15,7 @@
 package net.consensys.gpact.examples.hoteltrain;
 
 import net.consensys.gpact.appcontracts.erc20.soliditywrappers.LockableERC20PresetFixedSupply;
-import net.consensys.gpact.cbc.AbstractBlockchain;
+import net.consensys.gpact.common.AbstractBlockchain;
 import net.consensys.gpact.cbc.CbcManager;
 import net.consensys.gpact.cbc.calltree.CallExecutionTree;
 import net.consensys.gpact.cbc.engine.*;
@@ -45,23 +45,23 @@ public class EntityTravelAgency extends AbstractBlockchain {
 
     Simulator sim = new Simulator();
 
-    BigInteger hotelBcId;
+    BlockchainId hotelBcId;
     String hotelContractAddress;
-    BigInteger trainBcId;
+    BlockchainId trainBcId;
     String trainContractAddress;
 
     CbcManager cbcManager;
 
-    public EntityTravelAgency(String bcId, String uri, String gasPriceStrategy, String blockPeriod) throws IOException {
+    public EntityTravelAgency(BlockchainId bcId, String uri, String gasPriceStrategy, String blockPeriod) throws IOException {
         super(Credentials.create(PKEY), bcId, uri, gasPriceStrategy, blockPeriod);
     }
 
     public void deploy(final String cbcAddress,
-                       final BigInteger hotelBcId, final String hotelContractAddress,
-                       final BigInteger trainBcId, final String trainContractAddress) throws Exception {
+                       final BlockchainId hotelBcId, final String hotelContractAddress,
+                       final BlockchainId trainBcId, final String trainContractAddress) throws Exception {
         LOG.info(" Deploying travel agency contract");
         TravelAgency travelAgency = TravelAgency.deploy(this.web3j, this.tm, this.gasProvider,
-                hotelBcId, hotelContractAddress, trainBcId, trainContractAddress, cbcAddress).send();
+                hotelBcId.asBigInt(), hotelContractAddress, trainBcId.asBigInt(), trainContractAddress, cbcAddress).send();
         this.travelAgencyAddress = travelAgency.getContractAddress();
         LOG.info("  Travel Agency Contract deployed on blockchain {}, at address: {}",
             this.blockchainId, this.travelAgencyAddress);
@@ -74,9 +74,9 @@ public class EntityTravelAgency extends AbstractBlockchain {
 
     public void createCbcManager(
             CrossBlockchainConsensusType consensusMethodology,
-            PropertiesLoader.BlockchainInfo bcInfoTravel, List<String> infratructureContractAddressOnBcTravel,
-            PropertiesLoader.BlockchainInfo bcInfoHotel, List<String> infrastructureContractAddressOnBcHotel,
-            PropertiesLoader.BlockchainInfo bcInfoTrain, List<String> infrastructureContractAddressOnBcTrain,
+            BlockchainInfo bcInfoTravel, List<String> infratructureContractAddressOnBcTravel,
+            BlockchainInfo bcInfoHotel, List<String> infrastructureContractAddressOnBcHotel,
+            BlockchainInfo bcInfoTrain, List<String> infrastructureContractAddressOnBcTrain,
             AnIdentity globalSigner) throws Exception {
         this.cbcManager = new CbcManager(consensusMethodology);
         this.cbcManager.addBlockchain(this.credentials, bcInfoTravel, infratructureContractAddressOnBcTravel);
@@ -148,7 +148,7 @@ public class EntityTravelAgency extends AbstractBlockchain {
 
     public void grantAllowance(EntityBase entity, int amount) throws Exception {
         TransactionReceiptProcessor txrProcessor = new PollingTransactionReceiptProcessor(entity.web3j, this.pollingInterval, RETRY);
-        FastTxManager atm = TxManagerCache.getOrCreate(entity.web3j, this.credentials, entity.getBlockchainId().longValue(), txrProcessor);
+        FastTxManager atm = TxManagerCache.getOrCreate(entity.web3j, this.credentials, entity.getBlockchainId().asLong(), txrProcessor);
         LockableERC20PresetFixedSupply erc20 = LockableERC20PresetFixedSupply.load(entity.getErc20ContractAddress(), entity.web3j, atm, entity.gasProvider);
         erc20.increaseAllowance(entity.getHotelContractAddress(), BigInteger.valueOf(amount)).send();
         LOG.info(" Increased allowance of {} contract for account {} by {}", entity.entity, this.credentials.getAddress(), amount);

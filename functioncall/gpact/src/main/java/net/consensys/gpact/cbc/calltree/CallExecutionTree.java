@@ -1,5 +1,6 @@
 package net.consensys.gpact.cbc.calltree;
 
+import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.common.FormatConversion;
 import net.consensys.gpact.common.Tuple;
 
@@ -24,26 +25,26 @@ public class CallExecutionTree {
 
 
 
-    BigInteger blockchainId;
+    BlockchainId blockchainId;
     String contractAddress;
     String functionCallData;
     // In order list of functions called by this function.
     ArrayList<CallExecutionTree> calledFunctions;
 
-    public CallExecutionTree(BigInteger blockchainId, String contractAddress, String functionCallData) {
+    public CallExecutionTree(BlockchainId blockchainId, String contractAddress, String functionCallData) {
         this.blockchainId = blockchainId;
         this.contractAddress = contractAddress;
         this.functionCallData = functionCallData;
     }
 
-    public CallExecutionTree(BigInteger blockchainId, String contractAddress, String functionCallData, ArrayList<CallExecutionTree> calledFunctions) {
+    public CallExecutionTree(BlockchainId blockchainId, String contractAddress, String functionCallData, ArrayList<CallExecutionTree> calledFunctions) {
         this.blockchainId = blockchainId;
         this.contractAddress = contractAddress;
         this.functionCallData = functionCallData;
         this.calledFunctions = calledFunctions;
     }
 
-    public BigInteger getBlockchainId() {
+    public BlockchainId getBlockchainId() {
         return blockchainId;
     }
 
@@ -128,7 +129,7 @@ public class CallExecutionTree {
 
     private byte[] encodeFunctionCall() {
         ByteBuffer buf = ByteBuffer.allocate(MAX_CALL_EX_TREE_SIZE);
-        byte[] blockchainIdBytes = FormatConversion.bigIntegerToUint256ByteArray(this.blockchainId);
+        byte[] blockchainIdBytes = this.blockchainId.asBytes();
         byte[] address = addressStringToBytes(this.contractAddress);
         buf.put(blockchainIdBytes);
         buf.put(address);

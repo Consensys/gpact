@@ -14,10 +14,11 @@
  */
 package net.consensys.gpact.examples.write;
 
+import net.consensys.gpact.common.BlockchainId;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
-import net.consensys.gpact.cbc.AbstractBlockchain;
+import net.consensys.gpact.common.AbstractBlockchain;
 import net.consensys.gpact.examples.write.soliditywrappers.ContractA;
 
 import java.io.IOException;
@@ -29,18 +30,18 @@ public class Bc1ContractA extends AbstractBlockchain {
 
   ContractA contractA;
 
-  public Bc1ContractA(Credentials credentials, String bcId, String uri, String gasPriceStrategy, String blockPeriod) throws IOException {
+  public Bc1ContractA(Credentials credentials, BlockchainId bcId, String uri, String gasPriceStrategy, String blockPeriod) throws IOException {
     super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
   }
 
-  public void deployContracts(String cbcContractAddress, BigInteger busLogicBlockchainId, String busLogicContractAddress) throws Exception {
+  public void deployContracts(String cbcContractAddress, BlockchainId busLogicBlockchainId, String busLogicContractAddress) throws Exception {
     this.contractA =
         ContractA.deploy(this.web3j, this.tm, this.gasProvider,
             cbcContractAddress,
-            busLogicBlockchainId,
+            busLogicBlockchainId.asBigInt(),
             busLogicContractAddress).send();
-    LOG.info("ContractA deployed to {} on blockchain 0x{}",
-        this.contractA.getContractAddress(), this.blockchainId.toString(16));
+    LOG.info("ContractA deployed to {} on blockchain {}",
+        this.contractA.getContractAddress(), this.blockchainId);
   }
 
   public String getRlpFunctionSignature_DoCrosschainWrite(BigInteger val) {

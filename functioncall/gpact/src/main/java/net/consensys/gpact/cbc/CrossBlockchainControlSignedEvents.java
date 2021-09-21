@@ -15,6 +15,7 @@
 package net.consensys.gpact.cbc;
 
 import net.consensys.gpact.attestorsign.soliditywrappers.CrosschainVerifierSign;
+import net.consensys.gpact.common.BlockchainId;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
@@ -29,7 +30,7 @@ public class CrossBlockchainControlSignedEvents extends AbstractCbc {
 
   private CrosschainVerifierSign verifier;
 
-  public CrossBlockchainControlSignedEvents(Credentials credentials, String bcId, String uri, String gasPriceStrategy, String blockPeriod) throws IOException {
+  public CrossBlockchainControlSignedEvents(Credentials credentials, BlockchainId bcId, String uri, String gasPriceStrategy, String blockPeriod) throws IOException {
     super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
   }
 
@@ -51,8 +52,8 @@ public class CrossBlockchainControlSignedEvents extends AbstractCbc {
     this.verifier = CrosschainVerifierSign.load(addresses.get(2), this.web3j, this.tm, this.gasProvider);
   }
 
-  protected void addVerifier(BigInteger bcId) throws Exception {
-    this.crossBlockchainControlContract.addVerifier(bcId, this.verifier.getContractAddress()).send();
+  protected void addVerifier(BlockchainId bcId) throws Exception {
+    this.crossBlockchainControlContract.addVerifier(bcId.asBigInt(), this.verifier.getContractAddress()).send();
   }
 
 

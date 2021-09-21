@@ -43,9 +43,9 @@ public class HotelTrain {
 
         PropertiesLoader propsLoader = new PropertiesLoader(args[0]);
         Credentials creds = CredentialsCreator.createCredentials();
-        PropertiesLoader.BlockchainInfo root = propsLoader.getBlockchainInfo("ROOT");
-        PropertiesLoader.BlockchainInfo bc2 = propsLoader.getBlockchainInfo("BC2");
-        PropertiesLoader.BlockchainInfo bc3 = propsLoader.getBlockchainInfo("BC3");
+        BlockchainInfo root = propsLoader.getBlockchainInfo("ROOT");
+        BlockchainInfo bc2 = propsLoader.getBlockchainInfo("BC2");
+        BlockchainInfo bc3 = propsLoader.getBlockchainInfo("BC3");
         CrossBlockchainConsensusType consensusMethodology = propsLoader.getConsensusMethodology();
         StatsHolder.log(consensusMethodology.name());
         ExecutionEngineType engineType = propsLoader.getExecutionEnngine();
@@ -70,11 +70,11 @@ public class HotelTrain {
         EntityTravelAgency travelAgency = new EntityTravelAgency(root.bcId, root.uri, root.gasPriceStrategy, root.period);
 
         // Deploy application contracts.
-        BigInteger hotelBcId = hotel.getBlockchainId();
+        BlockchainId hotelBcId = hotel.getBlockchainId();
         hotel.deployContracts(cbcManager.getCbcAddress(hotelBcId));
-        BigInteger trainBcId = train.getBlockchainId();
+        BlockchainId trainBcId = train.getBlockchainId();
         train.deployContracts(cbcManager.getCbcAddress(trainBcId));
-        BigInteger travelBcId = travelAgency.getBlockchainId();
+        BlockchainId travelBcId = travelAgency.getBlockchainId();
         travelAgency.deploy(cbcManager.getCbcAddress(travelBcId), hotel.getBlockchainId(), hotel.getHotelContractAddress(), train.getBlockchainId(), train.getHotelContractAddress());
 
         travelAgency.createCbcManager(

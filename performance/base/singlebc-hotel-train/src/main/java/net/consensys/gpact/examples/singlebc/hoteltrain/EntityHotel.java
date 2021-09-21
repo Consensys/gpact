@@ -14,6 +14,7 @@
  */
 package net.consensys.gpact.examples.singlebc.hoteltrain;
 
+import net.consensys.gpact.common.BlockchainId;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
@@ -32,7 +33,7 @@ public class EntityHotel extends EntityBase {
 
     private static final String PKEY = "40000000000000000000000000000000000000000000000000000000001";
 
-    public EntityHotel(String bcId, String uri,
+    public EntityHotel(BlockchainId bcId, String uri,
                        String gasPriceStrategy, String blockPeriod) throws IOException {
         super(NAME, Credentials.create(PKEY), bcId, uri, gasPriceStrategy, blockPeriod);
     }

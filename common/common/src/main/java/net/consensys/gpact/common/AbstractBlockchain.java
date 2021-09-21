@@ -12,16 +12,13 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package net.consensys.gpact.cbc;
+package net.consensys.gpact.common;
 
-import net.consensys.gpact.common.FastTxManager;
-import net.consensys.gpact.common.TxManagerCache;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.http.HttpService;
-import net.consensys.gpact.common.DynamicGasProvider;
 import org.web3j.tx.response.PollingTransactionReceiptProcessor;
 import org.web3j.tx.response.TransactionReceiptProcessor;
 
@@ -39,7 +36,7 @@ public abstract class AbstractBlockchain {
   protected Credentials credentials;
 
 
-  protected BigInteger blockchainId;
+  protected BlockchainId blockchainId;
   protected String uri;
   // Polling interval should be equal to the block time.
   protected int pollingInterval;
@@ -49,15 +46,15 @@ public abstract class AbstractBlockchain {
   protected FastTxManager tm;
 
 
-  protected AbstractBlockchain(Credentials credentials, String bcId, String uri, String gasPriceStrategy, String blockPeriod) throws IOException {
-    this.blockchainId = new BigInteger(bcId, 16);
+  protected AbstractBlockchain(Credentials credentials, BlockchainId bcId, String uri, String gasPriceStrategy, String blockPeriod) throws IOException {
+    this.blockchainId = bcId;
     this.uri = uri;
     this.pollingInterval = Integer.parseInt(blockPeriod);
     this.credentials = credentials;
     this.web3j = Web3j.build(new HttpService(this.uri), this.pollingInterval, new ScheduledThreadPoolExecutor(5));
 
     TransactionReceiptProcessor txrProcessor = new PollingTransactionReceiptProcessor(this.web3j, this.pollingInterval, RETRY);
-    this.tm = TxManagerCache.getOrCreate(this.web3j, this.credentials, this.blockchainId.longValue(), txrProcessor);
+    this.tm = TxManagerCache.getOrCreate(this.web3j, this.credentials, this.blockchainId.asLong(), txrProcessor);
     this.gasProvider = new DynamicGasProvider(this.web3j, uri, gasPriceStrategy);
   }
 
@@ -66,7 +63,7 @@ public abstract class AbstractBlockchain {
   }
 
 
-  public BigInteger getBlockchainId() {
+  public BlockchainId getBlockchainId() {
     return this.blockchainId;
   }
 
