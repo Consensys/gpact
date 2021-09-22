@@ -82,14 +82,14 @@ public class TokenBridge {
             bc2.bcId, chainB.getErc20ContractAddress());
 
     user1.createCbcManager(
-            root, crossControlManagerGroup.getInfrastructureAddresses(chainABcId),
-            bc2, crossControlManagerGroup.getInfrastructureAddresses(chainBBcId));
+            root, crossControlManagerGroup.getInfrastructureAddresses(chainABcId), crossControlManagerGroup.getMessageVerification(chainABcId),
+            bc2, crossControlManagerGroup.getInfrastructureAddresses(chainBBcId), crossControlManagerGroup.getMessageVerification(chainBBcId));
     user2.createCbcManager(
-            root, crossControlManagerGroup.getInfrastructureAddresses(chainABcId),
-            bc2, crossControlManagerGroup.getInfrastructureAddresses(chainBBcId));
+            root, crossControlManagerGroup.getInfrastructureAddresses(chainABcId), crossControlManagerGroup.getMessageVerification(chainABcId),
+            bc2, crossControlManagerGroup.getInfrastructureAddresses(chainBBcId), crossControlManagerGroup.getMessageVerification(chainBBcId));
     user3.createCbcManager(
-            root, crossControlManagerGroup.getInfrastructureAddresses(chainABcId),
-            bc2, crossControlManagerGroup.getInfrastructureAddresses(chainBBcId));
+            root, crossControlManagerGroup.getInfrastructureAddresses(chainABcId), crossControlManagerGroup.getMessageVerification(chainABcId),
+            bc2, crossControlManagerGroup.getInfrastructureAddresses(chainBBcId), crossControlManagerGroup.getMessageVerification(chainBBcId));
 
 
       // Give some balance to the users

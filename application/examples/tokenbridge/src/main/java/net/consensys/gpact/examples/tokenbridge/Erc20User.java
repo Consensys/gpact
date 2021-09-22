@@ -6,6 +6,7 @@ import net.consensys.gpact.cbc.CrosschainExecutor;
 import net.consensys.gpact.cbc.calltree.CallExecutionTree;
 import net.consensys.gpact.cbc.engine.*;
 import net.consensys.gpact.common.*;
+import net.consensys.gpact.messaging.MessagingVerificationInterface;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
@@ -47,11 +48,11 @@ public class Erc20User {
     }
 
     public void createCbcManager(
-            BlockchainInfo bcInfoA, List<String> infrastructureContractAddressOnBcA,
-            BlockchainInfo bcInfoB, List<String> infrastructureContractAddressOnBcB) throws Exception {
+            BlockchainInfo bcInfoA, List<String> infrastructureContractAddressOnBcA, MessagingVerificationInterface msgVerA,
+            BlockchainInfo bcInfoB, List<String> infrastructureContractAddressOnBcB,  MessagingVerificationInterface msgVerB) throws Exception {
         this.crossControlManagerGroup = new CrossControlManagerGroup();
-        this.crossControlManagerGroup.addBlockchainAndLoadContracts(this.creds, bcInfoA, infrastructureContractAddressOnBcA);
-        this.crossControlManagerGroup.addBlockchainAndLoadContracts(this.creds, bcInfoB, infrastructureContractAddressOnBcB);
+        this.crossControlManagerGroup.addBlockchainAndLoadContracts(this.creds, bcInfoA, infrastructureContractAddressOnBcA, msgVerA);
+        this.crossControlManagerGroup.addBlockchainAndLoadContracts(this.creds, bcInfoB, infrastructureContractAddressOnBcB, msgVerB);
     }
 
     public String getName() {

@@ -36,7 +36,7 @@ public class CrossControlManagerGroup {
     this.blockchains.put(blockchainId, holder);
   }
 
-  public void addBlockchainAndLoadContracts(Credentials creds, BlockchainInfo bcInfo, List<String> addresses) throws Exception {
+  public void addBlockchainAndLoadContracts(Credentials creds, BlockchainInfo bcInfo, List<String> addresses, MessagingVerificationInterface messageVerification) throws Exception {
     BlockchainId blockchainId = bcInfo.bcId;
     if (this.blockchains.containsKey(blockchainId)) {
       return;
@@ -48,6 +48,7 @@ public class CrossControlManagerGroup {
 
     holder.cbc.loadContracts(addresses);
     holder.cbcContractAddress = addresses.get(0);
+    holder.ver = messageVerification;
 
     this.blockchains.put(blockchainId, holder);
   }

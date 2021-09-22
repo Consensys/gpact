@@ -62,9 +62,9 @@ public class HotelTrain {
         travelAgency.deploy(crossControlManagerGroup.getCbcAddress(travelBcId), hotel.getBlockchainId(), hotel.getHotelContractAddress(), train.getBlockchainId(), train.getHotelContractAddress());
 
         travelAgency.createCbcManager(
-                root, crossControlManagerGroup.getInfrastructureAddresses(travelBcId),
-                bc2, crossControlManagerGroup.getInfrastructureAddresses(hotelBcId),
-                bc3, crossControlManagerGroup.getInfrastructureAddresses(trainBcId));
+                root, crossControlManagerGroup.getInfrastructureAddresses(travelBcId), crossControlManagerGroup.getMessageVerification(travelBcId),
+                bc2, crossControlManagerGroup.getInfrastructureAddresses(hotelBcId), crossControlManagerGroup.getMessageVerification(hotelBcId),
+                bc3, crossControlManagerGroup.getInfrastructureAddresses(trainBcId), crossControlManagerGroup.getMessageVerification(trainBcId));
 
 
         // Set-up application contracts.

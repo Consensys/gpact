@@ -11,6 +11,7 @@ repositories {
 dependencies {
     implementation project (':common')
     implementation project (':app-erc20')
+    implementation project (':mes-interface')
     implementation project (':gpact')
     implementation project (':examplehelpers')
 

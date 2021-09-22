@@ -22,6 +22,7 @@ import net.consensys.gpact.cbc.calltree.CallExecutionTree;
 import net.consensys.gpact.cbc.engine.*;
 import net.consensys.gpact.common.*;
 import net.consensys.gpact.examples.hoteltrain.soliditywrappers.TravelAgency;
+import net.consensys.gpact.messaging.MessagingVerificationInterface;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
@@ -74,13 +75,13 @@ public class EntityTravelAgency extends AbstractBlockchain {
     }
 
     public void createCbcManager(
-            BlockchainInfo bcInfoTravel, List<String> infratructureContractAddressOnBcTravel,
-            BlockchainInfo bcInfoHotel, List<String> infrastructureContractAddressOnBcHotel,
-            BlockchainInfo bcInfoTrain, List<String> infrastructureContractAddressOnBcTrain) throws Exception {
+            BlockchainInfo bcInfoTravel, List<String> infratructureContractAddressOnBcTravel, MessagingVerificationInterface msgVerTravel,
+            BlockchainInfo bcInfoHotel, List<String> infrastructureContractAddressOnBcHotel, MessagingVerificationInterface msgVerHotel,
+            BlockchainInfo bcInfoTrain, List<String> infrastructureContractAddressOnBcTrain, MessagingVerificationInterface msgVerTrain) throws Exception {
         this.crossControlManagerGroup = new CrossControlManagerGroup();
-        this.crossControlManagerGroup.addBlockchainAndLoadContracts(this.credentials, bcInfoTravel, infratructureContractAddressOnBcTravel);
-        this.crossControlManagerGroup.addBlockchainAndLoadContracts(this.credentials, bcInfoHotel, infrastructureContractAddressOnBcHotel);
-        this.crossControlManagerGroup.addBlockchainAndLoadContracts(this.credentials, bcInfoTrain, infrastructureContractAddressOnBcTrain);
+        this.crossControlManagerGroup.addBlockchainAndLoadContracts(this.credentials, bcInfoTravel, infratructureContractAddressOnBcTravel, msgVerTravel);
+        this.crossControlManagerGroup.addBlockchainAndLoadContracts(this.credentials, bcInfoHotel, infrastructureContractAddressOnBcHotel, msgVerHotel);
+        this.crossControlManagerGroup.addBlockchainAndLoadContracts(this.credentials, bcInfoTrain, infrastructureContractAddressOnBcTrain, msgVerTrain);
     }
 
     public BigInteger book(final int dateInt, ExampleSystemManager exampleManager) throws Exception {
