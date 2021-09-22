@@ -45,7 +45,7 @@ public class TxRootTransferManager extends RegistrarManager {
     super.deployContracts();
     this.txReceiptsRootStorage =
             TxReceiptsRootStorage.deploy(this.web3j, this.tm, this.gasProvider, this.registrarContract.getContractAddress()).send();
-    LOG.debug(" TxReceiptsRootStorage Contract: {}", this.verifier.getContractAddress());
+    LOG.debug(" TxReceiptsRootStorage Contract: {}", this.txReceiptsRootStorage.getContractAddress());
     this.verifier =
             CrosschainVerifierTxRoot.deploy(this.web3j, this.tm, this.gasProvider, this.txReceiptsRootStorage.getContractAddress()).send();
     LOG.debug(" Verifier Contract: {}", this.verifier.getContractAddress());
