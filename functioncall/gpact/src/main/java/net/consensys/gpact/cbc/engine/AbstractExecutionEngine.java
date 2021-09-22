@@ -14,11 +14,12 @@
  */
 package net.consensys.gpact.cbc.engine;
 
+import net.consensys.gpact.cbc.CrosschainExecutor;
 import net.consensys.gpact.cbc.calltree.CallExecutionTree;
 import net.consensys.gpact.common.BlockchainId;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import net.consensys.gpact.cbc.AbstractCbc;
+import net.consensys.gpact.cbc.CrossControlManager;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -27,15 +28,15 @@ import java.util.List;
 public abstract class AbstractExecutionEngine implements ExecutionEngine {
   static final Logger LOG = LogManager.getLogger(AbstractExecutionEngine.class);
 
-  AbstractCbcExecutor executor;
+  CrosschainExecutor executor;
 
-  public AbstractExecutionEngine(AbstractCbcExecutor executor) {
+  public AbstractExecutionEngine(CrosschainExecutor executor) {
     this.executor = executor;
   }
 
   public boolean execute(CallExecutionTree callGraph, long timeout) throws Exception {
     LOG.info("start");
-    BigInteger crossBlockchainTransactionId = AbstractCbc.generateRandomCrossBlockchainTransactionId();
+    BigInteger crossBlockchainTransactionId = CrossControlManager.generateRandomCrossBlockchainTransactionId();
     BigInteger timeoutBig = BigInteger.valueOf(timeout);
 
 

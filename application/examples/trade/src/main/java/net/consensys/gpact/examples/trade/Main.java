@@ -20,13 +20,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
-import net.consensys.gpact.cbc.CbcManager;
-import net.consensys.gpact.cbc.engine.AbstractCbcExecutor;
-import net.consensys.gpact.cbc.engine.CbcExecutorSignedEvents;
-import net.consensys.gpact.cbc.engine.CbcExecutorTxReceiptRootTransfer;
+import net.consensys.gpact.cbc.CrossControlManagerGroup;
+import net.consensys.gpact.cbc.CrosschainExecutor;
 import net.consensys.gpact.cbc.engine.ExecutionEngine;
-import net.consensys.gpact.cbc.engine.ParallelExecutionEngine;
-import net.consensys.gpact.cbc.engine.SerialExecutionEngine;
 import net.consensys.gpact.examples.trade.sim.SimBalancesContract;
 import net.consensys.gpact.examples.trade.sim.SimBusLogicContract;
 import net.consensys.gpact.examples.trade.sim.SimPriceOracleContract;
@@ -49,33 +45,19 @@ public class Main {
       return;
     }
 
-    PropertiesLoader propsLoader = new PropertiesLoader(args[0]);
-    Credentials creds = CredentialsCreator.createCredentials();
-    BlockchainInfo root = propsLoader.getBlockchainInfo("ROOT");
-    BlockchainInfo bc2 = propsLoader.getBlockchainInfo("BC2");
-    BlockchainInfo bc3 = propsLoader.getBlockchainInfo("BC3");
-    BlockchainInfo bc4 = propsLoader.getBlockchainInfo("BC4");
-    BlockchainInfo bc5 = propsLoader.getBlockchainInfo("BC5");
-    CrossBlockchainConsensusType consensusMethodology = propsLoader.getConsensusMethodology();
-    StatsHolder.log(consensusMethodology.name());
-    ExecutionEngineType engineType = propsLoader.getExecutionEnngine();
-    StatsHolder.log(engineType.name());
+    ExampleSystemManager exampleManager = new ExampleSystemManager(args[0]);
+    // TODO can be configured for 5, however, need to set-up test system for 5 blockchains.
+    exampleManager.standardExampleConfig(3);
 
-    // Set-up GPACT contracts: Deploy Crosschain Control and Registrar contracts on
-    // each blockchain.
-    CbcManager cbcManager = new CbcManager(consensusMethodology);
-    cbcManager.addBlockchainAndDeployContracts(creds, root);
-    cbcManager.addBlockchainAndDeployContracts(creds, bc2);
-    cbcManager.addBlockchainAndDeployContracts(creds, bc3);
-    cbcManager.addBlockchainAndDeployContracts(creds, bc4);
-    cbcManager.addBlockchainAndDeployContracts(creds, bc5);
-    // Have each Crosschain Control contract trust the Crosschain Control
-    // contracts on the other blockchains.
-    // To keep the example simple, just have one signer for all blockchains.
-    AnIdentity globalSigner = new AnIdentity();
-    cbcManager.setupCrosschainTrust(globalSigner);
+    BlockchainInfo root = exampleManager.getRootBcInfo();
+    BlockchainInfo bc2 = exampleManager.getBc2Info();
+    BlockchainInfo bc3 = exampleManager.getBc3Info();
+    BlockchainInfo bc4 = exampleManager.getBc2Info(); // Change this to 4 if 5 blockchains are available
+    BlockchainInfo bc5 = exampleManager.getBc3Info(); // Change this to 5 if 5 blockchains are available
+    CrossControlManagerGroup crossControlManagerGroup = exampleManager.getCrossControlManagerGroup();
 
     // Set-up classes to manage blockchains.
+    Credentials creds = CredentialsCreator.createCredentials();
     Bc1TradeWallet bc1TradeWalletBlockchain = new Bc1TradeWallet(creds, root.bcId, root.uri, root.gasPriceStrategy, root.period);
     Bc2BusLogic bc2BusLogicBlockchain = new Bc2BusLogic(creds, bc2.bcId, bc2.uri, bc2.gasPriceStrategy, bc2.period);
     Bc3Balances bc3BalancesBlockchain = new Bc3Balances(creds, bc3.bcId, bc3.uri, bc3.gasPriceStrategy, bc3.period);
@@ -84,24 +66,24 @@ public class Main {
 
     // Set-up client side and deploy contracts on the blockchains.
     BlockchainId bc3BcId = bc3BalancesBlockchain.getBlockchainId();
-    bc3BalancesBlockchain.deployContracts(cbcManager.getCbcAddress(bc3BcId));
+    bc3BalancesBlockchain.deployContracts(crossControlManagerGroup.getCbcAddress(bc3BcId));
     String balancesContractAddress = bc3BalancesBlockchain.balancesContract.getContractAddress();
 
     BlockchainId bc4BcId = bc4OracleBlockchain.getBlockchainId();
-    bc4OracleBlockchain.deployContracts(cbcManager.getCbcAddress(bc4BcId));
+    bc4OracleBlockchain.deployContracts(crossControlManagerGroup.getCbcAddress(bc4BcId));
     String priceOracleContractAddress = bc4OracleBlockchain.priceOracleContract.getContractAddress();
 
     BlockchainId bc5BcId = bc5StockBlockchain.getBlockchainId();
-    bc5StockBlockchain.deployContracts(cbcManager.getCbcAddress(bc5BcId));
+    bc5StockBlockchain.deployContracts(crossControlManagerGroup.getCbcAddress(bc5BcId));
     String stockContractAddress = bc5StockBlockchain.stockContract.getContractAddress();
 
     BlockchainId bc2BcId = bc2BusLogicBlockchain.getBlockchainId();
-    bc2BusLogicBlockchain.deployContracts(cbcManager.getCbcAddress(bc2BcId),
+    bc2BusLogicBlockchain.deployContracts(crossControlManagerGroup.getCbcAddress(bc2BcId),
         bc3BcId, balancesContractAddress, bc4BcId, priceOracleContractAddress, bc5BcId, stockContractAddress);
     String businessLogicContractAddress = bc2BusLogicBlockchain.busLogicContract.getContractAddress();
 
     BlockchainId rootBcId = bc1TradeWalletBlockchain.getBlockchainId();
-    bc1TradeWalletBlockchain.deployContracts(cbcManager.getCbcAddress(rootBcId), bc2BcId, businessLogicContractAddress);
+    bc1TradeWalletBlockchain.deployContracts(crossControlManagerGroup.getCbcAddress(rootBcId), bc2BcId, businessLogicContractAddress);
     String tradeWalletContractAddress = bc1TradeWalletBlockchain.tradeWalletContract.getContractAddress();
 
 
@@ -159,29 +141,9 @@ public class Main {
     rootCalls.add(businessLogic);
     CallExecutionTree callGraph = new CallExecutionTree(rootBcId, tradeWalletContractAddress, rlpRootExecuteTrade, rootCalls);
 
-    AbstractCbcExecutor executor;
-    switch (consensusMethodology) {
-      case TRANSACTION_RECEIPT_SIGNING:
-        executor = new CbcExecutorTxReceiptRootTransfer(cbcManager);
-        break;
-      case EVENT_SIGNING:
-        executor = new CbcExecutorSignedEvents(cbcManager);
-        break;
-      default:
-        throw new RuntimeException("Not implemented yet");
-    }
+    CrosschainExecutor executor = new CrosschainExecutor(crossControlManagerGroup);
+    ExecutionEngine executionEngine = exampleManager.getExecutionEngine(executor);
 
-    ExecutionEngine executionEngine;
-    switch (engineType) {
-      case SERIAL:
-        executionEngine = new SerialExecutionEngine(executor);
-        break;
-      case PARALLEL:
-        executionEngine = new ParallelExecutionEngine(executor);
-        break;
-      default:
-        throw new RuntimeException("Not implemented yet");
-    }
     boolean success = executionEngine.execute(callGraph, 300);
 
     LOG.info("Success: {}", success);

@@ -14,6 +14,7 @@
  */
 package net.consensys.gpact.cbc.engine;
 
+import net.consensys.gpact.cbc.CrosschainExecutor;
 import net.consensys.gpact.cbc.calltree.CallExecutionTree;
 import net.consensys.gpact.common.BlockchainId;
 
@@ -24,7 +25,7 @@ import java.util.List;
 public class SerialExecutionEngine extends AbstractExecutionEngine {
 //  static final Logger LOG = LogManager.getLogger(SerialExecutionEngine.class);
 
-  public SerialExecutionEngine(AbstractCbcExecutor executor) {
+  public SerialExecutionEngine(CrosschainExecutor executor) {
     super(executor);
   }
 

@@ -12,48 +12,38 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package net.consensys.gpact.attestorsign;
+package net.consensys.gpact.txroot;
 
 import net.consensys.gpact.common.AnIdentity;
 import net.consensys.gpact.common.BlockchainId;
+import net.consensys.gpact.common.BlockchainInfo;
 import net.consensys.gpact.messaging.MessagingVerificationInterface;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.web3j.crypto.Credentials;
 
+import java.io.IOException;
 import java.util.*;
 
 
 /**
  * Manages a set of AttestorSigners for a set of blockchains.
  */
-public class AttestorSignerGroup {
-  static final Logger LOG = LogManager.getLogger(AttestorSignerGroup.class);
+public class TxRootTransferGroup {
+  static final Logger LOG = LogManager.getLogger(TxRootTransferGroup.class);
 
-  private Map<BlockchainId, AttestorSigner> blockchains = new HashMap<>();
+  Map<BlockchainId, TxRootTransfer> blockchains = new HashMap<>();
 
-  public void addBlockchain(BlockchainId blockchainId) throws Exception {
-    if (this.blockchains.containsKey(blockchainId)) {
+
+  public void addBlockchain(TxRootRelayerGroup relayerGroup,
+                            Credentials creds, BlockchainInfo bcInfo) throws Exception {
+    if (this.blockchains.containsKey(bcInfo.bcId)) {
       return;
-      //throw new Exception("Blockchain already in Attestor Signer Group: " + blockchainId);
+      // throw new Exception("Blockchain already in TxRoot Transfer Group: " + bcInfo.bcId);
     }
 
-    this.blockchains.put(blockchainId, new AttestorSigner(blockchainId));
-  }
-
-  // TODO when an attestor signer service is implemented, this will change to
-  // setting up URLs where attestors can be contacted
-  public void addSignerOnAllBlockchains(AnIdentity signer) throws Exception {
-    for (BlockchainId bcId1: this.blockchains.keySet()) {
-      addSigner(signer, bcId1);
-    }
-  }
-
-  // TODO when an attestor signer service is implemented, this will change to
-  // setting up URLs where attestors can be contacted
-  public void addSigner(AnIdentity signer, BlockchainId bcId1) throws Exception {
-    // Add the signer (their private key) to app for the blockchain
-    AttestorSigner holder = this.blockchains.get(bcId1);
-    holder.signers.add(signer);
+    this.blockchains.put(bcInfo.bcId, new TxRootTransfer(relayerGroup,
+            creds, bcInfo.bcId, bcInfo.uri, bcInfo.gasPriceStrategy, bcInfo.period));
   }
 
   public MessagingVerificationInterface getVerifier(BlockchainId bcId) throws Exception {
@@ -62,5 +52,4 @@ public class AttestorSignerGroup {
     }
     return this.blockchains.get(bcId);
   }
-
 }

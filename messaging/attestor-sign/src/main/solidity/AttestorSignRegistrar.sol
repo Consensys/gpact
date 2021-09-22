@@ -26,34 +26,29 @@ contract AttestorSignRegistrar is EcdsaSignatureVerification, Ownable {
     mapping(uint256=>BlockchainRecord) private blockchains;
 
 
-    function addBlockchain(uint256 _bcId, uint256 _signingThreshold, address[] calldata _signers) onlyOwner external {
-        require(blockchains[_bcId].signingThreshold == 0, "Blockchain already exists");
-        require(_signingThreshold != 0, "Signing threshold can not be zero");
-        blockchains[_bcId].numSigners = _signers.length;
-
-        for (uint256 i = 0; i < _signers.length; i++) {
-            internalAddSigner(_bcId, _signers[i]);
-        }
-
-        internalSetThreshold(_bcId, _signers.length, _signingThreshold);
-    }
-
     function addSigner(uint256 _bcId, address _signer) onlyOwner external {
-        require(blockchains[_bcId].signingThreshold != 0, "Blockchain does not exist");
+        require(blockchains[_bcId].signingThreshold != 0, "Can not add signer for blockchain with zero threshold");
         internalAddSigner(_bcId, _signer);
         blockchains[_bcId].numSigners++;
     }
 
     function addSignerSetThreshold(uint256 _bcId, address _signer, uint256 _newSigningThreshold) onlyOwner external {
-        require(blockchains[_bcId].signingThreshold != 0, "Blockchain does not exist");
         internalAddSigner(_bcId, _signer);
         uint256 newNumSigners = blockchains[_bcId].numSigners + 1;
         blockchains[_bcId].numSigners = newNumSigners;
         internalSetThreshold(_bcId, newNumSigners, _newSigningThreshold);
     }
 
+    function addSignersSetThreshold(uint256 _bcId, address[] calldata _signers, uint256 _newSigningThreshold) onlyOwner external {
+        for (uint256 i = 0; i < _signers.length; i++) {
+            internalAddSigner(_bcId, _signers[i]);
+        }
+        uint256 newNumSigners = blockchains[_bcId].numSigners + _signers.length;
+        blockchains[_bcId].numSigners = newNumSigners;
+        internalSetThreshold(_bcId, newNumSigners, _newSigningThreshold);
+    }
+
     function removeSigner(uint256 _bcId, address _signer) onlyOwner external {
-        require(blockchains[_bcId].signingThreshold != 0, "Blockchain does not exist");
         internalRemoveSigner(_bcId, _signer);
         uint256 newNumSigners = blockchains[_bcId].numSigners - 1;
         require(newNumSigners >= blockchains[_bcId].signingThreshold, "Proposed new number of signers is less than threshold");
@@ -61,7 +56,6 @@ contract AttestorSignRegistrar is EcdsaSignatureVerification, Ownable {
     }
 
     function removeSignerSetThreshold(uint256 _bcId, address _signer, uint256 _newSigningThreshold) onlyOwner external {
-        require(blockchains[_bcId].signingThreshold != 0, "Blockchain does not exist");
         internalRemoveSigner(_bcId, _signer);
         uint256 newNumSigners = blockchains[_bcId].numSigners - 1;
         blockchains[_bcId].numSigners = newNumSigners;
@@ -69,7 +63,6 @@ contract AttestorSignRegistrar is EcdsaSignatureVerification, Ownable {
     }
 
     function setThreshold(uint256 _bcId, uint256 _newSigningThreshold) onlyOwner external {
-        require(blockchains[_bcId].signingThreshold != 0, "Blockchain does not exist");
         internalSetThreshold(_bcId, blockchains[_bcId].numSigners, _newSigningThreshold);
     }
 
@@ -127,6 +120,7 @@ contract AttestorSignRegistrar is EcdsaSignatureVerification, Ownable {
 
     function internalSetThreshold(uint256 _bcId, uint256 _currentNumSigners, uint256 _newThreshold) private {
         require(_currentNumSigners >= _newThreshold, "Number of signers less than threshold");
+        require(_newThreshold != 0, "Threshold can not be zero");
         blockchains[_bcId].signingThreshold = _newThreshold;
     }
 }

@@ -14,6 +14,7 @@
  */
 package net.consensys.gpact.messaging;
 
+import net.consensys.gpact.common.BlockchainId;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
 import java.math.BigInteger;
@@ -31,13 +32,16 @@ public interface MessagingVerificationInterface {
      * @param targetBlockchainIds Blockchain ids that need to consume the event data.
      * @param startTxReceipt Transaction receipt for transaction that resulted in the event being emitted.
      * @param eventData Event data emitted.
+     * @param contractAddress The address of the contract that emitted the event.
      * @param eventFunctionSignature Function selector for event that emitted the event data.
      * @return Event information along with signature or proof.
      * @throws Exception TODO need to work through scenarios in whihc this can fail.
      */
     SignedEvent getSignedEvent(
-            List<BigInteger> targetBlockchainIds,
+            List<BlockchainId> targetBlockchainIds,
             TransactionReceipt startTxReceipt,
             byte[] eventData,
+            String contractAddress,
             byte[] eventFunctionSignature) throws Exception;
+
 }

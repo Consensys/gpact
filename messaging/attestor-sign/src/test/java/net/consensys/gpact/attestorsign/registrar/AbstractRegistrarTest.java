@@ -45,7 +45,7 @@ public abstract class AbstractRegistrarTest extends AbstractWeb3Test {
   }
 
   protected void addBlockchain(BigInteger blockchainId, List<String> signers) throws Exception {
-    TransactionReceipt receipt = this.registrarContract.addBlockchain(blockchainId, BigInteger.ONE, signers).send();
+    TransactionReceipt receipt = this.registrarContract.addSignersSetThreshold(blockchainId, signers, BigInteger.ONE).send();
     assert(receipt.isStatusOK());
   }
 

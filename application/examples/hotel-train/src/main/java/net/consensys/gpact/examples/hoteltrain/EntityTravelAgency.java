@@ -15,8 +15,9 @@
 package net.consensys.gpact.examples.hoteltrain;
 
 import net.consensys.gpact.appcontracts.erc20.soliditywrappers.LockableERC20PresetFixedSupply;
+import net.consensys.gpact.cbc.CrosschainExecutor;
 import net.consensys.gpact.common.AbstractBlockchain;
-import net.consensys.gpact.cbc.CbcManager;
+import net.consensys.gpact.cbc.CrossControlManagerGroup;
 import net.consensys.gpact.cbc.calltree.CallExecutionTree;
 import net.consensys.gpact.cbc.engine.*;
 import net.consensys.gpact.common.*;
@@ -50,7 +51,7 @@ public class EntityTravelAgency extends AbstractBlockchain {
     BlockchainId trainBcId;
     String trainContractAddress;
 
-    CbcManager cbcManager;
+    CrossControlManagerGroup crossControlManagerGroup;
 
     public EntityTravelAgency(BlockchainId bcId, String uri, String gasPriceStrategy, String blockPeriod) throws IOException {
         super(Credentials.create(PKEY), bcId, uri, gasPriceStrategy, blockPeriod);
@@ -73,21 +74,16 @@ public class EntityTravelAgency extends AbstractBlockchain {
     }
 
     public void createCbcManager(
-            CrossBlockchainConsensusType consensusMethodology,
             BlockchainInfo bcInfoTravel, List<String> infratructureContractAddressOnBcTravel,
             BlockchainInfo bcInfoHotel, List<String> infrastructureContractAddressOnBcHotel,
-            BlockchainInfo bcInfoTrain, List<String> infrastructureContractAddressOnBcTrain,
-            AnIdentity globalSigner) throws Exception {
-        this.cbcManager = new CbcManager(consensusMethodology);
-        this.cbcManager.addBlockchain(this.credentials, bcInfoTravel, infratructureContractAddressOnBcTravel);
-        this.cbcManager.addBlockchain(this.credentials, bcInfoHotel, infrastructureContractAddressOnBcHotel);
-        this.cbcManager.addBlockchain(this.credentials, bcInfoTrain, infrastructureContractAddressOnBcTrain);
-        this.cbcManager.addSignerOnAllBlockchains(globalSigner);
+            BlockchainInfo bcInfoTrain, List<String> infrastructureContractAddressOnBcTrain) throws Exception {
+        this.crossControlManagerGroup = new CrossControlManagerGroup();
+        this.crossControlManagerGroup.addBlockchainAndLoadContracts(this.credentials, bcInfoTravel, infratructureContractAddressOnBcTravel);
+        this.crossControlManagerGroup.addBlockchainAndLoadContracts(this.credentials, bcInfoHotel, infrastructureContractAddressOnBcHotel);
+        this.crossControlManagerGroup.addBlockchainAndLoadContracts(this.credentials, bcInfoTrain, infrastructureContractAddressOnBcTrain);
     }
 
-    public BigInteger book(final int dateInt,
-            CrossBlockchainConsensusType consensusMethodology,
-            ExecutionEngineType engineType) throws Exception {
+    public BigInteger book(final int dateInt, ExampleSystemManager exampleManager) throws Exception {
         LOG.info(" Book for date: {} ", dateInt);
         BigInteger date = BigInteger.valueOf(dateInt);
         BigInteger uniqueBookingId = this.notRandom;
@@ -112,29 +108,8 @@ public class EntityTravelAgency extends AbstractBlockchain {
         rootCalls.add(trainBookRoom);
         CallExecutionTree rootCall = new CallExecutionTree(this.blockchainId, this.travelAgencyAddress, rlpBookHotelAndTrain, rootCalls);
 
-        AbstractCbcExecutor executor;
-        switch (consensusMethodology) {
-            case TRANSACTION_RECEIPT_SIGNING:
-                executor = new CbcExecutorTxReceiptRootTransfer(cbcManager);
-                break;
-            case EVENT_SIGNING:
-                executor = new CbcExecutorSignedEvents(cbcManager);
-                break;
-            default:
-                throw new RuntimeException("Not implemented yet");
-        }
-
-        ExecutionEngine executionEngine;
-        switch (engineType) {
-            case SERIAL:
-                executionEngine = new SerialExecutionEngine(executor);
-                break;
-            case PARALLEL:
-                executionEngine = new ParallelExecutionEngine(executor);
-                break;
-            default:
-                throw new RuntimeException("Not implemented yet");
-        }
+        CrosschainExecutor executor = new CrosschainExecutor(this.crossControlManagerGroup);
+        ExecutionEngine executionEngine = exampleManager.getExecutionEngine(executor);
         boolean success = executionEngine.execute(rootCall, 300);
 
         LOG.info("Success: {}", success);

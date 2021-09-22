@@ -16,6 +16,7 @@ package net.consensys.gpact.messaging;
 
 
 import net.consensys.gpact.common.AnIdentity;
+import net.consensys.gpact.common.BlockchainId;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
 import java.math.BigInteger;
@@ -23,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public interface MessagingManagementInterface {
+public interface MessagingManagerInterface {
 
   void deployContracts() throws Exception;
 
@@ -45,7 +46,14 @@ public interface MessagingManagementInterface {
   void loadContracts(ArrayList<String> addresses);
 
 
-  void addBlockchain(BigInteger bcId, String initialSigner) throws Exception;
+  void registerSigner(BlockchainId bcId, String signer) throws Exception;
 
-  void registerSigner(AnIdentity signer, BigInteger bcId) throws Exception;
+  void registerSigner(BlockchainId bcId, String signer, BigInteger newThreshold) throws Exception;
+
+  void registerSigners(BlockchainId bcId, List<String> signers, BigInteger newThreshold) throws Exception;
+
+  void removeSigner(BlockchainId bcId, String signer) throws Exception;
+
+  void removeSigner(BlockchainId bcId, String signer, BigInteger newThreshold) throws Exception;
+
 }

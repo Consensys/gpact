@@ -1,7 +1,8 @@
 package net.consensys.gpact.examples.tokenbridge;
 
 import net.consensys.gpact.appcontracts.erc20.soliditywrappers.CrosschainERC20;
-import net.consensys.gpact.cbc.CbcManager;
+import net.consensys.gpact.cbc.CrossControlManagerGroup;
+import net.consensys.gpact.cbc.CrosschainExecutor;
 import net.consensys.gpact.cbc.calltree.CallExecutionTree;
 import net.consensys.gpact.cbc.engine.*;
 import net.consensys.gpact.common.*;
@@ -29,8 +30,7 @@ public class Erc20User {
     private final String addressOfCrosschainERCA;
     private final String addressOfCrosschainERCB;
 
-    private CbcManager cbcManager;
-    private CrossBlockchainConsensusType consensusMethodology;
+    private CrossControlManagerGroup crossControlManagerGroup;
 
     protected Erc20User(
             String name,
@@ -47,15 +47,11 @@ public class Erc20User {
     }
 
     public void createCbcManager(
-            CrossBlockchainConsensusType consensusMethodology,
             BlockchainInfo bcInfoA, List<String> infrastructureContractAddressOnBcA,
-            BlockchainInfo bcInfoB, List<String> infrastructureContractAddressOnBcB,
-            AnIdentity globalSigner) throws Exception {
-        this.consensusMethodology = consensusMethodology;
-        this.cbcManager = new CbcManager(consensusMethodology);
-        this.cbcManager.addBlockchain(this.creds, bcInfoA, infrastructureContractAddressOnBcA);
-        this.cbcManager.addBlockchain(this.creds, bcInfoB, infrastructureContractAddressOnBcB);
-        this.cbcManager.addSignerOnAllBlockchains(globalSigner);
+            BlockchainInfo bcInfoB, List<String> infrastructureContractAddressOnBcB) throws Exception {
+        this.crossControlManagerGroup = new CrossControlManagerGroup();
+        this.crossControlManagerGroup.addBlockchainAndLoadContracts(this.creds, bcInfoA, infrastructureContractAddressOnBcA);
+        this.crossControlManagerGroup.addBlockchainAndLoadContracts(this.creds, bcInfoB, infrastructureContractAddressOnBcB);
     }
 
     public String getName() {
@@ -89,17 +85,8 @@ public class Erc20User {
         byte[] encoded = root.encode();
         LOG.info(CallExecutionTree.dump(encoded));
 
-        AbstractCbcExecutor executor;
-        switch (this.consensusMethodology) {
-            case TRANSACTION_RECEIPT_SIGNING:
-                executor = new CbcExecutorTxReceiptRootTransfer(this.cbcManager);
-                break;
-            case EVENT_SIGNING:
-                executor = new CbcExecutorSignedEvents(this.cbcManager);
-                break;
-            default:
-                throw new RuntimeException("Not implemented yet");
-        }
+        CrosschainExecutor executor = new CrosschainExecutor(this.crossControlManagerGroup);
+        // Note: There is no point using a parallel execution engine: there is nothing to execute in parallel!
         ExecutionEngine executionEngine = new SerialExecutionEngine(executor);
         boolean success = executionEngine.execute(root, 300);
 
