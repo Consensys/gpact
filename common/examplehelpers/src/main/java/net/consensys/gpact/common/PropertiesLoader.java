@@ -26,20 +26,6 @@ import java.util.Properties;
 public class PropertiesLoader {
   static final Logger LOG = LogManager.getLogger(PropertiesLoader.class);
 
-  public class BlockchainInfo {
-    public String bcId;
-    public String uri;
-    public String gasPriceStrategy;
-    public String period;
-
-    public BlockchainInfo(String bcId, String uri, String gasPriceStrategy, String period) {
-      this.bcId = bcId;
-      this.uri = uri;
-      this.gasPriceStrategy = gasPriceStrategy;
-      this.period = period;
-    }
-  }
-
   public Properties properties = new Properties();
 
 

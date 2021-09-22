@@ -14,11 +14,12 @@
  */
 package net.consensys.gpact.examples.trade;
 
+import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.examples.trade.soliditywrappers.TradeWallet;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
-import net.consensys.gpact.cbc.AbstractBlockchain;
+import net.consensys.gpact.common.AbstractBlockchain;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -29,18 +30,18 @@ public class Bc1TradeWallet extends AbstractBlockchain {
 
   TradeWallet tradeWalletContract;
 
-  public Bc1TradeWallet(Credentials credentials, String bcId, String uri, String gasPriceStrategy, String blockPeriod) throws IOException {
+  public Bc1TradeWallet(Credentials credentials, BlockchainId bcId, String uri, String gasPriceStrategy, String blockPeriod) throws IOException {
     super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
   }
 
-  public void deployContracts(String cbcContractAddress, BigInteger busLogicBlockchainId, String busLogicContractAddress) throws Exception {
+  public void deployContracts(String cbcContractAddress, BlockchainId busLogicBlockchainId, String busLogicContractAddress) throws Exception {
     this.tradeWalletContract =
         TradeWallet.deploy(this.web3j, this.tm, this.gasProvider,
             cbcContractAddress,
-            busLogicBlockchainId,
+            busLogicBlockchainId.asBigInt(),
             busLogicContractAddress).send();
-    LOG.info("Trade Wallet contract deployed to {} on blockchain 0x{}",
-        this.tradeWalletContract.getContractAddress(), this.blockchainId.toString(16));
+    LOG.info("Trade Wallet contract deployed to {} on blockchain {}",
+        this.tradeWalletContract.getContractAddress(), this.blockchainId);
   }
 
   public String getRlpFunctionSignature_ExecuteTrade(String buyFrom, BigInteger quantity) {

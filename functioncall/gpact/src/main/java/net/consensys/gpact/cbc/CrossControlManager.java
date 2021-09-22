@@ -14,11 +14,7 @@
  */
 package net.consensys.gpact.cbc;
 
-import net.consensys.gpact.attestorsign.soliditywrappers.AttestorSignRegistrar;
-import net.consensys.gpact.cbc.soliditywrappers.CrosschainControl;
-import net.consensys.gpact.common.RevertReason;
-import net.consensys.gpact.common.StatsHolder;
-import net.consensys.gpact.common.Tuple;
+import net.consensys.gpact.common.*;
 import net.consensys.gpact.messaging.SignedEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -30,7 +26,6 @@ import org.web3j.crypto.Credentials;
 import org.web3j.protocol.core.methods.response.BaseEventResponse;
 import org.web3j.protocol.core.methods.response.Log;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
-import net.consensys.gpact.common.AnIdentity;
 import org.web3j.protocol.exceptions.TransactionException;
 
 import java.io.IOException;
@@ -44,8 +39,8 @@ import java.util.concurrent.CompletableFuture;
 
 import static java.security.DrbgParameters.Capability.RESEED_ONLY;
 
-public abstract class AbstractCbc extends AbstractBlockchain {
-  private static final Logger LOG = LogManager.getLogger(AbstractCbc.class);
+public class CrossControlManager extends AbstractBlockchain {
+  private static final Logger LOG = LogManager.getLogger(CrossControlManager.class);
 
   public static byte[] START_EVENT_SIGNATURE = Hash.keccak256(Bytes.wrap("Start(uint256,address,uint256,bytes)".getBytes())).toArray();
   public static Bytes START_EVENT_SIGNATURE_BYTES = Bytes.wrap(START_EVENT_SIGNATURE);
@@ -55,8 +50,7 @@ public abstract class AbstractCbc extends AbstractBlockchain {
   public static Bytes ROOT_EVENT_SIGNAUTRE_BYTES = Bytes.wrap(ROOT_EVENT_SIGNATURE);
 
 
-  AttestorSignRegistrar registrarContract;
-  protected CrosschainControl crossBlockchainControlContract;
+  protected net.consensys.gpact.cbc.soliditywrappers.CrosschainControl crossBlockchainControlContract;
 
   // TODO put this into a map for the current transaction id, so many transactions can be handled in parallel
   // The time-out for the current transaction.
@@ -64,56 +58,38 @@ public abstract class AbstractCbc extends AbstractBlockchain {
   private boolean rootEventSuccess;
 
 
-  protected AbstractCbc(Credentials credentials, String bcId, String uri, String gasPriceStrategy, String blockPeriod) throws IOException {
+  protected CrossControlManager(Credentials credentials, BlockchainId bcId, String uri, String gasPriceStrategy, String blockPeriod) throws IOException {
       super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
   }
 
   protected void deployContracts() throws Exception {
-    this.registrarContract = AttestorSignRegistrar.deploy(this.web3j, this.tm, this.gasProvider).send();
     this.crossBlockchainControlContract =
-            CrosschainControl.deploy(this.web3j, this.tm, this.gasProvider,
-                    this.blockchainId).send();
-    LOG.debug(" Registrar Contract: {}", this.registrarContract.getContractAddress());
+            net.consensys.gpact.cbc.soliditywrappers.CrosschainControl.deploy(this.web3j, this.tm, this.gasProvider,
+                    this.blockchainId.asBigInt()).send();
     LOG.debug(" Cross Blockchain Contract Contract: {}", this.crossBlockchainControlContract.getContractAddress());
   }
 
   public List<String> getContractAddresses() {
     List<String> addresses = new ArrayList<>();
     addresses.add(this.crossBlockchainControlContract.getContractAddress());
-    addresses.add(this.registrarContract.getContractAddress());
     return addresses;
   }
 
 
   public void loadContracts(List<String> addresses) {
     this.crossBlockchainControlContract =
-            CrosschainControl.load(addresses.get(0), this.web3j, this.tm, this.gasProvider);
-    this.registrarContract =
-            AttestorSignRegistrar.load(addresses.get(1), this.web3j, this.tm, this.gasProvider);
+            net.consensys.gpact.cbc.soliditywrappers.CrosschainControl.load(addresses.get(0), this.web3j, this.tm, this.gasProvider);
   }
 
 
-  public void addBlockchain(BigInteger bcId, String cbcContractAddress, String initialSigner) throws Exception {
-    List<String> signers = new ArrayList<>();
-    signers.add(initialSigner);
-    TransactionReceipt txr = this.registrarContract.addBlockchain(bcId, BigInteger.ONE, signers).send();
+  public void addBlockchain(BlockchainId bcId, String cbcContractAddress, String verifierContractAddress) throws Exception {
+    TransactionReceipt txr = this.crossBlockchainControlContract.addRemoteCrosschainControl(bcId.asBigInt(), cbcContractAddress).send();
     assert(txr.isStatusOK());
 
-    txr = this.crossBlockchainControlContract.addRemoteCrosschainControl(bcId, cbcContractAddress).send();
-    assert(txr.isStatusOK());
-
-    addVerifier(bcId);
-  }
-
-  protected abstract void addVerifier(BigInteger bcId) throws Exception;
-
-
-  public void registerSigner(AnIdentity signer, BigInteger bcId) throws Exception {
-    LOG.debug("Registering signer 0x{} as signer for blockchain 0x{} in registration contract on blockchain 0x{}",
-        signer.getAddress(), bcId.toString(16), this.blockchainId.toString(16));
-    TransactionReceipt txr = this.registrarContract.addSigner(bcId, signer.getAddress()).send();
+    txr = this.crossBlockchainControlContract.addVerifier(bcId.asBigInt(), verifierContractAddress).send();
     assert(txr.isStatusOK());
   }
+
 
   public static BigInteger generateRandomCrossBlockchainTransactionId() throws NoSuchAlgorithmException {
     // TODO put this into the crypto module and do a better job or this + reseeding.
@@ -123,17 +99,17 @@ public abstract class AbstractCbc extends AbstractBlockchain {
   }
 
   public Tuple<TransactionReceipt, byte[], Boolean> start(BigInteger transactionId, BigInteger timeout, byte[] callGraph) throws Exception {
-    LOG.debug("Start Transaction on blockchain 0x{}", this.blockchainId.toString(16));
+    LOG.debug("Start Transaction on blockchain {}", this.blockchainId);
     StatsHolder.log("Start call now");
     TransactionReceipt txR = this.crossBlockchainControlContract.start(transactionId, timeout, callGraph).send();
     StatsHolder.logGas("Start Transaction", txR.getGasUsed());
-    List<CrosschainControl.StartEventResponse> startEvents = this.crossBlockchainControlContract.getStartEvents(txR);
-    CrosschainControl.StartEventResponse startEvent = startEvents.get(0);
+    List<net.consensys.gpact.cbc.soliditywrappers.CrosschainControl.StartEventResponse> startEvents = this.crossBlockchainControlContract.getStartEvents(txR);
+    net.consensys.gpact.cbc.soliditywrappers.CrosschainControl.StartEventResponse startEvent = startEvents.get(0);
     this.crossBlockchainTransactionTimeout = startEvent._timeout.longValue();
     // LOG.debug("Start Event: {}", new BigInteger(getEventData(txR, AbstractCbc.START_EVENT_SIGNATURE_BYTES)).toString(16));
     return new Tuple<TransactionReceipt, byte[], Boolean>(
             txR,
-            getEventData(txR, AbstractCbc.START_EVENT_SIGNATURE_BYTES),
+            getEventData(txR, CrossControlManager.START_EVENT_SIGNATURE_BYTES),
             false);
   }
 
@@ -148,13 +124,13 @@ public abstract class AbstractCbc extends AbstractBlockchain {
     List<byte[]> eventData = new ArrayList<>();
     List<byte[]> encodedSignatures = new ArrayList<>();
 
-    bcIds.add(startEvent.getBcId());
+    bcIds.add(startEvent.getBcId().asBigInt());
     cbcAddresses.add(startEvent.getCbcContract());
     eventFunctionSignatures.add(startEvent.getEventFunctionSignature());
     eventData.add(startEvent.getEventData());
     encodedSignatures.add(startEvent.getEncodedSignatures());
     for (SignedEvent segEvent: segEvents) {
-      bcIds.add(segEvent.getBcId());
+      bcIds.add(segEvent.getBcId().asBigInt());
       cbcAddresses.add(segEvent.getCbcContract());
       eventFunctionSignatures.add(segEvent.getEventFunctionSignature());
       eventData.add(segEvent.getEventData());
@@ -170,7 +146,7 @@ public abstract class AbstractCbc extends AbstractBlockchain {
     //RlpDumper.dump(RLP.input(Bytes.wrap(encodedSignatures.get(0))));
     TransactionReceipt txR;
     try {
-      LOG.debug("Segment Transaction on blockchain 0x{}", this.blockchainId.toString(16));
+      LOG.debug("Segment Transaction on blockchain {}", this.blockchainId);
       txR = this.crossBlockchainControlContract.segment(bcIds, cbcAddresses, eventFunctionSignatures, eventData, encodedSignatures, callPath).send();
       StatsHolder.logGas("Segment Transaction", txR.getGasUsed());
     } catch (TransactionException ex) {
@@ -188,12 +164,12 @@ public abstract class AbstractCbc extends AbstractBlockchain {
     showCallResultEvents(convertCallResult(this.crossBlockchainControlContract.getCallResultEvents(txR)));
     showDumpEvents(convertDump(this.crossBlockchainControlContract.getDumpEvents(txR)));
 
-    List<CrosschainControl.SegmentEventResponse> segmentEventResponses = this.crossBlockchainControlContract.getSegmentEvents(txR);
-    CrosschainControl.SegmentEventResponse segmentEventResponse = segmentEventResponses.get(0);
+    List<net.consensys.gpact.cbc.soliditywrappers.CrosschainControl.SegmentEventResponse> segmentEventResponses = this.crossBlockchainControlContract.getSegmentEvents(txR);
+    net.consensys.gpact.cbc.soliditywrappers.CrosschainControl.SegmentEventResponse segmentEventResponse = segmentEventResponses.get(0);
 
     return new Tuple<TransactionReceipt, byte[], Boolean>(
             txR,
-            getEventData(txR, AbstractCbc.SEGMENT_EVENT_SIGNATURE_BYTES),
+            getEventData(txR, CrossControlManager.SEGMENT_EVENT_SIGNATURE_BYTES),
             segmentEventResponse._lockedContracts.isEmpty());
   }
 
@@ -205,13 +181,13 @@ public abstract class AbstractCbc extends AbstractBlockchain {
     List<byte[]> eventData = new ArrayList<>();
     List<byte[]> encodedSignatures = new ArrayList<>();
 
-    bcIds.add(startEvent.getBcId());
+    bcIds.add(startEvent.getBcId().asBigInt());
     cbcAddresses.add(startEvent.getCbcContract());
     eventFunctionSignatures.add(startEvent.getEventFunctionSignature());
     eventData.add(startEvent.getEventData());
     encodedSignatures.add(startEvent.getEncodedSignatures());
     for (SignedEvent segEvent: segEvents) {
-      bcIds.add(segEvent.getBcId());
+      bcIds.add(segEvent.getBcId().asBigInt());
       cbcAddresses.add(segEvent.getCbcContract());
       eventFunctionSignatures.add(segEvent.getEventFunctionSignature());
       eventData.add(segEvent.getEventData());
@@ -229,7 +205,7 @@ public abstract class AbstractCbc extends AbstractBlockchain {
 
     TransactionReceipt txR;
     try {
-      LOG.debug("Root Transaction on blockchain 0x{}", this.blockchainId.toString(16));
+      LOG.debug("Root Transaction on blockchain {}", this.blockchainId);
       txR = this.crossBlockchainControlContract.root(bcIds, cbcAddresses, eventFunctionSignatures, eventData, encodedSignatures).send();
       StatsHolder.logGas("Root Transaction", txR.getGasUsed());
       if (!txR.isStatusOK()) {
@@ -248,8 +224,8 @@ public abstract class AbstractCbc extends AbstractBlockchain {
     showCallResultEvents(convertCallResult(this.crossBlockchainControlContract.getCallResultEvents(txR)));
     showDumpEvents(this.convertDump(this.crossBlockchainControlContract.getDumpEvents(txR)));
 
-    List<CrosschainControl.RootEventResponse> rootEventResponses = this.crossBlockchainControlContract.getRootEvents(txR);
-    CrosschainControl.RootEventResponse rootEventResponse = rootEventResponses.get(0);
+    List<net.consensys.gpact.cbc.soliditywrappers.CrosschainControl.RootEventResponse> rootEventResponses = this.crossBlockchainControlContract.getRootEvents(txR);
+    net.consensys.gpact.cbc.soliditywrappers.CrosschainControl.RootEventResponse rootEventResponse = rootEventResponses.get(0);
     this.rootEventSuccess = rootEventResponse._success;
 
     return new Tuple<TransactionReceipt, byte[], Boolean>(
@@ -266,20 +242,20 @@ public abstract class AbstractCbc extends AbstractBlockchain {
     List<byte[]> eventData = new ArrayList<>();
     List<byte[]> encodedSignatures = new ArrayList<>();
 
-    bcIds.add(rootEvent.getBcId());
+    bcIds.add(rootEvent.getBcId().asBigInt());
     cbcAddresses.add(rootEvent.getCbcContract());
     eventFunctionSignatures.add(rootEvent.getEventFunctionSignature());
     eventData.add(rootEvent.getEventData());
     encodedSignatures.add(rootEvent.getEncodedSignatures());
     for (SignedEvent segEvent: segEvents) {
-      bcIds.add(segEvent.getBcId());
+      bcIds.add(segEvent.getBcId().asBigInt());
       cbcAddresses.add(segEvent.getCbcContract());
       eventFunctionSignatures.add(segEvent.getEventFunctionSignature());
       eventData.add(segEvent.getEventData());
       encodedSignatures.add(segEvent.getEncodedSignatures());
     }
 
-    LOG.debug("Signalling Transaction on blockchain 0x{}", this.blockchainId.toString(16));
+    LOG.debug("Signalling Transaction on blockchain {}", this.blockchainId);
     return this.crossBlockchainControlContract.signalling(bcIds, cbcAddresses, eventFunctionSignatures, eventData, encodedSignatures).sendAsync();
   }
 
@@ -290,8 +266,8 @@ public abstract class AbstractCbc extends AbstractBlockchain {
       throw new Exception("Signalling transaction failed");
     }
 
-    List<CrosschainControl.SignallingEventResponse> sigEventResponses = this.crossBlockchainControlContract.getSignallingEvents(txR);
-    CrosschainControl.SignallingEventResponse sigEventResponse = sigEventResponses.get(0);
+    List<net.consensys.gpact.cbc.soliditywrappers.CrosschainControl.SignallingEventResponse> sigEventResponses = this.crossBlockchainControlContract.getSignallingEvents(txR);
+    net.consensys.gpact.cbc.soliditywrappers.CrosschainControl.SignallingEventResponse sigEventResponse = sigEventResponses.get(0);
     LOG.debug("Signalling Event:");
     LOG.debug(" _rootBlockchainId: {}", sigEventResponse._rootBcId.toString(16));
     LOG.debug(" _crossBlockchainTransactionId: {}", sigEventResponse._crossBlockchainTransactionId.toString(16));
@@ -557,9 +533,9 @@ public abstract class AbstractCbc extends AbstractBlockchain {
   }
 
 
-  private List<BadCallEventResponse> convertBadCall(List<CrosschainControl.BadCallEventResponse> callEventResponses) {
+  private List<BadCallEventResponse> convertBadCall(List<net.consensys.gpact.cbc.soliditywrappers.CrosschainControl.BadCallEventResponse> callEventResponses) {
     List<BadCallEventResponse> result = new ArrayList<>();
-    for (CrosschainControl.BadCallEventResponse e : callEventResponses) {
+    for (net.consensys.gpact.cbc.soliditywrappers.CrosschainControl.BadCallEventResponse e : callEventResponses) {
       BadCallEventResponse event = new BadCallEventResponse(e._expectedBlockchainId, e._actualBlockchainId,
               e._expectedContract, e._actualContract, e._expectedFunctionCall, e._actualFunctionCall);
       result.add(event);
@@ -567,54 +543,54 @@ public abstract class AbstractCbc extends AbstractBlockchain {
     return result;
   }
 
-  private List<CallFailureEventResponse> convertCallFailure(List<CrosschainControl.CallFailureEventResponse> callFailureEventResponses) {
+  private List<CallFailureEventResponse> convertCallFailure(List<net.consensys.gpact.cbc.soliditywrappers.CrosschainControl.CallFailureEventResponse> callFailureEventResponses) {
     List<CallFailureEventResponse> result = new ArrayList<>();
-    for (CrosschainControl.CallFailureEventResponse e : callFailureEventResponses) {
+    for (net.consensys.gpact.cbc.soliditywrappers.CrosschainControl.CallFailureEventResponse e : callFailureEventResponses) {
       CallFailureEventResponse event = new CallFailureEventResponse(e._revertReason);
       result.add(event);
     }
     return result;
   }
 
-  private List<CallResultEventResponse> convertCallResult(List<CrosschainControl.CallResultEventResponse> callResultEventResponses) {
+  private List<CallResultEventResponse> convertCallResult(List<net.consensys.gpact.cbc.soliditywrappers.CrosschainControl.CallResultEventResponse> callResultEventResponses) {
     List<CallResultEventResponse> result = new ArrayList<>();
-    for (CrosschainControl.CallResultEventResponse e : callResultEventResponses) {
+    for (net.consensys.gpact.cbc.soliditywrappers.CrosschainControl.CallResultEventResponse e : callResultEventResponses) {
       CallResultEventResponse event = new CallResultEventResponse(e._blockchainId, e._contract, e._functionCall, e._result);
       result.add(event);
     }
     return result;
   }
 
-  private List<DumpEventResponse> convertDump(List<CrosschainControl.DumpEventResponse> dumpEventResponses) {
+  private List<DumpEventResponse> convertDump(List<net.consensys.gpact.cbc.soliditywrappers.CrosschainControl.DumpEventResponse> dumpEventResponses) {
     List<DumpEventResponse> result = new ArrayList<>();
-    for (CrosschainControl.DumpEventResponse e : dumpEventResponses) {
+    for (net.consensys.gpact.cbc.soliditywrappers.CrosschainControl.DumpEventResponse e : dumpEventResponses) {
       DumpEventResponse event = new DumpEventResponse(e._val1, e._val2, e._val3, e._val4);
       result.add(event);
     }
     return result;
   }
 
-  private List<NotEnoughCallsEventResponse> convertNotEnoughCalls(List<CrosschainControl.NotEnoughCallsEventResponse> notEnoughCallsEventResponses) {
+  private List<NotEnoughCallsEventResponse> convertNotEnoughCalls(List<net.consensys.gpact.cbc.soliditywrappers.CrosschainControl.NotEnoughCallsEventResponse> notEnoughCallsEventResponses) {
     List<NotEnoughCallsEventResponse> result = new ArrayList<>();
-    for (CrosschainControl.NotEnoughCallsEventResponse e : notEnoughCallsEventResponses) {
+    for (net.consensys.gpact.cbc.soliditywrappers.CrosschainControl.NotEnoughCallsEventResponse e : notEnoughCallsEventResponses) {
       NotEnoughCallsEventResponse event = new NotEnoughCallsEventResponse(e._expectedNumberOfCalls, e._actualNumberOfCalls);
       result.add(event);
     }
     return result;
   }
 
-  private List<RootEventResponse> convertRoot(List<CrosschainControl.RootEventResponse> rootEventResponses) {
+  private List<RootEventResponse> convertRoot(List<net.consensys.gpact.cbc.soliditywrappers.CrosschainControl.RootEventResponse> rootEventResponses) {
     List<RootEventResponse> result = new ArrayList<>();
-    for (CrosschainControl.RootEventResponse e : rootEventResponses) {
+    for (net.consensys.gpact.cbc.soliditywrappers.CrosschainControl.RootEventResponse e : rootEventResponses) {
       RootEventResponse event = new RootEventResponse(e._crossBlockchainTransactionId, e._success);
       result.add(event);
     }
     return result;
   }
 
-  private List<SegmentEventResponse> convertSegment(List<CrosschainControl.SegmentEventResponse> segmentEventResponses) {
+  private List<SegmentEventResponse> convertSegment(List<net.consensys.gpact.cbc.soliditywrappers.CrosschainControl.SegmentEventResponse> segmentEventResponses) {
     List<SegmentEventResponse> result = new ArrayList<>();
-    for (CrosschainControl.SegmentEventResponse e : segmentEventResponses) {
+    for (net.consensys.gpact.cbc.soliditywrappers.CrosschainControl.SegmentEventResponse e : segmentEventResponses) {
       // TODO The code below is a hack to handle the fact that currently Web3J returns a Uint256 object, but the type is BigInteger.
       // TODO this code will break when Web3J fixes their bug.
       List<BigInteger> callPathFixed = new ArrayList<>();

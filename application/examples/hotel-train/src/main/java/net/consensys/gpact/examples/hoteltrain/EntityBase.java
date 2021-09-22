@@ -15,7 +15,8 @@
 package net.consensys.gpact.examples.hoteltrain;
 
 import net.consensys.gpact.appcontracts.erc20.soliditywrappers.LockableERC20PresetFixedSupply;
-import net.consensys.gpact.cbc.AbstractBlockchain;
+import net.consensys.gpact.common.AbstractBlockchain;
+import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.examples.hoteltrain.soliditywrappers.Hotel;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -39,7 +40,7 @@ public class EntityBase extends AbstractBlockchain {
 
 
     public EntityBase(final String entity,
-        Credentials credentials, String bcId, String uri, String gasPriceStrategy, String blockPeriod) throws IOException {
+                      Credentials credentials, BlockchainId bcId, String uri, String gasPriceStrategy, String blockPeriod) throws IOException {
         super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
         this.entity = entity;
     }
@@ -73,8 +74,8 @@ public class EntityBase extends AbstractBlockchain {
         LOG.info(" New balance of account {}: {}", account, balance1);
     }
 
-    public void addTravelAgency(BigInteger travelAgencyBcId, String travelAgencyContractAddress, String tokenHoldingAccount) throws Exception {
-        this.hotelContract.addApprovedTravelAgency(travelAgencyBcId, travelAgencyContractAddress, tokenHoldingAccount).send();
+    public void addTravelAgency(BlockchainId travelAgencyBcId, String travelAgencyContractAddress, String tokenHoldingAccount) throws Exception {
+        this.hotelContract.addApprovedTravelAgency(travelAgencyBcId.asBigInt(), travelAgencyContractAddress, tokenHoldingAccount).send();
     }
 
     public void showErc20Balances(String[] accounts) throws Exception {

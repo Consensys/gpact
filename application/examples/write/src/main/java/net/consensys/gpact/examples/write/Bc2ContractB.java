@@ -14,11 +14,12 @@
  */
 package net.consensys.gpact.examples.write;
 
+import net.consensys.gpact.common.BlockchainId;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
-import net.consensys.gpact.cbc.AbstractBlockchain;
+import net.consensys.gpact.common.AbstractBlockchain;
 import net.consensys.gpact.examples.write.soliditywrappers.ContractB;
 
 
@@ -31,14 +32,14 @@ public class Bc2ContractB extends AbstractBlockchain {
 
   ContractB contractB;
 
-  public Bc2ContractB(Credentials credentials, String bcId, String uri, String gasPriceStrategy, String blockPeriod) throws IOException {
+  public Bc2ContractB(Credentials credentials, BlockchainId bcId, String uri, String gasPriceStrategy, String blockPeriod) throws IOException {
     super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
   }
 
   public void deployContracts(String cbcContractAddress) throws Exception {
     this.contractB = ContractB.deploy(this.web3j, this.tm, this.gasProvider, cbcContractAddress).send();
-    LOG.info("ContractB deployed to {} on blockchain 0x{}",
-        this.contractB.getContractAddress(), this.blockchainId.toString(16));
+    LOG.info("ContractB deployed to {} on blockchain {}",
+        this.contractB.getContractAddress(), this.blockchainId);
   }
 
   public String getRlpFunctionSignature_Set(BigInteger val) {

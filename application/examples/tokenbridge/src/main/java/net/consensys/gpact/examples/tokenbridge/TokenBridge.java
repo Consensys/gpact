@@ -14,7 +14,7 @@
  */
 package net.consensys.gpact.examples.tokenbridge;
 
-import net.consensys.gpact.cbc.CbcManager;
+import net.consensys.gpact.cbc.CrossControlManagerGroup;
 import net.consensys.gpact.common.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -37,25 +37,12 @@ public class TokenBridge {
       return;
     }
 
-    PropertiesLoader propsLoader = new PropertiesLoader(args[0]);
-    Credentials creds = CredentialsCreator.createCredentials();
-    PropertiesLoader.BlockchainInfo root = propsLoader.getBlockchainInfo("ROOT");
-    PropertiesLoader.BlockchainInfo bc2 = propsLoader.getBlockchainInfo("BC2");
-    CrossBlockchainConsensusType consensusMethodology = propsLoader.getConsensusMethodology();
-    StatsHolder.log(consensusMethodology.name());
-    ExecutionEngineType engineType = propsLoader.getExecutionEnngine();
-    StatsHolder.log(engineType.name());
+    ExampleSystemManager exampleManager = new ExampleSystemManager(args[0]);
+    exampleManager.standardExampleConfig(2);
 
-    // Set-up GPACT contracts: Deploy Crosschain Control and Registrar contracts on
-    // each blockchain.
-    CbcManager cbcManager = new CbcManager(consensusMethodology);
-    cbcManager.addBlockchainAndDeployContracts(creds, root);
-    cbcManager.addBlockchainAndDeployContracts(creds, bc2);
-    // Have each Crosschain Control contract trust the Crosschain Control
-    // contracts on the other blockchains.
-    // To keep the example simple, just have one signer for all blockchains.
-    AnIdentity globalSigner = new AnIdentity();
-    cbcManager.setupCrosschainTrust(globalSigner);
+    BlockchainInfo root = exampleManager.getRootBcInfo();
+    BlockchainInfo bc2 = exampleManager.getBc2Info();
+    CrossControlManagerGroup crossControlManagerGroup = exampleManager.getCrossControlManagerGroup();
 
     final int CHAIN_A_TOKEN_SUPPLY = 1000;
     final int CHAIN_B_TOKEN_SUPPLY = 2000;
@@ -70,10 +57,10 @@ public class TokenBridge {
             erc20OwnerCreds, bc2.bcId, bc2.uri, bc2.gasPriceStrategy, bc2.period);
 
     // Deploy application contracts.
-    BigInteger chainABcId = chainA.getBlockchainId();
-    chainA.deployContract(cbcManager.getCbcAddress(chainABcId));
-    BigInteger chainBBcId = chainB.getBlockchainId();
-    chainB.deployContract(cbcManager.getCbcAddress(chainBBcId));
+    BlockchainId chainABcId = chainA.getBlockchainId();
+    chainA.deployContract(crossControlManagerGroup.getCbcAddress(chainABcId));
+    BlockchainId chainBBcId = chainB.getBlockchainId();
+    chainB.deployContract(crossControlManagerGroup.getCbcAddress(chainBBcId));
 
     // Register the ERC20 contracts with each other.
     chainA.addRemoteERC20(chainBBcId, chainB.getErc20ContractAddress());
@@ -95,20 +82,14 @@ public class TokenBridge {
             bc2.bcId, chainB.getErc20ContractAddress());
 
     user1.createCbcManager(
-            consensusMethodology,
-            root, cbcManager.getInfrastructureAddresses(chainABcId),
-            bc2, cbcManager.getInfrastructureAddresses(chainBBcId),
-            globalSigner);
+            root, crossControlManagerGroup.getInfrastructureAddresses(chainABcId), crossControlManagerGroup.getMessageVerification(chainABcId),
+            bc2, crossControlManagerGroup.getInfrastructureAddresses(chainBBcId), crossControlManagerGroup.getMessageVerification(chainBBcId));
     user2.createCbcManager(
-            consensusMethodology,
-            root, cbcManager.getInfrastructureAddresses(chainABcId),
-            bc2, cbcManager.getInfrastructureAddresses(chainBBcId),
-            globalSigner);
+            root, crossControlManagerGroup.getInfrastructureAddresses(chainABcId), crossControlManagerGroup.getMessageVerification(chainABcId),
+            bc2, crossControlManagerGroup.getInfrastructureAddresses(chainBBcId), crossControlManagerGroup.getMessageVerification(chainBBcId));
     user3.createCbcManager(
-            consensusMethodology,
-            root, cbcManager.getInfrastructureAddresses(chainABcId),
-            bc2, cbcManager.getInfrastructureAddresses(chainBBcId),
-            globalSigner);
+            root, crossControlManagerGroup.getInfrastructureAddresses(chainABcId), crossControlManagerGroup.getMessageVerification(chainABcId),
+            bc2, crossControlManagerGroup.getInfrastructureAddresses(chainBBcId), crossControlManagerGroup.getMessageVerification(chainBBcId));
 
 
       // Give some balance to the users

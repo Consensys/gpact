@@ -14,6 +14,7 @@
  */
 package net.consensys.gpact.examples.singlebc.hoteltrain;
 
+import net.consensys.gpact.common.BlockchainInfo;
 import net.consensys.gpact.common.PropertiesLoader;
 import net.consensys.gpact.common.StatsHolder;
 import org.apache.logging.log4j.LogManager;
@@ -40,7 +41,7 @@ public class HotelTrain {
         }
 
         PropertiesLoader propsLoader = new PropertiesLoader(args[0]);
-        PropertiesLoader.BlockchainInfo root = propsLoader.getBlockchainInfo("ROOT");
+        BlockchainInfo root = propsLoader.getBlockchainInfo("ROOT");
 
         EntityHotel hotel = new EntityHotel(root.bcId, root.uri, root.gasPriceStrategy, root.period);
         hotel.deployContracts();

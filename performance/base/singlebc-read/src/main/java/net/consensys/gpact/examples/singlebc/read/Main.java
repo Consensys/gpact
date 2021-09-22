@@ -14,6 +14,7 @@
  */
 package net.consensys.gpact.examples.singlebc.read;
 
+import net.consensys.gpact.common.BlockchainInfo;
 import net.consensys.gpact.common.CredentialsCreator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -41,7 +42,7 @@ public class Main {
 
     PropertiesLoader propsLoader = new PropertiesLoader(args[0]);
     Credentials creds = CredentialsCreator.createCredentials();
-    PropertiesLoader.BlockchainInfo root = propsLoader.getBlockchainInfo("ROOT");
+    BlockchainInfo root = propsLoader.getBlockchainInfo("ROOT");
 
     Bc1ContractA bc1ContractABlockchain = new Bc1ContractA(creds, root.bcId, root.uri, root.gasPriceStrategy, root.period);
     Bc2ContractB bc2ContractBBlockchain = new Bc2ContractB(creds, root.bcId, root.uri, root.gasPriceStrategy, root.period);

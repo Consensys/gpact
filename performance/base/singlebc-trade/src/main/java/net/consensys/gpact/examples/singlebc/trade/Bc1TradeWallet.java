@@ -14,7 +14,8 @@
  */
 package net.consensys.gpact.examples.singlebc.trade;
 
-import net.consensys.gpact.cbc.AbstractBlockchain;
+import net.consensys.gpact.common.AbstractBlockchain;
+import net.consensys.gpact.common.BlockchainId;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
@@ -40,7 +41,7 @@ public class Bc1TradeWallet extends AbstractBlockchain {
   Stock stockContract;
   PriceOracle priceOracleContract;
 
-  public Bc1TradeWallet(Credentials credentials, String bcId, String uri, String gasPriceStrategy, String blockPeriod) throws IOException {
+  public Bc1TradeWallet(Credentials credentials, BlockchainId bcId, String uri, String gasPriceStrategy, String blockPeriod) throws IOException {
     super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
   }
 
@@ -55,16 +56,16 @@ public class Bc1TradeWallet extends AbstractBlockchain {
     this.tradeWalletContract =
         TradeWallet.deploy(this.web3j, this.tm, this.gasProvider, this.busLogicContract.getContractAddress()).send();
 
-    LOG.info("Balances contract deployed to {} on blockchain 0x{}",
-        this.balancesContract.getContractAddress(), this.blockchainId.toString(16));
-    LOG.info("Stock contract deployed to {} on blockchain 0x{}",
-        this.stockContract.getContractAddress(), this.blockchainId.toString(16));
-    LOG.info("Price Oracle contract deployed to {}, on blockchain 0x{}",
-        this.priceOracleContract.getContractAddress(), this.blockchainId.toString(16));
-    LOG.info("Business Logic contract deployed to {} on blockchain 0x{}",
-        this.busLogicContract.getContractAddress(), this.blockchainId.toString(16));
-    LOG.info("Trade Wallet contract deployed to {} on blockchain 0x{}",
-        this.tradeWalletContract.getContractAddress(), this.blockchainId.toString(16));
+    LOG.info("Balances contract deployed to {} on blockchain {}",
+        this.balancesContract.getContractAddress(), this.blockchainId);
+    LOG.info("Stock contract deployed to {} on blockchain {}",
+        this.stockContract.getContractAddress(), this.blockchainId);
+    LOG.info("Price Oracle contract deployed to {}, on blockchain {}",
+        this.priceOracleContract.getContractAddress(), this.blockchainId);
+    LOG.info("Business Logic contract deployed to {} on blockchain {}",
+        this.busLogicContract.getContractAddress(), this.blockchainId);
+    LOG.info("Trade Wallet contract deployed to {} on blockchain {}",
+        this.tradeWalletContract.getContractAddress(), this.blockchainId);
   }
 
 

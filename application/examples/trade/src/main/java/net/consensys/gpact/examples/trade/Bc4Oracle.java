@@ -14,11 +14,12 @@
  */
 package net.consensys.gpact.examples.trade;
 
+import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.examples.trade.soliditywrappers.PriceOracle;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
-import net.consensys.gpact.cbc.AbstractBlockchain;
+import net.consensys.gpact.common.AbstractBlockchain;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -28,7 +29,7 @@ public class Bc4Oracle extends AbstractBlockchain {
 
   PriceOracle priceOracleContract;
 
-  public Bc4Oracle(Credentials credentials, String bcId, String uri, String gasPriceStrategy, String blockPeriod) throws IOException {
+  public Bc4Oracle(Credentials credentials, BlockchainId bcId, String uri, String gasPriceStrategy, String blockPeriod) throws IOException {
     super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
   }
 
@@ -36,8 +37,8 @@ public class Bc4Oracle extends AbstractBlockchain {
   public void deployContracts(String cbcContractAddress) throws Exception {
     this.priceOracleContract =
         PriceOracle.deploy(this.web3j, this.tm, this.gasProvider, cbcContractAddress).send();
-    LOG.info("Price Oracle contract deployed to {}, on blockchain 0x{}",
-        this.priceOracleContract.getContractAddress(), this.blockchainId.toString(16));
+    LOG.info("Price Oracle contract deployed to {}, on blockchain {}",
+        this.priceOracleContract.getContractAddress(), this.blockchainId);
   }
 
   public void setPrice(BigInteger newPrice) throws Exception {

@@ -12,6 +12,7 @@ include 'gpact'
 include 'app-erc20'
 include 'app-lockablestorage'
 
+include 'examplehelpers'
 include 'examples-conditional'
 include 'examples-hoteltrain'
 include 'examples-read'
@@ -38,6 +39,7 @@ project(":gpact").projectDir = file("functioncall/gpact")
 project(":app-erc20").projectDir = file("application/appcontracts/erc20")
 project(":app-lockablestorage").projectDir = file("application/appcontracts/lockablestorage")
 
+project(":examplehelpers").projectDir = file("common/examplehelpers")
 project(":examples-conditional").projectDir = file("application/examples/conditional")
 project(":examples-hoteltrain").projectDir = file("application/examples/hotel-train")
 project(":examples-read").projectDir = file("application/examples/read")

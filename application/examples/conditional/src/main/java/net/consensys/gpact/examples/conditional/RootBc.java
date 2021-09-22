@@ -14,10 +14,11 @@
  */
 package net.consensys.gpact.examples.conditional;
 
+import net.consensys.gpact.common.BlockchainId;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
-import net.consensys.gpact.cbc.AbstractBlockchain;
+import net.consensys.gpact.common.AbstractBlockchain;
 import net.consensys.gpact.examples.conditional.soliditywrappers.RootBlockchainContract;
 
 import java.io.IOException;
@@ -29,16 +30,16 @@ public class RootBc extends AbstractBlockchain {
 
   RootBlockchainContract rootBlockchainContract;
 
-  public RootBc(Credentials credentials, String bcId, String uri, String gasPriceStrategy, String blockPeriod) throws IOException {
+  public RootBc(Credentials credentials, BlockchainId bcId, String uri, String gasPriceStrategy, String blockPeriod) throws IOException {
     super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
   }
 
-  public void deployContracts(String cbcContractAddress, BigInteger otherBlockchainId, String otherContractAddress) throws Exception {
+  public void deployContracts(String cbcContractAddress, BlockchainId otherBlockchainId, String otherContractAddress) throws Exception {
     LOG.info("Deploy Root Blockchain Contracts");
     this.rootBlockchainContract =
         RootBlockchainContract.deploy(this.web3j, this.tm, this.gasProvider,
             cbcContractAddress,
-            otherBlockchainId,
+            otherBlockchainId.asBigInt(),
             otherContractAddress).send();
     LOG.info(" Root Blockchain Contract: {}", this.rootBlockchainContract.getContractAddress());
   }

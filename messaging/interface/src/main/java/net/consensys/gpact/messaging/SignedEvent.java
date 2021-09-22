@@ -14,6 +14,7 @@
  */
 package net.consensys.gpact.messaging;
 
+import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.common.FormatConversion;
 import org.web3j.crypto.Sign;
 import net.consensys.gpact.common.AnIdentity;
@@ -29,13 +30,13 @@ import static net.consensys.gpact.common.FormatConversion.addressStringToBytes;
  * Information to allow a transaction receipt to be verified within a Solidity contract.
  */
 public class SignedEvent {
-  private BigInteger bcId;
+  private BlockchainId bcId;
   private String cbcContract;
   private byte[] eventFunctionSignature;
   private byte[] eventData;
   private byte[] encodedSignatures;
 
-  public SignedEvent(AnIdentity[] signers, BigInteger blockchainId, String cbcContract, byte[] eventFunctionSignature, byte[] eventData) {
+  public SignedEvent(AnIdentity[] signers, BlockchainId blockchainId, String cbcContract, byte[] eventFunctionSignature, byte[] eventData) {
     this.bcId = blockchainId;
     this.cbcContract = cbcContract;
     this.eventFunctionSignature = eventFunctionSignature;
@@ -61,7 +62,7 @@ public class SignedEvent {
     this.encodedSignatures = abiEncodePackedSignatures(theSigners, sigR, sigS, sigV);
   }
 
-  public SignedEvent(BigInteger blockchainId, String cbcContract, byte[] eventFunctionSignature,
+  public SignedEvent(BlockchainId blockchainId, String cbcContract, byte[] eventFunctionSignature,
                      byte[] eventData, byte[] encodedSignatures) {
     this.bcId = blockchainId;
     this.cbcContract = cbcContract;
@@ -87,13 +88,13 @@ public class SignedEvent {
     return encodedSignatures;
   }
 
-  public BigInteger getBcId() {
+  public BlockchainId getBcId() {
     return this.bcId;
   }
 
-  private static byte[] abiEncodePackedEvent(BigInteger blockchainId, String cbcContractAddress,
+  private static byte[] abiEncodePackedEvent(BlockchainId blockchainId, String cbcContractAddress,
                                              byte[] eventSignature, byte[] eventData) {
-    byte[] blockchainIdBytes = FormatConversion.bigIntegerToUint256ByteArray(blockchainId);
+    byte[] blockchainIdBytes = blockchainId.asBytes();
 
     byte[] address = addressStringToBytes(cbcContractAddress);
 

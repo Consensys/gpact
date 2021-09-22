@@ -10,8 +10,10 @@ repositories {
 
 dependencies {
     implementation project (':common')
-    implementation project (':gpact')
     implementation project (':app-erc20')
+    implementation project (':gpact')
+    implementation project (':mes-interface')
+    implementation project (':examplehelpers')
 
     implementation group: 'com.google.guava', name: 'guava', version: '14.0'
     implementation group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.12.0'

@@ -14,17 +14,16 @@
  */
 package net.consensys.gpact.examples.singlebc.hoteltrain;
 
-import net.consensys.gpact.cbc.AbstractBlockchain;
+import net.consensys.gpact.common.AbstractBlockchain;
+import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.examples.singlebc.hoteltrain.soliditywrappers.Hotel;
 import net.consensys.gpact.openzeppelin.soliditywrappers.ERC20PresetFixedSupply;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
-import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -40,7 +39,7 @@ public class EntityBase extends AbstractBlockchain {
 
 
     public EntityBase(final String entity,
-        Credentials credentials, String bcId, String uri, String gasPriceStrategy, String blockPeriod) throws IOException {
+                      Credentials credentials, BlockchainId bcId, String uri, String gasPriceStrategy, String blockPeriod) throws IOException {
         super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
         this.entity = entity;
     }

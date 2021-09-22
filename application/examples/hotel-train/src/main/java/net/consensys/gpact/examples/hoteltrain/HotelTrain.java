@@ -14,11 +14,10 @@
  */
 package net.consensys.gpact.examples.hoteltrain;
 
-import net.consensys.gpact.cbc.CbcManager;
+import net.consensys.gpact.cbc.CrossControlManagerGroup;
 import net.consensys.gpact.common.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.web3j.crypto.Credentials;
 
 import java.math.BigInteger;
 
@@ -41,28 +40,13 @@ public class HotelTrain {
             return;
         }
 
-        PropertiesLoader propsLoader = new PropertiesLoader(args[0]);
-        Credentials creds = CredentialsCreator.createCredentials();
-        PropertiesLoader.BlockchainInfo root = propsLoader.getBlockchainInfo("ROOT");
-        PropertiesLoader.BlockchainInfo bc2 = propsLoader.getBlockchainInfo("BC2");
-        PropertiesLoader.BlockchainInfo bc3 = propsLoader.getBlockchainInfo("BC3");
-        CrossBlockchainConsensusType consensusMethodology = propsLoader.getConsensusMethodology();
-        StatsHolder.log(consensusMethodology.name());
-        ExecutionEngineType engineType = propsLoader.getExecutionEnngine();
-        StatsHolder.log(engineType.name());
+        ExampleSystemManager exampleManager = new ExampleSystemManager(args[0]);
+        exampleManager.standardExampleConfig(3);
 
-        // Set-up GPACT contracts: Deploy Crosschain Control and Registrar contracts on
-        // each blockchain.
-        CbcManager cbcManager = new CbcManager(consensusMethodology);
-        cbcManager.addBlockchainAndDeployContracts(creds, root);
-        cbcManager.addBlockchainAndDeployContracts(creds, bc2);
-        cbcManager.addBlockchainAndDeployContracts(creds, bc3);
-        // Have each Crosschain Control contract trust the Crosschain Control
-        // contracts on the other blockchains.
-        // To keep the example simple, just have one signer for all blockchains.
-        AnIdentity globalSigner = new AnIdentity();
-        cbcManager.setupCrosschainTrust(globalSigner);
-
+        BlockchainInfo root = exampleManager.getRootBcInfo();
+        BlockchainInfo bc2 = exampleManager.getBc2Info();
+        BlockchainInfo bc3 = exampleManager.getBc3Info();
+        CrossControlManagerGroup crossControlManagerGroup = exampleManager.getCrossControlManagerGroup();
 
         // Set-up classes to manage blockchains.
         EntityHotel hotel = new EntityHotel(bc2.bcId, bc2.uri, bc2.gasPriceStrategy, bc2.period);
@@ -70,19 +54,17 @@ public class HotelTrain {
         EntityTravelAgency travelAgency = new EntityTravelAgency(root.bcId, root.uri, root.gasPriceStrategy, root.period);
 
         // Deploy application contracts.
-        BigInteger hotelBcId = hotel.getBlockchainId();
-        hotel.deployContracts(cbcManager.getCbcAddress(hotelBcId));
-        BigInteger trainBcId = train.getBlockchainId();
-        train.deployContracts(cbcManager.getCbcAddress(trainBcId));
-        BigInteger travelBcId = travelAgency.getBlockchainId();
-        travelAgency.deploy(cbcManager.getCbcAddress(travelBcId), hotel.getBlockchainId(), hotel.getHotelContractAddress(), train.getBlockchainId(), train.getHotelContractAddress());
+        BlockchainId hotelBcId = hotel.getBlockchainId();
+        hotel.deployContracts(crossControlManagerGroup.getCbcAddress(hotelBcId));
+        BlockchainId trainBcId = train.getBlockchainId();
+        train.deployContracts(crossControlManagerGroup.getCbcAddress(trainBcId));
+        BlockchainId travelBcId = travelAgency.getBlockchainId();
+        travelAgency.deploy(crossControlManagerGroup.getCbcAddress(travelBcId), hotel.getBlockchainId(), hotel.getHotelContractAddress(), train.getBlockchainId(), train.getHotelContractAddress());
 
         travelAgency.createCbcManager(
-                consensusMethodology,
-                root, cbcManager.getInfrastructureAddresses(travelBcId),
-                bc2, cbcManager.getInfrastructureAddresses(hotelBcId),
-                bc3, cbcManager.getInfrastructureAddresses(trainBcId),
-                globalSigner);
+                root, crossControlManagerGroup.getInfrastructureAddresses(travelBcId), crossControlManagerGroup.getMessageVerification(travelBcId),
+                bc2, crossControlManagerGroup.getInfrastructureAddresses(hotelBcId), crossControlManagerGroup.getMessageVerification(hotelBcId),
+                bc3, crossControlManagerGroup.getInfrastructureAddresses(trainBcId), crossControlManagerGroup.getMessageVerification(trainBcId));
 
 
         // Set-up application contracts.
@@ -113,7 +95,7 @@ public class HotelTrain {
             LOG.info("Execution: {}  *****************", numExecutions);
             StatsHolder.log("Execution: " + numExecutions + " **************************");
 
-            BigInteger bookingId = travelAgency.book(date, consensusMethodology,engineType);
+            BigInteger bookingId = travelAgency.book(date, exampleManager);
 
             hotel.showBookingInformation(bookingId);
             train.showBookingInformation(bookingId);
@@ -122,15 +104,15 @@ public class HotelTrain {
             hotel.showErc20Allowance(travelAgency.getTravelAgencyAccount(), hotel.getHotelContractAddress());
             train.showErc20Allowance(travelAgency.getTravelAgencyAccount(), train.getHotelContractAddress());
 
-            travelAgency.book(date, consensusMethodology,engineType);
-            travelAgency.book(date, consensusMethodology,engineType);
+            travelAgency.book(date, exampleManager);
+            travelAgency.book(date, exampleManager);
 
             hotel.showErc20Balances(accounts);
             train.showErc20Balances(accounts);
             hotel.showErc20Allowance(travelAgency.getTravelAgencyAccount(), hotel.getHotelContractAddress());
             train.showErc20Allowance(travelAgency.getTravelAgencyAccount(), train.getHotelContractAddress());
             try {
-                travelAgency.book(date, consensusMethodology,engineType);
+                travelAgency.book(date, exampleManager);
                 throw new Exception("Exception now thrown as expected");
             } catch (Exception ex) {
                 LOG.info("Exception thrown as expected: not enough train seats");

@@ -20,13 +20,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
-import net.consensys.gpact.cbc.CbcManager;
-import net.consensys.gpact.cbc.engine.AbstractCbcExecutor;
-import net.consensys.gpact.cbc.engine.CbcExecutorSignedEvents;
-import net.consensys.gpact.cbc.engine.CbcExecutorTxReceiptRootTransfer;
+import net.consensys.gpact.cbc.CrossControlManagerGroup;
+import net.consensys.gpact.cbc.CrosschainExecutor;
 import net.consensys.gpact.cbc.engine.ExecutionEngine;
-import net.consensys.gpact.cbc.engine.ParallelExecutionEngine;
-import net.consensys.gpact.cbc.engine.SerialExecutionEngine;
 import net.consensys.gpact.examples.read.sim.SimContractA;
 import net.consensys.gpact.examples.read.sim.SimContractB;
 
@@ -49,25 +45,12 @@ public class Main {
       return;
     }
 
-    PropertiesLoader propsLoader = new PropertiesLoader(args[0]);
-    Credentials creds = CredentialsCreator.createCredentials();
-    PropertiesLoader.BlockchainInfo root = propsLoader.getBlockchainInfo("ROOT");
-    PropertiesLoader.BlockchainInfo bc2 = propsLoader.getBlockchainInfo("BC2");
-    CrossBlockchainConsensusType consensusMethodology = propsLoader.getConsensusMethodology();
-    StatsHolder.log(consensusMethodology.name());
-    ExecutionEngineType engineType = propsLoader.getExecutionEnngine();
-    StatsHolder.log(engineType.name());
+    ExampleSystemManager exampleManager = new ExampleSystemManager(args[0]);
+    exampleManager.standardExampleConfig(2);
 
-    // Set-up GPACT contracts: Deploy Crosschain Control and Registrar contracts on
-    // each blockchain.
-    CbcManager cbcManager = new CbcManager(consensusMethodology);
-    cbcManager.addBlockchainAndDeployContracts(creds, root);
-    cbcManager.addBlockchainAndDeployContracts(creds, bc2);
-    // Have each Crosschain Control contract trust the Crosschain Control
-    // contracts on the other blockchains.
-    // To keep the example simple, just have one signer for all blockchains.
-    AnIdentity globalSigner = new AnIdentity();
-    cbcManager.setupCrosschainTrust(globalSigner);
+    BlockchainInfo root = exampleManager.getRootBcInfo();
+    BlockchainInfo bc2 = exampleManager.getBc2Info();
+    CrossControlManagerGroup crossControlManagerGroup = exampleManager.getCrossControlManagerGroup();
 
     // Set-up classes to manage blockchains.
     Credentials appCreds = CredentialsCreator.createCredentials();
@@ -77,12 +60,12 @@ public class Main {
     BigInteger val = BigInteger.valueOf(7);
 
     // Set-up client side and deploy contracts on the blockchains.
-    BigInteger bc2BcId = bc2ContractBBlockchain.getBlockchainId();
+    BlockchainId bc2BcId = bc2ContractBBlockchain.getBlockchainId();
     bc2ContractBBlockchain.deployContracts(val);
     String contractBContractAddress = bc2ContractBBlockchain.contractB.getContractAddress();
 
-    BigInteger rootBcId = bc1ContractABlockchain.getBlockchainId();
-    bc1ContractABlockchain.deployContracts(cbcManager.getCbcAddress(rootBcId), bc2BcId, contractBContractAddress);
+    BlockchainId rootBcId = bc1ContractABlockchain.getBlockchainId();
+    bc1ContractABlockchain.deployContracts(crossControlManagerGroup.getCbcAddress(rootBcId), bc2BcId.asBigInt(), contractBContractAddress);
     String contractAContractAddress = bc1ContractABlockchain.contractA.getContractAddress();
 
 
@@ -107,29 +90,9 @@ public class Main {
       rootCalls.add(getFunction);
       CallExecutionTree callGraph = new CallExecutionTree(rootBcId, contractAContractAddress, rlpCrosschainRead, rootCalls);
 
-      AbstractCbcExecutor executor;
-      switch (consensusMethodology) {
-        case TRANSACTION_RECEIPT_SIGNING:
-          executor = new CbcExecutorTxReceiptRootTransfer(cbcManager);
-          break;
-        case EVENT_SIGNING:
-          executor = new CbcExecutorSignedEvents(cbcManager);
-          break;
-        default:
-          throw new RuntimeException("Not implemented yet");
-      }
+      CrosschainExecutor executor = new CrosschainExecutor(crossControlManagerGroup);
+      ExecutionEngine executionEngine = exampleManager.getExecutionEngine(executor);
 
-      ExecutionEngine executionEngine;
-      switch (engineType) {
-        case SERIAL:
-          executionEngine = new SerialExecutionEngine(executor);
-          break;
-        case PARALLEL:
-          executionEngine = new ParallelExecutionEngine(executor);
-          break;
-        default:
-          throw new RuntimeException("Not implemented yet");
-      }
       boolean success = executionEngine.execute(callGraph, 300);
 
       LOG.info("Success: {}", success);

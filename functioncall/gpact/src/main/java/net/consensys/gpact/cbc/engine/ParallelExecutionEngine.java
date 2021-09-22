@@ -14,7 +14,9 @@
  */
 package net.consensys.gpact.cbc.engine;
 
+import net.consensys.gpact.cbc.CrosschainExecutor;
 import net.consensys.gpact.cbc.calltree.CallExecutionTree;
+import net.consensys.gpact.common.BlockchainId;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -31,11 +33,11 @@ import java.util.concurrent.Future;
 public class ParallelExecutionEngine extends AbstractExecutionEngine {
   static final Logger LOG = LogManager.getLogger(ParallelExecutionEngine.class);
 
-  public ParallelExecutionEngine(AbstractCbcExecutor executor) {
+  public ParallelExecutionEngine(CrosschainExecutor executor) {
     super(executor);
   }
 
-  protected void executeCalls(List<CallExecutionTree> calls, List<BigInteger> callPath, BigInteger theCallerBlockchainId) throws Exception {
+  protected void executeCalls(List<CallExecutionTree> calls, List<BigInteger> callPath, BlockchainId theCallerBlockchainId) throws Exception {
     int numCalls = calls.size();
     Executor executor = Executors.newFixedThreadPool(numCalls);
     CompletionService<String> completionService = new ExecutorCompletionService<String>(executor);

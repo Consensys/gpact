@@ -12,8 +12,9 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package net.consensys.gpact.cbc;
+package net.consensys.gpact.txroot;
 
+import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.messaging.SignedEvent;
 import org.apache.tuweni.units.bigints.UInt256;
 import org.web3j.rlp.RlpEncoder;
@@ -31,7 +32,7 @@ import static net.consensys.gpact.common.FormatConversion.addressStringToBytes;
  * Information to allow a transaction receipt to be verified within a Solidity contract.
  */
 public class TxReceiptRootTransferEventProof {
-  BigInteger blockchainId;
+  BlockchainId blockchainId;
   String crossBlockchainControlContract;
   byte[] transactionReceiptRoot;
   byte[] transactionReceipt;
@@ -52,7 +53,7 @@ public class TxReceiptRootTransferEventProof {
    * @param proofs RLP encoded hashes from the transaction receipt trie.
    */
   public TxReceiptRootTransferEventProof(
-      BigInteger blockchainId,
+      BlockchainId blockchainId,
       String crossBlockchainControlContract,
       byte[] transactionReceiptRoot,
       byte[] transactionReceipt,
@@ -71,7 +72,7 @@ public class TxReceiptRootTransferEventProof {
     this.eventData = eventData;
   }
 
-  public BigInteger getBlockchainId() {
+  public BlockchainId getBlockchainId() {
     return blockchainId;
   }
 
@@ -103,8 +104,7 @@ public class TxReceiptRootTransferEventProof {
 
 
   private byte[] getEncodedProof() {
-    UInt256 blockchainIdUint256 = UInt256.valueOf(this.blockchainId);
-    byte[] blockchainIdBytes = blockchainIdUint256.toBytes().toArray();
+    byte[] blockchainIdBytes = this.blockchainId.asBytes();
 
     List<RlpType> proofOffsetsRlp = new ArrayList<>();
     List<RlpType> proofRlp = new ArrayList<>();
