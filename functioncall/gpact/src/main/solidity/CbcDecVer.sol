@@ -15,9 +15,10 @@
 pragma solidity >=0.8;
 
 import "../../../../../messaging/interface/src/main/solidity/CrosschainVerifier.sol";
+import "../../../../../common/openzeppelin/src/main/solidity/access/Ownable.sol";
 
 
-abstract contract CbcDecVer {
+abstract contract CbcDecVer is Ownable {
     // 	0x77dab611
     bytes32 constant internal START_EVENT_SIGNATURE = keccak256("Start(uint256,address,uint256,bytes)");
     // 0xb01557f1
@@ -31,13 +32,14 @@ abstract contract CbcDecVer {
     // Address of Crosschain Control Contract on another blockchain.
     mapping (uint256 => address) private remoteCrosschainControlContracts;
 
-    // TODO this must be only owner
-    function addVerifier(uint256 _blockchainId, address _verifier) external {
+    function addVerifier(uint256 _blockchainId, address _verifier) external onlyOwner {
+        require(_blockchainId != 0, "Invalid blockchain id");
+        require(_verifier != address(0), "Invalid verifier address");
         verifiers[_blockchainId] = CrosschainVerifier(_verifier);
     }
 
     // TODO this must be only owner
-    function addRemoteCrosschainControl(uint256 _blockchainId, address _cbc) external {
+    function addRemoteCrosschainControl(uint256 _blockchainId, address _cbc) external onlyOwner {
         remoteCrosschainControlContracts[_blockchainId] = _cbc;
     }
 
@@ -60,14 +62,6 @@ abstract contract CbcDecVer {
 
 
         for (uint256 i = 0; i < numEvents; i++) {
-            uint256 bcId = _blockchainIds[i];
-
-            CrosschainVerifier verifier = verifiers[bcId];
-            require(address(verifier) != address(0), "No registered verifier for blockchain");
-
-            require(_cbcAddresses[i] == remoteCrosschainControlContracts[bcId],
-                "Data not emitted by approved contract");
-
             if (i == 0) {
                 bytes32 eventSig = _expectStart ? START_EVENT_SIGNATURE : ROOT_EVENT_SIGNATURE;
                 require(eventSig == _eventFunctionSignatures[i], "Unexpected first event function signature");
@@ -76,9 +70,37 @@ abstract contract CbcDecVer {
                 require(SEGMENT_EVENT_SIGNATURE == _eventFunctionSignatures[i], "Event function signature not for a segment");
             }
 
-            bytes memory encodedEvent = abi.encodePacked(bcId, _cbcAddresses[i], _eventFunctionSignatures[i], _eventData[i]);
-            verifier.decodeAndVerifyEvent(
-                bcId, _eventFunctionSignatures[i], encodedEvent, _signatures[i]);
+            decodeAndVerifyEvent(_blockchainIds[i], _cbcAddresses[i], _eventFunctionSignatures[i], _eventData[i], _signatures[i]);
         }
+    }
+
+    /**
+     * Decode signatures or proofs and use them to verify an event.
+     *
+     * @param _blockchainId The blockchain that the event was emitted on.
+     * @param _cbcAddress The Crosschain Control Contract that emitted the event.
+     * @param _eventFunctionSignature The function selector of the event that emitted the event.
+     * @param _eventData The emitted event data.
+     * @param _signature The signature of proof across the ABI encoded combination of:
+     *            _blockchainId, _cbcAddress, _eventFunctionSignature, and _signature.
+     */
+    function decodeAndVerifyEvent(
+        uint256 _blockchainId,
+        address _cbcAddress,
+        bytes32 _eventFunctionSignature,
+        bytes calldata _eventData,
+        bytes calldata _signature) internal view {
+
+        // This indirectly checks that _blockchainId is an authorised source blockchain
+        // by checking that there is a verifier for the blockchain.
+        CrosschainVerifier verifier = verifiers[_blockchainId];
+        require(address(verifier) != address(0), "No registered verifier for blockchain");
+
+        require(_cbcAddress == remoteCrosschainControlContracts[_blockchainId],
+                "Data not emitted by approved contract");
+
+        bytes memory encodedEvent = abi.encodePacked(_blockchainId, _cbcAddress, _eventFunctionSignature, _eventData);
+        verifier.decodeAndVerifyEvent(
+            _blockchainId, _eventFunctionSignature, encodedEvent, _signature);
     }
 }
