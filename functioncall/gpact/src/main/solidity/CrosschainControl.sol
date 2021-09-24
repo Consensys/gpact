@@ -19,10 +19,10 @@ import "./CbcDecVer.sol";
 import "./CallPathCallExecutionTree.sol";
 import "../../../../interface/src/main/solidity/LockableStorageInterface.sol";
 import "../../../../interface/src/main/solidity/CrosschainLockingInterface.sol";
-import "../../../../interface/src/main/solidity/CrosschainFunctionCallInterface.sol";
+import "../../../../interface/src/main/solidity/CrosschainFunctionCallReturnInterface.sol";
 
 
-contract CrosschainControl is CrosschainFunctionCallInterface, CbcDecVer, CallPathCallExecutionTree,
+contract CrosschainControl is CrosschainFunctionCallReturnInterface, CbcDecVer, CallPathCallExecutionTree,
     CrosschainLockingInterface {
 
 
@@ -130,12 +130,15 @@ contract CrosschainControl is CrosschainFunctionCallInterface, CbcDecVer, CallPa
         require(tx.origin == msg.sender, "Segment must be called from an EOA");
 
         // Event 0 will be the start event
-        uint256 crosschainTransactionId = BytesUtil.bytesToUint256(_eventData[0], 0);
-        {
-            address startCaller = BytesUtil.bytesToAddress1(_eventData[0], 0x20);
-            require(startCaller == tx.origin, "EOA does not match start event");
-        }
-        uint256 lenOfActiveCallGraph = BytesUtil.bytesToUint256(_eventData[0], 0x80);
+        // Recall the start event is:
+        // Start(uint256 _crossBlockchainTransactionId, address _caller, uint256 _timeout, bytes _callGraph);
+        uint256 crosschainTransactionId;
+        address startCaller;
+        //uint256 timeout;
+        bytes memory callGraph;
+        (crosschainTransactionId, startCaller, , callGraph) =
+            abi.decode(_eventData[0], (uint256, address, uint256, bytes));
+        require(startCaller == tx.origin, "EOA does not match start event");
 
         // Stop replay of transaction segments.
         {
@@ -143,8 +146,6 @@ contract CrosschainControl is CrosschainFunctionCallInterface, CbcDecVer, CallPa
             require(segmentTransactionExecuted[mapKey] == false, "Segment transaction already executed");
             segmentTransactionExecuted[mapKey] == true;
         }
-
-        bytes memory callGraph = BytesUtil.slice(_eventData[0], 0xA0, lenOfActiveCallGraph);
         bytes32 hashOfCallGraph = keccak256(callGraph);
 
         activeCallRootBlockchainId = rootBcId;
@@ -199,8 +200,18 @@ contract CrosschainControl is CrosschainFunctionCallInterface, CbcDecVer, CallPa
         // Ensure this is the crosschain control contract that generated the start event.
         require(address(this) == _cbcAddresses[0], "Root blockchain CBC contract was not this one");
 
+
+        // Event 0 will be the start event
+        // Recall the start event is:
+        // Start(uint256 _crossBlockchainTransactionId, address _caller, uint256 _timeout, bytes _callGraph);
+        uint256 crosschainTransactionId;
+        address startCaller;
+        uint256 timeout;
+        bytes memory callGraph;
+        (crosschainTransactionId, startCaller, timeout, callGraph) =
+        abi.decode(_eventData[0], (uint256, address, uint256, bytes));
+
         // Check that Cross-blockchain Transaction Id as shown in the Start Event is still active.
-        uint256 crosschainTransactionId = BytesUtil.bytesToUint256(_eventData[0], 0);
         uint256 timeoutForCall = rootTransactionInformation[crosschainTransactionId];
         require(timeoutForCall != NOT_USED, "Call not active");
         require(timeoutForCall != SUCCESS, "Call ended (success)");
@@ -217,13 +228,10 @@ contract CrosschainControl is CrosschainFunctionCallInterface, CbcDecVer, CallPa
         // by checking the Start Event. Exit if it doesn’t.
         // This means that only the initiator of the cross-blockchain transaction can call this
         // function call prior to the time-out.
-        address startCaller = BytesUtil.bytesToAddress1(_eventData[0], 0x20);
         require(startCaller == tx.origin, "EOA does not match start event");
 
         // Determine the hash of the call graph described in the start event. This is needed to check the segment
         // event information.
-        uint256 lenOfActiveCallGraph = BytesUtil.bytesToUint256(_eventData[0], 0x80);
-        bytes memory callGraph = BytesUtil.slice(_eventData[0], 0xA0, lenOfActiveCallGraph);
         activeCallGraph = callGraph;
         bytes32 hashOfCallGraph = keccak256(callGraph);
 
@@ -263,8 +271,10 @@ contract CrosschainControl is CrosschainFunctionCallInterface, CbcDecVer, CallPa
         decodeAndVerifyEvents(_blockchainIds, _cbcAddresses, _eventFunctionSignatures, _eventData, _signatures, false);
 
         // Extract information from the root event.
-        uint256 rootEventCrossBlockchainTxId = BytesUtil.bytesToUint256(_eventData[0], 0);
-        uint256 success = BytesUtil.bytesToUint256(_eventData[0], 0x20);
+        // Recall: Root(uint256 _crossBlockchainTransactionId, bool _success);
+        uint256 rootEventCrossBlockchainTxId;
+        bool success;
+        (rootEventCrossBlockchainTxId, success) = abi.decode(_eventData[0], (uint256, bool));
 
         // Set-up root blockchain / crosschain transaction value for unlocking.
         bytes32 crosschainRootTxId = calcRootTxId(_blockchainIds[0], rootEventCrossBlockchainTxId);
@@ -292,7 +302,7 @@ contract CrosschainControl is CrosschainFunctionCallInterface, CbcDecVer, CallPa
                 address lockedContractAddr = BytesUtil.bytesToAddress1(_eventData[i], locationOfLockedContracts + 0x20 + 0x20 * j);
                 //emit Dump(i * 100 + j, bytes32(0), lockedContractAddr, bytes(""));
                 LockableStorageInterface lockedContract = LockableStorageInterface(lockedContractAddr);
-                lockedContract.finalise(success != 0, crosschainRootTxId);
+                lockedContract.finalise(success, crosschainRootTxId);
             }
         }
 
