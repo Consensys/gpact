@@ -8,6 +8,7 @@ include 'mes-attestor-sign'
 include 'mes-txroot-transfer'
 
 include 'gpact'
+include 'sfc'
 
 include 'app-erc20'
 include 'app-lockablestorage'
@@ -34,6 +35,7 @@ project(":mes-interface").projectDir = file("messaging/interface")
 project(":mes-attestor-sign").projectDir = file("messaging/attestor-sign")
 project(":mes-txroot-transfer").projectDir = file("messaging/txroot-transfer")
 project(":gpact").projectDir = file("functioncall/gpact")
+project(":sfc").projectDir = file("functioncall/sfc")
 
 
 project(":app-erc20").projectDir = file("application/appcontracts/erc20")

@@ -47,10 +47,6 @@ contract MockCbcForERC20Test is CrosschainFunctionCallInterface, CrosschainLocki
     }
 
 
-    function crossBlockchainCallReturnsUint256(uint256 /* _blockchain */, address /* _contract */, bytes calldata /* _functionCallData */) external override pure returns (uint256) {
-        return uint256(0);
-    }
-
     function whoCalledMe() external pure override returns (uint256 theRootBlockchainId, uint256 parentBlockchainId, address parentContract) {
         return (0, 0, address(0));
 

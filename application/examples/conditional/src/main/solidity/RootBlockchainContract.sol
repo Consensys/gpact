@@ -17,6 +17,7 @@ pragma solidity >=0.7.1;
 import "./OtherBlockchainContractInterface.sol";
 import "../../../../../appcontracts/lockablestorage/src/main/solidity/LockableStorage.sol";
 import "../../../../../../functioncall/interface/src/main/solidity/CrosschainFunctionCallInterface.sol";
+import "../../../../../../functioncall/interface/src/main/solidity/CrosschainFunctionCallReturnInterface.sol";
 
 
 contract RootBlockchainContract is LockableStorage {
@@ -35,7 +36,7 @@ contract RootBlockchainContract is LockableStorage {
     function someComplexBusinessLogic(uint256 _val) external {
         // Use the value on the other blockchain as a threshold
         uint256 valueFromOtherBlockchain =
-            CrosschainFunctionCallInterface(address(crossBlockchainControl)).crossBlockchainCallReturnsUint256(
+            CrosschainFunctionCallReturnInterface(address(crossBlockchainControl)).crossBlockchainCallReturnsUint256(
             otherBlockchainId, address(otherContract), abi.encodeWithSelector(otherContract.getVal.selector));
         setVal2(valueFromOtherBlockchain);
 

@@ -17,6 +17,7 @@ pragma solidity >=0.7.1;
 import "./Balances.sol";
 import "./PriceOracle.sol";
 import "./Stock.sol";
+import "../../../../../../functioncall/interface/src/main/solidity/CrosschainFunctionCallReturnInterface.sol";
 
 contract BusLogic {
     uint256 balancesBcId;
@@ -25,12 +26,12 @@ contract BusLogic {
     PriceOracle priceOracleContract;
     uint256 stockBcId;
     Stock stockContract;
-    CrosschainFunctionCallInterface crossBlockchainControl;
+    CrosschainFunctionCallReturnInterface crossBlockchainControl;
 
     event StockShipment(address _seller, address _buyer, uint256 _quantity, uint256 _price);
 
     constructor (address _cbc, uint256 _balancesBcId, address _balances, uint256 _oracleBcId, address _oracle, uint256 _stockBcId, address _stock) {
-        crossBlockchainControl = CrosschainFunctionCallInterface(_cbc);
+        crossBlockchainControl = CrosschainFunctionCallReturnInterface(_cbc);
         balancesBcId = _balancesBcId;
         balancesContract = Balances(_balances);
         priceBcId = _oracleBcId;

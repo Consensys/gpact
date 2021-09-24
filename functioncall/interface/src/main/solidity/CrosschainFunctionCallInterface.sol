@@ -31,17 +31,6 @@ interface CrosschainFunctionCallInterface {
      */
     function crossBlockchainCall(uint256 _bcId, address _contract, bytes calldata _functionCallData) external;
 
-    /**
-     * Call a function on another blockchain that returns a uint256 value. Function call implementations
-     * may implement this function. Implementations that do not support this functionality should revert
-     * with the message, "NOT SUPPORTED: crossBlockchainCallReturnsUint256".
-     *
-     * @param _bcId Blockchain identifier of blockchain to be called.
-     * @param _contract The address of the contract to be called.
-     * @param _functionCallData The function selector and parameter data encoded using ABI encoding rules.
-     */
-    function crossBlockchainCallReturnsUint256(uint256 _bcId, address _contract, bytes calldata _functionCallData) external returns (uint256);
-
 
     /**
      * Indicate if the executing code is being called as part of a crosschain call or
