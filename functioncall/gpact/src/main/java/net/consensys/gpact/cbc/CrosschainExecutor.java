@@ -15,12 +15,15 @@
 package net.consensys.gpact.cbc;
 
 import net.consensys.gpact.common.BlockchainId;
+import net.consensys.gpact.common.RevertReason;
+import net.consensys.gpact.common.StatsHolder;
 import net.consensys.gpact.common.Tuple;
 import net.consensys.gpact.messaging.MessagingVerificationInterface;
 import net.consensys.gpact.messaging.SignedEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.web3j.protocol.exceptions.TransactionException;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -29,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 
 
 /**
@@ -179,7 +183,19 @@ public class CrosschainExecutor {
       transactionReceiptCompletableFutures[i++] = cbcContract.signallingAsyncPart1(this.signedRootEvent, signedSegEventsLockedContractsCurrentBlockchain);
     }
     CompletableFuture<Void> combinedFuture = CompletableFuture.allOf(transactionReceiptCompletableFutures);
-    combinedFuture.get();
+    try {
+      combinedFuture.get();
+    }
+    catch (ExecutionException ex) {
+      Throwable cause = ex.getCause();
+      if (cause instanceof TransactionException) {
+        TransactionException transactionException = (TransactionException) cause;
+        LOG.error(" Revert Reason: {}",
+                RevertReason.decodeRevertReason(transactionException.getTransactionReceipt().get().getRevertReason()));
+      }
+      throw ex;
+    }
+
 
     i = 0;
     for (BlockchainId blockchainId: this.signedSegmentEventsWithLockedContracts.keySet()) {

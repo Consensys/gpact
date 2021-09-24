@@ -40,6 +40,9 @@ contract SimpleCrosschainControl is CrosschainFunctionCallInterface, CbcDecVer, 
     uint256 private activeCallParentBlockchainId;
     address private activeCallParentContract;
 
+
+
+
     /**
      * Crosschain Transaction event.
      *
@@ -59,6 +62,16 @@ contract SimpleCrosschainControl is CrosschainFunctionCallInterface, CbcDecVer, 
 
     constructor(uint256 _myBlockchainId) {
         myBlockchainId = _myBlockchainId;
+    }
+
+    function start(address _srcContract, bytes calldata _functionCall) public {
+        bool isSuccess;
+        bytes memory returnValueEncoded;
+        (isSuccess, returnValueEncoded) = _srcContract.call(_functionCall);
+
+        if (!isSuccess) {
+            revert(getRevertMsg(returnValueEncoded));
+        }
     }
 
     function crossBlockchainCall(uint256 _destBcId, address _destContract, bytes calldata _destData) override external {
