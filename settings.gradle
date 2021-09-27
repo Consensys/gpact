@@ -21,6 +21,7 @@ include 'examples-tokenbridge'
 include 'examples-trade'
 include 'examples-utilpkey'
 include 'examples-write'
+include 'examples-sfc-write'
 include 'examples-singlebc-hoteltrain'
 include 'examples-singlebc-read'
 include 'examples-singlebc-trade'
@@ -42,13 +43,16 @@ project(":app-erc20").projectDir = file("application/appcontracts/erc20")
 project(":app-lockablestorage").projectDir = file("application/appcontracts/lockablestorage")
 
 project(":examplehelpers").projectDir = file("common/examplehelpers")
-project(":examples-conditional").projectDir = file("application/examples/conditional")
-project(":examples-hoteltrain").projectDir = file("application/examples/hotel-train")
-project(":examples-read").projectDir = file("application/examples/read")
-project(":examples-tokenbridge").projectDir = file("application/examples/tokenbridge")
-project(":examples-trade").projectDir = file("application/examples/trade")
-project(":examples-utilpkey").projectDir = file("application/examples/utilpkey")
-project(":examples-write").projectDir = file("application/examples/write")
+project(":examples-conditional").projectDir = file("application/gpact-examples/conditional")
+project(":examples-hoteltrain").projectDir = file("application/gpact-examples/hotel-train")
+project(":examples-read").projectDir = file("application/gpact-examples/read")
+project(":examples-tokenbridge").projectDir = file("application/gpact-examples/tokenbridge")
+project(":examples-trade").projectDir = file("application/gpact-examples/trade")
+project(":examples-utilpkey").projectDir = file("application/gpact-examples/utilpkey")
+project(":examples-write").projectDir = file("application/gpact-examples/write")
+
+project(":examples-sfc-write").projectDir = file("application/sfc-examples/write")
+
 project(":examples-singlebc-hoteltrain").projectDir = file("performance/base/singlebc-hotel-train")
 project(":examples-singlebc-read").projectDir = file("performance/base/singlebc-read")
 project(":examples-singlebc-trade").projectDir = file("performance/base/singlebc-trade")

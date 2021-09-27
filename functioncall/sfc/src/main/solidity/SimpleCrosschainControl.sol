@@ -17,14 +17,13 @@ pragma solidity >=0.8;
 import "../../../../interface/src/main/solidity/CrosschainFunctionCallInterface.sol";
 import "../../../../../messaging/interface/src/main/solidity/CrosschainVerifier.sol";
 import "../../../../gpact/src/main/solidity/CbcDecVer.sol";
-import "../../../../../common/common/src/main/solidity/BytesUtil.sol";
 
 
 
 
-contract SimpleCrosschainControl is CrosschainFunctionCallInterface, CbcDecVer, BytesUtil {
+contract SimpleCrosschainControl is CrosschainFunctionCallInterface, CbcDecVer {
     // 	0x77dab611
-    bytes32 constant internal CROSS_CALL_EVENT_SIGNATURE = keccak256("CrossCall(uint256,uint256,address,uint256,address,bytes)");
+    bytes32 constant internal CROSS_CALL_EVENT_SIGNATURE = keccak256("CrossCall(bytes32,uint256,address,uint256,address,bytes)");
 
     // How old events can be before they are not accepted.
     // Also used as a time after which crosschain transaction ids can be purged from the
@@ -60,8 +59,14 @@ contract SimpleCrosschainControl is CrosschainFunctionCallInterface, CbcDecVer, 
 
 
 
-    constructor(uint256 _myBlockchainId) {
+    /**
+     * @param _myBlockchainId Blockchain identifier of this blockchain.
+     * @param _timeHorizon How old crosschain events can be before they are
+     *     deemed to be invalid. Measured in seconds.
+     */
+    constructor(uint256 _myBlockchainId, uint256 _timeHorizon) {
         myBlockchainId = _myBlockchainId;
+        timeHorizon = _timeHorizon;
     }
 
     function start(address _srcContract, bytes calldata _functionCall) public {
@@ -112,24 +117,24 @@ contract SimpleCrosschainControl is CrosschainFunctionCallInterface, CbcDecVer, 
 
         // Decode _eventData
         // Recall that the cross call event is:
-        // CrossCall(uint256 _txId, uint256 _timestamp, address _caller,
+        // CrossCall(bytes32 _txId, uint256 _timestamp, address _caller,
         //           uint256 _destBcId, address _destContract, bytes _destFunctionCall)
-        bytes32 txId = BytesUtil.bytesToBytes32CallData(_eventData, 0);
+        bytes32 txId;
+        uint256 timestamp;
+        address caller;
+        uint256 destBcId;
+        address destContract;
+        bytes memory functionCall;
+        (txId, timestamp, caller, destBcId, destContract, functionCall) =
+            abi.decode(_eventData, (bytes32,uint256,address,uint256,address,bytes));
+
         require(replayPrevention[txId] == 0, "Transaction already exists");
 
-        uint256 timestamp = BytesUtil.bytesToUint256(_eventData, 0x20);
         require(timestamp < block.timestamp, "Event timestamp is in the future");
         require(timestamp + timeHorizon > block.timestamp, "Event is too old");
         replayPrevention[txId] = timestamp;
 
-        address caller = BytesUtil.bytesToAddress1(_eventData, 0x40);
-
-        uint256 destBcId = BytesUtil.bytesToUint256(_eventData, 0x60);
         require(destBcId == myBlockchainId);
-
-        address destContract = BytesUtil.bytesToAddress1(_eventData, 0x80);
-        uint256 lenOfFunctionCall = BytesUtil.bytesToUint256(_eventData, 0xA0);
-        bytes memory functionCall = BytesUtil.slice(_eventData, 0xC0, lenOfFunctionCall);
 
         // Set-up active call state.
         activeCallParentBlockchainId = _sourceBcId;

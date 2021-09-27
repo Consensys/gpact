@@ -21,24 +21,15 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
 import org.hyperledger.besu.crypto.Hash;
-import org.web3j.abi.datatypes.Address;
-import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.crypto.Credentials;
-import org.web3j.protocol.core.methods.response.BaseEventResponse;
 import org.web3j.protocol.core.methods.response.Log;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.exceptions.TransactionException;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.security.DrbgParameters;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-
-import static java.security.DrbgParameters.Capability.RESEED_ONLY;
 
 public class SimpleCrossControlManager extends AbstractBlockchain {
   private static final Logger LOG = LogManager.getLogger(SimpleCrossControlManager.class);
@@ -50,20 +41,16 @@ public class SimpleCrossControlManager extends AbstractBlockchain {
 
   protected net.consensys.gpact.sfccbc.soliditywrappers.SimpleCrosschainControl crossBlockchainControlContract;
 
-  // TODO put this into a map for the current transaction id, so many transactions can be handled in parallel
-  // The time-out for the current transaction.
-  private long crossBlockchainTransactionTimeout;
-  private boolean rootEventSuccess;
 
-
-  protected SimpleCrossControlManager(Credentials credentials, BlockchainId bcId, String uri, String gasPriceStrategy, String blockPeriod) throws IOException {
+  public SimpleCrossControlManager(Credentials credentials, BlockchainId bcId, String uri, String gasPriceStrategy, String blockPeriod) throws IOException {
       super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
   }
 
   protected void deployContracts() throws Exception {
+    final BigInteger HARD_CODED_EVENT_HORIZON = BigInteger.valueOf(3600); // 1 hour == 3600 seconds
     this.crossBlockchainControlContract =
             net.consensys.gpact.sfccbc.soliditywrappers.SimpleCrosschainControl.deploy(this.web3j, this.tm, this.gasProvider,
-                    this.blockchainId.asBigInt()).send();
+                    this.blockchainId.asBigInt(), HARD_CODED_EVENT_HORIZON).send();
     LOG.debug(" Simple Cross Blockchain Contract Contract: {}", this.crossBlockchainControlContract.getContractAddress());
   }
 
@@ -89,53 +76,69 @@ public class SimpleCrossControlManager extends AbstractBlockchain {
   }
 
 
-  public Tuple<TransactionReceipt, byte[], Boolean> start(String srcBcContract, byte[] functionCall) throws Exception {
-    LOG.debug("Start Transaction on blockchain {}", this.blockchainId);
-    StatsHolder.log("Start call now");
+  public Tuple<TransactionReceipt, byte[], SimpleCrosschainControl.CrossCallEventResponse>
+    sourceBcCall(String srcBcContract, byte[] functionCall) throws Exception {
+
+    LOG.debug("Transaction on source blockchain {}", this.blockchainId);
+    StatsHolder.log("Source Blockchain call now");
     TransactionReceipt txR = this.crossBlockchainControlContract.start(srcBcContract, functionCall).send();
-    StatsHolder.logGas("Start Transaction", txR.getGasUsed());
+    StatsHolder.logGas("Source Bc Call", txR.getGasUsed());
     List<SimpleCrosschainControl.CrossCallEventResponse> callEvents = this.crossBlockchainControlContract.getCrossCallEvents(txR);
-    SimpleCrosschainControl.CrossCallEventResponse startEvent = callEvents.get(0);
-    // LOG.debug("Start Event: {}", new BigInteger(getEventData(txR, AbstractCbc.START_EVENT_SIGNATURE_BYTES)).toString(16));
-    return new Tuple<TransactionReceipt, byte[], Boolean>(
+    SimpleCrosschainControl.CrossCallEventResponse crossCallEvent = callEvents.get(0);
+    dumpCrossCallEvent(crossCallEvent);
+    return new Tuple<TransactionReceipt, byte[], SimpleCrosschainControl.CrossCallEventResponse>(
             txR,
             getEventData(txR, CROSSCALL_EVENT_SIGNATURE_BYTES),
-            false);
+            crossCallEvent);
   }
 
-  public Tuple<TransactionReceipt, byte[], Boolean> crossCall(SignedEvent crossCallEvent) throws Exception {
-    //RlpDumper.dump(RLP.input(Bytes.wrap(encodedSignatures.get(0))));
+  public Tuple<TransactionReceipt, String, Boolean> destinationBcCall(SignedEvent crossCallEvent) throws Exception {
     TransactionReceipt txR;
     try {
-      LOG.debug("CrossCall Transaction on blockchain {}", this.blockchainId);
+      LOG.debug("Transaction on Destination blockchain {}", this.blockchainId);
       txR = this.crossBlockchainControlContract.crossCallHandler(
               crossCallEvent.getBcId().asBigInt(), crossCallEvent.getCbcContract(),
               crossCallEvent.getEventData(), crossCallEvent.getEncodedSignatures()).send();
-      StatsHolder.logGas("CrossCall Transaction", txR.getGasUsed());
+      StatsHolder.logGas("Destination Bc Call", txR.getGasUsed());
     } catch (TransactionException ex) {
-      LOG.error(" Revert Reason: {}", RevertReason.decodeRevertReason(ex.getTransactionReceipt().get().getRevertReason()));
-      throw ex;
+      // Crosschain Control Contract reverted
+      String revertReason = RevertReason.decodeRevertReason(ex.getTransactionReceipt().get().getRevertReason());
+      LOG.error(" Revert Reason1: {}", revertReason);
+      return new Tuple<TransactionReceipt, String, Boolean>(
+              ex.getTransactionReceipt().get(),
+              revertReason,
+              false);
     }
+
     if (!txR.isStatusOK()) {
-      throw new Exception("CrossCall transaction failed");
+      // Transaction failed
+      return new Tuple<TransactionReceipt, String, Boolean>(
+              txR,
+              null,
+              false);
     }
 
-    // TODO showCallFailureEvents(convertCallFailure(this.crossBlockchainControlContract.getCallFailureEvents(txR)));
-
-    return new Tuple<TransactionReceipt, byte[], Boolean>(
+    List<SimpleCrosschainControl.CallFailureEventResponse> failureEventResponses =
+            this.crossBlockchainControlContract.getCallFailureEvents(txR);
+    if (!failureEventResponses.isEmpty()) {
+      // Application contract reverted
+      // There will only be one failure event.
+      LOG.warn(" Revert Reason1: {}", failureEventResponses.get(0)._revertReason);
+      return new Tuple<TransactionReceipt, String, Boolean>(
+              txR,
+              failureEventResponses.get(0)._revertReason,
+              false);
+    }
+    // Everything worked!
+    return new Tuple<TransactionReceipt, String, Boolean>(
             txR,
             null,
-            false);
+            true);
   }
 
   public String getCbcContractAddress() {
     return this.crossBlockchainControlContract.getContractAddress();
   }
-
-  public boolean getRootEventSuccess() {
-    return this.rootEventSuccess;
-  }
-
 
 
   // TODO this is common code between gpact and this.
@@ -164,5 +167,14 @@ public class SimpleCrossControlManager extends AbstractBlockchain {
     throw new Exception("Event not found in transaction receipt");
   }
 
+  private void dumpCrossCallEvent(SimpleCrosschainControl.CrossCallEventResponse event) {
+    LOG.debug(" Cross Call Event:");
+    LOG.debug("   Tx Id: 0x{}", new BigInteger(1, event._txId).toString(16));
+    LOG.debug("   Timestamp: {}", event._timestamp);
+    LOG.debug("   Caller: {}", event._caller);
+    LOG.debug("   Dest BdId: 0x{}", event._destBcId.toString(16));
+    LOG.debug("   Dest Contract: {}", event._destContract);
+    LOG.debug("   Dest Function Call: {}", new BigInteger(1, event._destFunctionCall).toString(16));
+  }
 
 }
