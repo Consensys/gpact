@@ -1,4 +1,10 @@
-# Hotel - Train Example
+Hotel - Train Example
+----------------
+This example demonstrates how the hotel - train problem can be solved
+using GPACT. The hotel - train problem is: a travel agency wants to 
+book a hotel and a train. However, they don't want the hotel booking
+if the train seat is not available, and vise-versa.
+
 
 ## Introduction
 This sample demonstrates:
