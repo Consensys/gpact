@@ -9,8 +9,3 @@ To spin up three blockchains:
 docker compose up
 ```
 
-To spin up five blockchains:
-
-```
-docker compose -f docker-compose-5blockchains.yml up
-```
