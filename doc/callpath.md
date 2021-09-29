@@ -1,6 +1,9 @@
 # Call Tree and Call Path Format
 
-Call Trees are RLP encoded data structures that represent the entry-point
+TODO: The wording below is out of date. The encoding has changed 
+since this was written.
+
+Call Trees are encoded data structures that represent the entry-point
 function calls to each blockchain that are expected to be called in a
 crosschain function call. Call Paths are used to identify function 
 calls within a call tree. This document describes the format of Call
@@ -17,11 +20,11 @@ This is the standard encoding used by Ethereum for calling functions in transact
 
 This data is encoded as:
 ```text
-EncodedFunction = RLP List {
-  RLP String(256 bit blockchain ID)
-  RLP String(160 bit contract address)
-  RLP String(Function call data)
-}
+EncodedFunction = abi.encode(
+  (256 bit blockchain ID)
+  (160 bit contract address)
+  (Function call data)
+)
 ```
 
 A call tree consists of a root node, intermediate nodes, and 
@@ -30,7 +33,7 @@ then a() is the root, c() and d() are leaf nodes, and b() is an
 intermediate node. The nodes are encoded in the following way:
 
 * LeafNode encoded as an EncodedFunction
-* IntermediateNode encoded as RLPList of:
+* IntermediateNode encoded as abi.encode of:
     * EncodedFunction representing the IntermediateNode itself.
     * Multiple IntermediateNodes or LeafNodes. The encoding is in 
      order in which the functions are called.  
@@ -38,9 +41,9 @@ intermediate node. The nodes are encoded in the following way:
 
 Hence, the call tree described above would be encoded:
 ```text
-RLPList {
+{
     EncodedFunction for a()
-    RLPList {
+    {
         EncodedFunction for b()
         EncodedFunction for d()
     }

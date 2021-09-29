@@ -8,26 +8,89 @@ The GPACT Protocol is described in this paper: https://arxiv.org/abs/2011.12783.
 
 ## Crosschain Protocol Layers
 GPACT forms part of an overall crosschain protocol stack as shown in the diagram below.
+The links in the table below will take you to implementations of those parts 
+of the protocol stack.
 
-![Crosschain Protocol Layers](https://raw.githubusercontent.com/ConsenSys/gpact/master/doc/images/layers.png "Crosschain Protocol Layers")
+<table>
+<thead>
+<tr>
+  <th>Crosschain Protocol Layer</th>
+  <th>Atomic Updates</th>
+  <th>Not Atomic Updates</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td rowspan=2>Crosschain Applications</td>
+  <td>Examples: <br>
+    <a href="https://github.com/ConsenSys/gpact/tree/main/application/gpact-examples/conditional">Conditional Execution</a><br>
+    <a href="https://github.com/ConsenSys/gpact/tree/main/application/gpact-examples/hotel-train">Hotel Train problem (3 blockchains)</a><br>
+    <a href="https://github.com/ConsenSys/gpact/tree/main/application/gpact-examples/read">Read across chains</a><br>
+    <a href="https://github.com/ConsenSys/gpact/tree/main/application/gpact-examples/tokenbridge">ERC20 Token Bridge</a><br>
+    <a href="https://github.com/ConsenSys/gpact/tree/main/application/gpact-examples/trade">Trade-Finance (5 blockchains)</a><br>
+    <a href="https://github.com/ConsenSys/gpact/tree/main/application/gpact-examples/write">Write across chains</a><br>
+  </td>
+  <td rowspan="2">Examples:
+    <a href="https://github.com/ConsenSys/gpact/tree/main/application/sfc-examples/write">Write across chains</a><br>
+  </td>
+</tr>
+<tr>
+  <td>Helper contracts:<br>
+    <a href="https://github.com/ConsenSys/gpact/tree/main/application/appcontracts/erc20">Crosschain ERC20</a><br>
+    <a href="https://github.com/ConsenSys/gpact/tree/main/application/appcontracts/erc20">Lockable storage</a><br>
+  </td>
+</tr>
+<tr>
+  <td rowspan="2">Crosschain Function Calls</td>
+  <td colspan=2>
+    <a href="https://github.com/ConsenSys/gpact/tree/main/functioncall/interface">Interfaces</a><br>
+  </td>
+</tr>
+<tr>
+  <td>
+    <a href="https://github.com/ConsenSys/gpact/tree/main/functioncall/gpact">General Purpose Atomic Crosschain Transaction (GPACT)</a><br>
+  </td>
+  <td>
+    <a href="https://github.com/ConsenSys/gpact/tree/main/functioncall/sfc">Simple Function Call (SFC)</a><br>
+  </td>
+</tr>
+<tr>
+  <td rowspan="2">Crosschain Messaging</td>
+  <td colspan=2>
+    <a href="https://github.com/ConsenSys/gpact/tree/main/messaging/interface">Interfaces</a><br>
+  </td>
+</tr>
+<tr>
+  <td colspan=2>
+    Messaging implementations:<br>
+    <a href="https://github.com/ConsenSys/gpact/tree/main/messaging/attestor-sign">Attestor Signing</a><br>
+    <a href="https://github.com/ConsenSys/gpact/tree/main/messaging/txroot-transfer">Transaction Receipt Root Transfer</a><br>
+  </td>
+</tr>
+</tbody>
+</table>
+
 
 Applications use the Crosschain Function Call code to execute function calls across blockchains.
 Crosschain Function Call code uses Crosschain Message Verification to ensure information from
 one blockchain is trusted on another blockchain. The layers of the protocol stack are separated
 by interfaces. Using common interfaces allows applications to use a variety of crosschain 
 function call implementations, and for crosschain function call implementations to use a variety
-of crosschain message verificaiton implementations. Importantly, this allows for different
-crosschain message verification systems to be used for different blockchains and rollups. It
+of crosschain messaging implementations. Importantly, this allows for different
+crosschain messaging systems to be used for different blockchains and rollups. It
 allows applications to choose use lighter weight non-atomic function call approaches 
 (which may be less costly and have lower latency) for low cost and less important transactions
 and fully atomic protocols such as GPACT for more important business critical transactions.
 
-The code is arranged in the following main directories:
-* application: Example code plus "appcontracts" that provide example
-  implementations for lockable storage and crosschain ERC20.
-* functioncall: GPACT, other function call protocols, and interfaces. 
-* messaging: Crosschain message verification protocols and interfaces.
+Applications that are written for atomic crosschain function protocols will 
+be different to non-atomic function call protocols, because the non-atomic
+implementations need to handle failures where an execution occurs on a source
+blockchain by not a destination blockchain. 
 
+It is expected that more Crosschain Messaging and Crosschain Function Call
+implementations will be written. Additionally, more example 
+application code will be written. Please get in contact if you are interested
+in writing an implementation or an example.
 
 ## GPACT
 
@@ -70,8 +133,6 @@ anonymous. A crosschain transaction capability is needed to meet these requireme
 [How to build](https://github.com/ConsenSys/gpact/blob/master/doc/build.md)
 
 [Reproducing Performance Results](https://github.com/ConsenSys/gpact/blob/master/doc/perf.md)
-
-[Directories in this Repo](https://github.com/ConsenSys/gpact/blob/master/doc/directories.md)
 
 
 
