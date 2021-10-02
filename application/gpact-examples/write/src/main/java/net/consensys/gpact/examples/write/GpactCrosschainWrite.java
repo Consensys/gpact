@@ -70,8 +70,7 @@ public class GpactCrosschainWrite {
     SimContractA simContractA = new SimContractA(bc1ContractABlockchain, simContractB);
 
 
-    int numExecutions = 0;
-    while (true) {
+    for (int numExecutions = 0; numExecutions < NUM_TIMES_EXECUTE; numExecutions++) {
       LOG.info("Execution: {} **************************", numExecutions);
       StatsHolder.log("Execution: " + numExecutions + " **************************");
 
@@ -103,10 +102,6 @@ public class GpactCrosschainWrite {
       TransactionReceipt txR = executor.getTransationReceipt(callP);
       bc2ContractBBlockchain.showEvents(txR);
       bc2ContractBBlockchain.showValueWritten();
-
-      if (++numExecutions >= NUM_TIMES_EXECUTE) {
-        break;
-      }
     }
 
 

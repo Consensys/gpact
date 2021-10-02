@@ -50,7 +50,7 @@ public class EntityTravelAgency extends AbstractBlockchain {
         this.travelAgency = TravelAgency.deploy(this.web3j, this.tm, this.gasProvider,
                 hotelBcId.asBigInt(), hotelContractAddress, trainBcId.asBigInt(), trainContractAddress).send();
         LOG.info("  Travel Agency Contract deployed on blockchain {}, at address: {}",
-            this.blockchainId, this.travelAgency.getContractAddress());
+                this.blockchainId, this.travelAgency.getContractAddress());
     }
 
     public BigInteger book(final int date) throws Exception {
@@ -79,7 +79,16 @@ public class EntityTravelAgency extends AbstractBlockchain {
     public String getTravelAgencyAccount() {
         return this.credentials.getAddress();
     }
+
     public String getTravelContractAddress() {
         return this.travelAgency.getContractAddress();
+    }
+
+    public BigInteger separatedBookHotelAndTrain(int date) throws Exception {
+        BigInteger uniqueBookingId = this.notRandom;
+        this.notRandom = this.notRandom.add(BigInteger.ONE);
+        TransactionReceipt txr = this.travelAgency.separatedBookHotelAndTrain(BigInteger.valueOf(date), uniqueBookingId).send();
+        StatsHolder.logGas("Separated Travel Agency book", txr.getGasUsed());
+        return uniqueBookingId;
     }
 }

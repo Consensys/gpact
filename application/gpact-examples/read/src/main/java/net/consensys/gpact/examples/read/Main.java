@@ -74,8 +74,7 @@ public class Main {
     SimContractA simContractA = new SimContractA(bc1ContractABlockchain);
     SimContractB simContractB = new SimContractB(bc2ContractBBlockchain);
 
-    int numExecutions = 0;
-    while (true) {
+    for (int numExecutions = 0; numExecutions < NUM_TIMES_EXECUTE; numExecutions++) {
       LOG.info("Execution: {}  *****************", numExecutions);
       StatsHolder.log("Execution: " + numExecutions + " **************************");
 
@@ -102,11 +101,6 @@ public class Main {
       TransactionReceipt txR = executor.getTransationReceipt(callP);
       bc1ContractABlockchain.showEvents(txR);
       bc1ContractABlockchain.showValueRead();
-
-
-      if (++numExecutions >= NUM_TIMES_EXECUTE) {
-        break;
-      }
     }
 
 

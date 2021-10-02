@@ -1,16 +1,27 @@
 package net.consensys.gpact.examples.singlebc.read.soliditywrappers;
 
+import io.reactivex.Flowable;
+import io.reactivex.functions.Function;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import org.web3j.abi.EventEncoder;
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.TypeReference;
-import org.web3j.abi.datatypes.Function;
+import org.web3j.abi.datatypes.Event;
 import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.RemoteCall;
 import org.web3j.protocol.core.RemoteFunctionCall;
+import org.web3j.protocol.core.methods.request.EthFilter;
+import org.web3j.protocol.core.methods.response.BaseEventResponse;
+import org.web3j.protocol.core.methods.response.Log;
+import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.tx.Contract;
 import org.web3j.tx.TransactionManager;
 import org.web3j.tx.gas.ContractGasProvider;
@@ -26,9 +37,15 @@ import org.web3j.tx.gas.ContractGasProvider;
  */
 @SuppressWarnings("rawtypes")
 public class ContractB extends Contract {
-    public static final String BINARY = "608060405234801561001057600080fd5b506040516100d63803806100d683398101604081905261002f91610037565b600055610050565b60006020828403121561004957600080fd5b5051919050565b60788061005e6000396000f3fe6080604052348015600f57600080fd5b506004361060285760003560e01c80636d4ce63c14602d575b600080fd5b60005460405190815260200160405180910390f3fea2646970667358221220bc68fa1d16807b7f404eb8d9fe9c4bdd23fbf9965e99649d39b5269e7672a7fb64736f6c63430008050033";
+    public static final String BINARY = "608060405234801561001057600080fd5b5060405161012438038061012483398101604081905261002f91610037565b600055610050565b60006020828403121561004957600080fd5b5051919050565b60c68061005e6000396000f3fe6080604052348015600f57600080fd5b506004361060325760003560e01c80636d4ce63c146037578063c1a24b6c14604c575b600080fd5b60005460405190815260200160405180910390f35b60526054565b005b7f9ebbca46e60e984aa522942ae547e34cddc84dec1c85971a1e80b27a23231b8a607d60005490565b60405190815260200160405180910390a156fea2646970667358221220384406a90089b8a74293a4e1ef6a8f6a9ef5a0a22c363522a8c466b7f013e45464736f6c63430008050033";
 
     public static final String FUNC_GET = "get";
+
+    public static final String FUNC_GETASTRANSACTION = "getAsTransaction";
+
+    public static final Event DUMP_EVENT = new Event("Dump", 
+            Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}));
+    ;
 
     @Deprecated
     protected ContractB(String contractAddress, Web3j web3j, Credentials credentials, BigInteger gasPrice, BigInteger gasLimit) {
@@ -48,11 +65,50 @@ public class ContractB extends Contract {
         super(BINARY, contractAddress, web3j, transactionManager, contractGasProvider);
     }
 
+    public List<DumpEventResponse> getDumpEvents(TransactionReceipt transactionReceipt) {
+        List<Contract.EventValuesWithLog> valueList = extractEventParametersWithLog(DUMP_EVENT, transactionReceipt);
+        ArrayList<DumpEventResponse> responses = new ArrayList<DumpEventResponse>(valueList.size());
+        for (Contract.EventValuesWithLog eventValues : valueList) {
+            DumpEventResponse typedResponse = new DumpEventResponse();
+            typedResponse.log = eventValues.getLog();
+            typedResponse._val = (BigInteger) eventValues.getNonIndexedValues().get(0).getValue();
+            responses.add(typedResponse);
+        }
+        return responses;
+    }
+
+    public Flowable<DumpEventResponse> dumpEventFlowable(EthFilter filter) {
+        return web3j.ethLogFlowable(filter).map(new Function<Log, DumpEventResponse>() {
+            @Override
+            public DumpEventResponse apply(Log log) {
+                Contract.EventValuesWithLog eventValues = extractEventParametersWithLog(DUMP_EVENT, log);
+                DumpEventResponse typedResponse = new DumpEventResponse();
+                typedResponse.log = log;
+                typedResponse._val = (BigInteger) eventValues.getNonIndexedValues().get(0).getValue();
+                return typedResponse;
+            }
+        });
+    }
+
+    public Flowable<DumpEventResponse> dumpEventFlowable(DefaultBlockParameter startBlock, DefaultBlockParameter endBlock) {
+        EthFilter filter = new EthFilter(startBlock, endBlock, getContractAddress());
+        filter.addSingleTopic(EventEncoder.encode(DUMP_EVENT));
+        return dumpEventFlowable(filter);
+    }
+
     public RemoteFunctionCall<BigInteger> get() {
-        final Function function = new Function(FUNC_GET, 
+        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(FUNC_GET, 
                 Arrays.<Type>asList(), 
                 Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}));
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
+    }
+
+    public RemoteFunctionCall<TransactionReceipt> getAsTransaction() {
+        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
+                FUNC_GETASTRANSACTION, 
+                Arrays.<Type>asList(), 
+                Collections.<TypeReference<?>>emptyList());
+        return executeRemoteCallTransaction(function);
     }
 
     @Deprecated
@@ -93,5 +149,9 @@ public class ContractB extends Contract {
     public static RemoteCall<ContractB> deploy(Web3j web3j, TransactionManager transactionManager, BigInteger gasPrice, BigInteger gasLimit, BigInteger _val) {
         String encodedConstructor = FunctionEncoder.encodeConstructor(Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_val)));
         return deployRemoteCall(ContractB.class, web3j, transactionManager, gasPrice, gasLimit, BINARY, encodedConstructor);
+    }
+
+    public static class DumpEventResponse extends BaseEventResponse {
+        public BigInteger _val;
     }
 }
