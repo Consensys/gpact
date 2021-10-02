@@ -29,7 +29,7 @@ public class Main {
   static final Logger LOG = LogManager.getLogger(Main.class);
 
   // Running multiple times will reveal any gas difference due to rerunning.
-  static int NUM_TIMES_EXECUTE = 4;
+  static int NUM_TIMES_EXECUTE = 3;
 
   public static void main(String[] args) throws Exception {
     StatsHolder.log("Example: Single Blockchain: Write");
@@ -54,20 +54,19 @@ public class Main {
     String contractBContractAddress = bc2ContractBBlockchain.contractB.getContractAddress();
 
     bc1ContractABlockchain.deployContracts(contractBContractAddress);
-    String contractAContractAddress = bc1ContractABlockchain.contractA.getContractAddress();
 
-    int numExecutions = 0;
-    while (true) {
+    for (int numExecutions = 0; numExecutions < NUM_TIMES_EXECUTE; numExecutions++) {
       LOG.info("Execution: {}  *****************", numExecutions);
       StatsHolder.log("Execution: " + numExecutions + " **************************");
+
 
       TransactionReceipt txR = bc1ContractABlockchain.doWrite(val);
       bc2ContractBBlockchain.showEvents(txR);
       bc2ContractBBlockchain.showValueWritten();
 
-      if (++numExecutions >= NUM_TIMES_EXECUTE) {
-        break;
-      }
+      txR = bc2ContractBBlockchain.separatedDoWrite(val);
+      bc2ContractBBlockchain.showEvents(txR);
+      bc2ContractBBlockchain.showValueWritten();
     }
 
 

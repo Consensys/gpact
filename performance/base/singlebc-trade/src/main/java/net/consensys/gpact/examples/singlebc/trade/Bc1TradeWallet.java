@@ -71,8 +71,25 @@ public class Bc1TradeWallet extends AbstractBlockchain {
 
   public TransactionReceipt executeTrade(String seller, BigInteger quantity) throws Exception {
     TransactionReceipt txR = this.tradeWalletContract.executeTrade(seller, quantity).send();
-    BigInteger gasCost = txR.getGasUsed();
-    StatsHolder.logGas("Execute Trade", gasCost);
+    StatsHolder.logGas("Execute Trade", txR.getGasUsed());
+    return txR;
+  }
+
+  public TransactionReceipt separatedExecuteTrade(String seller, BigInteger quantity) throws Exception {
+    TransactionReceipt txR = this.tradeWalletContract.separatedExecuteTrade(seller, quantity).send();
+    StatsHolder.logGas("Separated Execute Trade", txR.getGasUsed());
+    return txR;
+  }
+
+  public TransactionReceipt separatedBalanceTransfer(String from, String to, BigInteger amount) throws Exception {
+    TransactionReceipt txR = this.balancesContract.transfer(from, to, amount).send();
+    StatsHolder.logGas("Separated Balance Transfer", txR.getGasUsed());
+    return txR;
+  }
+
+  public TransactionReceipt separatedStockDelivery(String from, String to, BigInteger amount) throws Exception {
+    TransactionReceipt txR = this.stockContract.delivery(from, to, amount).send();
+    StatsHolder.logGas("Separated Stock Shipment", txR.getGasUsed());
     return txR;
   }
 

@@ -82,6 +82,25 @@ contract Hotel {
         require(false, "No rooms available");
     }
 
+    function separatedBookRoom(uint256 _date, uint256 _uniqueId, uint256 _maxAmountToPay)  onlyOwner external {
+        require(_date != 0, "Date can not be zero");
+        for (uint i = 0; i < numRooms; i++) {
+            uint256 rate = rooms[i].roomRate;
+            // If amount is OK and the room is available.
+            if (rate <= _maxAmountToPay && rooms[i].bookedBy[_date] == address(0)) {
+                // Book room
+                rooms[i].bookedBy[_date] = tx.origin;
+                bookingRefToRoomNumber[_uniqueId] = i;
+                bookingRefToDate[_uniqueId] = _date;
+                // Pay for room.
+                erc20.transferFrom(approvedTravelAgencies[msg.sender], owner, rate);
+                return;
+            }
+        }
+        require(false, "No rooms available");
+    }
+
+
     function getBookingInformation(uint256 _uniqueId) external view returns (uint256 amountPaid, uint256 roomId, uint256 date) {
         roomId = bookingRefToRoomNumber[_uniqueId];
         date = bookingRefToDate[_uniqueId];

@@ -15,11 +15,13 @@
 package net.consensys.gpact.examples.singlebc.read;
 
 import net.consensys.gpact.common.BlockchainId;
+import net.consensys.gpact.common.StatsHolder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
 import net.consensys.gpact.common.AbstractBlockchain;
 import net.consensys.gpact.examples.singlebc.read.soliditywrappers.ContractB;
+import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
 
 import java.io.IOException;
@@ -38,5 +40,11 @@ public class Bc2ContractB extends AbstractBlockchain {
     this.contractB = ContractB.deploy(this.web3j, this.tm, this.gasProvider, val).send();
     LOG.info("ContractB deployed to {} on blockchain {}",
         this.contractB.getContractAddress(), this.blockchainId);
+  }
+
+  public TransactionReceipt separatedGet() throws Exception {
+    TransactionReceipt txR = this.contractB.getAsTransaction().send();
+    StatsHolder.logGas("Separated Get", txR.getGasUsed());
+    return txR;
   }
 }

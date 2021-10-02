@@ -49,6 +49,11 @@ contract TravelAgency  {
         confirmedBookingDates.push(_date);
     }
 
+    function separatedBookHotelAndTrain(uint256 _date, uint256 _uniqueId) public {
+        require(msg.sender == owner, "Only owner can do bookings");
+        confirmedBookingIds.push(_uniqueId);
+        confirmedBookingDates.push(_date);
+    }
 
     function bookingConfirmed(uint256 _bookingId) public view returns (bool) {
         // TODO use a maps as well as array

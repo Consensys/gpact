@@ -64,8 +64,7 @@ public class HotelTrain {
 
         String[] accounts = new String[]{travelAgency.getTravelAgencyAccount(), hotel.getHotelContractAddress(), train.getHotelContractAddress()};
 
-        int numExecutions = 0;
-        while (true) {
+        for (int numExecutions = 0; numExecutions < NUM_TIMES_EXECUTE; numExecutions++) {
             LOG.info("Execution: {}  *****************", numExecutions);
             StatsHolder.log("Execution: " + numExecutions + " **************************");
 
@@ -105,10 +104,6 @@ public class HotelTrain {
             train.showErc20Allowance(travelAgency.getTravelAgencyAccount(), train.getHotelContractAddress());
 
             date++;
-
-            if (++numExecutions >= NUM_TIMES_EXECUTE) {
-                break;
-            }
         }
 
 

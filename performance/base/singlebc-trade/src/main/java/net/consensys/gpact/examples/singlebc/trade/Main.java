@@ -74,6 +74,14 @@ public class Main {
     BigInteger quantity = BigInteger.valueOf(7);
 
     TransactionReceipt txR = bc1TradeWalletBlockchain.executeTrade(sellerAddress, quantity);
+    LOG.info("Execute Trade: {}", txR);
+
+    txR = bc1TradeWalletBlockchain.separatedExecuteTrade(sellerAddress, quantity);
+    LOG.info("Separated Execute Trade: {}", txR);
+    txR = bc1TradeWalletBlockchain.separatedBalanceTransfer(buyerAddress, sellerAddress, quantity);
+    LOG.info("Separated Balance Transfer: {}", txR);
+    txR = bc1TradeWalletBlockchain.separatedStockDelivery(sellerAddress, buyerAddress, quantity);
+    LOG.info("Separated Stock Shipment: {}", txR);
 
     bc1TradeWalletBlockchain.showAllTrades();
 

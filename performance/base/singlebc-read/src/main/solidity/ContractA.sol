@@ -32,6 +32,11 @@ contract ContractA {
         emit ValueRead(val);
     }
 
+    function separatedDoRead(uint256 _val) external {
+        emit ValueRead(_val);
+    }
+
+
     function getVal() external view returns(uint256) {
         return val;
     }

@@ -37,6 +37,15 @@ contract TradeWallet {
         emit Trade(tradeId);
     }
 
+    function separatedExecuteTrade(address _seller, uint256 _quantity) public {
+        bytes32 tradeId = keccak256(abi.encodePacked(_seller, tx.origin, _quantity));
+
+        trades.push() = uint256(tradeId);
+
+        emit Trade(tradeId);
+    }
+
+
     function getNumTrades() external view returns (uint256) {
         return trades.length;
     }

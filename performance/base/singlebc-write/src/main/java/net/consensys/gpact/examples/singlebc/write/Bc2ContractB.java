@@ -15,6 +15,7 @@
 package net.consensys.gpact.examples.singlebc.write;
 
 import net.consensys.gpact.common.BlockchainId;
+import net.consensys.gpact.common.StatsHolder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
@@ -24,6 +25,7 @@ import net.consensys.gpact.examples.singlebc.write.soliditywrappers.ContractB;
 
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.List;
 
 public class Bc2ContractB extends AbstractBlockchain {
@@ -51,5 +53,12 @@ public class Bc2ContractB extends AbstractBlockchain {
 
   public void showValueWritten() throws Exception {
     LOG.info("ContractB: Value: {}", this.contractB.getVal().send());
+  }
+
+  public TransactionReceipt separatedDoWrite(BigInteger val) throws Exception {
+    TransactionReceipt txR = this.contractB.set(val).send();
+    StatsHolder.logGas("doSeparatedWrite", txR.getGasUsed());
+    return txR;
+
   }
 }
