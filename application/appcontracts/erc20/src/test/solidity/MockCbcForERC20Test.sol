@@ -47,12 +47,6 @@ contract MockCbcForERC20Test is CrosschainFunctionCallInterface, CrosschainLocki
     }
 
 
-    function whoCalledMe() external pure override returns (uint256 theRootBlockchainId, uint256 parentBlockchainId, address parentContract) {
-        return (0, 0, address(0));
-
-    }
-
-
     function addToListOfLockedContracts(address _contractToLock) external override {
         // Don't add the same contract twice. So, check the contract isn't in
         // the array first.

@@ -40,12 +40,12 @@ contract TravelAgency is LockableStorage {
     }
 
     function bookHotelAndTrain(uint256 _date, uint256 _bookingId) public {
-        require(msg.sender == address(crossBlockchainControl), "Should only be called by Crosschain Control Contract");
+        require(msg.sender == address(cbc), "Should only be called by Crosschain Control Contract");
         require(tx.origin == owner, "Only owner can do bookings");
 
-        CrosschainFunctionCallInterface(address(crossBlockchainControl)).crossBlockchainCall(hotelBlockchainId, address(hotelContract),
+        CrosschainFunctionCallInterface(address(cbc)).crossBlockchainCall(hotelBlockchainId, address(hotelContract),
             abi.encodeWithSelector(hotelContract.bookRoom.selector, _date, _bookingId, 100));
-        CrosschainFunctionCallInterface(address(crossBlockchainControl)).crossBlockchainCall(trainBlockchainId, address(trainContract),
+        CrosschainFunctionCallInterface(address(cbc)).crossBlockchainCall(trainBlockchainId, address(trainContract),
             abi.encodeWithSelector(trainContract.bookRoom.selector, _date, _bookingId, 100));
 
         setMapValue(CONFIRMED_BOOKINGS_MAP, _bookingId, _date);

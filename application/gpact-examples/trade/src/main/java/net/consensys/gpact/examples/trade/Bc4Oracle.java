@@ -34,9 +34,9 @@ public class Bc4Oracle extends AbstractBlockchain {
   }
 
 
-  public void deployContracts(String cbcContractAddress) throws Exception {
+  public void deployContracts() throws Exception {
     this.priceOracleContract =
-        PriceOracle.deploy(this.web3j, this.tm, this.gasProvider, cbcContractAddress).send();
+        PriceOracle.deploy(this.web3j, this.tm, this.gasProvider).send();
     LOG.info("Price Oracle contract deployed to {}, on blockchain {}",
         this.priceOracleContract.getContractAddress(), this.blockchainId);
   }

@@ -70,7 +70,7 @@ public class Main {
     String balancesContractAddress = bc3BalancesBlockchain.balancesContract.getContractAddress();
 
     BlockchainId bc4BcId = bc4OracleBlockchain.getBlockchainId();
-    bc4OracleBlockchain.deployContracts(crossControlManagerGroup.getCbcAddress(bc4BcId));
+    bc4OracleBlockchain.deployContracts();
     String priceOracleContractAddress = bc4OracleBlockchain.priceOracleContract.getContractAddress();
 
     BlockchainId bc5BcId = bc5StockBlockchain.getBlockchainId();

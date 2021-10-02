@@ -15,12 +15,14 @@
 pragma solidity ^0.8.0;
 
 import "./LockableERC20.sol";
+import "../../../../../../functioncall/interface/src/main/solidity/HiddenParameters.sol";
+
 
 /**
  * Implementation of the {IERC20} interface that allows tokens to be transferred
  * across blockchains using the GPACT.
  */
-contract CrosschainERC20 is LockableERC20 {
+contract CrosschainERC20 is LockableERC20, HiddenParameters {
     // ERC 20 contracts for the token represented by this contract
     // on remote blockchains.
     mapping (uint256 => address) public remoteERC20s;
@@ -75,12 +77,14 @@ contract CrosschainERC20 is LockableERC20 {
 
 
     function crosschainReceiver(address recipient, uint256 amount) external {
-        require(!cbc.isSingleBlockchainCall(), "Must be part of crosschain call");
+        require(msg.sender == address(cbc), "Must be part of crosschain call");
+
 
         // Check that the calling contract was the ERC 20 linked to this one from
         // the source blockchain.
         // TODO only allow approved Root Blockchains
-        (, uint256 sourceBlockchainId, address sourceContract) = cbc.whoCalledMe();
+        (, uint256 sourceBlockchainId, uint256 sourceContract1) = extractThreeHiddenParams();
+        address sourceContract = address(uint160(sourceContract1));
         require(sourceContract == remoteERC20s[sourceBlockchainId], "Source is not correct ERC20");
 
         mintInternal(recipient, amount);
@@ -88,14 +92,14 @@ contract CrosschainERC20 is LockableERC20 {
 
 
     function crosschainTransferInternal(uint256 blockchainId, address sender, address recipient, uint256 amount) internal {
-        require(!cbc.isSingleBlockchainCall(), "Must be part of crosschain call");
+        require(msg.sender == address(cbc), "Must be part of crosschain call");
 
         burnInternal(sender, amount);
 
         address remoteERC20Contract = remoteERC20s[blockchainId];
         require(remoteERC20Contract != address(0), "No ERC 20 registered for remote blockchain");
 
-        CrosschainFunctionCallInterface(address(crossBlockchainControl)).crossBlockchainCall(blockchainId, address(remoteERC20Contract),
+        CrosschainFunctionCallInterface(address(cbc)).crossBlockchainCall(blockchainId, address(remoteERC20Contract),
             abi.encodeWithSelector(this.crosschainReceiver.selector, recipient, amount));
     }
 }

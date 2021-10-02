@@ -36,18 +36,18 @@ contract RootBlockchainContract is LockableStorage {
     function someComplexBusinessLogic(uint256 _val) external {
         // Use the value on the other blockchain as a threshold
         uint256 valueFromOtherBlockchain =
-            CrosschainFunctionCallReturnInterface(address(crossBlockchainControl)).crossBlockchainCallReturnsUint256(
+            CrosschainFunctionCallReturnInterface(address(cbc)).crossBlockchainCallReturnsUint256(
             otherBlockchainId, address(otherContract), abi.encodeWithSelector(otherContract.getVal.selector));
         setVal2(valueFromOtherBlockchain);
 
         if (_val > valueFromOtherBlockchain) {
-            CrosschainFunctionCallInterface(address(crossBlockchainControl)).crossBlockchainCall(otherBlockchainId, address(otherContract),
+            CrosschainFunctionCallInterface(address(cbc)).crossBlockchainCall(otherBlockchainId, address(otherContract),
                 abi.encodeWithSelector(otherContract.setValues.selector, _val, valueFromOtherBlockchain));
             setVal1(valueFromOtherBlockchain);
         }
         else {
             uint256 valueToSet = _val + 13;
-            CrosschainFunctionCallInterface(address(crossBlockchainControl)).crossBlockchainCall(otherBlockchainId, address(otherContract),
+            CrosschainFunctionCallInterface(address(cbc)).crossBlockchainCall(otherBlockchainId, address(otherContract),
                 abi.encodeWithSelector(otherContract.setVal.selector, valueToSet));
             setVal1(_val);
         }

@@ -20,10 +20,11 @@ import "./CallPathCallExecutionTree.sol";
 import "../../../../interface/src/main/solidity/LockableStorageInterface.sol";
 import "../../../../interface/src/main/solidity/CrosschainLockingInterface.sol";
 import "../../../../interface/src/main/solidity/CrosschainFunctionCallReturnInterface.sol";
+import "../../../../interface/src/main/solidity/HiddenParameters.sol";
 
 
 contract CrosschainControl is CrosschainFunctionCallReturnInterface, CbcDecVer, CallPathCallExecutionTree,
-    CrosschainLockingInterface {
+    CrosschainLockingInterface, HiddenParameters {
 
 
     event Start(uint256 _crossBlockchainTransactionId, address _caller, uint256 _timeout, bytes _callGraph);
@@ -63,11 +64,6 @@ contract CrosschainControl is CrosschainFunctionCallReturnInterface, CbcDecVer, 
     // Storage variables that are stored for the life of a transaction. They need to
     // be available in storage as code calls back into this contract.
     // -----------------------------------------------------------------------------
-    // The root blockchain for the currently executing cross-blockchain call. Used to detect if there is a
-    // cross-blockchain call occurring and to determine the root blockchain id for the call locking a
-    // contract.
-    uint256 public activeCallRootBlockchainId;
-
     // Combination of root blockchain id and crosschain transaction id of the
     // currently executing crosschain call. Used for locking. Provisional
     // values are stored against this id.
@@ -93,10 +89,6 @@ contract CrosschainControl is CrosschainFunctionCallReturnInterface, CbcDecVer, 
 
     // Indicates the current call segment has failed.
     bool private activeCallFailed;
-
-    // Contract that called the target function.
-    uint256 private activeCallParentBlockchainId;
-    address private activeCallParentContract;
 
     constructor(uint256 _myBlockchainId) {
         myBlockchainId = _myBlockchainId;
@@ -148,8 +140,6 @@ contract CrosschainControl is CrosschainFunctionCallReturnInterface, CbcDecVer, 
         }
         bytes32 hashOfCallGraph = keccak256(callGraph);
 
-        activeCallRootBlockchainId = rootBcId;
-
         // No need to store call graph or call path if this is a leaf segment / function
         if (_eventData.length > 1) {
             activeCallGraph = callGraph;
@@ -162,12 +152,10 @@ contract CrosschainControl is CrosschainFunctionCallReturnInterface, CbcDecVer, 
 
         // Set-up root blockchain / crosschain transaction value used for locking.
         activeCallCrosschainRootTxId = calcRootTxId(rootBcId, crosschainTransactionId);
-        // Set-up values to be returned if whoCalledMe is called
-        prepareForWhoCalledMe(callGraph, _callPath);
 
         bool isSuccess;
         bytes memory returnValueEncoded;
-        (isSuccess, returnValueEncoded) = makeCall(callGraph, _callPath);
+        (isSuccess, returnValueEncoded) = makeCall(callGraph, _callPath, rootBcId);
 
         // TODO emit segments understanding of root blockhain id
         emit Segment(crosschainTransactionId, hashOfCallGraph, _callPath, activeCallLockedContracts, isSuccess, returnValueEncoded);
@@ -195,7 +183,6 @@ contract CrosschainControl is CrosschainFunctionCallReturnInterface, CbcDecVer, 
         //Check that the blockchain Id that can be used with the transaction receipt for verification matches this
         // blockchain. That is, check that this is the root blockchain.
         require(myBlockchainId == rootBcId, "This is not the root blockchain");
-        activeCallRootBlockchainId = rootBcId;
 
         // Ensure this is the crosschain control contract that generated the start event.
         require(address(this) == _cbcAddresses[0], "Root blockchain CBC contract was not this one");
@@ -249,7 +236,7 @@ contract CrosschainControl is CrosschainFunctionCallReturnInterface, CbcDecVer, 
         activeCallCrosschainRootTxId = crosschainRootTxId;
 
         bool isSuccess;
-        (isSuccess, ) = makeCall(callGraph, callPathForStart);
+        (isSuccess, ) = makeCall(callGraph, callPathForStart, rootBcId);
 
         // Unlock contracts locked by the root transaction.
         for (uint256 i = 0; i < activeCallLockedContracts.length; i++) {
@@ -350,32 +337,37 @@ contract CrosschainControl is CrosschainFunctionCallReturnInterface, CbcDecVer, 
     }
 
 
-    /**
-     * @return false if the current transaction execution is part of a cross-blockchain call\.
-     */
-    function isSingleBlockchainCall() public override view returns (bool) {
-        return bytes32(0) == activeCallCrosschainRootTxId;
-    }
-
     function getActiveCallCrosschainRootTxId() public override view returns (bytes32) {
         return activeCallCrosschainRootTxId;
     }
 
-    function whoCalledMe() external view override returns (uint256 rootBlockchainId, uint256 parentBlockchainId, address parentContract) {
-        return (activeCallRootBlockchainId, activeCallParentBlockchainId, activeCallParentContract);
+    function isSingleBlockchainCall() public override view returns (bool) {
+        return activeCallCrosschainRootTxId == 0;
     }
 
     // **************************** PRIVATE BELOW HERE ***************************
     // **************************** PRIVATE BELOW HERE ***************************
     // **************************** PRIVATE BELOW HERE ***************************
 
-    function makeCall(bytes memory _callGraph, uint256[] memory _callPath) private returns(bool, bytes memory) {
+    function makeCall(bytes memory _callGraph, uint256[] memory _callPath, uint256 _rootBcId) private returns(bool, bytes memory) {
         (uint256 targetBlockchainId, address targetContract, bytes memory functionCall) = extractTargetFromCallGraph(_callGraph, _callPath, true);
         require(targetBlockchainId == myBlockchainId, "Target blockchain id does not match my blockchain id");
 
+        // Add application authentication information to the end of the call data.
+        // For root transaction have parentBcId and parentContract == 0
+        uint256 parentBcId;
+        address parentContract;
+        if (!(_callPath.length == 1 && _callPath[0] == 0)) {
+            // If not root transaction
+            uint256[] memory parentCallPath = determineParentCallPath(_callPath);
+            (parentBcId, parentContract, /* bytes memory parentFunctionCall */ ) =
+            extractTargetFromCallGraph(_callGraph, parentCallPath, false);
+        }
+        bytes memory functionCallWithAuth = encodeThreeHiddenParams(functionCall, _rootBcId, parentBcId, uint256(uint160(parentContract)));
+
         bool isSuccess;
         bytes memory returnValueEncoded;
-        (isSuccess, returnValueEncoded) = targetContract.call(functionCall);
+        (isSuccess, returnValueEncoded) = targetContract.call(functionCallWithAuth);
 
         if (!isSuccess) {
             emit CallFailure(getRevertMsg(returnValueEncoded));
@@ -393,15 +385,6 @@ contract CrosschainControl is CrosschainFunctionCallReturnInterface, CbcDecVer, 
         isSuccess = activeCallFailed ? false : isSuccess;
         return (isSuccess, returnValueEncoded);
     }
-
-
-
-    function prepareForWhoCalledMe(bytes memory _callGraph, uint256[] memory _callPath) private {
-        uint256[] memory parentCallPath = determineParentCallPath(_callPath);
-        (activeCallParentBlockchainId, activeCallParentContract, /* bytes memory parentFunctionCall */ ) =
-            extractTargetFromCallGraph(_callGraph, parentCallPath, false);
-    }
-
 
     function failRootTransaction(uint256 _crosschainTxId) private {
         rootTransactionInformation[_crosschainTxId] = FAILURE;
@@ -427,11 +410,6 @@ contract CrosschainControl is CrosschainFunctionCallReturnInterface, CbcDecVer, 
             // Save gas by only writing to the location is it is not the default value.
             delete activeCallFailed;
         }
-
-        // Used in whoCalledMe
-        delete activeCallParentBlockchainId;
-        delete activeCallParentContract;
-        delete activeCallRootBlockchainId;
     }
     function cleanupAfterCallLeafSegment() private {
         // Indicates a failure happened in a call out to another segment. This
@@ -447,11 +425,6 @@ contract CrosschainControl is CrosschainFunctionCallReturnInterface, CbcDecVer, 
         delete activeCallCrosschainRootTxId;
         delete activeCallLockedContracts;
 
-        // Used in whoCalledMe
-        delete activeCallRootBlockchainId;
-        delete activeCallParentBlockchainId;
-        delete activeCallParentContract;
-
         // Not used by leaf calls:
         //        delete activeCallGraph;
         //        delete activeCallsCallPath;
@@ -460,9 +433,6 @@ contract CrosschainControl is CrosschainFunctionCallReturnInterface, CbcDecVer, 
     }
 
     function cleanupAfterCallRoot() private {
-        // Used in whoCalledMe
-        delete activeCallRootBlockchainId;
-
         // Used for calling segments
         delete activeCallGraph;
         delete activeCallsCallPath;
@@ -478,10 +448,6 @@ contract CrosschainControl is CrosschainFunctionCallReturnInterface, CbcDecVer, 
         // Used for contract locking
         delete activeCallCrosschainRootTxId;
         delete activeCallLockedContracts;
-
-        // Not used by root calls:
-        //        delete activeCallParentBlockchainId;
-        //        delete activeCallParentContract;
     }
 
 

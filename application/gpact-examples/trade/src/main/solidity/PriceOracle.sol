@@ -14,19 +14,24 @@
  */
 pragma solidity >=0.7.1;
 
-import "../../../../../../functioncall/interface/src/main/solidity/CrosschainFunctionCallInterface.sol";
-
 
 contract PriceOracle {
-    CrosschainFunctionCallInterface crossBlockchainControl;
     uint256 price;
 
-    constructor (address _cbcContract) {
-        crossBlockchainControl = CrosschainFunctionCallInterface(_cbcContract);
+    address owner;
+
+    constructor () {
+        owner = msg.sender;
     }
 
+    /**
+     * Set the price. This is a not-lockable location. As such, this must only be set as
+     * part of a single-blockchain call.
+     *
+     * @param _newPrice updated price
+     */
     function setPrice(uint256 _newPrice) external {
-        require(crossBlockchainControl.isSingleBlockchainCall(), "Price is non-lockable. Set using single blockchain call");
+        require(owner == msg.sender, "Only owner");
         price = _newPrice;
     }
 
