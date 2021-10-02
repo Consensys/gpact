@@ -14,7 +14,7 @@
  */
 pragma solidity >=0.8;
 
-import "../../../../../contracts/solidity/crossblockchaincontrol/src/main/solidity/CallPathCallExecutionTree.sol";
+import "../../main/solidity/CallPathCallExecutionTree.sol";
 
 contract CallExecutionTreeTest is CallPathCallExecutionTree {
 

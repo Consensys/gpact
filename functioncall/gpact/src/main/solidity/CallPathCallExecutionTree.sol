@@ -67,12 +67,18 @@ contract CallPathCallExecutionTree is BytesUtil {
         }
     }
 
+    /**
+     * Determine call path of parent. NOTE: Do not call if this current call path represents the root.
+     *
+     * @param _callPath Currently executing call path
+     * @return Call path of parent.
+     */
     function determineParentCallPath(uint256[] memory _callPath) internal pure returns (uint256[] memory) {
         uint256[] memory callPathOfParent;
         uint256 callPathLen = _callPath.length;
 
         // Don't call from root function
-        assert(!(callPathLen == 1 && _callPath[0] == 0));
+        //assert(!(callPathLen == 1 && _callPath[0] == 0));
 
         if (_callPath[callPathLen - 1] != 0) {
             callPathOfParent = new uint256[](callPathLen);

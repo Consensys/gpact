@@ -54,7 +54,7 @@ public class RevertReason {
       String encodedRevertReason = revertReasonEncoded.substring(panicMethodId.length());
       List<Type> decoded = FunctionReturnDecoder.decode(encodedRevertReason, panicRevertReasonTypes);
       Uint256 decodedRevertReason = (Uint256) decoded.get(0);
-      return "0x" + decodedRevertReason.getValue().toString(16);
+      return "Panic: 0x" + decodedRevertReason.getValue().toString(16);
     }
 
     return revertReasonEncoded;

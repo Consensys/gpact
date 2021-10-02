@@ -34,7 +34,7 @@ abstract contract LockableStorage is LockableStorageInterface {
     uint256 constant private NOT_LOCKED_INDICATOR = 0;
 
     // The Cross-Blockchain Control Contract used for cross-blockchain transaction locking.
-    CrosschainLockingInterface internal crossBlockchainControl;
+    CrosschainLockingInterface internal cbc;
 
     // Data storage keys to values stored.
     mapping(uint256=>uint256) private dataStore;
@@ -49,7 +49,7 @@ abstract contract LockableStorage is LockableStorageInterface {
 
 
     constructor (address _crossBlockchainControl) {
-        crossBlockchainControl = CrosschainLockingInterface(_crossBlockchainControl);
+        cbc = CrosschainLockingInterface(_crossBlockchainControl);
     }
 
 
@@ -65,13 +65,13 @@ abstract contract LockableStorage is LockableStorageInterface {
             revert("Contract item locked");
         }
 
-        bytes32 crossRootTxId = crossBlockchainControl.getActiveCallCrosschainRootTxId();
+        bytes32 crossRootTxId = cbc.getActiveCallCrosschainRootTxId();
         if (crossRootTxId == bytes32(0)) {
             // Single blockchain call
             dataStore[_key] = _val;
         }
         else {
-            crossBlockchainControl.addToListOfLockedContracts(address(this));
+            cbc.addToListOfLockedContracts(address(this));
             provisionalUpdatesLists[crossRootTxId].push(_key);
             // Note, the following addition is unchecked. If the value being stored
             // is 2**256-1 then this will overflow and revert.

@@ -34,7 +34,7 @@ contract ContractA is LockableStorage {
     }
 
     function doCrosschainRead() external {
-        uint256 val = CrosschainFunctionCallReturnInterface(address(crossBlockchainControl)).crossBlockchainCallReturnsUint256(
+        uint256 val = CrosschainFunctionCallReturnInterface(address(cbc)).crossBlockchainCallReturnsUint256(
             otherBcId, address(contractB), abi.encodeWithSelector(contractB.get.selector));
         setUint256(KEY_VAL, val);
         emit ValueRead(val);

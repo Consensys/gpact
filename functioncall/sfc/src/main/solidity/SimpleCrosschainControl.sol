@@ -17,11 +17,10 @@ pragma solidity >=0.8;
 import "../../../../interface/src/main/solidity/CrosschainFunctionCallInterface.sol";
 import "../../../../../messaging/interface/src/main/solidity/CrosschainVerifier.sol";
 import "../../../../gpact/src/main/solidity/CbcDecVer.sol";
+import "../../../../interface/src/main/solidity/HiddenParameters.sol";
 
 
-
-
-contract SimpleCrosschainControl is CrosschainFunctionCallInterface, CbcDecVer {
+contract SimpleCrosschainControl is CrosschainFunctionCallInterface, CbcDecVer, HiddenParameters {
     // 	0x77dab611
     bytes32 constant internal CROSS_CALL_EVENT_SIGNATURE = keccak256("CrossCall(bytes32,uint256,address,uint256,address,bytes)");
 
@@ -35,11 +34,6 @@ contract SimpleCrosschainControl is CrosschainFunctionCallInterface, CbcDecVer {
     mapping (bytes32=> uint256) public replayPrevention;
 
     uint256 public myBlockchainId;
-
-    uint256 private activeCallParentBlockchainId;
-    address private activeCallParentContract;
-
-
 
 
     /**
@@ -136,35 +130,16 @@ contract SimpleCrosschainControl is CrosschainFunctionCallInterface, CbcDecVer {
 
         require(destBcId == myBlockchainId);
 
-        // Set-up active call state.
-        activeCallParentBlockchainId = _sourceBcId;
-        activeCallParentContract = caller;
+        // Add authentication information to the function call.
+        bytes memory functionCallWithAuth = encodeTwoHiddenParams(functionCall, _sourceBcId, uint256(uint160(caller)));
 
         bool isSuccess;
         bytes memory returnValueEncoded;
-        (isSuccess, returnValueEncoded) = destContract.call(functionCall);
+        (isSuccess, returnValueEncoded) = destContract.call(functionCallWithAuth);
 
         if (!isSuccess) {
             emit CallFailure(getRevertMsg(returnValueEncoded));
         }
-
-        // Clear active call state.
-        activeCallParentBlockchainId = 0;
-        activeCallParentContract = address(0);
-    }
-
-
-
-    /**
-     * @return false if the current transaction execution is part of a cross-blockchain call\.
-     */
-    function isSingleBlockchainCall() public override view returns (bool) {
-        return 0 == activeCallParentBlockchainId;
-    }
-
-    function whoCalledMe() external view override returns (uint256 rootBlockchainId, uint256 parentBlockchainId, address parentContract) {
-        uint256 parentBcId = activeCallParentBlockchainId;
-        return (parentBcId, parentBcId, activeCallParentContract);
     }
 
     // **************************** PRIVATE BELOW HERE ***************************

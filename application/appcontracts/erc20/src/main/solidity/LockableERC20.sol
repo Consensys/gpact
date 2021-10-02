@@ -60,9 +60,6 @@ contract LockableERC20 is Context, IERC20, IERC20Metadata, Ownable, LockableStor
     string private erc20Name;
     string private erc20Symbol;
 
-    // Cross-blockchain Control Contract on this blockchain.
-    CrosschainFunctionCallInterface public cbc;
-
     /**
      * @dev Sets the values for {name} and {symbol}.
      *
@@ -75,7 +72,6 @@ contract LockableERC20 is Context, IERC20, IERC20Metadata, Ownable, LockableStor
     constructor (string memory _name, string memory _symbol, address _cbc) LockableStorage(_cbc) {
         erc20Name = _name;
         erc20Symbol = _symbol;
-        cbc = CrosschainFunctionCallInterface(_cbc);
 
         accountPallelizationFactor = 5;
         erc20PallelizationFactor = 10;
@@ -110,7 +106,7 @@ contract LockableERC20 is Context, IERC20, IERC20Metadata, Ownable, LockableStor
      * - `spender` cannot be the zero address.
      */
     function approve(address spender, uint256 amount) public virtual override returns (bool) {
-        require(CrosschainFunctionCallInterface(address(crossBlockchainControl)).isSingleBlockchainCall(), "Must be single blockchain call");
+        require(cbc.isSingleBlockchainCall(), "Must be single blockchain call");
         approveInternal(_msgSender(), spender, amount);
         return true;
     }
