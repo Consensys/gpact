@@ -49,8 +49,23 @@ contract CallPathCallExecutionTree is BytesUtil {
         // Jump over the leaf function indicator / numFuncsCalled = 0 indicator
         if (_callPath[_callPath.length-1] != 0) {
             uint8 numFuncsCalled = BytesUtil.bytesToUint8(_callGraph, index);
-            require(numFuncsCalled == 0, "Expected leaf function.");
-            index += NUM_FUNCS_CALLED_SIZE;
+            if (numFuncsCalled != 0) {
+                // The call path should have included an extra 0 at the end,
+                // for instance [2] rather than [2][0].
+                // This can happen for multi-level call trees, where the call path is only a part of the
+                // call path. In determineFuncsToBeCalled, it will pass in, for instance
+                // [1] rather than [1][0], when fetching the functions that the root function calls.
+
+                // Jump to the location of the offset of the function
+                // functionCalled would be 0
+                uint256 offset = BytesUtil.bytesToUint32(_callGraph,
+                    index + NUM_FUNCS_CALLED_SIZE);
+                // Jump to the function
+                index = index + offset;
+            }
+            else {
+                index += NUM_FUNCS_CALLED_SIZE;
+            }
         }
 
         targetBlockchainId = BytesUtil.bytesToUint256(_callGraph, index);
