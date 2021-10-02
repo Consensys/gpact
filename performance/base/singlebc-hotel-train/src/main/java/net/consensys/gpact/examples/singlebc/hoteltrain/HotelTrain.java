@@ -21,6 +21,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.protocol.exceptions.TransactionException;
 
+import java.math.BigInteger;
+
 /**
  * Main Class for sample code.
  *
@@ -29,7 +31,7 @@ import org.web3j.protocol.exceptions.TransactionException;
 public class HotelTrain {
     private static final Logger LOG = LogManager.getLogger(HotelTrain.class);
 
-    static int NUM_TIMES_EXECUTE = 4;
+    static int NUM_TIMES_EXECUTE = 3;
 
     public static void main(String[] args) throws Exception {
         StatsHolder.log("Example: Single Blockchain: Read");
@@ -53,11 +55,11 @@ public class HotelTrain {
         EntityTravelAgency travelAgency = new EntityTravelAgency(root.bcId, root.uri, root.gasPriceStrategy, root.period);
         travelAgency.deploy(hotel.getBlockchainId(), hotel.getHotelContractAddress(), train.getBlockchainId(), train.getHotelContractAddress());
 
-        hotel.buyTokens(travelAgency.getTravelAgencyAccount(), 200);
-        travelAgency.grantAllowance(hotel, 200);
+        hotel.buyTokens(travelAgency.getTravelAgencyAccount(), 1000);
+        travelAgency.grantAllowance(hotel, 1000);
         hotel.addTravelAgency(travelAgency.getTravelContractAddress(), travelAgency.getTravelAgencyAccount());
-        train.buyTokens(travelAgency.getTravelAgencyAccount(), 200);
-        travelAgency.grantAllowance(train, 200);
+        train.buyTokens(travelAgency.getTravelAgencyAccount(), 1000);
+        travelAgency.grantAllowance(train, 1000);
         train.addTravelAgency(travelAgency.getTravelContractAddress(), travelAgency.getTravelAgencyAccount());
 
         int date = 1;
@@ -104,8 +106,13 @@ public class HotelTrain {
             train.showErc20Allowance(travelAgency.getTravelAgencyAccount(), train.getHotelContractAddress());
 
             date++;
-        }
+            String spender = travelAgency.getTravelAgencyAccount();
+            BigInteger bookingId = travelAgency.separatedBookHotelAndTrain(date);
+            train.separatedBook(date, bookingId, 15, spender);
+            hotel.separatedBook(date, bookingId, 15, spender);
 
+            date++;
+        }
 
         hotel.shutdown();
         train.shutdown();

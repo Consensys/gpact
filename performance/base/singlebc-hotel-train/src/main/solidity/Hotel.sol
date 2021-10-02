@@ -82,7 +82,7 @@ contract Hotel {
         require(false, "No rooms available");
     }
 
-    function separatedBookRoom(uint256 _date, uint256 _uniqueId, uint256 _maxAmountToPay)  onlyOwner external {
+    function separatedBookRoom(uint256 _date, uint256 _uniqueId, uint256 _maxAmountToPay, address _travelAgencySpender)  onlyOwner external {
         require(_date != 0, "Date can not be zero");
         for (uint i = 0; i < numRooms; i++) {
             uint256 rate = rooms[i].roomRate;
@@ -93,7 +93,7 @@ contract Hotel {
                 bookingRefToRoomNumber[_uniqueId] = i;
                 bookingRefToDate[_uniqueId] = _date;
                 // Pay for room.
-                erc20.transferFrom(approvedTravelAgencies[msg.sender], owner, rate);
+                erc20.transferFrom(_travelAgencySpender, owner, rate);
                 return;
             }
         }

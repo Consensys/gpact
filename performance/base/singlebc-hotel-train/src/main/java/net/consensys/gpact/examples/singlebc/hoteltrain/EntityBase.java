@@ -16,11 +16,15 @@ package net.consensys.gpact.examples.singlebc.hoteltrain;
 
 import net.consensys.gpact.common.AbstractBlockchain;
 import net.consensys.gpact.common.BlockchainId;
+import net.consensys.gpact.common.RevertReason;
+import net.consensys.gpact.common.StatsHolder;
 import net.consensys.gpact.examples.singlebc.hoteltrain.soliditywrappers.Hotel;
 import net.consensys.gpact.openzeppelin.soliditywrappers.ERC20PresetFixedSupply;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
+import org.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.web3j.protocol.exceptions.TransactionException;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -106,4 +110,16 @@ public class EntityBase extends AbstractBlockchain {
             LOG.info("  Seat booked for {}", booking);
         }
     }
+
+    public void separatedBook(int date, BigInteger uniqueId, int maxAmountToPay, String spender) throws Exception {
+        try {
+            TransactionReceipt txr = this.hotelContract.separatedBookRoom(
+                    BigInteger.valueOf(date), uniqueId, BigInteger.valueOf(maxAmountToPay), spender).send();
+            StatsHolder.logGas("Separated Hotel Book", txr.getGasUsed());
+        } catch (TransactionException ex) {
+            LOG.error(" Revert Reason: {}", RevertReason.decodeRevertReason(ex.getTransactionReceipt().get().getRevertReason()));
+            throw ex;
+        }
+    }
+
 }
