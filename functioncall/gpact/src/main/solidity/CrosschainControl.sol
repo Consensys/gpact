@@ -69,12 +69,10 @@ contract CrosschainControl is CrosschainFunctionCallReturnInterface, CbcDecVer, 
     // values are stored against this id.
     bytes32 public activeCallCrosschainRootTxId;
 
-    // The call graph currently being executed. This is needed to determine whether any
-    // cross-blockchain calls from the current execution are valid.
-    bytes public activeCallGraph;
-
-    // The location within the call graph of the currently executing call segment.
-    uint256[] private activeCallsCallPath;
+    // Crosschain calls that the business logic code will make.
+    uint256[] private activeCallTargetBcIds;
+    address[] private activeCallTargetContracts;
+    bytes[] private activeCallTargetFunctionCalls;
 
     // The values to be returned to function calls in the currently executing call segment.
     bytes[] private activeCallReturnValues;
@@ -142,11 +140,11 @@ contract CrosschainControl is CrosschainFunctionCallReturnInterface, CbcDecVer, 
 
         // No need to store call graph or call path if this is a leaf segment / function
         if (_eventData.length > 1) {
-            activeCallGraph = callGraph;
-            activeCallsCallPath = _callPath;
             if (verifySegmentEvents(_eventData, _callPath, hashOfCallGraph, crosschainTransactionId)) {
                 return;
             }
+
+            determineFuncsToBeCalled(callGraph, _callPath, _eventData.length - 1);
         }
 
 
@@ -219,16 +217,15 @@ contract CrosschainControl is CrosschainFunctionCallReturnInterface, CbcDecVer, 
 
         // Determine the hash of the call graph described in the start event. This is needed to check the segment
         // event information.
-        activeCallGraph = callGraph;
         bytes32 hashOfCallGraph = keccak256(callGraph);
 
         // The element will be the default, 0.
         uint256[] memory callPathForStart = new uint256[](1);
-        activeCallsCallPath = callPathForStart;
 
         if (verifySegmentEvents(_eventData, callPathForStart, hashOfCallGraph, crosschainTransactionId)) {
             return;
         }
+        determineFuncsToBeCalled(callGraph, callPathForStart, _eventData.length - 1);
 
         // Set-up root blockchain / crosschain transaction value used for locking.
         // Store a copy in memory so that storage isn't read from in the code further below.
@@ -398,8 +395,9 @@ contract CrosschainControl is CrosschainFunctionCallReturnInterface, CbcDecVer, 
      * that could have been set given the scenario.
      */
     function cleanupAfterCallSegment() private {
-        delete activeCallGraph;
-        delete activeCallsCallPath;
+        delete activeCallTargetBcIds;
+        delete activeCallTargetContracts;
+        delete activeCallTargetFunctionCalls;
         delete activeCallCrosschainRootTxId;
         delete activeCallLockedContracts;
         delete activeCallReturnValues;
@@ -426,16 +424,19 @@ contract CrosschainControl is CrosschainFunctionCallReturnInterface, CbcDecVer, 
         delete activeCallLockedContracts;
 
         // Not used by leaf calls:
-        //        delete activeCallGraph;
-        //        delete activeCallsCallPath;
+//        delete activeCallTargetBcIds;
+//        delete activeCallTargetContracts;
+//        delete activeCallTargetFunctionCalls;
+
         //        delete activeCallReturnValues;
         //        delete activeCallReturnValuesIndex;
     }
 
     function cleanupAfterCallRoot() private {
         // Used for calling segments
-        delete activeCallGraph;
-        delete activeCallsCallPath;
+        delete activeCallTargetBcIds;
+        delete activeCallTargetContracts;
+        delete activeCallTargetFunctionCalls;
         delete activeCallReturnValues;
         delete activeCallReturnValuesIndex;
 
@@ -452,34 +453,29 @@ contract CrosschainControl is CrosschainFunctionCallReturnInterface, CbcDecVer, 
 
 
     function commonCallProcessing(uint256 _blockchainId, address _contract, bytes calldata _functionCallData) private returns(bool, bytes memory) {
+        uint256 returnValuesIndex = activeCallReturnValuesIndex;
         // Fail if we have run out of return results.
-        if (activeCallReturnValuesIndex >= activeCallReturnValues.length) {
+        if (returnValuesIndex >= activeCallReturnValues.length) {
             activeCallFailed = true;
-            activeCallReturnValuesIndex++;
             return (true, bytes(""));
         }
 
-        // Check that this function call should occur.
-        // First create the call path to the next function that should execute.
-        require(activeCallsCallPath.length != 0, "Active Calls call path length is zero");
-        uint256[] memory callPath = new uint256[](activeCallsCallPath.length);
-        for (uint i = 0; i < activeCallsCallPath.length - 1; i++) {
-            callPath[i] = activeCallsCallPath[i];
-        }
-        callPath[callPath.length - 1] = activeCallReturnValuesIndex + 1;
-        (uint256 targetBlockchainId, address targetContract, bytes memory functionCall) = extractTargetFromCallGraph(activeCallGraph, callPath, true);
+        uint256 targetBcId = activeCallTargetBcIds[returnValuesIndex];
+        address targetContract = activeCallTargetContracts[returnValuesIndex];
+        bytes memory targetFunctionCall = activeCallTargetFunctionCalls[returnValuesIndex];
 
         // Fail if what was called doesn't match what was expected to be called.
-        if (_blockchainId != targetBlockchainId ||
+        if (_blockchainId != targetBcId ||
             _contract != targetContract ||
-            !compare(_functionCallData, functionCall)) {
+            !compare(_functionCallData, targetFunctionCall)) {
 
             activeCallFailed = true;
-            activeCallReturnValuesIndex++;
-            emit BadCall(targetBlockchainId, _blockchainId, targetContract, _contract, functionCall, _functionCallData);
+            activeCallReturnValuesIndex = returnValuesIndex + 1;
+            emit BadCall(targetBcId, _blockchainId, targetContract, _contract, targetFunctionCall, _functionCallData);
             return (true, bytes(""));
         }
-        bytes memory retVal = activeCallReturnValues[activeCallReturnValuesIndex++];
+        bytes memory retVal = activeCallReturnValues[returnValuesIndex++];
+        activeCallReturnValuesIndex = returnValuesIndex;
         emit CallResult(_blockchainId, _contract, _functionCallData, retVal);
         return (false, retVal);
     }
@@ -543,6 +539,36 @@ contract CrosschainControl is CrosschainFunctionCallReturnInterface, CbcDecVer, 
         }
         return false;
     }
+
+    /**
+     * Determine the functions that are going to be called from this segment or root function, and
+     * set-up the activeCallTargetBcIds, activeCallTargetContracts, and activeCallTargetFunctionCalls
+     * with the appropriate values, in preparation for the business logic function executing a
+     * crosschain coll.
+     *
+     * @param _callGraph Call graph to be executed.
+     * @param _callPath Call path to be executed as part of this root or segment function.
+     * @param _numCalls The number of calls that the current segment / root is expected to call.
+     */
+    function determineFuncsToBeCalled(bytes memory _callGraph, uint256[] memory _callPath, uint256 _numCalls) private {
+
+        uint256 callPathLen = _callPath.length;
+        uint256[] memory dynamicCallPath = new uint256[](callPathLen);
+        for (uint i = 0; i < callPathLen - 1; i++) {
+            dynamicCallPath[i] = _callPath[i];
+        }
+
+        for (uint256 i = 1; i <= _numCalls; i++) {
+            dynamicCallPath[callPathLen - 1] = i;
+
+            (uint256 targetBlockchainId, address targetContract, bytes memory functionCall) =
+                extractTargetFromCallGraph(_callGraph, dynamicCallPath, true);
+            activeCallTargetBcIds.push(targetBlockchainId);
+            activeCallTargetContracts.push(targetContract);
+            activeCallTargetFunctionCalls.push(functionCall);
+        }
+    }
+
 
     /**
      * Calculate the combined Root Blockchain and Crosschain Transaction Id. This
