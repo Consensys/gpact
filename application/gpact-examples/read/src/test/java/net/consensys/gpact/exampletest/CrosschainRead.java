@@ -46,7 +46,6 @@ public class CrosschainRead extends AbstractExampleTest {
     net.consensys.gpact.examples.read.Main.main(new String[]{tempPropsFile});
   }
 
-  @Ignore
   @Test
   public void transferSerialMultiBlockchain() throws Exception {
     String tempPropsFile = createPropertiesFile(false, true, false);

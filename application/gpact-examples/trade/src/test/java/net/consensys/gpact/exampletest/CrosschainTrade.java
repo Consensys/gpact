@@ -21,7 +21,6 @@ public class CrosschainTrade extends AbstractExampleTest {
     Main.main(new String[]{tempPropsFile});
   }
 
-  @Ignore
   @Test
   public void transferSerialSingleBlockchain() throws Exception {
     String tempPropsFile = createPropertiesFile(false, true, true);

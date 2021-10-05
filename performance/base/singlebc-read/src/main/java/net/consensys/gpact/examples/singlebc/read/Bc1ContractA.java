@@ -24,6 +24,7 @@ import net.consensys.gpact.common.StatsHolder;
 import net.consensys.gpact.examples.singlebc.read.soliditywrappers.ContractA;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.List;
 
 
@@ -59,6 +60,11 @@ public class Bc1ContractA extends AbstractBlockchain {
 
   public void showValueRead() throws Exception {
     LOG.info("ContractA: Value: {}", this.contractA.getVal().send());
+  }
+
+  public void separatedGet() throws Exception {
+    TransactionReceipt txR = this.contractA.separatedDoRead(BigInteger.ONE).send();
+    StatsHolder.logGas("Separated Get", txR.getGasUsed());
   }
 
 }
