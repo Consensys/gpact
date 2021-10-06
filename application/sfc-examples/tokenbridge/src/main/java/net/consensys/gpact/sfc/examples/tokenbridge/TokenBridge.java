@@ -49,10 +49,10 @@ public class TokenBridge {
 
     // Set-up classes to manage blockchains.
     Credentials erc20OwnerCreds = CredentialsCreator.createCredentials();
-    SourceAndDestinationBlockchain chainA = new SourceAndDestinationBlockchain(
+    MassConservationERC20Bridge chainA = new MassConservationERC20Bridge(
             "ChainA", BigInteger.valueOf(CHAIN_A_TOKEN_SUPPLY),
             erc20OwnerCreds, root.bcId, root.uri, root.gasPriceStrategy, root.period);
-    SourceAndDestinationBlockchain chainB = new SourceAndDestinationBlockchain(
+    MassConservationERC20Bridge chainB = new MassConservationERC20Bridge(
             "ChainB", BigInteger.valueOf(CHAIN_B_TOKEN_SUPPLY),
             erc20OwnerCreds, bc2.bcId, bc2.uri, bc2.gasPriceStrategy, bc2.period);
 

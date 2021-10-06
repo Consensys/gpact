@@ -24,18 +24,7 @@ import "../../../../../../functioncall/interface/src/main/solidity/HiddenParamet
  * ERC 20 bridge using the Simple Function Call protocol.
  *
  */
-contract SfcErc20Bridge is HiddenParameters, Pausable, Ownable {
-    // Simple Function Call bridge.
-    CrosschainFunctionCallInterface crosschainBridge;
-
-    // Mapping of ERC 20 contracts on this blockchain to ERC 20 contracts
-    // of the same type on different blockchains.
-    //
-    // Map (token contract address on this blockchain =>
-    //  Map (destination blockchain Id => address on remote contract)
-    mapping (address => mapping (uint256 => address)) public tokenContractAddressMapping;
-
-
+interface SfcErc20BridgeInterface {
     /**
      * Indicates a request to transfer some tokens has occurred on this blockchain.
      *
@@ -81,13 +70,6 @@ contract SfcErc20Bridge is HiddenParameters, Pausable, Ownable {
     event AdminTransfer(address _erc20Contract, address _recipient, uint256 _amount);
 
 
-    /**
-     * @param _sfcCbcContract  Simple Function Call protocol implementation.
-     */
-    constructor (address _sfcCbcContract) {
-        crosschainBridge = CrosschainFunctionCallInterface(_sfcCbcContract);
-    }
-
 
     /**
      * Update the mapping between an ERC 20 contract on this blockchain and an ERC 20
@@ -97,10 +79,7 @@ contract SfcErc20Bridge is HiddenParameters, Pausable, Ownable {
      * @param _otherBcId            Blockchain ID where the corresponding ERC 20 contract resides.
      * @param _othercTokenContract  Address of ERC 20 contract on the other blockchain.
      */
-    function changeContractMapping(address _thisBcTokenContract, uint256 _otherBcId, address _othercTokenContract) onlyOwner external {
-        tokenContractAddressMapping[_thisBcTokenContract][_otherBcId] = _othercTokenContract;
-        emit TokenContractAddressMappingChanged(_thisBcTokenContract, _otherBcId, _othercTokenContract);
-    }
+    function changeContractMapping(address _thisBcTokenContract, uint256 _otherBcId, address _othercTokenContract) external;
 
     /**
      * Transfer tokens from msg.sender to this contract on this blockchain,
@@ -113,24 +92,7 @@ contract SfcErc20Bridge is HiddenParameters, Pausable, Ownable {
      * @param _recipient        Address of account to transfer tokens to on the destination blockchain.
      * @param _amount           The number of tokens to transfer.
      */
-    function transferToOtherBlockchain(uint256 _destBcId, address _srcTokenContract, address _recipient, uint256 _amount) whenNotPaused public {
-        address destTokenContract = tokenContractAddressMapping[_srcTokenContract][_destBcId];
-
-        // The token must be able to be transferred to the target blockchain.
-        require(destTokenContract != address(0), "Token not transferable");
-
-        // Transfer tokens from the user to this contract.
-        // The transfer will revert if the account has inadequate balance or if adequate
-        // allowance hasn't been set-up.
-        if (!IERC20(_srcTokenContract).transferFrom(msg.sender, address(this), _amount)) {
-            revert("transferFrom failed");
-        }
-
-        crosschainBridge.crossBlockchainCall(_destBcId, destTokenContract,
-            abi.encodeWithSelector(this.receiveFromOtherBlockchain.selector, destTokenContract, _recipient, _amount));
-
-        emit TransferTo(_destBcId, _srcTokenContract, destTokenContract, msg.sender, _recipient, _amount);
-    }
+    function transferToOtherBlockchain(uint256 _destBcId, address _srcTokenContract, address _recipient, uint256 _amount) external;
 
 
     /**
@@ -141,28 +103,7 @@ contract SfcErc20Bridge is HiddenParameters, Pausable, Ownable {
      * @param _recipient          Account to transfer ownership of the tokens to.
      * @param _amount             The number of tokens to be transferred.
      */
-    function receiveFromOtherBlockchain(address _destTokenContract, address _recipient, uint256 _amount) whenNotPaused external {
-        require(msg.sender == address(crosschainBridge), "Can not process transfers from contracts other than the bridge contract");
-
-        (uint256 sourceBcId, uint256 sourceContract1) = extractTwoHiddenParams();
-        address sourceContract = address(uint160(sourceContract1));
-        // The source blockchain id is validated at the function call layer. No need to check
-        // that is isn't zero.
-        // The sourceContract could be manipulated by malicious validators. A value of zero
-        // would be deemed valid in the code that follows. Hence, check for zero here.
-        require(sourceContract != address(0), "Source is not correct ERC20");
-
-        // Determine the ERC contract address that corresponds to the address on this blockchain.
-        address expectedSourceContract = tokenContractAddressMapping[_destTokenContract][sourceBcId];
-
-        require(sourceContract == expectedSourceContract, "Source is not correct ERC20");
-
-        if (!IERC20(_destTokenContract).transfer(_recipient, _amount)) {
-            revert("transferFrom failed");
-        }
-
-        emit ReceivedFrom(sourceBcId, sourceContract, _destTokenContract, _recipient, _amount);
-    }
+    function receiveFromOtherBlockchain(address _destTokenContract, address _recipient, uint256 _amount) external;
 
 
     /**
@@ -179,13 +120,7 @@ contract SfcErc20Bridge is HiddenParameters, Pausable, Ownable {
      * @param _recipient        Address to transfer the tokens to.
      * @param _amount           Number of tokens to transfer.
      */
-    function adminTransfer(address _erc20Contract, address _recipient, uint256 _amount) onlyOwner external {
-        if (!IERC20(_erc20Contract).transfer(_recipient, _amount)) {
-            revert("transferFrom failed");
-        }
-
-        emit AdminTransfer(_erc20Contract, _recipient, _amount);
-    }
+    function adminTransfer(address _erc20Contract, address _recipient, uint256 _amount) external;
 
     /**
      * Indicates whether a token can be transferred to (or from) a blockchain.
@@ -194,9 +129,7 @@ contract SfcErc20Bridge is HiddenParameters, Pausable, Ownable {
      * @param _tokenContract Address of ERC 20 token contract on this blockchain.
      * @return bool          True if the token can be transferred to (or from) a blockchain.
      */
-    function isBcIdTokenAllowed(uint256 _bcId, address _tokenContract) public view returns(bool) {
-        return address(0) != tokenContractAddressMapping[_tokenContract][_bcId];
-    }
+    function isBcIdTokenAllowed(uint256 _bcId, address _tokenContract) external view returns(bool);
 
     /**
      * Gets the mapping between an ERC 20 contract on this blockchain and the ERC 20 contract on
@@ -206,7 +139,6 @@ contract SfcErc20Bridge is HiddenParameters, Pausable, Ownable {
      * @param _tokenContract Address of ERC 20 token contract on this blockchain.
      * @return address       Contract address of ERC 20 token contract on other blockchain.
      */
-    function getBcIdTokenMaping(uint256 _bcId, address _tokenContract) public view returns(address) {
-        return tokenContractAddressMapping[_tokenContract][_bcId];
-    }
+    function getBcIdTokenMaping(uint256 _bcId, address _tokenContract) external view returns(address);
+
 }

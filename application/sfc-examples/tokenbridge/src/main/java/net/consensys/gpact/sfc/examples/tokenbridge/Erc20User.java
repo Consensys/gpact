@@ -1,13 +1,25 @@
+/*
+ * Copyright 2021 ConsenSys Software Inc
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 package net.consensys.gpact.sfc.examples.tokenbridge;
 
 import net.consensys.gpact.common.*;
 import net.consensys.gpact.messaging.MessagingVerificationInterface;
 import net.consensys.gpact.openzeppelin.soliditywrappers.ERC20PresetFixedSupply;
-import net.consensys.gpact.sfc.examples.tokenbridge.soliditywrappers.SfcErc20Bridge;
-import net.consensys.gpact.sfccbc.SimpleCrossControlManager;
+import net.consensys.gpact.sfc.examples.tokenbridge.soliditywrappers.SfcErc20MassConservationBridge;
 import net.consensys.gpact.sfccbc.SimpleCrossControlManagerGroup;
 import net.consensys.gpact.sfccbc.SimpleCrosschainExecutor;
-import net.consensys.gpact.sfccbc.soliditywrappers.SimpleCrosschainControl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
@@ -119,7 +131,7 @@ public class Erc20User {
         StatsHolder.logGas("Approve", txR.getGasUsed());
 
         // Step 2: Do the crosschain transaction.
-        SfcErc20Bridge sfcErc20Bridge = SfcErc20Bridge.load(sourceBridgeContractAddress, web3j, tm, gasProvider);
+        SfcErc20MassConservationBridge sfcErc20Bridge = SfcErc20MassConservationBridge.load(sourceBridgeContractAddress, web3j, tm, gasProvider);
         LOG.info(" Call: BcId: {}, ERC20 Bridge: {}", sourceBlockchainId, sourceBridgeContractAddress);
         RemoteFunctionCall<TransactionReceipt> functionCall = sfcErc20Bridge.transferToOtherBlockchain(
                 destinationBlockchainId.asBigInt(), sourceERC20ContractAddress, this.creds.getAddress(), amount);

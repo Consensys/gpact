@@ -18,7 +18,7 @@ import net.consensys.gpact.common.AbstractBlockchain;
 import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.common.DynamicGasProvider;
 import net.consensys.gpact.openzeppelin.soliditywrappers.ERC20PresetFixedSupply;
-import net.consensys.gpact.sfc.examples.tokenbridge.soliditywrappers.SfcErc20Bridge;
+import net.consensys.gpact.sfc.examples.tokenbridge.soliditywrappers.SfcErc20MassConservationBridge;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
@@ -28,34 +28,32 @@ import java.math.BigInteger;
 
 
 /**
- * Configures and operates an ERC 20 contract and the ERC 20 Bridge contract on a certain blockchain.
+ * Configures and operates an ERC 20 contract and the ERC 20 Bridge
+ * contract on a certain blockchain.
+ *
  */
-public class SourceAndDestinationBlockchain extends AbstractBlockchain {
-    private static final Logger LOG = LogManager.getLogger(SourceAndDestinationBlockchain.class);
+public abstract class AbstractERC20Bridge extends AbstractBlockchain {
+    private static final Logger LOG = LogManager.getLogger(AbstractERC20Bridge.class);
 
     // Total number of tokens issued for booking.
     public final BigInteger tokenSupply;
     ERC20PresetFixedSupply erc20;
-    SfcErc20Bridge erc20Bridge;
     public final String entity;
 
 
-    public SourceAndDestinationBlockchain(final String entity, BigInteger tokenSupply,
-                                          Credentials credentials, BlockchainId bcId, String uri, DynamicGasProvider.Strategy gasPriceStrategy, int blockPeriod) throws IOException {
+    public AbstractERC20Bridge(final String entity, BigInteger tokenSupply,
+                               Credentials credentials, BlockchainId bcId, String uri, DynamicGasProvider.Strategy gasPriceStrategy, int blockPeriod) throws IOException {
         super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
         this.entity = entity;
         this.tokenSupply = tokenSupply;
     }
 
-    public void deployContract(String cbcAddress) throws Exception {
+    public void deployContract() throws Exception {
         String name = this.entity;
         String symbol= this.entity;
         String owner = this.credentials.getAddress();
         this.erc20 = ERC20PresetFixedSupply.deploy(this.web3j, this.tm, this.gasProvider, name, symbol, this.tokenSupply, owner).send();
         LOG.info(" Deploy {} ERC20: {}. Token Supply: {}", this.entity, this.erc20.getContractAddress(), this.tokenSupply);
-
-        this.erc20Bridge = SfcErc20Bridge.deploy(this.web3j, this.tm, this.gasProvider, cbcAddress).send();
-        LOG.info(" Deploy ERC20 Bridge: {}", this.erc20Bridge.getContractAddress());
     }
 
 
@@ -63,20 +61,12 @@ public class SourceAndDestinationBlockchain extends AbstractBlockchain {
         return this.erc20.getContractAddress();
     }
 
-    public String getErc20BridgeContractAddress() {
-        return this.erc20Bridge.getContractAddress();
-    }
 
 
     public void giveTokens(final Erc20User user, final int number) throws Exception {
         this.erc20.transfer(user.getAddress(), BigInteger.valueOf(number)).send();
     }
 
-    public void addRemoteERC20(BlockchainId remoteBcId, String remoteERC20ContractAddress) throws Exception {
-//        LOG.info(" Setting Remote ERC20: Local BcId: {}, Remote BcId: {}, Remote ERC20: {}",
-//                this.blockchainId, remoteBcId, remoteERC20ContractAddress);
-        this.erc20Bridge.changeContractMapping(this.erc20.getContractAddress(), remoteBcId.asBigInt(), remoteERC20ContractAddress).send();
-    }
 
     public void showErc20Balances(Erc20User[] users) throws Exception {
         LOG.info(" {} ERC 20 Balances", this.entity);
