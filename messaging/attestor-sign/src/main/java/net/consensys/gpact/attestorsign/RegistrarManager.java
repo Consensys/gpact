@@ -17,6 +17,7 @@ package net.consensys.gpact.attestorsign;
 import net.consensys.gpact.attestorsign.soliditywrappers.AttestorSignRegistrar;
 import net.consensys.gpact.common.AbstractBlockchain;
 import net.consensys.gpact.common.BlockchainId;
+import net.consensys.gpact.common.DynamicGasProvider;
 import net.consensys.gpact.common.RevertReason;
 import net.consensys.gpact.messaging.MessagingManagerInterface;
 import org.apache.logging.log4j.LogManager;
@@ -38,7 +39,7 @@ public abstract class RegistrarManager extends AbstractBlockchain implements Mes
 
   protected AttestorSignRegistrar registrarContract;
 
-  public RegistrarManager(Credentials credentials, BlockchainId bcId, String uri, String gasPriceStrategy, String blockPeriod) throws IOException {
+  public RegistrarManager(Credentials credentials, BlockchainId bcId, String uri, DynamicGasProvider.Strategy gasPriceStrategy, int blockPeriod) throws IOException {
     super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
   }
 

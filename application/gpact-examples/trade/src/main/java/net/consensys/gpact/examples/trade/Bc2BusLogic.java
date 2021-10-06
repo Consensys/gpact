@@ -15,6 +15,7 @@
 package net.consensys.gpact.examples.trade;
 
 import net.consensys.gpact.common.BlockchainId;
+import net.consensys.gpact.common.DynamicGasProvider;
 import net.consensys.gpact.examples.trade.soliditywrappers.BusLogic;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -32,7 +33,7 @@ public class Bc2BusLogic extends AbstractBlockchain {
 
   BusLogic busLogicContract;
 
-  public Bc2BusLogic(Credentials credentials, BlockchainId bcId, String uri, String gasPriceStrategy, String blockPeriod) throws IOException {
+  public Bc2BusLogic(Credentials credentials, BlockchainId bcId, String uri, DynamicGasProvider.Strategy gasPriceStrategy, int blockPeriod) throws IOException {
     super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
   }
 

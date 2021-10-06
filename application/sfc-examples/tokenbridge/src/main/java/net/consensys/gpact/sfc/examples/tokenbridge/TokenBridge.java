@@ -62,7 +62,7 @@ public class TokenBridge {
     BlockchainId chainBBcId = chainB.getBlockchainId();
     chainB.deployContract(crossControlManagerGroup.getCbcAddress(chainBBcId));
 
-    // Register the ERC20 contracts with each other.
+    // Register the ERC20 contracts with each blockchain.
     chainA.addRemoteERC20(chainBBcId, chainB.getErc20ContractAddress());
     chainB.addRemoteERC20(chainABcId, chainA.getErc20ContractAddress());
 
@@ -70,48 +70,47 @@ public class TokenBridge {
       // Create some users and give them some tokens.
     Erc20User user1 = new Erc20User(
             "User1",
-            root.bcId, chainA.getErc20ContractAddress(),
-            bc2.bcId, chainB.getErc20ContractAddress());
+            root.bcId, chainA.getErc20ContractAddress(), chainA.getErc20BridgeContractAddress(),
+            bc2.bcId, chainB.getErc20ContractAddress(), chainA.getErc20BridgeContractAddress());
     Erc20User user2 = new Erc20User(
             "User2",
-            root.bcId, chainA.getErc20ContractAddress(),
-            bc2.bcId, chainB.getErc20ContractAddress());
+            root.bcId, chainA.getErc20ContractAddress(), chainA.getErc20BridgeContractAddress(),
+            bc2.bcId, chainB.getErc20ContractAddress(), chainA.getErc20BridgeContractAddress());
     Erc20User user3 = new Erc20User(
             "User3",
-            root.bcId, chainA.getErc20ContractAddress(),
-            bc2.bcId, chainB.getErc20ContractAddress());
+            root.bcId, chainA.getErc20ContractAddress(), chainA.getErc20BridgeContractAddress(),
+            bc2.bcId, chainB.getErc20ContractAddress(), chainA.getErc20BridgeContractAddress());
 
-    // TODO
-//    user1.createCbcManager(
-//            root, crossControlManagerGroup.getInfrastructureAddresses(chainABcId), crossControlManagerGroup.getMessageVerification(chainABcId),
-//            bc2, crossControlManagerGroup.getInfrastructureAddresses(chainBBcId), crossControlManagerGroup.getMessageVerification(chainBBcId));
-//    user2.createCbcManager(
-//            root, crossControlManagerGroup.getInfrastructureAddresses(chainABcId), crossControlManagerGroup.getMessageVerification(chainABcId),
-//            bc2, crossControlManagerGroup.getInfrastructureAddresses(chainBBcId), crossControlManagerGroup.getMessageVerification(chainBBcId));
-//    user3.createCbcManager(
-//            root, crossControlManagerGroup.getInfrastructureAddresses(chainABcId), crossControlManagerGroup.getMessageVerification(chainABcId),
-//            bc2, crossControlManagerGroup.getInfrastructureAddresses(chainBBcId), crossControlManagerGroup.getMessageVerification(chainBBcId));
-//
-//
-//      // Give some balance to the users
-//    chainA.giveTokens(user1, 500);
-//    chainA.giveTokens(user2, 200);
-//    chainA.giveTokens(user3, 300);
-//
-//    Erc20User[] users = new Erc20User[]{user1, user2, user3};
-//
-//    chainA.showErc20Balances(users);
-//    chainB.showErc20Balances(users);
-//
-//    for (int numExecutions = 0; numExecutions < NUM_TIMES_EXECUTE; numExecutions++) {
-//      LOG.info("Execution: {}  *****************", numExecutions);
-//      StatsHolder.log("Execution: " + numExecutions + " **************************");
-//
-//      user1.transfer(true, numExecutions + 7);
-//
-//      chainA.showErc20Balances(users);
-//      chainB.showErc20Balances(users);
-//    }
+    user1.createCbcManager(
+            root, crossControlManagerGroup.getInfrastructureAddresses(chainABcId), crossControlManagerGroup.getMessageVerification(chainABcId),
+            bc2, crossControlManagerGroup.getInfrastructureAddresses(chainBBcId), crossControlManagerGroup.getMessageVerification(chainBBcId));
+    user2.createCbcManager(
+            root, crossControlManagerGroup.getInfrastructureAddresses(chainABcId), crossControlManagerGroup.getMessageVerification(chainABcId),
+            bc2, crossControlManagerGroup.getInfrastructureAddresses(chainBBcId), crossControlManagerGroup.getMessageVerification(chainBBcId));
+    user3.createCbcManager(
+            root, crossControlManagerGroup.getInfrastructureAddresses(chainABcId), crossControlManagerGroup.getMessageVerification(chainABcId),
+            bc2, crossControlManagerGroup.getInfrastructureAddresses(chainBBcId), crossControlManagerGroup.getMessageVerification(chainBBcId));
+
+
+      // Give some balance to the users
+    chainA.giveTokens(user1, 500);
+    chainA.giveTokens(user2, 200);
+    chainA.giveTokens(user3, 300);
+
+    Erc20User[] users = new Erc20User[]{user1, user2, user3};
+
+    chainA.showErc20Balances(users);
+    chainB.showErc20Balances(users);
+
+    for (int numExecutions = 0; numExecutions < NUM_TIMES_EXECUTE; numExecutions++) {
+      LOG.info("Execution: {}  *****************", numExecutions);
+      StatsHolder.log("Execution: " + numExecutions + " **************************");
+
+      user1.transfer(true, numExecutions + 7);
+
+      chainA.showErc20Balances(users);
+      chainB.showErc20Balances(users);
+    }
 
     chainA.shutdown();
     chainB.shutdown();

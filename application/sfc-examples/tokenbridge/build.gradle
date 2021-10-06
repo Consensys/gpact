@@ -12,6 +12,7 @@ dependencies {
     implementation project (':common')
     implementation project (':openzeppelin')
     implementation project (':sfc')
+    implementation project (':mes-interface')
     implementation project (':examplehelpers')
 
     implementation group: 'com.google.guava', name: 'guava', version: '14.0'

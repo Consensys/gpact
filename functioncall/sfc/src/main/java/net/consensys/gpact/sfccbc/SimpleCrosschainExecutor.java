@@ -21,6 +21,7 @@ import net.consensys.gpact.messaging.SignedEvent;
 import net.consensys.gpact.sfccbc.soliditywrappers.SimpleCrosschainControl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.web3j.protocol.core.RemoteCall;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
 /**
@@ -36,12 +37,12 @@ public class SimpleCrosschainExecutor {
     this.crossControlManagerGroup = crossControlManagerGroup;
   }
 
-  public TransactionReceipt[] execute(BlockchainId sourceBcId, String sourceBcContract, byte[] sourceBcFunctionData) throws Exception {
+  public TransactionReceipt[] execute(BlockchainId sourceBcId, RemoteCall<TransactionReceipt> functionCall) throws Exception {
     SimpleCrossControlManager cbcContract = this.crossControlManagerGroup.getCbcContract(sourceBcId);
     MessagingVerificationInterface messaging = this.crossControlManagerGroup.getMessageVerification(sourceBcId);
 
     Tuple<TransactionReceipt, byte[], SimpleCrosschainControl.CrossCallEventResponse> result =
-            cbcContract.sourceBcCall(sourceBcContract, sourceBcFunctionData);
+            cbcContract.sourceBcCall(functionCall);
     TransactionReceipt txr1 = result.getFirst();
     byte[] crossCallEventData = result.getSecond();
     SimpleCrosschainControl.CrossCallEventResponse crossCallEvent = result.getThird();
@@ -63,5 +64,6 @@ public class SimpleCrosschainExecutor {
     Tuple<TransactionReceipt, String, Boolean> result2 = cbcContract.destinationBcCall(signedCrossCallEvent);
     return new TransactionReceipt[]{txr1, result2.getFirst()};
   }
+
 
 }

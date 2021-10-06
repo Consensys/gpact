@@ -15,6 +15,7 @@
 package net.consensys.gpact.examples.conditional;
 
 import net.consensys.gpact.common.BlockchainId;
+import net.consensys.gpact.common.DynamicGasProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
@@ -30,7 +31,7 @@ public class OtherBc extends AbstractBlockchain {
 
   OtherBlockchainContract otherBlockchainContract;
 
-  public OtherBc(Credentials credentials, BlockchainId bcId, String uri, String gasPriceStrategy, String blockPeriod) throws IOException {
+  public OtherBc(Credentials credentials, BlockchainId bcId, String uri, DynamicGasProvider.Strategy gasPriceStrategy, int blockPeriod) throws IOException {
     super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
   }
 

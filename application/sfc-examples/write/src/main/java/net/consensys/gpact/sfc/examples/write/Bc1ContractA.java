@@ -15,11 +15,14 @@
 package net.consensys.gpact.sfc.examples.write;
 
 import net.consensys.gpact.common.BlockchainId;
+import net.consensys.gpact.common.DynamicGasProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
 import net.consensys.gpact.common.AbstractBlockchain;
 import net.consensys.gpact.sfc.examples.write.soliditywrappers.ContractA;
+import org.web3j.protocol.core.RemoteCall;
+import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -30,7 +33,7 @@ public class Bc1ContractA extends AbstractBlockchain {
 
   ContractA contractA;
 
-  public Bc1ContractA(Credentials credentials, BlockchainId bcId, String uri, String gasPriceStrategy, String blockPeriod) throws IOException {
+  public Bc1ContractA(Credentials credentials, BlockchainId bcId, String uri, DynamicGasProvider.Strategy gasPriceStrategy, int blockPeriod) throws IOException {
     super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
   }
 
@@ -44,8 +47,8 @@ public class Bc1ContractA extends AbstractBlockchain {
         this.contractA.getContractAddress(), this.blockchainId);
   }
 
-  public String getRlpFunctionSignature_DoCrosschainWrite(BigInteger val) {
-    return this.contractA.getRLP_doCrosschainWrite(val);
+  public RemoteCall<TransactionReceipt> doCrosschainWrite(BigInteger val) {
+    return this.contractA.doCrosschainWrite(val);
   }
 
 }

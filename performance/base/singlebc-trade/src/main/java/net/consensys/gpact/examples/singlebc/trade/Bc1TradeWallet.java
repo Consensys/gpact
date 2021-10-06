@@ -16,6 +16,7 @@ package net.consensys.gpact.examples.singlebc.trade;
 
 import net.consensys.gpact.common.AbstractBlockchain;
 import net.consensys.gpact.common.BlockchainId;
+import net.consensys.gpact.common.DynamicGasProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
@@ -41,7 +42,7 @@ public class Bc1TradeWallet extends AbstractBlockchain {
   Stock stockContract;
   PriceOracle priceOracleContract;
 
-  public Bc1TradeWallet(Credentials credentials, BlockchainId bcId, String uri, String gasPriceStrategy, String blockPeriod) throws IOException {
+  public Bc1TradeWallet(Credentials credentials, BlockchainId bcId, String uri, DynamicGasProvider.Strategy gasPriceStrategy, int blockPeriod) throws IOException {
     super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
   }
 

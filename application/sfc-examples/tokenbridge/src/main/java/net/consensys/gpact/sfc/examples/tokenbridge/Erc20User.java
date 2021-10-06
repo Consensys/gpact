@@ -1,14 +1,27 @@
 package net.consensys.gpact.sfc.examples.tokenbridge;
 
 import net.consensys.gpact.common.*;
+import net.consensys.gpact.messaging.MessagingVerificationInterface;
+import net.consensys.gpact.openzeppelin.soliditywrappers.ERC20PresetFixedSupply;
+import net.consensys.gpact.sfc.examples.tokenbridge.soliditywrappers.SfcErc20Bridge;
+import net.consensys.gpact.sfccbc.SimpleCrossControlManager;
 import net.consensys.gpact.sfccbc.SimpleCrossControlManagerGroup;
+import net.consensys.gpact.sfccbc.SimpleCrosschainExecutor;
+import net.consensys.gpact.sfccbc.soliditywrappers.SimpleCrosschainControl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
+import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.RemoteFunctionCall;
+import org.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.web3j.protocol.exceptions.TransactionException;
+import org.web3j.protocol.http.HttpService;
+import org.web3j.tx.response.PollingTransactionReceiptProcessor;
+import org.web3j.tx.response.TransactionReceiptProcessor;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 /**
  * An owner of ERC 20 tokens transferring tokens from one blockchain to another.
@@ -28,75 +41,98 @@ public class Erc20User {
     private final String addressOfERC20OnBlockchainA;
     private final String addressOfERC20OnBlockchainB;
 
+    private final String addressOfBridgeOnBlockchainA;
+    private final String addressOfBridgeOnBlockchainB;
+
+    private BlockchainInfo bcInfoA;
+    private BlockchainInfo bcInfoB;
+
     private SimpleCrossControlManagerGroup crossControlManagerGroup;
 
     protected Erc20User(
             String name,
-            BlockchainId bcIdA, String erc20AddressA,
-            BlockchainId bcIdB, String erc20AddressB) throws Exception {
+            BlockchainId bcIdA, String erc20AddressA, String erc20BridgeAddressA,
+            BlockchainId bcIdB, String erc20AddressB, String erc20BridgeAddressB) throws Exception {
 
         this.name = name;
         this.creds = CredentialsCreator.createCredentials();
         this.addressOfERC20OnBlockchainA = erc20AddressA;
         this.addressOfERC20OnBlockchainB = erc20AddressB;
+        this.addressOfBridgeOnBlockchainA = erc20BridgeAddressA;
+        this.addressOfBridgeOnBlockchainB = erc20BridgeAddressB;
 
         this.bcIdA = bcIdA;
         this.bcIdB = bcIdB;
     }
 
-    // TODO
-//
-//    public void createCbcManager(
-//            BlockchainInfo bcInfoA, List<String> infrastructureContractAddressOnBcA, MessagingVerificationInterface msgVerA,
-//            BlockchainInfo bcInfoB, List<String> infrastructureContractAddressOnBcB,  MessagingVerificationInterface msgVerB) throws Exception {
-//        this.crossControlManagerGroup = new CrossControlManagerGroup();
-//        this.crossControlManagerGroup.addBlockchainAndLoadContracts(this.creds, bcInfoA, infrastructureContractAddressOnBcA, msgVerA);
-//        this.crossControlManagerGroup.addBlockchainAndLoadContracts(this.creds, bcInfoB, infrastructureContractAddressOnBcB, msgVerB);
-//    }
-//
-//    public String getName() {
-//        return this.name;
-//    }
-//
-//    public String getAddress() {
-//        return this.creds.getAddress();
-//    }
-//
-//
-//
-//    public void transfer(boolean fromAToB, int amountInt) throws Exception {
-//        LOG.info(" Transfer: {}: {}: {} tokens ", this.name, fromAToB ? "ChainA -> ChainB" : "ChainB -> ChainA", amountInt);
-//
-//        BigInteger amount = BigInteger.valueOf(amountInt);
-//        BlockchainId destinationBlockchainId = fromAToB ? this.bcIdB : this.bcIdA;
-//        BlockchainId sourceBlockchainId = fromAToB ? this.bcIdA : this.bcIdB;
-//        String destinationContractAddress = fromAToB ? this.addressOfERC20OnBlockchainB : this.addressOfERC20OnBlockchainA;
-//        String sourceContractAddress = fromAToB ? this.addressOfERC20OnBlockchainA : this.addressOfERC20OnBlockchainB;
-//
-//        // Build the call execution tree.
-//        CrosschainERC20 dummy = CrosschainERC20.load(null, null, this.creds, null);
-//        String rlpRoot = dummy.getRLP_crosschainTransfer(destinationBlockchainId.asBigInt(), this.creds.getAddress(), amount);
-//        String rlpSegment = dummy.getRLP_crosschainReceiver(this.creds.getAddress(), amount);
-//
-//        CallExecutionTree seg = new CallExecutionTree(destinationBlockchainId, destinationContractAddress, rlpSegment);
-//        ArrayList<CallExecutionTree> rootCalls1 = new ArrayList<>();
-//        rootCalls1.add(seg);
-//        CallExecutionTree root = new CallExecutionTree(sourceBlockchainId, sourceContractAddress, rlpRoot, rootCalls1);
-//        byte[] encoded = root.encode();
-//        LOG.info(CallExecutionTree.dump(encoded));
-//
-//        CrosschainExecutor executor = new CrosschainExecutor(this.crossControlManagerGroup);
-//        // Note: There is no point using a parallel execution engine: there is nothing to execute in parallel!
-//        ExecutionEngine executionEngine = new SerialExecutionEngine(executor);
-//        boolean success = executionEngine.execute(root, 300);
-//
-//        LOG.info("Success: {}", success);
-//
-//        if (!success) {
-//            throw new Exception("Crosschain Execution failed. See log for details");
-//        }
-//    }
-//
-//
+
+    public void createCbcManager(
+            BlockchainInfo bcInfoA, List<String> infrastructureContractAddressOnBcA, MessagingVerificationInterface msgVerA,
+            BlockchainInfo bcInfoB, List<String> infrastructureContractAddressOnBcB,  MessagingVerificationInterface msgVerB) throws Exception {
+        this.crossControlManagerGroup = new SimpleCrossControlManagerGroup();
+        this.crossControlManagerGroup.addBlockchainAndLoadContracts(this.creds, bcInfoA, infrastructureContractAddressOnBcA, msgVerA);
+        this.crossControlManagerGroup.addBlockchainAndLoadContracts(this.creds, bcInfoB, infrastructureContractAddressOnBcB, msgVerB);
+
+        this.bcInfoA = bcInfoA;
+        this.bcInfoB = bcInfoB;
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
+    public String getAddress() {
+        return this.creds.getAddress();
+    }
+
+
+
+    public void transfer(boolean fromAToB, int amountInt) throws Exception {
+        LOG.info(" Transfer: {}: {}: {} tokens ", this.name, fromAToB ? "ChainA -> ChainB" : "ChainB -> ChainA", amountInt);
+
+        BigInteger amount = BigInteger.valueOf(amountInt);
+        BlockchainId destinationBlockchainId = fromAToB ? this.bcIdB : this.bcIdA;
+        BlockchainId sourceBlockchainId = fromAToB ? this.bcIdA : this.bcIdB;
+        String sourceERC20ContractAddress = fromAToB ? this.addressOfERC20OnBlockchainA : this.addressOfERC20OnBlockchainB;
+        String sourceBridgeContractAddress = fromAToB ? this.addressOfBridgeOnBlockchainA : this.addressOfBridgeOnBlockchainB;
+
+        BlockchainInfo bcInfo = fromAToB ? this.bcInfoA : this.bcInfoB;
+
+        final int RETRY = 20;
+        Web3j web3j = Web3j.build(new HttpService(bcInfo.uri), bcInfo.period, new ScheduledThreadPoolExecutor(5));
+        TransactionReceiptProcessor txrProcessor = new PollingTransactionReceiptProcessor(web3j, bcInfo.period, RETRY);
+        FastTxManager tm = TxManagerCache.getOrCreate(web3j, this.creds, sourceBlockchainId.asLong(), txrProcessor);
+        DynamicGasProvider gasProvider = new DynamicGasProvider(web3j, bcInfo.uri, bcInfo.gasPriceStrategy);
+
+        // Step 1: Approve of the bridge contract using some of the user's tokens.
+        LOG.info("Approve");
+        ERC20PresetFixedSupply erc20 = ERC20PresetFixedSupply.load(sourceERC20ContractAddress, web3j, tm, gasProvider);
+        TransactionReceipt txR;
+        try {
+            txR = erc20.approve(sourceBridgeContractAddress, amount).send();
+        } catch (TransactionException ex) {
+            // Crosschain Control Contract reverted
+            String revertReason = RevertReason.decodeRevertReason(ex.getTransactionReceipt().get().getRevertReason());
+            LOG.error(" Revert Reason: {}", revertReason);
+            throw ex;
+        }
+        StatsHolder.logGas("Approve", txR.getGasUsed());
+
+        // Step 2: Do the crosschain transaction.
+        SfcErc20Bridge sfcErc20Bridge = SfcErc20Bridge.load(sourceBridgeContractAddress, web3j, tm, gasProvider);
+        LOG.info(" Call: BcId: {}, ERC20 Bridge: {}", sourceBlockchainId, sourceBridgeContractAddress);
+        RemoteFunctionCall<TransactionReceipt> functionCall = sfcErc20Bridge.transferToOtherBlockchain(
+                destinationBlockchainId.asBigInt(), sourceERC20ContractAddress, this.creds.getAddress(), amount);
+
+        SimpleCrosschainExecutor executor = new SimpleCrosschainExecutor(crossControlManagerGroup);
+        TransactionReceipt[] receipts = executor.execute(sourceBlockchainId, functionCall);
+
+        boolean success = (receipts.length == 2) && receipts[0].isStatusOK() && receipts[1].isStatusOK();
+        LOG.info("Success: {}", success);
+
+        if (!success) {
+            throw new Exception("Crosschain Execution failed. See log for details");
+        }
+    }
 
 }

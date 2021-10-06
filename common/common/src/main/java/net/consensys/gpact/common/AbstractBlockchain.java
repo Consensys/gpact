@@ -46,10 +46,10 @@ public abstract class AbstractBlockchain {
   protected FastTxManager tm;
 
 
-  protected AbstractBlockchain(Credentials credentials, BlockchainId bcId, String uri, String gasPriceStrategy, String blockPeriod) throws IOException {
+  protected AbstractBlockchain(Credentials credentials, BlockchainId bcId, String uri, DynamicGasProvider.Strategy gasPriceStrategy, int blockPeriod) throws IOException {
     this.blockchainId = bcId;
     this.uri = uri;
-    this.pollingInterval = Integer.parseInt(blockPeriod);
+    this.pollingInterval = blockPeriod;
     this.credentials = credentials;
     this.web3j = Web3j.build(new HttpService(this.uri), this.pollingInterval, new ScheduledThreadPoolExecutor(5));
 

@@ -58,7 +58,7 @@ public class CrossControlManager extends AbstractBlockchain {
   private boolean rootEventSuccess;
 
 
-  protected CrossControlManager(Credentials credentials, BlockchainId bcId, String uri, String gasPriceStrategy, String blockPeriod) throws IOException {
+  protected CrossControlManager(Credentials credentials, BlockchainId bcId, String uri, DynamicGasProvider.Strategy gasPriceStrategy, int blockPeriod) throws IOException {
       super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
   }
 

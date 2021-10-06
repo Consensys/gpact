@@ -85,7 +85,7 @@ contract SfcErc20Bridge is HiddenParameters, Pausable, Ownable {
      * @param _sfcCbcContract  Simple Function Call protocol implementation.
      */
     constructor (address _sfcCbcContract) {
-        crosschainBridge = CrosschainFunctionCallInterface(_bridgeContract);
+        crosschainBridge = CrosschainFunctionCallInterface(_sfcCbcContract);
     }
 
 

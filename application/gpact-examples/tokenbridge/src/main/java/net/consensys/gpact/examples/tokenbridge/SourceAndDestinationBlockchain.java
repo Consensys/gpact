@@ -17,6 +17,7 @@ package net.consensys.gpact.examples.tokenbridge;
 import net.consensys.gpact.appcontracts.erc20.soliditywrappers.CrosschainERC20PresetFixedSupply;
 import net.consensys.gpact.common.AbstractBlockchain;
 import net.consensys.gpact.common.BlockchainId;
+import net.consensys.gpact.common.DynamicGasProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
@@ -35,7 +36,7 @@ public class SourceAndDestinationBlockchain extends AbstractBlockchain {
 
 
     public SourceAndDestinationBlockchain(final String entity, BigInteger tokenSupply,
-                Credentials credentials, BlockchainId bcId, String uri, String gasPriceStrategy, String blockPeriod) throws IOException {
+                                          Credentials credentials, BlockchainId bcId, String uri, DynamicGasProvider.Strategy gasPriceStrategy, int blockPeriod) throws IOException {
         super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
         this.entity = entity;
         this.tokenSupply = tokenSupply;

@@ -102,28 +102,12 @@ public class ContractB extends Contract {
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
 
-    public String getRLP_getVal() {
-        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
-                FUNC_GETVAL, 
-                Arrays.<Type>asList(), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
-    }
-
     public RemoteFunctionCall<TransactionReceipt> set(BigInteger _val) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_SET, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_val)), 
                 Collections.<TypeReference<?>>emptyList());
         return executeRemoteCallTransaction(function);
-    }
-
-    public String getRLP_set(BigInteger _val) {
-        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
-                FUNC_SET, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_val)), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
     }
 
     @Deprecated

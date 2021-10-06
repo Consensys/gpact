@@ -16,6 +16,7 @@ package net.consensys.gpact.attestorsign;
 
 import net.consensys.gpact.attestorsign.soliditywrappers.CrosschainVerifierSign;
 import net.consensys.gpact.common.BlockchainId;
+import net.consensys.gpact.common.DynamicGasProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
@@ -32,7 +33,7 @@ public class AttestorSignerManager extends RegistrarManager {
   private CrosschainVerifierSign verifier;
 
 
-  public AttestorSignerManager(Credentials credentials, BlockchainId bcId, String uri, String gasPriceStrategy, String blockPeriod) throws IOException {
+  public AttestorSignerManager(Credentials credentials, BlockchainId bcId, String uri, DynamicGasProvider.Strategy gasPriceStrategy, int blockPeriod) throws IOException {
     super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
   }
 
