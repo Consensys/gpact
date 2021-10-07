@@ -26,17 +26,13 @@ services:
     environment:
       - OTEL_RESOURCE_ATTRIBUTES=service.name=bc31node1,service.version=${BESU_VERSION:-latest}
     volumes:
-      - public-keys:/tmp/
-      - ./bc31/config.toml:/config/config.toml
-      - ./bc31/static-nodes.json:/config/static-nodes.json
-      - ./bc31/log-config.xml:/config/log-config.xml
-      - ./logs/besu:/tmp/besu
-      - ./bc31/genesis.json:/config/genesis.json
-      - ./bc31/keys:/opt/besu/keys
+      - ./bc31:/config
+      - ./keys:/opt/besu/keys
+      #- ./logs/bc31:/tmp/besu
     ports:
       - 8310:8545/tcp
     networks:
-      gpact-test:
+      gpact-test1:
         ipv4_address: 172.16.239.11
 
   bc32node1:
@@ -44,17 +40,13 @@ services:
     environment:
       - OTEL_RESOURCE_ATTRIBUTES=service.name=bc32node1,service.version=${BESU_VERSION:-latest}
     volumes:
-      - public-keys:/tmp/
-      - ./bc32/config.toml:/config/config.toml
-      - ./bc32/static-nodes.json:/config/static-nodes.json
-      - ./bc32/log-config.xml:/config/log-config.xml
-      - ./logs/besu:/tmp/besu
-      - ./bc32/genesis.json:/config/genesis.json
-      - ./bc32/keys:/opt/besu/keys
+      - ./bc32:/config
+      - ./keys:/opt/besu/keys
+      #- ./logs/bc32:/tmp/besu
     ports:
       - 8320:8545/tcp
     networks:
-      gpact-test:
+      gpact-test1:
         ipv4_address: 172.16.239.12
 
   bc33node1:
@@ -62,17 +54,13 @@ services:
     environment:
       - OTEL_RESOURCE_ATTRIBUTES=service.name=bc33node1,service.version=${BESU_VERSION:-latest}
     volumes:
-      - public-keys:/tmp/
-      - ./bc33/config.toml:/config/config.toml
-      - ./bc33/static-nodes.json:/config/static-nodes.json
-      - ./bc33/log-config.xml:/config/log-config.xml
-      - ./logs/besu:/tmp/besu
-      - ./bc33/genesis.json:/config/genesis.json
-      - ./bc33/keys:/opt/besu/keys
+      - ./bc33:/config
+      - ./keys:/opt/besu/keys
+      #- ./logs/bc33:/tmp/besu
     ports:
       - 8330:8545/tcp
     networks:
-      gpact-test:
+      gpact-test1:
         ipv4_address: 172.16.239.13
 
   bc34node1:
@@ -80,53 +68,31 @@ services:
     environment:
       - OTEL_RESOURCE_ATTRIBUTES=service.name=bc34node1,service.version=${BESU_VERSION:-latest}
     volumes:
-      - public-keys:/tmp/
-      - ./bc34/config.toml:/config/config.toml
-      - ./bc34/static-nodes.json:/config/static-nodes.json
-      - ./bc34/log-config.xml:/config/log-config.xml
-      - ./logs/besu:/tmp/besu
-      - ./bc34/genesis.json:/config/genesis.json
-      - ./bc34/keys:/opt/besu/keys
+      - ./bc34/config
+      - ./keys:/opt/besu/keys
+      #- ./logs/bc34:/tmp/besu
     ports:
       - 8340:8545/tcp
     networks:
-      gpact-test:
+      gpact-test1:
         ipv4_address: 172.16.239.14
-
 
   bc35node1:
     << : *besu-bootnode-def
     environment:
       - OTEL_RESOURCE_ATTRIBUTES=service.name=bc35node1,service.version=${BESU_VERSION:-latest}
     volumes:
-      - public-keys:/tmp/
-      - ./bc35/config.toml:/config/config.toml
-      - ./bc35/static-nodes.json:/config/static-nodes.json
-      - ./bc35/log-config.xml:/config/log-config.xml
-      - ./logs/besu:/tmp/besu
-      - ./bc35/genesis.json:/config/genesis.json
-      - ./bc35/keys:/opt/besu/keys
+      - ./bc35/config
+      - ./keys:/opt/besu/keys
+      #- ./logs/bc35:/tmp/besu
     ports:
       - 8350:8545/tcp
     networks:
-      gpact-test:
+      gpact-test1:
         ipv4_address: 172.16.239.15
 
-volumes:
-  public-keys:
-  prometheus:
-  grafana:
-  cakeshop:
-  member1tessera:
-  member2tessera:
-  member3tessera:
-
-  splunk:
-
-  ethlogger:
-
 networks:
-  gpact-test:
+  gpact-test1:
     driver: bridge
     ipam:
       config:

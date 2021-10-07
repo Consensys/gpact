@@ -20,6 +20,7 @@ import net.consensys.gpact.sfccbc.SimpleCrosschainExecutor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
+import org.web3j.protocol.core.RemoteCall;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
 import java.math.BigInteger;
@@ -59,31 +60,23 @@ public class SfcCrosschainWrite {
     bc1ContractABlockchain.deployContracts(crossControlManagerGroup.getCbcAddress(rootBcId), bc2BcId, contractBContractAddress);
     String contractAContractAddress = bc1ContractABlockchain.contractA.getContractAddress();
 
-    int numExecutions = 0;
     boolean success = false;
-    while (true) {
+    for (int numExecutions = 0; numExecutions < NUM_TIMES_EXECUTE; numExecutions++) {
       LOG.info("Execution: {} **************************", numExecutions);
       StatsHolder.log("Execution: " + numExecutions + " **************************");
 
       BigInteger val = BigInteger.valueOf(7);
 
-      LOG.info("Function Calls");
-      String encodedCrosschainWrite = bc1ContractABlockchain.getRlpFunctionSignature_DoCrosschainWrite(val);
-      LOG.info(" ContractA: DoCrosschainWrite: {}", encodedCrosschainWrite);
+      RemoteCall<TransactionReceipt> functionCall = bc1ContractABlockchain.doCrosschainWrite(val);
 
       SimpleCrosschainExecutor executor = new SimpleCrosschainExecutor(crossControlManagerGroup);
-      TransactionReceipt[] receipts =
-              executor.execute(rootBcId, contractAContractAddress, FormatConversion.hexStringToByteArray(encodedCrosschainWrite));
+      TransactionReceipt[] receipts = executor.execute(rootBcId, functionCall);
 
       success = (receipts.length == 2) && receipts[0].isStatusOK() && receipts[1].isStatusOK();
       LOG.info("Success: {}", success);
 
       bc2ContractBBlockchain.showEvents(receipts[1]);
       bc2ContractBBlockchain.checkValueWritten(val);
-
-      if (++numExecutions >= NUM_TIMES_EXECUTE) {
-        break;
-      }
     }
 
 

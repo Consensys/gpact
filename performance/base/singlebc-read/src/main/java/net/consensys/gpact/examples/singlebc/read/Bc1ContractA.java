@@ -15,6 +15,7 @@
 package net.consensys.gpact.examples.singlebc.read;
 
 import net.consensys.gpact.common.BlockchainId;
+import net.consensys.gpact.common.DynamicGasProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
@@ -24,6 +25,7 @@ import net.consensys.gpact.common.StatsHolder;
 import net.consensys.gpact.examples.singlebc.read.soliditywrappers.ContractA;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.List;
 
 
@@ -32,7 +34,7 @@ public class Bc1ContractA extends AbstractBlockchain {
 
   ContractA contractA;
 
-  public Bc1ContractA(Credentials credentials, BlockchainId bcId, String uri, String gasPriceStrategy, String blockPeriod) throws IOException {
+  public Bc1ContractA(Credentials credentials, BlockchainId bcId, String uri, DynamicGasProvider.Strategy gasPriceStrategy, int blockPeriod) throws IOException {
     super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
   }
 
@@ -59,6 +61,11 @@ public class Bc1ContractA extends AbstractBlockchain {
 
   public void showValueRead() throws Exception {
     LOG.info("ContractA: Value: {}", this.contractA.getVal().send());
+  }
+
+  public void separatedGet() throws Exception {
+    TransactionReceipt txR = this.contractA.separatedDoRead(BigInteger.ONE).send();
+    StatsHolder.logGas("Separated Get", txR.getGasUsed());
   }
 
 }

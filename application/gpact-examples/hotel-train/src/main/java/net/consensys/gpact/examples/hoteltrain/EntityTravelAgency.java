@@ -54,7 +54,7 @@ public class EntityTravelAgency extends AbstractBlockchain {
 
     CrossControlManagerGroup crossControlManagerGroup;
 
-    public EntityTravelAgency(BlockchainId bcId, String uri, String gasPriceStrategy, String blockPeriod) throws IOException {
+    public EntityTravelAgency(BlockchainId bcId, String uri, DynamicGasProvider.Strategy gasPriceStrategy, int blockPeriod) throws IOException {
         super(Credentials.create(PKEY), bcId, uri, gasPriceStrategy, blockPeriod);
     }
 

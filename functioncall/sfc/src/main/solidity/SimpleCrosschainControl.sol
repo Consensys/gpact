@@ -63,15 +63,6 @@ contract SimpleCrosschainControl is CrosschainFunctionCallInterface, CbcDecVer, 
         timeHorizon = _timeHorizon;
     }
 
-    function start(address _srcContract, bytes calldata _functionCall) public {
-        bool isSuccess;
-        bytes memory returnValueEncoded;
-        (isSuccess, returnValueEncoded) = _srcContract.call(_functionCall);
-
-        if (!isSuccess) {
-            revert(getRevertMsg(returnValueEncoded));
-        }
-    }
 
     function crossBlockchainCall(uint256 _destBcId, address _destContract, bytes calldata _destData) override external {
         // Note that this limits the number of calls to the same contract

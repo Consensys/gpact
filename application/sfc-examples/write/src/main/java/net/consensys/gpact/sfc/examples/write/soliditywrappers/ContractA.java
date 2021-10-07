@@ -57,14 +57,6 @@ public class ContractA extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_doCrosschainWrite(BigInteger _val) {
-        final Function function = new Function(
-                FUNC_DOCROSSCHAINWRITE, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_val)), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
-    }
-
     @Deprecated
     public static ContractA load(String contractAddress, Web3j web3j, Credentials credentials, BigInteger gasPrice, BigInteger gasLimit) {
         return new ContractA(contractAddress, web3j, credentials, gasPrice, gasLimit);

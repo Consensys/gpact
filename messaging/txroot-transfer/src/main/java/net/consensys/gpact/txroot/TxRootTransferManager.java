@@ -17,6 +17,7 @@ package net.consensys.gpact.txroot;
 import net.consensys.gpact.attestorsign.RegistrarManager;
 import net.consensys.gpact.attestorsign.soliditywrappers.CrosschainVerifierSign;
 import net.consensys.gpact.common.BlockchainId;
+import net.consensys.gpact.common.DynamicGasProvider;
 import net.consensys.gpact.txroot.soliditywrappers.CrosschainVerifierTxRoot;
 import net.consensys.gpact.txroot.soliditywrappers.TxReceiptsRootStorage;
 import org.apache.logging.log4j.LogManager;
@@ -36,7 +37,7 @@ public class TxRootTransferManager extends RegistrarManager {
   private TxReceiptsRootStorage txReceiptsRootStorage;
 
 
-  public TxRootTransferManager(Credentials credentials, BlockchainId bcId, String uri, String gasPriceStrategy, String blockPeriod) throws IOException {
+  public TxRootTransferManager(Credentials credentials, BlockchainId bcId, String uri, DynamicGasProvider.Strategy gasPriceStrategy, int blockPeriod) throws IOException {
     super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
   }
 

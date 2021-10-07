@@ -66,6 +66,7 @@ public class Main {
       bc1ContractABlockchain.showValueRead();
 
       bc2ContractBBlockchain.separatedGet();
+      bc1ContractABlockchain.separatedGet();
     }
 
 

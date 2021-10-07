@@ -17,6 +17,7 @@ package net.consensys.gpact.txroot;
 
 import net.consensys.gpact.common.AbstractBlockchain;
 import net.consensys.gpact.common.BlockchainId;
+import net.consensys.gpact.common.DynamicGasProvider;
 import net.consensys.gpact.messaging.MessagingVerificationInterface;
 import net.consensys.gpact.messaging.SignedEvent;
 import net.consensys.gpact.trie.MerklePatriciaTrie;
@@ -58,7 +59,7 @@ public class TxRootTransfer extends AbstractBlockchain implements MessagingVerif
 
   public TxRootTransfer(
           TxRootRelayerGroup relayerGroup,
-          Credentials credentials, BlockchainId bcId, String uri, String gasPriceStrategy, String blockPeriod) throws IOException {
+          Credentials credentials, BlockchainId bcId, String uri, DynamicGasProvider.Strategy gasPriceStrategy, int blockPeriod) throws IOException {
     super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
     this.relayerGroup = relayerGroup;
   }
