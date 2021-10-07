@@ -98,8 +98,11 @@ public class Erc20User {
     }
 
 
-
     public void transfer(boolean fromAToB, int amountInt) throws Exception {
+        transfer(fromAToB, this.creds.getAddress(), amountInt);
+    }
+
+    public void transfer(boolean fromAToB, String recipient, int amountInt) throws Exception {
         LOG.info(" Transfer: {}: {}: {} tokens ", this.name, fromAToB ? "ChainA -> ChainB" : "ChainB -> ChainA", amountInt);
 
         BigInteger amount = BigInteger.valueOf(amountInt);
@@ -134,15 +137,21 @@ public class Erc20User {
         SfcErc20MassConservationBridge sfcErc20Bridge = SfcErc20MassConservationBridge.load(sourceBridgeContractAddress, web3j, tm, gasProvider);
         LOG.info(" Call: BcId: {}, ERC20 Bridge: {}", sourceBlockchainId, sourceBridgeContractAddress);
         RemoteFunctionCall<TransactionReceipt> functionCall = sfcErc20Bridge.transferToOtherBlockchain(
-                destinationBlockchainId.asBigInt(), sourceERC20ContractAddress, this.creds.getAddress(), amount);
+                destinationBlockchainId.asBigInt(), sourceERC20ContractAddress, recipient, amount);
 
         SimpleCrosschainExecutor executor = new SimpleCrosschainExecutor(crossControlManagerGroup);
-        TransactionReceipt[] receipts = executor.execute(sourceBlockchainId, functionCall);
-
-        boolean success = (receipts.length == 2) && receipts[0].isStatusOK() && receipts[1].isStatusOK();
+        Tuple<TransactionReceipt[], String, Boolean> results = executor.execute(sourceBlockchainId, functionCall);
+        boolean success =  results.getThird();
         LOG.info("Success: {}", success);
-
         if (!success) {
+            LOG.error("Crosschain Execution failed. See log for details");
+            String errorMsg = results.getSecond();
+            if (errorMsg != null) {
+                LOG.error("Error information: {}", errorMsg);
+            }
+            for (TransactionReceipt txr: results.getFirst()) {
+                LOG.error("Transaction Receipt: {}", txr.toString());
+            }
             throw new Exception("Crosschain Execution failed. See log for details");
         }
     }

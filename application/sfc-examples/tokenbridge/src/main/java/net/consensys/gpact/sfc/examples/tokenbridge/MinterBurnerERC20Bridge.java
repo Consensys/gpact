@@ -16,11 +16,13 @@ package net.consensys.gpact.sfc.examples.tokenbridge;
 
 import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.common.DynamicGasProvider;
-import net.consensys.gpact.openzeppelin.soliditywrappers.ERC20PresetFixedSupply;
-import net.consensys.gpact.sfc.examples.tokenbridge.soliditywrappers.SfcErc20MassConservationBridge;
+import net.consensys.gpact.openzeppelin.soliditywrappers.ERC20PresetMinterPauser;
+import net.consensys.gpact.sfc.examples.tokenbridge.soliditywrappers.SfcErc20MintingBurningBridge;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.hyperledger.besu.crypto.Hash;
 import org.web3j.crypto.Credentials;
+import org.apache.tuweni.bytes.Bytes;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -31,15 +33,20 @@ import java.math.BigInteger;
  * contract on a certain blockchain.
  *
  */
-public class MassConservationERC20Bridge extends AbstractERC20Bridge {
-    private static final Logger LOG = LogManager.getLogger(MassConservationERC20Bridge.class);
+public class MinterBurnerERC20Bridge extends AbstractERC20Bridge {
+    private static final Logger LOG = LogManager.getLogger(MinterBurnerERC20Bridge.class);
 
-    ERC20PresetFixedSupply erc20;
-    SfcErc20MassConservationBridge erc20Bridge;
+    public static byte[] MINTER_ROLE = Hash.keccak256(Bytes.wrap("MINTER_ROLE".getBytes())).toArray();
 
 
-    public MassConservationERC20Bridge(final String entity, BigInteger tokenSupply,
-                                       Credentials credentials, BlockchainId bcId, String uri, DynamicGasProvider.Strategy gasPriceStrategy, int blockPeriod) throws IOException {
+
+    ERC20PresetMinterPauser erc20;
+
+    SfcErc20MintingBurningBridge erc20Bridge;
+
+
+    public MinterBurnerERC20Bridge(final String entity, BigInteger tokenSupply,
+                                   Credentials credentials, BlockchainId bcId, String uri, DynamicGasProvider.Strategy gasPriceStrategy, int blockPeriod) throws IOException {
         super(entity, tokenSupply, credentials, bcId, uri, gasPriceStrategy, blockPeriod);
     }
 
@@ -47,12 +54,15 @@ public class MassConservationERC20Bridge extends AbstractERC20Bridge {
         String name = this.entity;
         String symbol= this.entity;
         String owner = this.credentials.getAddress();
-        this.erc20 = ERC20PresetFixedSupply.deploy(this.web3j, this.tm, this.gasProvider, name, symbol, this.tokenSupply, owner).send();
-        LOG.info(" Deploy {} ERC20: {}. Token Supply: {}", this.entity, this.erc20.getContractAddress(), this.tokenSupply);
+        this.erc20 = ERC20PresetMinterPauser.deploy(this.web3j, this.tm, this.gasProvider, name, symbol).send();
+        LOG.info(" Deploy {} ERC20: {}.", this.entity, this.erc20.getContractAddress());
 
-        this.erc20Bridge = SfcErc20MassConservationBridge.deploy(this.web3j, this.tm, this.gasProvider, cbcAddress).send();
-        LOG.info(" Deploy ERC20 Mass Conservation Bridge: {}", this.erc20Bridge.getContractAddress());
+        this.erc20Bridge = SfcErc20MintingBurningBridge.deploy(this.web3j, this.tm, this.gasProvider, cbcAddress).send();
+        LOG.info(" Deploy ERC20 Minter Burner Bridge: {}", this.erc20Bridge.getContractAddress());
         this.erc20BridgeAddress = this.erc20Bridge.getContractAddress();
+
+        LOG.info(" Configure ERC20 Bridge to be the minter for the ERC20 contract");
+        this.erc20.grantRole(MINTER_ROLE, this.erc20BridgeAddress).send();
     }
 
     public String getErc20ContractAddress() {
@@ -76,11 +86,11 @@ public class MassConservationERC20Bridge extends AbstractERC20Bridge {
     }
 
     public void giveTokensToERC20Bridge(final int number) throws Exception {
-        this.erc20.transfer(this.erc20BridgeAddress, BigInteger.valueOf(number)).send();
+        throw new Exception("ERC 20 Bridge doesn't need tokens. It can mint then whenever it needs");
     }
 
     public void giveTokens(final Erc20User user, final int number) throws Exception {
-        this.erc20.transfer(user.getAddress(), BigInteger.valueOf(number)).send();
+        throw new Exception("Only the bridge can mint tokens");
     }
 
 

@@ -31,6 +31,7 @@ of the protocol stack.
     <a href="https://github.com/ConsenSys/gpact/tree/main/application/gpact-examples/write">Write across chains</a><br>
   </td>
   <td rowspan="2">Examples:
+    <a href="https://github.com/ConsenSys/gpact/tree/main/application/sfc-examples/tokenbridge">ERC 20 Token Bridge</a><br>
     <a href="https://github.com/ConsenSys/gpact/tree/main/application/sfc-examples/write">Write across chains</a><br>
   </td>
 </tr>

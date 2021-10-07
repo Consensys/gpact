@@ -27,14 +27,19 @@ import "./SfcErc20BridgeInterface.sol";
  */
 abstract contract AbstractSfcErc20Bridge is HiddenParameters, Pausable, Ownable, SfcErc20BridgeInterface {
     // Simple Function Call bridge.
-    CrosschainFunctionCallInterface crosschainBridge;
+    CrosschainFunctionCallInterface private crosschainBridge;
 
     // Mapping of ERC 20 contracts on this blockchain to ERC 20 contracts
     // of the same type on different blockchains.
     //
     // Map (token contract address on this blockchain =>
     //  Map (destination blockchain Id => address on remote contract)
-    mapping (address => mapping (uint256 => address)) public tokenContractAddressMapping;
+    mapping (address => mapping (uint256 => address)) private tokenContractAddressMapping;
+
+
+    // Addresses of ERC 20 bridges on other blockchains.
+    mapping (uint256 => address) private remoteErc20Bridges;
+
 
     /**
      * @param _sfcCbcContract  Simple Function Call protocol implementation.
@@ -44,17 +49,13 @@ abstract contract AbstractSfcErc20Bridge is HiddenParameters, Pausable, Ownable,
     }
 
 
-    /**
-     * Update the mapping between an ERC 20 contract on this blockchain and an ERC 20
-     * contract on another blockchain.
-     *
-     * @param _thisBcTokenContract  Address of ERC 20 contract on this blockchain.
-     * @param _otherBcId            Blockchain ID where the corresponding ERC 20 contract resides.
-     * @param _othercTokenContract  Address of ERC 20 contract on the other blockchain.
-     */
     function changeContractMapping(address _thisBcTokenContract, uint256 _otherBcId, address _othercTokenContract) onlyOwner override external {
         tokenContractAddressMapping[_thisBcTokenContract][_otherBcId] = _othercTokenContract;
         emit TokenContractAddressMappingChanged(_thisBcTokenContract, _otherBcId, _othercTokenContract);
+    }
+
+    function changeBlockchainMapping(uint256 _otherBcId, address _otherErc20Bridge) onlyOwner override external {
+        remoteErc20Bridges[_otherBcId] = _otherErc20Bridge;
     }
 
     /**
@@ -69,19 +70,19 @@ abstract contract AbstractSfcErc20Bridge is HiddenParameters, Pausable, Ownable,
      * @param _amount           The number of tokens to transfer.
      */
     function transferToOtherBlockchain(uint256 _destBcId, address _srcTokenContract, address _recipient, uint256 _amount) whenNotPaused override public {
-        address destTokenContract = tokenContractAddressMapping[_srcTokenContract][_destBcId];
+        address destErc20BridgeContract = remoteErc20Bridges[_destBcId];
+        require(destErc20BridgeContract != address(0), "Blockchain not supported");
 
         // The token must be able to be transferred to the target blockchain.
-        require(destTokenContract != address(0), "Token not transferable");
+        address destTokenContract = tokenContractAddressMapping[_srcTokenContract][_destBcId];
+        require(destTokenContract != address(0), "Token not transferable to requested blockchain");
 
         // Transfer tokens from the user to this contract.
         // The transfer will revert if the account has inadequate balance or if adequate
         // allowance hasn't been set-up.
-        if (!IERC20(_srcTokenContract).transferFrom(msg.sender, address(this), _amount)) {
-            revert("transferFrom failed");
-        }
+        transferOrBurn(_srcTokenContract, msg.sender, _amount);
 
-        crosschainBridge.crossBlockchainCall(_destBcId, destTokenContract,
+        crosschainBridge.crossBlockchainCall(_destBcId, destErc20BridgeContract,
             abi.encodeWithSelector(this.receiveFromOtherBlockchain.selector, destTokenContract, _recipient, _amount));
 
         emit TransferTo(_destBcId, _srcTokenContract, destTokenContract, msg.sender, _recipient, _amount);
@@ -102,28 +103,22 @@ abstract contract AbstractSfcErc20Bridge is HiddenParameters, Pausable, Ownable,
         (uint256 sourceBcId, uint256 sourceContract1) = extractTwoHiddenParams();
         address sourceContract = address(uint160(sourceContract1));
         // The source blockchain id is validated at the function call layer. No need to check
-        // that is isn't zero.
-        // The sourceContract could be manipulated by malicious validators. A value of zero
-        // would be deemed valid in the code that follows. Hence, check for zero here.
-        require(sourceContract != address(0), "Source is not correct ERC20");
+        // that it isn't zero.
 
-        // Determine the ERC contract address that corresponds to the address on this blockchain.
-        address expectedSourceContract = tokenContractAddressMapping[_destTokenContract][sourceBcId];
+        require(sourceContract != address(0), "ERC 20 Bridge (caller) contract is 0");
+        address remoteErc20Bridge = remoteErc20Bridges[sourceBcId];
+        require(remoteErc20Bridge != address(0), "No ERC 20 Bridge supported for source blockchain");
+        require(sourceContract == remoteErc20Bridge, "Incorrect source ERC 20 Bridge");
 
-        require(sourceContract == expectedSourceContract, "Source is not correct ERC20");
-
-        if (!transferOrMint(_destTokenContract, _recipient, _amount)) {
-            revert("transferFrom failed");
-        }
+        transferOrMint(_destTokenContract, _recipient, _amount);
 
         emit ReceivedFrom(sourceBcId, sourceContract, _destTokenContract, _recipient, _amount);
     }
 
 
+
     function adminTransfer(address _erc20Contract, address _recipient, uint256 _amount) onlyOwner override external {
-        if (!IERC20(_erc20Contract).transfer(_recipient, _amount)) {
-            revert("transferFrom failed");
-        }
+        transferOrMint(_erc20Contract, _recipient, _amount);
 
         emit AdminTransfer(_erc20Contract, _recipient, _amount);
     }
@@ -136,11 +131,32 @@ abstract contract AbstractSfcErc20Bridge is HiddenParameters, Pausable, Ownable,
         return tokenContractAddressMapping[_tokenContract][_bcId];
     }
 
+    function getRemoteErc20BridgeContract(uint256 _bcId) external override view returns(address) {
+        return remoteErc20Bridges[_bcId];
+    }
 
     // ***************************************************************************
     // ******* Internal below here ***********************************************
     // ***************************************************************************
-    function transferOrMint(address _tokenContract, address _recipient, uint256 _amount) virtual internal returns (bool);
+    /**
+     * Mass Conservation: Transfer tokens that are owned by this contract to a recipient.
+     * OR
+     * Minting Burning: Mint token and assign them to a recipient.
+     *
+     * @param _tokenContract      ERC 20 contract of the token being transferred or minted.
+     * @param _recipient          Account to transfer ownership of the tokens to.
+     * @param _amount             The number of tokens to be transferred.
+     */
+    function transferOrMint(address _tokenContract, address _recipient, uint256 _amount) virtual internal;
 
-
+    /**
+     * Mass Conservation: TransferFrom tokens from a spender to this contract.
+     * OR
+     * Minting Burning: BurnFrom a spender's tokens.
+     *
+     * @param _tokenContract      ERC 20 contract of the token being transferred or burned.
+     * @param _spender            Account to transfer ownership of the tokens from.
+     * @param _amount             The number of tokens to be transferred.
+     */
+    function transferOrBurn(address _tokenContract, address _spender, uint256 _amount) virtual internal;
 }

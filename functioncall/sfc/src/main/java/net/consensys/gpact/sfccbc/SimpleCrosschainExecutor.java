@@ -37,7 +37,7 @@ public class SimpleCrosschainExecutor {
     this.crossControlManagerGroup = crossControlManagerGroup;
   }
 
-  public TransactionReceipt[] execute(BlockchainId sourceBcId, RemoteCall<TransactionReceipt> functionCall) throws Exception {
+  public Tuple<TransactionReceipt[], String, Boolean> execute(BlockchainId sourceBcId, RemoteCall<TransactionReceipt> functionCall) throws Exception {
     SimpleCrossControlManager cbcContract = this.crossControlManagerGroup.getCbcContract(sourceBcId);
     MessagingVerificationInterface messaging = this.crossControlManagerGroup.getMessageVerification(sourceBcId);
 
@@ -48,7 +48,7 @@ public class SimpleCrosschainExecutor {
     SimpleCrosschainControl.CrossCallEventResponse crossCallEvent = result.getThird();
 
     if (!txr1.isStatusOK()) {
-      return new TransactionReceipt[] {txr1};
+      return new Tuple<TransactionReceipt[], String, Boolean>(new TransactionReceipt[] {txr1}, "Source blockchain transaction failed", false);
     }
 
     SignedEvent signedCrossCallEvent = messaging.getSignedEvent(
@@ -62,7 +62,10 @@ public class SimpleCrosschainExecutor {
 
     cbcContract = this.crossControlManagerGroup.getCbcContract(destBcId);
     Tuple<TransactionReceipt, String, Boolean> result2 = cbcContract.destinationBcCall(signedCrossCallEvent);
-    return new TransactionReceipt[]{txr1, result2.getFirst()};
+    return new Tuple<TransactionReceipt[], String, Boolean>(
+            new TransactionReceipt[]{txr1, result2.getFirst()},
+            result2.getSecond(),
+            result2.getThird());
   }
 
 

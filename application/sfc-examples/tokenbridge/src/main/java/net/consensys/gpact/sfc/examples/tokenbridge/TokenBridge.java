@@ -22,9 +22,14 @@ import org.web3j.crypto.Credentials;
 
 import java.math.BigInteger;
 
-
+/**
+ * Sample code showing how to use the Simple Function Call protocol
+ * ERC 20 Mass Conservation and Minter Burner bridges.
+ */
 public class TokenBridge {
   static final Logger LOG = LogManager.getLogger(TokenBridge.class);
+
+  public static final boolean BLOCKCHAIN_B_MASS_CONSERVATION = false;
 
   public static final int NUM_TIMES_EXECUTE = 2;
 
@@ -45,22 +50,34 @@ public class TokenBridge {
     SimpleCrossControlManagerGroup crossControlManagerGroup = exampleManager.getSfcCrossControlManagerGroup();
 
     final int CHAIN_A_TOKEN_SUPPLY = 1000;
-    final int CHAIN_B_TOKEN_SUPPLY = 2000;
+    final int CHAIN_B_TOKEN_SUPPLY = 1000;
 
     // Set-up classes to manage blockchains.
     Credentials erc20OwnerCreds = CredentialsCreator.createCredentials();
     MassConservationERC20Bridge chainA = new MassConservationERC20Bridge(
             "ChainA", BigInteger.valueOf(CHAIN_A_TOKEN_SUPPLY),
             erc20OwnerCreds, root.bcId, root.uri, root.gasPriceStrategy, root.period);
-    MassConservationERC20Bridge chainB = new MassConservationERC20Bridge(
+    AbstractERC20Bridge chainB;
+    if (BLOCKCHAIN_B_MASS_CONSERVATION) {
+      chainB = new MassConservationERC20Bridge(
+              "ChainB", BigInteger.valueOf(CHAIN_B_TOKEN_SUPPLY),
+              erc20OwnerCreds, bc2.bcId, bc2.uri, bc2.gasPriceStrategy, bc2.period);
+    }
+    else {
+      chainB = new MinterBurnerERC20Bridge(
             "ChainB", BigInteger.valueOf(CHAIN_B_TOKEN_SUPPLY),
             erc20OwnerCreds, bc2.bcId, bc2.uri, bc2.gasPriceStrategy, bc2.period);
+    }
 
     // Deploy application contracts.
     BlockchainId chainABcId = chainA.getBlockchainId();
-    chainA.deployContract(crossControlManagerGroup.getCbcAddress(chainABcId));
+    chainA.deployContracts(crossControlManagerGroup.getCbcAddress(chainABcId));
     BlockchainId chainBBcId = chainB.getBlockchainId();
-    chainB.deployContract(crossControlManagerGroup.getCbcAddress(chainBBcId));
+    chainB.deployContracts(crossControlManagerGroup.getCbcAddress(chainBBcId));
+
+    // Connect the ERC 20 Bridges
+    chainA.addBlockchain(chainBBcId, chainB.getErc20BridgeContractAddress());
+    chainB.addBlockchain(chainABcId, chainA.getErc20BridgeContractAddress());
 
     // Register the ERC20 contracts with each blockchain.
     chainA.addRemoteERC20(chainBBcId, chainB.getErc20ContractAddress());
@@ -97,6 +114,10 @@ public class TokenBridge {
     chainA.giveTokens(user2, 200);
     chainA.giveTokens(user3, 300);
 
+    if (BLOCKCHAIN_B_MASS_CONSERVATION) {
+      chainB.giveTokensToERC20Bridge(1000);
+    }
+
     Erc20User[] users = new Erc20User[]{user1, user2, user3};
 
     chainA.showErc20Balances(users);
@@ -106,7 +127,12 @@ public class TokenBridge {
       LOG.info("Execution: {}  *****************", numExecutions);
       StatsHolder.log("Execution: " + numExecutions + " **************************");
 
-      user1.transfer(true, numExecutions + 7);
+      user1.transfer(true, 20);
+      user2.transfer(true, user2.getAddress(), 30);
+      user3.transfer(true, user2.getAddress(), 10);
+
+      user2.transfer(false, 39);
+      user1.transfer(false, 18);
 
       chainA.showErc20Balances(users);
       chainB.showErc20Balances(users);

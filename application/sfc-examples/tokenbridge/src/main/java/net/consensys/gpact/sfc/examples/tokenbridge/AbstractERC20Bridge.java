@@ -37,8 +37,9 @@ public abstract class AbstractERC20Bridge extends AbstractBlockchain {
 
     // Total number of tokens issued for booking.
     public final BigInteger tokenSupply;
-    ERC20PresetFixedSupply erc20;
     public final String entity;
+
+    protected String erc20BridgeAddress;
 
 
     public AbstractERC20Bridge(final String entity, BigInteger tokenSupply,
@@ -48,36 +49,24 @@ public abstract class AbstractERC20Bridge extends AbstractBlockchain {
         this.tokenSupply = tokenSupply;
     }
 
-    public void deployContract() throws Exception {
-        String name = this.entity;
-        String symbol= this.entity;
-        String owner = this.credentials.getAddress();
-        this.erc20 = ERC20PresetFixedSupply.deploy(this.web3j, this.tm, this.gasProvider, name, symbol, this.tokenSupply, owner).send();
-        LOG.info(" Deploy {} ERC20: {}. Token Supply: {}", this.entity, this.erc20.getContractAddress(), this.tokenSupply);
-    }
-
-
-    public String getErc20ContractAddress() {
-        return this.erc20.getContractAddress();
-    }
+    public abstract void deployContracts(String cbcAddress) throws Exception;
 
 
 
-    public void giveTokens(final Erc20User user, final int number) throws Exception {
-        this.erc20.transfer(user.getAddress(), BigInteger.valueOf(number)).send();
-    }
+    public abstract void addRemoteERC20(BlockchainId remoteBcId, String remoteERC20ContractAddress) throws Exception;
+
+    public abstract void addBlockchain(BlockchainId remoteBcId, String remoteERC20BridgeContractAddress) throws Exception;
 
 
-    public void showErc20Balances(Erc20User[] users) throws Exception {
-        LOG.info(" {} ERC 20 Balances", this.entity);
-        for (Erc20User user: users) {
-            BigInteger bal = this.erc20.balanceOf(user.getAddress()).send();
-            LOG.info(" Account {}:{} balance: {}", user.getName(), user.getAddress(), bal);
-        }
-    }
-    public void showErc20Allowance(String owner, String spender) throws Exception {
-        BigInteger allowance = this.erc20.allowance(owner, spender).send();
-        LOG.info(" {}: Owner {}: Spender: {}: Allowance: {}", this.entity, owner, spender, allowance);
+    public abstract String getErc20ContractAddress();
 
-    }
+    public abstract String getErc20BridgeContractAddress();
+
+    public abstract void giveTokensToERC20Bridge(final int number) throws Exception;
+
+    public abstract void giveTokens(final Erc20User user, final int number) throws Exception;
+
+    public abstract void showErc20Balances(Erc20User[] users) throws Exception;
+
+    public abstract void showErc20Allowance(String owner, String spender) throws Exception;
 }
