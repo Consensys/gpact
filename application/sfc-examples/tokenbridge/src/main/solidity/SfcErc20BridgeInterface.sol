@@ -82,6 +82,12 @@ interface SfcErc20BridgeInterface {
     function changeContractMapping(address _thisBcTokenContract, uint256 _otherBcId, address _othercTokenContract) external;
 
     /**
+     * Connect this ERC20 Bridge contract to an ERC20 Bridge contract on another blockchain.
+     */
+    function changeBlockchainMapping(uint256 _otherBcId, address _otherErc20Bridge) external;
+
+
+    /**
      * Transfer tokens from msg.sender to this contract on this blockchain,
      * and request tokens on the remote blockchain be given to the requested
      * account on the destination blockchain.
@@ -141,4 +147,6 @@ interface SfcErc20BridgeInterface {
      */
     function getBcIdTokenMaping(uint256 _bcId, address _tokenContract) external view returns(address);
 
+
+    function getRemoteErc20BridgeContract(uint256 _bcId) external view returns(address);
 }

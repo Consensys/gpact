@@ -89,7 +89,7 @@ public class SimpleCrossControlManager extends AbstractBlockchain {
     } catch (TransactionException ex) {
       // Crosschain Control Contract reverted
       String revertReason = RevertReason.decodeRevertReason(ex.getTransactionReceipt().get().getRevertReason());
-      LOG.error(" Revert Reason: {}", revertReason);
+      LOG.error(" Revert Reason1: {}", revertReason);
       return new Tuple<TransactionReceipt, byte[], SimpleCrosschainControl.CrossCallEventResponse>(
               ex.getTransactionReceipt().get(),
               null,
@@ -121,7 +121,7 @@ public class SimpleCrossControlManager extends AbstractBlockchain {
     } catch (TransactionException ex) {
       // Crosschain Control Contract reverted
       String revertReason = RevertReason.decodeRevertReason(ex.getTransactionReceipt().get().getRevertReason());
-      LOG.error(" Revert Reason1: {}", revertReason);
+      LOG.error(" Revert Reason2: {}", revertReason);
       return new Tuple<TransactionReceipt, String, Boolean>(
               ex.getTransactionReceipt().get(),
               revertReason,
@@ -141,7 +141,7 @@ public class SimpleCrossControlManager extends AbstractBlockchain {
     if (!failureEventResponses.isEmpty()) {
       // Application contract reverted
       // There will only be one failure event.
-      LOG.warn(" Revert Reason1: {}", failureEventResponses.get(0)._revertReason);
+      LOG.warn(" Revert Reason3: {}", failureEventResponses.get(0)._revertReason);
       return new Tuple<TransactionReceipt, String, Boolean>(
               txR,
               failureEventResponses.get(0)._revertReason,

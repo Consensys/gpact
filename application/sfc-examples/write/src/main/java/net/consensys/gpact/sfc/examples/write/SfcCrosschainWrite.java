@@ -70,12 +70,22 @@ public class SfcCrosschainWrite {
       RemoteCall<TransactionReceipt> functionCall = bc1ContractABlockchain.doCrosschainWrite(val);
 
       SimpleCrosschainExecutor executor = new SimpleCrosschainExecutor(crossControlManagerGroup);
-      TransactionReceipt[] receipts = executor.execute(rootBcId, functionCall);
-
-      success = (receipts.length == 2) && receipts[0].isStatusOK() && receipts[1].isStatusOK();
+      Tuple<TransactionReceipt[], String, Boolean> results = executor.execute(rootBcId, functionCall);
+      success =  results.getThird();
       LOG.info("Success: {}", success);
+      if (!success) {
+        LOG.error("Crosschain Execution failed. See log for details");
+        String errorMsg = results.getSecond();
+        if (errorMsg != null) {
+          LOG.error("Error information: {}", errorMsg);
+        }
+        for (TransactionReceipt txr: results.getFirst()) {
+          LOG.error("Transaction Receipt: {}", txr.toString());
+        }
+        throw new Exception("Crosschain Execution failed. See log for details");
+      }
 
-      bc2ContractBBlockchain.showEvents(receipts[1]);
+      bc2ContractBBlockchain.showEvents(results.getFirst()[1]);
       bc2ContractBBlockchain.checkValueWritten(val);
     }
 

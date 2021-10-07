@@ -14,19 +14,16 @@
  */
 pragma solidity >=0.8.0;
 
-import "../../../../../../common/openzeppelin/src/main/solidity/token/ERC20/IERC20.sol";
+import "../../../../../../common/openzeppelin/src/main/solidity/token/ERC20/presets/ERC20PresetMinterPauser.sol";
 import "./SfcErc20BridgeInterface.sol";
 import "./AbstractSfcErc20Bridge.sol";
 
 /**
- * ERC 20 bridge using the Simple Function Call protocol. This bridge is the owner
- * of tokens that are transferred to other blockchains. When tokens are
- * transferred to another blockchain, the user approves the contract using some
- * of their tokens. The contract is then able to execute a transferFrom() for the
- * tokens to be transferred. When tokens are transferred back to this chain,
- * the contract transfers tokens to the recipient.
+ * ERC 20 bridge using the Simple Function Call protocol. This bridge mints new tokens
+ * when they are transferred to this chain and burns tokens when they are transferred
+ * from this chain.
  */
-contract SfcErc20MassConservationBridge is SfcErc20BridgeInterface, AbstractSfcErc20Bridge {
+contract SfcErc20MintingBurningBridge is SfcErc20BridgeInterface, AbstractSfcErc20Bridge {
 
     /**
      * @param _sfcCbcContract  Simple Function Call protocol implementation.
@@ -36,16 +33,11 @@ contract SfcErc20MassConservationBridge is SfcErc20BridgeInterface, AbstractSfcE
 
 
     function transferOrMint(address _tokenContract, address _recipient, uint256 _amount) internal override {
-        if (!IERC20(_tokenContract).transfer(_recipient, _amount)) {
-            revert("transfer failed");
-        }
+        ERC20PresetMinterPauser(_tokenContract).mint(_recipient, _amount);
     }
 
     function transferOrBurn(address _tokenContract, address _spender, uint256 _amount) internal override {
-        if (!IERC20(_tokenContract).transferFrom(_spender, address(this), _amount)) {
-            revert("transferFrom failed");
-        }
+        ERC20PresetMinterPauser(_tokenContract).burnFrom(_spender, _amount);
     }
-
 
 }
