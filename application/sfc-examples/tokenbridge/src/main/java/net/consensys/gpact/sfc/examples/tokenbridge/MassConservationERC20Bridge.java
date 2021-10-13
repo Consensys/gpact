@@ -76,16 +76,18 @@ public class MassConservationERC20Bridge extends AbstractERC20Bridge {
     }
 
     public void giveTokensToERC20Bridge(final int number) throws Exception {
+        LOG.info("{} Transferring {} tokens to bridge", this.entity, number);
         this.erc20.transfer(this.erc20BridgeAddress, BigInteger.valueOf(number)).send();
     }
 
     public void giveTokens(final Erc20User user, final int number) throws Exception {
+        LOG.info("{} Transferring {} tokens to {}", this.entity, number, user.getName());
         this.erc20.transfer(user.getAddress(), BigInteger.valueOf(number)).send();
     }
 
 
     public void showErc20Balances(Erc20User[] users) throws Exception {
-        LOG.info(" {} ERC 20 Balances", this.entity);
+        LOG.info("{} ERC20 Balances", this.entity);
         BigInteger totalSupply = this.erc20.totalSupply().send();
         LOG.info(" Total Supply: {}", totalSupply);
         BigInteger bal = this.erc20.balanceOf(this.erc20BridgeAddress).send();

@@ -95,14 +95,14 @@ public class MinterBurnerERC20Bridge extends AbstractERC20Bridge {
 
 
     public void showErc20Balances(Erc20User[] users) throws Exception {
-        LOG.info(" {} ERC 20 Balances", this.entity);
+        LOG.info(" {} ERC20 Balances", this.entity);
         BigInteger totalSupply = this.erc20.totalSupply().send();
-        LOG.info(" Total Supply: {}", totalSupply);
+        LOG.info("  Total Supply: {}", totalSupply);
         BigInteger bal = this.erc20.balanceOf(this.erc20BridgeAddress).send();
-        LOG.info(" ERC20 Bridge Account {}: balance: {}", this.erc20BridgeAddress, bal);
+        LOG.info("  ERC20 Bridge Account {}: balance: {}", this.erc20BridgeAddress, bal);
         for (Erc20User user: users) {
             bal = this.erc20.balanceOf(user.getAddress()).send();
-            LOG.info(" Account {}:{} balance: {}", user.getName(), user.getAddress(), bal);
+            LOG.info("  Account {}:{} balance: {}", user.getName(), user.getAddress(), bal);
         }
     }
     public void showErc20Allowance(String owner, String spender) throws Exception {

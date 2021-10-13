@@ -34,8 +34,14 @@ public class TokenBridge {
   public static final int NUM_TIMES_EXECUTE = 2;
 
   public static void main(String[] args) throws Exception {
+    main(args, BLOCKCHAIN_B_MASS_CONSERVATION);
+  }
+
+
+  public static void main(String[] args, boolean blockchainBIsMassConservation) throws Exception {
     StatsHolder.log("Example: SFC: Token Bridge");
     LOG.info("Started");
+    LOG.info("Blockchain B is Mass Conservation: {}", blockchainBIsMassConservation);
 
     if (args.length != 1) {
       LOG.info("Usage: [properties file name]");
@@ -58,7 +64,7 @@ public class TokenBridge {
             "ChainA", BigInteger.valueOf(CHAIN_A_TOKEN_SUPPLY),
             erc20OwnerCreds, root.bcId, root.uri, root.gasPriceStrategy, root.period);
     AbstractERC20Bridge chainB;
-    if (BLOCKCHAIN_B_MASS_CONSERVATION) {
+    if (blockchainBIsMassConservation) {
       chainB = new MassConservationERC20Bridge(
               "ChainB", BigInteger.valueOf(CHAIN_B_TOKEN_SUPPLY),
               erc20OwnerCreds, bc2.bcId, bc2.uri, bc2.gasPriceStrategy, bc2.period);
@@ -114,7 +120,7 @@ public class TokenBridge {
     chainA.giveTokens(user2, 200);
     chainA.giveTokens(user3, 300);
 
-    if (BLOCKCHAIN_B_MASS_CONSERVATION) {
+    if (blockchainBIsMassConservation) {
       chainB.giveTokensToERC20Bridge(1000);
     }
 
