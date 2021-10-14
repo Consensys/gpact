@@ -24,7 +24,6 @@
             <AppenderRef ref="Console" />
         </Root>
         <Logger name="net.consensys.gpact.cbc" level="DEBUG">
-            <AppenderRef ref="Console"/>
         </Logger>
     </Loggers>
 </Configuration>
