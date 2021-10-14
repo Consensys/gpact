@@ -14,6 +14,7 @@ dependencies {
     implementation project (':sfc')
     implementation project (':mes-interface')
     implementation project (':examplehelpers')
+    implementation project (':app-nonatomic-erc20bridge')
 
     implementation group: 'com.google.guava', name: 'guava', version: '14.0'
     implementation group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.12.0'
@@ -39,18 +40,4 @@ dependencies {
 
     testImplementation project (':commontest')
     testImplementation group: 'junit', name: 'junit', version: '4.12'
-}
-
-task generateSources {
-    def script = "application/sfc-examples/tokenbridge/gen.sh".execute()
-//    script.in.eachLine {line -> println line}
-//    script.err.eachLine {line -> println "ERROR: " + line}
-    script.waitForProcessOutput(System.out, System.err)
-    if (script.exitValue() != 0) {
-        throw new GradleException("Solidity compile error")
-    }
-}
-
-project.afterEvaluate {
-    build.dependsOn generateSources
 }

@@ -17,7 +17,7 @@ package net.consensys.gpact.sfc.examples.tokenbridge;
 import net.consensys.gpact.common.*;
 import net.consensys.gpact.messaging.MessagingVerificationInterface;
 import net.consensys.gpact.openzeppelin.soliditywrappers.ERC20PresetFixedSupply;
-import net.consensys.gpact.sfc.examples.tokenbridge.soliditywrappers.SfcErc20MassConservationBridge;
+import net.consensys.gpact.nonatomic.appcontracts.erc20bridge.soliditywrappers.SfcErc20MassConservationBridge;
 import net.consensys.gpact.sfccbc.SimpleCrossControlManagerGroup;
 import net.consensys.gpact.sfccbc.SimpleCrosschainExecutor;
 import org.apache.logging.log4j.LogManager;

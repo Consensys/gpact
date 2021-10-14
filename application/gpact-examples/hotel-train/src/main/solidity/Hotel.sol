@@ -15,7 +15,7 @@
 pragma solidity >=0.8;
 
 import "../../../../../../common/openzeppelin/src/main/solidity/token/ERC20/IERC20.sol";
-import "../../../../../appcontracts/lockablestorage/src/main/solidity/LockableStorage.sol";
+import "../../../../../atomic-appcontracts/lockablestorage/src/main/solidity/LockableStorage.sol";
 import "../../../../../../functioncall/interface/src/main/solidity/CrosschainFunctionCallInterface.sol";
 import "../../../../../../functioncall/interface/src/main/solidity/HiddenParameters.sol";
 
