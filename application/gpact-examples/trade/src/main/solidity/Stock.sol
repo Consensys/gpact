@@ -14,7 +14,7 @@
  */
 pragma solidity >=0.7.1;
 
-import "../../../../../appcontracts/lockablestorage/src/main/solidity/LockableStorage.sol";
+import "../../../../../atomic-appcontracts/lockablestorage/src/main/solidity/LockableStorage.sol";
 import "../../../../../../functioncall/interface/src/main/solidity/CrosschainFunctionCallInterface.sol";
 
 contract Stock is LockableStorage {

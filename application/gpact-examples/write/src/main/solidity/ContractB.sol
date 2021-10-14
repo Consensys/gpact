@@ -13,7 +13,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 pragma solidity >=0.7.1;
-import "../../../../../appcontracts/lockablestorage/src/main/solidity/LockableStorage.sol";
+import "../../../../../atomic-appcontracts/lockablestorage/src/main/solidity/LockableStorage.sol";
 
 
 

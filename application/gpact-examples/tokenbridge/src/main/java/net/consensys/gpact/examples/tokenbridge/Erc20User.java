@@ -1,6 +1,6 @@
 package net.consensys.gpact.examples.tokenbridge;
 
-import net.consensys.gpact.appcontracts.erc20.soliditywrappers.CrosschainERC20;
+import net.consensys.gpact.appcontracts.atomic.erc20.soliditywrappers.CrosschainERC20;
 import net.consensys.gpact.cbc.CrossControlManagerGroup;
 import net.consensys.gpact.cbc.CrosschainExecutor;
 import net.consensys.gpact.cbc.calltree.CallExecutionTree;

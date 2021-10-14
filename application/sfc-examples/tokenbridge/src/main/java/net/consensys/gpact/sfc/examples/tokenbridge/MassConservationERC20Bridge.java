@@ -17,7 +17,7 @@ package net.consensys.gpact.sfc.examples.tokenbridge;
 import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.common.DynamicGasProvider;
 import net.consensys.gpact.openzeppelin.soliditywrappers.ERC20PresetFixedSupply;
-import net.consensys.gpact.sfc.examples.tokenbridge.soliditywrappers.SfcErc20MassConservationBridge;
+import net.consensys.gpact.nonatomic.appcontracts.erc20bridge.soliditywrappers.SfcErc20MassConservationBridge;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;

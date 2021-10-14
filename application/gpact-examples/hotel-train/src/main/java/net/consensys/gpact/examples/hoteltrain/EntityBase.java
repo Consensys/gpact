@@ -14,7 +14,7 @@
  */
 package net.consensys.gpact.examples.hoteltrain;
 
-import net.consensys.gpact.appcontracts.erc20.soliditywrappers.LockableERC20PresetFixedSupply;
+import net.consensys.gpact.appcontracts.atomic.erc20.soliditywrappers.LockableERC20PresetFixedSupply;
 import net.consensys.gpact.common.AbstractBlockchain;
 import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.common.DynamicGasProvider;
