@@ -14,7 +14,7 @@ include 'sfc'
 include 'app-erc20'
 include 'app-lockablestorage'
 include 'app-nonatomic-erc20bridge'
-
+include 'app-nonatomic-erc721bridge'
 
 
 include 'examplehelpers'
@@ -49,6 +49,7 @@ project(":sfc").projectDir = file("functioncall/sfc")
 project(":app-erc20").projectDir = file("application/atomic-appcontracts/erc20")
 project(":app-lockablestorage").projectDir = file("application/atomic-appcontracts/lockablestorage")
 project(":app-nonatomic-erc20bridge").projectDir = file("application/nonatomic-appcontracts/erc20bridge")
+project(":app-nonatomic-erc721bridge").projectDir = file("application/nonatomic-appcontracts/erc721bridge")
 
 
 project(":examplehelpers").projectDir = file("common/examplehelpers")

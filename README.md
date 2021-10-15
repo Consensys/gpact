@@ -42,6 +42,7 @@ of the protocol stack.
   </td>
   <td>Helper contracts:<br>
     <a href="https://github.com/ConsenSys/gpact/tree/main/application/nonatomic-appcontracts/erc20bridge">ERC20 Token Bridge</a><br>
+    <a href="https://github.com/ConsenSys/gpact/tree/main/application/nonatomic-appcontracts/erc721bridge">ERC721 Token Bridge</a><br>
   </td>
 </tr>
 <tr>
