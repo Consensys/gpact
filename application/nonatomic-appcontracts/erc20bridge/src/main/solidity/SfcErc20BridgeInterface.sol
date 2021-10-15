@@ -70,10 +70,29 @@ interface SfcErc20BridgeInterface {
     event AdminTransfer(address _erc20Contract, address _recipient, uint256 _amount);
 
 
+    /**
+     * Pauses the bridge.
+     *
+     * Requirements:
+     * - the caller must have the `PAUSER_ROLE`.
+     */
+    function pause() external;
+
+    /**
+     * Unpauses the bridge.
+     *
+     * Requirements:
+     * - the caller must have the `PAUSER_ROLE`.
+     */
+    function unpause() external;
+
 
     /**
      * Update the mapping between an ERC 20 contract on this blockchain and an ERC 20
      * contract on another blockchain.
+     *
+     * Requirements:
+     * - the caller must have the `MAPPING_ROLE`.
      *
      * @param _thisBcTokenContract  Address of ERC 20 contract on this blockchain.
      * @param _otherBcId            Blockchain ID where the corresponding ERC 20 contract resides.
@@ -83,6 +102,12 @@ interface SfcErc20BridgeInterface {
 
     /**
      * Connect this ERC20 Bridge contract to an ERC20 Bridge contract on another blockchain.
+     *
+     * Requirements:
+     * - the caller must have the `MAPPING_ROLE`.
+     *
+     * @param _otherBcId            Blockchain ID where the corresponding ERC 20 bridge contract resides.
+     * @param _otherErc20Bridge     Address of ERC 20 Bridge contract on other blockchain.
      */
     function changeBlockchainMapping(uint256 _otherBcId, address _otherErc20Bridge) external;
 
@@ -121,6 +146,9 @@ interface SfcErc20BridgeInterface {
      * users' funds escrowed into this contact while they are used on a rollup
      * or sidechain needs to be kept in perfect balance. That is, the number of
      * escrowed tokens must match the number of tokens on other blockchains.
+     *
+     * Requirements:
+     * - the caller must have the `ADMINTRANSFER_ROLE`.
      *
      * @param _erc20Contract    Token to transfer.
      * @param _recipient        Address to transfer the tokens to.

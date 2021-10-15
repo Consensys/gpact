@@ -16,8 +16,8 @@ pragma solidity >=0.8.0;
 
 import "../../../../../../common/openzeppelin/src/main/solidity/token/ERC20/IERC20.sol";
 import "../../../../../../functioncall/interface/src/main/solidity/CrosschainFunctionCallInterface.sol";
+import "../../../../../../common/openzeppelin/src/main/solidity/access/AccessControl.sol";
 import "../../../../../../common/openzeppelin/src/main/solidity/security/Pausable.sol";
-import "../../../../../../common/openzeppelin/src/main/solidity/access/Ownable.sol";
 import "../../../../../../functioncall/interface/src/main/solidity/HiddenParameters.sol";
 import "./SfcErc20BridgeInterface.sol";
 
@@ -25,7 +25,12 @@ import "./SfcErc20BridgeInterface.sol";
  * ERC 20 bridge using the Simple Function Call protocol.
  *
  */
-abstract contract AbstractSfcErc20Bridge is HiddenParameters, Pausable, Ownable, SfcErc20BridgeInterface {
+abstract contract AbstractSfcErc20Bridge is HiddenParameters, Pausable, AccessControl, SfcErc20BridgeInterface {
+    bytes32 public constant MAPPING_ROLE = keccak256("MAPPING_ROLE");
+    bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
+    bytes32 public constant ADMINTRANSFER_ROLE = keccak256("ADMINTRANSFER_ROLE");
+
+
     // Simple Function Call bridge.
     CrosschainFunctionCallInterface private crosschainBridge;
 
@@ -45,37 +50,49 @@ abstract contract AbstractSfcErc20Bridge is HiddenParameters, Pausable, Ownable,
      * @param _sfcCbcContract  Simple Function Call protocol implementation.
      */
     constructor (address _sfcCbcContract) {
+        address sender = _msgSender();
+        _setupRole(DEFAULT_ADMIN_ROLE, sender);
+
+        _setupRole(MAPPING_ROLE, sender);
+        _setupRole(PAUSER_ROLE, sender);
+        _setupRole(ADMINTRANSFER_ROLE, sender);
+
         crosschainBridge = CrosschainFunctionCallInterface(_sfcCbcContract);
     }
 
 
-    function changeContractMapping(address _thisBcTokenContract, uint256 _otherBcId, address _othercTokenContract) onlyOwner override external {
+    function pause() override external {
+        require(hasRole(PAUSER_ROLE, _msgSender()), "ERC20 Bridge: Must have PAUSER role");
+        _pause();
+    }
+
+
+    function unpause() override external {
+        require(hasRole(PAUSER_ROLE, _msgSender()), "ERC20 Bridge: Must have PAUSER role");
+        _unpause();
+    }
+
+
+    function changeContractMapping(address _thisBcTokenContract, uint256 _otherBcId, address _othercTokenContract) override external {
+        require(hasRole(MAPPING_ROLE, _msgSender()), "ERC20 Bridge: Must have MAPPING role");
         tokenContractAddressMapping[_thisBcTokenContract][_otherBcId] = _othercTokenContract;
         emit TokenContractAddressMappingChanged(_thisBcTokenContract, _otherBcId, _othercTokenContract);
     }
 
-    function changeBlockchainMapping(uint256 _otherBcId, address _otherErc20Bridge) onlyOwner override external {
+
+    function changeBlockchainMapping(uint256 _otherBcId, address _otherErc20Bridge) override external {
+        require(hasRole(MAPPING_ROLE, _msgSender()), "ERC20 Bridge: Must have MAPPING role");
         remoteErc20Bridges[_otherBcId] = _otherErc20Bridge;
     }
 
-    /**
-     * Transfer tokens from msg.sender to this contract on this blockchain,
-     * and request tokens on the remote blockchain be given to the requested
-     * account on the destination blockchain.
-     *
-     * NOTE: msg.sender must have called approve() on the token contract.
-     *
-     * @param _srcTokenContract Address of ERC 20 contract on this blockchain.
-     * @param _recipient        Address of account to transfer tokens to on the destination blockchain.
-     * @param _amount           The number of tokens to transfer.
-     */
+
     function transferToOtherBlockchain(uint256 _destBcId, address _srcTokenContract, address _recipient, uint256 _amount) whenNotPaused override public {
         address destErc20BridgeContract = remoteErc20Bridges[_destBcId];
-        require(destErc20BridgeContract != address(0), "Blockchain not supported");
+        require(destErc20BridgeContract != address(0), "ERC20 Bridge: Blockchain not supported");
 
         // The token must be able to be transferred to the target blockchain.
         address destTokenContract = tokenContractAddressMapping[_srcTokenContract][_destBcId];
-        require(destTokenContract != address(0), "Token not transferable to requested blockchain");
+        require(destTokenContract != address(0), "ERC20 Bridge: Token not transferable to requested blockchain");
 
         // Transfer tokens from the user to this contract.
         // The transfer will revert if the account has inadequate balance or if adequate
@@ -98,17 +115,17 @@ abstract contract AbstractSfcErc20Bridge is HiddenParameters, Pausable, Ownable,
      * @param _amount             The number of tokens to be transferred.
      */
     function receiveFromOtherBlockchain(address _destTokenContract, address _recipient, uint256 _amount) whenNotPaused override external {
-        require(msg.sender == address(crosschainBridge), "Can not process transfers from contracts other than the bridge contract");
+        require(_msgSender() == address(crosschainBridge), "ERC20 Bridge: Can not process transfers from contracts other than the bridge contract");
 
         (uint256 sourceBcId, uint256 sourceContract1) = extractTwoHiddenParams();
         address sourceContract = address(uint160(sourceContract1));
         // The source blockchain id is validated at the function call layer. No need to check
         // that it isn't zero.
 
-        require(sourceContract != address(0), "ERC 20 Bridge (caller) contract is 0");
+        require(sourceContract != address(0), "ERC 20 Bridge: caller contract is 0");
         address remoteErc20Bridge = remoteErc20Bridges[sourceBcId];
-        require(remoteErc20Bridge != address(0), "No ERC 20 Bridge supported for source blockchain");
-        require(sourceContract == remoteErc20Bridge, "Incorrect source ERC 20 Bridge");
+        require(remoteErc20Bridge != address(0), "ERC20 Bridge: No ERC 20 Bridge supported for source blockchain");
+        require(sourceContract == remoteErc20Bridge, "ERC20 Bridge: Incorrect source ERC 20 Bridge");
 
         transferOrMint(_destTokenContract, _recipient, _amount);
 
@@ -117,9 +134,9 @@ abstract contract AbstractSfcErc20Bridge is HiddenParameters, Pausable, Ownable,
 
 
 
-    function adminTransfer(address _erc20Contract, address _recipient, uint256 _amount) onlyOwner override external {
+    function adminTransfer(address _erc20Contract, address _recipient, uint256 _amount) override external {
+        require(hasRole(ADMINTRANSFER_ROLE, _msgSender()), "ERC20 Bridge: Must have ADMINTRANSFER role");
         transferOrMint(_erc20Contract, _recipient, _amount);
-
         emit AdminTransfer(_erc20Contract, _recipient, _amount);
     }
 
