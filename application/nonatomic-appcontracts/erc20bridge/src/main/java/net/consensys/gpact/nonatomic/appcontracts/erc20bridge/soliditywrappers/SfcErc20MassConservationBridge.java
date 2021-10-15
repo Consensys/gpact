@@ -14,6 +14,7 @@ import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.Bool;
 import org.web3j.abi.datatypes.Event;
 import org.web3j.abi.datatypes.Type;
+import org.web3j.abi.datatypes.generated.Bytes32;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
@@ -39,7 +40,15 @@ import org.web3j.tx.gas.ContractGasProvider;
  */
 @SuppressWarnings("rawtypes")
 public class SfcErc20MassConservationBridge extends Contract {
-    public static final String BINARY = "608060405234801561001057600080fd5b50604051610ee1380380610ee183398101604081905261002f9161009c565b600080546001600160a81b031916336101008102919091178255604051839282917f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0908290a350600180546001600160a01b0319166001600160a01b0392909216919091179055506100cc565b6000602082840312156100ae57600080fd5b81516001600160a01b03811681146100c557600080fd5b9392505050565b610e06806100db6000396000f3fe608060405234801561001057600080fd5b50600436106100b45760003560e01c80638278ef6d116100715780638278ef6d146101ab57806384aea633146101be5780638da5cb5b146101d1578063da72c1e8146101e7578063e787282a146101fa578063f2fde38b1461020d57600080fd5b806306b47e9e146100b95780630dd4b783146100ce5780632e44a5b5146101145780635c975abb1461015f578063715018a61461016a57806380ccbde414610172575b600080fd5b6100cc6100c7366004610bea565b610220565b005b6100f76100dc366004610c26565b6000908152600360205260409020546001600160a01b031690565b6040516001600160a01b0390911681526020015b60405180910390f35b61014f610122366004610c3f565b6001600160a01b039081166000908152600260209081526040808320948352939052919091205416151590565b604051901515815260200161010b565b60005460ff1661014f565b6100cc6102d5565b6100f7610180366004610c3f565b6001600160a01b03908116600090815260026020908152604080832094835293905291909120541690565b6100cc6101b9366004610c6b565b610354565b6100cc6101cc366004610ca7565b6105e8565b60005461010090046001600160a01b03166100f7565b6100cc6101f5366004610c6b565b61083b565b6100cc610208366004610c3f565b6108be565b6100cc61021b366004610ceb565b61091c565b6000546001600160a01b036101009091041633146102595760405162461bcd60e51b815260040161025090610d0d565b60405180910390fd5b6001600160a01b03838116600081815260026020908152604080832087845282529182902080546001600160a01b0319169486169485179055815192835282018590528101919091527f3887b7740ba2f669b578cfaf7b54c097711335413cf96f681d36dbf97b98a830906060015b60405180910390a1505050565b6000546001600160a01b036101009091041633146103055760405162461bcd60e51b815260040161025090610d0d565b600080546040516101009091046001600160a01b0316907f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0908390a360008054610100600160a81b0319169055565b60005460ff161561039a5760405162461bcd60e51b815260206004820152601060248201526f14185d5cd8589b194e881c185d5cd95960821b6044820152606401610250565b6001546001600160a01b0316331461042a5760405162461bcd60e51b815260206004820152604760248201527f43616e206e6f742070726f63657373207472616e73666572732066726f6d206360448201527f6f6e747261637473206f74686572207468616e207468652062726964676520636064820152661bdb9d1c9858dd60ca1b608482015260a401610250565b600080610435610a17565b9092509050806001600160a01b03811661049d5760405162461bcd60e51b8152602060048201526024808201527f45524320323020427269646765202863616c6c65722920636f6e7472616374206044820152630697320360e41b6064820152608401610250565b6000838152600360205260409020546001600160a01b03168061051b5760405162461bcd60e51b815260206004820152603060248201527f4e6f204552432032302042726964676520737570706f7274656420666f72207360448201526f37bab931b290313637b1b5b1b430b4b760811b6064820152608401610250565b806001600160a01b0316826001600160a01b03161461057c5760405162461bcd60e51b815260206004820152601e60248201527f496e636f727265637420736f75726365204552432032302042726964676500006044820152606401610250565b610587878787610a3f565b604080518581526001600160a01b03848116602083015289811682840152881660608201526080810187905290517f3008be2f38f2c92605e65a39c193c4b67868ea0dd742f5b9d6f228c9e258ece19181900360a00190a150505050505050565b60005460ff161561062e5760405162461bcd60e51b815260206004820152601060248201526f14185d5cd8589b194e881c185d5cd95960821b6044820152606401610250565b6000848152600360205260409020546001600160a01b0316806106935760405162461bcd60e51b815260206004820152601860248201527f426c6f636b636861696e206e6f7420737570706f7274656400000000000000006044820152606401610250565b6001600160a01b038085166000908152600260209081526040808320898452909152902054168061071d5760405162461bcd60e51b815260206004820152602e60248201527f546f6b656e206e6f74207472616e7366657261626c6520746f2072657175657360448201526d3a32b210313637b1b5b1b430b4b760911b6064820152608401610250565b610728853385610b04565b600154604080516001600160a01b0384811660248301528781166044830152606480830188905283518084039091018152608490920183526020820180516001600160e01b0316638278ef6d60e01b17905291516392b2c33560e01b815291909216916392b2c335916107a2918a91879190600401610d42565b600060405180830381600087803b1580156107bc57600080fd5b505af11580156107d0573d6000803e3d6000fd5b5050604080518981526001600160a01b038981166020830152858116828401523360608301528816608082015260a0810187905290517f752a2bfed77c22e59eeaf9351f545a08f5ee0110b8d6de0e7bcaf32a5dfa661b93509081900360c0019150a1505050505050565b6000546001600160a01b0361010090910416331461086b5760405162461bcd60e51b815260040161025090610d0d565b610876838383610a3f565b604080516001600160a01b038086168252841660208201529081018290527f728fe8c3e9dd087cac70e8ff44565c920a2bb77c726ed3191394fefb4aabc358906060016102c8565b6000546001600160a01b036101009091041633146108ee5760405162461bcd60e51b815260040161025090610d0d565b60009182526003602052604090912080546001600160a01b0319166001600160a01b03909216919091179055565b6000546001600160a01b0361010090910416331461094c5760405162461bcd60e51b815260040161025090610d0d565b6001600160a01b0381166109b15760405162461bcd60e51b815260206004820152602660248201527f4f776e61626c653a206e6577206f776e657220697320746865207a65726f206160448201526564647265737360d01b6064820152608401610250565b600080546040516001600160a01b038085169361010090930416917f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e091a3600080546001600160a01b0390921661010002610100600160a81b0319909216919091179055565b6000808036806020603f19820184376000519450602080820360003760005193505050509091565b60405163a9059cbb60e01b81526001600160a01b0383811660048301526024820183905284169063a9059cbb90604401602060405180830381600087803b158015610a8957600080fd5b505af1158015610a9d573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190610ac19190610dae565b610aff5760405162461bcd60e51b815260206004820152600f60248201526e1d1c985b9cd9995c8819985a5b1959608a1b6044820152606401610250565b505050565b6040516323b872dd60e01b81526001600160a01b038381166004830152306024830152604482018390528416906323b872dd90606401602060405180830381600087803b158015610b5457600080fd5b505af1158015610b68573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190610b8c9190610dae565b610aff5760405162461bcd60e51b81526020600482015260136024820152721d1c985b9cd9995c919c9bdb4819985a5b1959606a1b6044820152606401610250565b80356001600160a01b0381168114610be557600080fd5b919050565b600080600060608486031215610bff57600080fd5b610c0884610bce565b925060208401359150610c1d60408501610bce565b90509250925092565b600060208284031215610c3857600080fd5b5035919050565b60008060408385031215610c5257600080fd5b82359150610c6260208401610bce565b90509250929050565b600080600060608486031215610c8057600080fd5b610c8984610bce565b9250610c9760208501610bce565b9150604084013590509250925092565b60008060008060808587031215610cbd57600080fd5b84359350610ccd60208601610bce565b9250610cdb60408601610bce565b9396929550929360600135925050565b600060208284031215610cfd57600080fd5b610d0682610bce565b9392505050565b6020808252818101527f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e6572604082015260600190565b8381526000602060018060a01b0385168184015260606040840152835180606085015260005b81811015610d8457858101830151858201608001528201610d68565b81811115610d96576000608083870101525b50601f01601f19169290920160800195945050505050565b600060208284031215610dc057600080fd5b81518015158114610d0657600080fdfea264697066735822122073952bce9e71ceba4ddaddba3fee5b31c32629f79c4814d6959295e5f5dea49864736f6c63430008090033";
+    public static final String BINARY = "60806040523480156200001157600080fd5b506040516200153938038062001539833981016040819052620000349162000192565b6000805460ff19168155819033906200004e9082620000fa565b6200007a7f0121836bd496e565c22481bc40c30c41db1fecf07c7376491a377f8056cfccd582620000fa565b620000a67f65d7a28e3265b37a6474929f336521b332c1681b933f6cb9f3376673440d862a82620000fa565b620000d27f5d0c1c948618f08b3c6c416314a18855862126dc2035e0bc9f6ed23f8394ad0c82620000fa565b50600280546001600160a01b0319166001600160a01b039290921691909117905550620001c4565b6200010682826200010a565b5050565b60008281526001602090815260408083206001600160a01b038516845290915290205460ff16620001065760008281526001602081815260408084206001600160a01b0386168086529252808420805460ff19169093179092559051339285917f2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d9190a45050565b600060208284031215620001a557600080fd5b81516001600160a01b0381168114620001bd57600080fd5b9392505050565b61136580620001d46000396000f3fe608060405234801561001057600080fd5b50600436106101375760003560e01c806380ccbde4116100b8578063a217fddf1161007c578063a217fddf14610301578063c3be3f3614610309578063d547741f14610330578063da72c1e814610343578063e63ab1e914610356578063e787282a1461037d57600080fd5b806380ccbde4146102875780638278ef6d146102c05780638456cb59146102d357806384aea633146102db57806391d14854146102ee57600080fd5b80632f2ff15d116100ff5780632f2ff15d1461022757806336568abe1461023a5780633f4ba83a1461024d57806343a12224146102555780635c975abb1461027c57600080fd5b806301ffc9a71461013c57806306b47e9e146101645780630dd4b78314610179578063248a9ca3146101ba5780632e44a5b5146101ec575b600080fd5b61014f61014a3660046110a2565b610390565b60405190151581526020015b60405180910390f35b6101776101723660046110ef565b6103c7565b005b6101a261018736600461112b565b6000908152600460205260409020546001600160a01b031690565b6040516001600160a01b03909116815260200161015b565b6101de6101c836600461112b565b6000908152600160208190526040909120015490565b60405190815260200161015b565b61014f6101fa366004611144565b6001600160a01b039081166000908152600360209081526040808320948352939052919091205416151590565b610177610235366004611144565b610492565b610177610248366004611144565b610522565b61017761059c565b6101de7f0121836bd496e565c22481bc40c30c41db1fecf07c7376491a377f8056cfccd581565b60005460ff1661014f565b6101a2610295366004611144565b6001600160a01b03908116600090815260036020908152604080832094835293905291909120541690565b6101776102ce366004611170565b6105ec565b610177610896565b6101776102e93660046111ac565b6108e4565b61014f6102fc366004611144565b610b32565b6101de600081565b6101de7f5d0c1c948618f08b3c6c416314a18855862126dc2035e0bc9f6ed23f8394ad0c81565b61017761033e366004611144565b610b5d565b610177610351366004611170565b610bde565b6101de7f65d7a28e3265b37a6474929f336521b332c1681b933f6cb9f3376673440d862a81565b61017761038b366004611144565b610cba565b60006001600160e01b03198216637965db0b60e01b14806103c157506301ffc9a760e01b6001600160e01b03198316145b92915050565b6103f17f0121836bd496e565c22481bc40c30c41db1fecf07c7376491a377f8056cfccd533610b32565b6104165760405162461bcd60e51b815260040161040d906111f0565b60405180910390fd5b6001600160a01b03838116600081815260036020908152604080832087845282529182902080546001600160a01b0319169486169485179055815192835282018590528101919091527f3887b7740ba2f669b578cfaf7b54c097711335413cf96f681d36dbf97b98a830906060015b60405180910390a1505050565b600082815260016020819052604090912001546104b0905b33610b32565b6105145760405162461bcd60e51b815260206004820152602f60248201527f416363657373436f6e74726f6c3a2073656e646572206d75737420626520616e60448201526e0818591b5a5b881d1bc819dc985b9d608a1b606482015260840161040d565b61051e8282610d2e565b5050565b6001600160a01b03811633146105925760405162461bcd60e51b815260206004820152602f60248201527f416363657373436f6e74726f6c3a2063616e206f6e6c792072656e6f756e636560448201526e103937b632b9903337b91039b2b63360891b606482015260840161040d565b61051e8282610d99565b6105c67f65d7a28e3265b37a6474929f336521b332c1681b933f6cb9f3376673440d862a33610b32565b6105e25760405162461bcd60e51b815260040161040d90611234565b6105ea610e00565b565b60005460ff161561060f5760405162461bcd60e51b815260040161040d90611277565b6002546001600160a01b0316336001600160a01b0316146106b65760405162461bcd60e51b815260206004820152605560248201527f4552433230204272696467653a2043616e206e6f742070726f6365737320747260448201527f616e73666572732066726f6d20636f6e747261637473206f74686572207468616064820152741b881d1a1948189c9a5919d94818dbdb9d1c9858dd605a1b608482015260a40161040d565b6000806106c1610e93565b9092509050806001600160a01b0381166107295760405162461bcd60e51b815260206004820152602360248201527f455243203230204272696467653a2063616c6c657220636f6e7472616374206960448201526207320360ec1b606482015260840161040d565b6000838152600460205260409020546001600160a01b0316806107b45760405162461bcd60e51b815260206004820152603e60248201527f4552433230204272696467653a204e6f2045524320323020427269646765207360448201527f7570706f7274656420666f7220736f7572636520626c6f636b636861696e0000606482015260840161040d565b806001600160a01b0316826001600160a01b03161461082a5760405162461bcd60e51b815260206004820152602c60248201527f4552433230204272696467653a20496e636f727265637420736f75726365204560448201526b52432032302042726964676560a01b606482015260840161040d565b610835878787610ebb565b604080518581526001600160a01b03848116602083015289811682840152881660608201526080810187905290517f3008be2f38f2c92605e65a39c193c4b67868ea0dd742f5b9d6f228c9e258ece19181900360a00190a150505050505050565b6108c07f65d7a28e3265b37a6474929f336521b332c1681b933f6cb9f3376673440d862a33610b32565b6108dc5760405162461bcd60e51b815260040161040d90611234565b6105ea610f80565b60005460ff16156109075760405162461bcd60e51b815260040161040d90611277565b6000848152600460205260409020546001600160a01b03168061097b5760405162461bcd60e51b815260206004820152602660248201527f4552433230204272696467653a20426c6f636b636861696e206e6f74207375706044820152651c1bdc9d195960d21b606482015260840161040d565b6001600160a01b0380851660009081526003602090815260408083208984529091529020541680610a145760405162461bcd60e51b815260206004820152603c60248201527f4552433230204272696467653a20546f6b656e206e6f74207472616e7366657260448201527f61626c6520746f2072657175657374656420626c6f636b636861696e00000000606482015260840161040d565b610a1f853385610fd8565b600254604080516001600160a01b0384811660248301528781166044830152606480830188905283518084039091018152608490920183526020820180516001600160e01b0316638278ef6d60e01b17905291516392b2c33560e01b815291909216916392b2c33591610a99918a918791906004016112a1565b600060405180830381600087803b158015610ab357600080fd5b505af1158015610ac7573d6000803e3d6000fd5b5050604080518981526001600160a01b038981166020830152858116828401523360608301528816608082015260a0810187905290517f752a2bfed77c22e59eeaf9351f545a08f5ee0110b8d6de0e7bcaf32a5dfa661b93509081900360c0019150a1505050505050565b60009182526001602090815260408084206001600160a01b0393909316845291905290205460ff1690565b60008281526001602081905260409091200154610b79906104aa565b6105925760405162461bcd60e51b815260206004820152603060248201527f416363657373436f6e74726f6c3a2073656e646572206d75737420626520616e60448201526f2061646d696e20746f207265766f6b6560801b606482015260840161040d565b610c087f5d0c1c948618f08b3c6c416314a18855862126dc2035e0bc9f6ed23f8394ad0c33610b32565b610c675760405162461bcd60e51b815260206004820152602a60248201527f4552433230204272696467653a204d75737420686176652041444d494e5452416044820152694e5346455220726f6c6560b01b606482015260840161040d565b610c72838383610ebb565b604080516001600160a01b038086168252841660208201529081018290527f728fe8c3e9dd087cac70e8ff44565c920a2bb77c726ed3191394fefb4aabc35890606001610485565b610ce47f0121836bd496e565c22481bc40c30c41db1fecf07c7376491a377f8056cfccd533610b32565b610d005760405162461bcd60e51b815260040161040d906111f0565b60009182526004602052604090912080546001600160a01b0319166001600160a01b03909216919091179055565b610d388282610b32565b61051e5760008281526001602081815260408084206001600160a01b0386168086529252808420805460ff19169093179092559051339285917f2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d9190a45050565b610da38282610b32565b1561051e5760008281526001602090815260408083206001600160a01b0385168085529252808320805460ff1916905551339285917ff6391f5c32d9c69d2a47ea670b442974b53935d1edc7fd64eb21e047a839171b9190a45050565b60005460ff16610e495760405162461bcd60e51b815260206004820152601460248201527314185d5cd8589b194e881b9bdd081c185d5cd95960621b604482015260640161040d565b6000805460ff191690557f5db9ee0a495bf2e6ff9c91a7834c1ba4fdd244a5e8aa4e537bd38aeae4b073aa335b6040516001600160a01b03909116815260200160405180910390a1565b6000808036806020603f19820184376000519450602080820360003760005193505050509091565b60405163a9059cbb60e01b81526001600160a01b0383811660048301526024820183905284169063a9059cbb90604401602060405180830381600087803b158015610f0557600080fd5b505af1158015610f19573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190610f3d919061130d565b610f7b5760405162461bcd60e51b815260206004820152600f60248201526e1d1c985b9cd9995c8819985a5b1959608a1b604482015260640161040d565b505050565b60005460ff1615610fa35760405162461bcd60e51b815260040161040d90611277565b6000805460ff191660011790557f62e78cea01bee320cd4e420270b5ea74000d11b0c9f74754ebdbfc544b05a258610e763390565b6040516323b872dd60e01b81526001600160a01b038381166004830152306024830152604482018390528416906323b872dd90606401602060405180830381600087803b15801561102857600080fd5b505af115801561103c573d6000803e3d6000fd5b505050506040513d601f19601f82011682018060405250810190611060919061130d565b610f7b5760405162461bcd60e51b81526020600482015260136024820152721d1c985b9cd9995c919c9bdb4819985a5b1959606a1b604482015260640161040d565b6000602082840312156110b457600080fd5b81356001600160e01b0319811681146110cc57600080fd5b9392505050565b80356001600160a01b03811681146110ea57600080fd5b919050565b60008060006060848603121561110457600080fd5b61110d846110d3565b925060208401359150611122604085016110d3565b90509250925092565b60006020828403121561113d57600080fd5b5035919050565b6000806040838503121561115757600080fd5b82359150611167602084016110d3565b90509250929050565b60008060006060848603121561118557600080fd5b61118e846110d3565b925061119c602085016110d3565b9150604084013590509250925092565b600080600080608085870312156111c257600080fd5b843593506111d2602086016110d3565b92506111e0604086016110d3565b9396929550929360600135925050565b60208082526024908201527f4552433230204272696467653a204d7573742068617665204d415050494e4720604082015263726f6c6560e01b606082015260800190565b60208082526023908201527f4552433230204272696467653a204d75737420686176652050415553455220726040820152626f6c6560e81b606082015260800190565b60208082526010908201526f14185d5cd8589b194e881c185d5cd95960821b604082015260600190565b8381526000602060018060a01b0385168184015260606040840152835180606085015260005b818110156112e3578581018301518582016080015282016112c7565b818111156112f5576000608083870101525b50601f01601f19169290920160800195945050505050565b60006020828403121561131f57600080fd5b815180151581146110cc57600080fdfea2646970667358221220181bd425a4484dbca2a0263a35063c69e5065af5fb3b6268ecd4acd1ea9e295764736f6c63430008090033";
+
+    public static final String FUNC_ADMINTRANSFER_ROLE = "ADMINTRANSFER_ROLE";
+
+    public static final String FUNC_DEFAULT_ADMIN_ROLE = "DEFAULT_ADMIN_ROLE";
+
+    public static final String FUNC_MAPPING_ROLE = "MAPPING_ROLE";
+
+    public static final String FUNC_PAUSER_ROLE = "PAUSER_ROLE";
 
     public static final String FUNC_ADMINTRANSFER = "adminTransfer";
 
@@ -51,26 +60,32 @@ public class SfcErc20MassConservationBridge extends Contract {
 
     public static final String FUNC_GETREMOTEERC20BRIDGECONTRACT = "getRemoteErc20BridgeContract";
 
+    public static final String FUNC_GETROLEADMIN = "getRoleAdmin";
+
+    public static final String FUNC_GRANTROLE = "grantRole";
+
+    public static final String FUNC_HASROLE = "hasRole";
+
     public static final String FUNC_ISBCIDTOKENALLOWED = "isBcIdTokenAllowed";
 
-    public static final String FUNC_OWNER = "owner";
+    public static final String FUNC_PAUSE = "pause";
 
     public static final String FUNC_PAUSED = "paused";
 
     public static final String FUNC_RECEIVEFROMOTHERBLOCKCHAIN = "receiveFromOtherBlockchain";
 
-    public static final String FUNC_RENOUNCEOWNERSHIP = "renounceOwnership";
+    public static final String FUNC_RENOUNCEROLE = "renounceRole";
 
-    public static final String FUNC_TRANSFEROWNERSHIP = "transferOwnership";
+    public static final String FUNC_REVOKEROLE = "revokeRole";
+
+    public static final String FUNC_SUPPORTSINTERFACE = "supportsInterface";
 
     public static final String FUNC_TRANSFERTOOTHERBLOCKCHAIN = "transferToOtherBlockchain";
 
+    public static final String FUNC_UNPAUSE = "unpause";
+
     public static final Event ADMINTRANSFER_EVENT = new Event("AdminTransfer", 
             Arrays.<TypeReference<?>>asList(new TypeReference<Address>() {}, new TypeReference<Address>() {}, new TypeReference<Uint256>() {}));
-    ;
-
-    public static final Event OWNERSHIPTRANSFERRED_EVENT = new Event("OwnershipTransferred", 
-            Arrays.<TypeReference<?>>asList(new TypeReference<Address>(true) {}, new TypeReference<Address>(true) {}));
     ;
 
     public static final Event PAUSED_EVENT = new Event("Paused", 
@@ -79,6 +94,18 @@ public class SfcErc20MassConservationBridge extends Contract {
 
     public static final Event RECEIVEDFROM_EVENT = new Event("ReceivedFrom", 
             Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}, new TypeReference<Address>() {}, new TypeReference<Address>() {}, new TypeReference<Address>() {}, new TypeReference<Uint256>() {}));
+    ;
+
+    public static final Event ROLEADMINCHANGED_EVENT = new Event("RoleAdminChanged", 
+            Arrays.<TypeReference<?>>asList(new TypeReference<Bytes32>(true) {}, new TypeReference<Bytes32>(true) {}, new TypeReference<Bytes32>(true) {}));
+    ;
+
+    public static final Event ROLEGRANTED_EVENT = new Event("RoleGranted", 
+            Arrays.<TypeReference<?>>asList(new TypeReference<Bytes32>(true) {}, new TypeReference<Address>(true) {}, new TypeReference<Address>(true) {}));
+    ;
+
+    public static final Event ROLEREVOKED_EVENT = new Event("RoleRevoked", 
+            Arrays.<TypeReference<?>>asList(new TypeReference<Bytes32>(true) {}, new TypeReference<Address>(true) {}, new TypeReference<Address>(true) {}));
     ;
 
     public static final Event TOKENCONTRACTADDRESSMAPPINGCHANGED_EVENT = new Event("TokenContractAddressMappingChanged", 
@@ -144,39 +171,6 @@ public class SfcErc20MassConservationBridge extends Contract {
         EthFilter filter = new EthFilter(startBlock, endBlock, getContractAddress());
         filter.addSingleTopic(EventEncoder.encode(ADMINTRANSFER_EVENT));
         return adminTransferEventFlowable(filter);
-    }
-
-    public List<OwnershipTransferredEventResponse> getOwnershipTransferredEvents(TransactionReceipt transactionReceipt) {
-        List<Contract.EventValuesWithLog> valueList = extractEventParametersWithLog(OWNERSHIPTRANSFERRED_EVENT, transactionReceipt);
-        ArrayList<OwnershipTransferredEventResponse> responses = new ArrayList<OwnershipTransferredEventResponse>(valueList.size());
-        for (Contract.EventValuesWithLog eventValues : valueList) {
-            OwnershipTransferredEventResponse typedResponse = new OwnershipTransferredEventResponse();
-            typedResponse.log = eventValues.getLog();
-            typedResponse.previousOwner = (String) eventValues.getIndexedValues().get(0).getValue();
-            typedResponse.newOwner = (String) eventValues.getIndexedValues().get(1).getValue();
-            responses.add(typedResponse);
-        }
-        return responses;
-    }
-
-    public Flowable<OwnershipTransferredEventResponse> ownershipTransferredEventFlowable(EthFilter filter) {
-        return web3j.ethLogFlowable(filter).map(new Function<Log, OwnershipTransferredEventResponse>() {
-            @Override
-            public OwnershipTransferredEventResponse apply(Log log) {
-                Contract.EventValuesWithLog eventValues = extractEventParametersWithLog(OWNERSHIPTRANSFERRED_EVENT, log);
-                OwnershipTransferredEventResponse typedResponse = new OwnershipTransferredEventResponse();
-                typedResponse.log = log;
-                typedResponse.previousOwner = (String) eventValues.getIndexedValues().get(0).getValue();
-                typedResponse.newOwner = (String) eventValues.getIndexedValues().get(1).getValue();
-                return typedResponse;
-            }
-        });
-    }
-
-    public Flowable<OwnershipTransferredEventResponse> ownershipTransferredEventFlowable(DefaultBlockParameter startBlock, DefaultBlockParameter endBlock) {
-        EthFilter filter = new EthFilter(startBlock, endBlock, getContractAddress());
-        filter.addSingleTopic(EventEncoder.encode(OWNERSHIPTRANSFERRED_EVENT));
-        return ownershipTransferredEventFlowable(filter);
     }
 
     public List<PausedEventResponse> getPausedEvents(TransactionReceipt transactionReceipt) {
@@ -247,6 +241,111 @@ public class SfcErc20MassConservationBridge extends Contract {
         EthFilter filter = new EthFilter(startBlock, endBlock, getContractAddress());
         filter.addSingleTopic(EventEncoder.encode(RECEIVEDFROM_EVENT));
         return receivedFromEventFlowable(filter);
+    }
+
+    public List<RoleAdminChangedEventResponse> getRoleAdminChangedEvents(TransactionReceipt transactionReceipt) {
+        List<Contract.EventValuesWithLog> valueList = extractEventParametersWithLog(ROLEADMINCHANGED_EVENT, transactionReceipt);
+        ArrayList<RoleAdminChangedEventResponse> responses = new ArrayList<RoleAdminChangedEventResponse>(valueList.size());
+        for (Contract.EventValuesWithLog eventValues : valueList) {
+            RoleAdminChangedEventResponse typedResponse = new RoleAdminChangedEventResponse();
+            typedResponse.log = eventValues.getLog();
+            typedResponse.role = (byte[]) eventValues.getIndexedValues().get(0).getValue();
+            typedResponse.previousAdminRole = (byte[]) eventValues.getIndexedValues().get(1).getValue();
+            typedResponse.newAdminRole = (byte[]) eventValues.getIndexedValues().get(2).getValue();
+            responses.add(typedResponse);
+        }
+        return responses;
+    }
+
+    public Flowable<RoleAdminChangedEventResponse> roleAdminChangedEventFlowable(EthFilter filter) {
+        return web3j.ethLogFlowable(filter).map(new Function<Log, RoleAdminChangedEventResponse>() {
+            @Override
+            public RoleAdminChangedEventResponse apply(Log log) {
+                Contract.EventValuesWithLog eventValues = extractEventParametersWithLog(ROLEADMINCHANGED_EVENT, log);
+                RoleAdminChangedEventResponse typedResponse = new RoleAdminChangedEventResponse();
+                typedResponse.log = log;
+                typedResponse.role = (byte[]) eventValues.getIndexedValues().get(0).getValue();
+                typedResponse.previousAdminRole = (byte[]) eventValues.getIndexedValues().get(1).getValue();
+                typedResponse.newAdminRole = (byte[]) eventValues.getIndexedValues().get(2).getValue();
+                return typedResponse;
+            }
+        });
+    }
+
+    public Flowable<RoleAdminChangedEventResponse> roleAdminChangedEventFlowable(DefaultBlockParameter startBlock, DefaultBlockParameter endBlock) {
+        EthFilter filter = new EthFilter(startBlock, endBlock, getContractAddress());
+        filter.addSingleTopic(EventEncoder.encode(ROLEADMINCHANGED_EVENT));
+        return roleAdminChangedEventFlowable(filter);
+    }
+
+    public List<RoleGrantedEventResponse> getRoleGrantedEvents(TransactionReceipt transactionReceipt) {
+        List<Contract.EventValuesWithLog> valueList = extractEventParametersWithLog(ROLEGRANTED_EVENT, transactionReceipt);
+        ArrayList<RoleGrantedEventResponse> responses = new ArrayList<RoleGrantedEventResponse>(valueList.size());
+        for (Contract.EventValuesWithLog eventValues : valueList) {
+            RoleGrantedEventResponse typedResponse = new RoleGrantedEventResponse();
+            typedResponse.log = eventValues.getLog();
+            typedResponse.role = (byte[]) eventValues.getIndexedValues().get(0).getValue();
+            typedResponse.account = (String) eventValues.getIndexedValues().get(1).getValue();
+            typedResponse.sender = (String) eventValues.getIndexedValues().get(2).getValue();
+            responses.add(typedResponse);
+        }
+        return responses;
+    }
+
+    public Flowable<RoleGrantedEventResponse> roleGrantedEventFlowable(EthFilter filter) {
+        return web3j.ethLogFlowable(filter).map(new Function<Log, RoleGrantedEventResponse>() {
+            @Override
+            public RoleGrantedEventResponse apply(Log log) {
+                Contract.EventValuesWithLog eventValues = extractEventParametersWithLog(ROLEGRANTED_EVENT, log);
+                RoleGrantedEventResponse typedResponse = new RoleGrantedEventResponse();
+                typedResponse.log = log;
+                typedResponse.role = (byte[]) eventValues.getIndexedValues().get(0).getValue();
+                typedResponse.account = (String) eventValues.getIndexedValues().get(1).getValue();
+                typedResponse.sender = (String) eventValues.getIndexedValues().get(2).getValue();
+                return typedResponse;
+            }
+        });
+    }
+
+    public Flowable<RoleGrantedEventResponse> roleGrantedEventFlowable(DefaultBlockParameter startBlock, DefaultBlockParameter endBlock) {
+        EthFilter filter = new EthFilter(startBlock, endBlock, getContractAddress());
+        filter.addSingleTopic(EventEncoder.encode(ROLEGRANTED_EVENT));
+        return roleGrantedEventFlowable(filter);
+    }
+
+    public List<RoleRevokedEventResponse> getRoleRevokedEvents(TransactionReceipt transactionReceipt) {
+        List<Contract.EventValuesWithLog> valueList = extractEventParametersWithLog(ROLEREVOKED_EVENT, transactionReceipt);
+        ArrayList<RoleRevokedEventResponse> responses = new ArrayList<RoleRevokedEventResponse>(valueList.size());
+        for (Contract.EventValuesWithLog eventValues : valueList) {
+            RoleRevokedEventResponse typedResponse = new RoleRevokedEventResponse();
+            typedResponse.log = eventValues.getLog();
+            typedResponse.role = (byte[]) eventValues.getIndexedValues().get(0).getValue();
+            typedResponse.account = (String) eventValues.getIndexedValues().get(1).getValue();
+            typedResponse.sender = (String) eventValues.getIndexedValues().get(2).getValue();
+            responses.add(typedResponse);
+        }
+        return responses;
+    }
+
+    public Flowable<RoleRevokedEventResponse> roleRevokedEventFlowable(EthFilter filter) {
+        return web3j.ethLogFlowable(filter).map(new Function<Log, RoleRevokedEventResponse>() {
+            @Override
+            public RoleRevokedEventResponse apply(Log log) {
+                Contract.EventValuesWithLog eventValues = extractEventParametersWithLog(ROLEREVOKED_EVENT, log);
+                RoleRevokedEventResponse typedResponse = new RoleRevokedEventResponse();
+                typedResponse.log = log;
+                typedResponse.role = (byte[]) eventValues.getIndexedValues().get(0).getValue();
+                typedResponse.account = (String) eventValues.getIndexedValues().get(1).getValue();
+                typedResponse.sender = (String) eventValues.getIndexedValues().get(2).getValue();
+                return typedResponse;
+            }
+        });
+    }
+
+    public Flowable<RoleRevokedEventResponse> roleRevokedEventFlowable(DefaultBlockParameter startBlock, DefaultBlockParameter endBlock) {
+        EthFilter filter = new EthFilter(startBlock, endBlock, getContractAddress());
+        filter.addSingleTopic(EventEncoder.encode(ROLEREVOKED_EVENT));
+        return roleRevokedEventFlowable(filter);
     }
 
     public List<TokenContractAddressMappingChangedEventResponse> getTokenContractAddressMappingChangedEvents(TransactionReceipt transactionReceipt) {
@@ -356,6 +455,34 @@ public class SfcErc20MassConservationBridge extends Contract {
         return unpausedEventFlowable(filter);
     }
 
+    public RemoteFunctionCall<byte[]> ADMINTRANSFER_ROLE() {
+        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(FUNC_ADMINTRANSFER_ROLE, 
+                Arrays.<Type>asList(), 
+                Arrays.<TypeReference<?>>asList(new TypeReference<Bytes32>() {}));
+        return executeRemoteCallSingleValueReturn(function, byte[].class);
+    }
+
+    public RemoteFunctionCall<byte[]> DEFAULT_ADMIN_ROLE() {
+        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(FUNC_DEFAULT_ADMIN_ROLE, 
+                Arrays.<Type>asList(), 
+                Arrays.<TypeReference<?>>asList(new TypeReference<Bytes32>() {}));
+        return executeRemoteCallSingleValueReturn(function, byte[].class);
+    }
+
+    public RemoteFunctionCall<byte[]> MAPPING_ROLE() {
+        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(FUNC_MAPPING_ROLE, 
+                Arrays.<Type>asList(), 
+                Arrays.<TypeReference<?>>asList(new TypeReference<Bytes32>() {}));
+        return executeRemoteCallSingleValueReturn(function, byte[].class);
+    }
+
+    public RemoteFunctionCall<byte[]> PAUSER_ROLE() {
+        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(FUNC_PAUSER_ROLE, 
+                Arrays.<Type>asList(), 
+                Arrays.<TypeReference<?>>asList(new TypeReference<Bytes32>() {}));
+        return executeRemoteCallSingleValueReturn(function, byte[].class);
+    }
+
     public RemoteFunctionCall<TransactionReceipt> adminTransfer(String _erc20Contract, String _recipient, BigInteger _amount) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_ADMINTRANSFER, 
@@ -400,6 +527,30 @@ public class SfcErc20MassConservationBridge extends Contract {
         return executeRemoteCallSingleValueReturn(function, String.class);
     }
 
+    public RemoteFunctionCall<byte[]> getRoleAdmin(byte[] role) {
+        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(FUNC_GETROLEADMIN, 
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(role)), 
+                Arrays.<TypeReference<?>>asList(new TypeReference<Bytes32>() {}));
+        return executeRemoteCallSingleValueReturn(function, byte[].class);
+    }
+
+    public RemoteFunctionCall<TransactionReceipt> grantRole(byte[] role, String account) {
+        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
+                FUNC_GRANTROLE, 
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(role), 
+                new org.web3j.abi.datatypes.Address(160, account)), 
+                Collections.<TypeReference<?>>emptyList());
+        return executeRemoteCallTransaction(function);
+    }
+
+    public RemoteFunctionCall<Boolean> hasRole(byte[] role, String account) {
+        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(FUNC_HASROLE, 
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(role), 
+                new org.web3j.abi.datatypes.Address(160, account)), 
+                Arrays.<TypeReference<?>>asList(new TypeReference<Bool>() {}));
+        return executeRemoteCallSingleValueReturn(function, Boolean.class);
+    }
+
     public RemoteFunctionCall<Boolean> isBcIdTokenAllowed(BigInteger _bcId, String _tokenContract) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(FUNC_ISBCIDTOKENALLOWED, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_bcId), 
@@ -408,11 +559,12 @@ public class SfcErc20MassConservationBridge extends Contract {
         return executeRemoteCallSingleValueReturn(function, Boolean.class);
     }
 
-    public RemoteFunctionCall<String> owner() {
-        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(FUNC_OWNER, 
+    public RemoteFunctionCall<TransactionReceipt> pause() {
+        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
+                FUNC_PAUSE, 
                 Arrays.<Type>asList(), 
-                Arrays.<TypeReference<?>>asList(new TypeReference<Address>() {}));
-        return executeRemoteCallSingleValueReturn(function, String.class);
+                Collections.<TypeReference<?>>emptyList());
+        return executeRemoteCallTransaction(function);
     }
 
     public RemoteFunctionCall<Boolean> paused() {
@@ -432,20 +584,29 @@ public class SfcErc20MassConservationBridge extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public RemoteFunctionCall<TransactionReceipt> renounceOwnership() {
+    public RemoteFunctionCall<TransactionReceipt> renounceRole(byte[] role, String account) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
-                FUNC_RENOUNCEOWNERSHIP, 
-                Arrays.<Type>asList(), 
+                FUNC_RENOUNCEROLE, 
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(role), 
+                new org.web3j.abi.datatypes.Address(160, account)), 
                 Collections.<TypeReference<?>>emptyList());
         return executeRemoteCallTransaction(function);
     }
 
-    public RemoteFunctionCall<TransactionReceipt> transferOwnership(String newOwner) {
+    public RemoteFunctionCall<TransactionReceipt> revokeRole(byte[] role, String account) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
-                FUNC_TRANSFEROWNERSHIP, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, newOwner)), 
+                FUNC_REVOKEROLE, 
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(role), 
+                new org.web3j.abi.datatypes.Address(160, account)), 
                 Collections.<TypeReference<?>>emptyList());
         return executeRemoteCallTransaction(function);
+    }
+
+    public RemoteFunctionCall<Boolean> supportsInterface(byte[] interfaceId) {
+        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(FUNC_SUPPORTSINTERFACE, 
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes4(interfaceId)), 
+                Arrays.<TypeReference<?>>asList(new TypeReference<Bool>() {}));
+        return executeRemoteCallSingleValueReturn(function, Boolean.class);
     }
 
     public RemoteFunctionCall<TransactionReceipt> transferToOtherBlockchain(BigInteger _destBcId, String _srcTokenContract, String _recipient, BigInteger _amount) {
@@ -455,6 +616,14 @@ public class SfcErc20MassConservationBridge extends Contract {
                 new org.web3j.abi.datatypes.Address(160, _srcTokenContract), 
                 new org.web3j.abi.datatypes.Address(160, _recipient), 
                 new org.web3j.abi.datatypes.generated.Uint256(_amount)), 
+                Collections.<TypeReference<?>>emptyList());
+        return executeRemoteCallTransaction(function);
+    }
+
+    public RemoteFunctionCall<TransactionReceipt> unpause() {
+        final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
+                FUNC_UNPAUSE, 
+                Arrays.<Type>asList(), 
                 Collections.<TypeReference<?>>emptyList());
         return executeRemoteCallTransaction(function);
     }
@@ -507,12 +676,6 @@ public class SfcErc20MassConservationBridge extends Contract {
         public BigInteger _amount;
     }
 
-    public static class OwnershipTransferredEventResponse extends BaseEventResponse {
-        public String previousOwner;
-
-        public String newOwner;
-    }
-
     public static class PausedEventResponse extends BaseEventResponse {
         public String account;
     }
@@ -527,6 +690,30 @@ public class SfcErc20MassConservationBridge extends Contract {
         public String _recipient;
 
         public BigInteger _amount;
+    }
+
+    public static class RoleAdminChangedEventResponse extends BaseEventResponse {
+        public byte[] role;
+
+        public byte[] previousAdminRole;
+
+        public byte[] newAdminRole;
+    }
+
+    public static class RoleGrantedEventResponse extends BaseEventResponse {
+        public byte[] role;
+
+        public String account;
+
+        public String sender;
+    }
+
+    public static class RoleRevokedEventResponse extends BaseEventResponse {
+        public byte[] role;
+
+        public String account;
+
+        public String sender;
     }
 
     public static class TokenContractAddressMappingChangedEventResponse extends BaseEventResponse {
