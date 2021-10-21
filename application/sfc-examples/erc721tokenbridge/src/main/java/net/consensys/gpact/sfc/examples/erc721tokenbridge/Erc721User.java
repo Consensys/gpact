@@ -12,12 +12,12 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package net.consensys.gpact.sfc.examples.tokenbridge;
+package net.consensys.gpact.sfc.examples.erc721tokenbridge;
 
+import net.consensys.gpact.appcontracts.nonatomic.erc721bridge.soliditywrappers.SfcErc721Bridge;
 import net.consensys.gpact.common.*;
 import net.consensys.gpact.messaging.MessagingVerificationInterface;
-import net.consensys.gpact.openzeppelin.soliditywrappers.ERC20PresetFixedSupply;
-import net.consensys.gpact.nonatomic.appcontracts.erc20bridge.soliditywrappers.SfcErc20MassConservationBridge;
+import net.consensys.gpact.openzeppelin.soliditywrappers.ERC721PresetMinterPauserAutoId;
 import net.consensys.gpact.sfccbc.SimpleCrossControlManagerGroup;
 import net.consensys.gpact.sfccbc.SimpleCrosschainExecutor;
 import org.apache.logging.log4j.LogManager;
@@ -38,8 +38,8 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 /**
  * An owner of ERC 20 tokens transferring tokens from one blockchain to another.
  */
-public class Erc20User {
-    private static final Logger LOG = LogManager.getLogger(Erc20User.class);
+public class Erc721User {
+    private static final Logger LOG = LogManager.getLogger(Erc721User.class);
 
     // protected static final int RETRY = 20;
 
@@ -61,7 +61,7 @@ public class Erc20User {
 
     private SimpleCrossControlManagerGroup crossControlManagerGroup;
 
-    protected Erc20User(
+    protected Erc721User(
             String name,
             BlockchainId bcIdA, String erc20AddressA, String erc20BridgeAddressA,
             BlockchainId bcIdB, String erc20AddressB, String erc20BridgeAddressB) throws Exception {
@@ -98,14 +98,13 @@ public class Erc20User {
     }
 
 
-    public void transfer(boolean fromAToB, int amountInt) throws Exception {
-        transfer(fromAToB, this.creds.getAddress(), amountInt);
+    public void transfer(boolean fromAToB, BigInteger tokenId) throws Exception {
+        transfer(fromAToB, this.creds.getAddress(), tokenId);
     }
 
-    public void transfer(boolean fromAToB, String recipient, int amountInt) throws Exception {
-        LOG.info(" Transfer: {}: {}: {} tokens ", this.name, fromAToB ? "ChainA -> ChainB" : "ChainB -> ChainA", amountInt);
+    public void transfer(boolean fromAToB, String recipient, BigInteger tokenId) throws Exception {
+        LOG.info(" Transfer: {}: {}: {} tokens ", this.name, fromAToB ? "ChainA -> ChainB" : "ChainB -> ChainA", tokenId);
 
-        BigInteger amount = BigInteger.valueOf(amountInt);
         BlockchainId destinationBlockchainId = fromAToB ? this.bcIdB : this.bcIdA;
         BlockchainId sourceBlockchainId = fromAToB ? this.bcIdA : this.bcIdB;
         String sourceERC20ContractAddress = fromAToB ? this.addressOfERC20OnBlockchainA : this.addressOfERC20OnBlockchainB;
@@ -121,10 +120,12 @@ public class Erc20User {
 
         // Step 1: Approve of the bridge contract using some of the user's tokens.
         LOG.info("Approve");
-        ERC20PresetFixedSupply erc20 = ERC20PresetFixedSupply.load(sourceERC20ContractAddress, web3j, tm, gasProvider);
+        // NOTE: Both ERC 721 implementations have the required functions.
+        // Hence, either can be used.
+        ERC721PresetMinterPauserAutoId erc721 = ERC721PresetMinterPauserAutoId.load(sourceERC20ContractAddress, web3j, tm, gasProvider);
         TransactionReceipt txR;
         try {
-            txR = erc20.approve(sourceBridgeContractAddress, amount).send();
+            txR = erc721.approve(sourceBridgeContractAddress, tokenId).send();
         } catch (TransactionException ex) {
             // Crosschain Control Contract reverted
             String revertReason = RevertReason.decodeRevertReason(ex.getTransactionReceipt().get().getRevertReason());
@@ -134,10 +135,10 @@ public class Erc20User {
         StatsHolder.logGas("Approve", txR.getGasUsed());
 
         // Step 2: Do the crosschain transaction.
-        SfcErc20MassConservationBridge sfcErc20Bridge = SfcErc20MassConservationBridge.load(sourceBridgeContractAddress, web3j, tm, gasProvider);
-        LOG.info(" Call: BcId: {}, ERC20 Bridge: {}", sourceBlockchainId, sourceBridgeContractAddress);
-        RemoteFunctionCall<TransactionReceipt> functionCall = sfcErc20Bridge.transferToOtherBlockchain(
-                destinationBlockchainId.asBigInt(), sourceERC20ContractAddress, recipient, amount);
+        SfcErc721Bridge sfcErc721Bridge = SfcErc721Bridge.load(sourceBridgeContractAddress, web3j, tm, gasProvider);
+        LOG.info(" Call: BcId: {}, ERC 721 Bridge: {}", sourceBlockchainId, sourceBridgeContractAddress);
+        RemoteFunctionCall<TransactionReceipt> functionCall = sfcErc721Bridge.transferToOtherBlockchain(
+                destinationBlockchainId.asBigInt(), sourceERC20ContractAddress, recipient, tokenId);
 
         SimpleCrosschainExecutor executor = new SimpleCrosschainExecutor(crossControlManagerGroup);
         Tuple<TransactionReceipt[], String, Boolean> results = executor.execute(sourceBlockchainId, functionCall);

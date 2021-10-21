@@ -1,4 +1,4 @@
-SFC ERC 20 Token Bridge Example
+SFC ERC 721 Token Bridge Example
 ----------------
 The sample demonstrates how to use SFC for a token bridge.
 

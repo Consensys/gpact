@@ -19,6 +19,7 @@ import "../../../../../../functioncall/interface/src/main/solidity/CrosschainFun
 import "../../../../../../common/openzeppelin/src/main/solidity/access/AccessControl.sol";
 import "../../../../../../common/openzeppelin/src/main/solidity/security/Pausable.sol";
 import "../../../../../../functioncall/interface/src/main/solidity/HiddenParameters.sol";
+import "./ERC721RemoteBlockchain.sol";
 
 /**
  * ERC 20 bridge using the Simple Function Call protocol.
@@ -282,7 +283,8 @@ contract SfcErc721Bridge is HiddenParameters, Pausable, AccessControl {
      * @param _tokenId            Id of token transferred.
      */
     function transferOrMint(address _tokenContract, address _recipient, uint256 _tokenId) internal {
-        IERC721(_tokenContract).transferFrom(address(this), _recipient, _tokenId);
+//        IERC721(_tokenContract).transferFrom(address(this), _recipient, _tokenId);
+        ERC721RemoteBlockchain(_tokenContract).mint(_recipient, _tokenId);
     }
 
     /**
@@ -296,5 +298,6 @@ contract SfcErc721Bridge is HiddenParameters, Pausable, AccessControl {
      */
     function transferOrBurn(address _tokenContract, address _spender, uint256 _tokenId) internal {
         IERC721(_tokenContract).transferFrom(_spender, address(this), _tokenId);
+//        IERC721(_tokenContract).transferFrom(_spender, address(this), _tokenId);
     }
 }

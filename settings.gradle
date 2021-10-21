@@ -27,6 +27,7 @@ include 'examples-utilpkey'
 include 'examples-write'
 
 include 'examples-sfc-erc20tokenbridge'
+include 'examples-sfc-erc721tokenbridge'
 include 'examples-sfc-write'
 
 include 'examples-singlebc-hoteltrain'
@@ -62,6 +63,7 @@ project(":examples-utilpkey").projectDir = file("application/gpact-examples/util
 project(":examples-write").projectDir = file("application/gpact-examples/write")
 
 project(":examples-sfc-erc20tokenbridge").projectDir = file("application/sfc-examples/erc20tokenbridge")
+project(":examples-sfc-erc721tokenbridge").projectDir = file("application/sfc-examples/erc721tokenbridge")
 project(":examples-sfc-write").projectDir = file("application/sfc-examples/write")
 
 project(":examples-singlebc-hoteltrain").projectDir = file("performance/base/singlebc-hotel-train")

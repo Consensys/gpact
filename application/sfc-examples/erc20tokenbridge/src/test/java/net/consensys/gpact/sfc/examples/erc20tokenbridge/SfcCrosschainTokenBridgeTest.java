@@ -1,4 +1,4 @@
-package net.consensys.gpact.sfc.examples.tokenbridge;
+package net.consensys.gpact.sfc.examples.erc20tokenbridge;
 
 import net.consensys.gpact.exampletest.AbstractExampleTest;
 import org.junit.Test;

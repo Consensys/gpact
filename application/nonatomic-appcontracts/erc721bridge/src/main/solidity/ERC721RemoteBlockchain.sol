@@ -24,7 +24,7 @@ import "../../../../../../common/openzeppelin/src/main/solidity/token/ERC721/ext
  * roles, as well as the default admin role, which will let it grant both minter
  * and pauser roles to other accounts.
  */
-contract ERC721CrosschainEndPoint is Context, AccessControlEnumerable, ERC721Enumerable, ERC721Burnable, ERC721Pausable {
+contract ERC721RemoteBlockchain is Context, AccessControlEnumerable, ERC721Enumerable, ERC721Burnable, ERC721Pausable {
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
 

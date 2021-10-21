@@ -12,7 +12,7 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package net.consensys.gpact.sfc.examples.tokenbridge;
+package net.consensys.gpact.sfc.examples.erc20tokenbridge;
 
 import net.consensys.gpact.common.AbstractBlockchain;
 import net.consensys.gpact.common.BlockchainId;
