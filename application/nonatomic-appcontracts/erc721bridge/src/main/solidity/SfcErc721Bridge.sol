@@ -14,7 +14,7 @@
  */
 pragma solidity >=0.8.0;
 
-import "../../../../../../common/openzeppelin/src/main/solidity/token/ERC20/IERC20.sol";
+import "../../../../../../common/openzeppelin/src/main/solidity/token/ERC721/IERC721.sol";
 import "../../../../../../functioncall/interface/src/main/solidity/CrosschainFunctionCallInterface.sol";
 import "../../../../../../common/openzeppelin/src/main/solidity/access/AccessControl.sol";
 import "../../../../../../common/openzeppelin/src/main/solidity/security/Pausable.sol";
@@ -41,53 +41,53 @@ contract SfcErc721Bridge is HiddenParameters, Pausable, AccessControl {
     mapping (address => mapping (uint256 => address)) private tokenContractAddressMapping;
 
 
-    // Addresses of ERC 20 bridges on other blockchains.
-    mapping (uint256 => address) private remoteErc20Bridges;
+    // Addresses of ERC 721 bridges on other blockchains.
+    mapping (uint256 => address) private remoteErc721Bridges;
 
 
     /**
-     * Indicates a request to transfer some tokens has occurred on this blockchain.
+     * @dev Indicates a request to transfer some tokens has occurred on this blockchain.
      *
      * @param _destBcId           Blockchain the tokens are being transferred to.
-     * @param _srcTokenContract   Address of the ERC 20 token contract on this blockchain.
-     * @param _destTokenContract  Address of the ERC 20 token contract on the blockchain
+     * @param _srcTokenContract   Address of the ERC 721 token contract on this blockchain.
+     * @param _destTokenContract  Address of the ERC 721 token contract on the blockchain
      *                            the tokens are being transferred to.
      * @param _sender             Address sending the tokens.
      * @param _recipient          Address to transfer the tokens to on the target blockchain.
-     * @param _amount             Number of tokens to transfer.
+     * @param _tokenId            Id of token transferred.
      */
-    event TransferTo(uint256 _destBcId, address _srcTokenContract, address _destTokenContract, address _sender, address _recipient, uint256 _amount);
+    event TransferTo(uint256 _destBcId, address _srcTokenContract, address _destTokenContract, address _sender, address _recipient, uint256 _tokenId);
 
     /**
-     * Indicates a transfer request has been received on this blockchain.
+     * @dev Indicates a transfer request has been received on this blockchain.
      *
      * @param _srcBcId            Blockchain the tokens are being transferred from.
-     * @param _srcTokenContract   Address of the ERC 20 token contract on the blockchain
+     * @param _srcTokenContract   Address of the ERC 721 token contract on the blockchain
      *                            the tokens are being transferred from.
-     * @param _destTokenContract  Address of the ERC 20 token contract on this blockchain.
+     * @param _destTokenContract  Address of the ERC 721 token contract on this blockchain.
      * @param _recipient          Address to transfer the tokens to on the this blockchain.
-     * @param _amount             Number of tokens to transfer.
+     * @param _tokenId            Id of token transferred.
      */
-    event ReceivedFrom(uint256 _srcBcId, address _srcTokenContract, address _destTokenContract, address _recipient, uint256 _amount);
+    event ReceivedFrom(uint256 _srcBcId, address _srcTokenContract, address _destTokenContract, address _recipient, uint256 _tokenId);
 
     /**
-     * Update the mapping between an ERC 20 contract on this blockchain and an ERC 20
+     * @dev Update the mapping between an ERC 721 contract on this blockchain and an ERC 721
      * contract on another blockchain.
      *
-     * @param _thisBcTokenContract  Address of ERC 20 contract on this blockchain.
-     * @param _otherBcId            Blockchain ID where the corresponding ERC 20 contract resides.
-     * @param _othercTokenContract  Address of ERC 20 contract on the other blockchain.
+     * @param _thisBcTokenContract  Address of ERC 721 contract on this blockchain.
+     * @param _otherBcId            Blockchain ID where the corresponding ERC 721 contract resides.
+     * @param _othercTokenContract  Address of ERC 721 contract on the other blockchain.
      */
     event TokenContractAddressMappingChanged(address _thisBcTokenContract, uint256 _otherBcId, address _othercTokenContract);
 
     /**
-     * Indicate an administrative transfer has occurred.
+     * @dev Indicate an administrative transfer has occurred.
      *
-     * @param _erc20Contract    Token to transfer.
+     * @param _erc721Contract   Token to transfer.
      * @param _recipient        Address to transfer the tokens to.
-     * @param _amount           Number of tokens to transfer.
+     * @param _tokenId          Id of token transferred.
      */
-    event AdminTransfer(address _erc20Contract, address _recipient, uint256 _amount);
+    event AdminTransfer(address _erc721Contract, address _recipient, uint256 _tokenId);
 
 
 
@@ -107,7 +107,7 @@ contract SfcErc721Bridge is HiddenParameters, Pausable, AccessControl {
 
 
     /**
-     * Pauses the bridge.
+     * @dev Pauses the bridge.
      *
      * Requirements:
      * - the caller must have the `PAUSER_ROLE`.
@@ -119,7 +119,7 @@ contract SfcErc721Bridge is HiddenParameters, Pausable, AccessControl {
 
 
     /**
-     * Unpauses the bridge.
+     * @dev Unpauses the bridge.
      *
      * Requirements:
      * - the caller must have the `PAUSER_ROLE`.
@@ -131,14 +131,14 @@ contract SfcErc721Bridge is HiddenParameters, Pausable, AccessControl {
 
 
     /**
-     * Update the mapping between an ERC 721 contract on this blockchain and an ERC 721
+     * @dev Update the mapping between an ERC 721 contract on this blockchain and an ERC 721
      * contract on another blockchain.
      *
      * Requirements:
      * - the caller must have the `MAPPING_ROLE`.
      *
      * @param _thisBcTokenContract  Address of ERC 721 contract on this blockchain.
-     * @param _otherBcId            Blockchain ID where the corresponding ERC 20 contract resides.
+     * @param _otherBcId            Blockchain ID where the corresponding ERC 721 contract resides.
      * @param _othercTokenContract  Address of ERC 721 contract on the other blockchain.
      */
     function changeContractMapping(address _thisBcTokenContract, uint256 _otherBcId, address _othercTokenContract) external {
@@ -149,17 +149,17 @@ contract SfcErc721Bridge is HiddenParameters, Pausable, AccessControl {
 
 
     /**
-     * Connect this ERC20 Bridge contract to an ERC20 Bridge contract on another blockchain.
+     * Connect this ERC721 Bridge contract to an ERC721 Bridge contract on another blockchain.
      *
      * Requirements:
      * - the caller must have the `MAPPING_ROLE`.
      *
-     * @param _otherBcId            Blockchain ID where the corresponding ERC 20 bridge contract resides.
-     * @param _otherErc20Bridge     Address of ERC 20 Bridge contract on other blockchain.
+     * @param _otherBcId            Blockchain ID where the corresponding ERC721 bridge contract resides.
+     * @param _otherErc721Bridge    Address of ERC721 Bridge contract on other blockchain.
      */
-    function changeBlockchainMapping(uint256 _otherBcId, address _otherErc20Bridge) external {
+    function changeBlockchainMapping(uint256 _otherBcId, address _otherErc721Bridge) external {
         require(hasRole(MAPPING_ROLE, _msgSender()), "ERC721 Bridge: Must have MAPPING role");
-        remoteErc20Bridges[_otherBcId] = _otherErc20Bridge;
+        remoteErc721Bridges[_otherBcId] = _otherErc721Bridge;
     }
 
 
@@ -172,25 +172,25 @@ contract SfcErc721Bridge is HiddenParameters, Pausable, AccessControl {
      *
      * @param _srcTokenContract Address of ERC 20 contract on this blockchain.
      * @param _recipient        Address of account to transfer tokens to on the destination blockchain.
-     * @param _amount           The number of tokens to transfer.
+     * @param _tokenId            Id of token transferred.
      */
-    function transferToOtherBlockchain(uint256 _destBcId, address _srcTokenContract, address _recipient, uint256 _amount) whenNotPaused public {
-        address destErc20BridgeContract = remoteErc20Bridges[_destBcId];
-        require(destErc20BridgeContract != address(0), "ERC20 Bridge: Blockchain not supported");
+    function transferToOtherBlockchain(uint256 _destBcId, address _srcTokenContract, address _recipient, uint256 _tokenId) whenNotPaused public {
+        address destErc721BridgeContract = remoteErc721Bridges[_destBcId];
+        require(destErc721BridgeContract != address(0), "ERC 721 Bridge: Blockchain not supported");
 
         // The token must be able to be transferred to the target blockchain.
         address destTokenContract = tokenContractAddressMapping[_srcTokenContract][_destBcId];
-        require(destTokenContract != address(0), "ERC20 Bridge: Token not transferable to requested blockchain");
+        require(destTokenContract != address(0), "ERC 721 Bridge: Token not transferable to requested blockchain");
 
         // Transfer tokens from the user to this contract.
         // The transfer will revert if the account has inadequate balance or if adequate
         // allowance hasn't been set-up.
-        transferOrBurn(_srcTokenContract, msg.sender, _amount);
+        transferOrBurn(_srcTokenContract, msg.sender, _tokenId);
 
-        crosschainBridge.crossBlockchainCall(_destBcId, destErc20BridgeContract,
-            abi.encodeWithSelector(this.receiveFromOtherBlockchain.selector, destTokenContract, _recipient, _amount));
+        crosschainBridge.crossBlockchainCall(_destBcId, destErc721BridgeContract,
+            abi.encodeWithSelector(this.receiveFromOtherBlockchain.selector, destTokenContract, _recipient, _tokenId));
 
-        emit TransferTo(_destBcId, _srcTokenContract, destTokenContract, msg.sender, _recipient, _amount);
+        emit TransferTo(_destBcId, _srcTokenContract, destTokenContract, msg.sender, _recipient, _tokenId);
     }
 
 
@@ -198,31 +198,31 @@ contract SfcErc721Bridge is HiddenParameters, Pausable, AccessControl {
      * Transfer tokens that are owned by this contract to a recipient. The tokens have
      * effectively been transferred from another blockchain to this blockchain.
      *
-     * @param _destTokenContract  ERC 20 contract of the token being transferred.
+     * @param _destTokenContract  ERC 721 contract of the token being transferred.
      * @param _recipient          Account to transfer ownership of the tokens to.
-     * @param _amount             The number of tokens to be transferred.
+     * @param _tokenId            Id of token transferred.
      */
-    function receiveFromOtherBlockchain(address _destTokenContract, address _recipient, uint256 _amount) whenNotPaused external {
-        require(_msgSender() == address(crosschainBridge), "ERC20 Bridge: Can not process transfers from contracts other than the bridge contract");
+    function receiveFromOtherBlockchain(address _destTokenContract, address _recipient, uint256 _tokenId) whenNotPaused external {
+        require(_msgSender() == address(crosschainBridge), "ERC 721 Bridge: Can not process transfers from contracts other than the bridge contract");
 
         (uint256 sourceBcId, uint256 sourceContract1) = extractTwoHiddenParams();
         address sourceContract = address(uint160(sourceContract1));
         // The source blockchain id is validated at the function call layer. No need to check
         // that it isn't zero.
 
-        require(sourceContract != address(0), "ERC 20 Bridge: caller contract is 0");
-        address remoteErc20Bridge = remoteErc20Bridges[sourceBcId];
-        require(remoteErc20Bridge != address(0), "ERC20 Bridge: No ERC 20 Bridge supported for source blockchain");
-        require(sourceContract == remoteErc20Bridge, "ERC20 Bridge: Incorrect source ERC 20 Bridge");
+        require(sourceContract != address(0), "ERC 721 Bridge: caller contract is 0");
+        address remoteErc721Bridge = remoteErc721Bridges[sourceBcId];
+        require(remoteErc721Bridge != address(0), "ERC 721 Bridge: No ERC721 Bridge supported for source blockchain");
+        require(sourceContract == remoteErc721Bridge, "ERC 721 Bridge: Incorrect source ERC721 Bridge");
 
-        transferOrMint(_destTokenContract, _recipient, _amount);
+        transferOrMint(_destTokenContract, _recipient, _tokenId);
 
-        emit ReceivedFrom(sourceBcId, sourceContract, _destTokenContract, _recipient, _amount);
+        emit ReceivedFrom(sourceBcId, sourceContract, _destTokenContract, _recipient, _tokenId);
     }
 
 
     /**
-     * Transfer any amount of any ERC 20 to anyone. This is needed to provide refunds to
+     * Transfer any ERC 721 token to anyone. This is needed to provide refunds to
      * customers who have had failed transactions where the token transfer occurred on this
      * blockchain, but did not happen on the destination blockchain.
      *
@@ -234,21 +234,21 @@ contract SfcErc721Bridge is HiddenParameters, Pausable, AccessControl {
      * Requirements:
      * - the caller must have the `ADMINTRANSFER_ROLE`.
      *
-     * @param _erc20Contract    Token to transfer.
+     * @param _erc721Contract    Token to transfer.
      * @param _recipient        Address to transfer the tokens to.
-     * @param _amount           Number of tokens to transfer.
+     * @param _tokenId            Id of token transferred.
      */
-    function adminTransfer(address _erc20Contract, address _recipient, uint256 _amount) external {
-        require(hasRole(ADMINTRANSFER_ROLE, _msgSender()), "ERC20 Bridge: Must have ADMINTRANSFER role");
-        transferOrMint(_erc20Contract, _recipient, _amount);
-        emit AdminTransfer(_erc20Contract, _recipient, _amount);
+    function adminTransfer(address _erc721Contract, address _recipient, uint256 _tokenId) external {
+        require(hasRole(ADMINTRANSFER_ROLE, _msgSender()), "ERC721 Bridge: Must have ADMINTRANSFER role");
+        transferOrMint(_erc721Contract, _recipient, _tokenId);
+        emit AdminTransfer(_erc721Contract, _recipient, _tokenId);
     }
 
     /**
      * Indicates whether a token can be transferred to (or from) a blockchain.
      *
      * @param _bcId          Blockchain id of other blockchain.
-     * @param _tokenContract Address of ERC 20 token contract on this blockchain.
+     * @param _tokenContract Address of ERC 721 token contract on this blockchain.
      * @return bool          True if the token can be transferred to (or from) a blockchain.
      */
     function isBcIdTokenAllowed(uint256 _bcId, address _tokenContract) public view returns(bool) {
@@ -260,33 +260,29 @@ contract SfcErc721Bridge is HiddenParameters, Pausable, AccessControl {
      * another blockchain.
      *
      * @param _bcId          Blockchain id of other blockchain.
-     * @param _tokenContract Address of ERC 20 token contract on this blockchain.
-     * @return address       Contract address of ERC 20 token contract on other blockchain.
+     * @param _tokenContract Address of ERC 721 token contract on this blockchain.
+     * @return address       Contract address of ERC 721 token contract on other blockchain.
      */
     function getBcIdTokenMaping(uint256 _bcId, address _tokenContract) public view returns(address) {
         return tokenContractAddressMapping[_tokenContract][_bcId];
     }
 
-    function getRemoteErc20BridgeContract(uint256 _bcId) external view returns(address) {
-        return remoteErc20Bridges[_bcId];
+    function getRemoteErc721BridgeContract(uint256 _bcId) external view returns(address) {
+        return remoteErc721Bridges[_bcId];
     }
 
     // ***************************************************************************
     // ******* Internal below here ***********************************************
     // ***************************************************************************
     /**
-     * Mass Conservation: Transfer tokens that are owned by this contract to a recipient.
-     * OR
-     * Minting Burning: Mint token and assign them to a recipient.
+     * Transfer tokens that are owned by this contract to a recipient.
      *
      * @param _tokenContract      ERC 20 contract of the token being transferred or minted.
      * @param _recipient          Account to transfer ownership of the tokens to.
-     * @param _amount             The number of tokens to be transferred.
+     * @param _tokenId            Id of token transferred.
      */
-    function transferOrMint(address _tokenContract, address _recipient, uint256 _amount) internal {
-        if (!IERC20(_tokenContract).transfer(_recipient, _amount)) {
-            revert("transfer failed");
-        }
+    function transferOrMint(address _tokenContract, address _recipient, uint256 _tokenId) internal {
+        IERC721(_tokenContract).transferFrom(address(this), _recipient, _tokenId);
     }
 
     /**
@@ -296,11 +292,9 @@ contract SfcErc721Bridge is HiddenParameters, Pausable, AccessControl {
      *
      * @param _tokenContract      ERC 20 contract of the token being transferred or burned.
      * @param _spender            Account to transfer ownership of the tokens from.
-     * @param _amount             The number of tokens to be transferred.
+     * @param _tokenId            Id of token transferred.
      */
-    function transferOrBurn(address _tokenContract, address _spender, uint256 _amount) internal {
-        if (!IERC20(_tokenContract).transferFrom(_spender, address(this), _amount)) {
-            revert("transferFrom failed");
-        }
+    function transferOrBurn(address _tokenContract, address _spender, uint256 _tokenId) internal {
+        IERC721(_tokenContract).transferFrom(_spender, address(this), _tokenId);
     }
 }
