@@ -14,7 +14,7 @@ include 'sfc'
 include 'app-erc20'
 include 'app-lockablestorage'
 include 'app-nonatomic-erc20bridge'
-
+include 'app-nonatomic-erc721bridge'
 
 
 include 'examplehelpers'
@@ -26,7 +26,8 @@ include 'examples-trade'
 include 'examples-utilpkey'
 include 'examples-write'
 
-include 'examples-sfc-tokenbridge'
+include 'examples-sfc-erc20tokenbridge'
+include 'examples-sfc-erc721tokenbridge'
 include 'examples-sfc-write'
 
 include 'examples-singlebc-hoteltrain'
@@ -49,6 +50,7 @@ project(":sfc").projectDir = file("functioncall/sfc")
 project(":app-erc20").projectDir = file("application/atomic-appcontracts/erc20")
 project(":app-lockablestorage").projectDir = file("application/atomic-appcontracts/lockablestorage")
 project(":app-nonatomic-erc20bridge").projectDir = file("application/nonatomic-appcontracts/erc20bridge")
+project(":app-nonatomic-erc721bridge").projectDir = file("application/nonatomic-appcontracts/erc721bridge")
 
 
 project(":examplehelpers").projectDir = file("common/examplehelpers")
@@ -60,7 +62,8 @@ project(":examples-trade").projectDir = file("application/gpact-examples/trade")
 project(":examples-utilpkey").projectDir = file("application/gpact-examples/utilpkey")
 project(":examples-write").projectDir = file("application/gpact-examples/write")
 
-project(":examples-sfc-tokenbridge").projectDir = file("application/sfc-examples/tokenbridge")
+project(":examples-sfc-erc20tokenbridge").projectDir = file("application/sfc-examples/erc20tokenbridge")
+project(":examples-sfc-erc721tokenbridge").projectDir = file("application/sfc-examples/erc721tokenbridge")
 project(":examples-sfc-write").projectDir = file("application/sfc-examples/write")
 
 project(":examples-singlebc-hoteltrain").projectDir = file("performance/base/singlebc-hotel-train")
