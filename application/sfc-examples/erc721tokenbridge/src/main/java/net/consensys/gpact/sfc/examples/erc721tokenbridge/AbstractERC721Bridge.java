@@ -60,6 +60,13 @@ public abstract class AbstractERC721Bridge extends AbstractBlockchain {
         return this.erc721BridgeAddress;
     }
 
+    public void addFirstRemoteERC721(BlockchainId remoteBcId, String remoteERC721ContractAddress, boolean thisBcIsHome) throws Exception {
+        LOG.info(" Setting Remote ERC 721: Local BcId: {}, Remote BcId: {}, Local ERC 721: {}, Remote ERC 721: {}, ThisBcIsHome: {}",
+                this.blockchainId, remoteBcId, this.erc721Address, remoteERC721ContractAddress, thisBcIsHome);
+        this.erc721Bridge.addContractFirstMapping(this.erc721Address, remoteBcId.asBigInt(), remoteERC721ContractAddress, thisBcIsHome).send();
+    }
+
+
     public void addRemoteERC721(BlockchainId remoteBcId, String remoteERC721ContractAddress) throws Exception {
         LOG.info(" Setting Remote ERC 721: Local BcId: {}, Remote BcId: {}, Local ERC 721: {}, Remote ERC 721: {}",
                 this.blockchainId, remoteBcId, this.erc721Address, remoteERC721ContractAddress);

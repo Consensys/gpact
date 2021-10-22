@@ -30,11 +30,35 @@ contract SfcErc721Bridge is HiddenParameters, Pausable, AccessControl {
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
     bytes32 public constant ADMINTRANSFER_ROLE = keccak256("ADMINTRANSFER_ROLE");
 
+    // Token contract configuration.
+    // Token has not been added to the bridge yet.
+    uint256 private constant TOKEN_CONTRACT_CONF_NONE = 0;
+    // Tokens of this type are created on this blockchain. This is the
+    // home blockchain for the token.
+    uint256 private constant TOKEN_CONTRACT_CONF_HOME = 1;
+    // Tokens of this type are created on another blockchain. This is a
+    // remote blockchain for the token.
+    uint256 private constant TOKEN_CONTRACT_CONF_REMOTE = 2;
+    // The maximum token contract configuration value.
+    uint256 private constant TOKEN_CONTRACT_CONF_MAX = 2;
+
 
     // Simple Function Call bridge.
     CrosschainFunctionCallInterface private crosschainBridge;
 
-    // Mapping of ERC 20 contracts on this blockchain to ERC 20 contracts
+    // Token configuration. This mapping is used to determine
+    // if a token contract is for a token that is minted originally
+    // on this blockchain, or if the token is minted on another
+    // blockchain. That is, is this home blockchain the token's "home".
+    //
+    // NOTE: An enum is not being used as when variables are invalid
+    // enums, unhelpful errors are thrown.
+    //
+    // Map (token contract address on this blockchain =>
+    //  token contract configuration)
+    mapping(address => uint256) public tokenContractConfiguration;
+
+    // Mapping of ERC 721 contracts on this blockchain to ERC 721 contracts
     // of the same type on different blockchains.
     //
     // Map (token contract address on this blockchain =>
@@ -132,6 +156,39 @@ contract SfcErc721Bridge is HiddenParameters, Pausable, AccessControl {
 
 
     /**
+     * @dev Add a token mapping and set the token contract configuration. This can
+     * only be called if the token has not been set-up yet.
+     *
+     * @param _thisBcTokenContract  Address of ERC 721 contract on this blockchain.
+     * @param _otherBcId            Blockchain ID where the corresponding ERC 721 contract resides.
+     * @param _otherTokenContract  Address of ERC 721 contract on the other blockchain.
+     * @param _thisIsTheHomeBlockchain  True if this blockchain is the home blockchain for the token.
+     */
+    function addContractFirstMapping(address _thisBcTokenContract, uint256 _otherBcId, address _otherTokenContract, bool _thisIsTheHomeBlockchain) external {
+        require(hasRole(MAPPING_ROLE, _msgSender()), "ERC721 Bridge: Must have MAPPING role");
+        require(!tokenExists(_thisBcTokenContract), "ERC721 Bridge: token already configured");
+
+        setTokenConfigInternal(_thisBcTokenContract, _thisIsTheHomeBlockchain);
+        changeContractMappingInternal(_thisBcTokenContract, _otherBcId, _otherTokenContract);
+    }
+
+    /**
+     * @dev Set the token configuration after the token has first been added. The ONLY reason
+     * to call this function is that when the contract was first added, it was added with
+     * the wrong value.
+     *
+     * @param _thisBcTokenContract      Address of ERC 721 contract on this blockchain.
+     * @param _thisIsTheHomeBlockchain  True if this blockchain is the home blockchain for the token.
+     */
+    function setTokenConfig(address _thisBcTokenContract, bool _thisIsTheHomeBlockchain) external {
+        require(hasRole(MAPPING_ROLE, _msgSender()), "ERC721 Bridge: Must have MAPPING role");
+        require(tokenExists(_thisBcTokenContract), "ERC721 Bridge: token not configured");
+        setTokenConfigInternal(_thisBcTokenContract, _thisIsTheHomeBlockchain);
+    }
+
+
+
+    /**
      * @dev Update the mapping between an ERC 721 contract on this blockchain and an ERC 721
      * contract on another blockchain.
      *
@@ -140,12 +197,12 @@ contract SfcErc721Bridge is HiddenParameters, Pausable, AccessControl {
      *
      * @param _thisBcTokenContract  Address of ERC 721 contract on this blockchain.
      * @param _otherBcId            Blockchain ID where the corresponding ERC 721 contract resides.
-     * @param _othercTokenContract  Address of ERC 721 contract on the other blockchain.
+     * @param _otherTokenContract  Address of ERC 721 contract on the other blockchain.
      */
-    function changeContractMapping(address _thisBcTokenContract, uint256 _otherBcId, address _othercTokenContract) external {
+    function changeContractMapping(address _thisBcTokenContract, uint256 _otherBcId, address _otherTokenContract) external {
         require(hasRole(MAPPING_ROLE, _msgSender()), "ERC721 Bridge: Must have MAPPING role");
-        tokenContractAddressMapping[_thisBcTokenContract][_otherBcId] = _othercTokenContract;
-        emit TokenContractAddressMappingChanged(_thisBcTokenContract, _otherBcId, _othercTokenContract);
+        require(tokenExists(_thisBcTokenContract), "ERC721 Bridge: token not configured");
+        changeContractMappingInternal(_thisBcTokenContract, _otherBcId, _otherTokenContract);
     }
 
 
@@ -276,28 +333,52 @@ contract SfcErc721Bridge is HiddenParameters, Pausable, AccessControl {
     // ******* Internal below here ***********************************************
     // ***************************************************************************
     /**
-     * Transfer tokens that are owned by this contract to a recipient.
+     * Home Blockchains: Transfer tokens that are owned by this contract to a recipient.
+     * Remote Blockchains: Mints tokens.
      *
-     * @param _tokenContract      ERC 20 contract of the token being transferred or minted.
+     * @param _tokenContract      ERC 721 contract of the token being transferred or minted.
      * @param _recipient          Account to transfer ownership of the tokens to.
      * @param _tokenId            Id of token transferred.
      */
-    function transferOrMint(address _tokenContract, address _recipient, uint256 _tokenId) internal {
-//        IERC721(_tokenContract).transferFrom(address(this), _recipient, _tokenId);
-        ERC721RemoteBlockchain(_tokenContract).mint(_recipient, _tokenId);
+    function transferOrMint(address _tokenContract, address _recipient, uint256 _tokenId) private {
+        if (tokenContractConfiguration[_tokenContract] == TOKEN_CONTRACT_CONF_HOME) {
+            IERC721(_tokenContract).transferFrom(address(this), _recipient, _tokenId);
+        }
+        else {
+            ERC721RemoteBlockchain(_tokenContract).mint(_recipient, _tokenId);
+        }
     }
 
     /**
-     * Mass Conservation: TransferFrom tokens from a spender to this contract.
-     * OR
-     * Minting Burning: BurnFrom a spender's tokens.
+     * Home Blockchains: Transfer tokens to this contract.
+     * Remote Blockchains: Burns tokens.
      *
-     * @param _tokenContract      ERC 20 contract of the token being transferred or burned.
+     * @param _tokenContract      ERC 721 contract of the token being transferred or burned.
      * @param _spender            Account to transfer ownership of the tokens from.
      * @param _tokenId            Id of token transferred.
      */
-    function transferOrBurn(address _tokenContract, address _spender, uint256 _tokenId) internal {
-        IERC721(_tokenContract).transferFrom(_spender, address(this), _tokenId);
-//        IERC721(_tokenContract).transferFrom(_spender, address(this), _tokenId);
+    function transferOrBurn(address _tokenContract, address _spender, uint256 _tokenId) private {
+        if (tokenContractConfiguration[_tokenContract] == TOKEN_CONTRACT_CONF_HOME) {
+            IERC721(_tokenContract).transferFrom(_spender, address(this), _tokenId);
+        }
+        else {
+            ERC721RemoteBlockchain(_tokenContract).burn(_tokenId);
+        }
     }
+
+    function tokenExists(address _tokenContract) private view returns (bool) {
+        return tokenContractConfiguration[_tokenContract] != TOKEN_CONTRACT_CONF_NONE;
+    }
+
+    function setTokenConfigInternal(address _thisBcTokenContract, bool _thisIsTheHomeBlockchain) private {
+        tokenContractConfiguration[_thisBcTokenContract] =
+            _thisIsTheHomeBlockchain ? TOKEN_CONTRACT_CONF_HOME : TOKEN_CONTRACT_CONF_REMOTE;
+    }
+
+    function changeContractMappingInternal(address _thisBcTokenContract, uint256 _otherBcId, address _othercTokenContract) private {
+        tokenContractAddressMapping[_thisBcTokenContract][_otherBcId] = _othercTokenContract;
+        emit TokenContractAddressMappingChanged(_thisBcTokenContract, _otherBcId, _othercTokenContract);
+    }
+
+
 }

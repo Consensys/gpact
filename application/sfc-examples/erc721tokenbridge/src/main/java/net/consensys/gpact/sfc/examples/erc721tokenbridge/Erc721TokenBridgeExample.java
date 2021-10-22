@@ -65,8 +65,8 @@ public class Erc721TokenBridgeExample {
     chainB.addBlockchain(chainABcId, chainA.getErc721BridgeContractAddress());
 
     // Register the ERC 721 contracts with each blockchain.
-    chainA.addRemoteERC721(chainBBcId, chainB.getErc721ContractAddress());
-    chainB.addRemoteERC721(chainABcId, chainA.getErc721ContractAddress());
+    chainA.addFirstRemoteERC721(chainBBcId, chainB.getErc721ContractAddress(), true);
+    chainB.addFirstRemoteERC721(chainABcId, chainA.getErc721ContractAddress(), false);
 
 
     // Create some users and give them some tokens.
@@ -104,8 +104,30 @@ public class Erc721TokenBridgeExample {
     chainA.showErc721Balances(users);
     chainB.showErc721Balances(users);
 
+    // Transfer token to self from home blockchain to remote blockchain.
     BigInteger tokenId = chainA.getTokenId(user1, 1);
     user1.transfer(true, tokenId);
+
+    chainA.showErc721Balances(users);
+    chainB.showErc721Balances(users);
+
+    // Transfer token to someone else from home blockchain to remote blockchain.
+    tokenId = chainA.getTokenId(user3, 0);
+    user3.transfer(true, user1.getAddress(), tokenId);
+
+    chainA.showErc721Balances(users);
+    chainB.showErc721Balances(users);
+
+    // Transfer token to self from remote blockchain to home blockchain.
+    tokenId = chainB.getTokenId(user1, 1);
+    user1.transfer(false, tokenId);
+
+    chainA.showErc721Balances(users);
+    chainB.showErc721Balances(users);
+
+    // Transfer token to someone else from remote blockchain to home blockchain.
+    tokenId = chainB.getTokenId(user1, 0);
+    user1.transfer(false, user2.getAddress(), tokenId);
 
     chainA.showErc721Balances(users);
     chainB.showErc721Balances(users);
