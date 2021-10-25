@@ -7,7 +7,7 @@ The example has some application code to send some tokens from
 a "home" blockchain, where an ERC 721 was first created to a "remote"
 blockchain. The contracts used in the example are shown below.
 
-![Architecture of ERC 721 Token Bridge Example](https://raw.githubusercontent.com/ConsenSys/gpact/application/sfc-examples/erc721tokenbridge/erc721architecture.png "Architecture of ERC 721 Token Bridge Example")
+![Architecture of ERC 721 Token Bridge Example](https://raw.githubusercontent.com/ConsenSys/gpact/main/application/sfc-examples/erc721tokenbridge/erc721architecture.png "Architecture of ERC 721 Token Bridge Example")
 
 The [ERC721PresetMinterPauserAutoId](https://github.com/ConsenSys/gpact/tree/main/common/openzeppelin/src/main/solidity/token/ERC721/presets/ERC721PresetMinterPauserAutoId.sol) is a standard ERC 721 contract from
 the Open Zeppelin project. It is the contract on the home blockchain
