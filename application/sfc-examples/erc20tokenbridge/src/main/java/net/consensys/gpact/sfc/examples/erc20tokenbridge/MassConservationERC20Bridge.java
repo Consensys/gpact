@@ -16,8 +16,8 @@ package net.consensys.gpact.sfc.examples.erc20tokenbridge;
 
 import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.common.DynamicGasProvider;
+import net.consensys.gpact.nonatomic.appcontracts.erc20bridge.soliditywrappers.SfcErc20Bridge;
 import net.consensys.gpact.openzeppelin.soliditywrappers.ERC20PresetFixedSupply;
-import net.consensys.gpact.nonatomic.appcontracts.erc20bridge.soliditywrappers.SfcErc20MassConservationBridge;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
@@ -35,7 +35,7 @@ public class MassConservationERC20Bridge extends AbstractERC20Bridge {
     private static final Logger LOG = LogManager.getLogger(MassConservationERC20Bridge.class);
 
     ERC20PresetFixedSupply erc20;
-    SfcErc20MassConservationBridge erc20Bridge;
+    SfcErc20Bridge erc20Bridge;
 
 
     public MassConservationERC20Bridge(final String entity, BigInteger tokenSupply,
@@ -50,7 +50,7 @@ public class MassConservationERC20Bridge extends AbstractERC20Bridge {
         this.erc20 = ERC20PresetFixedSupply.deploy(this.web3j, this.tm, this.gasProvider, name, symbol, this.tokenSupply, owner).send();
         LOG.info(" Deploy {} ERC20: {}. Token Supply: {}", this.entity, this.erc20.getContractAddress(), this.tokenSupply);
 
-        this.erc20Bridge = SfcErc20MassConservationBridge.deploy(this.web3j, this.tm, this.gasProvider, cbcAddress).send();
+        this.erc20Bridge = SfcErc20Bridge.deploy(this.web3j, this.tm, this.gasProvider, cbcAddress).send();
         LOG.info(" Deploy ERC20 Mass Conservation Bridge: {}", this.erc20Bridge.getContractAddress());
         this.erc20BridgeAddress = this.erc20Bridge.getContractAddress();
     }
@@ -66,7 +66,7 @@ public class MassConservationERC20Bridge extends AbstractERC20Bridge {
     public void addRemoteERC20(BlockchainId remoteBcId, String remoteERC20ContractAddress) throws Exception {
         LOG.info(" Setting Remote ERC20: Local BcId: {}, Remote BcId: {}, Local ERC20: {}, Remote ERC20: {}",
                 this.blockchainId, remoteBcId, this.erc20.getContractAddress(), remoteERC20ContractAddress);
-        this.erc20Bridge.changeContractMapping(this.erc20.getContractAddress(), remoteBcId.asBigInt(), remoteERC20ContractAddress).send();
+        this.erc20Bridge.addContractFirstMapping(this.erc20.getContractAddress(), remoteBcId.asBigInt(), remoteERC20ContractAddress, true).send();
     }
 
     public void addBlockchain(BlockchainId remoteBcId, String remoteERC20BridgeContractAddress) throws Exception {
