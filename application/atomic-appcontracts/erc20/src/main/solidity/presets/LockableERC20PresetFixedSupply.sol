@@ -14,14 +14,23 @@
  */
 pragma solidity ^0.8.0;
 
-import "./CrosschainERC20.sol";
+import "./LockableERC20.sol";
+import "../extensions/LockableERC20Burnable.sol";
 
 /**
- * @dev {ERC20} token, including:
+ * @dev This contract aims to mirror the Open Zeppelin ERC20PresetFixedSupply:
+ * https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/presets/ERC20PresetFixedSupply.sol
+ *
+  * {ERC20} token, including:
  *
  *  - Preminted initial supply
+ *  - Ability for holders to burn (destroy) their tokens
+ *  - No access control mechanism (for minting/pausing) and hence no governance
+ *
+ * This contract uses {LockableERC20Burnable} to include burn capabilities - head to
+ * its documentation for details.
  */
-contract CrosschainERC20PresetFixedSupply is CrosschainERC20 {
+contract LockableERC20PresetFixedSupply is LockableERC20Burnable {
     /**
      * @dev Mints `initialSupply` amount of token and transfers them to `owner`.
      *
@@ -33,7 +42,7 @@ contract CrosschainERC20PresetFixedSupply is CrosschainERC20 {
         address _cbc,
         uint256 _initialSupply,
         address _owner
-    ) CrosschainERC20(_name, _symbol, _cbc) {
+    ) LockableERC20(_name, _symbol, _cbc) {
         mintInternal(_owner, _initialSupply);
     }
 }

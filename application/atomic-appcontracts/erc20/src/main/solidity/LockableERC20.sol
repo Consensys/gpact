@@ -29,7 +29,7 @@ import "../../../../../../functioncall/interface/src/main/solidity/CrosschainFun
  * call. See CrosschainERC20 for additional functions that allow tokens to be
  * transferred across blockchains.
  */
-contract LockableERC20 is Context, IERC20, IERC20Metadata, Ownable, LockableStorage {
+abstract contract LockableERC20 is Context, IERC20, IERC20Metadata, Ownable, LockableStorage {
     // Number of crosschain transfers to or from an account that can
     // execute in parallel.
     uint256 public accountPallelizationFactor;
@@ -60,6 +60,8 @@ contract LockableERC20 is Context, IERC20, IERC20Metadata, Ownable, LockableStor
     string private erc20Name;
     string private erc20Symbol;
 
+    mapping(address => bool) private trustedErc20Bridges;
+
     /**
      * @dev Sets the values for {name} and {symbol}.
      *
@@ -83,6 +85,16 @@ contract LockableERC20 is Context, IERC20, IERC20Metadata, Ownable, LockableStor
 
     function increaseERC20ParallelizartionFactor(uint256 amount) onlyOwner external {
         erc20PallelizationFactor += amount;
+    }
+
+    function addTrustedBridge(address bridge) onlyOwner external {
+        trustedErc20Bridges[bridge] = true;
+        emit TrustedBridge(bridge, true);
+    }
+
+    function removeTrustedBridge(address bridge) onlyOwner external {
+        trustedErc20Bridges[bridge] = false;
+        emit TrustedBridge(bridge, false);
     }
 
     /**
@@ -125,16 +137,19 @@ contract LockableERC20 is Context, IERC20, IERC20Metadata, Ownable, LockableStor
      * `amount`.
      */
     function transferFrom(address sender, address recipient, uint256 amount) public virtual override returns (bool) {
-        transferInternal(sender, recipient, amount);
-
         address spender = _msgSender();
-
-        uint256 currentAllowance = allowanceMin(sender, spender);
-        require(currentAllowance >= amount, "ERC20: transfer amount exceeds allowance");
-        decreaseAllowanceInternal(sender, spender, amount);
-
+        transferFromInternal(spender, sender, recipient, amount);
         return true;
     }
+
+    /**
+     * Allow a trusted bridge to transfer from a specific account.
+     */
+    function transferFromAccount(address spender, address sender, address recipient, uint256 amount) public virtual {
+        require(trustedErc20Bridges[msg.sender], "ERC20: not trusted bridge");
+        transferFromInternal(spender, sender, recipient, amount);
+    }
+
 
     /**
      * @dev Atomically increases the allowance granted to `spender` by the caller.
@@ -422,6 +437,16 @@ contract LockableERC20 is Context, IERC20, IERC20Metadata, Ownable, LockableStor
     /************************************************************************/
     /************************************************************************/
 
+    function transferFromInternal(address spender, address sender, address recipient, uint256 amount) private {
+        transferInternal(sender, recipient, amount);
+
+        uint256 currentAllowance = allowanceMin(sender, spender);
+        require(currentAllowance >= amount, "ERC20: transfer amount exceeds allowance");
+        decreaseAllowanceInternal(sender, spender, amount);
+
+        return true;
+    }
+
 
     /**
      * @dev Moves tokens `amount` from `sender` to `recipient`.
@@ -642,4 +667,5 @@ contract LockableERC20 is Context, IERC20, IERC20Metadata, Ownable, LockableStor
 
     event ApprovalIncrease(address indexed owner, address indexed spender, uint256 value);
     event ApprovalDecrease(address indexed owner, address indexed spender, uint256 value);
+    event TrustedBridge(address bridge, bool added);
 }
