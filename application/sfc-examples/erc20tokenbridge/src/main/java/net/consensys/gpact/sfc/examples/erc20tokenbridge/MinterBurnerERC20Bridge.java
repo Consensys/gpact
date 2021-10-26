@@ -16,8 +16,8 @@ package net.consensys.gpact.sfc.examples.erc20tokenbridge;
 
 import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.common.DynamicGasProvider;
+import net.consensys.gpact.nonatomic.appcontracts.erc20bridge.soliditywrappers.SfcErc20Bridge;
 import net.consensys.gpact.openzeppelin.soliditywrappers.ERC20PresetMinterPauser;
-import net.consensys.gpact.nonatomic.appcontracts.erc20bridge.soliditywrappers.SfcErc20MintingBurningBridge;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hyperledger.besu.crypto.Hash;
@@ -42,7 +42,7 @@ public class MinterBurnerERC20Bridge extends AbstractERC20Bridge {
 
     ERC20PresetMinterPauser erc20;
 
-    SfcErc20MintingBurningBridge erc20Bridge;
+    SfcErc20Bridge erc20Bridge;
 
 
     public MinterBurnerERC20Bridge(final String entity, BigInteger tokenSupply,
@@ -57,7 +57,7 @@ public class MinterBurnerERC20Bridge extends AbstractERC20Bridge {
         this.erc20 = ERC20PresetMinterPauser.deploy(this.web3j, this.tm, this.gasProvider, name, symbol).send();
         LOG.info(" Deploy {} ERC20: {}.", this.entity, this.erc20.getContractAddress());
 
-        this.erc20Bridge = SfcErc20MintingBurningBridge.deploy(this.web3j, this.tm, this.gasProvider, cbcAddress).send();
+        this.erc20Bridge = SfcErc20Bridge.deploy(this.web3j, this.tm, this.gasProvider, cbcAddress).send();
         LOG.info(" Deploy ERC20 Minter Burner Bridge: {}", this.erc20Bridge.getContractAddress());
         this.erc20BridgeAddress = this.erc20Bridge.getContractAddress();
 
@@ -76,7 +76,7 @@ public class MinterBurnerERC20Bridge extends AbstractERC20Bridge {
     public void addRemoteERC20(BlockchainId remoteBcId, String remoteERC20ContractAddress) throws Exception {
         LOG.info(" Setting Remote ERC20: Local BcId: {}, Remote BcId: {}, Local ERC20: {}, Remote ERC20: {}",
                 this.blockchainId, remoteBcId, this.erc20.getContractAddress(), remoteERC20ContractAddress);
-        this.erc20Bridge.changeContractMapping(this.erc20.getContractAddress(), remoteBcId.asBigInt(), remoteERC20ContractAddress).send();
+        this.erc20Bridge.addContractFirstMapping(this.erc20.getContractAddress(), remoteBcId.asBigInt(), remoteERC20ContractAddress, false).send();
     }
 
     public void addBlockchain(BlockchainId remoteBcId, String remoteERC20BridgeContractAddress) throws Exception {

@@ -16,8 +16,8 @@ package net.consensys.gpact.sfc.examples.erc20tokenbridge;
 
 import net.consensys.gpact.common.*;
 import net.consensys.gpact.messaging.MessagingVerificationInterface;
+import net.consensys.gpact.nonatomic.appcontracts.erc20bridge.soliditywrappers.SfcErc20Bridge;
 import net.consensys.gpact.openzeppelin.soliditywrappers.ERC20PresetFixedSupply;
-import net.consensys.gpact.nonatomic.appcontracts.erc20bridge.soliditywrappers.SfcErc20MassConservationBridge;
 import net.consensys.gpact.sfccbc.SimpleCrossControlManagerGroup;
 import net.consensys.gpact.sfccbc.SimpleCrosschainExecutor;
 import org.apache.logging.log4j.LogManager;
@@ -134,7 +134,7 @@ public class Erc20User {
         StatsHolder.logGas("Approve", txR.getGasUsed());
 
         // Step 2: Do the crosschain transaction.
-        SfcErc20MassConservationBridge sfcErc20Bridge = SfcErc20MassConservationBridge.load(sourceBridgeContractAddress, web3j, tm, gasProvider);
+        SfcErc20Bridge sfcErc20Bridge = SfcErc20Bridge.load(sourceBridgeContractAddress, web3j, tm, gasProvider);
         LOG.info(" Call: BcId: {}, ERC20 Bridge: {}", sourceBlockchainId, sourceBridgeContractAddress);
         RemoteFunctionCall<TransactionReceipt> functionCall = sfcErc20Bridge.transferToOtherBlockchain(
                 destinationBlockchainId.asBigInt(), sourceERC20ContractAddress, recipient, amount);
