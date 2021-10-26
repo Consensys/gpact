@@ -70,16 +70,16 @@ contract SfcErc20Bridge is HiddenParameters, Pausable, AccessControl {
 
 
     /**
- * Indicates a request to transfer some tokens has occurred on this blockchain.
- *
- * @param _destBcId           Blockchain the tokens are being transferred to.
- * @param _srcTokenContract   Address of the ERC 20 token contract on this blockchain.
- * @param _destTokenContract  Address of the ERC 20 token contract on the blockchain
- *                            the tokens are being transferred to.
- * @param _sender             Address sending the tokens.
- * @param _recipient          Address to transfer the tokens to on the target blockchain.
- * @param _amount             Number of tokens to transfer.
- */
+     * Indicates a request to transfer some tokens has occurred on this blockchain.
+     *
+     * @param _destBcId           Blockchain the tokens are being transferred to.
+     * @param _srcTokenContract   Address of the ERC 20 token contract on this blockchain.
+     * @param _destTokenContract  Address of the ERC 20 token contract on the blockchain
+     *                            the tokens are being transferred to.
+     * @param _sender             Address sending the tokens.
+     * @param _recipient          Address to transfer the tokens to on the target blockchain.
+     * @param _amount             Number of tokens to transfer.
+     */
     event TransferTo(uint256 _destBcId, address _srcTokenContract, address _destTokenContract, address _sender, address _recipient, uint256 _amount);
 
     /**
@@ -103,6 +103,14 @@ contract SfcErc20Bridge is HiddenParameters, Pausable, AccessControl {
      * @param _othercTokenContract  Address of ERC 20 contract on the other blockchain.
      */
     event TokenContractAddressMappingChanged(address _thisBcTokenContract, uint256 _otherBcId, address _othercTokenContract);
+
+    /**
+     * Token contract configuration has been set / been changed.
+     *
+     * @param _thisBcTokenContract  Address of ERC 20 contract on this blockchain.
+     * @param _config               Configuration value for the contract.
+     */
+    event TokenContractConfig(address _thisBcTokenContract, uint256 _config);
 
     /**
      * Indicate an administrative transfer has occurred.
@@ -384,8 +392,9 @@ contract SfcErc20Bridge is HiddenParameters, Pausable, AccessControl {
     }
 
     function setTokenConfigInternal(address _thisBcTokenContract, bool _thisBcMassC) private {
-        tokenContractConfiguration[_thisBcTokenContract] =
-            _thisBcMassC ? TOKEN_CONTRACT_CONF_MASSC : TOKEN_CONTRACT_CONF_MINTER;
+        uint256 config = _thisBcMassC ? TOKEN_CONTRACT_CONF_MASSC : TOKEN_CONTRACT_CONF_MINTER;
+        tokenContractConfiguration[_thisBcTokenContract] = config;
+        emit TokenContractConfig(_thisBcTokenContract, config);
     }
 
     function changeContractMappingInternal(address _thisBcTokenContract, uint256 _otherBcId, address _othercTokenContract) private {

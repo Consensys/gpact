@@ -40,4 +40,5 @@ dependencies {
 
     testImplementation project (':commontest')
     testImplementation group: 'junit', name: 'junit', version: '4.12'
+    testImplementation "com.fasterxml.jackson.core:jackson-databind:2.8.11.6"
 }
