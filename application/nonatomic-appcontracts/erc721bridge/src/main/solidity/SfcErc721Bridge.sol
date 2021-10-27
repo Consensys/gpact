@@ -29,6 +29,7 @@ contract SfcErc721Bridge is HiddenParameters, Pausable, AccessControl {
     bytes32 public constant MAPPING_ROLE = keccak256("MAPPING_ROLE");
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
     bytes32 public constant ADMINTRANSFER_ROLE = keccak256("ADMINTRANSFER_ROLE");
+    bytes32 public constant BLACKLIST_ROLE = keccak256("BLACKLIST_ROLE");
 
     // Token contract configuration.
     // Token has not been added to the bridge yet.
@@ -63,12 +64,14 @@ contract SfcErc721Bridge is HiddenParameters, Pausable, AccessControl {
     //
     // Map (token contract address on this blockchain =>
     //  Map (destination blockchain Id => address on remote contract)
-    mapping (address => mapping (uint256 => address)) private tokenContractAddressMapping;
+    mapping(address => mapping(uint256 => address)) private tokenContractAddressMapping;
 
 
     // Addresses of ERC 721 bridges on other blockchains.
-    mapping (uint256 => address) private remoteErc721Bridges;
+    mapping(uint256 => address) private remoteErc721Bridges;
 
+    // List of addresses that have been blocked from using this bridge.
+    mapping(address => bool) private blacklist;
 
     /**
      * @dev Indicates a request to transfer some tokens has occurred on this blockchain.
@@ -114,7 +117,20 @@ contract SfcErc721Bridge is HiddenParameters, Pausable, AccessControl {
      */
     event AdminTransfer(address _erc721Contract, address _recipient, uint256 _tokenId);
 
+    /**
+    * @dev  Indicates that the specified address has been blacklisted, and cannot transfer or receive ERC721 tokens through the bridge.
+    *
+    * @param _address   The blacklisted address
+    */
+    event AddressBlacklisted(address _address);
 
+    /**
+    * @dev  Indicates that the specified address has been removed from the blacklist,
+    *       and can resume transferring and receiving ERC721 tokens through the bridge.
+    *
+    * @param _address The address removed from the blacklist
+    */
+    event AddressRemovedFromBlacklist(address _address);
 
     /**
      * @param _sfcCbcContract  Simple Function Call protocol implementation.
@@ -126,10 +142,48 @@ contract SfcErc721Bridge is HiddenParameters, Pausable, AccessControl {
         _setupRole(MAPPING_ROLE, sender);
         _setupRole(PAUSER_ROLE, sender);
         _setupRole(ADMINTRANSFER_ROLE, sender);
+        _setupRole(BLACKLIST_ROLE, sender);
 
         crosschainBridge = CrosschainFunctionCallInterface(_sfcCbcContract);
     }
 
+    /**
+    * @dev Adds the specified address to a blacklist, preventing it from transferring or receiving tokens through the bridge.
+    *
+    * Requirements:
+    *   - the caller must have the `BLACKLIST_ROLE`.
+    *
+    * @param _address The address to blacklist
+    */
+    function addToBlacklist(address _address) external {
+        require(hasRole(BLACKLIST_ROLE, _msgSender()), "ERC721 Bridge: Must have BLACKLIST role");
+        blacklist[_address] = true;
+        emit AddressBlacklisted(_address);
+    }
+
+    /**
+    * @dev Removes the specified address from the blacklist, allowing it to resume transferring or receiving tokens through the bridge.
+    *
+    * Requirements:
+    *   - the caller must have the `BLACKLIST_ROLE`.
+    *
+    * @param _address The address to remove from the blacklist
+    */
+    function removeFromBlacklist(address _address) external {
+        require(hasRole(BLACKLIST_ROLE, _msgSender()), "ERC721 Bridge: Must have BLACKLIST role");
+        blacklist[_address] = false;
+        emit AddressRemovedFromBlacklist(_address);
+    }
+   
+    /**
+    * @dev Checks whether a given address is blacklisted.
+    *
+    * @param _address   The address to check against the blacklist
+    * @return true if the address is blacklisted, false otherwise.
+    */
+    function isBlacklisted(address _address) public view returns (bool) {
+        return blacklist[_address];
+    }
 
     /**
      * @dev Pauses the bridge.
@@ -233,6 +287,10 @@ contract SfcErc721Bridge is HiddenParameters, Pausable, AccessControl {
      * @param _tokenId            Id of token transferred.
      */
     function transferToOtherBlockchain(uint256 _destBcId, address _srcTokenContract, address _recipient, uint256 _tokenId) whenNotPaused public {
+        require(!isBlacklisted(msg.sender), "ERC 721 Bridge: Sender is blacklisted");
+        require(!isBlacklisted(_recipient), "ERC 721 Bridge: Recipient is blacklisted");
+        require(!isBlacklisted(tx.origin), "ERC 721 Bridge: Transaction originator is blacklisted");
+
         address destErc721BridgeContract = remoteErc721Bridges[_destBcId];
         require(destErc721BridgeContract != address(0), "ERC 721 Bridge: Blockchain not supported");
 
@@ -261,8 +319,10 @@ contract SfcErc721Bridge is HiddenParameters, Pausable, AccessControl {
      * @param _tokenId            Id of token transferred.
      */
     function receiveFromOtherBlockchain(address _destTokenContract, address _recipient, uint256 _tokenId) whenNotPaused external {
-        require(_msgSender() == address(crosschainBridge), "ERC 721 Bridge: Can not process transfers from contracts other than the bridge contract");
+        require(!isBlacklisted(tx.origin), "ERC 721 Bridge: Transaction originator is blacklisted");
+        require(!isBlacklisted(_recipient), "ERC 721 Bridge: Recipient is blacklisted");
 
+        require(_msgSender() == address(crosschainBridge), "ERC 721 Bridge: Can not process transfers from contracts other than the bridge contract");
         (uint256 sourceBcId, uint256 sourceContract1) = extractTwoHiddenParams();
         address sourceContract = address(uint160(sourceContract1));
         // The source blockchain id is validated at the function call layer. No need to check
@@ -277,7 +337,6 @@ contract SfcErc721Bridge is HiddenParameters, Pausable, AccessControl {
 
         emit ReceivedFrom(sourceBcId, sourceContract, _destTokenContract, _recipient, _tokenId);
     }
-
 
     /**
      * Transfer any ERC 721 token to anyone. This is needed to provide refunds to
@@ -309,7 +368,7 @@ contract SfcErc721Bridge is HiddenParameters, Pausable, AccessControl {
      * @param _tokenContract Address of ERC 721 token contract on this blockchain.
      * @return bool          True if the token can be transferred to (or from) a blockchain.
      */
-    function isBcIdTokenAllowed(uint256 _bcId, address _tokenContract) public view returns(bool) {
+    function isBcIdTokenAllowed(uint256 _bcId, address _tokenContract) public view returns (bool) {
         return address(0) != tokenContractAddressMapping[_tokenContract][_bcId];
     }
 
@@ -321,11 +380,11 @@ contract SfcErc721Bridge is HiddenParameters, Pausable, AccessControl {
      * @param _tokenContract Address of ERC 721 token contract on this blockchain.
      * @return address       Contract address of ERC 721 token contract on other blockchain.
      */
-    function getBcIdTokenMaping(uint256 _bcId, address _tokenContract) public view returns(address) {
+    function getBcIdTokenMaping(uint256 _bcId, address _tokenContract) public view returns (address) {
         return tokenContractAddressMapping[_tokenContract][_bcId];
     }
 
-    function getRemoteErc721BridgeContract(uint256 _bcId) external view returns(address) {
+    function getRemoteErc721BridgeContract(uint256 _bcId) external view returns (address) {
         return remoteErc721Bridges[_bcId];
     }
 
@@ -372,13 +431,12 @@ contract SfcErc721Bridge is HiddenParameters, Pausable, AccessControl {
 
     function setTokenConfigInternal(address _thisBcTokenContract, bool _thisIsTheHomeBlockchain) private {
         tokenContractConfiguration[_thisBcTokenContract] =
-            _thisIsTheHomeBlockchain ? TOKEN_CONTRACT_CONF_HOME : TOKEN_CONTRACT_CONF_REMOTE;
+        _thisIsTheHomeBlockchain ? TOKEN_CONTRACT_CONF_HOME : TOKEN_CONTRACT_CONF_REMOTE;
     }
 
     function changeContractMappingInternal(address _thisBcTokenContract, uint256 _otherBcId, address _othercTokenContract) private {
         tokenContractAddressMapping[_thisBcTokenContract][_otherBcId] = _othercTokenContract;
         emit TokenContractAddressMappingChanged(_thisBcTokenContract, _otherBcId, _othercTokenContract);
     }
-
 
 }

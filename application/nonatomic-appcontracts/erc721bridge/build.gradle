@@ -9,6 +9,8 @@ repositories {
 }
 
 dependencies {
+    implementation project (':common')
+
     implementation group: 'com.google.guava', name: 'guava', version: '14.0'
     implementation group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.12.0'
     implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.12.0'
@@ -31,6 +33,9 @@ dependencies {
     // https://mvnrepository.com/artifact/org.apache.tuweni/tuweni-units
     implementation group: 'org.apache.tuweni', name: 'tuweni-units', version: '1.0.0'
 
+    testImplementation project (':commontest')
+    testImplementation group: 'junit', name: 'junit', version: '4.13'
+    testImplementation "com.fasterxml.jackson.core:jackson-databind:2.8.11.6"
 }
 
 task generateSources {
