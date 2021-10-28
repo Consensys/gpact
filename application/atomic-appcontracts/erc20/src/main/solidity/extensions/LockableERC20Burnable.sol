@@ -14,7 +14,6 @@
  */
 pragma solidity ^0.8.0;
 
-import "../../../utils/Context.sol";
 import "../LockableERC20.sol";
 
 /**
@@ -29,7 +28,7 @@ abstract contract LockableERC20Burnable is Context, LockableERC20 {
      * See {ERC20-_burn}.
      */
     function burn(uint256 amount) public virtual {
-        _burn(_msgSender(), amount);
+        burnInternal(_msgSender(), amount);
     }
 
     /**
@@ -44,19 +43,19 @@ abstract contract LockableERC20Burnable is Context, LockableERC20 {
      * `amount`.
      */
     function burnFrom(address account, uint256 amount) public virtual {
-        burnFromInternal(_msgSender(), sender, recipient, amount);
+        burnFromInternal(_msgSender(), account, amount);
     }
 
-    function burnFromAccount(address spender, address sender, address recipient, uint256 amount) public virtual {
+    function burnFromAccount(address spender, address sender, uint256 amount) public virtual {
         require(trustedErc20Bridges[msg.sender], "ERC20: not trusted bridge");
-        burnFromInternal(spender, sender, recipient, amount);
+        burnFromInternal(spender, sender, amount);
     }
 
     function burnFromInternal(address burner, address account, uint256 amount) public virtual {
         uint256 currentAllowance = allowance(account, burner);
         require(currentAllowance >= amount, "ERC20: burn amount exceeds allowance");
-        _approve(account, burner, currentAllowance - amount);
-        _burn(account, amount);
+        approveInternal(account, burner, currentAllowance - amount);
+        burnInternal(account, amount);
     }
 
 

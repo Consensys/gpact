@@ -60,7 +60,7 @@ abstract contract LockableERC20 is Context, IERC20, IERC20Metadata, Ownable, Loc
     string private erc20Name;
     string private erc20Symbol;
 
-    mapping(address => bool) private trustedErc20Bridges;
+    mapping(address => bool) internal trustedErc20Bridges;
 
     /**
      * @dev Sets the values for {name} and {symbol}.
@@ -96,6 +96,8 @@ abstract contract LockableERC20 is Context, IERC20, IERC20Metadata, Ownable, Loc
         trustedErc20Bridges[bridge] = false;
         emit TrustedBridge(bridge, false);
     }
+
+
 
     /**
      * @dev See {IERC20-transfer}.
@@ -443,8 +445,6 @@ abstract contract LockableERC20 is Context, IERC20, IERC20Metadata, Ownable, Loc
         uint256 currentAllowance = allowanceMin(sender, spender);
         require(currentAllowance >= amount, "ERC20: transfer amount exceeds allowance");
         decreaseAllowanceInternal(sender, spender, amount);
-
-        return true;
     }
 
 
@@ -466,7 +466,7 @@ abstract contract LockableERC20 is Context, IERC20, IERC20Metadata, Ownable, Loc
         require(sender != address(0), "ERC20: transfer from the zero address");
         require(recipient != address(0), "ERC20: transfer to the zero address");
 
-        beforeTokenTransfer(sender, recipient, amount);
+        _beforeTokenTransfer(sender, recipient, amount);
         decreaseBalance(sender, amount);
         increaseBalance(recipient, amount);
         emit Transfer(sender, recipient, amount);
@@ -485,7 +485,7 @@ abstract contract LockableERC20 is Context, IERC20, IERC20Metadata, Ownable, Loc
     function mintInternal(address account, uint256 amount) internal virtual {
         require(account != address(0), "ERC20: mint to the zero address");
 
-        beforeTokenTransfer(address(0), account, amount);
+        _beforeTokenTransfer(address(0), account, amount);
         increaseTotalSupply(amount);
         increaseBalance(account, amount);
         emit Transfer(address(0), account, amount);
@@ -505,7 +505,7 @@ abstract contract LockableERC20 is Context, IERC20, IERC20Metadata, Ownable, Loc
     function burnInternal(address account, uint256 amount) internal virtual {
         require(account != address(0), "ERC20: burn from the zero address");
 
-        beforeTokenTransfer(account, address(0), amount);
+        _beforeTokenTransfer(account, address(0), amount);
         decreaseTotalSupply(amount);
         decreaseBalance(account, amount);
         emit Transfer(account, address(0), amount);
@@ -663,7 +663,7 @@ abstract contract LockableERC20 is Context, IERC20, IERC20Metadata, Ownable, Loc
     *
     * To learn more about hooks, head to xref:ROOT:extending-contracts.adoc#using-hooks[Using Hooks].
     */
-    function beforeTokenTransfer(address from, address to, uint256 amount) internal virtual { }
+    function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual { }
 
     event ApprovalIncrease(address indexed owner, address indexed spender, uint256 value);
     event ApprovalDecrease(address indexed owner, address indexed spender, uint256 value);

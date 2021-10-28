@@ -1,6 +1,6 @@
 package net.consensys.gpact.examples.tokenbridge;
 
-import net.consensys.gpact.appcontracts.atomic.erc20.soliditywrappers.CrosschainERC20;
+import net.consensys.gpact.appcontracts.atomic.erc20.soliditywrappers.GpactERC20Bridge;
 import net.consensys.gpact.cbc.CrossControlManagerGroup;
 import net.consensys.gpact.cbc.CrosschainExecutor;
 import net.consensys.gpact.cbc.calltree.CallExecutionTree;
@@ -75,9 +75,9 @@ public class Erc20User {
         String sourceContractAddress = fromAToB ? this.addressOfCrosschainERCA : this.addressOfCrosschainERCB;
 
         // Build the call execution tree.
-        CrosschainERC20 dummy = CrosschainERC20.load(null, null, this.creds, null);
-        String rlpRoot = dummy.getRLP_crosschainTransfer(destinationBlockchainId.asBigInt(), this.creds.getAddress(), amount);
-        String rlpSegment = dummy.getRLP_crosschainReceiver(this.creds.getAddress(), amount);
+        GpactERC20Bridge dummy = GpactERC20Bridge.load(null, null, this.creds, null);
+        String rlpRoot = dummy.getRLP_transferToOtherBlockchain(destinationBlockchainId.asBigInt(), sourceContractAddress, this.creds.getAddress(), amount);
+        String rlpSegment = dummy.getRLP_receiveFromOtherBlockchain(destinationContractAddress, this.creds.getAddress(), amount);
 
         CallExecutionTree seg = new CallExecutionTree(destinationBlockchainId, destinationContractAddress, rlpSegment);
         ArrayList<CallExecutionTree> rootCalls1 = new ArrayList<>();

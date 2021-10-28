@@ -19,7 +19,9 @@ import "../../../../../../functioncall/interface/src/main/solidity/CrosschainFun
 import "../../../../../../common/openzeppelin/src/main/solidity/access/AccessControl.sol";
 import "../../../../../../common/openzeppelin/src/main/solidity/security/Pausable.sol";
 import "../../../../../../functioncall/interface/src/main/solidity/HiddenParameters.sol";
-import "../../../../../../common/openzeppelin/src/main/solidity/token/ERC20/presets/ERC20PresetMinterPauser.sol";
+import "./presets/LockableERC20PresetMinterPauser.sol";
+import "./LockableERC20.sol";
+
 
 /**
  * ERC 20 bridge using the General Purpose Atomic Crosschain Transaction protocol.
@@ -122,16 +124,16 @@ contract GpactErc20Bridge is HiddenParameters, Pausable, AccessControl {
     event ApprovedRootBcId(uint256 _bcId, bool _approved);
 
     /**
-     * @param _sfcCbcContract  Simple Function Call protocol implementation.
+     * @param _gpactCbcContract  Simple Function Call protocol implementation.
      */
-    constructor (address _sfcCbcContract) {
+    constructor (address _gpactCbcContract) {
         address sender = _msgSender();
         _setupRole(DEFAULT_ADMIN_ROLE, sender);
 
         _setupRole(MAPPING_ROLE, sender);
         _setupRole(PAUSER_ROLE, sender);
 
-        crosschainBridge = CrosschainFunctionCallInterface(_sfcCbcContract);
+        crosschainBridge = CrosschainFunctionCallInterface(_gpactCbcContract);
     }
 
 
@@ -424,7 +426,7 @@ contract GpactErc20Bridge is HiddenParameters, Pausable, AccessControl {
             }
         }
         else {
-            ERC20PresetMinterPauser(_tokenContract).burnFrom(_spender, _amount);
+            LockableERC20PresetMinterPauser(_tokenContract).burnFrom(_spender, _amount);
         }
     }
 
@@ -441,12 +443,10 @@ contract GpactErc20Bridge is HiddenParameters, Pausable, AccessControl {
      */
     function transferFromOrBurnFrom(address sender, address _tokenContract, address _spender, uint256 _amount) private {
         if (tokenContractConfiguration[_tokenContract] == TOKEN_CONTRACT_CONF_MASSC) {
-            if (!IERC20(_tokenContract).transferFromAccount(sender, _spender, address(this), _amount)) {
-                revert("transferFrom failed");
-            }
+            LockableERC20(_tokenContract).transferFromAccount(sender, _spender, address(this), _amount);
         }
         else {
-            ERC20PresetMinterPauser(_tokenContract).burnFromAccount(sender, _spender, _amount);
+            LockableERC20PresetMinterPauser(_tokenContract).burnFromAccount(sender, _spender, _amount);
         }
     }
 

@@ -16,6 +16,7 @@ pragma solidity ^0.8.0;
 
 import "../LockableERC20.sol";
 import "../extensions/LockableERC20Burnable.sol";
+import "../extensions/TraditionalERC20Adaptor.sol";
 
 /**
  * @dev This contract aims to mirror the Open Zeppelin ERC20PresetFixedSupply:
@@ -30,7 +31,7 @@ import "../extensions/LockableERC20Burnable.sol";
  * This contract uses {LockableERC20Burnable} to include burn capabilities - head to
  * its documentation for details.
  */
-contract LockableERC20PresetFixedSupply is LockableERC20Burnable {
+contract LockableERC20PresetTraditionalPresetFixedSupply is LockableERC20Burnable, TraditionalERC20Adaptor {
     /**
      * @dev Mints `initialSupply` amount of token and transfers them to `owner`.
      *

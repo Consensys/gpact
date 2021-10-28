@@ -33,7 +33,7 @@ contract LockableERC20PresetMinterPauser is Context, AccessControlEnumerable, Lo
      *
      * See {ERC20-constructor}.
      */
-    constructor(string memory name, string memory symbol) ERC20(name, symbol) {
+    constructor(string memory name, string memory symbol, address _cbc) LockableERC20(name, symbol, _cbc) {
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
 
         _setupRole(MINTER_ROLE, _msgSender());
@@ -82,7 +82,7 @@ contract LockableERC20PresetMinterPauser is Context, AccessControlEnumerable, Lo
         _unpause();
     }
 
-    function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual override(ERC20, ERC20Pausable) {
+    function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual override(LockableERC20, LockableERC20Pausable) {
         super._beforeTokenTransfer(from, to, amount);
     }
 }

@@ -62,6 +62,10 @@ public class TokenBridge {
     BlockchainId chainBBcId = chainB.getBlockchainId();
     chainB.deployContract(crossControlManagerGroup.getCbcAddress(chainBBcId));
 
+    // Register the bridges with each other.
+    chainA.addRemoteERC20Bridge(chainBBcId, chainB.getBridgeContractAddress());
+    chainB.addRemoteERC20Bridge(chainABcId, chainA.getBridgeContractAddress());
+
     // Register the ERC20 contracts with each other.
     chainA.addRemoteERC20(chainBBcId, chainB.getErc20ContractAddress());
     chainB.addRemoteERC20(chainABcId, chainA.getErc20ContractAddress());
