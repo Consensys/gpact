@@ -29,7 +29,7 @@ contract SfcErc721Bridge is HiddenParameters, Pausable, AccessControl {
     bytes32 public constant MAPPING_ROLE = keccak256("MAPPING_ROLE");
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
     bytes32 public constant ADMINTRANSFER_ROLE = keccak256("ADMINTRANSFER_ROLE");
-    bytes32 public constant BLACKLIST_ROLE = keccak256("BLACKLIST_ROLE");
+    bytes32 public constant DENYLIST_ROLE = keccak256("DENYLIST_ROLE");
 
     // Token contract configuration.
     // Token has not been added to the bridge yet.
@@ -71,7 +71,7 @@ contract SfcErc721Bridge is HiddenParameters, Pausable, AccessControl {
     mapping(uint256 => address) private remoteErc721Bridges;
 
     // List of addresses that have been blocked from using this bridge.
-    mapping(address => bool) private blacklist;
+    mapping(address => bool) private denylist;
 
     /**
      * @dev Indicates a request to transfer some tokens has occurred on this blockchain.
@@ -118,19 +118,19 @@ contract SfcErc721Bridge is HiddenParameters, Pausable, AccessControl {
     event AdminTransfer(address _erc721Contract, address _recipient, uint256 _tokenId);
 
     /**
-    * @dev  Indicates that the specified address has been blacklisted, and cannot transfer or receive ERC721 tokens through the bridge.
+    * @dev  Indicates that the specified address has been denylisted, and cannot transfer or receive ERC721 tokens through the bridge.
     *
-    * @param _address   The blacklisted address
+    * @param _address   The address added to the denylist
     */
-    event AddressBlacklisted(address _address);
+    event AddressDenylisted(address _address);
 
     /**
-    * @dev  Indicates that the specified address has been removed from the blacklist,
+    * @dev  Indicates that the specified address has been removed from the denylist,
     *       and can resume transferring and receiving ERC721 tokens through the bridge.
     *
-    * @param _address The address removed from the blacklist
+    * @param _address The address removed from the denylist
     */
-    event AddressRemovedFromBlacklist(address _address);
+    event AddressRemovedFromDenylist(address _address);
 
     /**
      * @param _sfcCbcContract  Simple Function Call protocol implementation.
@@ -142,47 +142,47 @@ contract SfcErc721Bridge is HiddenParameters, Pausable, AccessControl {
         _setupRole(MAPPING_ROLE, sender);
         _setupRole(PAUSER_ROLE, sender);
         _setupRole(ADMINTRANSFER_ROLE, sender);
-        _setupRole(BLACKLIST_ROLE, sender);
+        _setupRole(DENYLIST_ROLE, sender);
 
         crosschainBridge = CrosschainFunctionCallInterface(_sfcCbcContract);
     }
 
     /**
-    * @dev Adds the specified address to a blacklist, preventing it from transferring or receiving tokens through the bridge.
+    * @dev Adds the specified address to a denylist, preventing it from transferring or receiving tokens through the bridge.
     *
     * Requirements:
-    *   - the caller must have the `BLACKLIST_ROLE`.
+    *   - the caller must have the `DENYLIST_ROLE`.
     *
-    * @param _address The address to blacklist
+    * @param _address The address to denylist
     */
-    function addToBlacklist(address _address) external {
-        require(hasRole(BLACKLIST_ROLE, _msgSender()), "ERC721 Bridge: Must have BLACKLIST role");
-        blacklist[_address] = true;
-        emit AddressBlacklisted(_address);
+    function addToDenylist(address _address) external {
+        require(hasRole(DENYLIST_ROLE, _msgSender()), "ERC721 Bridge: Must have DENYLIST role");
+        denylist[_address] = true;
+        emit AddressDenylisted(_address);
     }
 
     /**
-    * @dev Removes the specified address from the blacklist, allowing it to resume transferring or receiving tokens through the bridge.
+    * @dev Removes the specified address from the denylist, allowing it to resume transferring or receiving tokens through the bridge.
     *
     * Requirements:
-    *   - the caller must have the `BLACKLIST_ROLE`.
+    *   - the caller must have the `DENYLIST_ROLE`.
     *
-    * @param _address The address to remove from the blacklist
+    * @param _address The address to remove from the denylist
     */
-    function removeFromBlacklist(address _address) external {
-        require(hasRole(BLACKLIST_ROLE, _msgSender()), "ERC721 Bridge: Must have BLACKLIST role");
-        blacklist[_address] = false;
-        emit AddressRemovedFromBlacklist(_address);
+    function removeFromDenylist(address _address) external {
+        require(hasRole(DENYLIST_ROLE, _msgSender()), "ERC721 Bridge: Must have DENYLIST role");
+        denylist[_address] = false;
+        emit AddressRemovedFromDenylist(_address);
     }
    
     /**
-    * @dev Checks whether a given address is blacklisted.
+    * @dev Checks whether a given address is in the denylist.
     *
-    * @param _address   The address to check against the blacklist
-    * @return true if the address is blacklisted, false otherwise.
+    * @param _address   The address to check against the denylist
+    * @return true if the address is in the denylist, false otherwise.
     */
-    function isBlacklisted(address _address) public view returns (bool) {
-        return blacklist[_address];
+    function isDenylisted(address _address) public view returns (bool) {
+        return denylist[_address];
     }
 
     /**
@@ -287,9 +287,9 @@ contract SfcErc721Bridge is HiddenParameters, Pausable, AccessControl {
      * @param _tokenId            Id of token transferred.
      */
     function transferToOtherBlockchain(uint256 _destBcId, address _srcTokenContract, address _recipient, uint256 _tokenId) whenNotPaused public {
-        require(!isBlacklisted(msg.sender), "ERC 721 Bridge: Sender is blacklisted");
-        require(!isBlacklisted(_recipient), "ERC 721 Bridge: Recipient is blacklisted");
-        require(!isBlacklisted(tx.origin), "ERC 721 Bridge: Transaction originator is blacklisted");
+        require(!isDenylisted(msg.sender), "ERC 721 Bridge: Sender is denylisted");
+        require(!isDenylisted(_recipient), "ERC 721 Bridge: Recipient is denylisted");
+        require(!isDenylisted(tx.origin), "ERC 721 Bridge: Transaction originator is denylisted");
 
         address destErc721BridgeContract = remoteErc721Bridges[_destBcId];
         require(destErc721BridgeContract != address(0), "ERC 721 Bridge: Blockchain not supported");
@@ -319,8 +319,8 @@ contract SfcErc721Bridge is HiddenParameters, Pausable, AccessControl {
      * @param _tokenId            Id of token transferred.
      */
     function receiveFromOtherBlockchain(address _destTokenContract, address _recipient, uint256 _tokenId) whenNotPaused external {
-        require(!isBlacklisted(tx.origin), "ERC 721 Bridge: Transaction originator is blacklisted");
-        require(!isBlacklisted(_recipient), "ERC 721 Bridge: Recipient is blacklisted");
+        require(!isDenylisted(tx.origin), "ERC 721 Bridge: Transaction originator is denylisted");
+        require(!isDenylisted(_recipient), "ERC 721 Bridge: Recipient is denylisted");
 
         require(_msgSender() == address(crosschainBridge), "ERC 721 Bridge: Can not process transfers from contracts other than the bridge contract");
         (uint256 sourceBcId, uint256 sourceContract1) = extractTwoHiddenParams();
