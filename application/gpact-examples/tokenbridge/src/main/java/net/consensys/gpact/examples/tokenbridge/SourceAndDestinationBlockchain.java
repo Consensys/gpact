@@ -69,20 +69,53 @@ public class SourceAndDestinationBlockchain extends AbstractBlockchain {
     public void giveTokens(final Erc20User user, final int number) throws Exception {
         this.erc20.transfer(user.getAddress(), BigInteger.valueOf(number)).send();
     }
+    public void giveTokensToBridge(final int number) throws Exception {
+        this.erc20.transfer(this.bridge.getContractAddress(), BigInteger.valueOf(number)).send();
+    }
 
     public void addRemoteERC20Bridge(BlockchainId remoteBcId, String remoteERC20BridgeContractAddress) throws Exception {
+        LOG.info("Add bridge: My BcId: {}, My ERC 20 Bridge Contract: {}, Remote BcId: {}, Remote ERC 20 Bridge Contract: {}",
+                this.blockchainId, this.bridge.getContractAddress(), remoteBcId, remoteERC20BridgeContractAddress);
         try {
-            this.bridge.changeContractMapping(this.erc20.getContractAddress(), remoteBcId.asBigInt(), remoteERC20BridgeContractAddress).send();
+            this.bridge.addRemoteERC20Bridge(remoteBcId.asBigInt(), remoteERC20BridgeContractAddress).send();
         } catch (TransactionException ex) {
             LOG.error(" Revert Reason: {}", RevertReason.decodeRevertReason(ex.getTransactionReceipt().get().getRevertReason()));
             throw ex;
         }
     }
 
+    public void addFirstRemoteERC20(BlockchainId remoteBcId, String remoteERC20ContractAddress) throws Exception {
+        LOG.info("Add remote ERC 20: My BcId: {}, My ERC 20 Contract: {}, Remote BcId: {}, Remote ERC 20 Contract: {}",
+                this.blockchainId, this.erc20.getContractAddress(), remoteBcId, remoteERC20ContractAddress);
+        try {
+            this.bridge.addContractFirstMapping(this.erc20.getContractAddress(), remoteBcId.asBigInt(), remoteERC20ContractAddress, true).send();
+        } catch (TransactionException ex) {
+            LOG.error(" Revert Reason: {}", RevertReason.decodeRevertReason(ex.getTransactionReceipt().get().getRevertReason()));
+            throw ex;
+        }
+    }
+
+
     public void addRemoteERC20(BlockchainId remoteBcId, String remoteERC20ContractAddress) throws Exception {
-//        LOG.info(" Setting Remote ERC20: Local BcId: {}, Remote BcId: {}, Remote ERC20: {}",
-//                this.blockchainId, remoteBcId, remoteERC20ContractAddress);
-        this.bridge.addContractFirstMapping(this.erc20.getContractAddress(), remoteBcId.asBigInt(), remoteERC20ContractAddress, true).send();
+        LOG.info("Add remote ERC 20: My BcId: {}, My ERC 20 Contract: {}, Remote BcId: {}, Remote ERC 20 Contract: {}",
+                this.blockchainId, this.erc20.getContractAddress(), remoteBcId, remoteERC20ContractAddress);
+        try {
+            this.bridge.changeContractMapping(this.erc20.getContractAddress(), remoteBcId.asBigInt(), remoteERC20ContractAddress).send();
+        } catch (TransactionException ex) {
+            LOG.error(" Revert Reason: {}", RevertReason.decodeRevertReason(ex.getTransactionReceipt().get().getRevertReason()));
+            throw ex;
+        }
+    }
+
+    public void addTrustedRootBlockchain(BlockchainId remoteBcId) throws Exception {
+        LOG.info("Add trusted root blockchain: My BcId: {}, My ERC 20 Bridge Contract: {}, Remote BcId: {}",
+                this.blockchainId, this.erc20.getContractAddress(), remoteBcId);
+        try {
+            this.bridge.addApprovedRootBcId(remoteBcId.asBigInt()).send();
+        } catch (TransactionException ex) {
+            LOG.error(" Revert Reason: {}", RevertReason.decodeRevertReason(ex.getTransactionReceipt().get().getRevertReason()));
+            throw ex;
+        }
     }
 
 
@@ -90,8 +123,11 @@ public class SourceAndDestinationBlockchain extends AbstractBlockchain {
 
     public void showErc20Balances(Erc20User[] users) throws Exception {
         LOG.info(" {} ERC 20 Balances", this.entity);
+        String bridgeAccount = this.bridge.getContractAddress();
+        BigInteger bal = this.erc20.balanceOf(bridgeAccount).send();
+        LOG.info(" Bridge {}: balance: {}", bridgeAccount, bal);
         for (Erc20User user: users) {
-            BigInteger bal = this.erc20.balanceOf(user.getAddress()).send();
+            bal = this.erc20.balanceOf(user.getAddress()).send();
             LOG.info(" Account {}:{} balance: {}", user.getName(), user.getAddress(), bal);
         }
     }

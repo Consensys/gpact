@@ -67,23 +67,28 @@ public class TokenBridge {
     chainB.addRemoteERC20Bridge(chainABcId, chainA.getBridgeContractAddress());
 
     // Register the ERC20 contracts with each other.
-    chainA.addRemoteERC20(chainBBcId, chainB.getErc20ContractAddress());
-    chainB.addRemoteERC20(chainABcId, chainA.getErc20ContractAddress());
+    chainA.addFirstRemoteERC20(chainBBcId, chainB.getErc20ContractAddress());
+    chainB.addFirstRemoteERC20(chainABcId, chainA.getErc20ContractAddress());
 
+    // Register the other blockchain as a trusted root blockchain
+    // If the call execution tree could possibly go: chain A, chain B, chain A, then
+    // chain A should trust itself, as well as B.
+    chainA.addTrustedRootBlockchain(chainBBcId);
+    chainB.addTrustedRootBlockchain(chainABcId);
 
       // Create some users and give them some tokens.
     Erc20User user1 = new Erc20User(
             "User1",
-            root.bcId, chainA.getErc20ContractAddress(),
-            bc2.bcId, chainB.getErc20ContractAddress());
+            root.bcId, chainA.getBridgeContractAddress(),chainA.getErc20ContractAddress(),
+            bc2.bcId, chainB.getBridgeContractAddress(), chainB.getErc20ContractAddress());
     Erc20User user2 = new Erc20User(
             "User2",
-            root.bcId, chainA.getErc20ContractAddress(),
-            bc2.bcId, chainB.getErc20ContractAddress());
+            root.bcId, chainA.getBridgeContractAddress(),chainA.getErc20ContractAddress(),
+            bc2.bcId, chainB.getBridgeContractAddress(), chainB.getErc20ContractAddress());
     Erc20User user3 = new Erc20User(
             "User3",
-            root.bcId, chainA.getErc20ContractAddress(),
-            bc2.bcId, chainB.getErc20ContractAddress());
+            root.bcId, chainA.getBridgeContractAddress(),chainA.getErc20ContractAddress(),
+            bc2.bcId, chainB.getBridgeContractAddress(), chainB.getErc20ContractAddress());
 
     user1.createCbcManager(
             root, crossControlManagerGroup.getInfrastructureAddresses(chainABcId), crossControlManagerGroup.getMessageVerification(chainABcId),
@@ -100,6 +105,7 @@ public class TokenBridge {
     chainA.giveTokens(user1, 500);
     chainA.giveTokens(user2, 200);
     chainA.giveTokens(user3, 300);
+    chainB.giveTokensToBridge(1000);
 
     Erc20User[] users = new Erc20User[]{user1, user2, user3};
 

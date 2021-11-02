@@ -45,7 +45,7 @@ contract GpactErc20Bridge is HiddenParameters, Pausable, AccessControl {
 
 
     // Simple Function Call bridge.
-    CrosschainFunctionCallInterface private crosschainBridge;
+    CrosschainFunctionCallInterface private gpactCbcBridge;
 
     // Token configuration. This mapping is used to determine
     // how tokens should be processed when cross-blockchain transfers
@@ -133,7 +133,7 @@ contract GpactErc20Bridge is HiddenParameters, Pausable, AccessControl {
         _setupRole(MAPPING_ROLE, sender);
         _setupRole(PAUSER_ROLE, sender);
 
-        crosschainBridge = CrosschainFunctionCallInterface(_gpactCbcContract);
+        gpactCbcBridge = CrosschainFunctionCallInterface(_gpactCbcContract);
     }
 
 
@@ -183,6 +183,24 @@ contract GpactErc20Bridge is HiddenParameters, Pausable, AccessControl {
     }
 
     /**
+     * @dev Update the mapping between an ERC 20 contract on this blockchain and an ERC 20
+     * contract on another blockchain.
+     *
+     * Requirements:
+   * - the caller must have the `MAPPING_ROLE`.
+   *
+   * @param _thisBcTokenContract  Address of ERC 20 contract on this blockchain.
+   * @param _otherBcId            Blockchain ID where the corresponding ERC 20 contract resides.
+   * @param _otherTokenContract  Address of ERC 20 contract on the other blockchain.
+   */
+    function changeContractMapping(address _thisBcTokenContract, uint256 _otherBcId, address _otherTokenContract) external {
+        require(hasRole(MAPPING_ROLE, _msgSender()), "ERC20 Bridge: Must have MAPPING role");
+        require(tokenExists(_thisBcTokenContract), "ERC20 Bridge: token not configured");
+        changeContractMappingInternal(_thisBcTokenContract, _otherBcId, _otherTokenContract);
+    }
+
+
+    /**
      * @dev Set the token configuration after the token has first been added. The ONLY reason
      * to call this function is that when the contract was first added, it was added with
      * the wrong value.
@@ -226,22 +244,6 @@ contract GpactErc20Bridge is HiddenParameters, Pausable, AccessControl {
     }
 
 
-    /**
-     * @dev Update the mapping between an ERC 20 contract on this blockchain and an ERC 20
-     * contract on another blockchain.
-     *
-     * Requirements:
-     * - the caller must have the `MAPPING_ROLE`.
-     *
-     * @param _thisBcTokenContract  Address of ERC 20 contract on this blockchain.
-     * @param _otherBcId            Blockchain ID where the corresponding ERC 20 contract resides.
-     * @param _otherTokenContract  Address of ERC 20 contract on the other blockchain.
-     */
-    function changeContractMapping(address _thisBcTokenContract, uint256 _otherBcId, address _otherTokenContract) external {
-        require(hasRole(MAPPING_ROLE, _msgSender()), "ERC20 Bridge: Must have MAPPING role");
-        require(tokenExists(_thisBcTokenContract), "ERC20 Bridge: token not configured");
-        changeContractMappingInternal(_thisBcTokenContract, _otherBcId, _otherTokenContract);
-    }
 
 
     /**
@@ -253,18 +255,21 @@ contract GpactErc20Bridge is HiddenParameters, Pausable, AccessControl {
      * @param _otherBcId            Blockchain ID where the corresponding ERC 20 bridge contract resides.
      * @param _otherErc20Bridge     Address of ERC 20 Bridge contract on other blockchain.
      */
-    function changeBlockchainMapping(uint256 _otherBcId, address _otherErc20Bridge) external {
+    function addRemoteERC20Bridge(uint256 _otherBcId, address _otherErc20Bridge) external {
         require(hasRole(MAPPING_ROLE, _msgSender()), "ERC20 Bridge: Must have MAPPING role");
         remoteErc20Bridges[_otherBcId] = _otherErc20Bridge;
     }
 
 
     /**
-     * Transfer tokens from msg.sender to this contract on this blockchain,
+     * Transfer tokens from tx.origin to this contract on this blockchain,
      * and request tokens on the remote blockchain be given to the requested
-     * account on the destination blockchain.
+     * account on the destination blockchain from the bridge contract.
+     * (or burn on this blockchain and mint on the other blockchain).
      *
-     * NOTE: msg.sender must have called approve() on the token contract.
+     * The msg.sender MUST be the crosschain control contract.
+     *
+     * NOTE: tx.origin must have called approve() on the token contract.
      *
      * @param _destBcId         Blockchain id of destination blockchain.
      * @param _srcTokenContract Address of ERC 20 contract on this blockchain.
@@ -272,6 +277,8 @@ contract GpactErc20Bridge is HiddenParameters, Pausable, AccessControl {
      * @param _amount           The number of tokens to transfer.
      */
     function transferToOtherBlockchain(uint256 _destBcId, address _srcTokenContract, address _recipient, uint256 _amount) whenNotPaused public {
+        require(msg.sender == address(gpactCbcBridge), "Can only be called directly from Crosschain Control Contract");
+
         address destErc20BridgeContract = remoteErc20Bridges[_destBcId];
         require(destErc20BridgeContract != address(0), "ERC20 Bridge: Blockchain not supported");
 
@@ -282,17 +289,19 @@ contract GpactErc20Bridge is HiddenParameters, Pausable, AccessControl {
         // Transfer tokens from the user to this contract.
         // The transfer will revert if the account has inadequate balance or if adequate
         // allowance hasn't been set-up.
-        transferOrBurn(_srcTokenContract, msg.sender, _amount);
+        transferOrBurn(_srcTokenContract, tx.origin, _amount);
 
-        crosschainBridge.crossBlockchainCall(_destBcId, destErc20BridgeContract,
+        gpactCbcBridge.crossBlockchainCall(_destBcId, destErc20BridgeContract,
             abi.encodeWithSelector(this.receiveFromOtherBlockchain.selector, destTokenContract, _recipient, _amount));
 
         // NOTE: This event could be emitted, but the overall crosschain transaction
         // could still fail.
-        emit TransferTo(_destBcId, _srcTokenContract, destTokenContract, msg.sender, _recipient, _amount);
+        emit TransferTo(_destBcId, _srcTokenContract, destTokenContract, tx.origin, _recipient, _amount);
     }
 
     /**
+     * TODO: The use-case this was trying to match was Crosschain Control -> business logic -> ERC 20 bridge
+     * TODO: Re-review
      * Transfer tokens from msg.sender to this contract on this blockchain,
      * and request tokens on the remote blockchain be given to the requested
      * account on the destination blockchain.
@@ -306,6 +315,7 @@ contract GpactErc20Bridge is HiddenParameters, Pausable, AccessControl {
      * @param _amount           The number of tokens to transfer.
      */
     function transferFromAccountToOtherBlockchain(address _sender, uint256 _destBcId, address _srcTokenContract, address _recipient, uint256 _amount) whenNotPaused public {
+        // TODO need to audit this function
         address destErc20BridgeContract = remoteErc20Bridges[_destBcId];
         require(destErc20BridgeContract != address(0), "ERC20 Bridge: Blockchain not supported");
 
@@ -318,14 +328,13 @@ contract GpactErc20Bridge is HiddenParameters, Pausable, AccessControl {
         // allowance hasn't been set-up.
         transferFromOrBurnFrom(msg.sender, _srcTokenContract, _sender, _amount);
 
-        crosschainBridge.crossBlockchainCall(_destBcId, destErc20BridgeContract,
+        gpactCbcBridge.crossBlockchainCall(_destBcId, destErc20BridgeContract,
             abi.encodeWithSelector(this.receiveFromOtherBlockchain.selector, destTokenContract, _recipient, _amount));
 
         // NOTE: This event could be emitted, but the overall crosschain transaction
         // could still fail.
         emit TransferTo(_destBcId, _srcTokenContract, destTokenContract, _sender, _recipient, _amount);
     }
-
 
 
     /**
@@ -337,7 +346,7 @@ contract GpactErc20Bridge is HiddenParameters, Pausable, AccessControl {
      * @param _amount             The number of tokens to be transferred.
      */
     function receiveFromOtherBlockchain(address _destTokenContract, address _recipient, uint256 _amount) whenNotPaused external {
-        require(_msgSender() == address(crosschainBridge), "ERC20 Bridge: Can not process transfers from contracts other than the bridge contract");
+        require(_msgSender() == address(gpactCbcBridge), "ERC20 Bridge: Can not process transfers from contracts other than the bridge contract");
 
         (uint256 rootBcId, uint256 sourceBcId, uint256 sourceContract1) = extractThreeHiddenParams();
         address sourceContract = address(uint160(sourceContract1));

@@ -608,7 +608,7 @@ abstract contract LockableERC20 is Context, IERC20, IERC20Metadata, Ownable, Loc
         require(account != address(0), "ERC20: From account: zero address");
 
         uint256 accountBalance = balanceOfMin(account);
-        require(accountBalance >= amount, "ERC20: amount exceeds min balance of FROM sender");
+        require(accountBalance >= amount, "ERC20: amount exceeds min balance of from account");
 
         uint256 accAddr = uint256(uint160(account));
         bool foundUnlockedSlot = false;
