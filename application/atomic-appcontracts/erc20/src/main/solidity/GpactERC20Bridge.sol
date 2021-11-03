@@ -27,7 +27,7 @@ import "./LockableERC20.sol";
  * ERC 20 bridge using the General Purpose Atomic Crosschain Transaction protocol.
  *
  */
-contract GpactErc20Bridge is HiddenParameters, Pausable, AccessControl {
+contract GpactERC20Bridge is HiddenParameters, Pausable, AccessControl {
     bytes32 public constant MAPPING_ROLE = keccak256("MAPPING_ROLE");
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
 
