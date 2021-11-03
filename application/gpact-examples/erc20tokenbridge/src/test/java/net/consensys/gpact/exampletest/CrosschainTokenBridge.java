@@ -15,7 +15,7 @@
 package net.consensys.gpact.exampletest;
 
 
-import net.consensys.gpact.examples.tokenbridge.TokenBridge;
+import net.consensys.gpact.examples.erc20tokenbridge.TokenBridge;
 import org.junit.Test;
 
 public class CrosschainTokenBridge extends AbstractExampleTest {

@@ -12,7 +12,7 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package net.consensys.gpact.examples.tokenbridge;
+package net.consensys.gpact.examples.erc20tokenbridge;
 
 import net.consensys.gpact.cbc.CrossControlManagerGroup;
 import net.consensys.gpact.common.*;

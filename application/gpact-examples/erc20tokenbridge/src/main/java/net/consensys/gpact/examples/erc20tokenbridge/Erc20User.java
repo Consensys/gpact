@@ -1,4 +1,4 @@
-package net.consensys.gpact.examples.tokenbridge;
+package net.consensys.gpact.examples.erc20tokenbridge;
 
 import net.consensys.gpact.appcontracts.atomic.erc20.soliditywrappers.GpactERC20Bridge;
 import net.consensys.gpact.appcontracts.atomic.erc20.soliditywrappers.LockableERC20PresetFixedSupply;
@@ -117,7 +117,7 @@ public class Erc20User {
         }
         StatsHolder.logGas("Approve", txR.getGasUsed());
 
-
+        // Step 2: Do the crosschain transaction.
         // Build the call execution tree.
         GpactERC20Bridge dummy = GpactERC20Bridge.load(null, null, this.creds, null);
         String rlpRoot = dummy.getRLP_transferToOtherBlockchain(destinationBlockchainId.asBigInt(), sourceERC20ContractAddress, this.creds.getAddress(), amount);

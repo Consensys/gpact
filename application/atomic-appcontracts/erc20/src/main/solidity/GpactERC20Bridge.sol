@@ -300,9 +300,10 @@ contract GpactERC20Bridge is HiddenParameters, Pausable, AccessControl {
     }
 
     /**
-     * TODO: The use-case this was trying to match was Crosschain Control -> business logic -> ERC 20 bridge
-     * TODO: Re-review
-     * Transfer tokens from msg.sender to this contract on this blockchain,
+     * The use-case this handles is EOA -> Crosschain Control -> business logic -> ERC 20 bridge
+     * where the business logic contract has an allowance for the specified ERC 20 contract.
+     *
+     * Transfer tokens from _sender to this contract on this blockchain,
      * and request tokens on the remote blockchain be given to the requested
      * account on the destination blockchain.
      *
@@ -315,7 +316,6 @@ contract GpactERC20Bridge is HiddenParameters, Pausable, AccessControl {
      * @param _amount           The number of tokens to transfer.
      */
     function transferFromAccountToOtherBlockchain(address _sender, uint256 _destBcId, address _srcTokenContract, address _recipient, uint256 _amount) whenNotPaused public {
-        // TODO need to audit this function
         address destErc20BridgeContract = remoteErc20Bridges[_destBcId];
         require(destErc20BridgeContract != address(0), "ERC20 Bridge: Blockchain not supported");
 
