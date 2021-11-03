@@ -26,7 +26,7 @@ of the protocol stack.
     <a href="https://github.com/ConsenSys/gpact/tree/main/application/gpact-examples/conditional">Conditional Execution</a><br>
     <a href="https://github.com/ConsenSys/gpact/tree/main/application/gpact-examples/hotel-train">Hotel Train problem (3 blockchains)</a><br>
     <a href="https://github.com/ConsenSys/gpact/tree/main/application/gpact-examples/read">Read across chains</a><br>
-    <a href="https://github.com/ConsenSys/gpact/tree/main/application/gpact-examples/tokenbridge">ERC20 Token Bridge</a><br>
+    <a href="https://github.com/ConsenSys/gpact/tree/main/application/gpact-examples/erc20tokenbridge">ERC20 Token Bridge</a><br>
     <a href="https://github.com/ConsenSys/gpact/tree/main/application/gpact-examples/trade">Trade-Finance (5 blockchains)</a><br>
     <a href="https://github.com/ConsenSys/gpact/tree/main/application/gpact-examples/write">Write across chains</a><br>
   </td>
