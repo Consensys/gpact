@@ -17,10 +17,10 @@ dependencies {
     implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.12.0'
 
 
-    implementation files('../../../../web3j-rlp/abi/build/libs/abi.jar')
-    implementation files('../../../../web3j-rlp/core/build/libs/core.jar')
-    implementation files('../../../../web3j-rlp/crypto/build/libs/crypto.jar')
-    implementation files('../../../../web3j-rlp/rlp/build/libs/rlp.jar')
-    implementation files('../../../../web3j-rlp/utils/build/libs/utils.jar')
+    implementation files('../../../../web3j-abi/abi/build/libs/abi.jar')
+    implementation files('../../../../web3j-abi/core/build/libs/core.jar')
+    implementation files('../../../../web3j-abi/crypto/build/libs/crypto.jar')
+    implementation files('../../../../web3j-abi/rlp/build/libs/rlp.jar')
+    implementation files('../../../../web3j-abi/utils/build/libs/utils.jar')
 }
 

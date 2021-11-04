@@ -111,7 +111,7 @@ public class BusLogic extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_stockShipment(String _seller, String _buyer, BigInteger _quantity) {
+    public String getABI_stockShipment(String _seller, String _buyer, BigInteger _quantity) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_STOCKSHIPMENT, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, _seller), 

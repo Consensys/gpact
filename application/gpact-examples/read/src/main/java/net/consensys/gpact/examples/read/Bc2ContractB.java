@@ -42,6 +42,6 @@ public class Bc2ContractB extends AbstractBlockchain {
   }
 
   public String getRlpFunctionSignature_Get() {
-    return this.contractB.getRLP_get();
+    return this.contractB.getABI_get();
   }
 }

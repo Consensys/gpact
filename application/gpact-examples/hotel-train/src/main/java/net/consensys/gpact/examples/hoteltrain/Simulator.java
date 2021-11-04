@@ -25,9 +25,9 @@ public class Simulator {
 
     public void executeSimulateBookHotelAndTrain(BigInteger date, BigInteger bookingId) {
         BigInteger maxAmountToPay = BigInteger.valueOf(100); // The hard coded value in the Solidity code.
-        this.hotelBookRoomRLP = this.hotelContract.getRLP_bookRoom(date, bookingId, maxAmountToPay);
-        this.trainBookRoomRLP = this.hotelContract.getRLP_bookRoom(date, bookingId, maxAmountToPay);
-        this.bookHotelAndTrainRLP = this.travelAgencyContract.getRLP_bookHotelAndTrain(date, bookingId);
+        this.hotelBookRoomRLP = this.hotelContract.getABI_bookRoom(date, bookingId, maxAmountToPay);
+        this.trainBookRoomRLP = this.hotelContract.getABI_bookRoom(date, bookingId, maxAmountToPay);
+        this.bookHotelAndTrainRLP = this.travelAgencyContract.getABI_bookHotelAndTrain(date, bookingId);
     }
 
     public String getBookHotelAndTrainRLP() {

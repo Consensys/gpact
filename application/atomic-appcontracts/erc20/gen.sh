@@ -10,7 +10,7 @@ OUTPUTDIR=$HERE/src/main/java
 TESTOUTPUTDIR=$HERE/src/test/java
 PACKAGE=net.consensys.gpact.appcontracts.atomic.erc20.soliditywrappers
 #WEB3J=web3j
-WEB3J=../web3j-rlp/codegen/build/install/codegen/bin/codegen
+WEB3J=../web3j-abi/codegen/build/install/codegen/bin/codegen
 
 solc $CONTRACTSDIR/presets/LockableERC20PresetFixedSupply.sol --allow-paths . --bin --abi --optimize -o $BUILDDIR --overwrite
 solc $CONTRACTSDIR/presets/LockableERC20PresetMinterPauser.sol --allow-paths . --bin --abi --optimize -o $BUILDDIR --overwrite

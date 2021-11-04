@@ -16,12 +16,12 @@ dependencies {
     implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.12.0'
     implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.12.0'
 
-    implementation files('../../../web3j-rlp/abi/build/libs/abi-4.8.5-SNAPSHOT.jar')
-    implementation files('../../../web3j-rlp/core/build/libs/core-4.8.5-SNAPSHOT.jar')
-    implementation files('../../../web3j-rlp/crypto/build/libs/crypto-4.8.5-SNAPSHOT.jar')
-    implementation files('../../../web3j-rlp/rlp/build/libs/rlp-4.8.5-SNAPSHOT.jar')
-    implementation files('../../../web3j-rlp/utils/build/libs/utils-4.8.5-SNAPSHOT.jar')
-    implementation files('../../../web3j-rlp/tuples/build/libs/tuples-4.8.5-SNAPSHOT.jar')
+    implementation files('../../../web3j-abi/abi/build/libs/abi-4.8.5-SNAPSHOT.jar')
+    implementation files('../../../web3j-abi/core/build/libs/core-4.8.5-SNAPSHOT.jar')
+    implementation files('../../../web3j-abi/crypto/build/libs/crypto-4.8.5-SNAPSHOT.jar')
+    implementation files('../../../web3j-abi/rlp/build/libs/rlp-4.8.5-SNAPSHOT.jar')
+    implementation files('../../../web3j-abi/utils/build/libs/utils-4.8.5-SNAPSHOT.jar')
+    implementation files('../../../web3j-abi/tuples/build/libs/tuples-4.8.5-SNAPSHOT.jar')
     implementation "io.reactivex.rxjava2:rxjava:2.2.2"
     //    compile ('org.web3j:core:4.6.3')
 

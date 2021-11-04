@@ -10,7 +10,7 @@ TESTCONTRACTSDIR=$HERE/src/test/solidity
 TESTOUTPUTDIR=$HERE/src/test/java
 PACKAGE=net.consensys.gpact.txroot.soliditywrappers
 #WEB3J=web3j
-WEB3J=../web3j-rlp/codegen/build/install/codegen/bin/codegen
+WEB3J=../web3j-abi/codegen/build/install/codegen/bin/codegen
 
 
 solc $TESTCONTRACTSDIR/TestReceipts.sol --allow-paths . --bin --abi --optimize -o $BUILDDIR --overwrite

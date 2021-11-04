@@ -586,7 +586,7 @@ public class LockableERC20PresetMinterPauser extends Contract {
         return executeRemoteCallSingleValueReturn(function, byte[].class);
     }
 
-    public String getRLP_DEFAULT_ADMIN_ROLE() {
+    public String getABI_DEFAULT_ADMIN_ROLE() {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_DEFAULT_ADMIN_ROLE, 
                 Arrays.<Type>asList(), 
@@ -601,7 +601,7 @@ public class LockableERC20PresetMinterPauser extends Contract {
         return executeRemoteCallSingleValueReturn(function, byte[].class);
     }
 
-    public String getRLP_MINTER_ROLE() {
+    public String getABI_MINTER_ROLE() {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_MINTER_ROLE, 
                 Arrays.<Type>asList(), 
@@ -616,7 +616,7 @@ public class LockableERC20PresetMinterPauser extends Contract {
         return executeRemoteCallSingleValueReturn(function, byte[].class);
     }
 
-    public String getRLP_PAUSER_ROLE() {
+    public String getABI_PAUSER_ROLE() {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_PAUSER_ROLE, 
                 Arrays.<Type>asList(), 
@@ -631,7 +631,7 @@ public class LockableERC20PresetMinterPauser extends Contract {
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
 
-    public String getRLP_accountPallelizationFactor() {
+    public String getABI_accountPallelizationFactor() {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_ACCOUNTPALLELIZATIONFACTOR, 
                 Arrays.<Type>asList(), 
@@ -647,7 +647,7 @@ public class LockableERC20PresetMinterPauser extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_addTrustedBridge(String bridge) {
+    public String getABI_addTrustedBridge(String bridge) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_ADDTRUSTEDBRIDGE, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, bridge)), 
@@ -663,7 +663,7 @@ public class LockableERC20PresetMinterPauser extends Contract {
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
 
-    public String getRLP_allowance(String owner, String spender) {
+    public String getABI_allowance(String owner, String spender) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_ALLOWANCE, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, owner), 
@@ -680,7 +680,7 @@ public class LockableERC20PresetMinterPauser extends Contract {
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
 
-    public String getRLP_allowanceMax(String owner, String spender) {
+    public String getABI_allowanceMax(String owner, String spender) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_ALLOWANCEMAX, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, owner), 
@@ -697,7 +697,7 @@ public class LockableERC20PresetMinterPauser extends Contract {
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
 
-    public String getRLP_allowanceMin(String owner, String spender) {
+    public String getABI_allowanceMin(String owner, String spender) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_ALLOWANCEMIN, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, owner), 
@@ -714,7 +714,7 @@ public class LockableERC20PresetMinterPauser extends Contract {
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
 
-    public String getRLP_allowanceProvisional(String owner, String spender) {
+    public String getABI_allowanceProvisional(String owner, String spender) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_ALLOWANCEPROVISIONAL, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, owner), 
@@ -732,7 +732,7 @@ public class LockableERC20PresetMinterPauser extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_approve(String spender, BigInteger amount) {
+    public String getABI_approve(String spender, BigInteger amount) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_APPROVE, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, spender), 
@@ -748,7 +748,7 @@ public class LockableERC20PresetMinterPauser extends Contract {
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
 
-    public String getRLP_balanceOf(String account) {
+    public String getABI_balanceOf(String account) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_BALANCEOF, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, account)), 
@@ -763,7 +763,7 @@ public class LockableERC20PresetMinterPauser extends Contract {
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
 
-    public String getRLP_balanceOfMin(String account) {
+    public String getABI_balanceOfMin(String account) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_BALANCEOFMIN, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, account)), 
@@ -778,7 +778,7 @@ public class LockableERC20PresetMinterPauser extends Contract {
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
 
-    public String getRLP_balanceOfProvisional(String account) {
+    public String getABI_balanceOfProvisional(String account) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_BALANCEOFPROVISIONAL, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, account)), 
@@ -794,7 +794,7 @@ public class LockableERC20PresetMinterPauser extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_burn(BigInteger amount) {
+    public String getABI_burn(BigInteger amount) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_BURN, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(amount)), 
@@ -811,7 +811,7 @@ public class LockableERC20PresetMinterPauser extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_burnFrom(String account, BigInteger amount) {
+    public String getABI_burnFrom(String account, BigInteger amount) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_BURNFROM, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, account), 
@@ -830,7 +830,7 @@ public class LockableERC20PresetMinterPauser extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_burnFromAccount(String spender, String sender, BigInteger amount) {
+    public String getABI_burnFromAccount(String spender, String sender, BigInteger amount) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_BURNFROMACCOUNT, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, spender), 
@@ -850,7 +850,7 @@ public class LockableERC20PresetMinterPauser extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_burnFromInternal(String burner, String account, BigInteger amount) {
+    public String getABI_burnFromInternal(String burner, String account, BigInteger amount) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_BURNFROMINTERNAL, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, burner), 
@@ -867,7 +867,7 @@ public class LockableERC20PresetMinterPauser extends Contract {
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
 
-    public String getRLP_decimals() {
+    public String getABI_decimals() {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_DECIMALS, 
                 Arrays.<Type>asList(), 
@@ -884,7 +884,7 @@ public class LockableERC20PresetMinterPauser extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_decreaseAllowance(String spender, BigInteger subtractedValue) {
+    public String getABI_decreaseAllowance(String spender, BigInteger subtractedValue) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_DECREASEALLOWANCE, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, spender), 
@@ -900,7 +900,7 @@ public class LockableERC20PresetMinterPauser extends Contract {
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
 
-    public String getRLP_erc20PallelizationFactor() {
+    public String getABI_erc20PallelizationFactor() {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_ERC20PALLELIZATIONFACTOR, 
                 Arrays.<Type>asList(), 
@@ -917,7 +917,7 @@ public class LockableERC20PresetMinterPauser extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_finalise(Boolean _commit, byte[] _crossRootTxId) {
+    public String getABI_finalise(Boolean _commit, byte[] _crossRootTxId) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_FINALISE, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.Bool(_commit), 
@@ -933,7 +933,7 @@ public class LockableERC20PresetMinterPauser extends Contract {
         return executeRemoteCallSingleValueReturn(function, byte[].class);
     }
 
-    public String getRLP_getRoleAdmin(byte[] role) {
+    public String getABI_getRoleAdmin(byte[] role) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_GETROLEADMIN, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(role)), 
@@ -949,7 +949,7 @@ public class LockableERC20PresetMinterPauser extends Contract {
         return executeRemoteCallSingleValueReturn(function, String.class);
     }
 
-    public String getRLP_getRoleMember(byte[] role, BigInteger index) {
+    public String getABI_getRoleMember(byte[] role, BigInteger index) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_GETROLEMEMBER, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(role), 
@@ -965,7 +965,7 @@ public class LockableERC20PresetMinterPauser extends Contract {
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
 
-    public String getRLP_getRoleMemberCount(byte[] role) {
+    public String getABI_getRoleMemberCount(byte[] role) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_GETROLEMEMBERCOUNT, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(role)), 
@@ -982,7 +982,7 @@ public class LockableERC20PresetMinterPauser extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_grantRole(byte[] role, String account) {
+    public String getABI_grantRole(byte[] role, String account) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_GRANTROLE, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(role), 
@@ -999,7 +999,7 @@ public class LockableERC20PresetMinterPauser extends Contract {
         return executeRemoteCallSingleValueReturn(function, Boolean.class);
     }
 
-    public String getRLP_hasRole(byte[] role, String account) {
+    public String getABI_hasRole(byte[] role, String account) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_HASROLE, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(role), 
@@ -1016,7 +1016,7 @@ public class LockableERC20PresetMinterPauser extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_increaseAccountParallelizartionFactor(BigInteger amount) {
+    public String getABI_increaseAccountParallelizartionFactor(BigInteger amount) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_INCREASEACCOUNTPARALLELIZARTIONFACTOR, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(amount)), 
@@ -1033,7 +1033,7 @@ public class LockableERC20PresetMinterPauser extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_increaseAllowance(String spender, BigInteger addedValue) {
+    public String getABI_increaseAllowance(String spender, BigInteger addedValue) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_INCREASEALLOWANCE, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, spender), 
@@ -1050,7 +1050,7 @@ public class LockableERC20PresetMinterPauser extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_increaseERC20ParallelizartionFactor(BigInteger amount) {
+    public String getABI_increaseERC20ParallelizartionFactor(BigInteger amount) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_INCREASEERC20PARALLELIZARTIONFACTOR, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(amount)), 
@@ -1065,7 +1065,7 @@ public class LockableERC20PresetMinterPauser extends Contract {
         return executeRemoteCallSingleValueReturn(function, Boolean.class);
     }
 
-    public String getRLP_isLocked(BigInteger _key) {
+    public String getABI_isLocked(BigInteger _key) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_ISLOCKED, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_key)), 
@@ -1082,7 +1082,7 @@ public class LockableERC20PresetMinterPauser extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_mint(String to, BigInteger amount) {
+    public String getABI_mint(String to, BigInteger amount) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_MINT, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, to), 
@@ -1098,7 +1098,7 @@ public class LockableERC20PresetMinterPauser extends Contract {
         return executeRemoteCallSingleValueReturn(function, String.class);
     }
 
-    public String getRLP_name() {
+    public String getABI_name() {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_NAME, 
                 Arrays.<Type>asList(), 
@@ -1113,7 +1113,7 @@ public class LockableERC20PresetMinterPauser extends Contract {
         return executeRemoteCallSingleValueReturn(function, String.class);
     }
 
-    public String getRLP_owner() {
+    public String getABI_owner() {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_OWNER, 
                 Arrays.<Type>asList(), 
@@ -1129,7 +1129,7 @@ public class LockableERC20PresetMinterPauser extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_pause() {
+    public String getABI_pause() {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_PAUSE, 
                 Arrays.<Type>asList(), 
@@ -1144,7 +1144,7 @@ public class LockableERC20PresetMinterPauser extends Contract {
         return executeRemoteCallSingleValueReturn(function, Boolean.class);
     }
 
-    public String getRLP_paused() {
+    public String getABI_paused() {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_PAUSED, 
                 Arrays.<Type>asList(), 
@@ -1160,7 +1160,7 @@ public class LockableERC20PresetMinterPauser extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_removeTrustedBridge(String bridge) {
+    public String getABI_removeTrustedBridge(String bridge) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_REMOVETRUSTEDBRIDGE, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, bridge)), 
@@ -1176,7 +1176,7 @@ public class LockableERC20PresetMinterPauser extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_renounceOwnership() {
+    public String getABI_renounceOwnership() {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_RENOUNCEOWNERSHIP, 
                 Arrays.<Type>asList(), 
@@ -1193,7 +1193,7 @@ public class LockableERC20PresetMinterPauser extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_renounceRole(byte[] role, String account) {
+    public String getABI_renounceRole(byte[] role, String account) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_RENOUNCEROLE, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(role), 
@@ -1211,7 +1211,7 @@ public class LockableERC20PresetMinterPauser extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_revokeRole(byte[] role, String account) {
+    public String getABI_revokeRole(byte[] role, String account) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_REVOKEROLE, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(role), 
@@ -1227,7 +1227,7 @@ public class LockableERC20PresetMinterPauser extends Contract {
         return executeRemoteCallSingleValueReturn(function, Boolean.class);
     }
 
-    public String getRLP_supportsInterface(byte[] interfaceId) {
+    public String getABI_supportsInterface(byte[] interfaceId) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_SUPPORTSINTERFACE, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes4(interfaceId)), 
@@ -1242,7 +1242,7 @@ public class LockableERC20PresetMinterPauser extends Contract {
         return executeRemoteCallSingleValueReturn(function, String.class);
     }
 
-    public String getRLP_symbol() {
+    public String getABI_symbol() {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_SYMBOL, 
                 Arrays.<Type>asList(), 
@@ -1257,7 +1257,7 @@ public class LockableERC20PresetMinterPauser extends Contract {
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
 
-    public String getRLP_totalSupply() {
+    public String getABI_totalSupply() {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_TOTALSUPPLY, 
                 Arrays.<Type>asList(), 
@@ -1272,7 +1272,7 @@ public class LockableERC20PresetMinterPauser extends Contract {
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
 
-    public String getRLP_totalSupplyMax() {
+    public String getABI_totalSupplyMax() {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_TOTALSUPPLYMAX, 
                 Arrays.<Type>asList(), 
@@ -1287,7 +1287,7 @@ public class LockableERC20PresetMinterPauser extends Contract {
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
 
-    public String getRLP_totalSupplyMin() {
+    public String getABI_totalSupplyMin() {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_TOTALSUPPLYMIN, 
                 Arrays.<Type>asList(), 
@@ -1302,7 +1302,7 @@ public class LockableERC20PresetMinterPauser extends Contract {
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
 
-    public String getRLP_totalSupplyProvisional() {
+    public String getABI_totalSupplyProvisional() {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_TOTALSUPPLYPROVISIONAL, 
                 Arrays.<Type>asList(), 
@@ -1319,7 +1319,7 @@ public class LockableERC20PresetMinterPauser extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_transfer(String recipient, BigInteger amount) {
+    public String getABI_transfer(String recipient, BigInteger amount) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_TRANSFER, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, recipient), 
@@ -1338,7 +1338,7 @@ public class LockableERC20PresetMinterPauser extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_transferFrom(String sender, String recipient, BigInteger amount) {
+    public String getABI_transferFrom(String sender, String recipient, BigInteger amount) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_TRANSFERFROM, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, sender), 
@@ -1359,7 +1359,7 @@ public class LockableERC20PresetMinterPauser extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_transferFromAccount(String spender, String sender, String recipient, BigInteger amount) {
+    public String getABI_transferFromAccount(String spender, String sender, String recipient, BigInteger amount) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_TRANSFERFROMACCOUNT, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, spender), 
@@ -1378,7 +1378,7 @@ public class LockableERC20PresetMinterPauser extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_transferOwnership(String newOwner) {
+    public String getABI_transferOwnership(String newOwner) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_TRANSFEROWNERSHIP, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, newOwner)), 
@@ -1394,7 +1394,7 @@ public class LockableERC20PresetMinterPauser extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_unpause() {
+    public String getABI_unpause() {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_UNPAUSE, 
                 Arrays.<Type>asList(), 

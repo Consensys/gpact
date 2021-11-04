@@ -113,7 +113,7 @@ public class TradeWallet extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_executeTrade(String _seller, BigInteger _quantity) {
+    public String getABI_executeTrade(String _seller, BigInteger _quantity) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_EXECUTETRADE, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, _seller), 
@@ -131,7 +131,7 @@ public class TradeWallet extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_finalise(Boolean _commit, byte[] _crossRootTxId) {
+    public String getABI_finalise(Boolean _commit, byte[] _crossRootTxId) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_FINALISE, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.Bool(_commit), 
@@ -147,7 +147,7 @@ public class TradeWallet extends Contract {
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
 
-    public String getRLP_getNumTrades() {
+    public String getABI_getNumTrades() {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_GETNUMTRADES, 
                 Arrays.<Type>asList(), 
@@ -162,7 +162,7 @@ public class TradeWallet extends Contract {
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
 
-    public String getRLP_getTrade(BigInteger _index) {
+    public String getABI_getTrade(BigInteger _index) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_GETTRADE, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_index)), 
@@ -177,7 +177,7 @@ public class TradeWallet extends Contract {
         return executeRemoteCallSingleValueReturn(function, Boolean.class);
     }
 
-    public String getRLP_isLocked(BigInteger _key) {
+    public String getABI_isLocked(BigInteger _key) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_ISLOCKED, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_key)), 

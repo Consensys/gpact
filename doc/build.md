@@ -14,8 +14,8 @@ code to allow the RLP encoded function to be fetched.
 
 The special version of Web3J needs to end up in the directory `./gpact/..`. To create the special version of Web3J:
 * cd ..
-* git clone https://github.com/drinkcoffee/web3j-rlp
-* cd web3j-rlp
+* git clone https://github.com/drinkcoffee/web3j-abi
+* cd web3j-abi
 * ./gradlew installDist
 * cd ../gpact
 

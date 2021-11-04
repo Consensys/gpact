@@ -76,7 +76,7 @@ public class LockableStorage extends Contract {
         return executeRemoteCallSingleValueReturn(function, String.class);
     }
 
-    public String getRLP_businessLogicContract() {
+    public String getABI_businessLogicContract() {
         final Function function = new Function(
                 FUNC_BUSINESSLOGICCONTRACT, 
                 Arrays.<Type>asList(), 
@@ -91,7 +91,7 @@ public class LockableStorage extends Contract {
         return executeRemoteCallSingleValueReturn(function, Boolean.class);
     }
 
-    public String getRLP_getBool(BigInteger _key) {
+    public String getABI_getBool(BigInteger _key) {
         final Function function = new Function(
                 FUNC_GETBOOL, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_key)), 
@@ -106,7 +106,7 @@ public class LockableStorage extends Contract {
         return executeRemoteCallSingleValueReturn(function, byte[].class);
     }
 
-    public String getRLP_getBytes(BigInteger _key) {
+    public String getABI_getBytes(BigInteger _key) {
         final Function function = new Function(
                 FUNC_GETBYTES, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_key)), 
@@ -121,7 +121,7 @@ public class LockableStorage extends Contract {
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
 
-    public String getRLP_getUint256(BigInteger _key) {
+    public String getABI_getUint256(BigInteger _key) {
         final Function function = new Function(
                 FUNC_GETUINT256, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_key)), 
@@ -136,7 +136,7 @@ public class LockableStorage extends Contract {
         return executeRemoteCallSingleValueReturn(function, Boolean.class);
     }
 
-    public String getRLP_locked() {
+    public String getABI_locked() {
         final Function function = new Function(
                 FUNC_LOCKED, 
                 Arrays.<Type>asList(), 
@@ -153,7 +153,7 @@ public class LockableStorage extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_setBool(BigInteger _key, Boolean _val) {
+    public String getABI_setBool(BigInteger _key, Boolean _val) {
         final Function function = new Function(
                 FUNC_SETBOOL, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_key), 
@@ -170,7 +170,7 @@ public class LockableStorage extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_setBusinessLogicContract(String _businessLogicContract) {
+    public String getABI_setBusinessLogicContract(String _businessLogicContract) {
         final Function function = new Function(
                 FUNC_SETBUSINESSLOGICCONTRACT, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, _businessLogicContract)), 
@@ -187,7 +187,7 @@ public class LockableStorage extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_setBytes(BigInteger _key, byte[] _val) {
+    public String getABI_setBytes(BigInteger _key, byte[] _val) {
         final Function function = new Function(
                 FUNC_SETBYTES, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_key), 
@@ -205,7 +205,7 @@ public class LockableStorage extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_setUint256(BigInteger _key, BigInteger _val) {
+    public String getABI_setUint256(BigInteger _key, BigInteger _val) {
         final Function function = new Function(
                 FUNC_SETUINT256, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_key), 

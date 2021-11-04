@@ -120,8 +120,8 @@ public class Erc20User {
         // Step 2: Do the crosschain transaction.
         // Build the call execution tree.
         GpactERC20Bridge dummy = GpactERC20Bridge.load(null, null, this.creds, null);
-        String rlpRoot = dummy.getRLP_transferToOtherBlockchain(destinationBlockchainId.asBigInt(), sourceERC20ContractAddress, this.creds.getAddress(), amount);
-        String rlpSegment = dummy.getRLP_receiveFromOtherBlockchain(destinationERC20ContractAddress, this.creds.getAddress(), amount);
+        String rlpRoot = dummy.getABI_transferToOtherBlockchain(destinationBlockchainId.asBigInt(), sourceERC20ContractAddress, this.creds.getAddress(), amount);
+        String rlpSegment = dummy.getABI_receiveFromOtherBlockchain(destinationERC20ContractAddress, this.creds.getAddress(), amount);
 
         CallExecutionTree seg = new CallExecutionTree(destinationBlockchainId, destinationBridgeContractAddress, rlpSegment);
         ArrayList<CallExecutionTree> rootCalls1 = new ArrayList<>();

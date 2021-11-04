@@ -46,7 +46,7 @@ public class Bc1TradeWallet extends AbstractBlockchain {
   }
 
   public String getRlpFunctionSignature_ExecuteTrade(String buyFrom, BigInteger quantity) {
-    return this.tradeWalletContract.getRLP_executeTrade(buyFrom, quantity);
+    return this.tradeWalletContract.getABI_executeTrade(buyFrom, quantity);
   }
 
   public void showAllTrades() throws Exception {
