@@ -18,11 +18,11 @@ dependencies {
     implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.12.0'
     implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.12.0'
 
-    implementation files('../../../../web3j-abi/abi/build/libs/abi-4.8.5-SNAPSHOT.jar')
-    implementation files('../../../../web3j-abi/core/build/libs/core-4.8.5-SNAPSHOT.jar')
-    implementation files('../../../../web3j-abi/crypto/build/libs/crypto-4.8.5-SNAPSHOT.jar')
-    implementation files('../../../../web3j-abi/rlp/build/libs/rlp-4.8.5-SNAPSHOT.jar')
-    implementation files('../../../../web3j-abi/utils/build/libs/utils-4.8.5-SNAPSHOT.jar')
+    implementation files('../../../../web3j-abi/abi/build/libs/abi-4.8.7-SNAPSHOT.jar')
+    implementation files('../../../../web3j-abi/core/build/libs/core-4.8.7-SNAPSHOT.jar')
+    implementation files('../../../../web3j-abi/crypto/build/libs/crypto-4.8.7-SNAPSHOT.jar')
+    implementation files('../../../../web3j-abi/rlp/build/libs/rlp-4.8.7-SNAPSHOT.jar')
+    implementation files('../../../../web3j-abi/utils/build/libs/utils-4.8.7-SNAPSHOT.jar')
 
     implementation "com.squareup.okhttp3:okhttp:4.9.0"
     implementation "com.squareup.okhttp3:logging-interceptor:4.9.0"
