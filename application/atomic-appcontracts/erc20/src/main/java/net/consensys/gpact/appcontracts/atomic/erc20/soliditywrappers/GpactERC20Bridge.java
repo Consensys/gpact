@@ -505,7 +505,7 @@ public class GpactERC20Bridge extends Contract {
         return executeRemoteCallSingleValueReturn(function, byte[].class);
     }
 
-    public String getRLP_DEFAULT_ADMIN_ROLE() {
+    public String getABI_DEFAULT_ADMIN_ROLE() {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_DEFAULT_ADMIN_ROLE, 
                 Arrays.<Type>asList(), 
@@ -520,7 +520,7 @@ public class GpactERC20Bridge extends Contract {
         return executeRemoteCallSingleValueReturn(function, byte[].class);
     }
 
-    public String getRLP_MAPPING_ROLE() {
+    public String getABI_MAPPING_ROLE() {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_MAPPING_ROLE, 
                 Arrays.<Type>asList(), 
@@ -535,7 +535,7 @@ public class GpactERC20Bridge extends Contract {
         return executeRemoteCallSingleValueReturn(function, byte[].class);
     }
 
-    public String getRLP_PAUSER_ROLE() {
+    public String getABI_PAUSER_ROLE() {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_PAUSER_ROLE, 
                 Arrays.<Type>asList(), 
@@ -551,7 +551,7 @@ public class GpactERC20Bridge extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_addApprovedRootBcId(BigInteger _bcId) {
+    public String getABI_addApprovedRootBcId(BigInteger _bcId) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_ADDAPPROVEDROOTBCID, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_bcId)), 
@@ -570,7 +570,7 @@ public class GpactERC20Bridge extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_addContractFirstMapping(String _thisBcTokenContract, BigInteger _otherBcId, String _otherTokenContract, Boolean _thisBcMassC) {
+    public String getABI_addContractFirstMapping(String _thisBcTokenContract, BigInteger _otherBcId, String _otherTokenContract, Boolean _thisBcMassC) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_ADDCONTRACTFIRSTMAPPING, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, _thisBcTokenContract), 
@@ -590,7 +590,7 @@ public class GpactERC20Bridge extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_addRemoteERC20Bridge(BigInteger _otherBcId, String _otherErc20Bridge) {
+    public String getABI_addRemoteERC20Bridge(BigInteger _otherBcId, String _otherErc20Bridge) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_ADDREMOTEERC20BRIDGE, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_otherBcId), 
@@ -609,7 +609,7 @@ public class GpactERC20Bridge extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_changeContractMapping(String _thisBcTokenContract, BigInteger _otherBcId, String _otherTokenContract) {
+    public String getABI_changeContractMapping(String _thisBcTokenContract, BigInteger _otherBcId, String _otherTokenContract) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_CHANGECONTRACTMAPPING, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, _thisBcTokenContract), 
@@ -627,7 +627,7 @@ public class GpactERC20Bridge extends Contract {
         return executeRemoteCallSingleValueReturn(function, String.class);
     }
 
-    public String getRLP_getBcIdTokenMaping(BigInteger _bcId, String _tokenContract) {
+    public String getABI_getBcIdTokenMaping(BigInteger _bcId, String _tokenContract) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_GETBCIDTOKENMAPING, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_bcId), 
@@ -643,7 +643,7 @@ public class GpactERC20Bridge extends Contract {
         return executeRemoteCallSingleValueReturn(function, String.class);
     }
 
-    public String getRLP_getRemoteErc20BridgeContract(BigInteger _bcId) {
+    public String getABI_getRemoteErc20BridgeContract(BigInteger _bcId) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_GETREMOTEERC20BRIDGECONTRACT, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_bcId)), 
@@ -658,7 +658,7 @@ public class GpactERC20Bridge extends Contract {
         return executeRemoteCallSingleValueReturn(function, byte[].class);
     }
 
-    public String getRLP_getRoleAdmin(byte[] role) {
+    public String getABI_getRoleAdmin(byte[] role) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_GETROLEADMIN, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(role)), 
@@ -675,7 +675,7 @@ public class GpactERC20Bridge extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_grantRole(byte[] role, String account) {
+    public String getABI_grantRole(byte[] role, String account) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_GRANTROLE, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(role), 
@@ -692,7 +692,7 @@ public class GpactERC20Bridge extends Contract {
         return executeRemoteCallSingleValueReturn(function, Boolean.class);
     }
 
-    public String getRLP_hasRole(byte[] role, String account) {
+    public String getABI_hasRole(byte[] role, String account) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_HASROLE, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(role), 
@@ -709,7 +709,7 @@ public class GpactERC20Bridge extends Contract {
         return executeRemoteCallSingleValueReturn(function, Boolean.class);
     }
 
-    public String getRLP_isBcIdTokenAllowed(BigInteger _bcId, String _tokenContract) {
+    public String getABI_isBcIdTokenAllowed(BigInteger _bcId, String _tokenContract) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_ISBCIDTOKENALLOWED, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_bcId), 
@@ -726,7 +726,7 @@ public class GpactERC20Bridge extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_pause() {
+    public String getABI_pause() {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_PAUSE, 
                 Arrays.<Type>asList(), 
@@ -741,7 +741,7 @@ public class GpactERC20Bridge extends Contract {
         return executeRemoteCallSingleValueReturn(function, Boolean.class);
     }
 
-    public String getRLP_paused() {
+    public String getABI_paused() {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_PAUSED, 
                 Arrays.<Type>asList(), 
@@ -759,7 +759,7 @@ public class GpactERC20Bridge extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_receiveFromOtherBlockchain(String _destTokenContract, String _recipient, BigInteger _amount) {
+    public String getABI_receiveFromOtherBlockchain(String _destTokenContract, String _recipient, BigInteger _amount) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_RECEIVEFROMOTHERBLOCKCHAIN, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, _destTokenContract), 
@@ -777,7 +777,7 @@ public class GpactERC20Bridge extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_removeApprovedRootBcId(BigInteger _bcId) {
+    public String getABI_removeApprovedRootBcId(BigInteger _bcId) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_REMOVEAPPROVEDROOTBCID, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_bcId)), 
@@ -794,7 +794,7 @@ public class GpactERC20Bridge extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_renounceRole(byte[] role, String account) {
+    public String getABI_renounceRole(byte[] role, String account) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_RENOUNCEROLE, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(role), 
@@ -812,7 +812,7 @@ public class GpactERC20Bridge extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_revokeRole(byte[] role, String account) {
+    public String getABI_revokeRole(byte[] role, String account) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_REVOKEROLE, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(role), 
@@ -830,7 +830,7 @@ public class GpactERC20Bridge extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_setTokenConfig(String _thisBcTokenContract, Boolean _thisBcMassC) {
+    public String getABI_setTokenConfig(String _thisBcTokenContract, Boolean _thisBcMassC) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_SETTOKENCONFIG, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, _thisBcTokenContract), 
@@ -846,7 +846,7 @@ public class GpactERC20Bridge extends Contract {
         return executeRemoteCallSingleValueReturn(function, Boolean.class);
     }
 
-    public String getRLP_supportsInterface(byte[] interfaceId) {
+    public String getABI_supportsInterface(byte[] interfaceId) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_SUPPORTSINTERFACE, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes4(interfaceId)), 
@@ -861,7 +861,7 @@ public class GpactERC20Bridge extends Contract {
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
 
-    public String getRLP_tokenContractConfiguration(String param0) {
+    public String getABI_tokenContractConfiguration(String param0) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_TOKENCONTRACTCONFIGURATION, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, param0)), 
@@ -881,7 +881,7 @@ public class GpactERC20Bridge extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_transferFromAccountToOtherBlockchain(String _sender, BigInteger _destBcId, String _srcTokenContract, String _recipient, BigInteger _amount) {
+    public String getABI_transferFromAccountToOtherBlockchain(String _sender, BigInteger _destBcId, String _srcTokenContract, String _recipient, BigInteger _amount) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_TRANSFERFROMACCOUNTTOOTHERBLOCKCHAIN, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, _sender), 
@@ -904,7 +904,7 @@ public class GpactERC20Bridge extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_transferToOtherBlockchain(BigInteger _destBcId, String _srcTokenContract, String _recipient, BigInteger _amount) {
+    public String getABI_transferToOtherBlockchain(BigInteger _destBcId, String _srcTokenContract, String _recipient, BigInteger _amount) {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_TRANSFERTOOTHERBLOCKCHAIN, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_destBcId), 
@@ -923,7 +923,7 @@ public class GpactERC20Bridge extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_unpause() {
+    public String getABI_unpause() {
         final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(
                 FUNC_UNPAUSE, 
                 Arrays.<Type>asList(), 

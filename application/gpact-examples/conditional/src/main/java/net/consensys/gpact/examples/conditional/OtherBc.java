@@ -48,15 +48,15 @@ public class OtherBc extends AbstractBlockchain {
   }
 
   public String getRlpFunctionSignature_GetVal() {
-    return this.otherBlockchainContract.getRLP_getVal();
+    return this.otherBlockchainContract.getABI_getVal();
   }
 
   public String getRlpFunctionSignature_SetVal(BigInteger val) {
-    return this.otherBlockchainContract.getRLP_setVal(val);
+    return this.otherBlockchainContract.getABI_setVal(val);
   }
 
   public String getRlpFunctionSignature_SetValues(BigInteger val1, BigInteger val2) {
-    return this.otherBlockchainContract.getRLP_setValues(val1, val2);
+    return this.otherBlockchainContract.getABI_setValues(val1, val2);
   }
 
   public boolean storageIsLocked() throws Exception {

@@ -9,7 +9,7 @@ OUTPUTDIR=$HERE/src/main/java
 PACKAGE=net.consensys.gpact.attestorsign.soliditywrappers
 
 #WEB3J=web3j
-WEB3J=../web3j-rlp/codegen/build/install/codegen/bin/codegen
+WEB3J=../web3j-abi/codegen/build/install/codegen/bin/codegen
 
 
 # compiling one file also compiles its dependencies. We use overwrite to avoid the related warnings.

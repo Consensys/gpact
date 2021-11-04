@@ -46,7 +46,7 @@ public class RootBc extends AbstractBlockchain {
   }
 
   public String getRlpFunctionSignature_SomeComplexBusinessLogic(BigInteger val) {
-    return this.rootBlockchainContract.getRLP_someComplexBusinessLogic(val);
+    return this.rootBlockchainContract.getABI_someComplexBusinessLogic(val);
   }
 
   public void setVal1(BigInteger val) throws Exception {

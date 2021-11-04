@@ -68,7 +68,7 @@ public class Balances extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_finalise(Boolean _commit, byte[] _crossRootTxId) {
+    public String getABI_finalise(Boolean _commit, byte[] _crossRootTxId) {
         final Function function = new Function(
                 FUNC_FINALISE, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.Bool(_commit), 
@@ -84,7 +84,7 @@ public class Balances extends Contract {
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
 
-    public String getRLP_getBalance(String _account) {
+    public String getABI_getBalance(String _account) {
         final Function function = new Function(
                 FUNC_GETBALANCE, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, _account)), 
@@ -99,7 +99,7 @@ public class Balances extends Contract {
         return executeRemoteCallSingleValueReturn(function, Boolean.class);
     }
 
-    public String getRLP_isLocked(BigInteger _key) {
+    public String getABI_isLocked(BigInteger _key) {
         final Function function = new Function(
                 FUNC_ISLOCKED, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_key)), 
@@ -116,7 +116,7 @@ public class Balances extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_setBalance(String _account, BigInteger _newBalance) {
+    public String getABI_setBalance(String _account, BigInteger _newBalance) {
         final Function function = new Function(
                 FUNC_SETBALANCE, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, _account), 
@@ -135,7 +135,7 @@ public class Balances extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_transfer(String _from, String _to, BigInteger _amount) {
+    public String getABI_transfer(String _from, String _to, BigInteger _amount) {
         final Function function = new Function(
                 FUNC_TRANSFER, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, _from), 

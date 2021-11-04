@@ -68,7 +68,7 @@ public class MockCbcForERC20Test extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_addToListOfLockedContracts(String _contractToLock) {
+    public String getABI_addToListOfLockedContracts(String _contractToLock) {
         final Function function = new Function(
                 FUNC_ADDTOLISTOFLOCKEDCONTRACTS, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.Address(160, _contractToLock)), 
@@ -84,7 +84,7 @@ public class MockCbcForERC20Test extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_clearListOfLockedContracts() {
+    public String getABI_clearListOfLockedContracts() {
         final Function function = new Function(
                 FUNC_CLEARLISTOFLOCKEDCONTRACTS, 
                 Arrays.<Type>asList(), 
@@ -102,7 +102,7 @@ public class MockCbcForERC20Test extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_crossBlockchainCall(BigInteger param0, String param1, byte[] param2) {
+    public String getABI_crossBlockchainCall(BigInteger param0, String param1, byte[] param2) {
         final Function function = new Function(
                 FUNC_CROSSBLOCKCHAINCALL, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(param0), 
@@ -119,7 +119,7 @@ public class MockCbcForERC20Test extends Contract {
         return executeRemoteCallSingleValueReturn(function, byte[].class);
     }
 
-    public String getRLP_getActiveCallCrosschainRootTxId() {
+    public String getABI_getActiveCallCrosschainRootTxId() {
         final Function function = new Function(
                 FUNC_GETACTIVECALLCROSSCHAINROOTTXID, 
                 Arrays.<Type>asList(), 
@@ -134,7 +134,7 @@ public class MockCbcForERC20Test extends Contract {
         return executeRemoteCallSingleValueReturn(function, Boolean.class);
     }
 
-    public String getRLP_isSingleBlockchainCall() {
+    public String getABI_isSingleBlockchainCall() {
         final Function function = new Function(
                 FUNC_ISSINGLEBLOCKCHAINCALL, 
                 Arrays.<Type>asList(), 
@@ -150,7 +150,7 @@ public class MockCbcForERC20Test extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_setCrosschainRootTxId(byte[] _txId) {
+    public String getABI_setCrosschainRootTxId(byte[] _txId) {
         final Function function = new Function(
                 FUNC_SETCROSSCHAINROOTTXID, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Bytes32(_txId)), 

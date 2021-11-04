@@ -51,7 +51,7 @@ public class Bc3Balances extends AbstractBlockchain {
   }
 
   public String getRlpFunctionSignature_Transfer(String from, String to, BigInteger amount) {
-    return this.balancesContract.getRLP_transfer(from, to, amount);
+    return this.balancesContract.getABI_transfer(from, to, amount);
   }
 
   public boolean storageIsLocked() throws Exception {

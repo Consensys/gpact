@@ -51,7 +51,7 @@ public class Bc5Stock extends AbstractBlockchain {
   }
 
   public String getRlpFunctionSignature_Delivery(String from, String to, BigInteger amount) {
-    return this.stockContract.getRLP_delivery(from, to, amount);
+    return this.stockContract.getABI_delivery(from, to, amount);
   }
 
   public boolean storageIsLocked() throws Exception {

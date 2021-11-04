@@ -75,7 +75,7 @@ public class TravelAgency extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_bookHotelAndTrain(BigInteger _date, BigInteger _bookingId) {
+    public String getABI_bookHotelAndTrain(BigInteger _date, BigInteger _bookingId) {
         final Function function = new Function(
                 FUNC_BOOKHOTELANDTRAIN, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_date), 
@@ -91,7 +91,7 @@ public class TravelAgency extends Contract {
         return executeRemoteCallSingleValueReturn(function, Boolean.class);
     }
 
-    public String getRLP_bookingConfirmed(BigInteger _bookingId) {
+    public String getABI_bookingConfirmed(BigInteger _bookingId) {
         final Function function = new Function(
                 FUNC_BOOKINGCONFIRMED, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_bookingId)), 
@@ -108,7 +108,7 @@ public class TravelAgency extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_finalise(Boolean _commit, byte[] _crossRootTxId) {
+    public String getABI_finalise(Boolean _commit, byte[] _crossRootTxId) {
         final Function function = new Function(
                 FUNC_FINALISE, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.Bool(_commit), 
@@ -124,7 +124,7 @@ public class TravelAgency extends Contract {
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
 
-    public String getRLP_hotelBlockchainId() {
+    public String getABI_hotelBlockchainId() {
         final Function function = new Function(
                 FUNC_HOTELBLOCKCHAINID, 
                 Arrays.<Type>asList(), 
@@ -139,7 +139,7 @@ public class TravelAgency extends Contract {
         return executeRemoteCallSingleValueReturn(function, String.class);
     }
 
-    public String getRLP_hotelContract() {
+    public String getABI_hotelContract() {
         final Function function = new Function(
                 FUNC_HOTELCONTRACT, 
                 Arrays.<Type>asList(), 
@@ -154,7 +154,7 @@ public class TravelAgency extends Contract {
         return executeRemoteCallSingleValueReturn(function, Boolean.class);
     }
 
-    public String getRLP_isLocked(BigInteger _key) {
+    public String getABI_isLocked(BigInteger _key) {
         final Function function = new Function(
                 FUNC_ISLOCKED, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_key)), 
@@ -169,7 +169,7 @@ public class TravelAgency extends Contract {
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
 
-    public String getRLP_trainBlockchainId() {
+    public String getABI_trainBlockchainId() {
         final Function function = new Function(
                 FUNC_TRAINBLOCKCHAINID, 
                 Arrays.<Type>asList(), 
@@ -184,7 +184,7 @@ public class TravelAgency extends Contract {
         return executeRemoteCallSingleValueReturn(function, String.class);
     }
 
-    public String getRLP_trainContract() {
+    public String getABI_trainContract() {
         final Function function = new Function(
                 FUNC_TRAINCONTRACT, 
                 Arrays.<Type>asList(), 

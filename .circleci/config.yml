@@ -6,12 +6,12 @@ commands:
       - run:
           name: Check out Web3j
           command: |
-            git clone https://github.com/drinkcoffee/web3j-rlp.git ../web3j-rlp
-            git --git-dir=../web3j-rlp/.git rev-parse HEAD > ../web3j-rlp/headcommit
+            git clone https://github.com/drinkcoffee/web3j-abi.git ../web3j-abi
+            git --git-dir=../web3j-abi/.git rev-parse HEAD > ../web3j-abi/headcommit
       - restore_cache:
           name: Restore cached Web3j gradle dependencies
           keys:
-            - deps-web3j-{{ checksum "../web3j-rlp/build.gradle" }}
+            - deps-web3j-{{ checksum "../web3j-abi/build.gradle" }}
             - deps-web3j
       - restore_cache:
           name: Restore cached GPACT gradle dependencies
@@ -21,8 +21,8 @@ commands:
       - restore_cache:
           name: Restore gradle build cache
           keys: # by decreasing rate of change...
-            - build-cache-{{ checksum "../web3j-rlp/headcommit" }}-{{ .Revision }}
-            - build-cache-{{ checksum "../web3j-rlp/headcommit" }}
+            - build-cache-{{ checksum "../web3j-abi/headcommit" }}-{{ .Revision }}
+            - build-cache-{{ checksum "../web3j-abi/headcommit" }}
             - build-cache
       - run:
          name: Install Solidity
@@ -68,14 +68,14 @@ jobs:
           command: |
             pushd .
             # Build our Web3j
-            cd ../web3j-rlp
+            cd ../web3j-abi
             ./gradlew --parallel --stacktrace --info --build-cache installDist
             popd
             # Build the gpact
             ./gradlew --parallel --stacktrace --info --build-cache clean compileJava compileTestJava assemble
       - save_cache:
           name: Caching Web3j gradle dependencies
-          key: deps-web3j-{{ checksum "../web3j-rlp/build.gradle" }}
+          key: deps-web3j-{{ checksum "../web3j-abi/build.gradle" }}
           paths:
             - ../web3j/.gradle
       - save_cache:
@@ -85,7 +85,7 @@ jobs:
             - .gradle
       - save_cache:
           name: Caching gradle build cache
-          key: build-cache-{{ checksum "../besu/headcommit" }}-{{ checksum "../web3j-rlp/headcommit" }}-{{ .Revision }}
+          key: build-cache-{{ checksum "../besu/headcommit" }}-{{ checksum "../web3j-abi/headcommit" }}-{{ .Revision }}
           paths:
             - ~/.gradle
 
@@ -93,7 +93,7 @@ jobs:
 #          root: ~/
 #          paths:
 #            - ./gpact
-#            - ./web3j-rlp
+#            - ./web3j-abi
             #           - ./besu/build/install
 #      - store_artifacts:
 #          name: Distribution artifacts
@@ -113,7 +113,7 @@ jobs:
           name: Build web3j
           command: |
             # Build our Web3j
-            cd ../web3j-rlp
+            cd ../web3j-abi
             ./gradlew --parallel --stacktrace --info --build-cache installDist
       - setup_remote_docker:
           version: 20.10.6
@@ -189,13 +189,13 @@ jobs:
     steps:
       # The home directory is: /home/circleci/project
       # gpact is cloned to: /home/circleci/project/.
-      # web3j is cloned to: /home/circleci/web3j-rlp
+      # web3j is cloned to: /home/circleci/web3j-abi
       - prepare
       - run:
           name: Build web3j
           command: |
             # Build our Web3j
-            cd ../web3j-rlp
+            cd ../web3j-abi
             ./gradlew --parallel --stacktrace --info --build-cache installDist
       - run:
           name: Create and Start blockchains

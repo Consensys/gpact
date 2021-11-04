@@ -52,7 +52,7 @@ public class Bc4Oracle extends AbstractBlockchain {
 
 
   public String getRlpFunctionSignature_GetPrice() {
-    return this.priceOracleContract.getRLP_getPrice();
+    return this.priceOracleContract.getABI_getPrice();
   }
 
   public void showValues() throws Exception {

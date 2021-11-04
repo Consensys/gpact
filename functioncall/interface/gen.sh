@@ -11,7 +11,7 @@ TESTOUTPUTDIR=$HERE/src/test/java
 PACKAGE=net.consensys.gpact.funcioninterfaces.soliditywrappers
 
 #WEB3J=web3j
-WEB3J=../web3j-rlp/codegen/build/install/codegen/bin/codegen
+WEB3J=../web3j-abi/codegen/build/install/codegen/bin/codegen
 
 
 solc $TESTCONTRACTSDIR/HiddenParamDestTest.sol --allow-paths . --bin --abi --hashes --optimize -o $BUILDDIR --overwrite

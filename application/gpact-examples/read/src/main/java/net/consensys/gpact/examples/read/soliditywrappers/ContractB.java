@@ -56,7 +56,7 @@ public class ContractB extends Contract {
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
 
-    public String getRLP_get() {
+    public String getABI_get() {
         final Function function = new Function(
                 FUNC_GET, 
                 Arrays.<Type>asList(), 

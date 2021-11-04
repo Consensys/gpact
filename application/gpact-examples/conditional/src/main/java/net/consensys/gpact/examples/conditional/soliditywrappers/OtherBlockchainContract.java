@@ -70,7 +70,7 @@ public class OtherBlockchainContract extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_finalise(Boolean _commit, byte[] _crossRootTxId) {
+    public String getABI_finalise(Boolean _commit, byte[] _crossRootTxId) {
         final Function function = new Function(
                 FUNC_FINALISE, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.Bool(_commit), 
@@ -86,7 +86,7 @@ public class OtherBlockchainContract extends Contract {
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
 
-    public String getRLP_getVal() {
+    public String getABI_getVal() {
         final Function function = new Function(
                 FUNC_GETVAL, 
                 Arrays.<Type>asList(), 
@@ -102,7 +102,7 @@ public class OtherBlockchainContract extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_incrementVal() {
+    public String getABI_incrementVal() {
         final Function function = new Function(
                 FUNC_INCREMENTVAL, 
                 Arrays.<Type>asList(), 
@@ -117,7 +117,7 @@ public class OtherBlockchainContract extends Contract {
         return executeRemoteCallSingleValueReturn(function, Boolean.class);
     }
 
-    public String getRLP_isLocked(BigInteger _key) {
+    public String getABI_isLocked(BigInteger _key) {
         final Function function = new Function(
                 FUNC_ISLOCKED, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_key)), 
@@ -133,7 +133,7 @@ public class OtherBlockchainContract extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_setVal(BigInteger _val) {
+    public String getABI_setVal(BigInteger _val) {
         final Function function = new Function(
                 FUNC_SETVAL, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_val)), 
@@ -150,7 +150,7 @@ public class OtherBlockchainContract extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_setValues(BigInteger _val1, BigInteger _val2) {
+    public String getABI_setValues(BigInteger _val1, BigInteger _val2) {
         final Function function = new Function(
                 FUNC_SETVALUES, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_val1), 

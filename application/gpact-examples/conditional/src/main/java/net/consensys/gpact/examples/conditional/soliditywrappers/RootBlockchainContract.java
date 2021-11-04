@@ -72,7 +72,7 @@ public class RootBlockchainContract extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_finalise(Boolean _commit, byte[] _crossRootTxId) {
+    public String getABI_finalise(Boolean _commit, byte[] _crossRootTxId) {
         final Function function = new Function(
                 FUNC_FINALISE, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.Bool(_commit), 
@@ -88,7 +88,7 @@ public class RootBlockchainContract extends Contract {
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
 
-    public String getRLP_getVal1() {
+    public String getABI_getVal1() {
         final Function function = new Function(
                 FUNC_GETVAL1, 
                 Arrays.<Type>asList(), 
@@ -103,7 +103,7 @@ public class RootBlockchainContract extends Contract {
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
 
-    public String getRLP_getVal2() {
+    public String getABI_getVal2() {
         final Function function = new Function(
                 FUNC_GETVAL2, 
                 Arrays.<Type>asList(), 
@@ -118,7 +118,7 @@ public class RootBlockchainContract extends Contract {
         return executeRemoteCallSingleValueReturn(function, Boolean.class);
     }
 
-    public String getRLP_isLocked(BigInteger _key) {
+    public String getABI_isLocked(BigInteger _key) {
         final Function function = new Function(
                 FUNC_ISLOCKED, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_key)), 
@@ -134,7 +134,7 @@ public class RootBlockchainContract extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_setVal1(BigInteger _val) {
+    public String getABI_setVal1(BigInteger _val) {
         final Function function = new Function(
                 FUNC_SETVAL1, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_val)), 
@@ -150,7 +150,7 @@ public class RootBlockchainContract extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_setVal2(BigInteger _val) {
+    public String getABI_setVal2(BigInteger _val) {
         final Function function = new Function(
                 FUNC_SETVAL2, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_val)), 
@@ -166,7 +166,7 @@ public class RootBlockchainContract extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_someComplexBusinessLogic(BigInteger _val) {
+    public String getABI_someComplexBusinessLogic(BigInteger _val) {
         final Function function = new Function(
                 FUNC_SOMECOMPLEXBUSINESSLOGIC, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_val)), 

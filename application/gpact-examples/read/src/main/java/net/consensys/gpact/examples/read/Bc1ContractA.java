@@ -48,7 +48,7 @@ public class Bc1ContractA extends AbstractBlockchain {
   }
 
   public String getRlpFunctionSignature_DoCrosschainRead() {
-    return this.contractA.getRLP_doCrosschainRead();
+    return this.contractA.getABI_doCrosschainRead();
   }
 
   public void showEvents(TransactionReceipt txR) {

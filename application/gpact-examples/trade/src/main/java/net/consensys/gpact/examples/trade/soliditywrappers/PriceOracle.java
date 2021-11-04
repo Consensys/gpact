@@ -58,7 +58,7 @@ public class PriceOracle extends Contract {
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
 
-    public String getRLP_getPrice() {
+    public String getABI_getPrice() {
         final Function function = new Function(
                 FUNC_GETPRICE, 
                 Arrays.<Type>asList(), 
@@ -74,7 +74,7 @@ public class PriceOracle extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_setPrice(BigInteger _newPrice) {
+    public String getABI_setPrice(BigInteger _newPrice) {
         final Function function = new Function(
                 FUNC_SETPRICE, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_newPrice)), 

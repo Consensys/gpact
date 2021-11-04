@@ -57,7 +57,7 @@ public class ContractA extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_doCrosschainWrite(BigInteger _val) {
+    public String getABI_doCrosschainWrite(BigInteger _val) {
         final Function function = new Function(
                 FUNC_DOCROSSCHAINWRITE, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_val)), 

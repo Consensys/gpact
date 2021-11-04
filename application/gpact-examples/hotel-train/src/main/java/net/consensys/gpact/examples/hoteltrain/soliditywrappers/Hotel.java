@@ -82,7 +82,7 @@ public class Hotel extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_addApprovedTravelAgency(BigInteger _blockchainId, String _travelAgencyContract, String spendingAccount) {
+    public String getABI_addApprovedTravelAgency(BigInteger _blockchainId, String _travelAgencyContract, String spendingAccount) {
         final Function function = new Function(
                 FUNC_ADDAPPROVEDTRAVELAGENCY, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_blockchainId), 
@@ -101,7 +101,7 @@ public class Hotel extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_addRooms(BigInteger _roomRate, BigInteger _numberOfRooms) {
+    public String getABI_addRooms(BigInteger _roomRate, BigInteger _numberOfRooms) {
         final Function function = new Function(
                 FUNC_ADDROOMS, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_roomRate), 
@@ -120,7 +120,7 @@ public class Hotel extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_bookRoom(BigInteger _date, BigInteger _uniqueId, BigInteger _maxAmountToPay) {
+    public String getABI_bookRoom(BigInteger _date, BigInteger _uniqueId, BigInteger _maxAmountToPay) {
         final Function function = new Function(
                 FUNC_BOOKROOM, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_date), 
@@ -139,7 +139,7 @@ public class Hotel extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_changeRoomRate(BigInteger _roomNumber, BigInteger _roomRate) {
+    public String getABI_changeRoomRate(BigInteger _roomNumber, BigInteger _roomRate) {
         final Function function = new Function(
                 FUNC_CHANGEROOMRATE, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_roomNumber), 
@@ -157,7 +157,7 @@ public class Hotel extends Contract {
         return executeRemoteCallTransaction(function);
     }
 
-    public String getRLP_finalise(Boolean _commit, byte[] _crossRootTxId) {
+    public String getABI_finalise(Boolean _commit, byte[] _crossRootTxId) {
         final Function function = new Function(
                 FUNC_FINALISE, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.Bool(_commit), 
@@ -183,7 +183,7 @@ public class Hotel extends Contract {
                 });
     }
 
-    public String getRLP_getBookingInformation(BigInteger _uniqueId) {
+    public String getABI_getBookingInformation(BigInteger _uniqueId) {
         final Function function = new Function(
                 FUNC_GETBOOKINGINFORMATION, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_uniqueId)), 
@@ -206,7 +206,7 @@ public class Hotel extends Contract {
                 });
     }
 
-    public String getRLP_getBookings(BigInteger _date) {
+    public String getABI_getBookings(BigInteger _date) {
         final Function function = new Function(
                 FUNC_GETBOOKINGS, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_date)), 
@@ -221,7 +221,7 @@ public class Hotel extends Contract {
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
 
-    public String getRLP_getNumberRoomsAvailable(BigInteger _date) {
+    public String getABI_getNumberRoomsAvailable(BigInteger _date) {
         final Function function = new Function(
                 FUNC_GETNUMBERROOMSAVAILABLE, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_date)), 
@@ -236,7 +236,7 @@ public class Hotel extends Contract {
         return executeRemoteCallSingleValueReturn(function, Boolean.class);
     }
 
-    public String getRLP_isLocked(BigInteger _key) {
+    public String getABI_isLocked(BigInteger _key) {
         final Function function = new Function(
                 FUNC_ISLOCKED, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_key)), 

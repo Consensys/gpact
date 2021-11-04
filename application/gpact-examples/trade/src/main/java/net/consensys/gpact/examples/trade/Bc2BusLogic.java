@@ -49,7 +49,7 @@ public class Bc2BusLogic extends AbstractBlockchain {
   }
 
   public String getRlpFunctionSignature_StockShipment(String seller, String buyer, BigInteger quantity) {
-    return this.busLogicContract.getRLP_stockShipment(seller, buyer, quantity);
+    return this.busLogicContract.getABI_stockShipment(seller, buyer, quantity);
   }
 
   public void showEvents(TransactionReceipt txR) {

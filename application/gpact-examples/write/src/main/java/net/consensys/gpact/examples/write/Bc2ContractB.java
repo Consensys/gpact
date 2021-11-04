@@ -44,7 +44,7 @@ public class Bc2ContractB extends AbstractBlockchain {
   }
 
   public String getRlpFunctionSignature_Set(BigInteger val) {
-    return this.contractB.getRLP_set(val);
+    return this.contractB.getABI_set(val);
   }
 
   public void showEvents(TransactionReceipt txR) {

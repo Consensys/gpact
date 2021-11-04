@@ -46,7 +46,7 @@ public class Bc1ContractA extends AbstractBlockchain {
   }
 
   public String getRlpFunctionSignature_DoCrosschainWrite(BigInteger val) {
-    return this.contractA.getRLP_doCrosschainWrite(val);
+    return this.contractA.getABI_doCrosschainWrite(val);
   }
 
 }
