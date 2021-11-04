@@ -12,28 +12,24 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-pragma solidity ^0.8.0;
+package net.consensys.gpact.exampletest;
 
-import "./LockableERC20.sol";
 
-/**
- * @dev {ERC20} token, including:
- *
- *  - Preminted initial supply
- */
-contract LockableERC20PresetFixedSupply is LockableERC20 {
-    /**
-     * @dev Mints `initialSupply` amount of token and transfers them to `owner`.
-     *
-     * See {ERC20-constructor}.
-     */
-    constructor(
-        string memory _name,
-        string memory _symbol,
-        address _cbc,
-        uint256 _initialSupply,
-        address _owner
-    ) LockableERC20(_name, _symbol, _cbc) {
-        mintInternal(_owner, _initialSupply);
-    }
+import net.consensys.gpact.examples.erc20tokenbridge.TokenBridge;
+import org.junit.Test;
+
+public class CrosschainTokenBridge extends AbstractExampleTest {
+
+  @Test
+  public void directSignSerialMultiBlockchain() throws Exception {
+    String tempPropsFile = createPropertiesFile(true, true, false);
+    TokenBridge.main(new String[]{tempPropsFile});
+  }
+
+  @Test
+  public void transferSignSerialMultiBlockchain() throws Exception {
+    String tempPropsFile = createPropertiesFile(false, true, false);
+    TokenBridge.main(new String[]{tempPropsFile});
+  }
+
 }

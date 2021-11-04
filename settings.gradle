@@ -21,7 +21,7 @@ include 'examplehelpers'
 include 'examples-conditional'
 include 'examples-hoteltrain'
 include 'examples-read'
-include 'examples-tokenbridge'
+include 'examples-gpact-erc20tokenbridge'
 include 'examples-trade'
 include 'examples-utilpkey'
 include 'examples-write'
@@ -57,7 +57,7 @@ project(":examplehelpers").projectDir = file("common/examplehelpers")
 project(":examples-conditional").projectDir = file("application/gpact-examples/conditional")
 project(":examples-hoteltrain").projectDir = file("application/gpact-examples/hotel-train")
 project(":examples-read").projectDir = file("application/gpact-examples/read")
-project(":examples-tokenbridge").projectDir = file("application/gpact-examples/tokenbridge")
+project(":examples-gpact-erc20tokenbridge").projectDir = file("application/gpact-examples/erc20tokenbridge")
 project(":examples-trade").projectDir = file("application/gpact-examples/trade")
 project(":examples-utilpkey").projectDir = file("application/gpact-examples/utilpkey")
 project(":examples-write").projectDir = file("application/gpact-examples/write")
