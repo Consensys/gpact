@@ -13,13 +13,12 @@ allprojects {
     spotless {
         java {
             target fileTree('.') {
-                include '**/*.java'
+                exclude '**/soliditywrappers/*.*'
                 exclude '**/*.sol'
                 exclude '**/.gradle/**'
                 exclude '**/resources'
-                exclude '**/src/*/generated'
-                exclude '**/src/*/generated_tests'
                 exclude '**/build/**'
+                include '**/*.java'
             }
             importOrder('net.consensys', 'java', '')
             removeUnusedImports()
@@ -28,7 +27,4 @@ allprojects {
             googleJavaFormat('1.12.0')
         }
     }
-}
-afterEvaluate {
-    tasks.getByName('spotlessCheck').dependsOn(tasks.getByName('spotlessApply'))
 }
