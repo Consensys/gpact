@@ -16,14 +16,13 @@ pragma solidity >=0.7.1;
 
 import "./ContractB.sol";
 
-
 contract ContractA {
     ContractB contractB;
     uint256 private val;
 
     event ValueRead(uint256 _val);
 
-    constructor (address _contractBAddress) {
+    constructor(address _contractBAddress) {
         contractB = ContractB(_contractBAddress);
     }
 
@@ -36,8 +35,7 @@ contract ContractA {
         emit ValueRead(_val);
     }
 
-
-    function getVal() external view returns(uint256) {
+    function getVal() external view returns (uint256) {
         return val;
     }
 }

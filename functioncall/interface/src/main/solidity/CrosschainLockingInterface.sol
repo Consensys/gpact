@@ -32,7 +32,6 @@ interface CrosschainLockingInterface {
      */
     function addToListOfLockedContracts(address _contractToLock) external;
 
-
     /**
      * Get the combined Root Blockchain / Crosschain Transaction id for the
      * current crosschain transaction.
@@ -44,5 +43,4 @@ interface CrosschainLockingInterface {
     function getActiveCallCrosschainRootTxId() external view returns (bytes32);
 
     function isSingleBlockchainCall() external view returns (bool);
-
 }

@@ -30,9 +30,9 @@ abstract contract TraditionalERC20Adaptor is LockableERC20 {
     }
 
     /**
-    * Transfer tokens from the traditional, non-lockable ERC20 to this ERC 20.
-    *
-    */
+     * Transfer tokens from the traditional, non-lockable ERC20 to this ERC 20.
+     *
+     */
     function transferFromTraditionalContract(uint256 amount) external {
         require(cbc.isSingleBlockchainCall(), "Must be single blockchain call");
 
@@ -42,10 +42,13 @@ abstract contract TraditionalERC20Adaptor is LockableERC20 {
     }
 
     /**
-    * Transfer tokens from the traditional, non-lockable ERC20 to this ERC 20.
-    *
-    */
-    function transferFromTraditionalContractAndApprove(address spender, uint256 amount) external {
+     * Transfer tokens from the traditional, non-lockable ERC20 to this ERC 20.
+     *
+     */
+    function transferFromTraditionalContractAndApprove(
+        address spender,
+        uint256 amount
+    ) external {
         require(cbc.isSingleBlockchainCall(), "Must be single blockchain call");
 
         address owner = _msgSender();
@@ -55,9 +58,9 @@ abstract contract TraditionalERC20Adaptor is LockableERC20 {
     }
 
     /**
-    * Transfer tokens from the traditional, non-lockable ERC20 to this ERC 20.
-    *
-    */
+     * Transfer tokens from the traditional, non-lockable ERC20 to this ERC 20.
+     *
+     */
     function transferToTraditionalContract(uint256 amount) external {
         require(cbc.isSingleBlockchainCall(), "Must be single blockchain call");
 

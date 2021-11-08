@@ -28,9 +28,22 @@ contract BusLogic {
     Stock stockContract;
     CrosschainFunctionCallReturnInterface crossBlockchainControl;
 
-    event StockShipment(address _seller, address _buyer, uint256 _quantity, uint256 _price);
+    event StockShipment(
+        address _seller,
+        address _buyer,
+        uint256 _quantity,
+        uint256 _price
+    );
 
-    constructor (address _cbc, uint256 _balancesBcId, address _balances, uint256 _oracleBcId, address _oracle, uint256 _stockBcId, address _stock) {
+    constructor(
+        address _cbc,
+        uint256 _balancesBcId,
+        address _balances,
+        uint256 _oracleBcId,
+        address _oracle,
+        uint256 _stockBcId,
+        address _stock
+    ) {
         crossBlockchainControl = CrosschainFunctionCallReturnInterface(_cbc);
         balancesBcId = _balancesBcId;
         balancesContract = Balances(_balances);
@@ -40,19 +53,43 @@ contract BusLogic {
         stockContract = Stock(_stock);
     }
 
-    function stockShipment(address _seller, address _buyer, uint256 _quantity) public {
-        uint256 currentPrice = crossBlockchainControl.crossBlockchainCallReturnsUint256(
-            priceBcId, address(priceOracleContract), abi.encodeWithSelector(priceOracleContract.getPrice.selector));
+    function stockShipment(
+        address _seller,
+        address _buyer,
+        uint256 _quantity
+    ) public {
+        uint256 currentPrice = crossBlockchainControl
+            .crossBlockchainCallReturnsUint256(
+                priceBcId,
+                address(priceOracleContract),
+                abi.encodeWithSelector(priceOracleContract.getPrice.selector)
+            );
 
         uint256 cost = currentPrice * _quantity;
 
         // To address pays for goods.
-        crossBlockchainControl.crossBlockchainCall(balancesBcId, address(balancesContract),
-              abi.encodeWithSelector(balancesContract.transfer.selector, _buyer, _seller, cost));
+        crossBlockchainControl.crossBlockchainCall(
+            balancesBcId,
+            address(balancesContract),
+            abi.encodeWithSelector(
+                balancesContract.transfer.selector,
+                _buyer,
+                _seller,
+                cost
+            )
+        );
 
         // Goods are shipped from From to To.
-        crossBlockchainControl.crossBlockchainCall(stockBcId, address(stockContract),
-            abi.encodeWithSelector(stockContract.delivery.selector, _seller, _buyer, _quantity));
+        crossBlockchainControl.crossBlockchainCall(
+            stockBcId,
+            address(stockContract),
+            abi.encodeWithSelector(
+                stockContract.delivery.selector,
+                _seller,
+                _buyer,
+                _quantity
+            )
+        );
 
         emit StockShipment(_seller, _buyer, _quantity, currentPrice);
     }

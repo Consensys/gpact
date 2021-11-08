@@ -23,20 +23,20 @@ contract Hotel is LockableStorage, HiddenParameters {
     // Room rate.
     // Map (room number => room rate)
     // mapping (uint256 => uint256) private roomRate;
-    uint256 constant private ROOM_RATE_MAP = 0;
+    uint256 private constant ROOM_RATE_MAP = 0;
 
     // Booked by.
     // Map (room number => map (date => who booked room))
     // Map (uint256 => map (uint256 => address)) bookedBy;
-    uint256 constant private ROOM_BOOKED_BY_2MAP = 1;
+    uint256 private constant ROOM_BOOKED_BY_2MAP = 1;
 
     // Map (booking reference => room number)
     // mapping(uint256 => uint256) bookingRefToRoomNumber;
-    uint256 constant private BOOKING_REF_TO_ROOM_NUMBER = 2;
+    uint256 private constant BOOKING_REF_TO_ROOM_NUMBER = 2;
 
     // Map (booking reference => date)
     // mapping(uint256 => uint256) bookingRefToDate;
-    uint256 constant private BOOKING_REF_TO_DATE = 3;
+    uint256 private constant BOOKING_REF_TO_DATE = 3;
 
     // Number of rooms.
     // For this example, the number of rooms can never be smaller. If
@@ -67,81 +67,133 @@ contract Hotel is LockableStorage, HiddenParameters {
         erc20 = IERC20(_erc20);
     }
 
-    function addApprovedTravelAgency(uint256 _blockchainId, address _travelAgencyContract, address spendingAccount) onlyOwner external {
+    function addApprovedTravelAgency(
+        uint256 _blockchainId,
+        address _travelAgencyContract,
+        address spendingAccount
+    ) external onlyOwner {
         approvedTravelAgencies[_blockchainId] = _travelAgencyContract;
         travelAgencySpender[_travelAgencyContract] = spendingAccount;
     }
 
-    function addRooms(uint256 _roomRate, uint256 _numberOfRooms) onlyOwner external {
-        for (uint i=0; i < _numberOfRooms; i++) {
+    function addRooms(uint256 _roomRate, uint256 _numberOfRooms)
+        external
+        onlyOwner
+    {
+        for (uint256 i = 0; i < _numberOfRooms; i++) {
             setMapValue(ROOM_RATE_MAP, numRooms++, _roomRate);
         }
     }
 
-    function changeRoomRate(uint256 _roomNumber, uint256 _roomRate) onlyOwner external {
+    function changeRoomRate(uint256 _roomNumber, uint256 _roomRate)
+        external
+        onlyOwner
+    {
         setMapValue(ROOM_RATE_MAP, _roomNumber, _roomRate);
     }
 
-
-    function bookRoom(uint256 _date, uint256 _uniqueId, uint256 _maxAmountToPay) external {
+    function bookRoom(
+        uint256 _date,
+        uint256 _uniqueId,
+        uint256 _maxAmountToPay
+    ) external {
         require(address(cbc) == msg.sender, "Must be crosschain call");
 
         // Check that the calling contract was the travel agency linked to this one from
         // the source blockchain.
         // TODO check that the root blockchain is trusted
-        (, uint256 sourceBlockchainId, uint256 sourceContract1) = extractThreeHiddenParams();
+        (
+            ,
+            uint256 sourceBlockchainId,
+            uint256 sourceContract1
+        ) = extractThreeHiddenParams();
         address sourceContract = address(uint160(sourceContract1));
-        require(sourceContract == approvedTravelAgencies[sourceBlockchainId], "Sender is not an approved travel agency");
+        require(
+            sourceContract == approvedTravelAgencies[sourceBlockchainId],
+            "Sender is not an approved travel agency"
+        );
 
         require(_date != 0, "Date can not be zero");
-        for (uint i = 0; i < numRooms; i++) {
+        for (uint256 i = 0; i < numRooms; i++) {
             uint256 rate = getMapValue(ROOM_RATE_MAP, i);
             // If amount is OK and the room is available.
-            if (!isDoubleMapValueLocked(ROOM_BOOKED_BY_2MAP, i, _date) &&
-                    rate <= _maxAmountToPay &&
-                    address(uint160(getDoubleMapValue(ROOM_BOOKED_BY_2MAP, i, _date))) == address(0)) {
+            if (
+                !isDoubleMapValueLocked(ROOM_BOOKED_BY_2MAP, i, _date) &&
+                rate <= _maxAmountToPay &&
+                address(
+                    uint160(getDoubleMapValue(ROOM_BOOKED_BY_2MAP, i, _date))
+                ) ==
+                address(0)
+            ) {
                 // Book room
-                setDoubleMapValue(ROOM_BOOKED_BY_2MAP, i, _date, uint160(tx.origin));
+                setDoubleMapValue(
+                    ROOM_BOOKED_BY_2MAP,
+                    i,
+                    _date,
+                    uint160(tx.origin)
+                );
                 setMapValue(BOOKING_REF_TO_ROOM_NUMBER, _uniqueId, i);
                 setMapValue(BOOKING_REF_TO_DATE, _uniqueId, _date);
                 // Pay for room.
-                erc20.transferFrom(travelAgencySpender[sourceContract], owner, rate);
+                erc20.transferFrom(
+                    travelAgencySpender[sourceContract],
+                    owner,
+                    rate
+                );
                 return;
             }
         }
         require(false, "No rooms available");
     }
 
-    function getBookingInformation(uint256 _uniqueId) external view returns (uint256 amountPaid, uint256 roomId, uint256 date) {
+    function getBookingInformation(uint256 _uniqueId)
+        external
+        view
+        returns (
+            uint256 amountPaid,
+            uint256 roomId,
+            uint256 date
+        )
+    {
         date = getMapValue(BOOKING_REF_TO_DATE, _uniqueId);
         if (date == 0) {
             amountPaid = 0;
             roomId = 0;
-        }
-        else {
+        } else {
             roomId = getMapValue(BOOKING_REF_TO_ROOM_NUMBER, _uniqueId);
             amountPaid = getMapValue(ROOM_RATE_MAP, roomId);
         }
     }
 
-
-    function getNumberRoomsAvailable(uint256 _date) public view returns (uint256 numRoomsAvailable) {
+    function getNumberRoomsAvailable(uint256 _date)
+        public
+        view
+        returns (uint256 numRoomsAvailable)
+    {
         numRoomsAvailable = 0;
-        for (uint i=0; i<numRooms; i++) {
-            if (!isDoubleMapValueLocked(ROOM_BOOKED_BY_2MAP, i, _date) &&
-                getDoubleMapValue(ROOM_BOOKED_BY_2MAP, i, _date) == 0) {
+        for (uint256 i = 0; i < numRooms; i++) {
+            if (
+                !isDoubleMapValueLocked(ROOM_BOOKED_BY_2MAP, i, _date) &&
+                getDoubleMapValue(ROOM_BOOKED_BY_2MAP, i, _date) == 0
+            ) {
                 numRoomsAvailable++;
             }
         }
     }
 
-    function getBookings(uint256 _date) external view returns (address[] memory bookings) {
+    function getBookings(uint256 _date)
+        external
+        view
+        returns (address[] memory bookings)
+    {
         uint256 numAvailable = getNumberRoomsAvailable(_date);
         bookings = new address[](numRooms - numAvailable);
         uint256 index = 0;
-        for (uint i=0; i<numRooms; i++) {
+        for (uint256 i = 0; i < numRooms; i++) {
             if (!isDoubleMapValueLocked(ROOM_BOOKED_BY_2MAP, i, _date)) {
-                address bookedBy = address(uint160(getDoubleMapValue(ROOM_BOOKED_BY_2MAP, i, _date)));
+                address bookedBy = address(
+                    uint160(getDoubleMapValue(ROOM_BOOKED_BY_2MAP, i, _date))
+                );
                 if (bookedBy != address(0)) {
                     bookings[index++] = bookedBy;
                 }

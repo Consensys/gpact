@@ -16,12 +16,15 @@ pragma solidity >=0.7.1;
 import "./OtherBlockchainContractInterface.sol";
 import "../../../../../atomic-appcontracts/lockablestorage/src/main/solidity/LockableStorage.sol";
 
-contract OtherBlockchainContract is OtherBlockchainContractInterface, LockableStorage {
-    uint256 constant private KEY_FOR_VAL = 1;
+contract OtherBlockchainContract is
+    OtherBlockchainContractInterface,
+    LockableStorage
+{
+    uint256 private constant KEY_FOR_VAL = 1;
 
-    constructor (address _crossBlockchainControl) LockableStorage(_crossBlockchainControl) {
-    }
-
+    constructor(address _crossBlockchainControl)
+        LockableStorage(_crossBlockchainControl)
+    {}
 
     function setVal(uint256 _val) public override {
         setUint256(KEY_FOR_VAL, _val);
@@ -37,8 +40,7 @@ contract OtherBlockchainContract is OtherBlockchainContractInterface, LockableSt
         setVal(_val1 + _val2);
     }
 
-
-    function getVal() external override view returns(uint256) {
+    function getVal() external view override returns (uint256) {
         return getUint256(KEY_FOR_VAL);
     }
 }

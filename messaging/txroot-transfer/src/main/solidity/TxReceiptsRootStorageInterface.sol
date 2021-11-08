@@ -15,13 +15,10 @@
 pragma solidity >=0.8;
 import "../../../../../common/common/src/main/solidity/ERC165.sol";
 
-
-
 /**
  * Transaction receipt root data store.
  */
 interface TxReceiptsRootStorageInterface is ERC165 {
-
     /**
      * Add a transaction receipt root to the transaction receipt root data store.
      *
@@ -43,8 +40,8 @@ interface TxReceiptsRootStorageInterface is ERC165 {
         bytes32[] calldata _sigR,
         bytes32[] calldata _sigS,
         uint8[] calldata _sigV,
-        bytes32 _txReceiptsRoot) external;
-
+        bytes32 _txReceiptsRoot
+    ) external;
 
     /**
      * Verify that a transaction receipt is part of the Merkle Patricia Trie that hashes to a transaction
@@ -84,9 +81,14 @@ interface TxReceiptsRootStorageInterface is ERC165 {
      * @param _proof The RLP encoding of branch nodes in the transaction receipt Merkle Patricia Trie.
      *
      */
-    function verify(uint256 _blockchainId, address _cbcContract, bytes32 _txReceiptsRoot, bytes calldata _txReceipt,
-        uint256[] calldata _proofOffsets, bytes[] calldata _proof) external view returns (bool) ;
-
+    function verify(
+        uint256 _blockchainId,
+        address _cbcContract,
+        bytes32 _txReceiptsRoot,
+        bytes calldata _txReceipt,
+        uint256[] calldata _proofOffsets,
+        bytes[] calldata _proof
+    ) external view returns (bool);
 
     /**
      * Check that a transaction receipt root has been added to the data store.
@@ -95,5 +97,8 @@ interface TxReceiptsRootStorageInterface is ERC165 {
      * @param _txReceiptsRoot The transaction receipt root to reference.
      * @return true if the transaction receipt has been stored in the data store for the blockchain id.
      */
-    function containsTxReceiptRoot(uint256 _blockchainId, bytes32 _txReceiptsRoot) external view returns (bool);
+    function containsTxReceiptRoot(
+        uint256 _blockchainId,
+        bytes32 _txReceiptsRoot
+    ) external view returns (bool);
 }

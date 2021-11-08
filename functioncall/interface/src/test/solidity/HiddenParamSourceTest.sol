@@ -25,7 +25,12 @@ contract HiddenParamSourceTest is HiddenParameters {
 
     event Dump(bytes _b);
 
-    constructor(address _dest, uint256 _expected1, uint256 _expected2, uint256 _expected3) {
+    constructor(
+        address _dest,
+        uint256 _expected1,
+        uint256 _expected2,
+        uint256 _expected3
+    ) {
         dest = HiddenParamDestTest(_dest);
         e1 = _expected1;
         e2 = _expected2;
@@ -36,9 +41,11 @@ contract HiddenParamSourceTest is HiddenParameters {
     function callFuncNoParamsExplicit() external {
         dest.funcNoParamsExplicit(e1, e2, e3);
     }
+
     function callFuncOneParamExplicit() external {
         dest.funcOneParamExplicit(17, e1, e2, e3);
     }
+
     function callFuncTwoParamsExplicit() external {
         dest.funcTwoParamsExplicit(17, 23, e1, e2, e3);
     }
@@ -47,61 +54,86 @@ contract HiddenParamSourceTest is HiddenParameters {
     function callFuncNoParams() external {
         doCallThreeParams(abi.encodeWithSelector(dest.funcNoParams.selector));
     }
+
     function callFuncOneParam() external {
-        doCallThreeParams(abi.encodeWithSelector(dest.funcOneParam.selector, 17));
+        doCallThreeParams(
+            abi.encodeWithSelector(dest.funcOneParam.selector, 17)
+        );
     }
+
     function callFuncTwoParams() external {
-        doCallThreeParams(abi.encodeWithSelector(dest.funcTwoParams.selector, 17, 23));
+        doCallThreeParams(
+            abi.encodeWithSelector(dest.funcTwoParams.selector, 17, 23)
+        );
     }
 
     function doCallThreeParams(bytes memory functionCall) private {
-        bytes memory functionCallWithAuth = encodeThreeHiddenParams(functionCall, e1, e2, e3);
+        bytes memory functionCallWithAuth = encodeThreeHiddenParams(
+            functionCall,
+            e1,
+            e2,
+            e3
+        );
 
         bool isSuccess;
         bytes memory returnValueEncoded;
-        (isSuccess, returnValueEncoded) = address(dest).call(functionCallWithAuth);
+        (isSuccess, returnValueEncoded) = address(dest).call(
+            functionCallWithAuth
+        );
 
         if (!isSuccess) {
             revert(getRevertMsg(returnValueEncoded));
         }
     }
-
 
     function twoParamCallFuncNoParams() external {
-        doCallTwoParams(abi.encodeWithSelector(dest.twoParamFuncNoParams.selector));
-    }
-    function twoParamCallFuncOneParam() external {
-        doCallTwoParams(abi.encodeWithSelector(dest.twoParamFuncOneParam.selector, 17));
-    }
-    function twoParamCallFuncTwoParams() external {
-        doCallTwoParams(abi.encodeWithSelector(dest.twoParamFuncTwoParams.selector, 17, 23));
+        doCallTwoParams(
+            abi.encodeWithSelector(dest.twoParamFuncNoParams.selector)
+        );
     }
 
+    function twoParamCallFuncOneParam() external {
+        doCallTwoParams(
+            abi.encodeWithSelector(dest.twoParamFuncOneParam.selector, 17)
+        );
+    }
+
+    function twoParamCallFuncTwoParams() external {
+        doCallTwoParams(
+            abi.encodeWithSelector(dest.twoParamFuncTwoParams.selector, 17, 23)
+        );
+    }
 
     function doCallTwoParams(bytes memory functionCall) private {
-        bytes memory functionCallWithAuth = encodeTwoHiddenParams(functionCall, e1, e2);
+        bytes memory functionCallWithAuth = encodeTwoHiddenParams(
+            functionCall,
+            e1,
+            e2
+        );
 
         bool isSuccess;
         bytes memory returnValueEncoded;
-        (isSuccess, returnValueEncoded) = address(dest).call(functionCallWithAuth);
+        (isSuccess, returnValueEncoded) = address(dest).call(
+            functionCallWithAuth
+        );
 
         if (!isSuccess) {
             revert(getRevertMsg(returnValueEncoded));
         }
     }
 
-
-
-
-    function getRevertMsg(bytes memory _returnData) internal pure returns (string memory) {
+    function getRevertMsg(bytes memory _returnData)
+        internal
+        pure
+        returns (string memory)
+    {
         // If the _res length is less than 68, then the transaction failed silently (without a revert message)
-        if (_returnData.length < 68) return 'Transaction reverted silently';
+        if (_returnData.length < 68) return "Transaction reverted silently";
 
         assembly {
-        // Slice the sighash.
+            // Slice the sighash.
             _returnData := add(_returnData, 0x04)
         }
         return abi.decode(_returnData, (string)); // All that remains is the revert string
     }
-
 }

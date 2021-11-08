@@ -22,7 +22,11 @@ contract ContractA {
     ContractB contractB;
     CrosschainFunctionCallInterface crossBlockchainControl;
 
-    constructor (address _cbc, uint256 _otherBcId, address _contractBAddress) {
+    constructor(
+        address _cbc,
+        uint256 _otherBcId,
+        address _contractBAddress
+    ) {
         crossBlockchainControl = CrosschainFunctionCallInterface(_cbc);
         otherBcId = _otherBcId;
         contractB = ContractB(_contractBAddress);
@@ -30,6 +34,9 @@ contract ContractA {
 
     function doCrosschainWrite(uint256 _val) external {
         crossBlockchainControl.crossBlockchainCall(
-            otherBcId, address(contractB), abi.encodeWithSelector(contractB.set.selector, _val));
+            otherBcId,
+            address(contractB),
+            abi.encodeWithSelector(contractB.set.selector, _val)
+        );
     }
 }

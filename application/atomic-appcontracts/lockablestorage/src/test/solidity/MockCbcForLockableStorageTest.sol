@@ -17,7 +17,6 @@ pragma experimental ABIEncoderV2;
 
 import "../../../../../../functioncall/interface/src/main/solidity/CrosschainLockingInterface.sol";
 
-
 contract MockCbcForLockableStorageTest is CrosschainLockingInterface {
     bytes32 private rootTxId;
     address[] activeCallLockedContracts;
@@ -29,30 +28,33 @@ contract MockCbcForLockableStorageTest is CrosschainLockingInterface {
     /**
      * @return false if the current transaction execution is part of a cross-blockchain call\.
      */
-    function isSingleBlockchainCall() external override view returns (bool) {
+    function isSingleBlockchainCall() external view override returns (bool) {
         return rootTxId == bytes32(0);
     }
 
-    function getActiveCallCrosschainRootTxId() external override view returns (bytes32) {
+    function getActiveCallCrosschainRootTxId()
+        external
+        view
+        override
+        returns (bytes32)
+    {
         return rootTxId;
     }
 
-
-
     // ****** Functions below here not used in this test ****
 
-//    function crossBlockchainCall(uint256 /* _blockchain */, address /* _contract */, bytes calldata /* _functionCallData */) external override {
-//
-//    }
+    //    function crossBlockchainCall(uint256 /* _blockchain */, address /* _contract */, bytes calldata /* _functionCallData */) external override {
+    //
+    //    }
 
+    //    function crossBlockchainCallReturnsUint256(uint256 /* _blockchain */, address /* _contract */, bytes calldata /* _functionCallData */) external override pure returns (uint256) {
+    //        return uint256(0);
+    //    }
 
-//    function crossBlockchainCallReturnsUint256(uint256 /* _blockchain */, address /* _contract */, bytes calldata /* _functionCallData */) external override pure returns (uint256) {
-//        return uint256(0);
-//    }
-
-
-
-    function addToListOfLockedContracts(address _contractToLock) external override {
+    function addToListOfLockedContracts(address _contractToLock)
+        external
+        override
+    {
         // Don't add the same contract twice. So, check the contract isn't in
         // the array first.
         for (uint256 i = 0; i < activeCallLockedContracts.length; i++) {

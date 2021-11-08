@@ -21,52 +21,77 @@ import "../../main/solidity/Receipts.sol";
  * Transaction receipt processing.
  */
 contract TestReceipts is Receipts {
-    bytes32 constant private startEventFunctionSignature = keccak256("StartEvent(uint256)");
+    bytes32 private constant startEventFunctionSignature =
+        keccak256("StartEvent(uint256)");
 
-
-    function retrieveStartLog(address _contractAddress, bytes memory _receiptRlp)
-      external pure returns (bytes memory){
-        (, bytes memory data) = extractEvent(_contractAddress, startEventFunctionSignature, _receiptRlp);
+    function retrieveStartLog(
+        address _contractAddress,
+        bytes memory _receiptRlp
+    ) external pure returns (bytes memory) {
+        (, bytes memory data) = extractEvent(
+            _contractAddress,
+            startEventFunctionSignature,
+            _receiptRlp
+        );
         return data;
     }
 
-
-    function retrieveALog(address _contractAddress, bytes32 _eventFunctionSignature, bytes memory _receiptRlp)
-       external pure returns (bytes memory){
-        (, bytes memory data) = extractEvent(_contractAddress, _eventFunctionSignature, _receiptRlp);
+    function retrieveALog(
+        address _contractAddress,
+        bytes32 _eventFunctionSignature,
+        bytes memory _receiptRlp
+    ) external pure returns (bytes memory) {
+        (, bytes memory data) = extractEvent(
+            _contractAddress,
+            _eventFunctionSignature,
+            _receiptRlp
+        );
         return data;
     }
-
 
     function triggerStartEvent(uint256 _val) external {
         emit StartEvent(_val);
     }
 
-
-    function numLogsFound(bytes memory _receiptRlp) external pure returns (uint){
+    function numLogsFound(bytes memory _receiptRlp)
+        external
+        pure
+        returns (uint256)
+    {
         RLP.RLPItem[] memory receipt = RLP.toList(RLP.toRLPItem(_receiptRlp));
         RLP.RLPItem[] memory logs = RLP.toList(receipt[3]);
         return logs.length;
     }
 
-    function emittingContractFirstLog(bytes memory _receiptRlp) external pure returns (address){
+    function emittingContractFirstLog(bytes memory _receiptRlp)
+        external
+        pure
+        returns (address)
+    {
         RLP.RLPItem[] memory receipt = RLP.toList(RLP.toRLPItem(_receiptRlp));
         RLP.RLPItem[] memory logs = RLP.toList(receipt[3]);
         require(logs.length == 1);
         RLP.RLPItem[] memory log = RLP.toList(logs[0]);
-        address contractAddressEmitter = BytesUtil.bytesToAddress(RLP.toData(log[0]));
+        address contractAddressEmitter = BytesUtil.bytesToAddress(
+            RLP.toData(log[0])
+        );
         return contractAddressEmitter;
     }
 
-    function getEventSignatureFirstLog(bytes memory _receiptRlp) external pure returns (address){
+    function getEventSignatureFirstLog(bytes memory _receiptRlp)
+        external
+        pure
+        returns (address)
+    {
         RLP.RLPItem[] memory receipt = RLP.toList(RLP.toRLPItem(_receiptRlp));
         RLP.RLPItem[] memory logs = RLP.toList(receipt[3]);
         require(logs.length == 1);
         RLP.RLPItem[] memory log = RLP.toList(logs[0]);
-        address contractAddressEmitter = BytesUtil.bytesToAddress(RLP.toData(log[0]));
+        address contractAddressEmitter = BytesUtil.bytesToAddress(
+            RLP.toData(log[0])
+        );
         return contractAddressEmitter;
     }
 
     event StartEvent(uint256 _val);
-
 }

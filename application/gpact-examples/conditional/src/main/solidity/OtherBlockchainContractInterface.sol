@@ -16,7 +16,10 @@ pragma solidity >=0.7.1;
 
 interface OtherBlockchainContractInterface {
     function setVal(uint256 _val) external;
+
     function setValues(uint256 _val1, uint256 _val2) external;
+
     function incrementVal() external;
-    function getVal() external view returns(uint256);
+
+    function getVal() external view returns (uint256);
 }

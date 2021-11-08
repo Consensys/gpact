@@ -17,12 +17,11 @@ pragma solidity >=0.7.1;
 contract ContractB {
     uint256 private val;
 
-    constructor (uint256 _val) {
+    constructor(uint256 _val) {
         val = _val;
     }
 
     function get() external view returns (uint256) {
         return val;
     }
-
 }

@@ -23,7 +23,12 @@ import "../../../../../../../common/openzeppelin/src/main/solidity/access/Access
  * roles, as well as the default admin role, which will let it grant both minter
  * and pauser roles to other accounts.
  */
-contract LockableERC20PresetMinterPauser is Context, AccessControlEnumerable, LockableERC20Burnable, LockableERC20Pausable {
+contract LockableERC20PresetMinterPauser is
+    Context,
+    AccessControlEnumerable,
+    LockableERC20Burnable,
+    LockableERC20Pausable
+{
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
 
@@ -33,7 +38,11 @@ contract LockableERC20PresetMinterPauser is Context, AccessControlEnumerable, Lo
      *
      * See {ERC20-constructor}.
      */
-    constructor(string memory name, string memory symbol, address _cbc) LockableERC20(name, symbol, _cbc) {
+    constructor(
+        string memory name,
+        string memory symbol,
+        address _cbc
+    ) LockableERC20(name, symbol, _cbc) {
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
 
         _setupRole(MINTER_ROLE, _msgSender());
@@ -50,7 +59,10 @@ contract LockableERC20PresetMinterPauser is Context, AccessControlEnumerable, Lo
      * - the caller must have the `MINTER_ROLE`.
      */
     function mint(address to, uint256 amount) public virtual {
-        require(hasRole(MINTER_ROLE, _msgSender()), "ERC20PresetMinterPauser: must have minter role to mint");
+        require(
+            hasRole(MINTER_ROLE, _msgSender()),
+            "ERC20PresetMinterPauser: must have minter role to mint"
+        );
         mintInternal(to, amount);
     }
 
@@ -64,7 +76,10 @@ contract LockableERC20PresetMinterPauser is Context, AccessControlEnumerable, Lo
      * - the caller must have the `PAUSER_ROLE`.
      */
     function pause() public virtual {
-        require(hasRole(PAUSER_ROLE, _msgSender()), "ERC20PresetMinterPauser: must have pauser role to pause");
+        require(
+            hasRole(PAUSER_ROLE, _msgSender()),
+            "ERC20PresetMinterPauser: must have pauser role to pause"
+        );
         _pause();
     }
 
@@ -78,11 +93,18 @@ contract LockableERC20PresetMinterPauser is Context, AccessControlEnumerable, Lo
      * - the caller must have the `PAUSER_ROLE`.
      */
     function unpause() public virtual {
-        require(hasRole(PAUSER_ROLE, _msgSender()), "ERC20PresetMinterPauser: must have pauser role to unpause");
+        require(
+            hasRole(PAUSER_ROLE, _msgSender()),
+            "ERC20PresetMinterPauser: must have pauser role to unpause"
+        );
         _unpause();
     }
 
-    function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual override(LockableERC20, LockableERC20Pausable) {
+    function _beforeTokenTransfer(
+        address from,
+        address to,
+        uint256 amount
+    ) internal virtual override(LockableERC20, LockableERC20Pausable) {
         super._beforeTokenTransfer(from, to, amount);
     }
 }

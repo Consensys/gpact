@@ -46,17 +46,26 @@ abstract contract LockableERC20Burnable is Context, LockableERC20 {
         burnFromInternal(_msgSender(), account, amount);
     }
 
-    function burnFromAccount(address spender, address sender, uint256 amount) public virtual {
+    function burnFromAccount(
+        address spender,
+        address sender,
+        uint256 amount
+    ) public virtual {
         require(trustedErc20Bridges[msg.sender], "ERC20: not trusted bridge");
         burnFromInternal(spender, sender, amount);
     }
 
-    function burnFromInternal(address burner, address account, uint256 amount) public virtual {
+    function burnFromInternal(
+        address burner,
+        address account,
+        uint256 amount
+    ) public virtual {
         uint256 currentAllowance = allowance(account, burner);
-        require(currentAllowance >= amount, "ERC20: burn amount exceeds allowance");
+        require(
+            currentAllowance >= amount,
+            "ERC20: burn amount exceeds allowance"
+        );
         approveInternal(account, burner, currentAllowance - amount);
         burnInternal(account, amount);
     }
-
-
 }
