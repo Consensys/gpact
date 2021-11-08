@@ -16,7 +16,6 @@ package net.consensys.gpact.trie;
 
 import java.util.Map;
 import java.util.TreeMap;
-
 import org.apache.tuweni.bytes.Bytes32;
 
 public class StorageEntriesCollector<V> implements TrieIterator.LeafHandler<V> {

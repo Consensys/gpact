@@ -14,16 +14,15 @@
  */
 package net.consensys.gpact.cbc.engine;
 
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
+import net.consensys.gpact.cbc.CrossControlManager;
 import net.consensys.gpact.cbc.CrosschainExecutor;
 import net.consensys.gpact.cbc.calltree.CallExecutionTree;
 import net.consensys.gpact.common.BlockchainId;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import net.consensys.gpact.cbc.CrossControlManager;
-
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
 
 public abstract class AbstractExecutionEngine implements ExecutionEngine {
   static final Logger LOG = LogManager.getLogger(AbstractExecutionEngine.class);
@@ -36,12 +35,13 @@ public abstract class AbstractExecutionEngine implements ExecutionEngine {
 
   public boolean execute(CallExecutionTree callGraph, long timeout) throws Exception {
     LOG.info("start");
-    BigInteger crossBlockchainTransactionId = CrossControlManager.generateRandomCrossBlockchainTransactionId();
+    BigInteger crossBlockchainTransactionId =
+        CrossControlManager.generateRandomCrossBlockchainTransactionId();
     BigInteger timeoutBig = BigInteger.valueOf(timeout);
 
-
     BlockchainId rootBlockchainId = callRootBlockchainId(callGraph);
-    this.executor.init(callGraph.encode(), timeoutBig, crossBlockchainTransactionId, rootBlockchainId);
+    this.executor.init(
+        callGraph.encode(), timeoutBig, crossBlockchainTransactionId, rootBlockchainId);
     this.executor.startCall();
     callSegmentsAndRoot(callGraph, new ArrayList<>(), rootBlockchainId);
 
@@ -50,8 +50,9 @@ public abstract class AbstractExecutionEngine implements ExecutionEngine {
     return this.executor.getRootEventSuccess();
   }
 
-
-  protected void callSegmentsAndRoot(CallExecutionTree callGraph, List<BigInteger> callPath, BlockchainId callerBlockchainId) throws Exception {
+  protected void callSegmentsAndRoot(
+      CallExecutionTree callGraph, List<BigInteger> callPath, BlockchainId callerBlockchainId)
+      throws Exception {
     BlockchainId thisCallsBcId = callGraph.getBlockchainId();
     if (!callGraph.isLeaf()) {
       executeCalls(callGraph.getCalledFunctions(), callPath, thisCallsBcId);
@@ -59,14 +60,12 @@ public abstract class AbstractExecutionEngine implements ExecutionEngine {
       // Now call the segment call that called all of the other segments.
       if (callPath.size() == 0) {
         this.executor.root();
-      }
-      else {
+      } else {
         List<BigInteger> nextCallPath = new ArrayList<>(callPath);
         nextCallPath.add(BigInteger.ZERO);
         this.executor.segment(thisCallsBcId, callerBlockchainId, nextCallPath);
       }
-    }
-    else {
+    } else {
       this.executor.segment(thisCallsBcId, callerBlockchainId, callPath);
     }
   }
@@ -77,6 +76,7 @@ public abstract class AbstractExecutionEngine implements ExecutionEngine {
     return rootBcId;
   }
 
-  protected abstract void executeCalls(List<CallExecutionTree> calls, List<BigInteger> callPath, BlockchainId theCallerBlockchainId) throws Exception;
-
+  protected abstract void executeCalls(
+      List<CallExecutionTree> calls, List<BigInteger> callPath, BlockchainId theCallerBlockchainId)
+      throws Exception;
 }

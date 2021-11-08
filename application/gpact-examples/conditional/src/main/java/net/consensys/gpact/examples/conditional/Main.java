@@ -14,20 +14,18 @@
  */
 package net.consensys.gpact.examples.conditional;
 
+import java.math.BigInteger;
+import java.util.ArrayList;
+import net.consensys.gpact.cbc.CrossControlManagerGroup;
+import net.consensys.gpact.cbc.CrosschainExecutor;
 import net.consensys.gpact.cbc.calltree.CallExecutionTree;
+import net.consensys.gpact.cbc.engine.ExecutionEngine;
 import net.consensys.gpact.common.*;
+import net.consensys.gpact.examples.conditional.sim.SimOtherContract;
+import net.consensys.gpact.examples.conditional.sim.SimRootContract;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
-import net.consensys.gpact.cbc.CrossControlManagerGroup;
-import net.consensys.gpact.cbc.CrosschainExecutor;
-import net.consensys.gpact.cbc.engine.ExecutionEngine;
-import net.consensys.gpact.examples.conditional.sim.SimOtherContract;
-import net.consensys.gpact.examples.conditional.sim.SimRootContract;
-
-import java.math.BigInteger;
-import java.util.ArrayList;
-
 
 public class Main {
   static final Logger LOG = LogManager.getLogger(Main.class);
@@ -45,24 +43,32 @@ public class Main {
     exampleManager.gpactStandardExampleConfig(2);
 
     if (exampleManager.getExecutionEngineType() == ExecutionEngineType.PARALLEL) {
-      throw new Exception("This example will not work with a paralell execution engine as it has two segments that interact with the same contract on the same blockchain");
+      throw new Exception(
+          "This example will not work with a paralell execution engine as it has two segments that interact with the same contract on the same blockchain");
     }
 
     BlockchainInfo root = exampleManager.getRootBcInfo();
     BlockchainInfo bc2 = exampleManager.getBc2Info();
-    CrossControlManagerGroup crossControlManagerGroup = exampleManager.getGpactCrossControlManagerGroup();
+    CrossControlManagerGroup crossControlManagerGroup =
+        exampleManager.getGpactCrossControlManagerGroup();
 
     // Set-up classes to manage blockchains.
     Credentials appCreds = CredentialsCreator.createCredentials();
-    RootBc rootBlockchain = new RootBc(appCreds, root.bcId, root.uri, root.gasPriceStrategy, root.period);
-    OtherBc otherBlockchain = new OtherBc(appCreds, bc2.bcId, bc2.uri, bc2.gasPriceStrategy, bc2.period);
+    RootBc rootBlockchain =
+        new RootBc(appCreds, root.bcId, root.uri, root.gasPriceStrategy, root.period);
+    OtherBc otherBlockchain =
+        new OtherBc(appCreds, bc2.bcId, bc2.uri, bc2.gasPriceStrategy, bc2.period);
 
     // Deploy application contracts.
     BlockchainId otherBcId = otherBlockchain.getBlockchainId();
     otherBlockchain.deployContracts(crossControlManagerGroup.getCbcAddress(otherBcId));
-    String otherBlockchainContractAddress = otherBlockchain.otherBlockchainContract.getContractAddress();
+    String otherBlockchainContractAddress =
+        otherBlockchain.otherBlockchainContract.getContractAddress();
     BlockchainId rootBcId = rootBlockchain.getBlockchainId();
-    rootBlockchain.deployContracts(crossControlManagerGroup.getCbcAddress(rootBcId), otherBcId, otherBlockchainContractAddress);
+    rootBlockchain.deployContracts(
+        crossControlManagerGroup.getCbcAddress(rootBcId),
+        otherBcId,
+        otherBlockchainContractAddress);
 
     // Create simulators
     SimOtherContract simOtherContract = new SimOtherContract();
@@ -85,39 +91,49 @@ public class Main {
     BigInteger param = BigInteger.valueOf(7);
     simRootContract.someComplexBusinessLogic(param);
 
-    String rlpFunctionCall_SomeComplexBusinessLogic = rootBlockchain.getRlpFunctionSignature_SomeComplexBusinessLogic(param);
-    LOG.info("rlpFunctionCall_SomeComplexBusinessLogic: {}", rlpFunctionCall_SomeComplexBusinessLogic);
+    String rlpFunctionCall_SomeComplexBusinessLogic =
+        rootBlockchain.getRlpFunctionSignature_SomeComplexBusinessLogic(param);
+    LOG.info(
+        "rlpFunctionCall_SomeComplexBusinessLogic: {}", rlpFunctionCall_SomeComplexBusinessLogic);
     String rlpFunctionCall_GetVal = otherBlockchain.getRlpFunctionSignature_GetVal();
     LOG.info("rlpFunctionCall_GetVal: {}", rlpFunctionCall_GetVal);
     String rlpFunctionCall_SetValues = null;
     String rlpFunctionCall_SetVal = null;
     if (simRootContract.someComplexBusinessLogicIfTrue) {
-      rlpFunctionCall_SetValues = otherBlockchain.getRlpFunctionSignature_SetValues(
-          simRootContract.someComplexBusinessLogicSetValuesParameter1,
-          simRootContract.someComplexBusinessLogicSetValuesParameter2);
+      rlpFunctionCall_SetValues =
+          otherBlockchain.getRlpFunctionSignature_SetValues(
+              simRootContract.someComplexBusinessLogicSetValuesParameter1,
+              simRootContract.someComplexBusinessLogicSetValuesParameter2);
       LOG.info("rlpFunctionCall_SetValues: {}", rlpFunctionCall_SetValues);
-    }
-    else {
-      rlpFunctionCall_SetVal = otherBlockchain.getRlpFunctionSignature_SetVal(simRootContract.someComplexBusinessLogicSetValParameter);
+    } else {
+      rlpFunctionCall_SetVal =
+          otherBlockchain.getRlpFunctionSignature_SetVal(
+              simRootContract.someComplexBusinessLogicSetValParameter);
       LOG.info("rlpFunctionCall_SetVal: {}", rlpFunctionCall_SetVal);
     }
 
     ArrayList<CallExecutionTree> rootCalls = new ArrayList<>();
-    CallExecutionTree getValSeg = new CallExecutionTree(otherBcId, otherBlockchainContractAddress, rlpFunctionCall_GetVal);
+    CallExecutionTree getValSeg =
+        new CallExecutionTree(otherBcId, otherBlockchainContractAddress, rlpFunctionCall_GetVal);
     rootCalls.add(getValSeg);
     if (simRootContract.someComplexBusinessLogicIfTrue) {
-      CallExecutionTree setValuesSeg = new CallExecutionTree(otherBcId, otherBlockchainContractAddress, rlpFunctionCall_SetValues);
+      CallExecutionTree setValuesSeg =
+          new CallExecutionTree(
+              otherBcId, otherBlockchainContractAddress, rlpFunctionCall_SetValues);
       rootCalls.add(setValuesSeg);
-    }
-    else {
-      CallExecutionTree setValSeg = new CallExecutionTree(otherBcId, otherBlockchainContractAddress, rlpFunctionCall_SetVal);
+    } else {
+      CallExecutionTree setValSeg =
+          new CallExecutionTree(otherBcId, otherBlockchainContractAddress, rlpFunctionCall_SetVal);
       rootCalls.add(setValSeg);
     }
-    CallExecutionTree rootCall = new CallExecutionTree(rootBcId, rootBlockchain.rootBlockchainContract.getContractAddress(),
-            rlpFunctionCall_SomeComplexBusinessLogic, rootCalls);
+    CallExecutionTree rootCall =
+        new CallExecutionTree(
+            rootBcId,
+            rootBlockchain.rootBlockchainContract.getContractAddress(),
+            rlpFunctionCall_SomeComplexBusinessLogic,
+            rootCalls);
     byte[] encoded = rootCall.encode();
     LOG.info(CallExecutionTree.dump(encoded));
-
 
     CrosschainExecutor executor = new CrosschainExecutor(crossControlManagerGroup);
     ExecutionEngine executionEngine = exampleManager.getExecutionEngine(executor);
@@ -126,12 +142,17 @@ public class Main {
 
     LOG.info("Success: {}", success);
     if (success) {
-      LOG.info(" Simulated expected values: Root val1: {}, val2: {}, Other val: {}",
-          simRootContract.getVal1(), simRootContract.getVal2(), simOtherContract.getVal());
-    }
-    else {
-      LOG.info(" Expect unchanged initial values: Root val1: {}, val2: {}, Other val: {}",
-          rootBcVal1InitialValue, rootBcVal2InitialValue, otherBcValInitialValue);
+      LOG.info(
+          " Simulated expected values: Root val1: {}, val2: {}, Other val: {}",
+          simRootContract.getVal1(),
+          simRootContract.getVal2(),
+          simOtherContract.getVal());
+    } else {
+      LOG.info(
+          " Expect unchanged initial values: Root val1: {}, val2: {}, Other val: {}",
+          rootBcVal1InitialValue,
+          rootBcVal2InitialValue,
+          otherBcValInitialValue);
     }
     rootBlockchain.showValues();
     otherBlockchain.showValues();

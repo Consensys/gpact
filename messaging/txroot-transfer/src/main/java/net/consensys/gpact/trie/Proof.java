@@ -16,7 +16,6 @@ package net.consensys.gpact.trie;
 
 import java.util.List;
 import java.util.Optional;
-
 import org.apache.tuweni.bytes.Bytes;
 
 public class Proof<V> {

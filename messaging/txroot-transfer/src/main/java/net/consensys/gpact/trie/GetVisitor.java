@@ -57,6 +57,7 @@ class GetVisitor<V> implements PathNodeVisitor<V> {
 
     return branchNode.child(childIndex).accept(this, path.slice(1));
   }
+
   @Override
   public Node<V> visit(final LeafNode<V> leafNode, final Bytes path) {
     final Bytes leafPath = leafNode.getPath();

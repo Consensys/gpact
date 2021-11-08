@@ -14,6 +14,14 @@
  */
 package net.consensys.gpact.txroot;
 
+import static junit.framework.TestCase.assertEquals;
+import static org.hyperledger.besu.crypto.Hash.keccak256;
+
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
+import net.consensys.gpact.common.test.AbstractWeb3Test;
+import net.consensys.gpact.txroot.soliditywrappers.TestReceipts;
 import org.apache.tuweni.bytes.Bytes;
 import org.hyperledger.besu.ethereum.core.Hash;
 import org.hyperledger.besu.ethereum.core.LogTopic;
@@ -21,22 +29,14 @@ import org.hyperledger.besu.ethereum.rlp.RLP;
 import org.junit.Test;
 import org.web3j.protocol.core.methods.response.Log;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
-import net.consensys.gpact.txroot.soliditywrappers.TestReceipts;
-import net.consensys.gpact.common.test.AbstractWeb3Test;
-
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
-
-import static junit.framework.TestCase.assertEquals;
-import static org.hyperledger.besu.crypto.Hash.keccak256;
 
 public class ReceiptDecoding extends AbstractWeb3Test {
   @Test
   public void numLogsFound() throws Exception {
     setupWeb3();
 
-    TestReceipts testReceiptsContract = TestReceipts.deploy(this.web3j, this.tm, this.freeGasProvider).send();
+    TestReceipts testReceiptsContract =
+        TestReceipts.deploy(this.web3j, this.tm, this.freeGasProvider).send();
     TransactionReceipt receipt = testReceiptsContract.triggerStartEvent(BigInteger.TEN).send();
     byte[] rlpOfReceipt = web3JReceiptToBytes(receipt);
     BigInteger numLogsFound = testReceiptsContract.numLogsFound(rlpOfReceipt).send();
@@ -47,16 +47,14 @@ public class ReceiptDecoding extends AbstractWeb3Test {
   public void eventEmitterContractAddress() throws Exception {
     setupWeb3();
 
-    TestReceipts testReceiptsContract = TestReceipts.deploy(this.web3j, this.tm, this.freeGasProvider).send();
+    TestReceipts testReceiptsContract =
+        TestReceipts.deploy(this.web3j, this.tm, this.freeGasProvider).send();
     TransactionReceipt receipt = testReceiptsContract.triggerStartEvent(BigInteger.TEN).send();
     byte[] rlpOfReceipt = web3JReceiptToBytes(receipt);
     String emitterAddress = testReceiptsContract.emittingContractFirstLog(rlpOfReceipt).send();
     String contractAddress = testReceiptsContract.getContractAddress();
     assertEquals(emitterAddress, contractAddress);
   }
-
-
-
 
   @Test
   public void checkEventData() throws Exception {
@@ -65,7 +63,8 @@ public class ReceiptDecoding extends AbstractWeb3Test {
 
     setupWeb3();
 
-    TestReceipts testReceiptsContract = TestReceipts.deploy(this.web3j, this.tm, this.freeGasProvider).send();
+    TestReceipts testReceiptsContract =
+        TestReceipts.deploy(this.web3j, this.tm, this.freeGasProvider).send();
     TransactionReceipt receipt = testReceiptsContract.triggerStartEvent(valBigInt).send();
     byte[] rlpOfReceipt = web3JReceiptToBytes(receipt);
     String contractAddress = testReceiptsContract.getContractAddress();
@@ -75,7 +74,6 @@ public class ReceiptDecoding extends AbstractWeb3Test {
     assertEquals(eventDataBigInt, valBigInt);
   }
 
-
   @Test
   public void checkEventDataNamedEvent() throws Exception {
     int val = 11;
@@ -83,55 +81,63 @@ public class ReceiptDecoding extends AbstractWeb3Test {
 
     setupWeb3();
 
-    TestReceipts testReceiptsContract = TestReceipts.deploy(this.web3j, this.tm, this.freeGasProvider).send();
+    TestReceipts testReceiptsContract =
+        TestReceipts.deploy(this.web3j, this.tm, this.freeGasProvider).send();
     TransactionReceipt receipt = testReceiptsContract.triggerStartEvent(valBigInt).send();
     byte[] rlpOfReceipt = web3JReceiptToBytes(receipt);
     String contractAddress = testReceiptsContract.getContractAddress();
     String eventFuncSigStr = "StartEvent(uint256)";
     byte[] eventFuncSigBytes = eventFuncSigStr.getBytes();
     byte[] eventFuncSigHash = keccak256(Bytes.wrap(eventFuncSigBytes)).toArray();
-    byte[] eventData = testReceiptsContract.retrieveALog(contractAddress, eventFuncSigHash, rlpOfReceipt).send();
+    byte[] eventData =
+        testReceiptsContract.retrieveALog(contractAddress, eventFuncSigHash, rlpOfReceipt).send();
     assertEquals(eventData.length, 32);
     BigInteger eventDataBigInt = new BigInteger(1, eventData);
     assertEquals(eventDataBigInt, valBigInt);
   }
-
 
   private static byte[] web3JReceiptToBytes(TransactionReceipt receipt) {
     org.hyperledger.besu.ethereum.core.TransactionReceipt txR = web3JReceiptToBesuReceipt(receipt);
     return RLP.encode(txR::writeTo).toArray();
   }
 
-  private static org.hyperledger.besu.ethereum.core.TransactionReceipt web3JReceiptToBesuReceipt(TransactionReceipt receipt) {
+  private static org.hyperledger.besu.ethereum.core.TransactionReceipt web3JReceiptToBesuReceipt(
+      TransactionReceipt receipt) {
     // Convert to Besu objects
     List<org.hyperledger.besu.ethereum.core.Log> besuLogs = new ArrayList<>();
 
     String stateRootFromReceipt = receipt.getRoot();
     Hash root = (stateRootFromReceipt == null) ? null : Hash.fromHexString(receipt.getRoot());
     String statusFromReceipt = receipt.getStatus();
-    int status = statusFromReceipt == null ? -1 : Integer.parseInt(statusFromReceipt.substring(2), 16);
-    for (Log web3jLog: receipt.getLogs()) {
-      org.hyperledger.besu.ethereum.core.Address addr = org.hyperledger.besu.ethereum.core.Address.fromHexString(web3jLog.getAddress());
+    int status =
+        statusFromReceipt == null ? -1 : Integer.parseInt(statusFromReceipt.substring(2), 16);
+    for (Log web3jLog : receipt.getLogs()) {
+      org.hyperledger.besu.ethereum.core.Address addr =
+          org.hyperledger.besu.ethereum.core.Address.fromHexString(web3jLog.getAddress());
       Bytes data = Bytes.fromHexString(web3jLog.getData());
       List<String> topics = web3jLog.getTopics();
       List<LogTopic> logTopics = new ArrayList<>();
-      for (String topic: topics) {
+      for (String topic : topics) {
         LogTopic logTopic = LogTopic.create(Bytes.fromHexString(topic));
         logTopics.add(logTopic);
       }
       besuLogs.add(new org.hyperledger.besu.ethereum.core.Log(addr, data, logTopics));
     }
     String revertReasonFromReceipt = receipt.getRevertReason();
-    Bytes revertReason = revertReasonFromReceipt == null ? null : Bytes.fromHexString(receipt.getRevertReason());
+    Bytes revertReason =
+        revertReasonFromReceipt == null ? null : Bytes.fromHexString(receipt.getRevertReason());
     org.hyperledger.besu.ethereum.core.TransactionReceipt txReceipt =
-        root == null ?
-            new org.hyperledger.besu.ethereum.core.TransactionReceipt(status, receipt.getCumulativeGasUsed().longValue(),
-                besuLogs, java.util.Optional.ofNullable(revertReason))
-            :
-            new org.hyperledger.besu.ethereum.core.TransactionReceipt(root, receipt.getCumulativeGasUsed().longValue(),
-                besuLogs, java.util.Optional.ofNullable(revertReason));
+        root == null
+            ? new org.hyperledger.besu.ethereum.core.TransactionReceipt(
+                status,
+                receipt.getCumulativeGasUsed().longValue(),
+                besuLogs,
+                java.util.Optional.ofNullable(revertReason))
+            : new org.hyperledger.besu.ethereum.core.TransactionReceipt(
+                root,
+                receipt.getCumulativeGasUsed().longValue(),
+                besuLogs,
+                java.util.Optional.ofNullable(revertReason));
     return txReceipt;
   }
-
 }
-

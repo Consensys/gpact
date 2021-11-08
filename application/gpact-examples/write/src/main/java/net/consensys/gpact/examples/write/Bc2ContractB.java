@@ -14,33 +14,40 @@
  */
 package net.consensys.gpact.examples.write;
 
+import java.io.IOException;
+import java.math.BigInteger;
+import java.util.List;
+import net.consensys.gpact.common.AbstractBlockchain;
 import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.common.DynamicGasProvider;
+import net.consensys.gpact.examples.write.soliditywrappers.ContractB;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
-import net.consensys.gpact.common.AbstractBlockchain;
-import net.consensys.gpact.examples.write.soliditywrappers.ContractB;
-
-
-import java.io.IOException;
-import java.math.BigInteger;
-import java.util.List;
 
 public class Bc2ContractB extends AbstractBlockchain {
   private static final Logger LOG = LogManager.getLogger(Bc2ContractB.class);
 
   ContractB contractB;
 
-  public Bc2ContractB(Credentials credentials, BlockchainId bcId, String uri, DynamicGasProvider.Strategy gasPriceStrategy, int blockPeriod) throws IOException {
+  public Bc2ContractB(
+      Credentials credentials,
+      BlockchainId bcId,
+      String uri,
+      DynamicGasProvider.Strategy gasPriceStrategy,
+      int blockPeriod)
+      throws IOException {
     super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
   }
 
   public void deployContracts(String cbcContractAddress) throws Exception {
-    this.contractB = ContractB.deploy(this.web3j, this.tm, this.gasProvider, cbcContractAddress).send();
-    LOG.info("ContractB deployed to {} on blockchain {}",
-        this.contractB.getContractAddress(), this.blockchainId);
+    this.contractB =
+        ContractB.deploy(this.web3j, this.tm, this.gasProvider, cbcContractAddress).send();
+    LOG.info(
+        "ContractB deployed to {} on blockchain {}",
+        this.contractB.getContractAddress(),
+        this.blockchainId);
   }
 
   public String getRlpFunctionSignature_Set(BigInteger val) {
@@ -50,7 +57,7 @@ public class Bc2ContractB extends AbstractBlockchain {
   public void showEvents(TransactionReceipt txR) {
     LOG.info("ContractB: Value Write Events");
     List<ContractB.ValueWrittenEventResponse> events = this.contractB.getValueWrittenEvents(txR);
-    for (ContractB.ValueWrittenEventResponse e: events) {
+    for (ContractB.ValueWrittenEventResponse e : events) {
       LOG.info(" Value: {}", e._val);
     }
   }
@@ -59,9 +66,9 @@ public class Bc2ContractB extends AbstractBlockchain {
     boolean isLocked = this.contractB.isLocked(BigInteger.ZERO).send();
     LOG.info("Contract B's lockable storage: locked: {}", isLocked);
     if (isLocked) {
-      throw new RuntimeException("Contract B's lockable storage locked after end of crosschain transaction");
+      throw new RuntimeException(
+          "Contract B's lockable storage locked after end of crosschain transaction");
     }
     LOG.info("ContractB: Value: {}", this.contractB.getVal().send());
   }
-
 }

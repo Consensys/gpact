@@ -14,9 +14,8 @@
  */
 package net.consensys.gpact.examples.write.sim;
 
-import net.consensys.gpact.examples.write.Bc2ContractB;
-
 import java.math.BigInteger;
+import net.consensys.gpact.examples.write.Bc2ContractB;
 
 public class SimContractB {
   private Bc2ContractB bc2ContractB;
@@ -30,7 +29,6 @@ public class SimContractB {
   public void set(BigInteger val) {
     this.val = val;
   }
-
 
   public String getRlpFunctionSignature_Set() {
     return this.bc2ContractB.getRlpFunctionSignature_Set(this.val);

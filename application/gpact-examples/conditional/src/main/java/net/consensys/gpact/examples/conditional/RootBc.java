@@ -14,34 +14,44 @@
  */
 package net.consensys.gpact.examples.conditional;
 
+import java.io.IOException;
+import java.math.BigInteger;
+import net.consensys.gpact.common.AbstractBlockchain;
 import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.common.DynamicGasProvider;
+import net.consensys.gpact.examples.conditional.soliditywrappers.RootBlockchainContract;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
-import net.consensys.gpact.common.AbstractBlockchain;
-import net.consensys.gpact.examples.conditional.soliditywrappers.RootBlockchainContract;
-
-import java.io.IOException;
-import java.math.BigInteger;
-
 
 public class RootBc extends AbstractBlockchain {
   static final Logger LOG = LogManager.getLogger(RootBc.class);
 
   RootBlockchainContract rootBlockchainContract;
 
-  public RootBc(Credentials credentials, BlockchainId bcId, String uri, DynamicGasProvider.Strategy gasPriceStrategy, int blockPeriod) throws IOException {
+  public RootBc(
+      Credentials credentials,
+      BlockchainId bcId,
+      String uri,
+      DynamicGasProvider.Strategy gasPriceStrategy,
+      int blockPeriod)
+      throws IOException {
     super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
   }
 
-  public void deployContracts(String cbcContractAddress, BlockchainId otherBlockchainId, String otherContractAddress) throws Exception {
+  public void deployContracts(
+      String cbcContractAddress, BlockchainId otherBlockchainId, String otherContractAddress)
+      throws Exception {
     LOG.info("Deploy Root Blockchain Contracts");
     this.rootBlockchainContract =
-        RootBlockchainContract.deploy(this.web3j, this.tm, this.gasProvider,
-            cbcContractAddress,
-            otherBlockchainId.asBigInt(),
-            otherContractAddress).send();
+        RootBlockchainContract.deploy(
+                this.web3j,
+                this.tm,
+                this.gasProvider,
+                cbcContractAddress,
+                otherBlockchainId.asBigInt(),
+                otherContractAddress)
+            .send();
     LOG.info(" Root Blockchain Contract: {}", this.rootBlockchainContract.getContractAddress());
   }
 
@@ -52,6 +62,7 @@ public class RootBc extends AbstractBlockchain {
   public void setVal1(BigInteger val) throws Exception {
     this.rootBlockchainContract.setVal1(val).send();
   }
+
   public void setVal2(BigInteger val) throws Exception {
     this.rootBlockchainContract.setVal2(val).send();
   }
@@ -59,10 +70,10 @@ public class RootBc extends AbstractBlockchain {
   public BigInteger getVal1() throws Exception {
     return this.rootBlockchainContract.getVal1().send();
   }
+
   public BigInteger getVal2() throws Exception {
     return this.rootBlockchainContract.getVal2().send();
   }
-
 
   public void showValues() throws Exception {
     LOG.info("Root Blockchain: Val1: {}", this.rootBlockchainContract.getVal1().send());

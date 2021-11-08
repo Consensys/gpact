@@ -57,14 +57,14 @@ abstract class CompactEncoding {
     int j = 0;
     for (int i = 0; i < bytes.size(); i += 1, j += 8) {
       final byte b = bytes.get(i);
-      path.set(j, (byte)((b >>> 7) & 0x01));
-      path.set(j+1, (byte)((b >>> 6) & 0x01));
-      path.set(j+2, (byte)((b >>> 5) & 0x01));
-      path.set(j+3, (byte)((b >>> 4) & 0x01));
-      path.set(j+4, (byte)((b >>> 3) & 0x01));
-      path.set(j+5, (byte)((b >>> 2) & 0x01));
-      path.set(j+6, (byte)((b >>> 1) & 0x01));
-      path.set(j+7, (byte)(b & 0x01));
+      path.set(j, (byte) ((b >>> 7) & 0x01));
+      path.set(j + 1, (byte) ((b >>> 6) & 0x01));
+      path.set(j + 2, (byte) ((b >>> 5) & 0x01));
+      path.set(j + 3, (byte) ((b >>> 4) & 0x01));
+      path.set(j + 4, (byte) ((b >>> 3) & 0x01));
+      path.set(j + 5, (byte) ((b >>> 2) & 0x01));
+      path.set(j + 6, (byte) ((b >>> 1) & 0x01));
+      path.set(j + 7, (byte) (b & 0x01));
     }
     path.set(j, LEAF_TERMINATOR);
     return path;
@@ -77,10 +77,11 @@ abstract class CompactEncoding {
     int bytesPos = 0;
     for (int pathPos = 0; pathPos < path.size() - 1; pathPos += 8, bytesPos += 1) {
       byte bit, packed = 0;
-      for(int j = 0; j < 8; j++) {
+      for (int j = 0; j < 8; j++) {
         bit = path.get(pathPos + j);
-        if((bit & 0xfe) != 0) {
-          throw new IllegalArgumentException("Invalid path: contains elements larger than a nibble");
+        if ((bit & 0xfe) != 0) {
+          throw new IllegalArgumentException(
+              "Invalid path: contains elements larger than a nibble");
         }
         packed |= bit << (7 - j);
       }

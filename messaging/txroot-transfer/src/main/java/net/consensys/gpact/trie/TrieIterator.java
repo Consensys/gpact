@@ -17,7 +17,6 @@ package net.consensys.gpact.trie;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Iterator;
-
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.Bytes32;
 import org.apache.tuweni.bytes.MutableBytes;
@@ -68,7 +67,6 @@ public class TrieIterator<V> implements PathNodeVisitor<V> {
     return node;
   }
 
-
   @Override
   public Node<V> visit(final BinaryBranchNode<V> node, final Bytes searchPath) {
     byte iterateFrom = 0;
@@ -89,6 +87,7 @@ public class TrieIterator<V> implements PathNodeVisitor<V> {
     paths.pop();
     return node;
   }
+
   @Override
   public Node<V> visit(final LeafNode<V> node, final Bytes path) {
     paths.push(node.getPath());
@@ -114,9 +113,7 @@ public class TrieIterator<V> implements PathNodeVisitor<V> {
     MutableBytes b = MutableBytes.create(65); // 64 bytes (1 nibble/byte) + terminator
     fullPath.shiftRight(0, b);
 
-    return b.isZero()
-            ? Bytes32.ZERO
-            : Bytes32.wrap(CompactEncoding.pathToBytes(b), 0);
+    return b.isZero() ? Bytes32.ZERO : Bytes32.wrap(CompactEncoding.pathToBytes(b), 0);
   }
 
   public interface LeafHandler<V> {

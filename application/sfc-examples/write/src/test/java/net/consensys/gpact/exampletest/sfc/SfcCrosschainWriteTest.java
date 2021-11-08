@@ -9,6 +9,6 @@ public class SfcCrosschainWriteTest extends AbstractExampleTest {
   @Test
   public void directSignMultipleBlockchain() throws Exception {
     String tempPropsFile = createPropertiesFile(true, false, false);
-    SfcCrosschainWrite.main(new String[]{tempPropsFile});
+    SfcCrosschainWrite.main(new String[] {tempPropsFile});
   }
 }

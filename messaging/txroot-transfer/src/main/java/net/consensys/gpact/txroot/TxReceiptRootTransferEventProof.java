@@ -14,6 +14,11 @@
  */
 package net.consensys.gpact.txroot;
 
+import static net.consensys.gpact.common.FormatConversion.addressStringToBytes;
+
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.messaging.SignedEvent;
 import org.apache.tuweni.units.bigints.UInt256;
@@ -22,15 +27,7 @@ import org.web3j.rlp.RlpList;
 import org.web3j.rlp.RlpString;
 import org.web3j.rlp.RlpType;
 
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
-
-import static net.consensys.gpact.common.FormatConversion.addressStringToBytes;
-
-/**
- * Information to allow a transaction receipt to be verified within a Solidity contract.
- */
+/** Information to allow a transaction receipt to be verified within a Solidity contract. */
 public class TxReceiptRootTransferEventProof {
   BlockchainId blockchainId;
   String crossBlockchainControlContract;
@@ -44,11 +41,14 @@ public class TxReceiptRootTransferEventProof {
   /**
    * Create new proof.
    *
-   * @param blockchainId  Blockchain that emitted the event / the transaction receipt relates to.
-   * @param crossBlockchainControlContract Address of Cross-Blockchain Control Contract that emitted the event.
-   * @param transactionReceiptRoot Transaction receipt root for the block that the event was emitted in. This
-   *                              transaction receipt root needs to have been communicated to the receiving blockchain.
-   * @param transactionReceipt Transaction receipt for receipt that emitted the event. Contains the event information.
+   * @param blockchainId Blockchain that emitted the event / the transaction receipt relates to.
+   * @param crossBlockchainControlContract Address of Cross-Blockchain Control Contract that emitted
+   *     the event.
+   * @param transactionReceiptRoot Transaction receipt root for the block that the event was emitted
+   *     in. This transaction receipt root needs to have been communicated to the receiving
+   *     blockchain.
+   * @param transactionReceipt Transaction receipt for receipt that emitted the event. Contains the
+   *     event information.
    * @param proofOffsets Offsets within the proofs byte arrays of the RLP encoded hashes.
    * @param proofs RLP encoded hashes from the transaction receipt trie.
    */
@@ -96,12 +96,11 @@ public class TxReceiptRootTransferEventProof {
     return proofs;
   }
 
-//  public CrossBlockchainControl.EventProof asEventProof() {
-//    return new CrossBlockchainControl.EventProof(
-//        this.blockchainId, this.crossBlockchainControlContract,
-//        this.transactionReceiptRoot, this.transactionReceipt, this.proofOffsets, this.proofs);
-//  }
-
+  //  public CrossBlockchainControl.EventProof asEventProof() {
+  //    return new CrossBlockchainControl.EventProof(
+  //        this.blockchainId, this.crossBlockchainControlContract,
+  //        this.transactionReceiptRoot, this.transactionReceipt, this.proofOffsets, this.proofs);
+  //  }
 
   private byte[] getEncodedProof() {
     byte[] blockchainIdBytes = this.blockchainId.asBytes();
@@ -116,23 +115,24 @@ public class TxReceiptRootTransferEventProof {
       proofRlp.add(RlpString.create(this.proofs.get(i)));
     }
 
-    RlpList overallProofRlp = new RlpList(
-      RlpString.create(blockchainIdBytes),
-      RlpString.create(addressStringToBytes(this.crossBlockchainControlContract)),
-      RlpString.create(this.transactionReceiptRoot),
-      RlpString.create(this.transactionReceipt),
-        new RlpList(proofOffsetsRlp),
-        new RlpList(proofRlp));
+    RlpList overallProofRlp =
+        new RlpList(
+            RlpString.create(blockchainIdBytes),
+            RlpString.create(addressStringToBytes(this.crossBlockchainControlContract)),
+            RlpString.create(this.transactionReceiptRoot),
+            RlpString.create(this.transactionReceipt),
+            new RlpList(proofOffsetsRlp),
+            new RlpList(proofRlp));
 
     return RlpEncoder.encode(overallProofRlp);
   }
 
   public SignedEvent toSignedEvent() {
     return new SignedEvent(
-            this.blockchainId,
-            this.crossBlockchainControlContract,
-            this.eventFunctionSignature,
-            this.eventData,
-            getEncodedProof());
+        this.blockchainId,
+        this.crossBlockchainControlContract,
+        this.eventFunctionSignature,
+        this.eventData,
+        getEncodedProof());
   }
 }

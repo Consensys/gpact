@@ -14,12 +14,11 @@
  */
 package net.consensys.gpact.common;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class StatsHolder {
   private static final Logger LOG = LogManager.getLogger(StatsHolder.class);
@@ -43,27 +42,23 @@ public class StatsHolder {
     getInstance().stats.add(new Stats(event, gas));
   }
 
-
   public static void print() {
     getInstance().printAll();
   }
-
 
   public void printAll() {
     LOG.info("Stats");
     if (this.stats.isEmpty()) {
       LOG.info(" NONE");
     }
-    for (Stats s: this.stats) {
+    for (Stats s : this.stats) {
       if (s.gas == null) {
         LOG.info("{} {} {}", s.timestamp, s.nanoTime, s.event);
-      }
-      else {
+      } else {
         LOG.info("{} {} {}: gas: {}", s.timestamp, s.nanoTime, s.event, s.gas);
       }
     }
   }
-
 
   static class Stats {
     String event;
@@ -79,6 +74,5 @@ public class StatsHolder {
       this.event = event;
       this.gas = gas;
     }
-
   }
 }

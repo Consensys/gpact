@@ -14,32 +14,36 @@
  */
 package net.consensys.gpact.examples.conditional;
 
+import java.io.IOException;
+import java.math.BigInteger;
+import net.consensys.gpact.common.AbstractBlockchain;
 import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.common.DynamicGasProvider;
+import net.consensys.gpact.examples.conditional.soliditywrappers.OtherBlockchainContract;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
-import net.consensys.gpact.common.AbstractBlockchain;
-import net.consensys.gpact.examples.conditional.soliditywrappers.OtherBlockchainContract;
-
-
-import java.io.IOException;
-import java.math.BigInteger;
 
 public class OtherBc extends AbstractBlockchain {
   static final Logger LOG = LogManager.getLogger(OtherBc.class);
 
   OtherBlockchainContract otherBlockchainContract;
 
-  public OtherBc(Credentials credentials, BlockchainId bcId, String uri, DynamicGasProvider.Strategy gasPriceStrategy, int blockPeriod) throws IOException {
+  public OtherBc(
+      Credentials credentials,
+      BlockchainId bcId,
+      String uri,
+      DynamicGasProvider.Strategy gasPriceStrategy,
+      int blockPeriod)
+      throws IOException {
     super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
   }
-
 
   public void deployContracts(String cbcContractAddress) throws Exception {
     LOG.info("Deploy Other Blockchain Contracts");
     this.otherBlockchainContract =
-        OtherBlockchainContract.deploy(this.web3j, this.tm, this.gasProvider, cbcContractAddress).send();
+        OtherBlockchainContract.deploy(this.web3j, this.tm, this.gasProvider, cbcContractAddress)
+            .send();
     LOG.info(" Other Blockchain Contract: {}", this.otherBlockchainContract.getContractAddress());
   }
 
@@ -66,5 +70,4 @@ public class OtherBc extends AbstractBlockchain {
   public void showValues() throws Exception {
     LOG.info("Other Blockchain: KEY_FOR_VAL: {}", this.otherBlockchainContract.getVal().send());
   }
-
 }

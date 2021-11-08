@@ -14,24 +14,25 @@
  */
 package net.consensys.gpact.cbc.engine;
 
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 import net.consensys.gpact.cbc.CrosschainExecutor;
 import net.consensys.gpact.cbc.calltree.CallExecutionTree;
 import net.consensys.gpact.common.BlockchainId;
 
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
-
 public class SerialExecutionEngine extends AbstractExecutionEngine {
-//  static final Logger LOG = LogManager.getLogger(SerialExecutionEngine.class);
+  //  static final Logger LOG = LogManager.getLogger(SerialExecutionEngine.class);
 
   public SerialExecutionEngine(CrosschainExecutor executor) {
     super(executor);
   }
 
-  protected void executeCalls(List<CallExecutionTree> calls, List<BigInteger> callPath, BlockchainId theCallerBlockchainId) throws Exception {
+  protected void executeCalls(
+      List<CallExecutionTree> calls, List<BigInteger> callPath, BlockchainId theCallerBlockchainId)
+      throws Exception {
     BigInteger callOffset = BigInteger.ONE;
-    for (CallExecutionTree segCall: calls) {
+    for (CallExecutionTree segCall : calls) {
       List<BigInteger> nextCallPath = new ArrayList<>(callPath);
       nextCallPath.add(callOffset);
       callSegmentsAndRoot(segCall, nextCallPath, theCallerBlockchainId);

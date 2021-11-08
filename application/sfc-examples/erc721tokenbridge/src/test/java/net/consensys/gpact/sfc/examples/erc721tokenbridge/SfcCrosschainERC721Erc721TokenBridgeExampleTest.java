@@ -8,7 +8,6 @@ public class SfcCrosschainERC721Erc721TokenBridgeExampleTest extends AbstractExa
   @Test
   public void directSignMultipleBlockchain() throws Exception {
     String tempPropsFile = createPropertiesFile(true, false, false);
-    Erc721TokenBridgeExample.main(new String[]{tempPropsFile});
+    Erc721TokenBridgeExample.main(new String[] {tempPropsFile});
   }
-
 }

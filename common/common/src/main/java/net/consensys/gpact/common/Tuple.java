@@ -20,12 +20,13 @@ public class Tuple<K, V, U> {
   private V second;
   private U third;
 
-  public Tuple(K first, V second){
+  public Tuple(K first, V second) {
     this.first = first;
     this.second = second;
     this.third = null;
   }
-  public Tuple(K first, V second, U third){
+
+  public Tuple(K first, V second, U third) {
     this.first = first;
     this.second = second;
     this.third = third;

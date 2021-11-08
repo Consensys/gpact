@@ -32,14 +32,18 @@ public class AbstractLockableStorageAllValuesTest extends AbstractWeb3Test {
     zero = new byte[32];
   }
 
-
   TestLockableStorageWrapperAllValues lockableStorageContract;
   MockCbcForLockableStorageTest mockCrossBlockchainControlContract;
 
   protected void deployContracts() throws Exception {
-    this.mockCrossBlockchainControlContract = MockCbcForLockableStorageTest.deploy(this.web3j, this.tm, this.freeGasProvider).send();
-    this.lockableStorageContract = TestLockableStorageWrapperAllValues.deploy(this.web3j, this.tm, this.freeGasProvider,
-            this.mockCrossBlockchainControlContract.getContractAddress()).send();
+    this.mockCrossBlockchainControlContract =
+        MockCbcForLockableStorageTest.deploy(this.web3j, this.tm, this.freeGasProvider).send();
+    this.lockableStorageContract =
+        TestLockableStorageWrapperAllValues.deploy(
+                this.web3j,
+                this.tm,
+                this.freeGasProvider,
+                this.mockCrossBlockchainControlContract.getContractAddress())
+            .send();
   }
 }
-

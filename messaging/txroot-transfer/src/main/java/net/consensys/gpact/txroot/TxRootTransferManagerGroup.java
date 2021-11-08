@@ -14,35 +14,24 @@
  */
 package net.consensys.gpact.txroot;
 
-import net.consensys.gpact.attestorsign.AttestorSignerManager;
-import net.consensys.gpact.common.AnIdentity;
+import java.math.BigInteger;
+import java.util.*;
 import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.common.BlockchainInfo;
-import net.consensys.gpact.common.RevertReason;
 import net.consensys.gpact.messaging.MessagingManagerGroupInterface;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
-import org.web3j.protocol.core.methods.response.TransactionReceipt;
-import org.web3j.protocol.exceptions.TransactionException;
 
-import java.math.BigInteger;
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-
-
-/**
- * Manage multiple blockchains, each holding a set of registrar and verification contracts
- */
+/** Manage multiple blockchains, each holding a set of registrar and verification contracts */
 public class TxRootTransferManagerGroup implements MessagingManagerGroupInterface {
   static final Logger LOG = LogManager.getLogger(TxRootTransferManagerGroup.class);
 
   Map<BlockchainId, TxRootTransferManager> blockchains = new HashMap<>();
 
-
   @Override
-  public void addBlockchainAndDeployContracts(Credentials creds, BlockchainInfo bcInfo) throws Exception {
+  public void addBlockchainAndDeployContracts(Credentials creds, BlockchainInfo bcInfo)
+      throws Exception {
     BlockchainId blockchainId = bcInfo.bcId;
     if (this.blockchains.containsKey(blockchainId)) {
       return;
@@ -50,7 +39,8 @@ public class TxRootTransferManagerGroup implements MessagingManagerGroupInterfac
     }
     LOG.debug("Deploying Cross-Blockchain Control contracts for blockchain id {}", blockchainId);
 
-    TxRootTransferManager manager = new TxRootTransferManager(
+    TxRootTransferManager manager =
+        new TxRootTransferManager(
             creds, blockchainId, bcInfo.uri, bcInfo.gasPriceStrategy, bcInfo.period);
     manager.deployContracts();
 
@@ -58,14 +48,16 @@ public class TxRootTransferManagerGroup implements MessagingManagerGroupInterfac
   }
 
   @Override
-  public void addBlockchainAndLoadContracts(Credentials creds, BlockchainInfo bcInfo, ArrayList<String> addresses) throws Exception {
+  public void addBlockchainAndLoadContracts(
+      Credentials creds, BlockchainInfo bcInfo, ArrayList<String> addresses) throws Exception {
     BlockchainId blockchainId = bcInfo.bcId;
     if (this.blockchains.containsKey(blockchainId)) {
       return;
       // throw new Exception("Blockchain already added: " + blockchainId);
     }
 
-    TxRootTransferManager manager = new TxRootTransferManager(
+    TxRootTransferManager manager =
+        new TxRootTransferManager(
             creds, blockchainId, bcInfo.uri, bcInfo.gasPriceStrategy, bcInfo.period);
     manager.loadContracts(addresses);
 
@@ -74,7 +66,7 @@ public class TxRootTransferManagerGroup implements MessagingManagerGroupInterfac
 
   @Override
   public void registerSignerOnAllBlockchains(String signersAddress) throws Exception {
-    for (BlockchainId bcId1: this.blockchains.keySet()) {
+    for (BlockchainId bcId1 : this.blockchains.keySet()) {
       registerSigner(signersAddress, bcId1);
     }
   }
@@ -82,7 +74,7 @@ public class TxRootTransferManagerGroup implements MessagingManagerGroupInterfac
   @Override
   public void registerSigner(String signersAddress, BlockchainId bcId1) throws Exception {
     // Add the signer (their address / public key) to each blockchain
-    for (BlockchainId bcId2: this.blockchains.keySet()) {
+    for (BlockchainId bcId2 : this.blockchains.keySet()) {
       TxRootTransferManager manager = this.blockchains.get(bcId2);
       manager.registerSigner(bcId1, signersAddress);
     }
@@ -90,7 +82,7 @@ public class TxRootTransferManagerGroup implements MessagingManagerGroupInterfac
 
   @Override
   public void registerFirstSignerOnAllBlockchains(String signersAddress) throws Exception {
-    for (BlockchainId bcId1: this.blockchains.keySet()) {
+    for (BlockchainId bcId1 : this.blockchains.keySet()) {
       registerFirstSigner(signersAddress, bcId1);
     }
   }
@@ -98,12 +90,11 @@ public class TxRootTransferManagerGroup implements MessagingManagerGroupInterfac
   @Override
   public void registerFirstSigner(String signersAddress, BlockchainId bcId1) throws Exception {
     // Add the signer (their address / public key) to each blockchain
-    for (BlockchainId bcId2: this.blockchains.keySet()) {
+    for (BlockchainId bcId2 : this.blockchains.keySet()) {
       TxRootTransferManager manager = this.blockchains.get(bcId2);
       manager.registerSigner(bcId1, signersAddress, BigInteger.ONE);
     }
   }
-
 
   @Override
   public String getVerifierAddress(final BlockchainId bcId) throws Exception {
@@ -118,7 +109,5 @@ public class TxRootTransferManagerGroup implements MessagingManagerGroupInterfac
       throw new Exception("Unknown blockchain: " + bcId);
     }
     return this.blockchains.get(bcId).getTxRootContractAddress();
-
   }
-
 }

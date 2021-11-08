@@ -14,9 +14,8 @@
  */
 package net.consensys.gpact.examples.trade.sim;
 
-import net.consensys.gpact.examples.trade.Bc3Balances;
-
 import java.math.BigInteger;
+import net.consensys.gpact.examples.trade.Bc3Balances;
 
 public class SimBalancesContract {
   private String transfer_from;
@@ -28,7 +27,6 @@ public class SimBalancesContract {
     this.bc3Balances = contract;
   }
 
-
   public void transfer(String from, String to, BigInteger amount) throws Exception {
     this.transfer_from = from;
     this.transfer_to = to;
@@ -37,7 +35,11 @@ public class SimBalancesContract {
     // Check that the execution isn't going to fail due to insufficient balance.
     BigInteger fromBalance = getBalance(from);
     if (fromBalance.longValue() < amount.longValue()) {
-      throw new Exception("Value transfer: insufficient balance. From balance: " + fromBalance + " Transfer Amount: " + amount);
+      throw new Exception(
+          "Value transfer: insufficient balance. From balance: "
+              + fromBalance
+              + " Transfer Amount: "
+              + amount);
     }
   }
 
@@ -46,7 +48,7 @@ public class SimBalancesContract {
   }
 
   public String getRlpFunctionSignature_transfer() {
-    return this.bc3Balances.getRlpFunctionSignature_Transfer(this.transfer_from, this.transfer_to, this.transfer_amount);
+    return this.bc3Balances.getRlpFunctionSignature_Transfer(
+        this.transfer_from, this.transfer_to, this.transfer_amount);
   }
-
 }

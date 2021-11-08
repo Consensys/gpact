@@ -17,13 +17,12 @@ package org.hyperledger.besu.crypto;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.Security;
-
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 public class MessageDigestFactory {
 
   static {
-//    Security.addProvider(new BesuProvider());
+    //    Security.addProvider(new BesuProvider());
     Security.addProvider(new BouncyCastleProvider());
   }
 

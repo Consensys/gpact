@@ -14,32 +14,37 @@
  */
 package net.consensys.gpact.examples.trade;
 
+import java.io.IOException;
+import java.math.BigInteger;
+import net.consensys.gpact.common.AbstractBlockchain;
 import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.common.DynamicGasProvider;
 import net.consensys.gpact.examples.trade.soliditywrappers.PriceOracle;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
-import net.consensys.gpact.common.AbstractBlockchain;
-
-import java.io.IOException;
-import java.math.BigInteger;
 
 public class Bc4Oracle extends AbstractBlockchain {
   private static final Logger LOG = LogManager.getLogger(Bc4Oracle.class);
 
   PriceOracle priceOracleContract;
 
-  public Bc4Oracle(Credentials credentials, BlockchainId bcId, String uri, DynamicGasProvider.Strategy gasPriceStrategy, int blockPeriod) throws IOException {
+  public Bc4Oracle(
+      Credentials credentials,
+      BlockchainId bcId,
+      String uri,
+      DynamicGasProvider.Strategy gasPriceStrategy,
+      int blockPeriod)
+      throws IOException {
     super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
   }
 
-
   public void deployContracts() throws Exception {
-    this.priceOracleContract =
-        PriceOracle.deploy(this.web3j, this.tm, this.gasProvider).send();
-    LOG.info("Price Oracle contract deployed to {}, on blockchain {}",
-        this.priceOracleContract.getContractAddress(), this.blockchainId);
+    this.priceOracleContract = PriceOracle.deploy(this.web3j, this.tm, this.gasProvider).send();
+    LOG.info(
+        "Price Oracle contract deployed to {}, on blockchain {}",
+        this.priceOracleContract.getContractAddress(),
+        this.blockchainId);
   }
 
   public void setPrice(BigInteger newPrice) throws Exception {
@@ -50,7 +55,6 @@ public class Bc4Oracle extends AbstractBlockchain {
     return this.priceOracleContract.getPrice().send();
   }
 
-
   public String getRlpFunctionSignature_GetPrice() {
     return this.priceOracleContract.getABI_getPrice();
   }
@@ -58,5 +62,4 @@ public class Bc4Oracle extends AbstractBlockchain {
   public void showValues() throws Exception {
     LOG.info("Price Oracle: Price: {}", this.priceOracleContract.getPrice().send());
   }
-
 }

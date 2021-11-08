@@ -14,31 +14,37 @@
  */
 package net.consensys.gpact.examples.read;
 
+import java.io.IOException;
+import java.math.BigInteger;
+import net.consensys.gpact.common.AbstractBlockchain;
 import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.common.DynamicGasProvider;
+import net.consensys.gpact.examples.read.soliditywrappers.ContractB;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
-import net.consensys.gpact.common.AbstractBlockchain;
-import net.consensys.gpact.examples.read.soliditywrappers.ContractB;
-
-
-import java.io.IOException;
-import java.math.BigInteger;
 
 public class Bc2ContractB extends AbstractBlockchain {
   private static final Logger LOG = LogManager.getLogger(Bc2ContractB.class);
 
   ContractB contractB;
 
-  public Bc2ContractB(Credentials credentials, BlockchainId bcId, String uri, DynamicGasProvider.Strategy gasPriceStrategy, int blockPeriod) throws IOException {
+  public Bc2ContractB(
+      Credentials credentials,
+      BlockchainId bcId,
+      String uri,
+      DynamicGasProvider.Strategy gasPriceStrategy,
+      int blockPeriod)
+      throws IOException {
     super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
   }
 
   public void deployContracts(BigInteger val) throws Exception {
     this.contractB = ContractB.deploy(this.web3j, this.tm, this.gasProvider, val).send();
-    LOG.info("ContractB deployed to {} on blockchain {}",
-        this.contractB.getContractAddress(), this.blockchainId);
+    LOG.info(
+        "ContractB deployed to {} on blockchain {}",
+        this.contractB.getContractAddress(),
+        this.blockchainId);
   }
 
   public String getRlpFunctionSignature_Get() {

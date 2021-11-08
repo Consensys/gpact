@@ -15,15 +15,15 @@
 package net.consensys.gpact.common;
 
 public class BlockchainInfo {
-    public BlockchainId bcId;
-    public String uri;
-    public DynamicGasProvider.Strategy gasPriceStrategy;
-    public int period;
+  public BlockchainId bcId;
+  public String uri;
+  public DynamicGasProvider.Strategy gasPriceStrategy;
+  public int period;
 
-    public BlockchainInfo(String bcId, String uri, String gasPriceStrategy, String period) {
-        this.bcId = new BlockchainId(bcId);
-        this.uri = uri;
-        this.gasPriceStrategy = DynamicGasProvider.Strategy.valueOf(gasPriceStrategy);
-        this.period = Integer.parseInt(period);
-    }
+  public BlockchainInfo(String bcId, String uri, String gasPriceStrategy, String period) {
+    this.bcId = new BlockchainId(bcId);
+    this.uri = uri;
+    this.gasPriceStrategy = DynamicGasProvider.Strategy.valueOf(gasPriceStrategy);
+    this.period = Integer.parseInt(period);
+  }
 }

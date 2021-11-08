@@ -14,14 +14,12 @@
  */
 package net.consensys.gpact.examples.util;
 
+import net.consensys.gpact.utils.crypto.KeyPairGen;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import net.consensys.gpact.utils.crypto.KeyPairGen;
-
 
 public class Main {
   static final Logger LOG = LogManager.getLogger(Main.class);
-
 
   public static void main(String[] args) throws Exception {
     LOG.info("Example: Generate Key Pair");

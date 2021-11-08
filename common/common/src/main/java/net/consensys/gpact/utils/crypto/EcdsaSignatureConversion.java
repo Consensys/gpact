@@ -14,13 +14,9 @@ package net.consensys.gpact.utils.crypto;
 
 import org.web3j.crypto.Sign;
 
-/**
- * Convert from Web3J signature class to an array of bytes.
- */
+/** Convert from Web3J signature class to an array of bytes. */
 public abstract class EcdsaSignatureConversion {
-  private  EcdsaSignatureConversion() {
-
-  }
+  private EcdsaSignatureConversion() {}
 
   public static byte[] convert(final Sign.SignatureData signatureData) {
     final int lengthR = 32;
@@ -30,8 +26,7 @@ public abstract class EcdsaSignatureConversion {
     byte[] signature = new byte[signatureLength];
     System.arraycopy(signatureData.getR(), 0, signature, 0, lengthR);
     System.arraycopy(signatureData.getS(), 0, signature, lengthR, lengthS);
-    System.arraycopy(signatureData.getV(), 0, signature, lengthR+lengthS, lengthV);
+    System.arraycopy(signatureData.getV(), 0, signature, lengthR + lengthS, lengthV);
     return signature;
   }
-
 }

@@ -26,5 +26,4 @@ public class SimContractA {
   public String getRlpFunctionSignature_DoCrosschainRead() {
     return this.bc1ContractA.getRlpFunctionSignature_DoCrosschainRead();
   }
-
 }

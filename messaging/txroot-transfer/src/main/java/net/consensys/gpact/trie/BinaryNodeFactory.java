@@ -14,20 +14,20 @@
  */
 package net.consensys.gpact.trie;
 
+import static org.apache.logging.log4j.LogManager.getLogger;
+import static org.hyperledger.besu.crypto.Hash.keccak256;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.function.Function;
-
 import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
-
-import static org.apache.logging.log4j.LogManager.getLogger;
-import static org.hyperledger.besu.crypto.Hash.keccak256;
 
 class BinaryNodeFactory<V> implements NodeFactory<V> {
   @SuppressWarnings("rawtypes")
   private static final Node NULL_NODE = NullNode.instance();
+
   private static final Logger LOG = getLogger();
 
   private final Function<V, Bytes> valueSerializer;
@@ -44,13 +44,13 @@ class BinaryNodeFactory<V> implements NodeFactory<V> {
   @SuppressWarnings("unchecked")
   @Override
   public Node<V> createBranch(
-    final byte leftIndex, final Node<V> left, final byte rightIndex, final Node<V> right) {
+      final byte leftIndex, final Node<V> left, final byte rightIndex, final Node<V> right) {
     assert (leftIndex <= BranchNode.RADIX);
     assert (rightIndex <= BranchNode.RADIX);
     assert (leftIndex != rightIndex);
 
     final ArrayList<Node<V>> children =
-      new ArrayList<>(Collections.nCopies(2, (Node<V>) NULL_NODE));
+        new ArrayList<>(Collections.nCopies(2, (Node<V>) NULL_NODE));
     if (leftIndex == BranchNode.RADIX) {
       children.set(rightIndex, right);
       return createBranch(children, left.getValue());
