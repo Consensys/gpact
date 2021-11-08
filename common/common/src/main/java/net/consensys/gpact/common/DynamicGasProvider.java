@@ -14,6 +14,11 @@
  */
 package net.consensys.gpact.common;
 
+import java.io.IOException;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.protocol.Web3j;
@@ -24,12 +29,6 @@ import org.web3j.protocol.core.methods.response.EthGetBlockTransactionCountByHas
 import org.web3j.protocol.core.methods.response.EthTransaction;
 import org.web3j.protocol.core.methods.response.Transaction;
 import org.web3j.tx.gas.ContractGasProvider;
-
-import java.io.IOException;
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 
 public class DynamicGasProvider implements ContractGasProvider {
   public enum Strategy {
@@ -57,7 +56,6 @@ public class DynamicGasProvider implements ContractGasProvider {
     this(web3j, uri, Strategy.valueOf(pricingStrategy));
   }
 
-
   public DynamicGasProvider(Web3j web3j, String uri, Strategy pricingStrategy) throws IOException {
     this.pricingStrategy = pricingStrategy;
     this.uri = uri;
@@ -70,7 +68,6 @@ public class DynamicGasProvider implements ContractGasProvider {
     detertermineNewGasPrice();
   }
 
-
   private void detertermineNewGasPrice() throws IOException {
     if (this.pricingStrategy == Strategy.FREE) {
       return;
@@ -79,9 +76,11 @@ public class DynamicGasProvider implements ContractGasProvider {
     EthGasPrice ethGasPriceObj = this.web3j.ethGasPrice().send();
     this.ethGasPrice = ethGasPriceObj.getGasPrice();
 
-    EthBlock ethBlock = this.web3j.ethGetBlockByNumber(DefaultBlockParameterName.LATEST, false).send();
+    EthBlock ethBlock =
+        this.web3j.ethGetBlockByNumber(DefaultBlockParameterName.LATEST, false).send();
     String blockHash = ethBlock.getBlock().getHash();
-    EthGetBlockTransactionCountByHash transactionCountByHash = web3j.ethGetBlockTransactionCountByHash(blockHash).send();
+    EthGetBlockTransactionCountByHash transactionCountByHash =
+        web3j.ethGetBlockTransactionCountByHash(blockHash).send();
     BigInteger txCount = transactionCountByHash.getTransactionCount();
 
     if (txCount.compareTo(BigInteger.ZERO) == 0) {
@@ -94,9 +93,10 @@ public class DynamicGasProvider implements ContractGasProvider {
     this.lowest = BigInteger.TWO.pow(256);
     BigInteger transactionIndex = BigInteger.ZERO;
     do {
-      EthTransaction ethTransaction = this.web3j.ethGetTransactionByBlockHashAndIndex(blockHash, transactionIndex).send();
+      EthTransaction ethTransaction =
+          this.web3j.ethGetTransactionByBlockHashAndIndex(blockHash, transactionIndex).send();
       Optional<Transaction> transaction = ethTransaction.getTransaction();
-      assert(transaction.isPresent());
+      assert (transaction.isPresent());
       BigInteger gasPrice = transaction.get().getGasPrice();
 
       sortedList.add(gasPrice);
@@ -161,7 +161,6 @@ public class DynamicGasProvider implements ContractGasProvider {
   // The gas limit has to be below the block gas limit.
   // Ropsten test net gas limit is 8,000,000
   public static final BigInteger GAS_LIMIT = BigInteger.valueOf(8000000L);
-
 
   @Override
   public BigInteger getGasLimit() {

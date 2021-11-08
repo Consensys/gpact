@@ -14,21 +14,20 @@
  */
 package net.consensys.gpact.trie;
 
+import static org.apache.logging.log4j.LogManager.getLogger;
+import static org.hyperledger.besu.crypto.Hash.keccak256;
+
 import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
-
 import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.Bytes32;
 import org.hyperledger.besu.ethereum.rlp.BytesValueRLPOutput;
 import org.hyperledger.besu.ethereum.rlp.RLP;
-
-import static org.apache.logging.log4j.LogManager.getLogger;
-import static org.hyperledger.besu.crypto.Hash.keccak256;
 
 class LeafNode<V> implements Node<V> {
   private static final Logger LOG = getLogger();
@@ -58,18 +57,21 @@ class LeafNode<V> implements Node<V> {
 
   @Override
   public Node<V> constructMultiproof(final List<Bytes> keys, final NodeFactory<V> nodeFactory) {
-    if(keys.size() != 1) {
-      LOG.error("Construct LeafNode should be called with only one key. It is called with {} keys:", keys.size());
-      for(int i =0; i < keys.size(); i++)
-      {
+    if (keys.size() != 1) {
+      LOG.error(
+          "Construct LeafNode should be called with only one key. It is called with {} keys:",
+          keys.size());
+      for (int i = 0; i < keys.size(); i++) {
         LOG.info(keys.get(i).toHexString());
       }
       return NullNode.instance();
     }
 
-    if(!(keys.get(0).slice(0, path.size()-1).equals(path.slice(0, path.size()-1)))) {
-      LOG.error("Construct LeafNode is called with an unmatched key. Key = {}, Path inside leaf = {}",
-        keys.get(0).toHexString(), path.toHexString());
+    if (!(keys.get(0).slice(0, path.size() - 1).equals(path.slice(0, path.size() - 1)))) {
+      LOG.error(
+          "Construct LeafNode is called with an unmatched key. Key = {}, Path inside leaf = {}",
+          keys.get(0).toHexString(),
+          path.toHexString());
       return NullNode.instance();
     }
 

@@ -14,7 +14,9 @@
  */
 package net.consensys.gpact.txroot;
 
-
+import java.io.IOException;
+import java.math.BigInteger;
+import java.util.*;
 import net.consensys.gpact.common.AbstractBlockchain;
 import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.common.DynamicGasProvider;
@@ -34,23 +36,14 @@ import org.hyperledger.besu.ethereum.rlp.RLP;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.core.methods.response.*;
 
-import java.io.IOException;
-import java.math.BigInteger;
-import java.nio.ByteBuffer;
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-
-import static net.consensys.gpact.common.FormatConversion.addressStringToBytes;
-
 /**
  * Manages the interaction between the application library and transaction receipt root transfer
  * code for a certain blockchain.
  *
- * TODO The class should check that a threshold signed transaction receipt root have been
- * transferred to the target blockchain, and then create the Merkle Proof.
- * TODO the Relayer service has not been implemented yet. As such, this class simulates
- * the Relayer service tranferring the transaction receipt root to blockchains.
+ * <p>TODO The class should check that a threshold signed transaction receipt root have been
+ * transferred to the target blockchain, and then create the Merkle Proof. TODO the Relayer service
+ * has not been implemented yet. As such, this class simulates the Relayer service tranferring the
+ * transaction receipt root to blockchains.
  */
 public class TxRootTransfer extends AbstractBlockchain implements MessagingVerificationInterface {
   static final Logger LOG = LogManager.getLogger(TxRootTransfer.class);
@@ -58,56 +51,69 @@ public class TxRootTransfer extends AbstractBlockchain implements MessagingVerif
   TxRootRelayerGroup relayerGroup;
 
   public TxRootTransfer(
-          TxRootRelayerGroup relayerGroup,
-          Credentials credentials, BlockchainId bcId, String uri, DynamicGasProvider.Strategy gasPriceStrategy, int blockPeriod) throws IOException {
+      TxRootRelayerGroup relayerGroup,
+      Credentials credentials,
+      BlockchainId bcId,
+      String uri,
+      DynamicGasProvider.Strategy gasPriceStrategy,
+      int blockPeriod)
+      throws IOException {
     super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
     this.relayerGroup = relayerGroup;
   }
 
   @Override
   public SignedEvent getSignedEvent(
-          List<BlockchainId> targetBlockchainIds,
-          TransactionReceipt startTxReceipt,
-          byte[] eventData,
-          String contractAddress,
-          byte[] eventFunctionSignature) throws Exception {
+      List<BlockchainId> targetBlockchainIds,
+      TransactionReceipt startTxReceipt,
+      byte[] eventData,
+      String contractAddress,
+      byte[] eventFunctionSignature)
+      throws Exception {
 
-    TxReceiptRootTransferEventProof proof = getEventProof(startTxReceipt, eventData, contractAddress, eventFunctionSignature);
-    relayerGroup.publishReceiptRoot(this.blockchainId, proof.getTransactionReceiptRoot(), targetBlockchainIds);
+    TxReceiptRootTransferEventProof proof =
+        getEventProof(startTxReceipt, eventData, contractAddress, eventFunctionSignature);
+    relayerGroup.publishReceiptRoot(
+        this.blockchainId, proof.getTransactionReceiptRoot(), targetBlockchainIds);
     return proof.toSignedEvent();
-
   }
 
-
   public TxReceiptRootTransferEventProof getEventProof(
-          TransactionReceipt startTxReceipt, byte[] eventData, String contractAddress, byte[] eventFunctionSignature) throws Exception {
-    return getProofForTxReceipt(this.blockchainId,
-            contractAddress,
-            startTxReceipt,
-            eventData,
-            eventFunctionSignature);
+      TransactionReceipt startTxReceipt,
+      byte[] eventData,
+      String contractAddress,
+      byte[] eventFunctionSignature)
+      throws Exception {
+    return getProofForTxReceipt(
+        this.blockchainId, contractAddress, startTxReceipt, eventData, eventFunctionSignature);
   }
 
   public TxReceiptRootTransferEventProof getProofForTxReceipt(
-          BlockchainId blockchainId, String cbcContractAddress, TransactionReceipt aReceipt,
-          byte[] eventData,
-          byte[] eventFunctionSignature) throws Exception {
+      BlockchainId blockchainId,
+      String cbcContractAddress,
+      TransactionReceipt aReceipt,
+      byte[] eventData,
+      byte[] eventFunctionSignature)
+      throws Exception {
     // Calculate receipt root based on logs for all receipts of all transactions in the block.
     String blockHash = aReceipt.getBlockHash();
-    EthGetBlockTransactionCountByHash transactionCountByHash = this.web3j.ethGetBlockTransactionCountByHash(blockHash).send();
+    EthGetBlockTransactionCountByHash transactionCountByHash =
+        this.web3j.ethGetBlockTransactionCountByHash(blockHash).send();
     BigInteger txCount = transactionCountByHash.getTransactionCount();
 
     List<org.hyperledger.besu.ethereum.core.TransactionReceipt> besuReceipts = new ArrayList<>();
 
     BigInteger transactionIndex = BigInteger.ZERO;
     do {
-      EthTransaction ethTransaction = this.web3j.ethGetTransactionByBlockHashAndIndex(blockHash, transactionIndex).send();
+      EthTransaction ethTransaction =
+          this.web3j.ethGetTransactionByBlockHashAndIndex(blockHash, transactionIndex).send();
       Optional<Transaction> transaction = ethTransaction.getTransaction();
-      assert(transaction.isPresent());
+      assert (transaction.isPresent());
       String txHash = transaction.get().getHash();
-      EthGetTransactionReceipt ethGetTransactionReceipt = this.web3j.ethGetTransactionReceipt(txHash).send();
+      EthGetTransactionReceipt ethGetTransactionReceipt =
+          this.web3j.ethGetTransactionReceipt(txHash).send();
       Optional<TransactionReceipt> mayBeReceipt = ethGetTransactionReceipt.getTransactionReceipt();
-      assert(mayBeReceipt.isPresent());
+      assert (mayBeReceipt.isPresent());
       TransactionReceipt receipt = mayBeReceipt.get();
 
       // Convert to Besu objects
@@ -116,27 +122,35 @@ public class TxRootTransfer extends AbstractBlockchain implements MessagingVerif
       String stateRootFromReceipt = receipt.getRoot();
       Hash root = (stateRootFromReceipt == null) ? null : Hash.fromHexString(receipt.getRoot());
       String statusFromReceipt = receipt.getStatus();
-      int status = statusFromReceipt == null ? -1 : Integer.parseInt(statusFromReceipt.substring(2), 16);
-      for (Log web3jLog: receipt.getLogs()) {
-        org.hyperledger.besu.ethereum.core.Address addr = org.hyperledger.besu.ethereum.core.Address.fromHexString(web3jLog.getAddress());
+      int status =
+          statusFromReceipt == null ? -1 : Integer.parseInt(statusFromReceipt.substring(2), 16);
+      for (Log web3jLog : receipt.getLogs()) {
+        org.hyperledger.besu.ethereum.core.Address addr =
+            org.hyperledger.besu.ethereum.core.Address.fromHexString(web3jLog.getAddress());
         Bytes data = Bytes.fromHexString(web3jLog.getData());
         List<String> topics = web3jLog.getTopics();
         List<LogTopic> logTopics = new ArrayList<>();
-        for (String topic: topics) {
+        for (String topic : topics) {
           LogTopic logTopic = LogTopic.create(Bytes.fromHexString(topic));
           logTopics.add(logTopic);
         }
         besuLogs.add(new org.hyperledger.besu.ethereum.core.Log(addr, data, logTopics));
       }
       String revertReasonFromReceipt = receipt.getRevertReason();
-      Bytes revertReason = revertReasonFromReceipt == null ? null : Bytes.fromHexString(receipt.getRevertReason());
+      Bytes revertReason =
+          revertReasonFromReceipt == null ? null : Bytes.fromHexString(receipt.getRevertReason());
       org.hyperledger.besu.ethereum.core.TransactionReceipt txReceipt =
-              root == null ?
-                      new org.hyperledger.besu.ethereum.core.TransactionReceipt(status, receipt.getCumulativeGasUsed().longValue(),
-                              besuLogs, Optional.ofNullable(revertReason))
-                      :
-                      new org.hyperledger.besu.ethereum.core.TransactionReceipt(root, receipt.getCumulativeGasUsed().longValue(),
-                              besuLogs, Optional.ofNullable(revertReason));
+          root == null
+              ? new org.hyperledger.besu.ethereum.core.TransactionReceipt(
+                  status,
+                  receipt.getCumulativeGasUsed().longValue(),
+                  besuLogs,
+                  Optional.ofNullable(revertReason))
+              : new org.hyperledger.besu.ethereum.core.TransactionReceipt(
+                  root,
+                  receipt.getCumulativeGasUsed().longValue(),
+                  besuLogs,
+                  Optional.ofNullable(revertReason));
       besuReceipts.add(txReceipt);
 
       // Increment for the next time through the loop.
@@ -155,59 +169,62 @@ public class TxRootTransfer extends AbstractBlockchain implements MessagingVerif
     EthBlock block = this.web3j.ethGetBlockByHash(aReceipt.getBlockHash(), false).send();
     EthBlock.Block b1 = block.getBlock();
     String receiptsRoot = b1.getReceiptsRoot();
-    if (!besuCalculatedReceiptsRootStr.equalsIgnoreCase( receiptsRoot)) {
-      LOG.error("Calculated transaction receipt root {} does not match actual receipt root {}", besuCalculatedReceiptsRootStr, receiptsRoot);
+    if (!besuCalculatedReceiptsRootStr.equalsIgnoreCase(receiptsRoot)) {
+      LOG.error(
+          "Calculated transaction receipt root {} does not match actual receipt root {}",
+          besuCalculatedReceiptsRootStr,
+          receiptsRoot);
       throw new Error("Calculated transaction receipt root does not match actual receipt root");
     }
 
-//    // TODO remove
-//    Bytes32 parentHash = Bytes32.fromHexString(b1.getParentHash());
-//    Bytes32 ommersHash = Bytes32.fromHexString(b1.getSha3Uncles());
-//    Bytes coinbase = Bytes.fromHexString(b1.getMiner());
-//    Bytes32 stateRoot = Bytes32.fromHexString(b1.getStateRoot());
-//    Bytes32 transactionsRoot = Bytes32.fromHexString(b1.getTransactionsRoot());
-//    Bytes32 receiptsRoot1 = Bytes32.fromHexString(b1.getReceiptsRoot());
-//    Bytes logsBloom = Bytes.fromHexString(b1.getLogsBloom());
-//    BigInteger difficulty = b1.getDifficulty();
-//    BigInteger number = b1.getNumber();
-//    BigInteger gasLimit = b1.getGasLimit();
-//    BigInteger gasUsed = b1.getGasUsed();
-//    BigInteger timestamp = b1.getTimestamp();
-//    Bytes extraData = Bytes.fromHexString(b1.getExtraData());
-//    Bytes32 mixHash = Bytes32.fromHexString(b1.getMixHash());
-//    BigInteger nonce = b1.getNonce();
-//
-//    Bytes blockHash1 = Hash.hash(
-//        RLP.encode(
-//            out -> {
-//              out.startList();
-//              out.writeBytes(parentHash);
-//              out.writeBytes(ommersHash);
-//              out.writeBytes(coinbase);
-//              out.writeBytes(stateRoot);
-//              out.writeBytes(transactionsRoot);
-//              out.writeBytes(receiptsRoot1);
-//              out.writeBytes(logsBloom);
-//              out.writeBytes(UInt256.valueOf(difficulty).toMinimalBytes());
-//              out.writeLongScalar(number.longValue());
-//              out.writeLongScalar(gasLimit.longValue());
-//              out.writeLongScalar(gasUsed.longValue());
-//              out.writeLongScalar(timestamp.longValue());
-//              out.writeBytes(extraData);
-//              out.writeBytes(mixHash);
-//              out.writeLong(nonce.longValue());
-////    if (ExperimentalEIPs.eip1559Enabled && baseFee != null) {
-////      out.writeLongScalar(baseFee);
-////    }
-//              out.endList();
-//            }));
-//    LOG.debug("Block Hash Calculated***: {} should be: {}", blockHash1.toHexString(), blockHash);
-
+    //    // TODO remove
+    //    Bytes32 parentHash = Bytes32.fromHexString(b1.getParentHash());
+    //    Bytes32 ommersHash = Bytes32.fromHexString(b1.getSha3Uncles());
+    //    Bytes coinbase = Bytes.fromHexString(b1.getMiner());
+    //    Bytes32 stateRoot = Bytes32.fromHexString(b1.getStateRoot());
+    //    Bytes32 transactionsRoot = Bytes32.fromHexString(b1.getTransactionsRoot());
+    //    Bytes32 receiptsRoot1 = Bytes32.fromHexString(b1.getReceiptsRoot());
+    //    Bytes logsBloom = Bytes.fromHexString(b1.getLogsBloom());
+    //    BigInteger difficulty = b1.getDifficulty();
+    //    BigInteger number = b1.getNumber();
+    //    BigInteger gasLimit = b1.getGasLimit();
+    //    BigInteger gasUsed = b1.getGasUsed();
+    //    BigInteger timestamp = b1.getTimestamp();
+    //    Bytes extraData = Bytes.fromHexString(b1.getExtraData());
+    //    Bytes32 mixHash = Bytes32.fromHexString(b1.getMixHash());
+    //    BigInteger nonce = b1.getNonce();
+    //
+    //    Bytes blockHash1 = Hash.hash(
+    //        RLP.encode(
+    //            out -> {
+    //              out.startList();
+    //              out.writeBytes(parentHash);
+    //              out.writeBytes(ommersHash);
+    //              out.writeBytes(coinbase);
+    //              out.writeBytes(stateRoot);
+    //              out.writeBytes(transactionsRoot);
+    //              out.writeBytes(receiptsRoot1);
+    //              out.writeBytes(logsBloom);
+    //              out.writeBytes(UInt256.valueOf(difficulty).toMinimalBytes());
+    //              out.writeLongScalar(number.longValue());
+    //              out.writeLongScalar(gasLimit.longValue());
+    //              out.writeLongScalar(gasUsed.longValue());
+    //              out.writeLongScalar(timestamp.longValue());
+    //              out.writeBytes(extraData);
+    //              out.writeBytes(mixHash);
+    //              out.writeLong(nonce.longValue());
+    ////    if (ExperimentalEIPs.eip1559Enabled && baseFee != null) {
+    ////      out.writeLongScalar(baseFee);
+    ////    }
+    //              out.endList();
+    //            }));
+    //    LOG.debug("Block Hash Calculated***: {} should be: {}", blockHash1.toHexString(),
+    // blockHash);
 
     // TODO end remove
 
     BigInteger txIndex = aReceipt.getTransactionIndex();
-    Bytes aKey = indexKey((int)txIndex.longValue());
+    Bytes aKey = indexKey((int) txIndex.longValue());
 
     Proof<Bytes> simpleProof = trie.getValueWithSimpleProof(aKey);
     Bytes encodedTransactionReceipt = simpleProof.getValue().get();
@@ -221,25 +238,26 @@ public class TxRootTransfer extends AbstractBlockchain implements MessagingVerif
     List<Bytes> proofList1 = simpleProof.getProofRelatedNodes();
     List<BigInteger> proofOffsets = new ArrayList<>();
     List<byte[]> proofs = new ArrayList<>();
-    for (int j = proofList1.size()-1; j >=0; j--) {
+    for (int j = proofList1.size() - 1; j >= 0; j--) {
       rlpOfNode = proofList1.get(j);
       proofOffsets.add(BigInteger.valueOf(findOffset(rlpOfNode, nodeHash)));
       proofs.add(rlpOfNode.toArray());
       nodeHash = org.hyperledger.besu.crypto.Hash.keccak256(rlpOfNode);
     }
     if (!besuCalculatedReceiptsRoot.toHexString().equalsIgnoreCase(nodeHash.toHexString())) {
-      throw new Error("Transaction receipt root calculated using proof did not match actual receipt root");
+      throw new Error(
+          "Transaction receipt root calculated using proof did not match actual receipt root");
     }
 
     return new TxReceiptRootTransferEventProof(
-            blockchainId,
-            cbcContractAddress,
-            getTransactionReceiptRoot(aReceipt),
-            encodedTransactionReceipt.toArray(),
-            proofOffsets,
-            proofs,
-            eventFunctionSignature,
-            eventData);
+        blockchainId,
+        cbcContractAddress,
+        getTransactionReceiptRoot(aReceipt),
+        encodedTransactionReceipt.toArray(),
+        proofOffsets,
+        proofs,
+        eventFunctionSignature,
+        eventData);
   }
 
   static Bytes indexKey(final int i) {
@@ -255,7 +273,7 @@ public class TxRootTransfer extends AbstractBlockchain implements MessagingVerif
     for (int i = 0; i < rlpOfNode.size() - sizeNodeRef; i++) {
       boolean found = true;
       for (int j = 0; j < sizeNodeRef; j++) {
-        if (rlpOfNode.get(i+j) != nodeRef.get(j)) {
+        if (rlpOfNode.get(i + j) != nodeRef.get(j)) {
           found = false;
           break;
         }
@@ -266,7 +284,6 @@ public class TxRootTransfer extends AbstractBlockchain implements MessagingVerif
     }
     return -1;
   }
-
 
   public byte[] getTransactionReceiptRoot(TransactionReceipt transactionReceipt) throws Exception {
     EthBlock block = this.web3j.ethGetBlockByHash(transactionReceipt.getBlockHash(), false).send();

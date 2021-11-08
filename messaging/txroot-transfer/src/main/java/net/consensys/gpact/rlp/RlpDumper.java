@@ -15,16 +15,13 @@ public class RlpDumper {
         rlpInput.enterList();
         LOG.info("{}Enter List", getBlanks(depth));
         depth++;
-      }
-      else if (rlpInput.nextIsNull()) {
+      } else if (rlpInput.nextIsNull()) {
         LOG.info("{}Null: {}", getBlanks(depth), rlpInput.readBytes());
-      }
-      else if (rlpInput.isEndOfCurrentList()) {
+      } else if (rlpInput.isEndOfCurrentList()) {
         rlpInput.leaveList();
         depth--;
         LOG.info("{}End List", getBlanks(depth));
-      }
-      else {
+      } else {
         LOG.info("{}Bytes: {}", getBlanks(depth), rlpInput.readBytes());
       }
     }
@@ -58,5 +55,4 @@ public class RlpDumper {
         throw new Error("Not implemented yet");
     }
   }
-
 }

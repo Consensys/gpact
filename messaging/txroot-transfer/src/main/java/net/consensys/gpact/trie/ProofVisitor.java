@@ -16,7 +16,6 @@ package net.consensys.gpact.trie;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.tuweni.bytes.Bytes;
 
 class ProofVisitor<V> extends GetVisitor<V> implements PathNodeVisitor<V> {

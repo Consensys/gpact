@@ -14,21 +14,20 @@
  */
 package net.consensys.gpact.trie;
 
+import static org.apache.logging.log4j.LogManager.getLogger;
+import static org.hyperledger.besu.crypto.Hash.keccak256;
+
 import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-
 import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.Bytes32;
 import org.hyperledger.besu.ethereum.rlp.BytesValueRLPOutput;
 import org.hyperledger.besu.ethereum.rlp.RLP;
-
-import static org.apache.logging.log4j.LogManager.getLogger;
-import static org.hyperledger.besu.crypto.Hash.keccak256;
 
 class ExtensionNode<V> implements Node<V> {
   private static final Logger LOG = getLogger();
@@ -57,8 +56,8 @@ class ExtensionNode<V> implements Node<V> {
 
     // The prefixes of all the keyPaths should exactly match the path of this extension node
     List<Bytes> newkeys = new ArrayList<>();
-    for(Bytes key : keyPaths) {
-      if(!path.slice(0, path.size()-1).equals(key.slice(0, path.size()-1))) {
+    for (Bytes key : keyPaths) {
+      if (!path.slice(0, path.size() - 1).equals(key.slice(0, path.size() - 1))) {
         return NullNode.instance();
       }
       // Because path inside extension node does not end with the terminator, we should use
@@ -72,7 +71,7 @@ class ExtensionNode<V> implements Node<V> {
   @Override
   public Bytes constructSimpleProof(final Bytes key, final List<Bytes> proof) {
     proof.add(getRlp());
-    if(!path.slice(0, path.size()-1).equals(key.slice(0, path.size()-1))) {
+    if (!path.slice(0, path.size() - 1).equals(key.slice(0, path.size() - 1))) {
       throw new RuntimeException("Key didn't exist in trie");
     }
 

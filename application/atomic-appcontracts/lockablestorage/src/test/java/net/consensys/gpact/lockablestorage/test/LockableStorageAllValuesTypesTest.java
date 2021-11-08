@@ -14,16 +14,15 @@
  */
 package net.consensys.gpact.lockablestorage.test;
 
+import java.math.BigInteger;
 import org.junit.Test;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.exceptions.TransactionException;
 import org.web3j.tx.exceptions.ContractCallException;
 
-import java.math.BigInteger;
-
 /**
- * Check the ability to store and load all of the types. The tests assume the calls are
- * single blockchain (that is not part of a cross-blockchain) call.
+ * Check the ability to store and load all of the types. The tests assume the calls are single
+ * blockchain (that is not part of a cross-blockchain) call.
  */
 public class LockableStorageAllValuesTypesTest extends AbstractLockableStorageAllValuesTest {
   @Test
@@ -46,22 +45,20 @@ public class LockableStorageAllValuesTypesTest extends AbstractLockableStorageAl
       }
       throw ex;
     }
-    assert(this.lockableStorageContract.test_getBool(keyTestBool).send());
+    assert (this.lockableStorageContract.test_getBool(keyTestBool).send());
 
-      // Check the value after setting to false
-      try {
-        this.lockableStorageContract.test_setBool(keyTestBool, false).send();
-      } catch (TransactionException ex) {
-        if (ex.getTransactionReceipt().isPresent()) {
-          TransactionReceipt receipt = ex.getTransactionReceipt().get();
-          System.out.println("Revert Reason: " + receipt.getRevertReason());
-        }
-        throw ex;
+    // Check the value after setting to false
+    try {
+      this.lockableStorageContract.test_setBool(keyTestBool, false).send();
+    } catch (TransactionException ex) {
+      if (ex.getTransactionReceipt().isPresent()) {
+        TransactionReceipt receipt = ex.getTransactionReceipt().get();
+        System.out.println("Revert Reason: " + receipt.getRevertReason());
       }
-      assert(!this.lockableStorageContract.test_getBool(keyTestBool).send());
-
+      throw ex;
+    }
+    assert (!this.lockableStorageContract.test_getBool(keyTestBool).send());
   }
-
 
   @Test
   public void uint256() throws Exception {
@@ -75,7 +72,8 @@ public class LockableStorageAllValuesTypesTest extends AbstractLockableStorageAl
     BigInteger val3 = BigInteger.valueOf(76543);
 
     // Check the default value.
-    assert(this.lockableStorageContract.test_getUint256(uint256A).send().compareTo(BigInteger.ZERO) == 0);
+    assert (this.lockableStorageContract.test_getUint256(uint256A).send().compareTo(BigInteger.ZERO)
+        == 0);
 
     // Set the first value
     try {
@@ -87,7 +85,7 @@ public class LockableStorageAllValuesTypesTest extends AbstractLockableStorageAl
       }
       throw ex;
     }
-    assert(this.lockableStorageContract.test_getUint256(uint256A).send().compareTo(val1) == 0);
+    assert (this.lockableStorageContract.test_getUint256(uint256A).send().compareTo(val1) == 0);
 
     // Set the second value
     try {
@@ -99,9 +97,9 @@ public class LockableStorageAllValuesTypesTest extends AbstractLockableStorageAl
       }
       throw ex;
     }
-    assert(this.lockableStorageContract.test_getUint256(uint256B).send().compareTo(val2) == 0);
+    assert (this.lockableStorageContract.test_getUint256(uint256B).send().compareTo(val2) == 0);
     // Make sure uint256A hasn't been changed.
-    assert(this.lockableStorageContract.test_getUint256(uint256A).send().compareTo(val1) == 0);
+    assert (this.lockableStorageContract.test_getUint256(uint256A).send().compareTo(val1) == 0);
 
     // Check that an existing value can be changed
     try {
@@ -113,8 +111,7 @@ public class LockableStorageAllValuesTypesTest extends AbstractLockableStorageAl
       }
       throw ex;
     }
-    assert(this.lockableStorageContract.test_getUint256(uint256A).send().compareTo(val3) == 0);
-
+    assert (this.lockableStorageContract.test_getUint256(uint256A).send().compareTo(val3) == 0);
   }
 
   @Test
@@ -129,8 +126,16 @@ public class LockableStorageAllValuesTypesTest extends AbstractLockableStorageAl
     BigInteger val3 = BigInteger.valueOf(76543);
 
     // Check the default length.
-    assert(this.lockableStorageContract.test_getArrayLength(arrayA).send().compareTo(BigInteger.ZERO) == 0);
-    assert(this.lockableStorageContract.test_getArrayLength(arrayB).send().compareTo(BigInteger.ZERO) == 0);
+    assert (this.lockableStorageContract
+            .test_getArrayLength(arrayA)
+            .send()
+            .compareTo(BigInteger.ZERO)
+        == 0);
+    assert (this.lockableStorageContract
+            .test_getArrayLength(arrayB)
+            .send()
+            .compareTo(BigInteger.ZERO)
+        == 0);
 
     // Trying pop on empty array.
     try {
@@ -145,23 +150,67 @@ public class LockableStorageAllValuesTypesTest extends AbstractLockableStorageAl
 
     // Push value onto the end of the array.
     this.lockableStorageContract.test_pushArrayValue(arrayA, val1).send();
-    assert(this.lockableStorageContract.test_getArrayLength(arrayA).send().compareTo(BigInteger.ONE) == 0);
-    assert(this.lockableStorageContract.test_getArrayLength(arrayB).send().compareTo(BigInteger.ZERO) == 0);
-    assert(this.lockableStorageContract.test_getArrayValue(arrayA, BigInteger.ZERO).send().compareTo(val1) == 0);
+    assert (this.lockableStorageContract
+            .test_getArrayLength(arrayA)
+            .send()
+            .compareTo(BigInteger.ONE)
+        == 0);
+    assert (this.lockableStorageContract
+            .test_getArrayLength(arrayB)
+            .send()
+            .compareTo(BigInteger.ZERO)
+        == 0);
+    assert (this.lockableStorageContract
+            .test_getArrayValue(arrayA, BigInteger.ZERO)
+            .send()
+            .compareTo(val1)
+        == 0);
 
     // Push value onto the end of the array.
     this.lockableStorageContract.test_pushArrayValue(arrayA, val2).send();
-    assert(this.lockableStorageContract.test_getArrayLength(arrayA).send().compareTo(BigInteger.TWO) == 0);
-    assert(this.lockableStorageContract.test_getArrayLength(arrayB).send().compareTo(BigInteger.ZERO) == 0);
-    assert(this.lockableStorageContract.test_getArrayValue(arrayA, BigInteger.ZERO).send().compareTo(val1) == 0);
-    assert(this.lockableStorageContract.test_getArrayValue(arrayA, BigInteger.ONE).send().compareTo(val2) == 0);
+    assert (this.lockableStorageContract
+            .test_getArrayLength(arrayA)
+            .send()
+            .compareTo(BigInteger.TWO)
+        == 0);
+    assert (this.lockableStorageContract
+            .test_getArrayLength(arrayB)
+            .send()
+            .compareTo(BigInteger.ZERO)
+        == 0);
+    assert (this.lockableStorageContract
+            .test_getArrayValue(arrayA, BigInteger.ZERO)
+            .send()
+            .compareTo(val1)
+        == 0);
+    assert (this.lockableStorageContract
+            .test_getArrayValue(arrayA, BigInteger.ONE)
+            .send()
+            .compareTo(val2)
+        == 0);
 
     // Push value onto the end of the array.
     this.lockableStorageContract.test_pushArrayValue(arrayB, val3).send();
-    assert(this.lockableStorageContract.test_getArrayLength(arrayA).send().compareTo(BigInteger.TWO) == 0);
-    assert(this.lockableStorageContract.test_getArrayLength(arrayB).send().compareTo(BigInteger.ONE) == 0);
-    assert(this.lockableStorageContract.test_getArrayValue(arrayB, BigInteger.ZERO).send().compareTo(val3) == 0);
-    assert(this.lockableStorageContract.test_getArrayValue(arrayA, BigInteger.ZERO).send().compareTo(val1) == 0);
+    assert (this.lockableStorageContract
+            .test_getArrayLength(arrayA)
+            .send()
+            .compareTo(BigInteger.TWO)
+        == 0);
+    assert (this.lockableStorageContract
+            .test_getArrayLength(arrayB)
+            .send()
+            .compareTo(BigInteger.ONE)
+        == 0);
+    assert (this.lockableStorageContract
+            .test_getArrayValue(arrayB, BigInteger.ZERO)
+            .send()
+            .compareTo(val3)
+        == 0);
+    assert (this.lockableStorageContract
+            .test_getArrayValue(arrayA, BigInteger.ZERO)
+            .send()
+            .compareTo(val1)
+        == 0);
 
     // Trying getting a value that is out of bounds.
     try {
@@ -175,11 +224,17 @@ public class LockableStorageAllValuesTypesTest extends AbstractLockableStorageAl
     this.lockableStorageContract.test_popArrayValue(arrayA).send();
     this.lockableStorageContract.test_popArrayValue(arrayA).send();
     this.lockableStorageContract.test_popArrayValue(arrayB).send();
-    assert(this.lockableStorageContract.test_getArrayLength(arrayA).send().compareTo(BigInteger.ZERO) == 0);
-    assert(this.lockableStorageContract.test_getArrayLength(arrayB).send().compareTo(BigInteger.ZERO) == 0);
-
+    assert (this.lockableStorageContract
+            .test_getArrayLength(arrayA)
+            .send()
+            .compareTo(BigInteger.ZERO)
+        == 0);
+    assert (this.lockableStorageContract
+            .test_getArrayLength(arrayB)
+            .send()
+            .compareTo(BigInteger.ZERO)
+        == 0);
   }
-
 
   @Test
   public void map() throws Exception {
@@ -202,12 +257,11 @@ public class LockableStorageAllValuesTypesTest extends AbstractLockableStorageAl
     this.lockableStorageContract.test_setMapValue(mapB, key1, val3).send();
     this.lockableStorageContract.test_setMapValue(mapB, key2, val4).send();
 
-    assert(this.lockableStorageContract.test_getMapValue(mapA, key1).send().compareTo(val1) == 0);
-    assert(this.lockableStorageContract.test_getMapValue(mapA, key2).send().compareTo(val2) == 0);
-    assert(this.lockableStorageContract.test_getMapValue(mapB, key1).send().compareTo(val3) == 0);
-    assert(this.lockableStorageContract.test_getMapValue(mapB, key2).send().compareTo(val4) == 0);
+    assert (this.lockableStorageContract.test_getMapValue(mapA, key1).send().compareTo(val1) == 0);
+    assert (this.lockableStorageContract.test_getMapValue(mapA, key2).send().compareTo(val2) == 0);
+    assert (this.lockableStorageContract.test_getMapValue(mapB, key1).send().compareTo(val3) == 0);
+    assert (this.lockableStorageContract.test_getMapValue(mapB, key2).send().compareTo(val4) == 0);
   }
-
 
   @Test
   public void address() throws Exception {
@@ -223,34 +277,39 @@ public class LockableStorageAllValuesTypesTest extends AbstractLockableStorageAl
     this.lockableStorageContract.test_setAddress(addressA, addressVal1).send();
     this.lockableStorageContract.test_setAddress(addressB, addressVal2).send();
 
-    assert(this.lockableStorageContract.test_getAddress(addressA).send().equalsIgnoreCase(addressVal1));
-    assert(this.lockableStorageContract.test_getAddress(addressB).send().equalsIgnoreCase(addressVal2));
+    assert (this.lockableStorageContract
+        .test_getAddress(addressA)
+        .send()
+        .equalsIgnoreCase(addressVal1));
+    assert (this.lockableStorageContract
+        .test_getAddress(addressB)
+        .send()
+        .equalsIgnoreCase(addressVal2));
   }
 
-//  @Test
-//  public void bytes() throws Exception {
-//    setupWeb3();
-//    deployContracts();
-//
-//    BigInteger bytesA = BigInteger.ZERO;
-//    BigInteger bytesB = BigInteger.ONE;
-//
-//    byte[] val1 = new byte[]{10, 11, 12, 13};
-//    byte[] val2 = new byte[]{7};
-//
-//    this.storageWrapper.test_setBytes(bytesA, val1).send();
-//    this.storageWrapper.test_setBytes(bytesB, val2).send();
-//
-//    byte[] result1 = this.storageWrapper.test_getBytes(bytesA).send();
-//    byte[] result2 = this.storageWrapper.test_getBytes(bytesB).send();
-//
-//    assertEquals(val1.length, result1.length);
-//    assertEquals(val2.length, result2.length);
-//    assertEquals(val1[0], result1[0]);
-//    assertEquals(val1[1], result1[1]);
-//    assertEquals(val1[2], result1[2]);
-//    assertEquals(val2[0], result2[0]);
-//  }
-//
+  //  @Test
+  //  public void bytes() throws Exception {
+  //    setupWeb3();
+  //    deployContracts();
+  //
+  //    BigInteger bytesA = BigInteger.ZERO;
+  //    BigInteger bytesB = BigInteger.ONE;
+  //
+  //    byte[] val1 = new byte[]{10, 11, 12, 13};
+  //    byte[] val2 = new byte[]{7};
+  //
+  //    this.storageWrapper.test_setBytes(bytesA, val1).send();
+  //    this.storageWrapper.test_setBytes(bytesB, val2).send();
+  //
+  //    byte[] result1 = this.storageWrapper.test_getBytes(bytesA).send();
+  //    byte[] result2 = this.storageWrapper.test_getBytes(bytesB).send();
+  //
+  //    assertEquals(val1.length, result1.length);
+  //    assertEquals(val2.length, result2.length);
+  //    assertEquals(val1[0], result1[0]);
+  //    assertEquals(val1[1], result1[1]);
+  //    assertEquals(val1[2], result1[2]);
+  //    assertEquals(val2[0], result2[0]);
+  //  }
+  //
 }
-

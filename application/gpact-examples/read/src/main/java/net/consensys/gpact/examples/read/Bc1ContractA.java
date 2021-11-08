@@ -14,37 +14,49 @@
  */
 package net.consensys.gpact.examples.read;
 
+import java.io.IOException;
+import java.math.BigInteger;
+import java.util.List;
+import net.consensys.gpact.common.AbstractBlockchain;
 import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.common.DynamicGasProvider;
+import net.consensys.gpact.examples.read.soliditywrappers.ContractA;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
-import net.consensys.gpact.common.AbstractBlockchain;
-import net.consensys.gpact.examples.read.soliditywrappers.ContractA;
-
-import java.io.IOException;
-import java.math.BigInteger;
-import java.util.List;
-
 
 public class Bc1ContractA extends AbstractBlockchain {
   private static final Logger LOG = LogManager.getLogger(Bc1ContractA.class);
 
   ContractA contractA;
 
-  public Bc1ContractA(Credentials credentials, BlockchainId bcId, String uri, DynamicGasProvider.Strategy gasPriceStrategy, int blockPeriod) throws IOException {
+  public Bc1ContractA(
+      Credentials credentials,
+      BlockchainId bcId,
+      String uri,
+      DynamicGasProvider.Strategy gasPriceStrategy,
+      int blockPeriod)
+      throws IOException {
     super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
   }
 
-  public void deployContracts(String cbcContractAddress, BigInteger busLogicBlockchainId, String busLogicContractAddress) throws Exception {
+  public void deployContracts(
+      String cbcContractAddress, BigInteger busLogicBlockchainId, String busLogicContractAddress)
+      throws Exception {
     this.contractA =
-        ContractA.deploy(this.web3j, this.tm, this.gasProvider,
-            cbcContractAddress,
-            busLogicBlockchainId,
-            busLogicContractAddress).send();
-    LOG.info("ContractA deployed to {} on blockchain {}",
-        this.contractA.getContractAddress(), this.blockchainId);
+        ContractA.deploy(
+                this.web3j,
+                this.tm,
+                this.gasProvider,
+                cbcContractAddress,
+                busLogicBlockchainId,
+                busLogicContractAddress)
+            .send();
+    LOG.info(
+        "ContractA deployed to {} on blockchain {}",
+        this.contractA.getContractAddress(),
+        this.blockchainId);
   }
 
   public String getRlpFunctionSignature_DoCrosschainRead() {
@@ -54,7 +66,7 @@ public class Bc1ContractA extends AbstractBlockchain {
   public void showEvents(TransactionReceipt txR) {
     LOG.info("ContractA: Value Read Events");
     List<ContractA.ValueReadEventResponse> events = this.contractA.getValueReadEvents(txR);
-    for (ContractA.ValueReadEventResponse e: events) {
+    for (ContractA.ValueReadEventResponse e : events) {
       LOG.info(" Value: {}", e._val);
     }
   }
@@ -63,9 +75,9 @@ public class Bc1ContractA extends AbstractBlockchain {
     boolean isLocked = this.contractA.isLocked(BigInteger.ZERO).send();
     LOG.info("Contract A's lockable storage: locked: {}", isLocked);
     if (isLocked) {
-      throw new RuntimeException("Contract A's lockable storage locked after end of crosschain transaction");
+      throw new RuntimeException(
+          "Contract A's lockable storage locked after end of crosschain transaction");
     }
     LOG.info("ContractA: Value: {}", this.contractA.getVal().send());
   }
-
 }

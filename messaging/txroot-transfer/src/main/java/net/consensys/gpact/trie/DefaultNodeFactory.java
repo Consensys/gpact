@@ -14,20 +14,20 @@
  */
 package net.consensys.gpact.trie;
 
+import static org.apache.logging.log4j.LogManager.getLogger;
+import static org.hyperledger.besu.crypto.Hash.keccak256;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.function.Function;
-
 import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
-
-import static org.apache.logging.log4j.LogManager.getLogger;
-import static org.hyperledger.besu.crypto.Hash.keccak256;
 
 class DefaultNodeFactory<V> implements NodeFactory<V> {
   @SuppressWarnings("rawtypes")
   private static final Node NULL_NODE = NullNode.instance();
+
   private static final Logger LOG = getLogger();
 
   private final Function<V, Bytes> valueSerializer;

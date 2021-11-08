@@ -14,34 +14,30 @@
  */
 package net.consensys.gpact.common;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Properties;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class PropertiesLoader {
   static final Logger LOG = LogManager.getLogger(PropertiesLoader.class);
 
   public Properties properties = new Properties();
 
-
   public PropertiesLoader(String fileName) throws IOException {
     Path propertiesFile;
     if (fileName.startsWith("/")) {
       propertiesFile = Paths.get(fileName);
-    }
-    else {
+    } else {
       propertiesFile = Paths.get(System.getProperty("user.dir"), fileName);
     }
     FileInputStream fis = new FileInputStream(propertiesFile.toFile());
     this.properties.load(fis);
     LOG.info("Loaded properties from file {}", propertiesFile.toString());
   }
-
 
   public String getProperty(String prop) {
     String p = this.properties.getProperty(prop);
@@ -54,12 +50,12 @@ public class PropertiesLoader {
 
   // Static credentials don't work for testing as multiple tests are run in parallel.
   // The nonce values end up being wrong and the test fail.
-//  public Credentials getCredentials() {
-//    return Credentials.create(getProperty("PRIVATE_KEY"));
-//  }
-//  public Credentials getCredentials(String keyName) {
-//    return Credentials.create(this.properties.getProperty(keyName));
-//  }
+  //  public Credentials getCredentials() {
+  //    return Credentials.create(getProperty("PRIVATE_KEY"));
+  //  }
+  //  public Credentials getCredentials(String keyName) {
+  //    return Credentials.create(this.properties.getProperty(keyName));
+  //  }
 
   public BlockchainInfo getBlockchainInfo(String tag) {
     String bcIdStr = getProperty(tag + "_BC_ID");

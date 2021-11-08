@@ -17,14 +17,12 @@ package org.hyperledger.besu.ethereum.core;
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.hyperledger.besu.crypto.Hash.keccak256;
 
-import org.hyperledger.besu.ethereum.rlp.RLPException;
-import org.hyperledger.besu.ethereum.rlp.RLPInput;
-
 import java.util.Collection;
-
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.DelegatingBytes;
 import org.apache.tuweni.bytes.MutableBytes;
+import org.hyperledger.besu.ethereum.rlp.RLPException;
+import org.hyperledger.besu.ethereum.rlp.RLPInput;
 
 /*
  * Bloom filter implementation for storing persistent logs, describes a 2048-bit representation of

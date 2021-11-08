@@ -14,17 +14,15 @@
  */
 package net.consensys.gpact.trie;
 
+import static org.hyperledger.besu.crypto.Hash.keccak256;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
-
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.Bytes32;
 import org.hyperledger.besu.ethereum.rlp.RLP;
-
-import static org.hyperledger.besu.crypto.Hash.keccak256;
 
 /** An Merkle Patricial Trie. */
 public interface MerklePatriciaTrie<K, V> {
@@ -54,22 +52,21 @@ public interface MerklePatriciaTrie<K, V> {
    * @param keys The list of keys for which the multi Merkle proof is desired.
    * @return a multi Merkle proof along with the data
    */
-   default MultiMerkleProof<V> getValuesWithMultiMerkleProof(List<Bytes> keys) {
-     return new MultiMerkleProof<>(NullNode.instance());
-   }
+  default MultiMerkleProof<V> getValuesWithMultiMerkleProof(List<Bytes> keys) {
+    return new MultiMerkleProof<>(NullNode.instance());
+  }
 
-   default Proof<Bytes> getValueWithSimpleProof(final K key) {
-     throw new RuntimeException("not implemented yet");
-   }
+  default Proof<Bytes> getValueWithSimpleProof(final K key) {
+    throw new RuntimeException("not implemented yet");
+  }
 
-
-    /**
-     * Updates the value mapped to the specified key, creating the mapping if one does not already
-     * exist.
-     *
-     * @param key The key that corresponds to the value to be updated.
-     * @param value The value to associate the key with.
-     */
+  /**
+   * Updates the value mapped to the specified key, creating the mapping if one does not already
+   * exist.
+   *
+   * @param key The key that corresponds to the value to be updated.
+   * @param value The value to associate the key with.
+   */
   void put(K key, V value);
 
   /**

@@ -14,6 +14,8 @@
  */
 package net.consensys.gpact.common;
 
+import java.util.Collections;
+import java.util.List;
 import org.web3j.abi.FunctionReturnDecoder;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.AbiTypes;
@@ -21,24 +23,24 @@ import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.Utf8String;
 import org.web3j.abi.datatypes.generated.Uint256;
 
-import java.util.Collections;
-import java.util.List;
-
-
 /**
  * Decode revert reasons.
  *
- * See https://docs.soliditylang.org/en/v0.8.0/control-structures.html and look for Panic for a list
- * of Panic error codes.
+ * <p>See https://docs.soliditylang.org/en/v0.8.0/control-structures.html and look for Panic for a
+ * list of Panic error codes.
  */
 public class RevertReason {
 
-
   public static String decodeRevertReason(String revertReasonEncoded) {
-    String errorMethodId = "0x08c379a0"; // Numeric.toHexString(Hash.sha3("Error(string)".getBytes())).substring(0, 10)
-    String panicMethodId = "0x4e487b71"; // Numeric.toHexString(Hash.sha3("Panic(uint256)".getBytes())).substring(0, 10)
-    List<TypeReference<Type>> errorRevertReasonTypes = Collections.singletonList(TypeReference.create((Class<Type>) AbiTypes.getType("string")));
-    List<TypeReference<Type>> panicRevertReasonTypes = Collections.singletonList(TypeReference.create((Class<Type>) AbiTypes.getType("uint256")));
+    String errorMethodId =
+        "0x08c379a0"; // Numeric.toHexString(Hash.sha3("Error(string)".getBytes())).substring(0, 10)
+    String panicMethodId =
+        "0x4e487b71"; // Numeric.toHexString(Hash.sha3("Panic(uint256)".getBytes())).substring(0,
+    // 10)
+    List<TypeReference<Type>> errorRevertReasonTypes =
+        Collections.singletonList(TypeReference.create((Class<Type>) AbiTypes.getType("string")));
+    List<TypeReference<Type>> panicRevertReasonTypes =
+        Collections.singletonList(TypeReference.create((Class<Type>) AbiTypes.getType("uint256")));
 
     if (revertReasonEncoded == null) {
       return "Revert Reason is null";
@@ -46,13 +48,14 @@ public class RevertReason {
 
     if (revertReasonEncoded.startsWith(errorMethodId)) {
       String encodedRevertReason = revertReasonEncoded.substring(errorMethodId.length());
-      List<Type> decoded = FunctionReturnDecoder.decode(encodedRevertReason, errorRevertReasonTypes);
+      List<Type> decoded =
+          FunctionReturnDecoder.decode(encodedRevertReason, errorRevertReasonTypes);
       Utf8String decodedRevertReason = (Utf8String) decoded.get(0);
       return decodedRevertReason.getValue();
-    }
-    else if (revertReasonEncoded.startsWith(panicMethodId)) {
+    } else if (revertReasonEncoded.startsWith(panicMethodId)) {
       String encodedRevertReason = revertReasonEncoded.substring(panicMethodId.length());
-      List<Type> decoded = FunctionReturnDecoder.decode(encodedRevertReason, panicRevertReasonTypes);
+      List<Type> decoded =
+          FunctionReturnDecoder.decode(encodedRevertReason, panicRevertReasonTypes);
       Uint256 decodedRevertReason = (Uint256) decoded.get(0);
       return "Panic: 0x" + decodedRevertReason.getValue().toString(16);
     }

@@ -14,21 +14,16 @@
  */
 package net.consensys.gpact.messaging;
 
-import net.consensys.gpact.common.BlockchainId;
-import net.consensys.gpact.common.FormatConversion;
-import org.web3j.crypto.Sign;
-import net.consensys.gpact.common.AnIdentity;
+import static net.consensys.gpact.common.FormatConversion.addressStringToBytes;
 
-import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import net.consensys.gpact.common.AnIdentity;
+import net.consensys.gpact.common.BlockchainId;
+import org.web3j.crypto.Sign;
 
-import static net.consensys.gpact.common.FormatConversion.addressStringToBytes;
-
-/**
- * Information to allow a transaction receipt to be verified within a Solidity contract.
- */
+/** Information to allow a transaction receipt to be verified within a Solidity contract. */
 public class SignedEvent {
   private BlockchainId bcId;
   private String cbcContract;
@@ -36,13 +31,19 @@ public class SignedEvent {
   private byte[] eventData;
   private byte[] encodedSignatures;
 
-  public SignedEvent(AnIdentity[] signers, BlockchainId blockchainId, String cbcContract, byte[] eventFunctionSignature, byte[] eventData) {
+  public SignedEvent(
+      AnIdentity[] signers,
+      BlockchainId blockchainId,
+      String cbcContract,
+      byte[] eventFunctionSignature,
+      byte[] eventData) {
     this.bcId = blockchainId;
     this.cbcContract = cbcContract;
     this.eventFunctionSignature = eventFunctionSignature;
     this.eventData = eventData;
 
-    byte[] encodedEventInformation = abiEncodePackedEvent(blockchainId, cbcContract, eventFunctionSignature, eventData);
+    byte[] encodedEventInformation =
+        abiEncodePackedEvent(blockchainId, cbcContract, eventFunctionSignature, eventData);
 
     // Add the transaction receipt root for the blockchain
     // Sign the txReceiptRoot
@@ -50,8 +51,8 @@ public class SignedEvent {
     List<byte[]> sigR = new ArrayList<>();
     List<byte[]> sigS = new ArrayList<>();
     List<Byte> sigV = new ArrayList<>();
-//    List<BigInteger> sigV = new ArrayList<>();
-    for (AnIdentity signer: signers) {
+    //    List<BigInteger> sigV = new ArrayList<>();
+    for (AnIdentity signer : signers) {
       Sign.SignatureData signatureData = signer.sign(encodedEventInformation);
       theSigners.add(signer.getAddress());
       sigR.add(signatureData.getR());
@@ -62,8 +63,12 @@ public class SignedEvent {
     this.encodedSignatures = abiEncodePackedSignatures(theSigners, sigR, sigS, sigV);
   }
 
-  public SignedEvent(BlockchainId blockchainId, String cbcContract, byte[] eventFunctionSignature,
-                     byte[] eventData, byte[] encodedSignatures) {
+  public SignedEvent(
+      BlockchainId blockchainId,
+      String cbcContract,
+      byte[] eventFunctionSignature,
+      byte[] eventData,
+      byte[] encodedSignatures) {
     this.bcId = blockchainId;
     this.cbcContract = cbcContract;
     this.eventFunctionSignature = eventFunctionSignature;
@@ -71,8 +76,7 @@ public class SignedEvent {
     this.encodedSignatures = encodedSignatures;
   }
 
-
-    public String getCbcContract() {
+  public String getCbcContract() {
     return cbcContract;
   }
 
@@ -92,24 +96,38 @@ public class SignedEvent {
     return this.bcId;
   }
 
-  private static byte[] abiEncodePackedEvent(BlockchainId blockchainId, String cbcContractAddress,
-                                             byte[] eventSignature, byte[] eventData) {
+  private static byte[] abiEncodePackedEvent(
+      BlockchainId blockchainId,
+      String cbcContractAddress,
+      byte[] eventSignature,
+      byte[] eventData) {
     byte[] blockchainIdBytes = blockchainId.asBytes();
 
     byte[] address = addressStringToBytes(cbcContractAddress);
 
-    byte[] abiEncodePacked = new byte[blockchainIdBytes.length + address.length + eventSignature.length + eventData.length];
+    byte[] abiEncodePacked =
+        new byte
+            [blockchainIdBytes.length + address.length + eventSignature.length + eventData.length];
     System.arraycopy(blockchainIdBytes, 0, abiEncodePacked, 0, blockchainIdBytes.length);
     System.arraycopy(address, 0, abiEncodePacked, blockchainIdBytes.length, address.length);
-    System.arraycopy(eventSignature, 0, abiEncodePacked, blockchainIdBytes.length + address.length, eventSignature.length);
-    System.arraycopy(eventData, 0, abiEncodePacked,
-            blockchainIdBytes.length + address.length + eventSignature.length, eventData.length);
+    System.arraycopy(
+        eventSignature,
+        0,
+        abiEncodePacked,
+        blockchainIdBytes.length + address.length,
+        eventSignature.length);
+    System.arraycopy(
+        eventData,
+        0,
+        abiEncodePacked,
+        blockchainIdBytes.length + address.length + eventSignature.length,
+        eventData.length);
 
     return abiEncodePacked;
   }
 
-
-  private byte[] abiEncodePackedSignatures(List<String> theSigners, List<byte[]> sigR, List<byte[]> sigS, List<Byte> sigV) {
+  private byte[] abiEncodePackedSignatures(
+      List<String> theSigners, List<byte[]> sigR, List<byte[]> sigS, List<Byte> sigV) {
     final int LEN_OF_LEN = 4;
     final int LEN_OF_SIG = 20 + 32 + 32 + 1;
 

@@ -21,7 +21,6 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
-
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.Bytes32;
 import org.hyperledger.besu.ethereum.rlp.RLP;

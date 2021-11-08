@@ -14,20 +14,35 @@
  */
 package net.consensys.gpact.txroot;
 
+import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertFalse;
+
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import net.consensys.gpact.attestorsign.soliditywrappers.AttestorSignRegistrar;
+import net.consensys.gpact.common.AnIdentity;
 import net.consensys.gpact.common.FastTxManager;
+import net.consensys.gpact.common.RevertReason;
 import net.consensys.gpact.common.TxManagerCache;
 import net.consensys.gpact.common.test.AbstractWeb3Test;
+import net.consensys.gpact.trie.MerklePatriciaTrie;
+import net.consensys.gpact.trie.Proof;
+import net.consensys.gpact.trie.SimpleMerklePatriciaTrie;
+import net.consensys.gpact.txroot.soliditywrappers.TestEvents;
 import net.consensys.gpact.txroot.soliditywrappers.TxReceiptsRootStorage;
+import net.consensys.gpact.utils.crypto.KeyPairGen;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.Bytes32;
 import org.apache.tuweni.units.bigints.UInt256;
+import org.hyperledger.besu.ethereum.core.Hash;
 import org.hyperledger.besu.ethereum.core.LogTopic;
 import org.hyperledger.besu.ethereum.rlp.RLP;
 import org.junit.Test;
-import org.hyperledger.besu.ethereum.core.Hash;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.Sign;
 import org.web3j.protocol.core.methods.response.EthBlock;
@@ -40,24 +55,8 @@ import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.exceptions.TransactionException;
 import org.web3j.tx.TransactionManager;
 import org.web3j.tx.exceptions.ContractCallException;
-import net.consensys.gpact.common.RevertReason;
-import net.consensys.gpact.common.AnIdentity;
-import net.consensys.gpact.txroot.soliditywrappers.TestEvents;
-import net.consensys.gpact.utils.crypto.KeyPairGen;
-import net.consensys.gpact.trie.MerklePatriciaTrie;
-import net.consensys.gpact.trie.Proof;
-import net.consensys.gpact.trie.SimpleMerklePatriciaTrie;
 import org.web3j.tx.response.PollingTransactionReceiptProcessor;
 import org.web3j.tx.response.TransactionReceiptProcessor;
-
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertFalse;
 
 public class TxRootAddTest extends AbstractWeb3Test {
   static final Logger LOG = LogManager.getLogger(TxRootAddTest.class);
@@ -69,7 +68,8 @@ public class TxRootAddTest extends AbstractWeb3Test {
   protected AttestorSignRegistrar registrarContract;
 
   protected void deployRegistrarContract() throws Exception {
-    this.registrarContract = AttestorSignRegistrar.deploy(this.web3j, this.tm, this.freeGasProvider).send();
+    this.registrarContract =
+        AttestorSignRegistrar.deploy(this.web3j, this.tm, this.freeGasProvider).send();
   }
 
   protected AttestorSignRegistrar deployRegistrarContract(TransactionManager tm1) throws Exception {
@@ -77,7 +77,8 @@ public class TxRootAddTest extends AbstractWeb3Test {
   }
 
   protected AttestorSignRegistrar loadContract(TransactionManager tm1) throws Exception {
-    return AttestorSignRegistrar.load(this.registrarContract.getContractAddress(), this.web3j, tm1, this.freeGasProvider);
+    return AttestorSignRegistrar.load(
+        this.registrarContract.getContractAddress(), this.web3j, tm1, this.freeGasProvider);
   }
 
   protected void addBlockchain(BigInteger blockchainId, String initialSigner) throws Exception {
@@ -87,15 +88,20 @@ public class TxRootAddTest extends AbstractWeb3Test {
   }
 
   protected void addBlockchain(BigInteger blockchainId, List<String> signers) throws Exception {
-    TransactionReceipt receipt = this.registrarContract.addSignersSetThreshold(blockchainId, signers, BigInteger.ONE).send();
-    assert(receipt.isStatusOK());
+    TransactionReceipt receipt =
+        this.registrarContract.addSignersSetThreshold(blockchainId, signers, BigInteger.ONE).send();
+    assert (receipt.isStatusOK());
   }
 
   protected void deployTxReceiptRootStorageContract() throws Exception {
-    this.txReceiptRootStorageContract = TxReceiptsRootStorage.deploy(this.web3j, this.tm, this.freeGasProvider,
-        this.registrarContract.getContractAddress()).send();
+    this.txReceiptRootStorageContract =
+        TxReceiptsRootStorage.deploy(
+                this.web3j,
+                this.tm,
+                this.freeGasProvider,
+                this.registrarContract.getContractAddress())
+            .send();
   }
-
 
   @Test
   public void addTxReceipt() throws Exception {
@@ -119,23 +125,33 @@ public class TxRootAddTest extends AbstractWeb3Test {
     sigV.add(BigInteger.valueOf(signatureData.getV()[0]));
 
     // Check that the receipt root is has been registered.
-    boolean containsReceiptRoot = this.txReceiptRootStorageContract.containsTxReceiptRoot(blockchainId, this.txReceiptRoot).send();
+    boolean containsReceiptRoot =
+        this.txReceiptRootStorageContract
+            .containsTxReceiptRoot(blockchainId, this.txReceiptRoot)
+            .send();
     assertFalse(containsReceiptRoot);
 
     // This will revert if the signature does not verify
     try {
-      TransactionReceipt receipt = this.txReceiptRootStorageContract.addTxReceiptRoot(blockchainId, signers, sigR, sigS, sigV, this.txReceiptRoot).send();
-      assert(receipt.isStatusOK());
+      TransactionReceipt receipt =
+          this.txReceiptRootStorageContract
+              .addTxReceiptRoot(blockchainId, signers, sigR, sigS, sigV, this.txReceiptRoot)
+              .send();
+      assert (receipt.isStatusOK());
     } catch (TransactionException ex) {
-      LOG.error(" Revert Reason: {}", RevertReason.decodeRevertReason(ex.getTransactionReceipt().get().getRevertReason()));
+      LOG.error(
+          " Revert Reason: {}",
+          RevertReason.decodeRevertReason(ex.getTransactionReceipt().get().getRevertReason()));
       throw ex;
     }
 
     // Check that the receipt root is has been registered.
-    containsReceiptRoot = this.txReceiptRootStorageContract.containsTxReceiptRoot(blockchainId, this.txReceiptRoot).send();
-    assert(containsReceiptRoot);
+    containsReceiptRoot =
+        this.txReceiptRootStorageContract
+            .containsTxReceiptRoot(blockchainId, this.txReceiptRoot)
+            .send();
+    assert (containsReceiptRoot);
   }
-
 
   @Test
   public void proveTxReceiptOneTxPerBlock() throws Exception {
@@ -151,7 +167,8 @@ public class TxRootAddTest extends AbstractWeb3Test {
 
   @Test
   public void proveTxReceipt17TxPerBlock() throws Exception {
-    // This will result in just a branch node, another branch node and seventeen leaf nodes in the trie.
+    // This will result in just a branch node, another branch node and seventeen leaf nodes in the
+    // trie.
     proveTxReceipt(17, true, true);
   }
 
@@ -174,11 +191,14 @@ public class TxRootAddTest extends AbstractWeb3Test {
     }
   }
 
-  private void proveTxReceipt(int numTransactionsPerBlock, boolean correctBlockchain, boolean correctCbcContract) throws Exception {
+  private void proveTxReceipt(
+      int numTransactionsPerBlock, boolean correctBlockchain, boolean correctCbcContract)
+      throws Exception {
     setupWeb3();
     deployRegistrarContract();
     // In this test, the transactions being proven are actually on the same blockchain. However,
-    // for the sake of the test, assume they are on a different blockchain, and assume that blockchain
+    // for the sake of the test, assume they are on a different blockchain, and assume that
+    // blockchain
     // has blockchain id 10.
     BigInteger sourceBlockchainId = BigInteger.TEN;
     AnIdentity newSigner = new AnIdentity();
@@ -187,8 +207,7 @@ public class TxRootAddTest extends AbstractWeb3Test {
     deployTxReceiptRootStorageContract();
 
     // Deploy the contract that will emit the events.
-    TestEvents testContract =
-        TestEvents.deploy(this.web3j, this.tm, this.freeGasProvider).send();
+    TestEvents testContract = TestEvents.deploy(this.web3j, this.tm, this.freeGasProvider).send();
     String testContractAddress = testContract.getContractAddress();
 
     // Have a separate EOA (and hence credentials) for each signer. In this way, the nonce
@@ -200,29 +219,35 @@ public class TxRootAddTest extends AbstractWeb3Test {
       String privateKey0 = new KeyPairGen().generateKeyPairGetPrivateKey();
       creds[i] = Credentials.create(privateKey0);
 
-      TransactionReceiptProcessor txrProcessor = new PollingTransactionReceiptProcessor(this.web3j, POLLING_INTERVAL, RETRY);
-      tms[i] = TxManagerCache.getOrCreate(this.web3j, creds[i], BLOCKCHAIN_ID.longValue(), txrProcessor);
-      testContracts[i] = TestEvents.load(testContractAddress, this.web3j, tms[i], this.freeGasProvider);
+      TransactionReceiptProcessor txrProcessor =
+          new PollingTransactionReceiptProcessor(this.web3j, POLLING_INTERVAL, RETRY);
+      tms[i] =
+          TxManagerCache.getOrCreate(this.web3j, creds[i], BLOCKCHAIN_ID.longValue(), txrProcessor);
+      testContracts[i] =
+          TestEvents.load(testContractAddress, this.web3j, tms[i], this.freeGasProvider);
     }
 
     BigInteger id = BigInteger.TWO;
 
-//    CompletableFuture<TransactionReceipt>[] transactionReceiptCompletableFutures =
-//        (CompletableFuture<TransactionReceipt>[]) new Object[numTransactionsPerBlock];
-    CompletableFuture<?>[] transactionReceiptCompletableFutures = new CompletableFuture<?>[numTransactionsPerBlock];
+    //    CompletableFuture<TransactionReceipt>[] transactionReceiptCompletableFutures =
+    //        (CompletableFuture<TransactionReceipt>[]) new Object[numTransactionsPerBlock];
+    CompletableFuture<?>[] transactionReceiptCompletableFutures =
+        new CompletableFuture<?>[numTransactionsPerBlock];
     for (int i = 0; i < numTransactionsPerBlock; i++) {
       transactionReceiptCompletableFutures[i] = testContracts[i].start(id).sendAsync();
       id = id.add(BigInteger.ONE);
     }
-    CompletableFuture<Void> combinedFuture = CompletableFuture.allOf(transactionReceiptCompletableFutures);
+    CompletableFuture<Void> combinedFuture =
+        CompletableFuture.allOf(transactionReceiptCompletableFutures);
     combinedFuture.get();
 
     final TransactionReceipt[] receipts = new TransactionReceipt[numTransactionsPerBlock];
     for (int i = 0; i < numTransactionsPerBlock; i++) {
       receipts[i] = (TransactionReceipt) transactionReceiptCompletableFutures[i].get();
       // Show the receipts root that has been included in the block.
-      assert(receipts[i] != null && receipts[i].getBlockHash() != null);
-      // TODO check that all transactions ended up in the same block, and hence have the same block hash
+      assert (receipts[i] != null && receipts[i].getBlockHash() != null);
+      // TODO check that all transactions ended up in the same block, and hence have the same block
+      // hash
     }
 
     EthBlock block = web3j.ethGetBlockByHash(receipts[0].getBlockHash(), false).send();
@@ -244,26 +269,31 @@ public class TxRootAddTest extends AbstractWeb3Test {
     sigV.add(BigInteger.valueOf(signatureData.getV()[0]));
 
     // This will revert if the signature does not verify
-    TransactionReceipt receipt5 = this.txReceiptRootStorageContract.addTxReceiptRoot(sourceBlockchainId, signers, sigR, sigS, sigV, receiptsRootByte).send();
-    assert(receipt5.isStatusOK());
-
+    TransactionReceipt receipt5 =
+        this.txReceiptRootStorageContract
+            .addTxReceiptRoot(sourceBlockchainId, signers, sigR, sigS, sigV, receiptsRootByte)
+            .send();
+    assert (receipt5.isStatusOK());
 
     // Calculate receipt root based on logs for all receipts of all transactions in the block.
     String blockHash = receipts[0].getBlockHash();
-    EthGetBlockTransactionCountByHash transactionCountByHash = web3j.ethGetBlockTransactionCountByHash(blockHash).send();
+    EthGetBlockTransactionCountByHash transactionCountByHash =
+        web3j.ethGetBlockTransactionCountByHash(blockHash).send();
     BigInteger txCount = transactionCountByHash.getTransactionCount();
 
     List<org.hyperledger.besu.ethereum.core.TransactionReceipt> besuReceipts = new ArrayList<>();
 
     BigInteger transactionIndex = BigInteger.ZERO;
     do {
-      EthTransaction ethTransaction = this.web3j.ethGetTransactionByBlockHashAndIndex(blockHash, transactionIndex).send();
+      EthTransaction ethTransaction =
+          this.web3j.ethGetTransactionByBlockHashAndIndex(blockHash, transactionIndex).send();
       Optional<Transaction> transaction = ethTransaction.getTransaction();
-      assert(transaction.isPresent());
+      assert (transaction.isPresent());
       String txHash = transaction.get().getHash();
-      EthGetTransactionReceipt ethGetTransactionReceipt = this.web3j.ethGetTransactionReceipt(txHash).send();
+      EthGetTransactionReceipt ethGetTransactionReceipt =
+          this.web3j.ethGetTransactionReceipt(txHash).send();
       Optional<TransactionReceipt> mayBeReceipt = ethGetTransactionReceipt.getTransactionReceipt();
-      assert(mayBeReceipt.isPresent());
+      assert (mayBeReceipt.isPresent());
       TransactionReceipt receipt = mayBeReceipt.get();
 
       // Convert to Besu objects
@@ -272,27 +302,35 @@ public class TxRootAddTest extends AbstractWeb3Test {
       String stateRootFromReceipt = receipt.getRoot();
       Hash root = (stateRootFromReceipt == null) ? null : Hash.fromHexString(receipt.getRoot());
       String statusFromReceipt = receipt.getStatus();
-      int status = statusFromReceipt == null ? -1 : Integer.parseInt(statusFromReceipt.substring(2), 16);
-      for (Log web3jLog: receipt.getLogs()) {
-        org.hyperledger.besu.ethereum.core.Address addr = org.hyperledger.besu.ethereum.core.Address.fromHexString(web3jLog.getAddress());
+      int status =
+          statusFromReceipt == null ? -1 : Integer.parseInt(statusFromReceipt.substring(2), 16);
+      for (Log web3jLog : receipt.getLogs()) {
+        org.hyperledger.besu.ethereum.core.Address addr =
+            org.hyperledger.besu.ethereum.core.Address.fromHexString(web3jLog.getAddress());
         Bytes data = Bytes.fromHexString(web3jLog.getData());
         List<String> topics = web3jLog.getTopics();
         List<LogTopic> logTopics = new ArrayList<>();
-        for (String topic: topics) {
+        for (String topic : topics) {
           LogTopic logTopic = LogTopic.create(Bytes.fromHexString(topic));
           logTopics.add(logTopic);
         }
         besuLogs.add(new org.hyperledger.besu.ethereum.core.Log(addr, data, logTopics));
       }
       String revertReasonFromReceipt = receipt.getRevertReason();
-      Bytes revertReason = revertReasonFromReceipt == null ? null : Bytes.fromHexString(receipt.getRevertReason());
+      Bytes revertReason =
+          revertReasonFromReceipt == null ? null : Bytes.fromHexString(receipt.getRevertReason());
       org.hyperledger.besu.ethereum.core.TransactionReceipt txReceipt =
-          root == null ?
-              new org.hyperledger.besu.ethereum.core.TransactionReceipt(status, receipt.getCumulativeGasUsed().longValue(),
-                  besuLogs, java.util.Optional.ofNullable(revertReason))
-              :
-              new org.hyperledger.besu.ethereum.core.TransactionReceipt(root, receipt.getCumulativeGasUsed().longValue(),
-                  besuLogs, java.util.Optional.ofNullable(revertReason));
+          root == null
+              ? new org.hyperledger.besu.ethereum.core.TransactionReceipt(
+                  status,
+                  receipt.getCumulativeGasUsed().longValue(),
+                  besuLogs,
+                  java.util.Optional.ofNullable(revertReason))
+              : new org.hyperledger.besu.ethereum.core.TransactionReceipt(
+                  root,
+                  receipt.getCumulativeGasUsed().longValue(),
+                  besuLogs,
+                  java.util.Optional.ofNullable(revertReason));
       besuReceipts.add(txReceipt);
 
       // Increment for the next time through the loop.
@@ -307,7 +345,6 @@ public class TxRootAddTest extends AbstractWeb3Test {
     Bytes32 besuCalculatedReceiptsRoot = trie.getRootHash();
     String besuCalculatedReceiptsRootStr = besuCalculatedReceiptsRoot.toHexString();
     assertEquals(besuCalculatedReceiptsRootStr, receiptsRoot);
-
 
     // Check that each transaction receipt can be proven.
     for (int i = 0; i < numTransactionsPerBlock; i++) {
@@ -325,13 +362,15 @@ public class TxRootAddTest extends AbstractWeb3Test {
       List<Bytes> proofList1 = simpleProof.getProofRelatedNodes();
       List<BigInteger> proofOffsets = new ArrayList<>();
       List<byte[]> proofs = new ArrayList<>();
-      for (int j = proofList1.size()-1; j >=0; j--) {
+      for (int j = proofList1.size() - 1; j >= 0; j--) {
         rlpOfNode = proofList1.get(j);
         proofOffsets.add(BigInteger.valueOf(findOffset(rlpOfNode, nodeHash)));
         proofs.add(rlpOfNode.toArray());
         nodeHash = org.hyperledger.besu.crypto.Hash.keccak256(rlpOfNode);
       }
-      assertEquals(besuCalculatedReceiptsRoot.toHexString(), org.hyperledger.besu.crypto.Hash.keccak256(rlpOfNode).toHexString());
+      assertEquals(
+          besuCalculatedReceiptsRoot.toHexString(),
+          org.hyperledger.besu.crypto.Hash.keccak256(rlpOfNode).toHexString());
 
       BigInteger bcId = sourceBlockchainId;
       if (!correctBlockchain) {
@@ -343,28 +382,26 @@ public class TxRootAddTest extends AbstractWeb3Test {
         cbcContractAddress = "1";
       }
 
-      this.txReceiptRootStorageContract.verify(
-          bcId,
-          cbcContractAddress,
-          besuCalculatedReceiptsRoot.toArray(),
-          transactionReceipt.toArray(),
-          proofOffsets,
-          proofs
-      ).send();
+      this.txReceiptRootStorageContract
+          .verify(
+              bcId,
+              cbcContractAddress,
+              besuCalculatedReceiptsRoot.toArray(),
+              transactionReceipt.toArray(),
+              proofOffsets,
+              proofs)
+          .send();
     }
 
-
-
-
-//    System.exit(0);
-}
+    //    System.exit(0);
+  }
 
   private static int findOffset(Bytes rlpOfNode, Bytes nodeRef) {
     int sizeNodeRef = nodeRef.size();
     for (int i = 0; i < rlpOfNode.size() - sizeNodeRef; i++) {
       boolean found = true;
       for (int j = 0; j < sizeNodeRef; j++) {
-        if (rlpOfNode.get(i+j) != nodeRef.get(j)) {
+        if (rlpOfNode.get(i + j) != nodeRef.get(j)) {
           found = false;
           break;
         }
@@ -376,7 +413,6 @@ public class TxRootAddTest extends AbstractWeb3Test {
     return -1;
   }
 
-
   private static MerklePatriciaTrie<Bytes, Bytes> trie() {
     return new SimpleMerklePatriciaTrie<>(b -> b);
   }
@@ -384,8 +420,4 @@ public class TxRootAddTest extends AbstractWeb3Test {
   private static Bytes indexKey(final int i) {
     return RLP.encodeOne(UInt256.valueOf(i).toBytes().trimLeadingZeros());
   }
-
-
-
 }
-

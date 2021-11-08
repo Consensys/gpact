@@ -14,9 +14,8 @@
  */
 package net.consensys.gpact.examples.trade.sim;
 
-import net.consensys.gpact.examples.trade.Bc1TradeWallet;
-
 import java.math.BigInteger;
+import net.consensys.gpact.examples.trade.Bc1TradeWallet;
 
 // Note: only need to simulate enough to know what the parameters for function calls should be.
 public class SimTradeWallet {
@@ -39,6 +38,7 @@ public class SimTradeWallet {
   }
 
   public String getRlpFunctionSignature_executeTrade() {
-    return this.rootContract.getRlpFunctionSignature_ExecuteTrade(this.executeTrade_seller, this.executeTrade_quantity);
+    return this.rootContract.getRlpFunctionSignature_ExecuteTrade(
+        this.executeTrade_seller, this.executeTrade_quantity);
   }
 }

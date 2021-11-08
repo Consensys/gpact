@@ -14,7 +14,7 @@
  */
 package net.consensys.gpact.txroot;
 
-import net.consensys.gpact.common.AnIdentity;
+import java.util.*;
 import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.common.BlockchainInfo;
 import net.consensys.gpact.messaging.MessagingVerificationInterface;
@@ -22,28 +22,23 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
 
-import java.io.IOException;
-import java.util.*;
-
-
-/**
- * Manages a set of AttestorSigners for a set of blockchains.
- */
+/** Manages a set of AttestorSigners for a set of blockchains. */
 public class TxRootTransferGroup {
   static final Logger LOG = LogManager.getLogger(TxRootTransferGroup.class);
 
   Map<BlockchainId, TxRootTransfer> blockchains = new HashMap<>();
 
-
-  public void addBlockchain(TxRootRelayerGroup relayerGroup,
-                            Credentials creds, BlockchainInfo bcInfo) throws Exception {
+  public void addBlockchain(
+      TxRootRelayerGroup relayerGroup, Credentials creds, BlockchainInfo bcInfo) throws Exception {
     if (this.blockchains.containsKey(bcInfo.bcId)) {
       return;
       // throw new Exception("Blockchain already in TxRoot Transfer Group: " + bcInfo.bcId);
     }
 
-    this.blockchains.put(bcInfo.bcId, new TxRootTransfer(relayerGroup,
-            creds, bcInfo.bcId, bcInfo.uri, bcInfo.gasPriceStrategy, bcInfo.period));
+    this.blockchains.put(
+        bcInfo.bcId,
+        new TxRootTransfer(
+            relayerGroup, creds, bcInfo.bcId, bcInfo.uri, bcInfo.gasPriceStrategy, bcInfo.period));
   }
 
   public MessagingVerificationInterface getVerifier(BlockchainId bcId) throws Exception {

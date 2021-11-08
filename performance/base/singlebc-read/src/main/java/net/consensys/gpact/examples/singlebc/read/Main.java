@@ -14,16 +14,15 @@
  */
 package net.consensys.gpact.examples.singlebc.read;
 
+import java.math.BigInteger;
 import net.consensys.gpact.common.BlockchainInfo;
 import net.consensys.gpact.common.CredentialsCreator;
+import net.consensys.gpact.common.PropertiesLoader;
+import net.consensys.gpact.common.StatsHolder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
-import net.consensys.gpact.common.PropertiesLoader;
-import net.consensys.gpact.common.StatsHolder;
-
-import java.math.BigInteger;
 
 public class Main {
   static final Logger LOG = LogManager.getLogger(Main.class);
@@ -44,8 +43,10 @@ public class Main {
     Credentials creds = CredentialsCreator.createCredentials();
     BlockchainInfo root = propsLoader.getBlockchainInfo("ROOT");
 
-    Bc1ContractA bc1ContractABlockchain = new Bc1ContractA(creds, root.bcId, root.uri, root.gasPriceStrategy, root.period);
-    Bc2ContractB bc2ContractBBlockchain = new Bc2ContractB(creds, root.bcId, root.uri, root.gasPriceStrategy, root.period);
+    Bc1ContractA bc1ContractABlockchain =
+        new Bc1ContractA(creds, root.bcId, root.uri, root.gasPriceStrategy, root.period);
+    Bc2ContractB bc2ContractBBlockchain =
+        new Bc2ContractB(creds, root.bcId, root.uri, root.gasPriceStrategy, root.period);
 
     BigInteger val = BigInteger.valueOf(7);
 
@@ -55,7 +56,6 @@ public class Main {
 
     bc1ContractABlockchain.deployContracts(contractBContractAddress);
     String contractAContractAddress = bc1ContractABlockchain.contractA.getContractAddress();
-
 
     for (int numExecutions = 0; numExecutions < NUM_TIMES_EXECUTE; numExecutions++) {
       LOG.info("Execution: {}  *****************", numExecutions);
@@ -68,7 +68,6 @@ public class Main {
       bc2ContractBBlockchain.separatedGet();
       bc1ContractABlockchain.separatedGet();
     }
-
 
     bc1ContractABlockchain.shutdown();
     bc2ContractBBlockchain.shutdown();

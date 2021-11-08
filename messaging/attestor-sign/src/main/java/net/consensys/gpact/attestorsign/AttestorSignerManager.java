@@ -14,6 +14,8 @@
  */
 package net.consensys.gpact.attestorsign;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import net.consensys.gpact.attestorsign.soliditywrappers.CrosschainVerifierSign;
 import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.common.DynamicGasProvider;
@@ -21,19 +23,19 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
 
-import java.io.IOException;
-import java.util.ArrayList;
-
-/**
- * Manages the registrar and crosschain verifier contracts on a blockchain.
- */
+/** Manages the registrar and crosschain verifier contracts on a blockchain. */
 public class AttestorSignerManager extends RegistrarManager {
   static final Logger LOG = LogManager.getLogger(AttestorSignerManager.class);
 
   private CrosschainVerifierSign verifier;
 
-
-  public AttestorSignerManager(Credentials credentials, BlockchainId bcId, String uri, DynamicGasProvider.Strategy gasPriceStrategy, int blockPeriod) throws IOException {
+  public AttestorSignerManager(
+      Credentials credentials,
+      BlockchainId bcId,
+      String uri,
+      DynamicGasProvider.Strategy gasPriceStrategy,
+      int blockPeriod)
+      throws IOException {
     super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
   }
 
@@ -41,7 +43,9 @@ public class AttestorSignerManager extends RegistrarManager {
   public void deployContracts() throws Exception {
     super.deployContracts();
     this.verifier =
-            CrosschainVerifierSign.deploy(this.web3j, this.tm, this.gasProvider, this.registrarContract.getContractAddress()).send();
+        CrosschainVerifierSign.deploy(
+                this.web3j, this.tm, this.gasProvider, this.registrarContract.getContractAddress())
+            .send();
     LOG.debug(" Verifier Contract: {}", this.verifier.getContractAddress());
   }
 
@@ -52,12 +56,11 @@ public class AttestorSignerManager extends RegistrarManager {
     return addresses;
   }
 
-
   @Override
   public void loadContracts(ArrayList<String> addresses) {
     super.loadContracts(addresses);
     this.verifier =
-            CrosschainVerifierSign.load(addresses.get(1), this.web3j, this.tm, this.gasProvider);
+        CrosschainVerifierSign.load(addresses.get(1), this.web3j, this.tm, this.gasProvider);
   }
 
   @Override

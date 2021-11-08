@@ -14,9 +14,8 @@
  */
 package net.consensys.gpact.examples.trade.sim;
 
-import net.consensys.gpact.examples.trade.Bc2BusLogic;
-
 import java.math.BigInteger;
+import net.consensys.gpact.examples.trade.Bc2BusLogic;
 
 public class SimBusLogicContract {
   private String stockShipment_seller;
@@ -28,7 +27,11 @@ public class SimBusLogicContract {
   SimBalancesContract balancesContract;
   SimStockContract stockContract;
 
-  public SimBusLogicContract(Bc2BusLogic contract, SimPriceOracleContract oracleContract, SimBalancesContract balancesContract, SimStockContract stockContract) {
+  public SimBusLogicContract(
+      Bc2BusLogic contract,
+      SimPriceOracleContract oracleContract,
+      SimBalancesContract balancesContract,
+      SimStockContract stockContract) {
     this.bc2BusLogic = contract;
     this.priceOracleContract = oracleContract;
     this.balancesContract = balancesContract;
@@ -39,7 +42,6 @@ public class SimBusLogicContract {
     this.stockShipment_seller = seller;
     this.stockShipment_buyer = buyer;
     this.stockShipment_quantity = quantity;
-
 
     BigInteger currentPrice = this.priceOracleContract.getPrice();
     BigInteger cost = currentPrice.multiply(quantity);
@@ -52,6 +54,7 @@ public class SimBusLogicContract {
   }
 
   public String getRlpFunctionSignature_stockShipment() {
-    return this.bc2BusLogic.getRlpFunctionSignature_StockShipment(this.stockShipment_seller, this.stockShipment_buyer, this.stockShipment_quantity);
+    return this.bc2BusLogic.getRlpFunctionSignature_StockShipment(
+        this.stockShipment_seller, this.stockShipment_buyer, this.stockShipment_quantity);
   }
 }

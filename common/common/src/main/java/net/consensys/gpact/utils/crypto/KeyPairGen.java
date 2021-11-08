@@ -12,11 +12,11 @@
  */
 package net.consensys.gpact.utils.crypto;
 
+import static java.security.DrbgParameters.Capability.RESEED_ONLY;
+
 import com.google.common.primitives.Bytes;
 import com.google.common.primitives.Ints;
 import com.google.common.primitives.Longs;
-
-
 import java.math.BigInteger;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -31,28 +31,23 @@ import java.security.spec.ECGenParameterSpec;
 import java.util.Arrays;
 import java.util.Enumeration;
 
-import static java.security.DrbgParameters.Capability.RESEED_ONLY;
-
-/**
- * Generate one or more key pairs for use in the sample code.
- */
+/** Generate one or more key pairs for use in the sample code. */
 public class KeyPairGen {
   private final KeyPairGenerator keyPairGenerator;
 
   public KeyPairGen() {
     // TODO don't create a PRNG each call
     try {
-      final SecureRandom rand = SecureRandom.getInstance("DRBG",
-          DrbgParameters.instantiation(256, RESEED_ONLY, getPersonalizationString()));
+      final SecureRandom rand =
+          SecureRandom.getInstance(
+              "DRBG", DrbgParameters.instantiation(256, RESEED_ONLY, getPersonalizationString()));
       this.keyPairGenerator = KeyPairGenerator.getInstance("EC");
       final ECGenParameterSpec ecGenParameterSpec = new ECGenParameterSpec("secp256k1");
       this.keyPairGenerator.initialize(ecGenParameterSpec, rand);
     } catch (final Exception e) {
       throw new RuntimeException(e);
     }
-
   }
-
 
   public KeyPair generateKeyPair() {
     return this.keyPairGenerator.generateKeyPair();
@@ -60,11 +55,10 @@ public class KeyPairGen {
 
   public String generateKeyPairGetPrivateKey() {
     KeyPair rawKeyPair = this.keyPairGenerator.generateKeyPair();
-    final ECPrivateKey privateKey =  (ECPrivateKey) rawKeyPair.getPrivate();
+    final ECPrivateKey privateKey = (ECPrivateKey) rawKeyPair.getPrivate();
     final BigInteger privateKeyValue = privateKey.getS();
     return privateKeyValue.toString(16);
   }
-
 
   // Use a personalisation string to help ensure the entropy going into the PRNG is unique.
   private static byte[] getPersonalizationString() throws SocketException, BufferOverflowException {
@@ -81,8 +75,7 @@ public class KeyPairGen {
     final byte[] networkAddresses = new byte[256];
     final ByteBuffer buffer = ByteBuffer.wrap(networkAddresses);
 
-    final Enumeration<NetworkInterface> networkInterfaces =
-        NetworkInterface.getNetworkInterfaces();
+    final Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
     if (networkInterfaces != null) {
       while (networkInterfaces.hasMoreElements()) {
         final NetworkInterface networkInterface = networkInterfaces.nextElement();

@@ -24,7 +24,6 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
 import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.Bytes32;
@@ -62,15 +61,16 @@ public class BinaryMerklePatriciaTrie<K extends Bytes, V> implements MerklePatri
   public Proof<V> getValueWithProof(final K key) {
     checkNotNull(key);
     final ProofVisitor<V> proofVisitor = new ProofVisitor<>(root);
-    final Optional<V> value = root.accept(proofVisitor, CompactEncoding.bytesToPathBinary(key)).getValue();
+    final Optional<V> value =
+        root.accept(proofVisitor, CompactEncoding.bytesToPathBinary(key)).getValue();
     final List<Bytes> proof =
-      proofVisitor.getProof().stream().map(Node::getRlp).collect(Collectors.toList());
+        proofVisitor.getProof().stream().map(Node::getRlp).collect(Collectors.toList());
     return new Proof<>(value, proof);
   }
 
   public MultiMerkleProof<V> getValuesWithMultiMerkleProof(final List<Bytes> keys) {
     ArrayList<Bytes> keyPaths = new ArrayList<>();
-    for(Bytes key: keys) {
+    for (Bytes key : keys) {
       keyPaths.add(CompactEncoding.bytesToPathBinary(key));
     }
     return new MultiMerkleProof<>(root.constructMultiproof(keyPaths, nodeFactory));
@@ -80,7 +80,8 @@ public class BinaryMerklePatriciaTrie<K extends Bytes, V> implements MerklePatri
   public void put(final K key, final V value) {
     checkNotNull(key);
     checkNotNull(value);
-    this.root = root.accept(new PutVisitor<>(nodeFactory, value), CompactEncoding.bytesToPathBinary(key));
+    this.root =
+        root.accept(new PutVisitor<>(nodeFactory, value), CompactEncoding.bytesToPathBinary(key));
   }
 
   @Override

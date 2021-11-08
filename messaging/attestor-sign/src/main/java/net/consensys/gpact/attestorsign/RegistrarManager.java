@@ -14,6 +14,10 @@
  */
 package net.consensys.gpact.attestorsign;
 
+import java.io.IOException;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 import net.consensys.gpact.attestorsign.soliditywrappers.AttestorSignRegistrar;
 import net.consensys.gpact.common.AbstractBlockchain;
 import net.consensys.gpact.common.BlockchainId;
@@ -26,26 +30,27 @@ import org.web3j.crypto.Credentials;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.exceptions.TransactionException;
 
-import java.io.IOException;
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
-
-/**
- * Manages the registrar contract on a blockchain.
- */
-public abstract class RegistrarManager extends AbstractBlockchain implements MessagingManagerInterface {
+/** Manages the registrar contract on a blockchain. */
+public abstract class RegistrarManager extends AbstractBlockchain
+    implements MessagingManagerInterface {
   static final Logger LOG = LogManager.getLogger(RegistrarManager.class);
 
   protected AttestorSignRegistrar registrarContract;
 
-  public RegistrarManager(Credentials credentials, BlockchainId bcId, String uri, DynamicGasProvider.Strategy gasPriceStrategy, int blockPeriod) throws IOException {
+  public RegistrarManager(
+      Credentials credentials,
+      BlockchainId bcId,
+      String uri,
+      DynamicGasProvider.Strategy gasPriceStrategy,
+      int blockPeriod)
+      throws IOException {
     super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
   }
 
   @Override
   public void deployContracts() throws Exception {
-    this.registrarContract = AttestorSignRegistrar.deploy(this.web3j, this.tm, this.gasProvider).send();
+    this.registrarContract =
+        AttestorSignRegistrar.deploy(this.web3j, this.tm, this.gasProvider).send();
     LOG.debug(" Registrar Contract: {}", this.registrarContract.getContractAddress());
   }
 
@@ -56,63 +61,89 @@ public abstract class RegistrarManager extends AbstractBlockchain implements Mes
     return addresses;
   }
 
-
   @Override
   public void loadContracts(ArrayList<String> addresses) {
     this.registrarContract =
-            AttestorSignRegistrar.load(addresses.get(0), this.web3j, this.tm, this.gasProvider);
+        AttestorSignRegistrar.load(addresses.get(0), this.web3j, this.tm, this.gasProvider);
   }
-
 
   @Override
   public void registerSigner(BlockchainId bcId, String signersAddress) throws Exception {
-    LOG.debug("Registering signer 0x{} as signer for blockchain {} in registration contract on blockchain {}",
-            signersAddress, bcId, this.blockchainId);
+    LOG.debug(
+        "Registering signer 0x{} as signer for blockchain {} in registration contract on blockchain {}",
+        signersAddress,
+        bcId,
+        this.blockchainId);
     TransactionReceipt txr;
     try {
       txr = this.registrarContract.addSigner(bcId.asBigInt(), signersAddress).send();
     } catch (TransactionException ex) {
-      LOG.error(" Revert Reason: {}", RevertReason.decodeRevertReason(ex.getTransactionReceipt().get().getRevertReason()));
+      LOG.error(
+          " Revert Reason: {}",
+          RevertReason.decodeRevertReason(ex.getTransactionReceipt().get().getRevertReason()));
       throw ex;
     }
-    assert(txr.isStatusOK());
+    assert (txr.isStatusOK());
   }
 
   @Override
-  public void registerSigner(BlockchainId bcId, String signer, BigInteger newThreshold) throws Exception {
-    LOG.debug("Registering signer 0x{} as signer for blockchain {} in registration contract on blockchain {}",
-            signer, bcId, this.blockchainId);
+  public void registerSigner(BlockchainId bcId, String signer, BigInteger newThreshold)
+      throws Exception {
+    LOG.debug(
+        "Registering signer 0x{} as signer for blockchain {} in registration contract on blockchain {}",
+        signer,
+        bcId,
+        this.blockchainId);
     TransactionReceipt txr;
     try {
-      txr = this.registrarContract.addSignerSetThreshold(bcId.asBigInt(), signer, newThreshold).send();
+      txr =
+          this.registrarContract
+              .addSignerSetThreshold(bcId.asBigInt(), signer, newThreshold)
+              .send();
     } catch (TransactionException ex) {
-      LOG.error(" Revert Reason: {}", RevertReason.decodeRevertReason(ex.getTransactionReceipt().get().getRevertReason()));
+      LOG.error(
+          " Revert Reason: {}",
+          RevertReason.decodeRevertReason(ex.getTransactionReceipt().get().getRevertReason()));
       throw ex;
     }
-    assert(txr.isStatusOK());
+    assert (txr.isStatusOK());
   }
 
   @Override
-  public void registerSigners(BlockchainId bcId, List<String> signers, BigInteger newThreshold) throws Exception {
-    LOG.debug("Registering signers as signers for blockchain {} in registration contract on blockchain {}",
-            bcId, this.blockchainId);
-    TransactionReceipt txr = this.registrarContract.addSignersSetThreshold(bcId.asBigInt(), signers, newThreshold).send();
-    assert(txr.isStatusOK());
+  public void registerSigners(BlockchainId bcId, List<String> signers, BigInteger newThreshold)
+      throws Exception {
+    LOG.debug(
+        "Registering signers as signers for blockchain {} in registration contract on blockchain {}",
+        bcId,
+        this.blockchainId);
+    TransactionReceipt txr =
+        this.registrarContract
+            .addSignersSetThreshold(bcId.asBigInt(), signers, newThreshold)
+            .send();
+    assert (txr.isStatusOK());
   }
 
   @Override
   public void removeSigner(BlockchainId bcId, String signer) throws Exception {
-    LOG.debug("Remove signer as signer for blockchain {} in registration contract on blockchain {}",
-            bcId, this.blockchainId);
+    LOG.debug(
+        "Remove signer as signer for blockchain {} in registration contract on blockchain {}",
+        bcId,
+        this.blockchainId);
     TransactionReceipt txr = this.registrarContract.removeSigner(bcId.asBigInt(), signer).send();
-    assert(txr.isStatusOK());
+    assert (txr.isStatusOK());
   }
 
   @Override
-  public void removeSigner(BlockchainId bcId, String signer, BigInteger newThreshold) throws Exception {
-    LOG.debug("Remove signer as signer for blockchain {} in registration contract on blockchain {}",
-            bcId, this.blockchainId);
-    TransactionReceipt txr = this.registrarContract.removeSignerSetThreshold(bcId.asBigInt(), signer, newThreshold).send();
-    assert(txr.isStatusOK());
+  public void removeSigner(BlockchainId bcId, String signer, BigInteger newThreshold)
+      throws Exception {
+    LOG.debug(
+        "Remove signer as signer for blockchain {} in registration contract on blockchain {}",
+        bcId,
+        this.blockchainId);
+    TransactionReceipt txr =
+        this.registrarContract
+            .removeSignerSetThreshold(bcId.asBigInt(), signer, newThreshold)
+            .send();
+    assert (txr.isStatusOK());
   }
 }

@@ -14,6 +14,8 @@
  */
 package net.consensys.gpact.attestorsign;
 
+import java.math.BigInteger;
+import java.util.*;
 import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.common.BlockchainInfo;
 import net.consensys.gpact.messaging.MessagingManagerGroupInterface;
@@ -21,29 +23,24 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
 
-import java.math.BigInteger;
-import java.util.*;
-
-
-/**
- * Manage multiple blockchains, each holding a set of registrar and verification contracts
- */
+/** Manage multiple blockchains, each holding a set of registrar and verification contracts */
 public class AttestorSignerManagerGroup implements MessagingManagerGroupInterface {
   static final Logger LOG = LogManager.getLogger(AttestorSignerManagerGroup.class);
 
   Map<BlockchainId, AttestorSignerManager> blockchains = new HashMap<>();
 
-
   @Override
-  public void addBlockchainAndDeployContracts(Credentials creds, BlockchainInfo bcInfo) throws Exception {
+  public void addBlockchainAndDeployContracts(Credentials creds, BlockchainInfo bcInfo)
+      throws Exception {
     BlockchainId blockchainId = bcInfo.bcId;
     if (this.blockchains.containsKey(blockchainId)) {
       return;
-      //throw new Exception("Blockchain already added: " + blockchainId);
+      // throw new Exception("Blockchain already added: " + blockchainId);
     }
     LOG.debug("Deploying Cross-Blockchain Control contracts for blockchain id {}", blockchainId);
 
-    AttestorSignerManager manager = new AttestorSignerManager(
+    AttestorSignerManager manager =
+        new AttestorSignerManager(
             creds, blockchainId, bcInfo.uri, bcInfo.gasPriceStrategy, bcInfo.period);
     manager.deployContracts();
 
@@ -51,13 +48,15 @@ public class AttestorSignerManagerGroup implements MessagingManagerGroupInterfac
   }
 
   @Override
-  public void addBlockchainAndLoadContracts(Credentials creds, BlockchainInfo bcInfo, ArrayList<String> addresses) throws Exception {
+  public void addBlockchainAndLoadContracts(
+      Credentials creds, BlockchainInfo bcInfo, ArrayList<String> addresses) throws Exception {
     BlockchainId blockchainId = bcInfo.bcId;
     if (this.blockchains.containsKey(blockchainId)) {
       throw new Exception("Blockchain already added: " + blockchainId);
     }
 
-    AttestorSignerManager manager = new AttestorSignerManager(
+    AttestorSignerManager manager =
+        new AttestorSignerManager(
             creds, blockchainId, bcInfo.uri, bcInfo.gasPriceStrategy, bcInfo.period);
     manager.loadContracts(addresses);
 
@@ -66,7 +65,7 @@ public class AttestorSignerManagerGroup implements MessagingManagerGroupInterfac
 
   @Override
   public void registerSignerOnAllBlockchains(String signersAddress) throws Exception {
-    for (BlockchainId bcId1: this.blockchains.keySet()) {
+    for (BlockchainId bcId1 : this.blockchains.keySet()) {
       registerSigner(signersAddress, bcId1);
     }
   }
@@ -74,7 +73,7 @@ public class AttestorSignerManagerGroup implements MessagingManagerGroupInterfac
   @Override
   public void registerSigner(String signersAddress, BlockchainId bcId1) throws Exception {
     // Add the signer (their address / public key) to each blockchain
-    for (BlockchainId bcId2: this.blockchains.keySet()) {
+    for (BlockchainId bcId2 : this.blockchains.keySet()) {
       AttestorSignerManager manager = this.blockchains.get(bcId2);
       manager.registerSigner(bcId1, signersAddress);
     }
@@ -82,7 +81,7 @@ public class AttestorSignerManagerGroup implements MessagingManagerGroupInterfac
 
   @Override
   public void registerFirstSignerOnAllBlockchains(String signersAddress) throws Exception {
-    for (BlockchainId bcId1: this.blockchains.keySet()) {
+    for (BlockchainId bcId1 : this.blockchains.keySet()) {
       registerFirstSigner(signersAddress, bcId1);
     }
   }
@@ -90,12 +89,11 @@ public class AttestorSignerManagerGroup implements MessagingManagerGroupInterfac
   @Override
   public void registerFirstSigner(String signersAddress, BlockchainId bcId1) throws Exception {
     // Add the signer (their address / public key) to each blockchain
-    for (BlockchainId bcId2: this.blockchains.keySet()) {
+    for (BlockchainId bcId2 : this.blockchains.keySet()) {
       AttestorSignerManager manager = this.blockchains.get(bcId2);
       manager.registerSigner(bcId1, signersAddress, BigInteger.ONE);
     }
   }
-
 
   @Override
   public String getVerifierAddress(final BlockchainId bcId) throws Exception {
@@ -104,6 +102,4 @@ public class AttestorSignerManagerGroup implements MessagingManagerGroupInterfac
     }
     return this.blockchains.get(bcId).getVerifierAddress();
   }
-
-
 }

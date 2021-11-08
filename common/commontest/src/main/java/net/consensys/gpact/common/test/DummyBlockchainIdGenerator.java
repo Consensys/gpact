@@ -14,17 +14,15 @@
  */
 package net.consensys.gpact.common.test;
 
-import org.apache.tuweni.bytes.Bytes;
-
 import java.math.BigInteger;
 import java.util.Random;
 
 public class DummyBlockchainIdGenerator {
 
-    public static BigInteger gen() {
-        Random notVeryRandom = new Random();
-        byte[] bcId = new byte[32];
-        notVeryRandom.nextBytes(bcId);
-        return new BigInteger(1, bcId);
-    }
+  public static BigInteger gen() {
+    Random notVeryRandom = new Random();
+    byte[] bcId = new byte[32];
+    notVeryRandom.nextBytes(bcId);
+    return new BigInteger(1, bcId);
+  }
 }

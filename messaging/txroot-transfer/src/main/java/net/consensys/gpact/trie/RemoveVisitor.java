@@ -61,6 +61,7 @@ class RemoveVisitor<V> implements PathNodeVisitor<V> {
     final Node<V> updatedChild = branchNode.child(childIndex).accept(this, path.slice(1));
     return branchNode.replaceChild(childIndex, updatedChild);
   }
+
   @Override
   public Node<V> visit(final LeafNode<V> leafNode, final Bytes path) {
     final Bytes leafPath = leafNode.getPath();

@@ -14,21 +14,20 @@
  */
 package net.consensys.gpact.examples.read;
 
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
+import net.consensys.gpact.cbc.CrossControlManagerGroup;
+import net.consensys.gpact.cbc.CrosschainExecutor;
 import net.consensys.gpact.cbc.calltree.CallExecutionTree;
+import net.consensys.gpact.cbc.engine.ExecutionEngine;
 import net.consensys.gpact.common.*;
+import net.consensys.gpact.examples.read.sim.SimContractA;
+import net.consensys.gpact.examples.read.sim.SimContractB;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
-import net.consensys.gpact.cbc.CrossControlManagerGroup;
-import net.consensys.gpact.cbc.CrosschainExecutor;
-import net.consensys.gpact.cbc.engine.ExecutionEngine;
-import net.consensys.gpact.examples.read.sim.SimContractA;
-import net.consensys.gpact.examples.read.sim.SimContractB;
-
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
 
 public class Main {
   static final Logger LOG = LogManager.getLogger(Main.class);
@@ -50,12 +49,15 @@ public class Main {
 
     BlockchainInfo root = exampleManager.getRootBcInfo();
     BlockchainInfo bc2 = exampleManager.getBc2Info();
-    CrossControlManagerGroup crossControlManagerGroup = exampleManager.getGpactCrossControlManagerGroup();
+    CrossControlManagerGroup crossControlManagerGroup =
+        exampleManager.getGpactCrossControlManagerGroup();
 
     // Set-up classes to manage blockchains.
     Credentials appCreds = CredentialsCreator.createCredentials();
-    Bc1ContractA bc1ContractABlockchain = new Bc1ContractA(appCreds, root.bcId, root.uri, root.gasPriceStrategy, root.period);
-    Bc2ContractB bc2ContractBBlockchain = new Bc2ContractB(appCreds, bc2.bcId, bc2.uri, bc2.gasPriceStrategy, bc2.period);
+    Bc1ContractA bc1ContractABlockchain =
+        new Bc1ContractA(appCreds, root.bcId, root.uri, root.gasPriceStrategy, root.period);
+    Bc2ContractB bc2ContractBBlockchain =
+        new Bc2ContractB(appCreds, bc2.bcId, bc2.uri, bc2.gasPriceStrategy, bc2.period);
 
     BigInteger val = BigInteger.valueOf(7);
 
@@ -65,9 +67,11 @@ public class Main {
     String contractBContractAddress = bc2ContractBBlockchain.contractB.getContractAddress();
 
     BlockchainId rootBcId = bc1ContractABlockchain.getBlockchainId();
-    bc1ContractABlockchain.deployContracts(crossControlManagerGroup.getCbcAddress(rootBcId), bc2BcId.asBigInt(), contractBContractAddress);
+    bc1ContractABlockchain.deployContracts(
+        crossControlManagerGroup.getCbcAddress(rootBcId),
+        bc2BcId.asBigInt(),
+        contractBContractAddress);
     String contractAContractAddress = bc1ContractABlockchain.contractA.getContractAddress();
-
 
     // Create simulators
     // Note that no simulation is needed, as there are no parameter values.
@@ -85,9 +89,11 @@ public class Main {
       LOG.info(" ContractA: DoCrosschainRead: {}", rlpCrosschainRead);
 
       ArrayList<CallExecutionTree> rootCalls = new ArrayList<>();
-      CallExecutionTree getFunction = new CallExecutionTree(bc2BcId, contractBContractAddress, rlpGet);
+      CallExecutionTree getFunction =
+          new CallExecutionTree(bc2BcId, contractBContractAddress, rlpGet);
       rootCalls.add(getFunction);
-      CallExecutionTree callGraph = new CallExecutionTree(rootBcId, contractAContractAddress, rlpCrosschainRead, rootCalls);
+      CallExecutionTree callGraph =
+          new CallExecutionTree(rootBcId, contractAContractAddress, rlpCrosschainRead, rootCalls);
 
       CrosschainExecutor executor = new CrosschainExecutor(crossControlManagerGroup);
       ExecutionEngine executionEngine = exampleManager.getExecutionEngine(executor);
@@ -102,7 +108,6 @@ public class Main {
       bc1ContractABlockchain.showEvents(txR);
       bc1ContractABlockchain.showValueRead();
     }
-
 
     bc1ContractABlockchain.shutdown();
     bc2ContractBBlockchain.shutdown();

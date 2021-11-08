@@ -16,7 +16,6 @@ package org.hyperledger.besu.crypto;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.Bytes32;
 

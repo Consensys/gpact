@@ -14,6 +14,8 @@
  */
 package net.consensys.gpact.funcioninterfaces;
 
+import java.math.BigInteger;
+import java.util.List;
 import net.consensys.gpact.common.RevertReason;
 import net.consensys.gpact.common.test.AbstractWeb3Test;
 import net.consensys.gpact.funcioninterfaces.soliditywrappers.HiddenParamDestTest;
@@ -26,9 +28,6 @@ import org.junit.Test;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.exceptions.TransactionException;
 
-import java.math.BigInteger;
-import java.util.List;
-
 public class HiddenParamsTest extends AbstractWeb3Test {
   private static final Logger LOG = LogManager.getLogger(HiddenParamsTest.class);
 
@@ -40,9 +39,6 @@ public class HiddenParamsTest extends AbstractWeb3Test {
   HiddenParamDestTest destContract;
   HiddenParamSourceTest sourceContract;
 
-
-
-
   public static final BigInteger EXPECTED1 = BigInteger.valueOf(41);
   public static final BigInteger EXPECTED2 = BigInteger.valueOf(47);
   public static final BigInteger EXPECTED3 = BigInteger.valueOf(53);
@@ -51,12 +47,23 @@ public class HiddenParamsTest extends AbstractWeb3Test {
   public void setup() throws Exception {
     setupWeb3();
     LOG.info("Deploying contracts");
-    this.destContract = HiddenParamDestTest.deploy(this.web3j, this.tm, this.freeGasProvider, EXPECTED1, EXPECTED2, EXPECTED3).send();
+    this.destContract =
+        HiddenParamDestTest.deploy(
+                this.web3j, this.tm, this.freeGasProvider, EXPECTED1, EXPECTED2, EXPECTED3)
+            .send();
     String destContractAddress = this.destContract.getContractAddress();
     LOG.info(" destContract deployed to address: {}", destContractAddress);
 
-    this.sourceContract = HiddenParamSourceTest.deploy(this.web3j, this.tm, this.freeGasProvider,
-            destContractAddress, EXPECTED1, EXPECTED2, EXPECTED3).send();
+    this.sourceContract =
+        HiddenParamSourceTest.deploy(
+                this.web3j,
+                this.tm,
+                this.freeGasProvider,
+                destContractAddress,
+                EXPECTED1,
+                EXPECTED2,
+                EXPECTED3)
+            .send();
     LOG.info(" sourceContract deployed to address: {}", this.sourceContract.getContractAddress());
   }
 
@@ -73,11 +80,14 @@ public class HiddenParamsTest extends AbstractWeb3Test {
     LOG.info(" Gas used: {}", receipt1.getGasUsed());
     if (!receipt1.isStatusOK()) {
       LOG.info("  Revert Reason: {}", RevertReason.decodeRevertReason(receipt1.getRevertReason()));
-      throw new Exception("callFuncNoParams Reverted: " + RevertReason.decodeRevertReason(receipt1.getRevertReason()));
+      throw new Exception(
+          "callFuncNoParams Reverted: "
+              + RevertReason.decodeRevertReason(receipt1.getRevertReason()));
     }
-    List<HiddenParamSourceTest.DumpEventResponse> dumpEventResponses = this.sourceContract.getDumpEvents(receipt1);
-    for (HiddenParamSourceTest.DumpEventResponse event: dumpEventResponses) {
-        LOG.info("   DumpEvent: {}", new BigInteger(1, event._b).toString(16));
+    List<HiddenParamSourceTest.DumpEventResponse> dumpEventResponses =
+        this.sourceContract.getDumpEvents(receipt1);
+    for (HiddenParamSourceTest.DumpEventResponse event : dumpEventResponses) {
+      LOG.info("   DumpEvent: {}", new BigInteger(1, event._b).toString(16));
     }
 
     LOG.info("callFuncOneParam Hidden Params");
@@ -90,9 +100,11 @@ public class HiddenParamsTest extends AbstractWeb3Test {
     LOG.info(" Gas used: {}", receipt1.getGasUsed());
     if (!receipt1.isStatusOK()) {
       LOG.info("  Revert Reason: {}", RevertReason.decodeRevertReason(receipt1.getRevertReason()));
-      throw new Exception("callFuncOneParam Reverted: " + RevertReason.decodeRevertReason(receipt1.getRevertReason()));
+      throw new Exception(
+          "callFuncOneParam Reverted: "
+              + RevertReason.decodeRevertReason(receipt1.getRevertReason()));
     }
-    for (HiddenParamSourceTest.DumpEventResponse event: dumpEventResponses) {
+    for (HiddenParamSourceTest.DumpEventResponse event : dumpEventResponses) {
       LOG.info("   DumpEvent: {}", new BigInteger(1, event._b).toString(16));
     }
 
@@ -106,9 +118,11 @@ public class HiddenParamsTest extends AbstractWeb3Test {
     LOG.info(" Gas used: {}", receipt1.getGasUsed());
     if (!receipt1.isStatusOK()) {
       LOG.info("  Revert Reason: {}", RevertReason.decodeRevertReason(receipt1.getRevertReason()));
-      throw new Exception("callFuncTwoParams Reverted: " + RevertReason.decodeRevertReason(receipt1.getRevertReason()));
+      throw new Exception(
+          "callFuncTwoParams Reverted: "
+              + RevertReason.decodeRevertReason(receipt1.getRevertReason()));
     }
-    for (HiddenParamSourceTest.DumpEventResponse event: dumpEventResponses) {
+    for (HiddenParamSourceTest.DumpEventResponse event : dumpEventResponses) {
       LOG.info("   DumpEvent: {}", new BigInteger(1, event._b).toString(16));
     }
   }
@@ -126,10 +140,13 @@ public class HiddenParamsTest extends AbstractWeb3Test {
     LOG.info(" Gas used: {}", receipt1.getGasUsed());
     if (!receipt1.isStatusOK()) {
       LOG.info("  Revert Reason: {}", RevertReason.decodeRevertReason(receipt1.getRevertReason()));
-      throw new Exception("callFuncNoParams Reverted: " + RevertReason.decodeRevertReason(receipt1.getRevertReason()));
+      throw new Exception(
+          "callFuncNoParams Reverted: "
+              + RevertReason.decodeRevertReason(receipt1.getRevertReason()));
     }
-    List<HiddenParamSourceTest.DumpEventResponse> dumpEventResponses = this.sourceContract.getDumpEvents(receipt1);
-    for (HiddenParamSourceTest.DumpEventResponse event: dumpEventResponses) {
+    List<HiddenParamSourceTest.DumpEventResponse> dumpEventResponses =
+        this.sourceContract.getDumpEvents(receipt1);
+    for (HiddenParamSourceTest.DumpEventResponse event : dumpEventResponses) {
       LOG.info("   DumpEvent: {}", new BigInteger(1, event._b).toString(16));
     }
 
@@ -143,9 +160,11 @@ public class HiddenParamsTest extends AbstractWeb3Test {
     LOG.info(" Gas used: {}", receipt1.getGasUsed());
     if (!receipt1.isStatusOK()) {
       LOG.info("  Revert Reason: {}", RevertReason.decodeRevertReason(receipt1.getRevertReason()));
-      throw new Exception("callFuncOneParam Reverted: " + RevertReason.decodeRevertReason(receipt1.getRevertReason()));
+      throw new Exception(
+          "callFuncOneParam Reverted: "
+              + RevertReason.decodeRevertReason(receipt1.getRevertReason()));
     }
-    for (HiddenParamSourceTest.DumpEventResponse event: dumpEventResponses) {
+    for (HiddenParamSourceTest.DumpEventResponse event : dumpEventResponses) {
       LOG.info("   DumpEvent: {}", new BigInteger(1, event._b).toString(16));
     }
 
@@ -159,13 +178,14 @@ public class HiddenParamsTest extends AbstractWeb3Test {
     LOG.info(" Gas used: {}", receipt1.getGasUsed());
     if (!receipt1.isStatusOK()) {
       LOG.info("  Revert Reason: {}", RevertReason.decodeRevertReason(receipt1.getRevertReason()));
-      throw new Exception("callFuncTwoParams Reverted: " + RevertReason.decodeRevertReason(receipt1.getRevertReason()));
+      throw new Exception(
+          "callFuncTwoParams Reverted: "
+              + RevertReason.decodeRevertReason(receipt1.getRevertReason()));
     }
-    for (HiddenParamSourceTest.DumpEventResponse event: dumpEventResponses) {
+    for (HiddenParamSourceTest.DumpEventResponse event : dumpEventResponses) {
       LOG.info("   DumpEvent: {}", new BigInteger(1, event._b).toString(16));
     }
   }
-
 
   // This is just to create comparison gas costs.
   @Ignore
@@ -183,8 +203,9 @@ public class HiddenParamsTest extends AbstractWeb3Test {
     if (!receipt1.isStatusOK()) {
       LOG.info("  Revert Reason: {}", RevertReason.decodeRevertReason(receipt1.getRevertReason()));
     }
-    List<HiddenParamSourceTest.DumpEventResponse> dumpEventResponses = this.sourceContract.getDumpEvents(receipt1);
-    for (HiddenParamSourceTest.DumpEventResponse event: dumpEventResponses) {
+    List<HiddenParamSourceTest.DumpEventResponse> dumpEventResponses =
+        this.sourceContract.getDumpEvents(receipt1);
+    for (HiddenParamSourceTest.DumpEventResponse event : dumpEventResponses) {
       LOG.info("   DumpEvent: {}", new BigInteger(1, event._b).toString(16));
     }
 
@@ -199,7 +220,7 @@ public class HiddenParamsTest extends AbstractWeb3Test {
     if (!receipt1.isStatusOK()) {
       LOG.info("  Revert Reason: {}", RevertReason.decodeRevertReason(receipt1.getRevertReason()));
     }
-    for (HiddenParamSourceTest.DumpEventResponse event: dumpEventResponses) {
+    for (HiddenParamSourceTest.DumpEventResponse event : dumpEventResponses) {
       LOG.info("   DumpEvent: {}", new BigInteger(1, event._b).toString(16));
     }
 
@@ -214,9 +235,8 @@ public class HiddenParamsTest extends AbstractWeb3Test {
     if (!receipt1.isStatusOK()) {
       LOG.info("  Revert Reason: {}", RevertReason.decodeRevertReason(receipt1.getRevertReason()));
     }
-    for (HiddenParamSourceTest.DumpEventResponse event: dumpEventResponses) {
+    for (HiddenParamSourceTest.DumpEventResponse event : dumpEventResponses) {
       LOG.info("   DumpEvent: {}", new BigInteger(1, event._b).toString(16));
     }
   }
-
 }

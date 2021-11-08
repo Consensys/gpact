@@ -14,16 +14,15 @@
  */
 package net.consensys.gpact.examples.singlebc.write;
 
+import java.math.BigInteger;
 import net.consensys.gpact.common.BlockchainInfo;
 import net.consensys.gpact.common.CredentialsCreator;
+import net.consensys.gpact.common.PropertiesLoader;
+import net.consensys.gpact.common.StatsHolder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
-import net.consensys.gpact.common.PropertiesLoader;
-import net.consensys.gpact.common.StatsHolder;
-
-import java.math.BigInteger;
 
 public class Main {
   static final Logger LOG = LogManager.getLogger(Main.class);
@@ -44,8 +43,10 @@ public class Main {
     Credentials creds = CredentialsCreator.createCredentials();
     BlockchainInfo root = propsLoader.getBlockchainInfo("ROOT");
 
-    Bc1ContractA bc1ContractABlockchain = new Bc1ContractA(creds, root.bcId, root.uri, root.gasPriceStrategy, root.period);
-    Bc2ContractB bc2ContractBBlockchain = new Bc2ContractB(creds, root.bcId, root.uri, root.gasPriceStrategy, root.period);
+    Bc1ContractA bc1ContractABlockchain =
+        new Bc1ContractA(creds, root.bcId, root.uri, root.gasPriceStrategy, root.period);
+    Bc2ContractB bc2ContractBBlockchain =
+        new Bc2ContractB(creds, root.bcId, root.uri, root.gasPriceStrategy, root.period);
 
     BigInteger val = BigInteger.valueOf(7);
 
@@ -59,7 +60,6 @@ public class Main {
       LOG.info("Execution: {}  *****************", numExecutions);
       StatsHolder.log("Execution: " + numExecutions + " **************************");
 
-
       TransactionReceipt txR = bc1ContractABlockchain.doWrite(val);
       bc2ContractBBlockchain.showEvents(txR);
       bc2ContractBBlockchain.showValueWritten();
@@ -68,7 +68,6 @@ public class Main {
       bc2ContractBBlockchain.showEvents(txR);
       bc2ContractBBlockchain.showValueWritten();
     }
-
 
     bc1ContractABlockchain.shutdown();
     bc2ContractBBlockchain.shutdown();

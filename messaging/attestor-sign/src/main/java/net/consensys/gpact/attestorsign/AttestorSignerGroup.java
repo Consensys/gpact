@@ -14,18 +14,14 @@
  */
 package net.consensys.gpact.attestorsign;
 
+import java.util.*;
 import net.consensys.gpact.common.AnIdentity;
 import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.messaging.MessagingVerificationInterface;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.*;
-
-
-/**
- * Manages a set of AttestorSigners for a set of blockchains.
- */
+/** Manages a set of AttestorSigners for a set of blockchains. */
 public class AttestorSignerGroup {
   static final Logger LOG = LogManager.getLogger(AttestorSignerGroup.class);
 
@@ -34,7 +30,7 @@ public class AttestorSignerGroup {
   public void addBlockchain(BlockchainId blockchainId) throws Exception {
     if (this.blockchains.containsKey(blockchainId)) {
       return;
-      //throw new Exception("Blockchain already in Attestor Signer Group: " + blockchainId);
+      // throw new Exception("Blockchain already in Attestor Signer Group: " + blockchainId);
     }
 
     this.blockchains.put(blockchainId, new AttestorSigner(blockchainId));
@@ -43,7 +39,7 @@ public class AttestorSignerGroup {
   // TODO when an attestor signer service is implemented, this will change to
   // setting up URLs where attestors can be contacted
   public void addSignerOnAllBlockchains(AnIdentity signer) throws Exception {
-    for (BlockchainId bcId1: this.blockchains.keySet()) {
+    for (BlockchainId bcId1 : this.blockchains.keySet()) {
       addSigner(signer, bcId1);
     }
   }
@@ -62,5 +58,4 @@ public class AttestorSignerGroup {
     }
     return this.blockchains.get(bcId);
   }
-
 }

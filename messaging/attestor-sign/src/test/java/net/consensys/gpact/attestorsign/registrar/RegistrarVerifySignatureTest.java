@@ -14,19 +14,17 @@
  */
 package net.consensys.gpact.attestorsign.registrar;
 
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 import net.consensys.gpact.common.AnIdentity;
 import net.consensys.gpact.common.RevertReason;
 import org.junit.Test;
 import org.web3j.crypto.Sign;
-import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.exceptions.TransactionException;
 
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
-
 public class RegistrarVerifySignatureTest extends AbstractRegistrarTest {
-  final byte[] plainText = new byte[]{0x00};
+  final byte[] plainText = new byte[] {0x00};
 
   @Test
   public void verifyOneSignature() throws Exception {
@@ -75,10 +73,12 @@ public class RegistrarVerifySignatureTest extends AbstractRegistrarTest {
     sigV.add(BigInteger.valueOf(signatureData2.getV()[0]));
 
     // This will revert if the signature does not verify
-    boolean verified = this.registrarContract.verify(blockchainId, signers, sigR, sigS, sigV, this.plainText).send();
-    assert(verified);
+    boolean verified =
+        this.registrarContract
+            .verify(blockchainId, signers, sigR, sigS, sigV, this.plainText)
+            .send();
+    assert (verified);
   }
-
 
   // Put S instead of R. This will give an invalid signature
   @Test
@@ -102,10 +102,16 @@ public class RegistrarVerifySignatureTest extends AbstractRegistrarTest {
 
     // This will revert if the signature does not verify
     try {
-      boolean verified = this.registrarContract.verify(blockchainId, signers, sigR, sigS, sigV, this.plainText).send();
+      boolean verified =
+          this.registrarContract
+              .verify(blockchainId, signers, sigR, sigS, sigV, this.plainText)
+              .send();
       throw new Exception("Unexpectedly, no error while verifying. Verified: " + verified);
     } catch (TransactionException ex) {
-      System.err.println("Revert reason: " + RevertReason.decodeRevertReason(ex.getTransactionReceipt().get().getRevertReason()));
+      System.err.println(
+          "Revert reason: "
+              + RevertReason.decodeRevertReason(
+                  ex.getTransactionReceipt().get().getRevertReason()));
       // ignore
     } catch (org.web3j.tx.exceptions.ContractCallException ex1) {
       // System.err.println("Exception: " + ex1.getMessage());
@@ -134,10 +140,16 @@ public class RegistrarVerifySignatureTest extends AbstractRegistrarTest {
 
     // This will revert as signer2 is has not been registered for the blockchain
     try {
-      boolean verified = this.registrarContract.verify(blockchainId, signers, sigR, sigS, sigV, this.plainText).send();
+      boolean verified =
+          this.registrarContract
+              .verify(blockchainId, signers, sigR, sigS, sigV, this.plainText)
+              .send();
       throw new Exception("Unexpectedly, no error while verifying. Verified: " + verified);
     } catch (TransactionException ex) {
-      System.err.println("Revert reason: " + RevertReason.decodeRevertReason(ex.getTransactionReceipt().get().getRevertReason()));
+      System.err.println(
+          "Revert reason: "
+              + RevertReason.decodeRevertReason(
+                  ex.getTransactionReceipt().get().getRevertReason()));
       // ignore
     } catch (org.web3j.tx.exceptions.ContractCallException ex1) {
       // System.err.println("Exception: " + ex1.getMessage());
@@ -160,7 +172,7 @@ public class RegistrarVerifySignatureTest extends AbstractRegistrarTest {
     Sign.SignatureData signatureData2 = newSigner2.sign(this.plainText);
     signers = new ArrayList<>();
     signers.add(newSigner1.getAddress());
-    //signers.add(newSigner2.getAddress());
+    // signers.add(newSigner2.getAddress());
     List<byte[]> sigR = new ArrayList<>();
     sigR.add(signatureData1.getR());
     sigR.add(signatureData2.getR());
@@ -172,10 +184,16 @@ public class RegistrarVerifySignatureTest extends AbstractRegistrarTest {
     sigV.add(BigInteger.valueOf(signatureData2.getV()[0]));
 
     try {
-      boolean verified = this.registrarContract.verify(blockchainId, signers, sigR, sigS, sigV, this.plainText).send();
+      boolean verified =
+          this.registrarContract
+              .verify(blockchainId, signers, sigR, sigS, sigV, this.plainText)
+              .send();
       throw new Exception("Unexpectedly, no error while verifying. Verified: " + verified);
     } catch (TransactionException ex) {
-      System.err.println("Revert reason: " + RevertReason.decodeRevertReason(ex.getTransactionReceipt().get().getRevertReason()));
+      System.err.println(
+          "Revert reason: "
+              + RevertReason.decodeRevertReason(
+                  ex.getTransactionReceipt().get().getRevertReason()));
       // ignore
     } catch (org.web3j.tx.exceptions.ContractCallException ex1) {
       // System.err.println("Exception: " + ex1.getMessage());
@@ -198,7 +216,7 @@ public class RegistrarVerifySignatureTest extends AbstractRegistrarTest {
     Sign.SignatureData signatureData2 = newSigner2.sign(this.plainText);
     List<byte[]> sigR = new ArrayList<>();
     sigR.add(signatureData1.getR());
-    //sigR.add(signatureData2.getR());
+    // sigR.add(signatureData2.getR());
     List<byte[]> sigS = new ArrayList<>();
     sigS.add(signatureData1.getS());
     sigS.add(signatureData2.getS());
@@ -207,10 +225,16 @@ public class RegistrarVerifySignatureTest extends AbstractRegistrarTest {
     sigV.add(BigInteger.valueOf(signatureData2.getV()[0]));
 
     try {
-      boolean verified = this.registrarContract.verify(blockchainId, signers, sigR, sigS, sigV, this.plainText).send();
+      boolean verified =
+          this.registrarContract
+              .verify(blockchainId, signers, sigR, sigS, sigV, this.plainText)
+              .send();
       throw new Exception("Unexpectedly, no error while verifying. Verified: " + verified);
     } catch (TransactionException ex) {
-      System.err.println("Revert reason: " + RevertReason.decodeRevertReason(ex.getTransactionReceipt().get().getRevertReason()));
+      System.err.println(
+          "Revert reason: "
+              + RevertReason.decodeRevertReason(
+                  ex.getTransactionReceipt().get().getRevertReason()));
       // ignore
     } catch (org.web3j.tx.exceptions.ContractCallException ex1) {
       // System.err.println("Exception: " + ex1.getMessage());
@@ -236,16 +260,22 @@ public class RegistrarVerifySignatureTest extends AbstractRegistrarTest {
     sigR.add(signatureData2.getR());
     List<byte[]> sigS = new ArrayList<>();
     sigS.add(signatureData1.getS());
-    //sigS.add(signatureData2.getS());
+    // sigS.add(signatureData2.getS());
     List<BigInteger> sigV = new ArrayList<>();
     sigV.add(BigInteger.valueOf(signatureData1.getV()[0]));
     sigV.add(BigInteger.valueOf(signatureData2.getV()[0]));
 
     try {
-      boolean verified = this.registrarContract.verify(blockchainId, signers, sigR, sigS, sigV, this.plainText).send();
+      boolean verified =
+          this.registrarContract
+              .verify(blockchainId, signers, sigR, sigS, sigV, this.plainText)
+              .send();
       throw new Exception("Unexpectedly, no error while verifying. Verified: " + verified);
     } catch (TransactionException ex) {
-      System.err.println("Revert reason: " + RevertReason.decodeRevertReason(ex.getTransactionReceipt().get().getRevertReason()));
+      System.err.println(
+          "Revert reason: "
+              + RevertReason.decodeRevertReason(
+                  ex.getTransactionReceipt().get().getRevertReason()));
       // ignore
     } catch (org.web3j.tx.exceptions.ContractCallException ex1) {
       // System.err.println("Exception: " + ex1.getMessage());
@@ -274,13 +304,19 @@ public class RegistrarVerifySignatureTest extends AbstractRegistrarTest {
     sigS.add(signatureData2.getS());
     List<BigInteger> sigV = new ArrayList<>();
     sigV.add(BigInteger.valueOf(signatureData1.getV()[0]));
-    //sigV.add(BigInteger.valueOf(signatureData2.getV()[0]));
+    // sigV.add(BigInteger.valueOf(signatureData2.getV()[0]));
 
     try {
-      boolean verified = this.registrarContract.verify(blockchainId, signers, sigR, sigS, sigV, this.plainText).send();
+      boolean verified =
+          this.registrarContract
+              .verify(blockchainId, signers, sigR, sigS, sigV, this.plainText)
+              .send();
       throw new Exception("Unexpectedly, no error while verifying. Verified: " + verified);
     } catch (TransactionException ex) {
-      System.err.println("Revert reason: " + RevertReason.decodeRevertReason(ex.getTransactionReceipt().get().getRevertReason()));
+      System.err.println(
+          "Revert reason: "
+              + RevertReason.decodeRevertReason(
+                  ex.getTransactionReceipt().get().getRevertReason()));
       // ignore
     } catch (org.web3j.tx.exceptions.ContractCallException ex1) {
       // System.err.println("Exception: " + ex1.getMessage());

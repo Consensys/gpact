@@ -14,12 +14,6 @@
  */
 package net.consensys.gpact.cbc.engine;
 
-import net.consensys.gpact.cbc.CrosschainExecutor;
-import net.consensys.gpact.cbc.calltree.CallExecutionTree;
-import net.consensys.gpact.common.BlockchainId;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +23,11 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import net.consensys.gpact.cbc.CrosschainExecutor;
+import net.consensys.gpact.cbc.calltree.CallExecutionTree;
+import net.consensys.gpact.common.BlockchainId;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class ParallelExecutionEngine extends AbstractExecutionEngine {
   static final Logger LOG = LogManager.getLogger(ParallelExecutionEngine.class);
@@ -37,36 +36,37 @@ public class ParallelExecutionEngine extends AbstractExecutionEngine {
     super(executor);
   }
 
-  protected void executeCalls(List<CallExecutionTree> calls, List<BigInteger> callPath, BlockchainId theCallerBlockchainId) throws Exception {
+  protected void executeCalls(
+      List<CallExecutionTree> calls, List<BigInteger> callPath, BlockchainId theCallerBlockchainId)
+      throws Exception {
     int numCalls = calls.size();
     Executor executor = Executors.newFixedThreadPool(numCalls);
     CompletionService<String> completionService = new ExecutorCompletionService<String>(executor);
     BigInteger callOffset = BigInteger.ONE;
-    for (CallExecutionTree segCall: calls) {
+    for (CallExecutionTree segCall : calls) {
       List<BigInteger> nextCallPath = new ArrayList<>(callPath);
       nextCallPath.add(callOffset);
-      completionService.submit(new Callable<String>() {
-        public String call() throws Exception {
-          callSegmentsAndRoot(segCall, nextCallPath, theCallerBlockchainId);
-          return "Not used";
-        }
-      });
+      completionService.submit(
+          new Callable<String>() {
+            public String call() throws Exception {
+              callSegmentsAndRoot(segCall, nextCallPath, theCallerBlockchainId);
+              return "Not used";
+            }
+          });
       callOffset = callOffset.add(BigInteger.ONE);
     }
     int received = 0;
-    while(received < numCalls) {
-      Future<String> resultFuture = completionService.take(); //blocks if none available
+    while (received < numCalls) {
+      Future<String> resultFuture = completionService.take(); // blocks if none available
       try {
         String result = resultFuture.get();
         LOG.info("Finished {} of {} parallel calls", received + 1, numCalls - 1);
         received++;
-      }
-      catch(Exception e) {
+      } catch (Exception e) {
         LOG.error("Error for call: {}: {}", received, e.getMessage());
         throw e;
       }
     }
     LOG.info("Done");
   }
-
 }

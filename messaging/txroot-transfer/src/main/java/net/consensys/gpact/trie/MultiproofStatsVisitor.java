@@ -1,7 +1,5 @@
 package net.consensys.gpact.trie;
 
-import static org.apache.logging.log4j.LogManager.getLogger;
-
 public class MultiproofStatsVisitor<V> implements NodeVisitor<V> {
   private int numHashes = 0;
   private int numExtensions = 0;
@@ -20,33 +18,29 @@ public class MultiproofStatsVisitor<V> implements NodeVisitor<V> {
   }
 
   public void visit(final ExtensionNode<V> extensionNode) {
-    numExtensions ++;
+    numExtensions++;
     extensionNode.getChild().accept(this);
   }
 
   public void visit(final BranchNode<V> branchNode) {
-    numBranches ++;
-    for(Node<V> child: branchNode.getChildren()) {
+    numBranches++;
+    for (Node<V> child : branchNode.getChildren()) {
       child.accept(this);
     }
   }
 
   public void visit(final BinaryBranchNode<V> branchNode) {
-    numBranches ++;
-    for(Node<V> child: branchNode.getChildren()) {
+    numBranches++;
+    for (Node<V> child : branchNode.getChildren()) {
       child.accept(this);
     }
   }
 
-  public void visit(final LeafNode<V> leafNode) {
+  public void visit(final LeafNode<V> leafNode) {}
 
-  }
-
-  public void visit(final NullNode<V> nullNode) {
-
-  }
+  public void visit(final NullNode<V> nullNode) {}
 
   public void visit(final MerkleProofHashNode<V> proofNode) {
-    numHashes ++;
+    numHashes++;
   }
 }

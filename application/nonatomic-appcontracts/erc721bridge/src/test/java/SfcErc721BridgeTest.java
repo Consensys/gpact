@@ -13,6 +13,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import static org.junit.Assert.*;
+
+import java.math.BigInteger;
+import java.util.List;
 import net.consensys.gpact.appcontracts.nonatomic.erc721bridge.soliditywrappers.SfcErc721Bridge;
 import net.consensys.gpact.common.RevertReason;
 import net.consensys.gpact.common.test.AbstractWeb3Test;
@@ -25,118 +29,133 @@ import org.web3j.protocol.core.RemoteFunctionCall;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.exceptions.TransactionException;
 
-import java.math.BigInteger;
-import java.util.List;
-
-import static org.junit.Assert.*;
-
 public class SfcErc721BridgeTest extends AbstractWeb3Test {
-    private static final String SENDER_DENYLISTED_REVERT_MSG = "ERC 721 Bridge: Sender is denylisted";
-    private static final String RECIPIENT_DENYLISTED_REVERT_MSG = "ERC 721 Bridge: Recipient is denylisted";
+  private static final String SENDER_DENYLISTED_REVERT_MSG = "ERC 721 Bridge: Sender is denylisted";
+  private static final String RECIPIENT_DENYLISTED_REVERT_MSG =
+      "ERC 721 Bridge: Recipient is denylisted";
 
-    private String fixDeniedAddress;
-    private Credentials fixDeniedCred;
-    private SfcErc721Bridge fixBridgeWithAdminCred;
+  private String fixDeniedAddress;
+  private Credentials fixDeniedCred;
+  private SfcErc721Bridge fixBridgeWithAdminCred;
 
-    @Before
-    public void setup() throws Exception {
-        setupWeb3();
-        fixDeniedCred = createNewIdentity();
-        fixDeniedAddress = fixDeniedCred.getAddress();
-        fixBridgeWithAdminCred = SfcErc721Bridge.deploy(this.web3j, this.tm, this.freeGasProvider, DummyAddressGenerator.gen()).send();
-    }
+  @Before
+  public void setup() throws Exception {
+    setupWeb3();
+    fixDeniedCred = createNewIdentity();
+    fixDeniedAddress = fixDeniedCred.getAddress();
+    fixBridgeWithAdminCred =
+        SfcErc721Bridge.deploy(
+                this.web3j, this.tm, this.freeGasProvider, DummyAddressGenerator.gen())
+            .send();
+  }
 
-    @Test
-    public void addToDenylistShouldAddAddressToList() throws Exception {
-        // sanity check, ensure that the address is not already in the denylist.
-        assertEquals(fixBridgeWithAdminCred.isDenylisted(fixDeniedAddress).send(), false);
+  @Test
+  public void addToDenylistShouldAddAddressToList() throws Exception {
+    // sanity check, ensure that the address is not already in the denylist.
+    assertEquals(fixBridgeWithAdminCred.isDenylisted(fixDeniedAddress).send(), false);
 
-        TransactionReceipt receipt = addToDenylist(fixDeniedAddress);
-        List<SfcErc721Bridge.AddressDenylistedEventResponse> addressAddedEvents = fixBridgeWithAdminCred.getAddressDenylistedEvents(receipt);
-        assertEquals(1, addressAddedEvents.size());
-        assertEquals(fixDeniedAddress, addressAddedEvents.get(0)._address);
-    }
+    TransactionReceipt receipt = addToDenylist(fixDeniedAddress);
+    List<SfcErc721Bridge.AddressDenylistedEventResponse> addressAddedEvents =
+        fixBridgeWithAdminCred.getAddressDenylistedEvents(receipt);
+    assertEquals(1, addressAddedEvents.size());
+    assertEquals(fixDeniedAddress, addressAddedEvents.get(0)._address);
+  }
 
-    @Test
-    public void removeFromDenylistShouldRemoveAddressFromList() throws Exception {
-        addToDenylist(fixDeniedAddress);
+  @Test
+  public void removeFromDenylistShouldRemoveAddressFromList() throws Exception {
+    addToDenylist(fixDeniedAddress);
 
-        TransactionReceipt receipt = removeFromDenylist(fixDeniedAddress);
-        List<SfcErc721Bridge.AddressRemovedFromDenylistEventResponse> addressRemovedEvents =
-                fixBridgeWithAdminCred.getAddressRemovedFromDenylistEvents(receipt);
-        assertEquals(1, addressRemovedEvents.size());
-        assertEquals(fixDeniedAddress, addressRemovedEvents.get(0)._address);
-    }
+    TransactionReceipt receipt = removeFromDenylist(fixDeniedAddress);
+    List<SfcErc721Bridge.AddressRemovedFromDenylistEventResponse> addressRemovedEvents =
+        fixBridgeWithAdminCred.getAddressRemovedFromDenylistEvents(receipt);
+    assertEquals(1, addressRemovedEvents.size());
+    assertEquals(fixDeniedAddress, addressRemovedEvents.get(0)._address);
+  }
 
-    @Test
-    public void transferTokenShouldFailForDenylistedSender() throws Exception {
-        addToDenylist(fixDeniedAddress);
+  @Test
+  public void transferTokenShouldFailForDenylistedSender() throws Exception {
+    addToDenylist(fixDeniedAddress);
 
-        RemoteFunctionCall<TransactionReceipt> receipt = loadBridgeWithCredential(fixDeniedCred).transferToOtherBlockchain(BigInteger.ZERO,
-                DummyAddressGenerator.gen(), DummyAddressGenerator.gen(), BigInteger.ZERO);
-        TransactionException te = assertThrows(TransactionException.class, receipt::send);
-        assertEquals(SENDER_DENYLISTED_REVERT_MSG, getRevertReason(te));
-    }
-
-    @Test
-    public void transferTokenShouldFailForDenylistedRecipient() throws Exception {
-        addToDenylist(fixDeniedAddress);
-
-        RemoteFunctionCall<TransactionReceipt> receipt = fixBridgeWithAdminCred.transferToOtherBlockchain(BigInteger.ZERO, DummyAddressGenerator.gen(),
-                fixDeniedAddress, BigInteger.ZERO);
-        TransactionException te = assertThrows(TransactionException.class, receipt::send);
-        assertEquals(RECIPIENT_DENYLISTED_REVERT_MSG, getRevertReason(te));
-    }
-
-    @Test
-    public void transferTokenShouldSucceedIfSenderRemovedFromDenylist() throws Exception {
-        addToDenylist(fixDeniedAddress);
-        removeFromDenylist(fixDeniedAddress);
-
-        RemoteFunctionCall<TransactionReceipt> receipt = loadBridgeWithCredential(fixDeniedCred).transferToOtherBlockchain(BigInteger.ZERO,
-                DummyAddressGenerator.gen(), DummyAddressGenerator.gen(), BigInteger.ZERO);
-        TransactionException te = assertThrows(TransactionException.class, receipt::send);
-        assertNotEquals(SENDER_DENYLISTED_REVERT_MSG, getRevertReason(te));
-    }
-
-    @Test
-    public void receiveTokenShouldFailForDenylistedRecipient() throws Exception {
-        addToDenylist(fixDeniedAddress);
-
-        RemoteFunctionCall<TransactionReceipt> receipt = fixBridgeWithAdminCred.receiveFromOtherBlockchain(DummyAddressGenerator.gen(), fixDeniedAddress,
+    RemoteFunctionCall<TransactionReceipt> receipt =
+        loadBridgeWithCredential(fixDeniedCred)
+            .transferToOtherBlockchain(
+                BigInteger.ZERO,
+                DummyAddressGenerator.gen(),
+                DummyAddressGenerator.gen(),
                 BigInteger.ZERO);
-        TransactionException te = assertThrows(TransactionException.class, receipt::send);
-        assertEquals(RECIPIENT_DENYLISTED_REVERT_MSG, getRevertReason(te));
-    }
+    TransactionException te = assertThrows(TransactionException.class, receipt::send);
+    assertEquals(SENDER_DENYLISTED_REVERT_MSG, getRevertReason(te));
+  }
 
-    @Test
-    public void receiveTokenShouldSucceedIfRecipientRemovedFromDenylist() throws Exception {
-        addToDenylist(fixDeniedAddress);
-        removeFromDenylist(fixDeniedAddress);
+  @Test
+  public void transferTokenShouldFailForDenylistedRecipient() throws Exception {
+    addToDenylist(fixDeniedAddress);
 
-        RemoteFunctionCall<TransactionReceipt> receipt = fixBridgeWithAdminCred.receiveFromOtherBlockchain(DummyAddressGenerator.gen(), fixDeniedAddress,
+    RemoteFunctionCall<TransactionReceipt> receipt =
+        fixBridgeWithAdminCred.transferToOtherBlockchain(
+            BigInteger.ZERO, DummyAddressGenerator.gen(), fixDeniedAddress, BigInteger.ZERO);
+    TransactionException te = assertThrows(TransactionException.class, receipt::send);
+    assertEquals(RECIPIENT_DENYLISTED_REVERT_MSG, getRevertReason(te));
+  }
+
+  @Test
+  public void transferTokenShouldSucceedIfSenderRemovedFromDenylist() throws Exception {
+    addToDenylist(fixDeniedAddress);
+    removeFromDenylist(fixDeniedAddress);
+
+    RemoteFunctionCall<TransactionReceipt> receipt =
+        loadBridgeWithCredential(fixDeniedCred)
+            .transferToOtherBlockchain(
+                BigInteger.ZERO,
+                DummyAddressGenerator.gen(),
+                DummyAddressGenerator.gen(),
                 BigInteger.ZERO);
-        TransactionException te = assertThrows(TransactionException.class, receipt::send);
-        assertNotEquals(RECIPIENT_DENYLISTED_REVERT_MSG, getRevertReason(te));
-    }
+    TransactionException te = assertThrows(TransactionException.class, receipt::send);
+    assertNotEquals(SENDER_DENYLISTED_REVERT_MSG, getRevertReason(te));
+  }
 
-    private SfcErc721Bridge loadBridgeWithCredential(Credentials credentials) {
-        return SfcErc721Bridge.load(fixBridgeWithAdminCred.getContractAddress(), this.web3j, credentials, this.freeGasProvider);
-    }
+  @Test
+  public void receiveTokenShouldFailForDenylistedRecipient() throws Exception {
+    addToDenylist(fixDeniedAddress);
 
-    private TransactionReceipt addToDenylist(String address) throws Exception {
-        TransactionReceipt receipt = fixBridgeWithAdminCred.addToDenylist(address).send();
-        assertEquals(true, fixBridgeWithAdminCred.isDenylisted(address).send());
-        return receipt;
-    }
+    RemoteFunctionCall<TransactionReceipt> receipt =
+        fixBridgeWithAdminCred.receiveFromOtherBlockchain(
+            DummyAddressGenerator.gen(), fixDeniedAddress, BigInteger.ZERO);
+    TransactionException te = assertThrows(TransactionException.class, receipt::send);
+    assertEquals(RECIPIENT_DENYLISTED_REVERT_MSG, getRevertReason(te));
+  }
 
-    private TransactionReceipt removeFromDenylist(String address) throws Exception {
-        TransactionReceipt receipt = fixBridgeWithAdminCred.removeFromDenylist(address).send();
-        assertEquals(false, fixBridgeWithAdminCred.isDenylisted(address).send());
-        return receipt;
-    }
+  @Test
+  public void receiveTokenShouldSucceedIfRecipientRemovedFromDenylist() throws Exception {
+    addToDenylist(fixDeniedAddress);
+    removeFromDenylist(fixDeniedAddress);
 
-    private String getRevertReason(TransactionException te) {
-        return RevertReason.decodeRevertReason(te.getTransactionReceipt().map(TransactionReceipt::getRevertReason).orElse(Strings.EMPTY));
-    }
+    RemoteFunctionCall<TransactionReceipt> receipt =
+        fixBridgeWithAdminCred.receiveFromOtherBlockchain(
+            DummyAddressGenerator.gen(), fixDeniedAddress, BigInteger.ZERO);
+    TransactionException te = assertThrows(TransactionException.class, receipt::send);
+    assertNotEquals(RECIPIENT_DENYLISTED_REVERT_MSG, getRevertReason(te));
+  }
+
+  private SfcErc721Bridge loadBridgeWithCredential(Credentials credentials) {
+    return SfcErc721Bridge.load(
+        fixBridgeWithAdminCred.getContractAddress(), this.web3j, credentials, this.freeGasProvider);
+  }
+
+  private TransactionReceipt addToDenylist(String address) throws Exception {
+    TransactionReceipt receipt = fixBridgeWithAdminCred.addToDenylist(address).send();
+    assertEquals(true, fixBridgeWithAdminCred.isDenylisted(address).send());
+    return receipt;
+  }
+
+  private TransactionReceipt removeFromDenylist(String address) throws Exception {
+    TransactionReceipt receipt = fixBridgeWithAdminCred.removeFromDenylist(address).send();
+    assertEquals(false, fixBridgeWithAdminCred.isDenylisted(address).send());
+    return receipt;
+  }
+
+  private String getRevertReason(TransactionException te) {
+    return RevertReason.decodeRevertReason(
+        te.getTransactionReceipt().map(TransactionReceipt::getRevertReason).orElse(Strings.EMPTY));
+  }
 }

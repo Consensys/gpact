@@ -14,6 +14,8 @@
  */
 package net.consensys.gpact.sfc.examples.erc20tokenbridge;
 
+import java.io.IOException;
+import java.math.BigInteger;
 import net.consensys.gpact.common.AbstractBlockchain;
 import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.common.DynamicGasProvider;
@@ -21,50 +23,50 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
 
-import java.io.IOException;
-import java.math.BigInteger;
-
-
 /**
- * Configures and operates an ERC 20 contract and the ERC 20 Bridge
- * contract on a certain blockchain.
- *
+ * Configures and operates an ERC 20 contract and the ERC 20 Bridge contract on a certain
+ * blockchain.
  */
 public abstract class AbstractERC20Bridge extends AbstractBlockchain {
-    private static final Logger LOG = LogManager.getLogger(AbstractERC20Bridge.class);
+  private static final Logger LOG = LogManager.getLogger(AbstractERC20Bridge.class);
 
-    // Total number of tokens issued for booking.
-    public final BigInteger tokenSupply;
-    public final String entity;
+  // Total number of tokens issued for booking.
+  public final BigInteger tokenSupply;
+  public final String entity;
 
-    protected String erc20BridgeAddress;
+  protected String erc20BridgeAddress;
 
+  public AbstractERC20Bridge(
+      final String entity,
+      BigInteger tokenSupply,
+      Credentials credentials,
+      BlockchainId bcId,
+      String uri,
+      DynamicGasProvider.Strategy gasPriceStrategy,
+      int blockPeriod)
+      throws IOException {
+    super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
+    this.entity = entity;
+    this.tokenSupply = tokenSupply;
+  }
 
-    public AbstractERC20Bridge(final String entity, BigInteger tokenSupply,
-                               Credentials credentials, BlockchainId bcId, String uri, DynamicGasProvider.Strategy gasPriceStrategy, int blockPeriod) throws IOException {
-        super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
-        this.entity = entity;
-        this.tokenSupply = tokenSupply;
-    }
+  public abstract void deployContracts(String cbcAddress) throws Exception;
 
-    public abstract void deployContracts(String cbcAddress) throws Exception;
+  public abstract void addRemoteERC20(BlockchainId remoteBcId, String remoteERC20ContractAddress)
+      throws Exception;
 
+  public abstract void addBlockchain(
+      BlockchainId remoteBcId, String remoteERC20BridgeContractAddress) throws Exception;
 
+  public abstract String getErc20ContractAddress();
 
-    public abstract void addRemoteERC20(BlockchainId remoteBcId, String remoteERC20ContractAddress) throws Exception;
+  public abstract String getErc20BridgeContractAddress();
 
-    public abstract void addBlockchain(BlockchainId remoteBcId, String remoteERC20BridgeContractAddress) throws Exception;
+  public abstract void giveTokensToERC20Bridge(final int number) throws Exception;
 
+  public abstract void giveTokens(final Erc20User user, final int number) throws Exception;
 
-    public abstract String getErc20ContractAddress();
+  public abstract void showErc20Balances(Erc20User[] users) throws Exception;
 
-    public abstract String getErc20BridgeContractAddress();
-
-    public abstract void giveTokensToERC20Bridge(final int number) throws Exception;
-
-    public abstract void giveTokens(final Erc20User user, final int number) throws Exception;
-
-    public abstract void showErc20Balances(Erc20User[] users) throws Exception;
-
-    public abstract void showErc20Allowance(String owner, String spender) throws Exception;
+  public abstract void showErc20Allowance(String owner, String spender) throws Exception;
 }
