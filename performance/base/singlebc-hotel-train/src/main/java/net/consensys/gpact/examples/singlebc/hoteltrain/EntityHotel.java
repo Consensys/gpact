@@ -14,35 +14,32 @@
  */
 package net.consensys.gpact.examples.singlebc.hoteltrain;
 
+import java.io.IOException;
+import java.math.BigInteger;
 import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.common.DynamicGasProvider;
-import net.consensys.gpact.common.StatsHolder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
-import org.web3j.protocol.core.methods.response.TransactionReceipt;
-
-import java.io.IOException;
-import java.math.BigInteger;
-
 
 public class EntityHotel extends EntityBase {
-    private static final Logger LOG = LogManager.getLogger(EntityHotel.class);
+  private static final Logger LOG = LogManager.getLogger(EntityHotel.class);
 
-    private static final String NAME = "hotel";
+  private static final String NAME = "hotel";
 
-    public static final BigInteger STANDARD_RATE = BigInteger.valueOf(13);
-    public static final BigInteger NUM_ROOMS = BigInteger.valueOf(3);
+  public static final BigInteger STANDARD_RATE = BigInteger.valueOf(13);
+  public static final BigInteger NUM_ROOMS = BigInteger.valueOf(3);
 
-    private static final String PKEY = "40000000000000000000000000000000000000000000000000000000001";
+  private static final String PKEY = "40000000000000000000000000000000000000000000000000000000001";
 
-    public EntityHotel(BlockchainId bcId, String uri,
-                       DynamicGasProvider.Strategy gasPriceStrategy, int blockPeriod) throws IOException {
-        super(NAME, Credentials.create(PKEY), bcId, uri, gasPriceStrategy, blockPeriod);
-    }
+  public EntityHotel(
+      BlockchainId bcId, String uri, DynamicGasProvider.Strategy gasPriceStrategy, int blockPeriod)
+      throws IOException {
+    super(NAME, Credentials.create(PKEY), bcId, uri, gasPriceStrategy, blockPeriod);
+  }
 
-    public void addRooms() throws Exception {
-        LOG.info("Adding {} rooms at rate {}", NUM_ROOMS, STANDARD_RATE);
-        this.hotelContract.addRooms(STANDARD_RATE, NUM_ROOMS).send();
-    }
+  public void addRooms() throws Exception {
+    LOG.info("Adding {} rooms at rate {}", NUM_ROOMS, STANDARD_RATE);
+    this.hotelContract.addRooms(STANDARD_RATE, NUM_ROOMS).send();
+  }
 }

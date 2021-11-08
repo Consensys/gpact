@@ -14,24 +14,23 @@
  */
 package net.consensys.gpact.examples.trade;
 
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
+import net.consensys.gpact.cbc.CrossControlManagerGroup;
+import net.consensys.gpact.cbc.CrosschainExecutor;
 import net.consensys.gpact.cbc.calltree.CallExecutionTree;
+import net.consensys.gpact.cbc.engine.ExecutionEngine;
 import net.consensys.gpact.common.*;
+import net.consensys.gpact.examples.trade.sim.SimBalancesContract;
+import net.consensys.gpact.examples.trade.sim.SimBusLogicContract;
+import net.consensys.gpact.examples.trade.sim.SimPriceOracleContract;
+import net.consensys.gpact.examples.trade.sim.SimStockContract;
+import net.consensys.gpact.examples.trade.sim.SimTradeWallet;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
-import net.consensys.gpact.cbc.CrossControlManagerGroup;
-import net.consensys.gpact.cbc.CrosschainExecutor;
-import net.consensys.gpact.cbc.engine.ExecutionEngine;
-import net.consensys.gpact.examples.trade.sim.SimBalancesContract;
-import net.consensys.gpact.examples.trade.sim.SimBusLogicContract;
-import net.consensys.gpact.examples.trade.sim.SimPriceOracleContract;
-import net.consensys.gpact.examples.trade.sim.SimTradeWallet;
-import net.consensys.gpact.examples.trade.sim.SimStockContract;
-
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
 
 public class Main {
   static final Logger LOG = LogManager.getLogger(Main.class);
@@ -52,17 +51,25 @@ public class Main {
     BlockchainInfo root = exampleManager.getRootBcInfo();
     BlockchainInfo bc2 = exampleManager.getBc2Info();
     BlockchainInfo bc3 = exampleManager.getBc3Info();
-    BlockchainInfo bc4 = exampleManager.getBc2Info(); // Change this to 4 if 5 blockchains are available
-    BlockchainInfo bc5 = exampleManager.getBc3Info(); // Change this to 5 if 5 blockchains are available
-    CrossControlManagerGroup crossControlManagerGroup = exampleManager.getGpactCrossControlManagerGroup();
+    BlockchainInfo bc4 =
+        exampleManager.getBc2Info(); // Change this to 4 if 5 blockchains are available
+    BlockchainInfo bc5 =
+        exampleManager.getBc3Info(); // Change this to 5 if 5 blockchains are available
+    CrossControlManagerGroup crossControlManagerGroup =
+        exampleManager.getGpactCrossControlManagerGroup();
 
     // Set-up classes to manage blockchains.
     Credentials creds = CredentialsCreator.createCredentials();
-    Bc1TradeWallet bc1TradeWalletBlockchain = new Bc1TradeWallet(creds, root.bcId, root.uri, root.gasPriceStrategy, root.period);
-    Bc2BusLogic bc2BusLogicBlockchain = new Bc2BusLogic(creds, bc2.bcId, bc2.uri, bc2.gasPriceStrategy, bc2.period);
-    Bc3Balances bc3BalancesBlockchain = new Bc3Balances(creds, bc3.bcId, bc3.uri, bc3.gasPriceStrategy, bc3.period);
-    Bc4Oracle bc4OracleBlockchain = new Bc4Oracle(creds, bc4.bcId, bc4.uri, bc4.gasPriceStrategy, bc4.period);
-    Bc5Stock bc5StockBlockchain = new Bc5Stock(creds, bc5.bcId, bc5.uri, bc5.gasPriceStrategy, bc5.period);
+    Bc1TradeWallet bc1TradeWalletBlockchain =
+        new Bc1TradeWallet(creds, root.bcId, root.uri, root.gasPriceStrategy, root.period);
+    Bc2BusLogic bc2BusLogicBlockchain =
+        new Bc2BusLogic(creds, bc2.bcId, bc2.uri, bc2.gasPriceStrategy, bc2.period);
+    Bc3Balances bc3BalancesBlockchain =
+        new Bc3Balances(creds, bc3.bcId, bc3.uri, bc3.gasPriceStrategy, bc3.period);
+    Bc4Oracle bc4OracleBlockchain =
+        new Bc4Oracle(creds, bc4.bcId, bc4.uri, bc4.gasPriceStrategy, bc4.period);
+    Bc5Stock bc5StockBlockchain =
+        new Bc5Stock(creds, bc5.bcId, bc5.uri, bc5.gasPriceStrategy, bc5.period);
 
     // Set-up client side and deploy contracts on the blockchains.
     BlockchainId bc3BcId = bc3BalancesBlockchain.getBlockchainId();
@@ -71,28 +78,40 @@ public class Main {
 
     BlockchainId bc4BcId = bc4OracleBlockchain.getBlockchainId();
     bc4OracleBlockchain.deployContracts();
-    String priceOracleContractAddress = bc4OracleBlockchain.priceOracleContract.getContractAddress();
+    String priceOracleContractAddress =
+        bc4OracleBlockchain.priceOracleContract.getContractAddress();
 
     BlockchainId bc5BcId = bc5StockBlockchain.getBlockchainId();
     bc5StockBlockchain.deployContracts(crossControlManagerGroup.getCbcAddress(bc5BcId));
     String stockContractAddress = bc5StockBlockchain.stockContract.getContractAddress();
 
     BlockchainId bc2BcId = bc2BusLogicBlockchain.getBlockchainId();
-    bc2BusLogicBlockchain.deployContracts(crossControlManagerGroup.getCbcAddress(bc2BcId),
-        bc3BcId, balancesContractAddress, bc4BcId, priceOracleContractAddress, bc5BcId, stockContractAddress);
-    String businessLogicContractAddress = bc2BusLogicBlockchain.busLogicContract.getContractAddress();
+    bc2BusLogicBlockchain.deployContracts(
+        crossControlManagerGroup.getCbcAddress(bc2BcId),
+        bc3BcId,
+        balancesContractAddress,
+        bc4BcId,
+        priceOracleContractAddress,
+        bc5BcId,
+        stockContractAddress);
+    String businessLogicContractAddress =
+        bc2BusLogicBlockchain.busLogicContract.getContractAddress();
 
     BlockchainId rootBcId = bc1TradeWalletBlockchain.getBlockchainId();
-    bc1TradeWalletBlockchain.deployContracts(crossControlManagerGroup.getCbcAddress(rootBcId), bc2BcId, businessLogicContractAddress);
-    String tradeWalletContractAddress = bc1TradeWalletBlockchain.tradeWalletContract.getContractAddress();
-
+    bc1TradeWalletBlockchain.deployContracts(
+        crossControlManagerGroup.getCbcAddress(rootBcId), bc2BcId, businessLogicContractAddress);
+    String tradeWalletContractAddress =
+        bc1TradeWalletBlockchain.tradeWalletContract.getContractAddress();
 
     // Create simulators
     SimStockContract simStockContract = new SimStockContract(bc5StockBlockchain);
     SimBalancesContract simBalancesContract = new SimBalancesContract(bc3BalancesBlockchain);
     SimPriceOracleContract simPriceOracleContract = new SimPriceOracleContract(bc4OracleBlockchain);
-    SimBusLogicContract simBusLogicContract = new SimBusLogicContract(bc2BusLogicBlockchain, simPriceOracleContract, simBalancesContract, simStockContract);
-    SimTradeWallet simTradeWallet = new SimTradeWallet(bc1TradeWalletBlockchain, simBusLogicContract);
+    SimBusLogicContract simBusLogicContract =
+        new SimBusLogicContract(
+            bc2BusLogicBlockchain, simPriceOracleContract, simBalancesContract, simStockContract);
+    SimTradeWallet simTradeWallet =
+        new SimTradeWallet(bc1TradeWalletBlockchain, simBusLogicContract);
 
     // Do some single blockchain calls to set things up, to show that values have changed.
     // Ensure the simulator is set-up the same way.
@@ -112,7 +131,6 @@ public class Main {
     bc3BalancesBlockchain.setBalance(buyerAddress, buyerInitialBalance);
     bc3BalancesBlockchain.setBalance(sellerAddress, sellerInitialBalance);
 
-
     // Simulate passing in the parameter value 7 for the cross-blockchain call.
     BigInteger quantity = BigInteger.valueOf(7);
     simTradeWallet.executeTrade(buyerAddress, sellerAddress, quantity);
@@ -129,17 +147,23 @@ public class Main {
     String rlpStockDelivery = simStockContract.getRlpFunctionSignature_delivery();
     LOG.info(" Stock: Delivery: {}", rlpStockDelivery);
 
-    CallExecutionTree getPrice = new CallExecutionTree(bc4BcId, priceOracleContractAddress, rlpPriceOracleGetPrice);
-    CallExecutionTree balanceTransfer = new CallExecutionTree(bc3BcId, balancesContractAddress, rlpBalancesTransfer);
-    CallExecutionTree stockDelivery = new CallExecutionTree(bc5BcId, stockContractAddress, rlpStockDelivery);
+    CallExecutionTree getPrice =
+        new CallExecutionTree(bc4BcId, priceOracleContractAddress, rlpPriceOracleGetPrice);
+    CallExecutionTree balanceTransfer =
+        new CallExecutionTree(bc3BcId, balancesContractAddress, rlpBalancesTransfer);
+    CallExecutionTree stockDelivery =
+        new CallExecutionTree(bc5BcId, stockContractAddress, rlpStockDelivery);
     ArrayList<CallExecutionTree> busLogicCalls = new ArrayList<>();
     busLogicCalls.add(getPrice);
     busLogicCalls.add(balanceTransfer);
     busLogicCalls.add(stockDelivery);
-    CallExecutionTree businessLogic = new CallExecutionTree(bc2BcId, businessLogicContractAddress, rlpBusLogicStockShipment, busLogicCalls);
+    CallExecutionTree businessLogic =
+        new CallExecutionTree(
+            bc2BcId, businessLogicContractAddress, rlpBusLogicStockShipment, busLogicCalls);
     ArrayList<CallExecutionTree> rootCalls = new ArrayList<>();
     rootCalls.add(businessLogic);
-    CallExecutionTree callGraph = new CallExecutionTree(rootBcId, tradeWalletContractAddress, rlpRootExecuteTrade, rootCalls);
+    CallExecutionTree callGraph =
+        new CallExecutionTree(rootBcId, tradeWalletContractAddress, rlpRootExecuteTrade, rootCalls);
 
     CrosschainExecutor executor = new CrosschainExecutor(crossControlManagerGroup);
     ExecutionEngine executionEngine = exampleManager.getExecutionEngine(executor);
@@ -156,17 +180,26 @@ public class Main {
     TransactionReceipt txR = executor.getTransationReceipt(callP);
     bc2BusLogicBlockchain.showEvents(txR);
 
-    LOG.info("Trade Wallet contract's lockable storaged locked: {}", bc1TradeWalletBlockchain.storageIsLocked());
-    LOG.info("Balances contract's lockable storaged locked: {}", bc3BalancesBlockchain.storageIsLocked());
+    LOG.info(
+        "Trade Wallet contract's lockable storaged locked: {}",
+        bc1TradeWalletBlockchain.storageIsLocked());
+    LOG.info(
+        "Balances contract's lockable storaged locked: {}",
+        bc3BalancesBlockchain.storageIsLocked());
     LOG.info("Stock contract's lockable storaged locked: {}", bc5StockBlockchain.storageIsLocked());
 
-    LOG.info("Buyer: Initial Stock: {}, Initial Balance: {}, Final Stock: {}, Final Balance: {}",
+    LOG.info(
+        "Buyer: Initial Stock: {}, Initial Balance: {}, Final Stock: {}, Final Balance: {}",
         buyerInitialStock,
         buyerInitialBalance,
         bc5StockBlockchain.getStock(buyerAddress),
         bc3BalancesBlockchain.getBalance(buyerAddress));
-    LOG.info("Seller: Initial Stock: {}, Initial Balance: {}, Final Stock: {}, Final Balance: {}",
-        sellerInitialStock, sellerInitialBalance, bc5StockBlockchain.getStock(sellerAddress), bc3BalancesBlockchain.getBalance(sellerAddress));
+    LOG.info(
+        "Seller: Initial Stock: {}, Initial Balance: {}, Final Stock: {}, Final Balance: {}",
+        sellerInitialStock,
+        sellerInitialBalance,
+        bc5StockBlockchain.getStock(sellerAddress),
+        bc3BalancesBlockchain.getBalance(sellerAddress));
 
     bc1TradeWalletBlockchain.shutdown();
     bc2BusLogicBlockchain.shutdown();

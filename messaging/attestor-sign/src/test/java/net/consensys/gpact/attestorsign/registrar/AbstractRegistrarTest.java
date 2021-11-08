@@ -14,20 +14,20 @@
  */
 package net.consensys.gpact.attestorsign.registrar;
 
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 import net.consensys.gpact.attestorsign.soliditywrappers.AttestorSignRegistrar;
 import net.consensys.gpact.common.test.AbstractWeb3Test;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.tx.TransactionManager;
 
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
-
 public abstract class AbstractRegistrarTest extends AbstractWeb3Test {
   protected AttestorSignRegistrar registrarContract;
 
   protected void deployRegistrarContract() throws Exception {
-    this.registrarContract = AttestorSignRegistrar.deploy(this.web3j, this.tm, this.freeGasProvider).send();
+    this.registrarContract =
+        AttestorSignRegistrar.deploy(this.web3j, this.tm, this.freeGasProvider).send();
   }
 
   protected AttestorSignRegistrar deployRegistrarContract(TransactionManager tm1) throws Exception {
@@ -35,7 +35,8 @@ public abstract class AbstractRegistrarTest extends AbstractWeb3Test {
   }
 
   protected AttestorSignRegistrar loadContract(TransactionManager tm1) throws Exception {
-    return AttestorSignRegistrar.load(this.registrarContract.getContractAddress(), this.web3j, tm1, this.freeGasProvider);
+    return AttestorSignRegistrar.load(
+        this.registrarContract.getContractAddress(), this.web3j, tm1, this.freeGasProvider);
   }
 
   protected void addBlockchain(BigInteger blockchainId, String initialSigner) throws Exception {
@@ -45,8 +46,8 @@ public abstract class AbstractRegistrarTest extends AbstractWeb3Test {
   }
 
   protected void addBlockchain(BigInteger blockchainId, List<String> signers) throws Exception {
-    TransactionReceipt receipt = this.registrarContract.addSignersSetThreshold(blockchainId, signers, BigInteger.ONE).send();
-    assert(receipt.isStatusOK());
+    TransactionReceipt receipt =
+        this.registrarContract.addSignersSetThreshold(blockchainId, signers, BigInteger.ONE).send();
+    assert (receipt.isStatusOK());
   }
-
 }

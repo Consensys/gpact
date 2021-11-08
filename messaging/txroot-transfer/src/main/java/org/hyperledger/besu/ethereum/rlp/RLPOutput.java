@@ -20,7 +20,6 @@ import java.math.BigInteger;
 import java.net.InetAddress;
 import java.util.Collection;
 import java.util.function.BiConsumer;
-
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.MutableBytes;
 import org.apache.tuweni.units.bigints.UInt256Value;

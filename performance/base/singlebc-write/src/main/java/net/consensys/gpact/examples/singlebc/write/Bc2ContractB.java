@@ -14,40 +14,46 @@
  */
 package net.consensys.gpact.examples.singlebc.write;
 
+import java.io.IOException;
+import java.math.BigInteger;
+import java.util.List;
+import net.consensys.gpact.common.AbstractBlockchain;
 import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.common.DynamicGasProvider;
 import net.consensys.gpact.common.StatsHolder;
+import net.consensys.gpact.examples.singlebc.write.soliditywrappers.ContractB;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
-import net.consensys.gpact.common.AbstractBlockchain;
-import net.consensys.gpact.examples.singlebc.write.soliditywrappers.ContractB;
-
-
-import java.io.IOException;
-import java.math.BigInteger;
-import java.util.List;
 
 public class Bc2ContractB extends AbstractBlockchain {
   private static final Logger LOG = LogManager.getLogger(Bc2ContractB.class);
 
   ContractB contractB;
 
-  public Bc2ContractB(Credentials credentials, BlockchainId bcId, String uri, DynamicGasProvider.Strategy gasPriceStrategy, int blockPeriod) throws IOException {
+  public Bc2ContractB(
+      Credentials credentials,
+      BlockchainId bcId,
+      String uri,
+      DynamicGasProvider.Strategy gasPriceStrategy,
+      int blockPeriod)
+      throws IOException {
     super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
   }
 
   public void deployContracts() throws Exception {
     this.contractB = ContractB.deploy(this.web3j, this.tm, this.gasProvider).send();
-    LOG.info("ContractB deployed to {} on blockchain {}",
-        this.contractB.getContractAddress(), this.blockchainId);
+    LOG.info(
+        "ContractB deployed to {} on blockchain {}",
+        this.contractB.getContractAddress(),
+        this.blockchainId);
   }
 
   public void showEvents(TransactionReceipt txR) {
     LOG.info("ContractA: Value Read Events");
     List<ContractB.ValueWrittenEventResponse> events = this.contractB.getValueWrittenEvents(txR);
-    for (ContractB.ValueWrittenEventResponse e: events) {
+    for (ContractB.ValueWrittenEventResponse e : events) {
       LOG.info(" Value: {}", e._val);
     }
   }
@@ -60,6 +66,5 @@ public class Bc2ContractB extends AbstractBlockchain {
     TransactionReceipt txR = this.contractB.set(val).send();
     StatsHolder.logGas("doSeparatedWrite", txR.getGasUsed());
     return txR;
-
   }
 }

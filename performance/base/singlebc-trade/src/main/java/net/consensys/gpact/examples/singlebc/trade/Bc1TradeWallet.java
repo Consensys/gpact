@@ -14,24 +14,22 @@
  */
 package net.consensys.gpact.examples.singlebc.trade;
 
+import java.io.IOException;
+import java.math.BigInteger;
+import java.util.List;
 import net.consensys.gpact.common.AbstractBlockchain;
 import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.common.DynamicGasProvider;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.web3j.crypto.Credentials;
-import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import net.consensys.gpact.common.StatsHolder;
 import net.consensys.gpact.examples.singlebc.trade.soliditywrappers.Balances;
 import net.consensys.gpact.examples.singlebc.trade.soliditywrappers.BusLogic;
 import net.consensys.gpact.examples.singlebc.trade.soliditywrappers.PriceOracle;
 import net.consensys.gpact.examples.singlebc.trade.soliditywrappers.Stock;
 import net.consensys.gpact.examples.singlebc.trade.soliditywrappers.TradeWallet;
-
-import java.io.IOException;
-import java.math.BigInteger;
-import java.util.List;
-
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.web3j.crypto.Credentials;
+import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
 public class Bc1TradeWallet extends AbstractBlockchain {
   private static final Logger LOG = LogManager.getLogger(Bc1TradeWallet.class);
@@ -42,7 +40,13 @@ public class Bc1TradeWallet extends AbstractBlockchain {
   Stock stockContract;
   PriceOracle priceOracleContract;
 
-  public Bc1TradeWallet(Credentials credentials, BlockchainId bcId, String uri, DynamicGasProvider.Strategy gasPriceStrategy, int blockPeriod) throws IOException {
+  public Bc1TradeWallet(
+      Credentials credentials,
+      BlockchainId bcId,
+      String uri,
+      DynamicGasProvider.Strategy gasPriceStrategy,
+      int blockPeriod)
+      throws IOException {
     super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
   }
 
@@ -50,25 +54,41 @@ public class Bc1TradeWallet extends AbstractBlockchain {
     this.balancesContract = Balances.deploy(this.web3j, this.tm, this.gasProvider).send();
     this.stockContract = Stock.deploy(this.web3j, this.tm, this.gasProvider).send();
     this.priceOracleContract = PriceOracle.deploy(this.web3j, this.tm, this.gasProvider).send();
-    this.busLogicContract = BusLogic.deploy(this.web3j, this.tm, this.gasProvider,
-        this.balancesContract.getContractAddress(),
-        this.priceOracleContract.getContractAddress(),
-        this.stockContract.getContractAddress()).send();
+    this.busLogicContract =
+        BusLogic.deploy(
+                this.web3j,
+                this.tm,
+                this.gasProvider,
+                this.balancesContract.getContractAddress(),
+                this.priceOracleContract.getContractAddress(),
+                this.stockContract.getContractAddress())
+            .send();
     this.tradeWalletContract =
-        TradeWallet.deploy(this.web3j, this.tm, this.gasProvider, this.busLogicContract.getContractAddress()).send();
+        TradeWallet.deploy(
+                this.web3j, this.tm, this.gasProvider, this.busLogicContract.getContractAddress())
+            .send();
 
-    LOG.info("Balances contract deployed to {} on blockchain {}",
-        this.balancesContract.getContractAddress(), this.blockchainId);
-    LOG.info("Stock contract deployed to {} on blockchain {}",
-        this.stockContract.getContractAddress(), this.blockchainId);
-    LOG.info("Price Oracle contract deployed to {}, on blockchain {}",
-        this.priceOracleContract.getContractAddress(), this.blockchainId);
-    LOG.info("Business Logic contract deployed to {} on blockchain {}",
-        this.busLogicContract.getContractAddress(), this.blockchainId);
-    LOG.info("Trade Wallet contract deployed to {} on blockchain {}",
-        this.tradeWalletContract.getContractAddress(), this.blockchainId);
+    LOG.info(
+        "Balances contract deployed to {} on blockchain {}",
+        this.balancesContract.getContractAddress(),
+        this.blockchainId);
+    LOG.info(
+        "Stock contract deployed to {} on blockchain {}",
+        this.stockContract.getContractAddress(),
+        this.blockchainId);
+    LOG.info(
+        "Price Oracle contract deployed to {}, on blockchain {}",
+        this.priceOracleContract.getContractAddress(),
+        this.blockchainId);
+    LOG.info(
+        "Business Logic contract deployed to {} on blockchain {}",
+        this.busLogicContract.getContractAddress(),
+        this.blockchainId);
+    LOG.info(
+        "Trade Wallet contract deployed to {} on blockchain {}",
+        this.tradeWalletContract.getContractAddress(),
+        this.blockchainId);
   }
-
 
   public TransactionReceipt executeTrade(String seller, BigInteger quantity) throws Exception {
     TransactionReceipt txR = this.tradeWalletContract.executeTrade(seller, quantity).send();
@@ -76,24 +96,27 @@ public class Bc1TradeWallet extends AbstractBlockchain {
     return txR;
   }
 
-  public TransactionReceipt separatedExecuteTrade(String seller, BigInteger quantity) throws Exception {
-    TransactionReceipt txR = this.tradeWalletContract.separatedExecuteTrade(seller, quantity).send();
+  public TransactionReceipt separatedExecuteTrade(String seller, BigInteger quantity)
+      throws Exception {
+    TransactionReceipt txR =
+        this.tradeWalletContract.separatedExecuteTrade(seller, quantity).send();
     StatsHolder.logGas("Separated Execute Trade", txR.getGasUsed());
     return txR;
   }
 
-  public TransactionReceipt separatedBalanceTransfer(String from, String to, BigInteger amount) throws Exception {
+  public TransactionReceipt separatedBalanceTransfer(String from, String to, BigInteger amount)
+      throws Exception {
     TransactionReceipt txR = this.balancesContract.transfer(from, to, amount).send();
     StatsHolder.logGas("Separated Balance Transfer", txR.getGasUsed());
     return txR;
   }
 
-  public TransactionReceipt separatedStockDelivery(String from, String to, BigInteger amount) throws Exception {
+  public TransactionReceipt separatedStockDelivery(String from, String to, BigInteger amount)
+      throws Exception {
     TransactionReceipt txR = this.stockContract.delivery(from, to, amount).send();
     StatsHolder.logGas("Separated Stock Shipment", txR.getGasUsed());
     return txR;
   }
-
 
   public void setBalance(String account, BigInteger newBalance) throws Exception {
     this.balancesContract.setBalance(account, newBalance).send();
@@ -123,7 +146,6 @@ public class Bc1TradeWallet extends AbstractBlockchain {
     LOG.info("Price Oracle: Price: {}", this.priceOracleContract.getPrice().send());
   }
 
-
   public void showAllTrades() throws Exception {
     LOG.info("Trades:");
     BigInteger numTradesBig = this.tradeWalletContract.getNumTrades().send();
@@ -138,16 +160,15 @@ public class Bc1TradeWallet extends AbstractBlockchain {
     }
   }
 
-
   public void showEvents(TransactionReceipt txR) {
     LOG.info("Business Logic: Stock Shipment Events");
-    List<BusLogic.StockShipmentEventResponse> events = this.busLogicContract.getStockShipmentEvents(txR);
-    for (BusLogic.StockShipmentEventResponse e: events) {
+    List<BusLogic.StockShipmentEventResponse> events =
+        this.busLogicContract.getStockShipmentEvents(txR);
+    for (BusLogic.StockShipmentEventResponse e : events) {
       LOG.info(" Seller: {}", e._seller);
       LOG.info(" Buyer: {}", e._buyer);
       LOG.info(" Quantity: {}", e._quantity);
       LOG.info(" Price: {}", e._price);
     }
   }
-
 }

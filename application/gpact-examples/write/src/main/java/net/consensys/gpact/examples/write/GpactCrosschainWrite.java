@@ -14,21 +14,20 @@
  */
 package net.consensys.gpact.examples.write;
 
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
+import net.consensys.gpact.cbc.CrossControlManagerGroup;
+import net.consensys.gpact.cbc.CrosschainExecutor;
 import net.consensys.gpact.cbc.calltree.CallExecutionTree;
+import net.consensys.gpact.cbc.engine.ExecutionEngine;
 import net.consensys.gpact.common.*;
+import net.consensys.gpact.examples.write.sim.SimContractA;
+import net.consensys.gpact.examples.write.sim.SimContractB;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
-import net.consensys.gpact.cbc.CrossControlManagerGroup;
-import net.consensys.gpact.cbc.CrosschainExecutor;
-import net.consensys.gpact.cbc.engine.ExecutionEngine;
-import net.consensys.gpact.examples.write.sim.SimContractA;
-import net.consensys.gpact.examples.write.sim.SimContractB;
-
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
 
 public class GpactCrosschainWrite {
   static final Logger LOG = LogManager.getLogger(GpactCrosschainWrite.class);
@@ -50,11 +49,14 @@ public class GpactCrosschainWrite {
 
     BlockchainInfo root = exampleManager.getRootBcInfo();
     BlockchainInfo bc2 = exampleManager.getBc2Info();
-    CrossControlManagerGroup crossControlManagerGroup = exampleManager.getGpactCrossControlManagerGroup();
+    CrossControlManagerGroup crossControlManagerGroup =
+        exampleManager.getGpactCrossControlManagerGroup();
 
     Credentials creds = CredentialsCreator.createCredentials();
-    Bc1ContractA bc1ContractABlockchain = new Bc1ContractA(creds, root.bcId, root.uri, root.gasPriceStrategy, root.period);
-    Bc2ContractB bc2ContractBBlockchain = new Bc2ContractB(creds, bc2.bcId, bc2.uri, bc2.gasPriceStrategy, bc2.period);
+    Bc1ContractA bc1ContractABlockchain =
+        new Bc1ContractA(creds, root.bcId, root.uri, root.gasPriceStrategy, root.period);
+    Bc2ContractB bc2ContractBBlockchain =
+        new Bc2ContractB(creds, bc2.bcId, bc2.uri, bc2.gasPriceStrategy, bc2.period);
 
     // Set-up client side and deploy contracts on the blockchains.
     BlockchainId bc2BcId = bc2ContractBBlockchain.getBlockchainId();
@@ -62,13 +64,13 @@ public class GpactCrosschainWrite {
     String contractBContractAddress = bc2ContractBBlockchain.contractB.getContractAddress();
 
     BlockchainId rootBcId = bc1ContractABlockchain.getBlockchainId();
-    bc1ContractABlockchain.deployContracts(crossControlManagerGroup.getCbcAddress(rootBcId), bc2BcId, contractBContractAddress);
+    bc1ContractABlockchain.deployContracts(
+        crossControlManagerGroup.getCbcAddress(rootBcId), bc2BcId, contractBContractAddress);
     String contractAContractAddress = bc1ContractABlockchain.contractA.getContractAddress();
 
     // Create simulators
     SimContractB simContractB = new SimContractB(bc2ContractBBlockchain);
     SimContractA simContractA = new SimContractA(bc1ContractABlockchain, simContractB);
-
 
     for (int numExecutions = 0; numExecutions < NUM_TIMES_EXECUTE; numExecutions++) {
       LOG.info("Execution: {} **************************", numExecutions);
@@ -78,17 +80,18 @@ public class GpactCrosschainWrite {
 
       simContractA.doCrosschainWrite(val);
 
-
       LOG.info("Function Calls");
       String rlpSet = simContractB.getRlpFunctionSignature_Set();
       LOG.info(" ContractB: Set: {}", rlpSet);
       String rlpCrosschainWrite = simContractA.getRlpFunctionSignature_DoCrosschainWrite();
       LOG.info(" ContractA: DoCrosschainWrite: {}", rlpCrosschainWrite);
 
-      CallExecutionTree getFunction = new CallExecutionTree(bc2BcId, contractBContractAddress, rlpSet);
+      CallExecutionTree getFunction =
+          new CallExecutionTree(bc2BcId, contractBContractAddress, rlpSet);
       ArrayList<CallExecutionTree> rootCalls = new ArrayList<>();
       rootCalls.add(getFunction);
-      CallExecutionTree callGraph = new CallExecutionTree(rootBcId, contractAContractAddress, rlpCrosschainWrite, rootCalls);
+      CallExecutionTree callGraph =
+          new CallExecutionTree(rootBcId, contractAContractAddress, rlpCrosschainWrite, rootCalls);
 
       CrosschainExecutor executor = new CrosschainExecutor(crossControlManagerGroup);
       ExecutionEngine executionEngine = exampleManager.getExecutionEngine(executor);
@@ -103,7 +106,6 @@ public class GpactCrosschainWrite {
       bc2ContractBBlockchain.showEvents(txR);
       bc2ContractBBlockchain.showValueWritten();
     }
-
 
     bc1ContractABlockchain.shutdown();
     bc2ContractBBlockchain.shutdown();

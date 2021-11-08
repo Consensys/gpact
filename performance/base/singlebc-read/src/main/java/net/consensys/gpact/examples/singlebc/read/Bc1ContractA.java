@@ -14,35 +14,41 @@
  */
 package net.consensys.gpact.examples.singlebc.read;
 
+import java.io.IOException;
+import java.math.BigInteger;
+import java.util.List;
+import net.consensys.gpact.common.AbstractBlockchain;
 import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.common.DynamicGasProvider;
+import net.consensys.gpact.common.StatsHolder;
+import net.consensys.gpact.examples.singlebc.read.soliditywrappers.ContractA;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
-import net.consensys.gpact.common.AbstractBlockchain;
-import net.consensys.gpact.common.StatsHolder;
-import net.consensys.gpact.examples.singlebc.read.soliditywrappers.ContractA;
-
-import java.io.IOException;
-import java.math.BigInteger;
-import java.util.List;
-
 
 public class Bc1ContractA extends AbstractBlockchain {
   private static final Logger LOG = LogManager.getLogger(Bc1ContractA.class);
 
   ContractA contractA;
 
-  public Bc1ContractA(Credentials credentials, BlockchainId bcId, String uri, DynamicGasProvider.Strategy gasPriceStrategy, int blockPeriod) throws IOException {
+  public Bc1ContractA(
+      Credentials credentials,
+      BlockchainId bcId,
+      String uri,
+      DynamicGasProvider.Strategy gasPriceStrategy,
+      int blockPeriod)
+      throws IOException {
     super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
   }
 
   public void deployContracts(String busLogicContractAddress) throws Exception {
     this.contractA =
         ContractA.deploy(this.web3j, this.tm, this.gasProvider, busLogicContractAddress).send();
-    LOG.info("ContractA deployed to {} on blockchain {}",
-        this.contractA.getContractAddress(), this.blockchainId);
+    LOG.info(
+        "ContractA deployed to {} on blockchain {}",
+        this.contractA.getContractAddress(),
+        this.blockchainId);
   }
 
   public TransactionReceipt doRead() throws Exception {
@@ -54,7 +60,7 @@ public class Bc1ContractA extends AbstractBlockchain {
   public void showEvents(TransactionReceipt txR) {
     LOG.info("ContractA: Value Read Events");
     List<ContractA.ValueReadEventResponse> events = this.contractA.getValueReadEvents(txR);
-    for (ContractA.ValueReadEventResponse e: events) {
+    for (ContractA.ValueReadEventResponse e : events) {
       LOG.info(" Value: {}", e._val);
     }
   }
@@ -67,5 +73,4 @@ public class Bc1ContractA extends AbstractBlockchain {
     TransactionReceipt txR = this.contractA.separatedDoRead(BigInteger.ONE).send();
     StatsHolder.logGas("Separated Get", txR.getGasUsed());
   }
-
 }

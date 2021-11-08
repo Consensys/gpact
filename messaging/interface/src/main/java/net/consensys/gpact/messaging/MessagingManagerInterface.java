@@ -14,15 +14,10 @@
  */
 package net.consensys.gpact.messaging;
 
-
-import net.consensys.gpact.common.AnIdentity;
-import net.consensys.gpact.common.BlockchainId;
-import org.web3j.protocol.core.methods.response.TransactionReceipt;
-
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-
+import net.consensys.gpact.common.BlockchainId;
 
 public interface MessagingManagerInterface {
 
@@ -40,20 +35,19 @@ public interface MessagingManagerInterface {
   /**
    * Load all contracts related to this messaging technique.
    *
-   * @param addresses Addresses of the contracts, in the same order as
-   *                  returned by getContractAddresses.
+   * @param addresses Addresses of the contracts, in the same order as returned by
+   *     getContractAddresses.
    */
   void loadContracts(ArrayList<String> addresses);
-
 
   void registerSigner(BlockchainId bcId, String signer) throws Exception;
 
   void registerSigner(BlockchainId bcId, String signer, BigInteger newThreshold) throws Exception;
 
-  void registerSigners(BlockchainId bcId, List<String> signers, BigInteger newThreshold) throws Exception;
+  void registerSigners(BlockchainId bcId, List<String> signers, BigInteger newThreshold)
+      throws Exception;
 
   void removeSigner(BlockchainId bcId, String signer) throws Exception;
 
   void removeSigner(BlockchainId bcId, String signer, BigInteger newThreshold) throws Exception;
-
 }

@@ -14,7 +14,6 @@ public class SimRootContract {
   public BigInteger someComplexBusinessLogicSetValuesParameter1 = BigInteger.ZERO;
   public BigInteger someComplexBusinessLogicSetValuesParameter2 = BigInteger.ZERO;
 
-
   public SimRootContract(SimOtherContract otherContract) {
     this.simOtherContract = otherContract;
   }
@@ -29,10 +28,11 @@ public class SimRootContract {
       this.someComplexBusinessLogicIfTrue = true;
       this.someComplexBusinessLogicSetValuesParameter1 = _val;
       this.someComplexBusinessLogicSetValuesParameter2 = valueFromOtherBlockchain;
-      this.simOtherContract.setValues(this.someComplexBusinessLogicSetValuesParameter1, this.someComplexBusinessLogicSetValuesParameter2);
+      this.simOtherContract.setValues(
+          this.someComplexBusinessLogicSetValuesParameter1,
+          this.someComplexBusinessLogicSetValuesParameter2);
       this.val1 = valueFromOtherBlockchain;
-    }
-    else {
+    } else {
       this.someComplexBusinessLogicIfTrue = false;
       this.someComplexBusinessLogicSetValParameter = _val.add(BigInteger.valueOf(13));
       this.simOtherContract.setVal(this.someComplexBusinessLogicSetValParameter);
@@ -51,6 +51,7 @@ public class SimRootContract {
   public BigInteger getVal1() {
     return this.val1;
   }
+
   public BigInteger getVal2() {
     return this.val2;
   }

@@ -8,12 +8,12 @@ public class SfcCrosschainTokenBridgeTest extends AbstractExampleTest {
   @Test
   public void directSignMultipleBlockchainMinting() throws Exception {
     String tempPropsFile = createPropertiesFile(true, false, false);
-    TokenBridge.main(new String[]{tempPropsFile}, false);
+    TokenBridge.main(new String[] {tempPropsFile}, false);
   }
 
   @Test
   public void directSignMultipleBlockchainMassC() throws Exception {
     String tempPropsFile = createPropertiesFile(true, false, false);
-    TokenBridge.main(new String[]{tempPropsFile}, true);
+    TokenBridge.main(new String[] {tempPropsFile}, true);
   }
 }

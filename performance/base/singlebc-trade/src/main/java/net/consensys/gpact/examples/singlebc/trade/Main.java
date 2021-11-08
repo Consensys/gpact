@@ -14,23 +14,19 @@
  */
 package net.consensys.gpact.examples.singlebc.trade;
 
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 import net.consensys.gpact.common.BlockchainInfo;
+import net.consensys.gpact.common.CredentialsCreator;
+import net.consensys.gpact.common.PropertiesLoader;
+import net.consensys.gpact.common.StatsHolder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
-import net.consensys.gpact.common.CredentialsCreator;
-import net.consensys.gpact.common.PropertiesLoader;
-import net.consensys.gpact.common.StatsHolder;
 
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
-
-
-/**
- * Used to calculate gas cost of executing the trade finance call graph on a single blockchain.
- */
+/** Used to calculate gas cost of executing the trade finance call graph on a single blockchain. */
 public class Main {
   static final Logger LOG = LogManager.getLogger(Main.class);
 
@@ -47,9 +43,9 @@ public class Main {
     Credentials creds = CredentialsCreator.createCredentials();
     BlockchainInfo root = propsLoader.getBlockchainInfo("ROOT");
 
-    Bc1TradeWallet bc1TradeWalletBlockchain = new Bc1TradeWallet(creds, root.bcId, root.uri, root.gasPriceStrategy, root.period);
+    Bc1TradeWallet bc1TradeWalletBlockchain =
+        new Bc1TradeWallet(creds, root.bcId, root.uri, root.gasPriceStrategy, root.period);
     bc1TradeWalletBlockchain.deployContracts();
-
 
     // Do some single blockchain calls to set things up, to show that values have changed.
     // Ensure the simulator is set-up the same way.
@@ -68,7 +64,6 @@ public class Main {
     bc1TradeWalletBlockchain.setStock(sellerAddress, sellerInitialStock);
     bc1TradeWalletBlockchain.setBalance(buyerAddress, buyerInitialBalance);
     bc1TradeWalletBlockchain.setBalance(sellerAddress, sellerInitialBalance);
-
 
     // Simulate passing in the parameter value 7 for the cross-blockchain call.
     BigInteger quantity = BigInteger.valueOf(7);
@@ -90,13 +85,18 @@ public class Main {
     callP.add(BigInteger.ZERO);
     bc1TradeWalletBlockchain.showEvents(txR);
 
-    LOG.info("Buyer: Initial Stock: {}, Initial Balance: {}, Final Stock: {}, Final Balance: {}",
+    LOG.info(
+        "Buyer: Initial Stock: {}, Initial Balance: {}, Final Stock: {}, Final Balance: {}",
         buyerInitialStock,
         buyerInitialBalance,
         bc1TradeWalletBlockchain.getStock(buyerAddress),
         bc1TradeWalletBlockchain.getBalance(buyerAddress));
-    LOG.info("Seller: Initial Stock: {}, Initial Balance: {}, Final Stock: {}, Final Balance: {}",
-        sellerInitialStock, sellerInitialBalance, bc1TradeWalletBlockchain.getStock(sellerAddress), bc1TradeWalletBlockchain.getBalance(sellerAddress));
+    LOG.info(
+        "Seller: Initial Stock: {}, Initial Balance: {}, Final Stock: {}, Final Balance: {}",
+        sellerInitialStock,
+        sellerInitialBalance,
+        bc1TradeWalletBlockchain.getStock(sellerAddress),
+        bc1TradeWalletBlockchain.getBalance(sellerAddress));
 
     bc1TradeWalletBlockchain.shutdown();
 

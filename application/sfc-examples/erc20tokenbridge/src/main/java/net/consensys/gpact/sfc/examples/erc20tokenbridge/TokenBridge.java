@@ -14,17 +14,16 @@
  */
 package net.consensys.gpact.sfc.examples.erc20tokenbridge;
 
+import java.math.BigInteger;
 import net.consensys.gpact.common.*;
 import net.consensys.gpact.sfccbc.SimpleCrossControlManagerGroup;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
 
-import java.math.BigInteger;
-
 /**
- * Sample code showing how to use the Simple Function Call protocol
- * ERC 20 Mass Conservation and Minter Burner bridges.
+ * Sample code showing how to use the Simple Function Call protocol ERC 20 Mass Conservation and
+ * Minter Burner bridges.
  */
 public class TokenBridge {
   static final Logger LOG = LogManager.getLogger(TokenBridge.class);
@@ -36,7 +35,6 @@ public class TokenBridge {
   public static void main(String[] args) throws Exception {
     main(args, BLOCKCHAIN_B_MASS_CONSERVATION);
   }
-
 
   public static void main(String[] args, boolean blockchainBIsMassConservation) throws Exception {
     StatsHolder.log("Example: SFC: Token Bridge");
@@ -53,26 +51,44 @@ public class TokenBridge {
 
     BlockchainInfo root = exampleManager.getRootBcInfo();
     BlockchainInfo bc2 = exampleManager.getBc2Info();
-    SimpleCrossControlManagerGroup crossControlManagerGroup = exampleManager.getSfcCrossControlManagerGroup();
+    SimpleCrossControlManagerGroup crossControlManagerGroup =
+        exampleManager.getSfcCrossControlManagerGroup();
 
     final int CHAIN_A_TOKEN_SUPPLY = 1000;
     final int CHAIN_B_TOKEN_SUPPLY = 1000;
 
     // Set-up classes to manage blockchains.
     Credentials erc20OwnerCreds = CredentialsCreator.createCredentials();
-    MassConservationERC20Bridge chainA = new MassConservationERC20Bridge(
-            "ChainA", BigInteger.valueOf(CHAIN_A_TOKEN_SUPPLY),
-            erc20OwnerCreds, root.bcId, root.uri, root.gasPriceStrategy, root.period);
+    MassConservationERC20Bridge chainA =
+        new MassConservationERC20Bridge(
+            "ChainA",
+            BigInteger.valueOf(CHAIN_A_TOKEN_SUPPLY),
+            erc20OwnerCreds,
+            root.bcId,
+            root.uri,
+            root.gasPriceStrategy,
+            root.period);
     AbstractERC20Bridge chainB;
     if (blockchainBIsMassConservation) {
-      chainB = new MassConservationERC20Bridge(
-              "ChainB", BigInteger.valueOf(CHAIN_B_TOKEN_SUPPLY),
-              erc20OwnerCreds, bc2.bcId, bc2.uri, bc2.gasPriceStrategy, bc2.period);
-    }
-    else {
-      chainB = new MinterBurnerERC20Bridge(
-            "ChainB", BigInteger.valueOf(CHAIN_B_TOKEN_SUPPLY),
-            erc20OwnerCreds, bc2.bcId, bc2.uri, bc2.gasPriceStrategy, bc2.period);
+      chainB =
+          new MassConservationERC20Bridge(
+              "ChainB",
+              BigInteger.valueOf(CHAIN_B_TOKEN_SUPPLY),
+              erc20OwnerCreds,
+              bc2.bcId,
+              bc2.uri,
+              bc2.gasPriceStrategy,
+              bc2.period);
+    } else {
+      chainB =
+          new MinterBurnerERC20Bridge(
+              "ChainB",
+              BigInteger.valueOf(CHAIN_B_TOKEN_SUPPLY),
+              erc20OwnerCreds,
+              bc2.bcId,
+              bc2.uri,
+              bc2.gasPriceStrategy,
+              bc2.period);
     }
 
     // Deploy application contracts.
@@ -89,33 +105,58 @@ public class TokenBridge {
     chainA.addRemoteERC20(chainBBcId, chainB.getErc20ContractAddress());
     chainB.addRemoteERC20(chainABcId, chainA.getErc20ContractAddress());
 
-
-      // Create some users and give them some tokens.
-    Erc20User user1 = new Erc20User(
+    // Create some users and give them some tokens.
+    Erc20User user1 =
+        new Erc20User(
             "User1",
-            root.bcId, chainA.getErc20ContractAddress(), chainA.getErc20BridgeContractAddress(),
-            bc2.bcId, chainB.getErc20ContractAddress(), chainA.getErc20BridgeContractAddress());
-    Erc20User user2 = new Erc20User(
+            root.bcId,
+            chainA.getErc20ContractAddress(),
+            chainA.getErc20BridgeContractAddress(),
+            bc2.bcId,
+            chainB.getErc20ContractAddress(),
+            chainA.getErc20BridgeContractAddress());
+    Erc20User user2 =
+        new Erc20User(
             "User2",
-            root.bcId, chainA.getErc20ContractAddress(), chainA.getErc20BridgeContractAddress(),
-            bc2.bcId, chainB.getErc20ContractAddress(), chainA.getErc20BridgeContractAddress());
-    Erc20User user3 = new Erc20User(
+            root.bcId,
+            chainA.getErc20ContractAddress(),
+            chainA.getErc20BridgeContractAddress(),
+            bc2.bcId,
+            chainB.getErc20ContractAddress(),
+            chainA.getErc20BridgeContractAddress());
+    Erc20User user3 =
+        new Erc20User(
             "User3",
-            root.bcId, chainA.getErc20ContractAddress(), chainA.getErc20BridgeContractAddress(),
-            bc2.bcId, chainB.getErc20ContractAddress(), chainA.getErc20BridgeContractAddress());
+            root.bcId,
+            chainA.getErc20ContractAddress(),
+            chainA.getErc20BridgeContractAddress(),
+            bc2.bcId,
+            chainB.getErc20ContractAddress(),
+            chainA.getErc20BridgeContractAddress());
 
     user1.createCbcManager(
-            root, crossControlManagerGroup.getInfrastructureAddresses(chainABcId), crossControlManagerGroup.getMessageVerification(chainABcId),
-            bc2, crossControlManagerGroup.getInfrastructureAddresses(chainBBcId), crossControlManagerGroup.getMessageVerification(chainBBcId));
+        root,
+        crossControlManagerGroup.getInfrastructureAddresses(chainABcId),
+        crossControlManagerGroup.getMessageVerification(chainABcId),
+        bc2,
+        crossControlManagerGroup.getInfrastructureAddresses(chainBBcId),
+        crossControlManagerGroup.getMessageVerification(chainBBcId));
     user2.createCbcManager(
-            root, crossControlManagerGroup.getInfrastructureAddresses(chainABcId), crossControlManagerGroup.getMessageVerification(chainABcId),
-            bc2, crossControlManagerGroup.getInfrastructureAddresses(chainBBcId), crossControlManagerGroup.getMessageVerification(chainBBcId));
+        root,
+        crossControlManagerGroup.getInfrastructureAddresses(chainABcId),
+        crossControlManagerGroup.getMessageVerification(chainABcId),
+        bc2,
+        crossControlManagerGroup.getInfrastructureAddresses(chainBBcId),
+        crossControlManagerGroup.getMessageVerification(chainBBcId));
     user3.createCbcManager(
-            root, crossControlManagerGroup.getInfrastructureAddresses(chainABcId), crossControlManagerGroup.getMessageVerification(chainABcId),
-            bc2, crossControlManagerGroup.getInfrastructureAddresses(chainBBcId), crossControlManagerGroup.getMessageVerification(chainBBcId));
+        root,
+        crossControlManagerGroup.getInfrastructureAddresses(chainABcId),
+        crossControlManagerGroup.getMessageVerification(chainABcId),
+        bc2,
+        crossControlManagerGroup.getInfrastructureAddresses(chainBBcId),
+        crossControlManagerGroup.getMessageVerification(chainBBcId));
 
-
-      // Give some balance to the users
+    // Give some balance to the users
     chainA.giveTokens(user1, 500);
     chainA.giveTokens(user2, 200);
     chainA.giveTokens(user3, 300);
@@ -124,7 +165,7 @@ public class TokenBridge {
       chainB.giveTokensToERC20Bridge(1000);
     }
 
-    Erc20User[] users = new Erc20User[]{user1, user2, user3};
+    Erc20User[] users = new Erc20User[] {user1, user2, user3};
 
     chainA.showErc20Balances(users);
     chainB.showErc20Balances(users);

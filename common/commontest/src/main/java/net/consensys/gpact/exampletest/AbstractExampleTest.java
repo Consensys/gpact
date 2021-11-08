@@ -7,24 +7,24 @@ import java.util.Properties;
 
 public abstract class AbstractExampleTest {
 
-  protected String createPropertiesFile(boolean useDirectSigning, boolean serialExecution, boolean oneBlockchain) throws IOException {
+  protected String createPropertiesFile(
+      boolean useDirectSigning, boolean serialExecution, boolean oneBlockchain) throws IOException {
     File file = File.createTempFile("temp", null);
-//    file.deleteOnExit();
+    //    file.deleteOnExit();
 
     Properties props = new Properties();
 
-    props.setProperty("PRIVATE_KEY", "40000123456789012345678903961456349a242b3a4b8a211d85ea4d89b1");
+    props.setProperty(
+        "PRIVATE_KEY", "40000123456789012345678903961456349a242b3a4b8a211d85ea4d89b1");
     if (useDirectSigning) {
       props.setProperty("CONSENSUS_METHODOLOGY", "EVENT_SIGNING");
-    }
-    else {
+    } else {
       props.setProperty("CONSENSUS_METHODOLOGY", "TRANSACTION_RECEIPT_SIGNING");
     }
 
     if (serialExecution) {
       props.setProperty("EXECUTION_ENGINE", "SERIAL");
-    }
-    else {
+    } else {
       props.setProperty("EXECUTION_ENGINE", "PARALLEL");
     }
 
@@ -58,8 +58,7 @@ public abstract class AbstractExampleTest {
       props.setProperty("BC5_URI", "http://127.0.0.1:8310/");
       props.setProperty("BC5_GAS", "FREE");
       props.setProperty("BC5_PERIOD", "1000");
-    }
-    else {
+    } else {
       props.setProperty("OTHER_BC_ID", "20");
       props.setProperty("OTHER_URI", "http://127.0.0.1:8320/");
       props.setProperty("OTHER_GAS", "FREE");
@@ -91,7 +90,6 @@ public abstract class AbstractExampleTest {
       props.setProperty("BC5_PERIOD", "1000");
     }
 
-
     FileOutputStream fos = new FileOutputStream(file);
     props.store(fos, "");
     fos.flush();
@@ -99,5 +97,4 @@ public abstract class AbstractExampleTest {
 
     return file.getAbsolutePath();
   }
-
 }

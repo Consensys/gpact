@@ -14,32 +14,38 @@
  */
 package net.consensys.gpact.examples.trade;
 
+import java.io.IOException;
+import java.math.BigInteger;
+import net.consensys.gpact.common.AbstractBlockchain;
 import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.common.DynamicGasProvider;
 import net.consensys.gpact.examples.trade.soliditywrappers.Stock;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
-import net.consensys.gpact.common.AbstractBlockchain;
-
-import java.io.IOException;
-import java.math.BigInteger;
 
 public class Bc5Stock extends AbstractBlockchain {
   private static final Logger LOG = LogManager.getLogger(Bc5Stock.class);
 
   Stock stockContract;
 
-  public Bc5Stock(Credentials credentials, BlockchainId bcId, String uri, DynamicGasProvider.Strategy gasPriceStrategy, int blockPeriod) throws IOException {
+  public Bc5Stock(
+      Credentials credentials,
+      BlockchainId bcId,
+      String uri,
+      DynamicGasProvider.Strategy gasPriceStrategy,
+      int blockPeriod)
+      throws IOException {
     super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
   }
-
 
   public void deployContracts(String cbcContractAddress) throws Exception {
     this.stockContract =
         Stock.deploy(this.web3j, this.tm, this.gasProvider, cbcContractAddress).send();
-    LOG.info("Stock contract deployed to {} on blockchain 0x{}",
-        this.stockContract.getContractAddress(), this.blockchainId);
+    LOG.info(
+        "Stock contract deployed to {} on blockchain 0x{}",
+        this.stockContract.getContractAddress(),
+        this.blockchainId);
   }
 
   public void setStock(String account, BigInteger newAmount) throws Exception {
@@ -55,6 +61,6 @@ public class Bc5Stock extends AbstractBlockchain {
   }
 
   public boolean storageIsLocked() throws Exception {
-    return  this.stockContract.isLocked(BigInteger.ZERO).send();
+    return this.stockContract.isLocked(BigInteger.ZERO).send();
   }
 }

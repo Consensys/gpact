@@ -14,6 +14,7 @@
  */
 package net.consensys.gpact.sfc.examples.write;
 
+import java.math.BigInteger;
 import net.consensys.gpact.common.*;
 import net.consensys.gpact.sfccbc.SimpleCrossControlManagerGroup;
 import net.consensys.gpact.sfccbc.SimpleCrosschainExecutor;
@@ -22,8 +23,6 @@ import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.core.RemoteCall;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
-
-import java.math.BigInteger;
 
 public class SfcCrosschainWrite {
   static final Logger LOG = LogManager.getLogger(SfcCrosschainWrite.class);
@@ -45,11 +44,14 @@ public class SfcCrosschainWrite {
 
     BlockchainInfo root = exampleManager.getRootBcInfo();
     BlockchainInfo bc2 = exampleManager.getBc2Info();
-    SimpleCrossControlManagerGroup crossControlManagerGroup = exampleManager.getSfcCrossControlManagerGroup();
+    SimpleCrossControlManagerGroup crossControlManagerGroup =
+        exampleManager.getSfcCrossControlManagerGroup();
 
     Credentials creds = CredentialsCreator.createCredentials();
-    Bc1ContractA bc1ContractABlockchain = new Bc1ContractA(creds, root.bcId, root.uri, root.gasPriceStrategy, root.period);
-    Bc2ContractB bc2ContractBBlockchain = new Bc2ContractB(creds, bc2.bcId, bc2.uri, bc2.gasPriceStrategy, bc2.period);
+    Bc1ContractA bc1ContractABlockchain =
+        new Bc1ContractA(creds, root.bcId, root.uri, root.gasPriceStrategy, root.period);
+    Bc2ContractB bc2ContractBBlockchain =
+        new Bc2ContractB(creds, bc2.bcId, bc2.uri, bc2.gasPriceStrategy, bc2.period);
 
     // Set-up client side and deploy contracts on the blockchains.
     BlockchainId bc2BcId = bc2ContractBBlockchain.getBlockchainId();
@@ -57,7 +59,8 @@ public class SfcCrosschainWrite {
     String contractBContractAddress = bc2ContractBBlockchain.contractB.getContractAddress();
 
     BlockchainId rootBcId = bc1ContractABlockchain.getBlockchainId();
-    bc1ContractABlockchain.deployContracts(crossControlManagerGroup.getCbcAddress(rootBcId), bc2BcId, contractBContractAddress);
+    bc1ContractABlockchain.deployContracts(
+        crossControlManagerGroup.getCbcAddress(rootBcId), bc2BcId, contractBContractAddress);
     String contractAContractAddress = bc1ContractABlockchain.contractA.getContractAddress();
 
     boolean success = false;
@@ -70,8 +73,9 @@ public class SfcCrosschainWrite {
       RemoteCall<TransactionReceipt> functionCall = bc1ContractABlockchain.doCrosschainWrite(val);
 
       SimpleCrosschainExecutor executor = new SimpleCrosschainExecutor(crossControlManagerGroup);
-      Tuple<TransactionReceipt[], String, Boolean> results = executor.execute(rootBcId, functionCall);
-      success =  results.getThird();
+      Tuple<TransactionReceipt[], String, Boolean> results =
+          executor.execute(rootBcId, functionCall);
+      success = results.getThird();
       LOG.info("Success: {}", success);
       if (!success) {
         LOG.error("Crosschain Execution failed. See log for details");
@@ -79,7 +83,7 @@ public class SfcCrosschainWrite {
         if (errorMsg != null) {
           LOG.error("Error information: {}", errorMsg);
         }
-        for (TransactionReceipt txr: results.getFirst()) {
+        for (TransactionReceipt txr : results.getFirst()) {
           LOG.error("Transaction Receipt: {}", txr.toString());
         }
         throw new Exception("Crosschain Execution failed. See log for details");
@@ -88,7 +92,6 @@ public class SfcCrosschainWrite {
       bc2ContractBBlockchain.showEvents(results.getFirst()[1]);
       bc2ContractBBlockchain.checkValueWritten(val);
     }
-
 
     bc1ContractABlockchain.shutdown();
     bc2ContractBBlockchain.shutdown();

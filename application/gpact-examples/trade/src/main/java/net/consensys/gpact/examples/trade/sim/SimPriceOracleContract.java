@@ -14,9 +14,8 @@
  */
 package net.consensys.gpact.examples.trade.sim;
 
-import net.consensys.gpact.examples.trade.Bc4Oracle;
-
 import java.math.BigInteger;
+import net.consensys.gpact.examples.trade.Bc4Oracle;
 
 public class SimPriceOracleContract {
   private Bc4Oracle bc4Oracle;

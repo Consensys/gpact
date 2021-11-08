@@ -22,7 +22,6 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.Bytes32;
 
@@ -83,7 +82,8 @@ public class StoredMerklePatriciaTrie<K extends Bytes, V> implements MerklePatri
   public Proof<V> getValueWithProof(final K key) {
     checkNotNull(key);
     final ProofVisitor<V> proofVisitor = new ProofVisitor<>(root);
-    final Optional<V> value = root.accept(proofVisitor, CompactEncoding.bytesToPath(key)).getValue();
+    final Optional<V> value =
+        root.accept(proofVisitor, CompactEncoding.bytesToPath(key)).getValue();
     final List<Bytes> proof =
         proofVisitor.getProof().stream().map(Node::getRlp).collect(Collectors.toList());
     return new Proof<>(value, proof);

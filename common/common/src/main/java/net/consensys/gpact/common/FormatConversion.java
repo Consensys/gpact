@@ -14,11 +14,9 @@
  */
 package net.consensys.gpact.common;
 
+import java.math.BigInteger;
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.units.bigints.UInt256;
-
-import java.math.BigInteger;
-
 
 public class FormatConversion {
   public static final int BYTES_IN_ADDRESS = 20;
@@ -28,16 +26,17 @@ public class FormatConversion {
     byte[] addressBytes = eventDataBytes.toArray();
 
     if (addressBytes.length > BYTES_IN_ADDRESS) {
-      throw new RuntimeException("Unexpected address length: " + addressBytes.length + " for address: " + address);
+      throw new RuntimeException(
+          "Unexpected address length: " + addressBytes.length + " for address: " + address);
     }
     if (addressBytes.length < BYTES_IN_ADDRESS) {
       byte[] b = new byte[BYTES_IN_ADDRESS];
-      System.arraycopy(addressBytes, 0, b, BYTES_IN_ADDRESS - addressBytes.length, addressBytes.length);
+      System.arraycopy(
+          addressBytes, 0, b, BYTES_IN_ADDRESS - addressBytes.length, addressBytes.length);
       addressBytes = b;
     }
     return addressBytes;
   }
-
 
   public static byte[] hexStringToByteArray(String hexString) {
     Bytes eventDataBytes = Bytes.fromHexString(hexString);
@@ -54,9 +53,7 @@ public class FormatConversion {
     return blockchainIdUint256.toBytes().toArray();
   }
 
-
   public static String byteArrayToString(byte[] bytes) {
     return Bytes.wrap(bytes).toHexString();
   }
-
 }

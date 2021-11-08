@@ -14,34 +14,31 @@
  */
 package net.consensys.gpact.messaging;
 
+import java.util.List;
 import net.consensys.gpact.common.BlockchainId;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
-import java.math.BigInteger;
-import java.util.List;
-
 public interface MessagingVerificationInterface {
 
-
-    /**
-     * Create a SignedEvent object with event information and signatures or proofs
-     * such that the event information can be verified on the target blockchain.
-     * This is a blocking call that will wait until any required relay operations
-     * have occurred.
-     *
-     * @param targetBlockchainIds Blockchain ids that need to consume the event data.
-     * @param startTxReceipt Transaction receipt for transaction that resulted in the event being emitted.
-     * @param eventData Event data emitted.
-     * @param contractAddress The address of the contract that emitted the event.
-     * @param eventFunctionSignature Function selector for event that emitted the event data.
-     * @return Event information along with signature or proof.
-     * @throws Exception TODO need to work through scenarios in whihc this can fail.
-     */
-    SignedEvent getSignedEvent(
-            List<BlockchainId> targetBlockchainIds,
-            TransactionReceipt startTxReceipt,
-            byte[] eventData,
-            String contractAddress,
-            byte[] eventFunctionSignature) throws Exception;
-
+  /**
+   * Create a SignedEvent object with event information and signatures or proofs such that the event
+   * information can be verified on the target blockchain. This is a blocking call that will wait
+   * until any required relay operations have occurred.
+   *
+   * @param targetBlockchainIds Blockchain ids that need to consume the event data.
+   * @param startTxReceipt Transaction receipt for transaction that resulted in the event being
+   *     emitted.
+   * @param eventData Event data emitted.
+   * @param contractAddress The address of the contract that emitted the event.
+   * @param eventFunctionSignature Function selector for event that emitted the event data.
+   * @return Event information along with signature or proof.
+   * @throws Exception TODO need to work through scenarios in whihc this can fail.
+   */
+  SignedEvent getSignedEvent(
+      List<BlockchainId> targetBlockchainIds,
+      TransactionReceipt startTxReceipt,
+      byte[] eventData,
+      String contractAddress,
+      byte[] eventFunctionSignature)
+      throws Exception;
 }

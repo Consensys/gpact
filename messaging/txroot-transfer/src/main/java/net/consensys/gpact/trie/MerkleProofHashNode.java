@@ -17,7 +17,6 @@ package net.consensys.gpact.trie;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.Bytes32;
 import org.hyperledger.besu.ethereum.rlp.RLP;
@@ -33,7 +32,6 @@ class MerkleProofHashNode<V> implements Node<V> {
   public Bytes constructSimpleProof(final Bytes key, final List<Bytes> proof) {
     throw new RuntimeException("Not used");
   }
-
 
   @Override
   public Node<V> accept(final PathNodeVisitor<V> visitor, final Bytes path) {

@@ -16,7 +16,6 @@ package net.consensys.gpact.trie;
 
 import java.util.ArrayList;
 import java.util.Optional;
-
 import org.apache.tuweni.bytes.Bytes;
 
 interface NodeFactory<V> {
@@ -29,5 +28,7 @@ interface NodeFactory<V> {
 
   Node<V> createLeaf(Bytes path, V value);
 
-  default Node<V> createProofHash(final Bytes toHash) { return NullNode.instance(); }
+  default Node<V> createProofHash(final Bytes toHash) {
+    return NullNode.instance();
+  }
 }

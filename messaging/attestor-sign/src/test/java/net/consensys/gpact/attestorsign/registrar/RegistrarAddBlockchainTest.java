@@ -14,10 +14,9 @@
  */
 package net.consensys.gpact.attestorsign.registrar;
 
+import java.math.BigInteger;
 import org.junit.Test;
 import org.web3j.protocol.exceptions.TransactionException;
-
-import java.math.BigInteger;
 
 public class RegistrarAddBlockchainTest extends AbstractRegistrarTest {
 
@@ -28,9 +27,12 @@ public class RegistrarAddBlockchainTest extends AbstractRegistrarTest {
 
     BigInteger blockchainId = BigInteger.TEN;
     addBlockchain(blockchainId, this.credentials.getAddress());
-    assert(this.registrarContract.getSigningThreshold(blockchainId).send().compareTo(BigInteger.ONE) == 0);
+    assert (this.registrarContract
+            .getSigningThreshold(blockchainId)
+            .send()
+            .compareTo(BigInteger.ONE)
+        == 0);
   }
-
 
   // Do not allow an admin to be added twice.
   @Test
@@ -48,5 +50,4 @@ public class RegistrarAddBlockchainTest extends AbstractRegistrarTest {
       // Do nothing.
     }
   }
-
 }

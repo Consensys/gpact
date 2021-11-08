@@ -14,16 +14,15 @@
  */
 package net.consensys.gpact.common.test;
 
-import org.apache.tuweni.bytes.Bytes;
-
 import java.util.Random;
+import org.apache.tuweni.bytes.Bytes;
 
 public class DummyAddressGenerator {
 
-    public static String gen() {
-        Random notVeryRandom = new Random();
-        byte[] rAddress = new byte[20];
-        notVeryRandom.nextBytes(rAddress);
-        return Bytes.wrap(rAddress).toHexString();
-    }
+  public static String gen() {
+    Random notVeryRandom = new Random();
+    byte[] rAddress = new byte[20];
+    notVeryRandom.nextBytes(rAddress);
+    return Bytes.wrap(rAddress).toHexString();
+  }
 }

@@ -14,6 +14,10 @@
  */
 package net.consensys.gpact.txroot;
 
+import java.io.IOException;
+import java.math.BigInteger;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import net.consensys.gpact.common.*;
 import net.consensys.gpact.txroot.soliditywrappers.TxReceiptsRootStorage;
 import org.apache.logging.log4j.LogManager;
@@ -22,15 +26,7 @@ import org.web3j.crypto.Credentials;
 import org.web3j.crypto.Sign;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
-import java.io.IOException;
-import java.math.BigInteger;
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
-
-
-/**
- * TODO this simulates a relayer
- */
+/** TODO this simulates a relayer */
 public class TxRootRelayer extends AbstractBlockchain {
   static final Logger LOG = LogManager.getLogger(TxRootRelayer.class);
 
@@ -38,16 +34,23 @@ public class TxRootRelayer extends AbstractBlockchain {
 
   List<AnIdentity> signers = new ArrayList<>();
 
-  public TxRootRelayer(Credentials credentials, BlockchainId bcId, String uri, DynamicGasProvider.Strategy gasPriceStrategy, int blockPeriod) throws IOException {
+  public TxRootRelayer(
+      Credentials credentials,
+      BlockchainId bcId,
+      String uri,
+      DynamicGasProvider.Strategy gasPriceStrategy,
+      int blockPeriod)
+      throws IOException {
     super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
   }
 
   public void loadContract(String address) {
     this.txReceiptsRootStorage =
-            TxReceiptsRootStorage.load(address, this.web3j, this.tm, this.gasProvider);
+        TxReceiptsRootStorage.load(address, this.web3j, this.tm, this.gasProvider);
   }
 
-  // TODO this method won't be needed / should be removed once the Attestor service has been created.
+  // TODO this method won't be needed / should be removed once the Attestor service has been
+  // created.
   // Perhaps at that point, addSigner should be specifying the URL of an attestor.
   public void addSigner(AnIdentity signer) throws Exception {
     // Add the signer (their private key) to app for the blockchain
@@ -60,7 +63,7 @@ public class TxRootRelayer extends AbstractBlockchain {
     ArrayList<byte[]> sigR = new ArrayList<>();
     ArrayList<byte[]> sigS = new ArrayList<>();
     ArrayList<BigInteger> sigV = new ArrayList<>();
-    for (AnIdentity signer: signers) {
+    for (AnIdentity signer : signers) {
       Sign.SignatureData signatureData = signer.sign(transactionReceiptRoot);
       theSigners.add(signer.getAddress());
       sigR.add(signatureData.getR());
@@ -70,20 +73,35 @@ public class TxRootRelayer extends AbstractBlockchain {
     return new Signatures(theSigners, sigR, sigS, sigV);
   }
 
-
   public CompletableFuture<TransactionReceipt> addTransactionReceiptRootToBlockchainAsyncPart1(
-          Signatures signed, BlockchainId sourceBlockchainId, byte[] transactionReceiptRoot) throws Exception {
+      Signatures signed, BlockchainId sourceBlockchainId, byte[] transactionReceiptRoot)
+      throws Exception {
     // Add the transaction receipt root for the blockchain
-    LOG.debug("txReceiptsRootStorageContract.addTxReceiptRoot: publishing to BC ID {}, from BC ID: {}", this.blockchainId, sourceBlockchainId);
-    return this.txReceiptsRootStorage.addTxReceiptRoot(
-            sourceBlockchainId.asBigInt(), signed.theSigners, signed.sigR, signed.sigS, signed.sigV, transactionReceiptRoot).sendAsync();
+    LOG.debug(
+        "txReceiptsRootStorageContract.addTxReceiptRoot: publishing to BC ID {}, from BC ID: {}",
+        this.blockchainId,
+        sourceBlockchainId);
+    return this.txReceiptsRootStorage
+        .addTxReceiptRoot(
+            sourceBlockchainId.asBigInt(),
+            signed.theSigners,
+            signed.sigR,
+            signed.sigS,
+            signed.sigV,
+            transactionReceiptRoot)
+        .sendAsync();
   }
 
-  public void addTransactionReceiptRootToBlockchainAsyncPart2(TransactionReceipt txR) throws Exception {
+  public void addTransactionReceiptRootToBlockchainAsyncPart2(TransactionReceipt txR)
+      throws Exception {
     if (!txR.isStatusOK()) {
       String revertReason = txR.getRevertReason();
-      LOG.error("Transaction to add transaction receipt root failed: Revert Reason: {}", RevertReason.decodeRevertReason(revertReason));
-      throw new Exception("Transaction to add transaction receipt root failed: Revert Reason: " + RevertReason.decodeRevertReason(revertReason));
+      LOG.error(
+          "Transaction to add transaction receipt root failed: Revert Reason: {}",
+          RevertReason.decodeRevertReason(revertReason));
+      throw new Exception(
+          "Transaction to add transaction receipt root failed: Revert Reason: "
+              + RevertReason.decodeRevertReason(revertReason));
     }
     StatsHolder.logGas("AddTxReceiptRoot Transaction", txR.getGasUsed());
   }

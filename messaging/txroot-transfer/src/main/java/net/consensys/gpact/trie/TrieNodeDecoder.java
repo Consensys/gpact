@@ -16,6 +16,7 @@ package net.consensys.gpact.trie;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import com.google.common.collect.Streams;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -24,8 +25,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
-
-import com.google.common.collect.Streams;
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.Bytes32;
 

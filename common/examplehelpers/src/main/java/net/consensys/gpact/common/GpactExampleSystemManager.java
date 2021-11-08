@@ -1,5 +1,6 @@
 package net.consensys.gpact.common;
 
+import java.util.ArrayList;
 import net.consensys.gpact.attestorsign.AttestorSignerGroup;
 import net.consensys.gpact.attestorsign.AttestorSignerManagerGroup;
 import net.consensys.gpact.cbc.CrossControlManager;
@@ -9,15 +10,12 @@ import net.consensys.gpact.cbc.engine.ExecutionEngine;
 import net.consensys.gpact.cbc.engine.ParallelExecutionEngine;
 import net.consensys.gpact.cbc.engine.SerialExecutionEngine;
 import net.consensys.gpact.messaging.MessagingManagerGroupInterface;
-import net.consensys.gpact.sfccbc.SimpleCrossControlManagerGroup;
 import net.consensys.gpact.txroot.TxRootRelayerGroup;
 import net.consensys.gpact.txroot.TxRootTransferGroup;
 import net.consensys.gpact.txroot.TxRootTransferManagerGroup;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
-
-import java.util.ArrayList;
 
 public class GpactExampleSystemManager {
   static final Logger LOG = LogManager.getLogger(GpactExampleSystemManager.class);
@@ -41,7 +39,8 @@ public class GpactExampleSystemManager {
     // Less that two blockchains doesn't make sense for crosschain.
     // The test infrasturcture only supports three blockchains at present.
     if (!(numberOfBlockchains == 2 || numberOfBlockchains == 3)) {
-      throw new IllegalArgumentException("Number of blockchains must be two or three. Requested: " + numberOfBlockchains);
+      throw new IllegalArgumentException(
+          "Number of blockchains must be two or three. Requested: " + numberOfBlockchains);
     }
 
     PropertiesLoader propsLoader = new PropertiesLoader(this.propsFileName);
@@ -67,13 +66,25 @@ public class GpactExampleSystemManager {
         AttestorSignerGroup attestorSignerGroup = new AttestorSignerGroup();
         messagingManagerGroup = new AttestorSignerManagerGroup();
 
-        addBcAttestorSign(messagingManagerGroup, gpactCrossControlManagerGroup,
-                attestorSignerGroup, creds, this.root);
-        addBcAttestorSign(messagingManagerGroup, gpactCrossControlManagerGroup,
-                attestorSignerGroup, creds, this.bc2);
+        addBcAttestorSign(
+            messagingManagerGroup,
+            gpactCrossControlManagerGroup,
+            attestorSignerGroup,
+            creds,
+            this.root);
+        addBcAttestorSign(
+            messagingManagerGroup,
+            gpactCrossControlManagerGroup,
+            attestorSignerGroup,
+            creds,
+            this.bc2);
         if (this.numBlockchains == 3) {
-          addBcAttestorSign(messagingManagerGroup, gpactCrossControlManagerGroup,
-                  attestorSignerGroup, creds, this.bc3);
+          addBcAttestorSign(
+              messagingManagerGroup,
+              gpactCrossControlManagerGroup,
+              attestorSignerGroup,
+              creds,
+              this.bc3);
         }
         attestorSignerGroup.addSignerOnAllBlockchains(globalSigner);
         break;
@@ -82,13 +93,28 @@ public class GpactExampleSystemManager {
         TxRootTransferGroup txRootTransferGroup = new TxRootTransferGroup();
         messagingManagerGroup = new TxRootTransferManagerGroup();
 
-        addBcTxRootSign(messagingManagerGroup, gpactCrossControlManagerGroup,
-                relayerGroup, txRootTransferGroup, creds, this.root);
-        addBcTxRootSign(messagingManagerGroup, gpactCrossControlManagerGroup,
-                relayerGroup, txRootTransferGroup, creds, this.bc2);
+        addBcTxRootSign(
+            messagingManagerGroup,
+            gpactCrossControlManagerGroup,
+            relayerGroup,
+            txRootTransferGroup,
+            creds,
+            this.root);
+        addBcTxRootSign(
+            messagingManagerGroup,
+            gpactCrossControlManagerGroup,
+            relayerGroup,
+            txRootTransferGroup,
+            creds,
+            this.bc2);
         if (this.numBlockchains == 3) {
-          addBcTxRootSign(messagingManagerGroup, gpactCrossControlManagerGroup,
-                  relayerGroup, txRootTransferGroup, creds, this.bc3);
+          addBcTxRootSign(
+              messagingManagerGroup,
+              gpactCrossControlManagerGroup,
+              relayerGroup,
+              txRootTransferGroup,
+              creds,
+              this.bc3);
         }
         relayerGroup.addSignerOnAllBlockchains(globalSigner);
         break;
@@ -120,9 +146,11 @@ public class GpactExampleSystemManager {
   public BlockchainInfo getRootBcInfo() {
     return this.root;
   }
+
   public BlockchainInfo getBc2Info() {
     return this.bc2;
   }
+
   public BlockchainInfo getBc3Info() {
     return this.bc3;
   }
@@ -131,45 +159,52 @@ public class GpactExampleSystemManager {
     return this.gpactCrossControlManagerGroup;
   }
 
-  private void setupCrosschainTrust(CrossControlManagerGroup crossControlManagerGroup, MessagingManagerGroupInterface messagingManagerGroup) throws Exception {
+  private void setupCrosschainTrust(
+      CrossControlManagerGroup crossControlManagerGroup,
+      MessagingManagerGroupInterface messagingManagerGroup)
+      throws Exception {
     ArrayList<BlockchainId> bcs = crossControlManagerGroup.getAllBlockchainIds();
 
-    for (BlockchainId bcId1: bcs) {
+    for (BlockchainId bcId1 : bcs) {
       CrossControlManager crossManager1 = crossControlManagerGroup.getCbcContract(bcId1);
       String cbcContractAddress = crossManager1.getCbcContractAddress();
       String verifierContractAddress = messagingManagerGroup.getVerifierAddress(bcId1);
 
-      for (BlockchainId bcId2: bcs) {
+      for (BlockchainId bcId2 : bcs) {
         CrossControlManager crossManager2 = crossControlManagerGroup.getCbcContract(bcId2);
         crossManager2.addBlockchain(bcId1, cbcContractAddress, verifierContractAddress);
       }
     }
   }
 
-
   private void addBcAttestorSign(
-          MessagingManagerGroupInterface messagingManagerGroup,
-          CrossControlManagerGroup crossControlManagerGroup,
-          AttestorSignerGroup attestorSignerGroup,
-          Credentials creds,
-          BlockchainInfo bc) throws Exception {
+      MessagingManagerGroupInterface messagingManagerGroup,
+      CrossControlManagerGroup crossControlManagerGroup,
+      AttestorSignerGroup attestorSignerGroup,
+      Credentials creds,
+      BlockchainInfo bc)
+      throws Exception {
     messagingManagerGroup.addBlockchainAndDeployContracts(creds, bc);
     attestorSignerGroup.addBlockchain(bc.bcId);
-    crossControlManagerGroup.addBlockchainAndDeployContracts(creds, bc, attestorSignerGroup.getVerifier(bc.bcId));
+    crossControlManagerGroup.addBlockchainAndDeployContracts(
+        creds, bc, attestorSignerGroup.getVerifier(bc.bcId));
   }
 
   private void addBcTxRootSign(
-          MessagingManagerGroupInterface messagingManagerGroup,
-          CrossControlManagerGroup crossControlManagerGroup,
-          TxRootRelayerGroup relayerGroup,
-          TxRootTransferGroup txRootTransferGroup,
-          Credentials creds,
-          BlockchainInfo bc) throws Exception {
+      MessagingManagerGroupInterface messagingManagerGroup,
+      CrossControlManagerGroup crossControlManagerGroup,
+      TxRootRelayerGroup relayerGroup,
+      TxRootTransferGroup txRootTransferGroup,
+      Credentials creds,
+      BlockchainInfo bc)
+      throws Exception {
     messagingManagerGroup.addBlockchainAndDeployContracts(creds, bc);
     txRootTransferGroup.addBlockchain(relayerGroup, creds, bc);
-    relayerGroup.loadContractForBlockchain(creds, bc,
-            ((TxRootTransferManagerGroup)messagingManagerGroup).getTxRootContractAddress(bc.bcId));
-    crossControlManagerGroup.addBlockchainAndDeployContracts(creds, bc, txRootTransferGroup.getVerifier(bc.bcId));
+    relayerGroup.loadContractForBlockchain(
+        creds,
+        bc,
+        ((TxRootTransferManagerGroup) messagingManagerGroup).getTxRootContractAddress(bc.bcId));
+    crossControlManagerGroup.addBlockchainAndDeployContracts(
+        creds, bc, txRootTransferGroup.getVerifier(bc.bcId));
   }
-
 }

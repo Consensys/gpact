@@ -15,7 +15,6 @@
 package org.hyperledger.besu.ethereum.rlp;
 
 import java.math.BigInteger;
-
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.Bytes32;
 

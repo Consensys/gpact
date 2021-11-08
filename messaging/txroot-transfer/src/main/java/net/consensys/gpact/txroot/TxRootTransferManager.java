@@ -14,8 +14,9 @@
  */
 package net.consensys.gpact.txroot;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import net.consensys.gpact.attestorsign.RegistrarManager;
-import net.consensys.gpact.attestorsign.soliditywrappers.CrosschainVerifierSign;
 import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.common.DynamicGasProvider;
 import net.consensys.gpact.txroot.soliditywrappers.CrosschainVerifierTxRoot;
@@ -24,20 +25,20 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
 
-import java.io.IOException;
-import java.util.ArrayList;
-
-/**
- * Manages the registrar and crosschain verifier contracts on a blockchain.
- */
+/** Manages the registrar and crosschain verifier contracts on a blockchain. */
 public class TxRootTransferManager extends RegistrarManager {
   static final Logger LOG = LogManager.getLogger(TxRootTransferManager.class);
 
   private CrosschainVerifierTxRoot verifier;
   private TxReceiptsRootStorage txReceiptsRootStorage;
 
-
-  public TxRootTransferManager(Credentials credentials, BlockchainId bcId, String uri, DynamicGasProvider.Strategy gasPriceStrategy, int blockPeriod) throws IOException {
+  public TxRootTransferManager(
+      Credentials credentials,
+      BlockchainId bcId,
+      String uri,
+      DynamicGasProvider.Strategy gasPriceStrategy,
+      int blockPeriod)
+      throws IOException {
     super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
   }
 
@@ -45,10 +46,18 @@ public class TxRootTransferManager extends RegistrarManager {
   public void deployContracts() throws Exception {
     super.deployContracts();
     this.txReceiptsRootStorage =
-            TxReceiptsRootStorage.deploy(this.web3j, this.tm, this.gasProvider, this.registrarContract.getContractAddress()).send();
-    LOG.debug(" TxReceiptsRootStorage Contract: {}", this.txReceiptsRootStorage.getContractAddress());
+        TxReceiptsRootStorage.deploy(
+                this.web3j, this.tm, this.gasProvider, this.registrarContract.getContractAddress())
+            .send();
+    LOG.debug(
+        " TxReceiptsRootStorage Contract: {}", this.txReceiptsRootStorage.getContractAddress());
     this.verifier =
-            CrosschainVerifierTxRoot.deploy(this.web3j, this.tm, this.gasProvider, this.txReceiptsRootStorage.getContractAddress()).send();
+        CrosschainVerifierTxRoot.deploy(
+                this.web3j,
+                this.tm,
+                this.gasProvider,
+                this.txReceiptsRootStorage.getContractAddress())
+            .send();
     LOG.debug(" Verifier Contract: {}", this.verifier.getContractAddress());
   }
 
@@ -60,14 +69,13 @@ public class TxRootTransferManager extends RegistrarManager {
     return addresses;
   }
 
-
   @Override
   public void loadContracts(ArrayList<String> addresses) {
     super.loadContracts(addresses);
     this.txReceiptsRootStorage =
-            TxReceiptsRootStorage.load(addresses.get(1), this.web3j, this.tm, this.gasProvider);
+        TxReceiptsRootStorage.load(addresses.get(1), this.web3j, this.tm, this.gasProvider);
     this.verifier =
-            CrosschainVerifierTxRoot.load(addresses.get(2), this.web3j, this.tm, this.gasProvider);
+        CrosschainVerifierTxRoot.load(addresses.get(2), this.web3j, this.tm, this.gasProvider);
   }
 
   @Override

@@ -14,6 +14,8 @@
  */
 package net.consensys.gpact.common;
 
+import java.io.IOException;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
@@ -22,11 +24,6 @@ import org.web3j.protocol.http.HttpService;
 import org.web3j.tx.response.PollingTransactionReceiptProcessor;
 import org.web3j.tx.response.TransactionReceiptProcessor;
 
-import java.io.IOException;
-import java.math.BigInteger;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-
-
 public abstract class AbstractBlockchain {
   private static final Logger LOG = LogManager.getLogger(AbstractBlockchain.class);
 
@@ -34,7 +31,6 @@ public abstract class AbstractBlockchain {
   protected static final int RETRY = 20;
 
   protected Credentials credentials;
-
 
   protected BlockchainId blockchainId;
   protected String uri;
@@ -45,23 +41,32 @@ public abstract class AbstractBlockchain {
   public Web3j web3j;
   protected FastTxManager tm;
 
-
-  protected AbstractBlockchain(Credentials credentials, BlockchainId bcId, String uri, DynamicGasProvider.Strategy gasPriceStrategy, int blockPeriod) throws IOException {
+  protected AbstractBlockchain(
+      Credentials credentials,
+      BlockchainId bcId,
+      String uri,
+      DynamicGasProvider.Strategy gasPriceStrategy,
+      int blockPeriod)
+      throws IOException {
     this.blockchainId = bcId;
     this.uri = uri;
     this.pollingInterval = blockPeriod;
     this.credentials = credentials;
-    this.web3j = Web3j.build(new HttpService(this.uri), this.pollingInterval, new ScheduledThreadPoolExecutor(5));
+    this.web3j =
+        Web3j.build(
+            new HttpService(this.uri), this.pollingInterval, new ScheduledThreadPoolExecutor(5));
 
-    TransactionReceiptProcessor txrProcessor = new PollingTransactionReceiptProcessor(this.web3j, this.pollingInterval, RETRY);
-    this.tm = TxManagerCache.getOrCreate(this.web3j, this.credentials, this.blockchainId.asLong(), txrProcessor);
+    TransactionReceiptProcessor txrProcessor =
+        new PollingTransactionReceiptProcessor(this.web3j, this.pollingInterval, RETRY);
+    this.tm =
+        TxManagerCache.getOrCreate(
+            this.web3j, this.credentials, this.blockchainId.asLong(), txrProcessor);
     this.gasProvider = new DynamicGasProvider(this.web3j, uri, gasPriceStrategy);
   }
 
   public void shutdown() {
     this.web3j.shutdown();
   }
-
 
   public BlockchainId getBlockchainId() {
     return this.blockchainId;
@@ -70,5 +75,4 @@ public abstract class AbstractBlockchain {
   public String getUri() {
     return this.uri;
   }
-
 }

@@ -17,8 +17,6 @@ package org.hyperledger.besu.ethereum.rlp;
 import static java.lang.String.format;
 
 import java.util.function.Consumer;
-
-// import io.vertx.core.buffer.Buffer;
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.MutableBytes;
 
@@ -71,10 +69,10 @@ public abstract class RLP {
    *     deeply nested corruption/malformation of the input will not be detected by this method
    *     call, but only later when the input is read.
    */
-//  public static BytesValueRLPInput input(final Buffer buffer, final int offset) {
-//    return new BytesValueRLPInput(
-//        Bytes.wrapBuffer(buffer, offset, buffer.length() - offset), false, false);
-//  }
+  //  public static BytesValueRLPInput input(final Buffer buffer, final int offset) {
+  //    return new BytesValueRLPInput(
+  //        Bytes.wrapBuffer(buffer, offset, buffer.length() - offset), false, false);
+  //  }
 
   /**
    * Creates a {@link RLPOutput}, pass it to the provided consumer for writing, and then return the

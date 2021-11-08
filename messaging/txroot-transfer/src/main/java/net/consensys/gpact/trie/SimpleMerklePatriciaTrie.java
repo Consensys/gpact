@@ -24,7 +24,6 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
 import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.Bytes32;
@@ -62,7 +61,8 @@ public class SimpleMerklePatriciaTrie<K extends Bytes, V> implements MerklePatri
   public Proof<V> getValueWithProof(final K key) {
     checkNotNull(key);
     final ProofVisitor<V> proofVisitor = new ProofVisitor<>(root);
-    final Optional<V> value = root.accept(proofVisitor, CompactEncoding.bytesToPath(key)).getValue();
+    final Optional<V> value =
+        root.accept(proofVisitor, CompactEncoding.bytesToPath(key)).getValue();
     final List<Bytes> proof =
         proofVisitor.getProof().stream().map(Node::getRlp).collect(Collectors.toList());
     return new Proof<>(value, proof);
@@ -70,7 +70,7 @@ public class SimpleMerklePatriciaTrie<K extends Bytes, V> implements MerklePatri
 
   public MultiMerkleProof<V> getValuesWithMultiMerkleProof(final List<Bytes> keys) {
     ArrayList<Bytes> keyPaths = new ArrayList<>();
-    for(Bytes key: keys) {
+    for (Bytes key : keys) {
       keyPaths.add(CompactEncoding.bytesToPath(key));
     }
     return new MultiMerkleProof<>(root.constructMultiproof(keyPaths, nodeFactory));
@@ -83,7 +83,6 @@ public class SimpleMerklePatriciaTrie<K extends Bytes, V> implements MerklePatri
     final Bytes value = this.root.constructSimpleProof(CompactEncoding.bytesToPath(key), proof);
     return new Proof<>(Optional.of(value), proof);
   }
-
 
   @Override
   public void put(final K key, final V value) {

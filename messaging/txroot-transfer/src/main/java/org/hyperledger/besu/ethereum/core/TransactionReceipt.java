@@ -14,17 +14,15 @@
  */
 package org.hyperledger.besu.ethereum.core;
 
+import com.google.common.base.MoreObjects;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import org.apache.tuweni.bytes.Bytes;
 import org.hyperledger.besu.ethereum.mainnet.TransactionReceiptType;
 import org.hyperledger.besu.ethereum.rlp.RLPException;
 import org.hyperledger.besu.ethereum.rlp.RLPInput;
 import org.hyperledger.besu.ethereum.rlp.RLPOutput;
-
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-
-import com.google.common.base.MoreObjects;
-import org.apache.tuweni.bytes.Bytes;
 
 /**
  * A transaction receipt, containing information pertaining a transaction execution.

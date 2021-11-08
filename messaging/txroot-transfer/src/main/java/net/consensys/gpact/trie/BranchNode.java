@@ -14,7 +14,8 @@
  */
 package net.consensys.gpact.trie;
 
-
+import static org.apache.logging.log4j.LogManager.getLogger;
+import static org.hyperledger.besu.crypto.Hash.keccak256;
 
 import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
@@ -24,16 +25,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
-
 import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.Bytes32;
 import org.apache.tuweni.bytes.MutableBytes;
 import org.hyperledger.besu.ethereum.rlp.BytesValueRLPOutput;
 import org.hyperledger.besu.ethereum.rlp.RLP;
-
-import static org.apache.logging.log4j.LogManager.getLogger;
-import static org.hyperledger.besu.crypto.Hash.keccak256;
 
 class BranchNode<V> implements Node<V> {
   public static final byte RADIX = CompactEncoding.LEAF_TERMINATOR;
@@ -70,7 +67,7 @@ class BranchNode<V> implements Node<V> {
   public Node<V> constructMultiproof(final List<Bytes> keys, final NodeFactory<V> nodeFactory) {
     ArrayList<Node<V>> proofChildren = new ArrayList<>();
 
-    for(byte i = 0; i < RADIX; i ++) {
+    for (byte i = 0; i < RADIX; i++) {
       if (children.get(i) instanceof NullNode) {
         proofChildren.add(i, NullNode.instance());
         continue;
@@ -78,15 +75,15 @@ class BranchNode<V> implements Node<V> {
 
       boolean match = false;
       List<Bytes> newkeys = new ArrayList<>();
-      for(Bytes key : keys) {
+      for (Bytes key : keys) {
         // Matching the first nibble of the key with the branch label
-        if(key.get(0) == i) {
-          newkeys.add(key.slice(1, key.size()-1));
+        if (key.get(0) == i) {
+          newkeys.add(key.slice(1, key.size() - 1));
           match = true;
         }
       }
 
-      if(match) {
+      if (match) {
         Node<V> proofChild = children.get(i).constructMultiproof(newkeys, nodeFactory);
         proofChildren.add(i, proofChild);
       } else {
@@ -99,9 +96,8 @@ class BranchNode<V> implements Node<V> {
 
   public Bytes constructSimpleProof(final Bytes key, final List<Bytes> proof) {
     proof.add(getRlp());
-    return children.get(key.get(0)).constructSimpleProof(key.slice(1, key.size()-1), proof);
+    return children.get(key.get(0)).constructSimpleProof(key.slice(1, key.size() - 1), proof);
   }
-
 
   @Override
   public void accept(final NodeVisitor<V> visitor) {

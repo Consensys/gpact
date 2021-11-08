@@ -14,9 +14,8 @@
  */
 package net.consensys.gpact.examples.write.sim;
 
-import net.consensys.gpact.examples.write.Bc1ContractA;
-
 import java.math.BigInteger;
+import net.consensys.gpact.examples.write.Bc1ContractA;
 
 public class SimContractA {
   private Bc1ContractA bc1ContractA;
@@ -32,11 +31,9 @@ public class SimContractA {
   public void doCrosschainWrite(BigInteger val) {
     this.val = val;
     this.simContractB.set(val);
-
   }
 
   public String getRlpFunctionSignature_DoCrosschainWrite() {
     return this.bc1ContractA.getRlpFunctionSignature_DoCrosschainWrite(this.val);
   }
-
 }

@@ -14,13 +14,12 @@
  */
 package net.consensys.gpact.common;
 
+import java.math.BigInteger;
+import net.consensys.gpact.utils.crypto.KeyPairGen;
 import org.web3j.crypto.ECKeyPair;
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
 import org.web3j.utils.Numeric;
-import net.consensys.gpact.utils.crypto.KeyPairGen;
-
-import java.math.BigInteger;
 
 public class AnIdentity {
   private ECKeyPair keyPair;
@@ -47,6 +46,6 @@ public class AnIdentity {
 
   public BigInteger getAddressAsBigInt() {
     return new BigInteger(this.address, 16);
-//    return new BigInteger(this.address.substring(2), 16);
+    //    return new BigInteger(this.address.substring(2), 16);
   }
 }

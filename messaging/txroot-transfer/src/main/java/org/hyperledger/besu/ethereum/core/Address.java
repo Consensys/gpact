@@ -16,14 +16,12 @@ package org.hyperledger.besu.ethereum.core;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-//import org.hyperledger.besu.crypto.SECP256K1.PublicKey;
-import org.hyperledger.besu.ethereum.rlp.RLP;
-import org.hyperledger.besu.ethereum.rlp.RLPException;
-import org.hyperledger.besu.ethereum.rlp.RLPInput;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.DelegatingBytes;
+import org.hyperledger.besu.ethereum.rlp.RLP;
+import org.hyperledger.besu.ethereum.rlp.RLPException;
+import org.hyperledger.besu.ethereum.rlp.RLPInput;
 
 /** A 160-bits account address. */
 public class Address extends DelegatingBytes {
@@ -88,9 +86,9 @@ public class Address extends DelegatingBytes {
     return wrap(hash.slice(12, 20));
   }
 
-//  public static Address extract(final PublicKey publicKey) {
-//    return Address.extract(Hash.hash(publicKey.getEncodedBytes()));
-//  }
+  //  public static Address extract(final PublicKey publicKey) {
+  //    return Address.extract(Hash.hash(publicKey.getEncodedBytes()));
+  //  }
 
   /**
    * Parse an hexadecimal string representing an account address.
@@ -182,7 +180,7 @@ public class Address extends DelegatingBytes {
                 })));
   }
 
-//  public static Address fromPlugin(final org.hyperledger.besu.plugin.data.Address logger) {
-//    return logger instanceof Address ? (Address) logger : wrap(logger.copy());
-//  }
+  //  public static Address fromPlugin(final org.hyperledger.besu.plugin.data.Address logger) {
+  //    return logger instanceof Address ? (Address) logger : wrap(logger.copy());
+  //  }
 }

@@ -14,15 +14,12 @@
  */
 package net.consensys.gpact.lockablestorage.test;
 
+import java.math.BigInteger;
 import org.junit.Test;
 
-import java.math.BigInteger;
-
-import static org.junit.Assert.assertEquals;
-
 /**
- * Check operation of the contract prior to any data being added to the contract.
- * That is, check the default configuration immediately after deployment.
+ * Check operation of the contract prior to any data being added to the contract. That is, check the
+ * default configuration immediately after deployment.
  */
 public class LockableStorageInitTest extends AbstractLockableStorageTest {
   @Test
@@ -30,8 +27,6 @@ public class LockableStorageInitTest extends AbstractLockableStorageTest {
     setupWeb3();
     deployContracts();
 
-    assert(!this.lockableStorageContract.isLocked(BigInteger.ZERO).send());
+    assert (!this.lockableStorageContract.isLocked(BigInteger.ZERO).send());
   }
-
 }
-
