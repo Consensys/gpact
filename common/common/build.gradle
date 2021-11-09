@@ -13,14 +13,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-apply plugin: 'java-library'
-
-sourceCompatibility = 1.8
-
-repositories {
-    mavenCentral()
-}
-
 dependencies {
     // https://mvnrepository.com/artifact/org.apache.tuweni/tuweni-bytes
     implementation group: 'org.apache.tuweni', name: 'tuweni-bytes', version: '1.0.0'
@@ -38,8 +30,6 @@ dependencies {
     implementation files('../../../web3j-abi/crypto/build/libs/crypto-4.8.7-SNAPSHOT.jar')
     implementation files('../../../web3j-abi/rlp/build/libs/rlp-4.8.7-SNAPSHOT.jar')
     implementation files('../../../web3j-abi/utils/build/libs/utils-4.8.7-SNAPSHOT.jar')
-//    compile "com.squareup.okhttp3:okhttp:4.3.1"
-//    compile "com.squareup.okhttp3:logging-interceptor:4.3.1"
     implementation "com.squareup.okhttp3:okhttp:4.9.0"
     implementation "com.squareup.okhttp3:logging-interceptor:4.9.0"
 
@@ -63,12 +53,9 @@ artifacts {
     testArtifacts testJar
 }
 
-
 // Generate Solidity wrapper code before build.
 task generateSources {
     def script = "common/common/gen.sh".execute()
-//    script.in.eachLine {line -> println line}
-//    script.err.eachLine {line -> println "ERROR: " + line}
     script.waitForProcessOutput(System.out, System.err)
     if (script.exitValue() != 0) {
         throw new GradleException("Solidity compile error")

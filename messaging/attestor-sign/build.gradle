@@ -1,13 +1,3 @@
-plugins {
-    id 'java'
-}
-
-sourceCompatibility = 1.9
-
-repositories {
-    mavenCentral()
-}
-
 dependencies {
     implementation project (path: ':common')
     implementation project (path: ':mes-interface')
@@ -23,7 +13,6 @@ dependencies {
     implementation files('../../../web3j-abi/utils/build/libs/utils-4.8.7-SNAPSHOT.jar')
     implementation files('../../../web3j-abi/tuples/build/libs/tuples-4.8.7-SNAPSHOT.jar')
     implementation "io.reactivex.rxjava2:rxjava:2.2.2"
-    //    compile ('org.web3j:core:4.6.3')
 
     // https://mvnrepository.com/artifact/org.apache.tuweni/tuweni-bytes
     implementation group: 'org.apache.tuweni', name: 'tuweni-bytes', version: '1.0.0'
@@ -35,12 +24,9 @@ dependencies {
     testImplementation "com.fasterxml.jackson.core:jackson-databind:2.8.11.6"
 }
 
-
 // Generate Solidity wrapper code before build.
 task generateSources {
     def script = "messaging/attestor-sign/gen.sh".execute()
-//    script.in.eachLine {line -> println line}
-//    script.err.eachLine {line -> println "ERROR: " + line}
     script.waitForProcessOutput(System.out, System.err)
     if (script.exitValue() != 0) {
         throw new GradleException("Solidity compile error")

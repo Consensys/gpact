@@ -1,13 +1,3 @@
-plugins {
-    id 'java'
-}
-
-sourceCompatibility = 1.9
-
-repositories {
-    mavenCentral()
-}
-
 dependencies {
     implementation project (':common')
     implementation project (':app-erc20')
@@ -41,8 +31,6 @@ dependencies {
 
 task generateSources {
     def script = "application/gpact-examples/hotel-train/gen.sh".execute()
-//    script.in.eachLine {line -> println line}
-//    script.err.eachLine {line -> println "ERROR: " + line}
     script.waitForProcessOutput(System.out, System.err)
     if (script.exitValue() != 0) {
         throw new GradleException("Solidity compile error")

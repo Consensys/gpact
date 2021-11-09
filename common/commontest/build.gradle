@@ -13,14 +13,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-apply plugin: 'java-library'
-
-sourceCompatibility = 1.8
-
-repositories {
-    mavenCentral()
-}
-
 dependencies {
     implementation project(':common')
 
@@ -40,8 +32,6 @@ dependencies {
     implementation files('../../../web3j-abi/crypto/build/libs/crypto-4.8.7-SNAPSHOT.jar')
     implementation files('../../../web3j-abi/rlp/build/libs/rlp-4.8.7-SNAPSHOT.jar')
     implementation files('../../../web3j-abi/utils/build/libs/utils-4.8.7-SNAPSHOT.jar')
-//    compile "com.squareup.okhttp3:okhttp:4.3.1"
-//    compile "com.squareup.okhttp3:logging-interceptor:4.3.1"
     implementation "com.squareup.okhttp3:okhttp:4.9.0"
     implementation "com.squareup.okhttp3:logging-interceptor:4.9.0"
 
