@@ -22,23 +22,48 @@ import "../../../../interface/src/main/solidity/CrosschainLockingInterface.sol";
 import "../../../../interface/src/main/solidity/CrosschainFunctionCallReturnInterface.sol";
 import "../../../../interface/src/main/solidity/HiddenParameters.sol";
 
-
-contract CrosschainControl is CrosschainFunctionCallReturnInterface, CbcDecVer, CallPathCallExecutionTree,
-    CrosschainLockingInterface, HiddenParameters {
-
-
-    event Start(uint256 _crossBlockchainTransactionId, address _caller, uint256 _timeout, bytes _callGraph);
-    event Segment(uint256 _crossBlockchainTransactionId, bytes32 _hashOfCallGraph, uint256[] _callPath,
-        address[] _lockedContracts, bool _success, bytes _returnValue);
+contract CrosschainControl is
+    CrosschainFunctionCallReturnInterface,
+    CbcDecVer,
+    CallPathCallExecutionTree,
+    CrosschainLockingInterface,
+    HiddenParameters
+{
+    event Start(
+        uint256 _crossBlockchainTransactionId,
+        address _caller,
+        uint256 _timeout,
+        bytes _callGraph
+    );
+    event Segment(
+        uint256 _crossBlockchainTransactionId,
+        bytes32 _hashOfCallGraph,
+        uint256[] _callPath,
+        address[] _lockedContracts,
+        bool _success,
+        bytes _returnValue
+    );
     event Root(uint256 _crossBlockchainTransactionId, bool _success);
     event Signalling(uint256 _rootBcId, uint256 _crossBlockchainTransactionId);
 
     event BadCall(
-        uint256 _expectedBlockchainId, uint256 _actualBlockchainId,
-        address _expectedContract, address _actualContract,
-        bytes _expectedFunctionCall, bytes _actualFunctionCall);
-    event CallResult(uint256 _blockchainId, address _contract, bytes _functionCall, bytes _result);
-    event NotEnoughCalls(uint256 _expectedNumberOfCalls, uint256 _actualNumberOfCalls);
+        uint256 _expectedBlockchainId,
+        uint256 _actualBlockchainId,
+        address _expectedContract,
+        address _actualContract,
+        bytes _expectedFunctionCall,
+        bytes _actualFunctionCall
+    );
+    event CallResult(
+        uint256 _blockchainId,
+        address _contract,
+        bytes _functionCall,
+        bytes _result
+    );
+    event NotEnoughCalls(
+        uint256 _expectedNumberOfCalls,
+        uint256 _actualNumberOfCalls
+    );
     event CallFailure(string _revertReason);
 
     event Dump(uint256 _val1, bytes32 _val2, address _val3, bytes _val4);
@@ -51,15 +76,14 @@ contract CrosschainControl is CrosschainFunctionCallReturnInterface, CbcDecVer, 
     // 1: The transaction has completed and was successful.
     // 2: The transaction has completed and was not successful.
     // Otherwise: time-out for the transaction: as seconds since unix epoch.
-    uint256 constant private NOT_USED = 0;
-    uint256 constant private SUCCESS = 1;
-    uint256 constant private FAILURE = 2;
-    mapping (uint256=> uint256) public rootTransactionInformation;
+    uint256 private constant NOT_USED = 0;
+    uint256 private constant SUCCESS = 1;
+    uint256 private constant FAILURE = 2;
+    mapping(uint256 => uint256) public rootTransactionInformation;
 
     // Used to prevent replay attacks in transaction segments.
     // Mapping of keccak256(abi.encodePacked(root blockchain id, transaction id, callpath)
-    mapping (bytes32=> bool) public segmentTransactionExecuted;
-
+    mapping(bytes32 => bool) public segmentTransactionExecuted;
 
     // Storage variables that are stored for the life of a transaction. They need to
     // be available in storage as code calls back into this contract.
@@ -92,25 +116,50 @@ contract CrosschainControl is CrosschainFunctionCallReturnInterface, CbcDecVer, 
         myBlockchainId = _myBlockchainId;
     }
 
-
-    function start(uint256 _crossBlockchainTransactionId, uint256 _timeout, bytes calldata _callGraph) external {
+    function start(
+        uint256 _crossBlockchainTransactionId,
+        uint256 _timeout,
+        bytes calldata _callGraph
+    ) external {
         // The tx.origin needs to be the same on all blockchains that are party to the
         // cross-blockchain transaction. As such, ensure start is only called from an
         // EOA.
         require(tx.origin == msg.sender, "Start must be called from an EOA");
 
-        require(rootTransactionInformation[_crossBlockchainTransactionId] == NOT_USED, "Transaction already registered");
+        require(
+            rootTransactionInformation[_crossBlockchainTransactionId] ==
+                NOT_USED,
+            "Transaction already registered"
+        );
         uint256 transactionTimeoutSeconds = _timeout + block.timestamp;
-        rootTransactionInformation[_crossBlockchainTransactionId] = transactionTimeoutSeconds;
+        rootTransactionInformation[
+            _crossBlockchainTransactionId
+        ] = transactionTimeoutSeconds;
 
-        emit Start(_crossBlockchainTransactionId, msg.sender, transactionTimeoutSeconds, _callGraph);
+        emit Start(
+            _crossBlockchainTransactionId,
+            msg.sender,
+            transactionTimeoutSeconds,
+            _callGraph
+        );
     }
 
-
-    function segment(uint256[] calldata _blockchainIds, address[] calldata _cbcAddresses,
-            bytes32[] calldata _eventFunctionSignatures, bytes[] calldata _eventData, bytes[] calldata _signatures, uint256[] calldata _callPath) external {
-
-        decodeAndVerifyEvents(_blockchainIds, _cbcAddresses, _eventFunctionSignatures, _eventData, _signatures, true);
+    function segment(
+        uint256[] calldata _blockchainIds,
+        address[] calldata _cbcAddresses,
+        bytes32[] calldata _eventFunctionSignatures,
+        bytes[] calldata _eventData,
+        bytes[] calldata _signatures,
+        uint256[] calldata _callPath
+    ) external {
+        decodeAndVerifyEvents(
+            _blockchainIds,
+            _cbcAddresses,
+            _eventFunctionSignatures,
+            _eventData,
+            _signatures,
+            true
+        );
 
         uint256 rootBcId = _blockchainIds[0];
 
@@ -126,65 +175,111 @@ contract CrosschainControl is CrosschainFunctionCallReturnInterface, CbcDecVer, 
         address startCaller;
         //uint256 timeout;
         bytes memory callGraph;
-        (crosschainTransactionId, startCaller, , callGraph) =
-            abi.decode(_eventData[0], (uint256, address, uint256, bytes));
+        (crosschainTransactionId, startCaller, , callGraph) = abi.decode(
+            _eventData[0],
+            (uint256, address, uint256, bytes)
+        );
         require(startCaller == tx.origin, "EOA does not match start event");
 
         // Stop replay of transaction segments.
         {
-            bytes32 mapKey = keccak256(abi.encodePacked(rootBcId, crosschainTransactionId, _callPath));
-            require(segmentTransactionExecuted[mapKey] == false, "Segment transaction already executed");
+            bytes32 mapKey = keccak256(
+                abi.encodePacked(rootBcId, crosschainTransactionId, _callPath)
+            );
+            require(
+                segmentTransactionExecuted[mapKey] == false,
+                "Segment transaction already executed"
+            );
             segmentTransactionExecuted[mapKey] == true;
         }
         bytes32 hashOfCallGraph = keccak256(callGraph);
 
         // No need to store call graph or call path if this is a leaf segment / function
         if (_eventData.length > 1) {
-            if (verifySegmentEvents(_eventData, _callPath, hashOfCallGraph, crosschainTransactionId)) {
+            if (
+                verifySegmentEvents(
+                    _eventData,
+                    _callPath,
+                    hashOfCallGraph,
+                    crosschainTransactionId
+                )
+            ) {
                 return;
             }
 
-            determineFuncsToBeCalled(callGraph, _callPath, _eventData.length - 1);
+            determineFuncsToBeCalled(
+                callGraph,
+                _callPath,
+                _eventData.length - 1
+            );
         }
 
-
         // Set-up root blockchain / crosschain transaction value used for locking.
-        activeCallCrosschainRootTxId = calcRootTxId(rootBcId, crosschainTransactionId);
+        activeCallCrosschainRootTxId = calcRootTxId(
+            rootBcId,
+            crosschainTransactionId
+        );
 
         bool isSuccess;
         bytes memory returnValueEncoded;
-        (isSuccess, returnValueEncoded) = makeCall(callGraph, _callPath, rootBcId);
+        (isSuccess, returnValueEncoded) = makeCall(
+            callGraph,
+            _callPath,
+            rootBcId
+        );
 
         // TODO emit segments understanding of root blockhain id
-        emit Segment(crosschainTransactionId, hashOfCallGraph, _callPath, activeCallLockedContracts, isSuccess, returnValueEncoded);
+        emit Segment(
+            crosschainTransactionId,
+            hashOfCallGraph,
+            _callPath,
+            activeCallLockedContracts,
+            isSuccess,
+            returnValueEncoded
+        );
 
         // Only delete locations used.
         if (_eventData.length > 1) {
             cleanupAfterCallSegment();
-        }
-        else {
+        } else {
             cleanupAfterCallLeafSegment();
         }
     }
 
-    function root(uint256[] calldata _blockchainIds, address[] calldata _cbcAddresses,
-        bytes32[] calldata _eventFunctionSignatures, bytes[] calldata _eventData, bytes[] calldata _signatures) external {
-
-        decodeAndVerifyEvents(_blockchainIds, _cbcAddresses, _eventFunctionSignatures, _eventData, _signatures, true);
+    function root(
+        uint256[] calldata _blockchainIds,
+        address[] calldata _cbcAddresses,
+        bytes32[] calldata _eventFunctionSignatures,
+        bytes[] calldata _eventData,
+        bytes[] calldata _signatures
+    ) external {
+        decodeAndVerifyEvents(
+            _blockchainIds,
+            _cbcAddresses,
+            _eventFunctionSignatures,
+            _eventData,
+            _signatures,
+            true
+        );
 
         uint256 rootBcId = _blockchainIds[0];
 
         //Check that tx.origin == msg.sender. This call must be issued by an EOA. This is required so
         // that we can check that the tx.origin for this call matches what is in the start event.
-        require(tx.origin == msg.sender, "Transaction must be instigated by an EOA");
+        require(
+            tx.origin == msg.sender,
+            "Transaction must be instigated by an EOA"
+        );
 
         //Check that the blockchain Id that can be used with the transaction receipt for verification matches this
         // blockchain. That is, check that this is the root blockchain.
         require(myBlockchainId == rootBcId, "This is not the root blockchain");
 
         // Ensure this is the crosschain control contract that generated the start event.
-        require(address(this) == _cbcAddresses[0], "Root blockchain CBC contract was not this one");
-
+        require(
+            address(this) == _cbcAddresses[0],
+            "Root blockchain CBC contract was not this one"
+        );
 
         // Event 0 will be the start event
         // Recall the start event is:
@@ -193,11 +288,15 @@ contract CrosschainControl is CrosschainFunctionCallReturnInterface, CbcDecVer, 
         address startCaller;
         uint256 timeout;
         bytes memory callGraph;
-        (crosschainTransactionId, startCaller, timeout, callGraph) =
-        abi.decode(_eventData[0], (uint256, address, uint256, bytes));
+        (crosschainTransactionId, startCaller, timeout, callGraph) = abi.decode(
+            _eventData[0],
+            (uint256, address, uint256, bytes)
+        );
 
         // Check that Cross-blockchain Transaction Id as shown in the Start Event is still active.
-        uint256 timeoutForCall = rootTransactionInformation[crosschainTransactionId];
+        uint256 timeoutForCall = rootTransactionInformation[
+            crosschainTransactionId
+        ];
         require(timeoutForCall != NOT_USED, "Call not active");
         require(timeoutForCall != SUCCESS, "Call ended (success)");
         require(timeoutForCall != FAILURE, "Call ended (failure)");
@@ -222,14 +321,28 @@ contract CrosschainControl is CrosschainFunctionCallReturnInterface, CbcDecVer, 
         // The element will be the default, 0.
         uint256[] memory callPathForStart = new uint256[](1);
 
-        if (verifySegmentEvents(_eventData, callPathForStart, hashOfCallGraph, crosschainTransactionId)) {
+        if (
+            verifySegmentEvents(
+                _eventData,
+                callPathForStart,
+                hashOfCallGraph,
+                crosschainTransactionId
+            )
+        ) {
             return;
         }
-        determineFuncsToBeCalled(callGraph, callPathForStart, _eventData.length - 1);
+        determineFuncsToBeCalled(
+            callGraph,
+            callPathForStart,
+            _eventData.length - 1
+        );
 
         // Set-up root blockchain / crosschain transaction value used for locking.
         // Store a copy in memory so that storage isn't read from in the code further below.
-        bytes32 crosschainRootTxId = calcRootTxId(rootBcId, crosschainTransactionId);
+        bytes32 crosschainRootTxId = calcRootTxId(
+            rootBcId,
+            crosschainTransactionId
+        );
         activeCallCrosschainRootTxId = crosschainRootTxId;
 
         bool isSuccess;
@@ -237,31 +350,51 @@ contract CrosschainControl is CrosschainFunctionCallReturnInterface, CbcDecVer, 
 
         // Unlock contracts locked by the root transaction.
         for (uint256 i = 0; i < activeCallLockedContracts.length; i++) {
-            LockableStorageInterface lockableStorageContract = LockableStorageInterface(activeCallLockedContracts[i]);
+            LockableStorageInterface lockableStorageContract = LockableStorageInterface(
+                    activeCallLockedContracts[i]
+                );
             lockableStorageContract.finalise(isSuccess, crosschainRootTxId);
         }
-        rootTransactionInformation[crosschainTransactionId] = isSuccess ? SUCCESS : FAILURE;
+        rootTransactionInformation[crosschainTransactionId] = isSuccess
+            ? SUCCESS
+            : FAILURE;
         emit Root(crosschainTransactionId, isSuccess);
         cleanupAfterCallRoot();
     }
 
-
     /**
      * Signalling call: Commit or ignore updates + unlock any locked contracts.
      **/
-    function signalling(uint256[] calldata _blockchainIds, address[] calldata _cbcAddresses,
-        bytes32[] calldata _eventFunctionSignatures, bytes[] calldata _eventData, bytes[] calldata _signatures) external {
-
-        decodeAndVerifyEvents(_blockchainIds, _cbcAddresses, _eventFunctionSignatures, _eventData, _signatures, false);
+    function signalling(
+        uint256[] calldata _blockchainIds,
+        address[] calldata _cbcAddresses,
+        bytes32[] calldata _eventFunctionSignatures,
+        bytes[] calldata _eventData,
+        bytes[] calldata _signatures
+    ) external {
+        decodeAndVerifyEvents(
+            _blockchainIds,
+            _cbcAddresses,
+            _eventFunctionSignatures,
+            _eventData,
+            _signatures,
+            false
+        );
 
         // Extract information from the root event.
         // Recall: Root(uint256 _crossBlockchainTransactionId, bool _success);
         uint256 rootEventCrossBlockchainTxId;
         bool success;
-        (rootEventCrossBlockchainTxId, success) = abi.decode(_eventData[0], (uint256, bool));
+        (rootEventCrossBlockchainTxId, success) = abi.decode(
+            _eventData[0],
+            (uint256, bool)
+        );
 
         // Set-up root blockchain / crosschain transaction value for unlocking.
-        bytes32 crosschainRootTxId = calcRootTxId(_blockchainIds[0], rootEventCrossBlockchainTxId);
+        bytes32 crosschainRootTxId = calcRootTxId(
+            _blockchainIds[0],
+            rootEventCrossBlockchainTxId
+        );
 
         // Check that all of the Segment Events are for the same transaction id, and are for this blockchain.
         for (uint256 i = 1; i < _eventData.length; i++) {
@@ -270,20 +403,26 @@ contract CrosschainControl is CrosschainFunctionCallReturnInterface, CbcDecVer, 
             //        address[] _lockedContracts, bool _success, bytes _returnValue);
             uint256 segmentEventCrossBlockchainTxId;
             address[] memory lockedContracts;
-            (segmentEventCrossBlockchainTxId, , , lockedContracts, , ) =
-                abi.decode(_eventData[i], (uint256, bytes32, uint256[], address[], bool, bytes));
+            (segmentEventCrossBlockchainTxId, , , lockedContracts, , ) = abi
+                .decode(
+                    _eventData[i],
+                    (uint256, bytes32, uint256[], address[], bool, bytes)
+                );
 
             // Check that the cross blockchain transaction id is the same for the root and the segment event.
-            require(rootEventCrossBlockchainTxId == segmentEventCrossBlockchainTxId);
+            require(
+                rootEventCrossBlockchainTxId == segmentEventCrossBlockchainTxId
+            );
             // TODO check the Root Blockchain id indicated in the segment matches the one from the root transaction.
-
 
             // TODO Check that the cross chain transaction id for the root blockchain id is in use on this blockchain but has not been added to the completed list.
 
             // For each address indicated in the Segment Event as being locked, Commit or Ignore updates
             // according to what the Root Event says.
-             for (uint256 j = 0; j < lockedContracts.length; j++) {
-                LockableStorageInterface lockedContract = LockableStorageInterface(lockedContracts[j]);
+            for (uint256 j = 0; j < lockedContracts.length; j++) {
+                LockableStorageInterface lockedContract = LockableStorageInterface(
+                        lockedContracts[j]
+                    );
                 lockedContract.finalise(success, crosschainRootTxId);
             }
         }
@@ -291,26 +430,41 @@ contract CrosschainControl is CrosschainFunctionCallReturnInterface, CbcDecVer, 
         emit Signalling(_blockchainIds[0], rootEventCrossBlockchainTxId);
     }
 
-
-
-    function crossBlockchainCall(uint256 _blockchainId, address _contract, bytes calldata _functionCallData) external override {
+    function crossBlockchainCall(
+        uint256 _blockchainId,
+        address _contract,
+        bytes calldata _functionCallData
+    ) external override {
         bool failed;
         bytes memory returnValue;
-        (failed, returnValue) = commonCallProcessing(_blockchainId, _contract, _functionCallData);
+        (failed, returnValue) = commonCallProcessing(
+            _blockchainId,
+            _contract,
+            _functionCallData
+        );
 
         if (!failed) {
             if (!(compare(returnValue, bytes("")))) {
-                emit CallFailure("Cross Blockchain Call with unexpected return values");
+                emit CallFailure(
+                    "Cross Blockchain Call with unexpected return values"
+                );
                 activeCallFailed = true;
             }
         }
     }
 
-
-    function crossBlockchainCallReturnsUint256(uint256 _blockchainId, address _contract, bytes calldata _functionCallData) external override returns (uint256){
+    function crossBlockchainCallReturnsUint256(
+        uint256 _blockchainId,
+        address _contract,
+        bytes calldata _functionCallData
+    ) external override returns (uint256) {
         bool failed;
         bytes memory returnValue;
-        (failed, returnValue) = commonCallProcessing(_blockchainId, _contract, _functionCallData);
+        (failed, returnValue) = commonCallProcessing(
+            _blockchainId,
+            _contract,
+            _functionCallData
+        );
         if (failed) {
             return uint256(0);
         }
@@ -322,7 +476,10 @@ contract CrosschainControl is CrosschainFunctionCallReturnInterface, CbcDecVer, 
      * need to note which contracts are being locked for the purposes of Segment
      * transactions / events.
      */
-    function addToListOfLockedContracts(address _contractToLock) external override {
+    function addToListOfLockedContracts(address _contractToLock)
+        external
+        override
+    {
         // Don't add the same contract twice. So, check the contract isn't in
         // the array first.
         for (uint256 i = 0; i < activeCallLockedContracts.length; i++) {
@@ -333,12 +490,16 @@ contract CrosschainControl is CrosschainFunctionCallReturnInterface, CbcDecVer, 
         activeCallLockedContracts.push(_contractToLock);
     }
 
-
-    function getActiveCallCrosschainRootTxId() public override view returns (bytes32) {
+    function getActiveCallCrosschainRootTxId()
+        public
+        view
+        override
+        returns (bytes32)
+    {
         return activeCallCrosschainRootTxId;
     }
 
-    function isSingleBlockchainCall() public override view returns (bool) {
+    function isSingleBlockchainCall() public view override returns (bool) {
         return activeCallCrosschainRootTxId == 0;
     }
 
@@ -346,9 +507,20 @@ contract CrosschainControl is CrosschainFunctionCallReturnInterface, CbcDecVer, 
     // **************************** PRIVATE BELOW HERE ***************************
     // **************************** PRIVATE BELOW HERE ***************************
 
-    function makeCall(bytes memory _callGraph, uint256[] memory _callPath, uint256 _rootBcId) private returns(bool, bytes memory) {
-        (uint256 targetBlockchainId, address targetContract, bytes memory functionCall) = extractTargetFromCallGraph(_callGraph, _callPath, true);
-        require(targetBlockchainId == myBlockchainId, "Target blockchain id does not match my blockchain id");
+    function makeCall(
+        bytes memory _callGraph,
+        uint256[] memory _callPath,
+        uint256 _rootBcId
+    ) private returns (bool, bytes memory) {
+        (
+            uint256 targetBlockchainId,
+            address targetContract,
+            bytes memory functionCall
+        ) = extractTargetFromCallGraph(_callGraph, _callPath, true);
+        require(
+            targetBlockchainId == myBlockchainId,
+            "Target blockchain id does not match my blockchain id"
+        );
 
         // Add application authentication information to the end of the call data.
         // For root transaction have parentBcId and parentContract == 0
@@ -356,15 +528,27 @@ contract CrosschainControl is CrosschainFunctionCallReturnInterface, CbcDecVer, 
         address parentContract;
         if (!(_callPath.length == 1 && _callPath[0] == 0)) {
             // If not root transaction
-            uint256[] memory parentCallPath = determineParentCallPath(_callPath);
-            (parentBcId, parentContract, /* bytes memory parentFunctionCall */ ) =
-            extractTargetFromCallGraph(_callGraph, parentCallPath, false);
+            uint256[] memory parentCallPath = determineParentCallPath(
+                _callPath
+            );
+            (
+                parentBcId,
+                parentContract, /* bytes memory parentFunctionCall */
+
+            ) = extractTargetFromCallGraph(_callGraph, parentCallPath, false);
         }
-        bytes memory functionCallWithAuth = encodeThreeHiddenParams(functionCall, _rootBcId, parentBcId, uint256(uint160(parentContract)));
+        bytes memory functionCallWithAuth = encodeThreeHiddenParams(
+            functionCall,
+            _rootBcId,
+            parentBcId,
+            uint256(uint160(parentContract))
+        );
 
         bool isSuccess;
         bytes memory returnValueEncoded;
-        (isSuccess, returnValueEncoded) = targetContract.call(functionCallWithAuth);
+        (isSuccess, returnValueEncoded) = targetContract.call(
+            functionCallWithAuth
+        );
 
         if (!isSuccess) {
             emit CallFailure(getRevertMsg(returnValueEncoded));
@@ -374,7 +558,10 @@ contract CrosschainControl is CrosschainFunctionCallReturnInterface, CbcDecVer, 
         // Do this even if the call has already failed: it will provide a bit
         // more debug information.
         if (activeCallReturnValues.length != activeCallReturnValuesIndex) {
-            emit NotEnoughCalls(activeCallReturnValues.length, activeCallReturnValuesIndex);
+            emit NotEnoughCalls(
+                activeCallReturnValues.length,
+                activeCallReturnValuesIndex
+            );
             isSuccess = false;
         }
 
@@ -387,7 +574,6 @@ contract CrosschainControl is CrosschainFunctionCallReturnInterface, CbcDecVer, 
         rootTransactionInformation[_crosschainTxId] = FAILURE;
         emit Root(_crosschainTxId, false);
     }
-
 
     /**
      * Clean-up temporary storage after a Segment or Root call.
@@ -409,6 +595,7 @@ contract CrosschainControl is CrosschainFunctionCallReturnInterface, CbcDecVer, 
             delete activeCallFailed;
         }
     }
+
     function cleanupAfterCallLeafSegment() private {
         // Indicates a failure happened in a call out to another segment. This
         // should never happen for a leaf segment. However, it would be set
@@ -424,9 +611,9 @@ contract CrosschainControl is CrosschainFunctionCallReturnInterface, CbcDecVer, 
         delete activeCallLockedContracts;
 
         // Not used by leaf calls:
-//        delete activeCallTargetBcIds;
-//        delete activeCallTargetContracts;
-//        delete activeCallTargetFunctionCalls;
+        //        delete activeCallTargetBcIds;
+        //        delete activeCallTargetContracts;
+        //        delete activeCallTargetFunctionCalls;
 
         //        delete activeCallReturnValues;
         //        delete activeCallReturnValuesIndex;
@@ -451,8 +638,11 @@ contract CrosschainControl is CrosschainFunctionCallReturnInterface, CbcDecVer, 
         delete activeCallLockedContracts;
     }
 
-
-    function commonCallProcessing(uint256 _blockchainId, address _contract, bytes calldata _functionCallData) private returns(bool, bytes memory) {
+    function commonCallProcessing(
+        uint256 _blockchainId,
+        address _contract,
+        bytes calldata _functionCallData
+    ) private returns (bool, bytes memory) {
         uint256 returnValuesIndex = activeCallReturnValuesIndex;
         // Fail if we have run out of return results.
         if (returnValuesIndex >= activeCallReturnValues.length) {
@@ -462,16 +652,26 @@ contract CrosschainControl is CrosschainFunctionCallReturnInterface, CbcDecVer, 
 
         uint256 targetBcId = activeCallTargetBcIds[returnValuesIndex];
         address targetContract = activeCallTargetContracts[returnValuesIndex];
-        bytes memory targetFunctionCall = activeCallTargetFunctionCalls[returnValuesIndex];
+        bytes memory targetFunctionCall = activeCallTargetFunctionCalls[
+            returnValuesIndex
+        ];
 
         // Fail if what was called doesn't match what was expected to be called.
-        if (_blockchainId != targetBcId ||
+        if (
+            _blockchainId != targetBcId ||
             _contract != targetContract ||
-            !compare(_functionCallData, targetFunctionCall)) {
-
+            !compare(_functionCallData, targetFunctionCall)
+        ) {
             activeCallFailed = true;
             activeCallReturnValuesIndex = returnValuesIndex + 1;
-            emit BadCall(targetBcId, _blockchainId, targetContract, _contract, targetFunctionCall, _functionCallData);
+            emit BadCall(
+                targetBcId,
+                _blockchainId,
+                targetContract,
+                _contract,
+                targetFunctionCall,
+                _functionCallData
+            );
             return (true, bytes(""));
         }
         bytes memory retVal = activeCallReturnValues[returnValuesIndex++];
@@ -480,7 +680,12 @@ contract CrosschainControl is CrosschainFunctionCallReturnInterface, CbcDecVer, 
         return (false, retVal);
     }
 
-    function verifySegmentEvents(bytes[] memory _segmentEvents, uint256[] memory callPath, bytes32 hashOfCallGraph, uint256 _crosschainTxId) private returns(bool){
+    function verifySegmentEvents(
+        bytes[] memory _segmentEvents,
+        uint256[] memory callPath,
+        bytes32 hashOfCallGraph,
+        uint256 _crosschainTxId
+    ) private returns (bool) {
         //Verify the event information in the Segment Events.
         // Check that the Segment Events correspond to function calls that the Start Event indicates that the
         //  root function call should have been called.
@@ -497,38 +702,57 @@ contract CrosschainControl is CrosschainFunctionCallReturnInterface, CbcDecVer, 
             address[] memory lockedContracts;
             bool success;
             bytes memory returnValue;
-            (crossBlockchainTxId, hashOfCallGraphFromSegment, segCallPath, lockedContracts, success, returnValue) =
-                abi.decode(_segmentEvents[i], (uint256, bytes32, uint256[], address[], bool, bytes));
+            (
+                crossBlockchainTxId,
+                hashOfCallGraphFromSegment,
+                segCallPath,
+                lockedContracts,
+                success,
+                returnValue
+            ) = abi.decode(
+                _segmentEvents[i],
+                (uint256, bytes32, uint256[], address[], bool, bytes)
+            );
 
             // Recall Segment event is defined as:
             // event Segment(uint256 _crossBlockchainTransactionId, bytes32 _hashOfCallGraph, uint256[] _callPath,
             //        address[] _lockedContracts, bool _success, bytes _returnValue);
-//            uint256 crossBlockchainTxId = BytesUtil.bytesToUint256(segmentEvent, 0);
-//            bytes32 hashOfCallGraphFromSegment = BytesUtil.bytesToBytes32(segmentEvent, 0x20);
-//            uint256 locationOfCallPath = BytesUtil.bytesToUint256(segmentEvent, 0x40);
+            //            uint256 crossBlockchainTxId = BytesUtil.bytesToUint256(segmentEvent, 0);
+            //            bytes32 hashOfCallGraphFromSegment = BytesUtil.bytesToBytes32(segmentEvent, 0x20);
+            //            uint256 locationOfCallPath = BytesUtil.bytesToUint256(segmentEvent, 0x40);
             // Not needed: uint256 locationOfLockedContracts = BytesUtil.bytesToUint256(segmentEvent, 0x60);
-//            uint256 success = BytesUtil.bytesToUint256(segmentEvent, 0x80);
-//            uint256 locationOfReturnValue = BytesUtil.bytesToUint256(segmentEvent, 0xA0);
-//            uint256 lenOfReturnValue = BytesUtil.bytesToUint256(segmentEvent, locationOfReturnValue);
-//            bytes memory returnValue = BytesUtil.slice(segmentEvent, locationOfReturnValue + 0x20, lenOfReturnValue);
-//            uint256 lenOfCallPath = BytesUtil.bytesToUint256(segmentEvent, locationOfCallPath);
+            //            uint256 success = BytesUtil.bytesToUint256(segmentEvent, 0x80);
+            //            uint256 locationOfReturnValue = BytesUtil.bytesToUint256(segmentEvent, 0xA0);
+            //            uint256 lenOfReturnValue = BytesUtil.bytesToUint256(segmentEvent, locationOfReturnValue);
+            //            bytes memory returnValue = BytesUtil.slice(segmentEvent, locationOfReturnValue + 0x20, lenOfReturnValue);
+            //            uint256 lenOfCallPath = BytesUtil.bytesToUint256(segmentEvent, locationOfCallPath);
 
-            require(crossBlockchainTxId == _crosschainTxId, "Transaction id from segment and root do not match");
-            require(hashOfCallGraph == hashOfCallGraphFromSegment, "Call graph from segment and root do not match");
+            require(
+                crossBlockchainTxId == _crosschainTxId,
+                "Transaction id from segment and root do not match"
+            );
+            require(
+                hashOfCallGraph == hashOfCallGraphFromSegment,
+                "Call graph from segment and root do not match"
+            );
 
             // Segments with offset zero of Root calls are the only ones that can call segments.
             require(callPath[callPath.length - 1] == 0);
-//            require(lenOfCallPath == callPath.length || lenOfCallPath == callPath.length+1, "Bad call path length for segment");
-            require(segCallPath.length == callPath.length || segCallPath.length == callPath.length+1, "Bad call path length for segment");
+            //            require(lenOfCallPath == callPath.length || lenOfCallPath == callPath.length+1, "Bad call path length for segment");
+            require(
+                segCallPath.length == callPath.length ||
+                    segCallPath.length == callPath.length + 1,
+                "Bad call path length for segment"
+            );
             // TODO walk through call path to ensure the call path from the segment event is correct
-//            if (lenOfCallPath == callPath.length+1) {
-//                uint256 callPathFinalValue = BytesUtil.bytesToUint256(segmentEvent, locationOfCallPath + 0x20 * (lenOfCallPath-1));
-//                require(callPathFinalValue == 0, "Call path optional second element not zero");
-//            }
+            //            if (lenOfCallPath == callPath.length+1) {
+            //                uint256 callPathFinalValue = BytesUtil.bytesToUint256(segmentEvent, locationOfCallPath + 0x20 * (lenOfCallPath-1));
+            //                require(callPathFinalValue == 0, "Call path optional second element not zero");
+            //            }
 
             // Fail the root transaction is one of the segments failed.
             if (!success) {
-//                if (success == 0) {
+                //                if (success == 0) {
                 failRootTransaction(_crosschainTxId);
                 cleanupAfterCallSegment();
                 return true;
@@ -550,47 +774,59 @@ contract CrosschainControl is CrosschainFunctionCallReturnInterface, CbcDecVer, 
      * @param _callPath Call path to be executed as part of this root or segment function.
      * @param _numCalls The number of calls that the current segment / root is expected to call.
      */
-    function determineFuncsToBeCalled(bytes memory _callGraph, uint256[] memory _callPath, uint256 _numCalls) private {
-
+    function determineFuncsToBeCalled(
+        bytes memory _callGraph,
+        uint256[] memory _callPath,
+        uint256 _numCalls
+    ) private {
         uint256 callPathLen = _callPath.length;
         uint256[] memory dynamicCallPath = new uint256[](callPathLen);
-        for (uint i = 0; i < callPathLen - 1; i++) {
+        for (uint256 i = 0; i < callPathLen - 1; i++) {
             dynamicCallPath[i] = _callPath[i];
         }
 
         for (uint256 i = 1; i <= _numCalls; i++) {
             dynamicCallPath[callPathLen - 1] = i;
 
-            (uint256 targetBlockchainId, address targetContract, bytes memory functionCall) =
-                extractTargetFromCallGraph(_callGraph, dynamicCallPath, true);
+            (
+                uint256 targetBlockchainId,
+                address targetContract,
+                bytes memory functionCall
+            ) = extractTargetFromCallGraph(_callGraph, dynamicCallPath, true);
             activeCallTargetBcIds.push(targetBlockchainId);
             activeCallTargetContracts.push(targetContract);
             activeCallTargetFunctionCalls.push(functionCall);
         }
     }
 
-
     /**
      * Calculate the combined Root Blockchain and Crosschain Transaction Id. This
      * is used for calls from lockable storage.
      */
-    function calcRootTxId(uint256 _rootBcId, uint256 _crossTxId) private pure returns (bytes32) {
+    function calcRootTxId(uint256 _rootBcId, uint256 _crossTxId)
+        private
+        pure
+        returns (bytes32)
+    {
         return keccak256(abi.encodePacked(_rootBcId, _crossTxId));
     }
 
+    //    function getRevertMsg(bytes memory _returnData) internal pure returns (string memory) {
+    //        // If the _res length is less than 68, then the transaction failed silently (without a revert message)
+    //        if (_returnData.length < 68) return 'Transaction reverted silently';
+    //
+    //        assembly {
+    //        // Slice the sighash.
+    //            _returnData := add(_returnData, 0x04)
+    //        }
+    //        return abi.decode(_returnData, (string)); // All that remains is the revert string
+    //    }
 
-//    function getRevertMsg(bytes memory _returnData) internal pure returns (string memory) {
-//        // If the _res length is less than 68, then the transaction failed silently (without a revert message)
-//        if (_returnData.length < 68) return 'Transaction reverted silently';
-//
-//        assembly {
-//        // Slice the sighash.
-//            _returnData := add(_returnData, 0x04)
-//        }
-//        return abi.decode(_returnData, (string)); // All that remains is the revert string
-//    }
-
-    function getRevertMsg(bytes memory _returnData) internal pure returns (string memory) {
+    function getRevertMsg(bytes memory _returnData)
+        internal
+        pure
+        returns (string memory)
+    {
         // A string will be 4 bytes for the function selector + 32 bytes for string length +
         // 32 bytes for first part of string. Hence, if the length is less than 68, then
         // this is a panic.
@@ -599,7 +835,13 @@ contract CrosschainControl is CrosschainFunctionCallReturnInterface, CbcDecVer, 
         // or panic:
         // "0x4e487b71" = keccak256("Panic(uint256)"
         if (_returnData.length < 36) {
-            return string(abi.encodePacked("Revert for unknown error. Error length: ", uint2str(_returnData.length)));
+            return
+                string(
+                    abi.encodePacked(
+                        "Revert for unknown error. Error length: ",
+                        uint2str(_returnData.length)
+                    )
+                );
         }
         bool isPanic = _returnData.length < 68;
 
@@ -615,21 +857,25 @@ contract CrosschainControl is CrosschainFunctionCallReturnInterface, CbcDecVer, 
     }
 
     // TODO Move this to a utility sol file.
-    function uint2str(uint _i) internal pure returns (string memory _uintAsString) {
+    function uint2str(uint256 _i)
+        internal
+        pure
+        returns (string memory _uintAsString)
+    {
         if (_i == 0) {
             return "0";
         }
-        uint j = _i;
-        uint len;
+        uint256 j = _i;
+        uint256 len;
         while (j != 0) {
             len++;
             j /= 10;
         }
         bytes memory bstr = new bytes(len);
-        uint k = len;
+        uint256 k = len;
         while (_i != 0) {
-            k = k-1;
-            uint8 temp = (48 + uint8(_i - _i / 10 * 10));
+            k = k - 1;
+            uint8 temp = (48 + uint8(_i - (_i / 10) * 10));
             bytes1 b1 = bytes1(temp);
             bstr[k] = b1;
             _i /= 10;

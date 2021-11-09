@@ -15,7 +15,6 @@
 pragma solidity >=0.8;
 
 abstract contract HiddenParameters {
-
     /**
      * Add three parameters to the end of an existing function call.
      *
@@ -24,10 +23,18 @@ abstract contract HiddenParameters {
      * @param _param2 A parameter to be appended to the function call.
      * @param _param3 A parameter to be appended to the function call.
      */
-    function encodeThreeHiddenParams(bytes memory _functionCall, uint256 _param1, uint256 _param2, uint256 _param3) internal pure returns (bytes memory) {
-        return bytes.concat(_functionCall, abi.encodePacked(_param1, _param2, _param3));
+    function encodeThreeHiddenParams(
+        bytes memory _functionCall,
+        uint256 _param1,
+        uint256 _param2,
+        uint256 _param3
+    ) internal pure returns (bytes memory) {
+        return
+            bytes.concat(
+                _functionCall,
+                abi.encodePacked(_param1, _param2, _param3)
+            );
     }
-
 
     /**
      * Extract three values from the end of the call data. The parameters are expected to have been
@@ -38,7 +45,15 @@ abstract contract HiddenParameters {
      * @return _param3 Hidden parameter that was passed in by appending values to call data.
      *
      */
-    function extractThreeHiddenParams() internal pure returns (uint256 _param1, uint256 _param2, uint256 _param3) {
+    function extractThreeHiddenParams()
+        internal
+        pure
+        returns (
+            uint256 _param1,
+            uint256 _param2,
+            uint256 _param3
+        )
+    {
         bytes calldata allParams = msg.data;
         uint256 len = allParams.length;
 
@@ -59,10 +74,13 @@ abstract contract HiddenParameters {
      * @param _param1 A parameter to be appended to the function call.
      * @param _param2 A parameter to be appended to the function call.
      */
-    function encodeTwoHiddenParams(bytes memory _functionCall, uint256 _param1, uint256 _param2) internal pure returns (bytes memory) {
+    function encodeTwoHiddenParams(
+        bytes memory _functionCall,
+        uint256 _param1,
+        uint256 _param2
+    ) internal pure returns (bytes memory) {
         return bytes.concat(_functionCall, abi.encodePacked(_param1, _param2));
     }
-
 
     /**
      * Extract two values from the end of the call data. The parameters are expected to have been
@@ -71,7 +89,11 @@ abstract contract HiddenParameters {
      * @return _param1 Hidden parameter that was passed in by appending values to call data.
      * @return _param2 Hidden parameter that was passed in by appending values to call data.
      */
-    function extractTwoHiddenParams() internal pure returns (uint256 _param1, uint256 _param2) {
+    function extractTwoHiddenParams()
+        internal
+        pure
+        returns (uint256 _param1, uint256 _param2)
+    {
         bytes calldata allParams = msg.data;
         uint256 len = allParams.length;
 
@@ -83,4 +105,3 @@ abstract contract HiddenParameters {
         }
     }
 }
-

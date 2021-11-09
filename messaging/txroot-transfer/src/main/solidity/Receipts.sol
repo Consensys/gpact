@@ -30,8 +30,11 @@ contract Receipts is RLP, BytesUtil {
      * @return topics The topics associated with the event.
      * @return data The RLP encoded data associated with the event.
      */
-    function extractEvent(address _contractAddress, bytes32 _eventFunctionSignature, bytes memory _receiptRlp)
-       internal pure returns (RLP.RLPItem[] memory topics, bytes memory data) {
+    function extractEvent(
+        address _contractAddress,
+        bytes32 _eventFunctionSignature,
+        bytes memory _receiptRlp
+    ) internal pure returns (RLP.RLPItem[] memory topics, bytes memory data) {
         // Decode the receipt into an array of RLP items.
         //  receipt[0]: state root or status
         //  receipt[1]: cumulative gas used
@@ -49,19 +52,22 @@ contract Receipts is RLP, BytesUtil {
             //  log[0]: Address of contract that emitted the event.
             //  log[1]: Topics. These are the event function signature and indexed parameters.
             //  log[2]: Data. The RLP encoded parameters.
-            address contractAddressEmitter = BytesUtil.bytesToAddress(RLP.toData(log[0]));
+            address contractAddressEmitter = BytesUtil.bytesToAddress(
+                RLP.toData(log[0])
+            );
             topics = RLP.toList(log[1]);
             data = RLP.toData(log[2]);
 
             // With the exception of anonymous topics, the first topic is the Keccak 256 of the
             // event's function signature.
             bytes32 eventSignature = RLP.toBytes32(topics[0]);
-            if ((eventSignature == _eventFunctionSignature) && (contractAddressEmitter == _contractAddress)){
+            if (
+                (eventSignature == _eventFunctionSignature) &&
+                (contractAddressEmitter == _contractAddress)
+            ) {
                 return (topics, data);
             }
         }
         revert("No event found in transaction receipt");
     }
-
-
 }

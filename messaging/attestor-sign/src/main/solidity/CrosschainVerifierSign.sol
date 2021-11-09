@@ -18,8 +18,7 @@ import "../../../../interface/src/main/solidity/CrosschainVerifier.sol";
 import "./AttestorSignRegistrar.sol";
 import "../../../../../common/common/src/main/solidity/BytesUtil.sol";
 
-
-contract CrosschainVerifierSign is CrosschainVerifier, BytesUtil{
+contract CrosschainVerifierSign is CrosschainVerifier, BytesUtil {
     AttestorSignRegistrar registrar;
 
     constructor(address _registrar) {
@@ -29,11 +28,12 @@ contract CrosschainVerifierSign is CrosschainVerifier, BytesUtil{
     uint256 constant LEN_OF_LEN = 4;
     uint256 constant LEN_OF_SIG = 20 + 32 + 32 + 1;
 
-
-    function decodeAndVerifyEvent(uint256 _blockchainId, bytes32 /* _eventSig */,
-        bytes calldata _encodedEvent, bytes calldata _signature)
-            external view override {
-
+    function decodeAndVerifyEvent(
+        uint256 _blockchainId,
+        bytes32, /* _eventSig */
+        bytes calldata _encodedEvent,
+        bytes calldata _signature
+    ) external view override {
         address[] memory signers;
         bytes32[] memory sigRs;
         bytes32[] memory sigSs;
@@ -41,7 +41,10 @@ contract CrosschainVerifierSign is CrosschainVerifier, BytesUtil{
 
         {
             uint32 len = BytesUtil.bytesToUint32(_signature, 0);
-            require(_signature.length == LEN_OF_LEN + len * LEN_OF_SIG, "Signature incorrect length");
+            require(
+                _signature.length == LEN_OF_LEN + len * LEN_OF_SIG,
+                "Signature incorrect length"
+            );
 
             signers = new address[](len);
             sigRs = new bytes32[](len);
@@ -60,7 +63,13 @@ contract CrosschainVerifierSign is CrosschainVerifier, BytesUtil{
                 offset += 1;
             }
         }
-        registrar.verify(_blockchainId, signers, sigRs, sigSs, sigVs, _encodedEvent);
+        registrar.verify(
+            _blockchainId,
+            signers,
+            sigRs,
+            sigSs,
+            sigVs,
+            _encodedEvent
+        );
     }
-
 }

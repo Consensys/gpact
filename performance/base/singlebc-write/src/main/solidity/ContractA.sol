@@ -16,11 +16,10 @@ pragma solidity >=0.7.1;
 
 import "./ContractB.sol";
 
-
 contract ContractA {
     ContractB contractB;
 
-    constructor (address _contractBAddress) {
+    constructor(address _contractBAddress) {
         contractB = ContractB(_contractBAddress);
     }
 

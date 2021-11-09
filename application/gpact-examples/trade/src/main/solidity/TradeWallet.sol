@@ -20,22 +20,34 @@ contract TradeWallet is LockableStorage {
     uint256 busLogicBcId;
     BusLogic busLogicContract;
 
-
-    uint256 constant private KEY_TRADES_ARRAY = 0;
+    uint256 private constant KEY_TRADES_ARRAY = 0;
 
     event Trade(bytes32 _tradeId);
 
-    constructor (address _cbc, uint256 _busLogicBcId, address _busLogicContract)
-        LockableStorage(_cbc) {
+    constructor(
+        address _cbc,
+        uint256 _busLogicBcId,
+        address _busLogicContract
+    ) LockableStorage(_cbc) {
         busLogicBcId = _busLogicBcId;
         busLogicContract = BusLogic(_busLogicContract);
     }
 
     function executeTrade(address _seller, uint256 _quantity) public {
-        CrosschainFunctionCallInterface(address(cbc)).crossBlockchainCall(busLogicBcId, address(busLogicContract),
-            abi.encodeWithSelector(busLogicContract.stockShipment.selector, _seller, tx.origin, _quantity));
+        CrosschainFunctionCallInterface(address(cbc)).crossBlockchainCall(
+            busLogicBcId,
+            address(busLogicContract),
+            abi.encodeWithSelector(
+                busLogicContract.stockShipment.selector,
+                _seller,
+                tx.origin,
+                _quantity
+            )
+        );
 
-        bytes32 tradeId = keccak256(abi.encodePacked(_seller, tx.origin, _quantity));
+        bytes32 tradeId = keccak256(
+            abi.encodePacked(_seller, tx.origin, _quantity)
+        );
 
         pushArrayValue(KEY_TRADES_ARRAY, uint256(tradeId));
 

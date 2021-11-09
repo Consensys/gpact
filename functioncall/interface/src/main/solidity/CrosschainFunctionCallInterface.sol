@@ -20,7 +20,6 @@ pragma solidity >=0.8;
  *
  */
 interface CrosschainFunctionCallInterface {
-
     /**
      * Call a function on another blockchain. All function call implementations must implement
      * this function.
@@ -29,6 +28,9 @@ interface CrosschainFunctionCallInterface {
      * @param _contract The address of the contract to be called.
      * @param _functionCallData The function selector and parameter data encoded using ABI encoding rules.
      */
-    function crossBlockchainCall(uint256 _bcId, address _contract, bytes calldata _functionCallData) external;
-
+    function crossBlockchainCall(
+        uint256 _bcId,
+        address _contract,
+        bytes calldata _functionCallData
+    ) external;
 }

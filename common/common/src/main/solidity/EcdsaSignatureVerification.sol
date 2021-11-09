@@ -26,7 +26,11 @@ contract EcdsaSignatureVerification {
      * @param _signature Signature to be verified.
      *
      */
-    function verify(address _signer, bytes calldata _message, bytes calldata _signature) internal pure returns (bool) {
+    function verify(
+        address _signer,
+        bytes calldata _message,
+        bytes calldata _signature
+    ) internal pure returns (bool) {
         // Check the signature length
         if (_signature.length != 65) {
             return false;
@@ -57,7 +61,13 @@ contract EcdsaSignatureVerification {
      * @param _sigV Component of the signature to be verified.
      *
      */
-    function verifySigComponents(address _signer, bytes calldata _message, bytes32 _sigR, bytes32 _sigS, uint8 _sigV) internal pure returns (bool) {
+    function verifySigComponents(
+        address _signer,
+        bytes calldata _message,
+        bytes32 _sigR,
+        bytes32 _sigS,
+        uint8 _sigV
+    ) internal pure returns (bool) {
         bytes32 digest = keccak256(_message);
 
         if (_sigV != 27 && _sigV != 28) {
@@ -68,5 +78,4 @@ contract EcdsaSignatureVerification {
             return _signer == ecrecover(digest, _sigV, _sigR, _sigS);
         }
     }
-
 }

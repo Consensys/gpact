@@ -23,14 +23,16 @@ contract TradeWallet {
 
     event Trade(bytes32 _tradeId);
 
-    constructor (address _busLogicContract) {
+    constructor(address _busLogicContract) {
         busLogicContract = BusLogic(_busLogicContract);
     }
 
     function executeTrade(address _seller, uint256 _quantity) public {
         busLogicContract.stockShipment(_seller, tx.origin, _quantity);
 
-        bytes32 tradeId = keccak256(abi.encodePacked(_seller, tx.origin, _quantity));
+        bytes32 tradeId = keccak256(
+            abi.encodePacked(_seller, tx.origin, _quantity)
+        );
 
         trades.push() = uint256(tradeId);
 
@@ -38,13 +40,14 @@ contract TradeWallet {
     }
 
     function separatedExecuteTrade(address _seller, uint256 _quantity) public {
-        bytes32 tradeId = keccak256(abi.encodePacked(_seller, tx.origin, _quantity));
+        bytes32 tradeId = keccak256(
+            abi.encodePacked(_seller, tx.origin, _quantity)
+        );
 
         trades.push() = uint256(tradeId);
 
         emit Trade(tradeId);
     }
-
 
     function getNumTrades() external view returns (uint256) {
         return trades.length;

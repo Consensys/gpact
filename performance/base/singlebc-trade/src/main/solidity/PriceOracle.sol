@@ -24,5 +24,4 @@ contract PriceOracle {
     function getPrice() external view returns (uint256) {
         return price;
     }
-
 }

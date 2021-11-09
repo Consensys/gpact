@@ -21,8 +21,9 @@ import "./CrosschainFunctionCallInterface.sol";
  * The calls defined in this file return values.
  *
  */
-interface CrosschainFunctionCallReturnInterface is CrosschainFunctionCallInterface {
-
+interface CrosschainFunctionCallReturnInterface is
+    CrosschainFunctionCallInterface
+{
     /**
      * Call a function on another blockchain that returns a uint256 value. Function call implementations
      * may implement this function. Implementations that do not support this functionality should revert
@@ -32,6 +33,9 @@ interface CrosschainFunctionCallReturnInterface is CrosschainFunctionCallInterfa
      * @param _contract The address of the contract to be called.
      * @param _functionCallData The function selector and parameter data encoded using ABI encoding rules.
      */
-    function crossBlockchainCallReturnsUint256(uint256 _bcId, address _contract, bytes calldata _functionCallData) external returns (uint256);
-
+    function crossBlockchainCallReturnsUint256(
+        uint256 _bcId,
+        address _contract,
+        bytes calldata _functionCallData
+    ) external returns (uint256);
 }

@@ -23,15 +23,28 @@ contract BusLogic {
     PriceOracle priceOracleContract;
     Stock stockContract;
 
-    event StockShipment(address _seller, address _buyer, uint256 _quantity, uint256 _price);
+    event StockShipment(
+        address _seller,
+        address _buyer,
+        uint256 _quantity,
+        uint256 _price
+    );
 
-    constructor (address _balances, address _oracle, address _stock) {
+    constructor(
+        address _balances,
+        address _oracle,
+        address _stock
+    ) {
         balancesContract = Balances(_balances);
         priceOracleContract = PriceOracle(_oracle);
         stockContract = Stock(_stock);
     }
 
-    function stockShipment(address _seller, address _buyer, uint256 _quantity) public {
+    function stockShipment(
+        address _seller,
+        address _buyer,
+        uint256 _quantity
+    ) public {
         uint256 currentPrice = priceOracleContract.getPrice();
 
         uint256 cost = currentPrice * _quantity;

@@ -19,36 +19,54 @@ import "../../../../../atomic-appcontracts/lockablestorage/src/main/solidity/Loc
 import "../../../../../../functioncall/interface/src/main/solidity/CrosschainFunctionCallInterface.sol";
 import "../../../../../../functioncall/interface/src/main/solidity/CrosschainFunctionCallReturnInterface.sol";
 
-
 contract RootBlockchainContract is LockableStorage {
     uint256 private otherBlockchainId;
     OtherBlockchainContractInterface private otherContract;
 
-    uint256 constant private KEY_UINT256_VAL1 = 0;
-    uint256 constant private KEY_UINT256_VAL2 = 1;
+    uint256 private constant KEY_UINT256_VAL1 = 0;
+    uint256 private constant KEY_UINT256_VAL2 = 1;
 
-    constructor (address _crossBlockchainControl, uint256 _otherBlockchainId, address _otherContract)
-        LockableStorage(_crossBlockchainControl) {
+    constructor(
+        address _crossBlockchainControl,
+        uint256 _otherBlockchainId,
+        address _otherContract
+    ) LockableStorage(_crossBlockchainControl) {
         otherBlockchainId = _otherBlockchainId;
         otherContract = OtherBlockchainContractInterface(_otherContract);
     }
 
     function someComplexBusinessLogic(uint256 _val) external {
         // Use the value on the other blockchain as a threshold
-        uint256 valueFromOtherBlockchain =
-            CrosschainFunctionCallReturnInterface(address(cbc)).crossBlockchainCallReturnsUint256(
-            otherBlockchainId, address(otherContract), abi.encodeWithSelector(otherContract.getVal.selector));
+        uint256 valueFromOtherBlockchain = CrosschainFunctionCallReturnInterface(
+                address(cbc)
+            ).crossBlockchainCallReturnsUint256(
+                    otherBlockchainId,
+                    address(otherContract),
+                    abi.encodeWithSelector(otherContract.getVal.selector)
+                );
         setVal2(valueFromOtherBlockchain);
 
         if (_val > valueFromOtherBlockchain) {
-            CrosschainFunctionCallInterface(address(cbc)).crossBlockchainCall(otherBlockchainId, address(otherContract),
-                abi.encodeWithSelector(otherContract.setValues.selector, _val, valueFromOtherBlockchain));
+            CrosschainFunctionCallInterface(address(cbc)).crossBlockchainCall(
+                otherBlockchainId,
+                address(otherContract),
+                abi.encodeWithSelector(
+                    otherContract.setValues.selector,
+                    _val,
+                    valueFromOtherBlockchain
+                )
+            );
             setVal1(valueFromOtherBlockchain);
-        }
-        else {
+        } else {
             uint256 valueToSet = _val + 13;
-            CrosschainFunctionCallInterface(address(cbc)).crossBlockchainCall(otherBlockchainId, address(otherContract),
-                abi.encodeWithSelector(otherContract.setVal.selector, valueToSet));
+            CrosschainFunctionCallInterface(address(cbc)).crossBlockchainCall(
+                otherBlockchainId,
+                address(otherContract),
+                abi.encodeWithSelector(
+                    otherContract.setVal.selector,
+                    valueToSet
+                )
+            );
             setVal1(_val);
         }
     }

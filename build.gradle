@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'com.diffplug.spotless' version '5.12.5'
+    id "com.github.node-gradle.node" version "3.0.1"
 }
 
 sourceCompatibility = 1.9
@@ -28,3 +29,18 @@ allprojects {
         }
     }
 }
+
+task solFormat {
+    dependsOn npm_run_solFormat
+}
+
+task solCheckFormat {
+    dependsOn npm_run_solCheckFormat
+}
+
+task solhint {
+    dependsOn npm_run_solhint
+}
+
+build.dependsOn solCheckFormat
+build.dependsOn solhint

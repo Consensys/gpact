@@ -17,7 +17,6 @@ pragma solidity >=0.7.1;
 import "../../../../../../functioncall/interface/src/main/solidity/LockableStorageInterface.sol";
 import "../../../../../../functioncall/interface/src/main/solidity/CrosschainLockingInterface.sol";
 
-
 /**
  * Lockable storage contract:
  *  - lockable per item.
@@ -29,29 +28,27 @@ import "../../../../../../functioncall/interface/src/main/solidity/CrosschainLoc
 abstract contract LockableStorage is LockableStorageInterface {
     // A value added to all values stored in provisional storage so that
     // lock detection can happen without using an extra memory location.
-    uint256 constant private NOT_USED_OFFSET = 0x1;
+    uint256 private constant NOT_USED_OFFSET = 0x1;
     // The value that provisional storage will be if it is not being used.
-    uint256 constant private NOT_LOCKED_INDICATOR = 0;
+    uint256 private constant NOT_LOCKED_INDICATOR = 0;
 
     // The Cross-Blockchain Control Contract used for cross-blockchain transaction locking.
     CrosschainLockingInterface internal cbc;
 
     // Data storage keys to values stored.
-    mapping(uint256=>uint256) private dataStore;
+    mapping(uint256 => uint256) private dataStore;
     // Provisional updates for data storage keys to values stored.
     // Values are offset by the NOT_USED_OFFSET value so that locked storage can be
     // detected without using an extra memory location.
-    mapping(uint256=>uint256) private provisionalUpdates;
+    mapping(uint256 => uint256) private provisionalUpdates;
 
     // Map of list of keys for values that have been updated / are locked.
     // Map key is keccak256(root bc id, transaction id)
-    mapping(bytes32=>uint256[]) private provisionalUpdatesLists;
+    mapping(bytes32 => uint256[]) private provisionalUpdatesLists;
 
-
-    constructor (address _crossBlockchainControl) {
+    constructor(address _crossBlockchainControl) {
         cbc = CrosschainLockingInterface(_crossBlockchainControl);
     }
-
 
     /**
      * Set a uint256 value using the write algorithm.
@@ -69,8 +66,7 @@ abstract contract LockableStorage is LockableStorageInterface {
         if (crossRootTxId == bytes32(0)) {
             // Single blockchain call
             dataStore[_key] = _val;
-        }
-        else {
+        } else {
             cbc.addToListOfLockedContracts(address(this));
             provisionalUpdatesLists[crossRootTxId].push(_key);
             // Note, the following addition is unchecked. If the value being stored
@@ -87,7 +83,11 @@ abstract contract LockableStorage is LockableStorageInterface {
         setUint256(_key, uint256(uint160(_address)));
     }
 
-    function setArrayValue(uint256 _key, uint256 _index, uint256 _val) internal {
+    function setArrayValue(
+        uint256 _key,
+        uint256 _index,
+        uint256 _val
+    ) internal {
         // Location of the key is the length.
         uint256 len = getUint256(_key);
         require(_index < len, "Index out of bounds");
@@ -100,7 +100,7 @@ abstract contract LockableStorage is LockableStorageInterface {
         uint256 len = getUint256(_key);
         bytes32 startOfArrayLocation = keccak256(abi.encodePacked(_key));
         setUint256(uint256(startOfArrayLocation) + len, _val);
-        setUint256(_key, len+1);
+        setUint256(_key, len + 1);
     }
 
     function popArrayValue(uint256 _key) internal {
@@ -108,21 +108,38 @@ abstract contract LockableStorage is LockableStorageInterface {
         require(len > 0, "Pop called onzero length array");
         bytes32 startOfArrayLocation = keccak256(abi.encodePacked(_key));
         setUint256(uint256(startOfArrayLocation) + len, 0);
-        setUint256(_key, len-1);
+        setUint256(_key, len - 1);
     }
 
-    function setMapValue(uint256 _key, uint256 _mapKey, uint256 _val) internal {
+    function setMapValue(
+        uint256 _key,
+        uint256 _mapKey,
+        uint256 _val
+    ) internal {
         bytes32 index = keccak256(abi.encodePacked(_key, _mapKey));
         setUint256(uint256(index), _val);
     }
 
-    function setDoubleMapValue(uint256 _key, uint256 _mapKey1, uint256 _mapKey2, uint256 _val) internal {
+    function setDoubleMapValue(
+        uint256 _key,
+        uint256 _mapKey1,
+        uint256 _mapKey2,
+        uint256 _val
+    ) internal {
         bytes32 index = keccak256(abi.encodePacked(_key, _mapKey1, _mapKey2));
         setUint256(uint256(index), _val);
     }
 
-    function setTripleMapValue(uint256 _key, uint256 _mapKey1, uint256 _mapKey2, uint256 _mapKey3, uint256 _val) internal {
-        bytes32 index = keccak256(abi.encodePacked(_key, _mapKey1, _mapKey2, _mapKey3));
+    function setTripleMapValue(
+        uint256 _key,
+        uint256 _mapKey1,
+        uint256 _mapKey2,
+        uint256 _mapKey3,
+        uint256 _val
+    ) internal {
+        bytes32 index = keccak256(
+            abi.encodePacked(_key, _mapKey1, _mapKey2, _mapKey3)
+        );
         setUint256(uint256(index), _val);
     }
 
@@ -132,8 +149,15 @@ abstract contract LockableStorage is LockableStorageInterface {
      * @param _commit True if the provisional updates should be committed. False indicates the
      *         provisional updates should be discarded.
      */
-    function finalise(bool _commit, bytes32 _crossRootTxId) external override(LockableStorageInterface) {
-        for (uint256 i = 0; i < provisionalUpdatesLists[_crossRootTxId].length; i++) {
+    function finalise(bool _commit, bytes32 _crossRootTxId)
+        external
+        override(LockableStorageInterface)
+    {
+        for (
+            uint256 i = 0;
+            i < provisionalUpdatesLists[_crossRootTxId].length;
+            i++
+        ) {
             uint256 key = provisionalUpdatesLists[_crossRootTxId][i];
             if (_commit) {
                 // Copy provisional updates to data stores.
@@ -146,99 +170,174 @@ abstract contract LockableStorage is LockableStorageInterface {
         delete provisionalUpdatesLists[_crossRootTxId];
     }
 
-
     /************************************************************************/
     /************************************************************************/
     /*****                        VIEW BELOW HERE                       *****/
     /************************************************************************/
     /************************************************************************/
 
-
-    function getUint256(uint256 _key) internal view returns(uint256) {
+    function getUint256(uint256 _key) internal view returns (uint256) {
         if (isLocked(_key)) {
             revert("Read while contract item locked");
         }
         return dataStore[_key];
     }
-    function getUint256Committed(uint256 _key) internal view returns(uint256) {
+
+    function getUint256Committed(uint256 _key) internal view returns (uint256) {
         return dataStore[_key];
     }
-    function getUint256Provisional(uint256 _key) internal view returns(uint256) {
+
+    function getUint256Provisional(uint256 _key)
+        internal
+        view
+        returns (uint256)
+    {
         if (isLocked(_key)) {
             return provisionalUpdates[_key] - NOT_USED_OFFSET;
         }
         return dataStore[_key];
     }
 
-
-
-    function getBool(uint256 _key) internal view returns(bool) {
+    function getBool(uint256 _key) internal view returns (bool) {
         return getUint256(_key) == 1 ? true : false;
     }
 
-    function getAddress(uint256 _key) internal view returns(address) {
+    function getAddress(uint256 _key) internal view returns (address) {
         return address(uint160(getUint256(_key)));
     }
 
-    function getArrayLength(uint256 _key) internal view returns(uint256) {
+    function getArrayLength(uint256 _key) internal view returns (uint256) {
         return getUint256(_key);
     }
 
-    function getArrayValue(uint256 _key, uint256 _index) internal view returns(uint256) {
+    function getArrayValue(uint256 _key, uint256 _index)
+        internal
+        view
+        returns (uint256)
+    {
         uint256 len = getUint256(_key);
         require(len > _index, "Index out of bounds");
         bytes32 startOfArrayLocation = keccak256(abi.encodePacked(_key));
         return getUint256(uint256(startOfArrayLocation) + _index);
     }
 
-    function getMapValue(uint256 _key, uint256 _mapKey) internal view returns(uint256) {
+    function getMapValue(uint256 _key, uint256 _mapKey)
+        internal
+        view
+        returns (uint256)
+    {
         bytes32 index = keccak256(abi.encodePacked(_key, _mapKey));
         return getUint256(uint256(index));
     }
-    function getMapValueCommitted(uint256 _key, uint256 _mapKey) internal view returns(uint256) {
+
+    function getMapValueCommitted(uint256 _key, uint256 _mapKey)
+        internal
+        view
+        returns (uint256)
+    {
         bytes32 index = keccak256(abi.encodePacked(_key, _mapKey));
         return getUint256Committed(uint256(index));
     }
-    function getMapValueProvisional(uint256 _key, uint256 _mapKey) internal view returns(uint256) {
+
+    function getMapValueProvisional(uint256 _key, uint256 _mapKey)
+        internal
+        view
+        returns (uint256)
+    {
         bytes32 index = keccak256(abi.encodePacked(_key, _mapKey));
         return getUint256Provisional(uint256(index));
     }
-    function isMapValueLocked(uint256 _key, uint256 _mapKey) internal view returns(bool) {
+
+    function isMapValueLocked(uint256 _key, uint256 _mapKey)
+        internal
+        view
+        returns (bool)
+    {
         bytes32 index = keccak256(abi.encodePacked(_key, _mapKey));
         return isLocked(uint256(index));
     }
 
-    function getDoubleMapValue(uint256 _key, uint256 _mapKey1, uint256 _mapKey2) internal view returns(uint256) {
+    function getDoubleMapValue(
+        uint256 _key,
+        uint256 _mapKey1,
+        uint256 _mapKey2
+    ) internal view returns (uint256) {
         bytes32 index = keccak256(abi.encodePacked(_key, _mapKey1, _mapKey2));
         return getUint256(uint256(index));
     }
-    function getDoubleMapValueCommitted(uint256 _key, uint256 _mapKey1, uint256 _mapKey2) internal view returns(uint256) {
+
+    function getDoubleMapValueCommitted(
+        uint256 _key,
+        uint256 _mapKey1,
+        uint256 _mapKey2
+    ) internal view returns (uint256) {
         bytes32 index = keccak256(abi.encodePacked(_key, _mapKey1, _mapKey2));
         return getUint256Committed(uint256(index));
     }
-    function getDoubleMapValueProvisional(uint256 _key, uint256 _mapKey1, uint256 _mapKey2) internal view returns(uint256) {
+
+    function getDoubleMapValueProvisional(
+        uint256 _key,
+        uint256 _mapKey1,
+        uint256 _mapKey2
+    ) internal view returns (uint256) {
         bytes32 index = keccak256(abi.encodePacked(_key, _mapKey1, _mapKey2));
         return getUint256Provisional(uint256(index));
     }
-    function isDoubleMapValueLocked(uint256 _key, uint256 _mapKey1, uint256 _mapKey2) internal view returns(bool) {
+
+    function isDoubleMapValueLocked(
+        uint256 _key,
+        uint256 _mapKey1,
+        uint256 _mapKey2
+    ) internal view returns (bool) {
         bytes32 index = keccak256(abi.encodePacked(_key, _mapKey1, _mapKey2));
         return isLocked(uint256(index));
     }
 
-    function getTripleMapValue(uint256 _key, uint256 _mapKey1, uint256 _mapKey2, uint256 _mapKey3) internal view returns (uint256) {
-        bytes32 index = keccak256(abi.encodePacked(_key, _mapKey1, _mapKey2, _mapKey3));
+    function getTripleMapValue(
+        uint256 _key,
+        uint256 _mapKey1,
+        uint256 _mapKey2,
+        uint256 _mapKey3
+    ) internal view returns (uint256) {
+        bytes32 index = keccak256(
+            abi.encodePacked(_key, _mapKey1, _mapKey2, _mapKey3)
+        );
         return getUint256(uint256(index));
     }
-    function getTripleMapValueCommitted(uint256 _key, uint256 _mapKey1, uint256 _mapKey2, uint256 _mapKey3) internal view returns (uint256) {
-        bytes32 index = keccak256(abi.encodePacked(_key, _mapKey1, _mapKey2, _mapKey3));
+
+    function getTripleMapValueCommitted(
+        uint256 _key,
+        uint256 _mapKey1,
+        uint256 _mapKey2,
+        uint256 _mapKey3
+    ) internal view returns (uint256) {
+        bytes32 index = keccak256(
+            abi.encodePacked(_key, _mapKey1, _mapKey2, _mapKey3)
+        );
         return getUint256Committed(uint256(index));
     }
-    function getTripleMapValueProvisional(uint256 _key, uint256 _mapKey1, uint256 _mapKey2, uint256 _mapKey3) internal view returns (uint256) {
-        bytes32 index = keccak256(abi.encodePacked(_key, _mapKey1, _mapKey2, _mapKey3));
+
+    function getTripleMapValueProvisional(
+        uint256 _key,
+        uint256 _mapKey1,
+        uint256 _mapKey2,
+        uint256 _mapKey3
+    ) internal view returns (uint256) {
+        bytes32 index = keccak256(
+            abi.encodePacked(_key, _mapKey1, _mapKey2, _mapKey3)
+        );
         return getUint256Provisional(uint256(index));
     }
-    function isTripleMapValueLocked(uint256 _key, uint256 _mapKey1, uint256 _mapKey2, uint256 _mapKey3) internal view returns (bool) {
-        bytes32 index = keccak256(abi.encodePacked(_key, _mapKey1, _mapKey2, _mapKey3));
+
+    function isTripleMapValueLocked(
+        uint256 _key,
+        uint256 _mapKey1,
+        uint256 _mapKey2,
+        uint256 _mapKey3
+    ) internal view returns (bool) {
+        bytes32 index = keccak256(
+            abi.encodePacked(_key, _mapKey1, _mapKey2, _mapKey3)
+        );
         return isLocked(uint256(index));
     }
 

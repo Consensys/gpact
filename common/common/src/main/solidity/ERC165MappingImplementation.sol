@@ -19,11 +19,17 @@ import "./ERC165.sol";
 abstract contract ERC165MappingImplementation is ERC165 {
     /// @dev You must not set element 0xffffffff to true
     mapping(bytes4 => bool) internal supportedInterfaces;
+
     constructor() {
         supportedInterfaces[type(ERC165).interfaceId] = true;
     }
-    function supportsInterface(bytes4 interfaceID) external override view returns (bool) {
+
+    function supportsInterface(bytes4 interfaceID)
+        external
+        view
+        override
+        returns (bool)
+    {
         return supportedInterfaces[interfaceID];
     }
 }
-

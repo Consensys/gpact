@@ -23,7 +23,11 @@ contract HiddenParamDestTest is HiddenParameters {
 
     event AllGood(bool happy);
 
-    constructor(uint256 _expected1, uint256 _expected2, uint256 _expected3) {
+    constructor(
+        uint256 _expected1,
+        uint256 _expected2,
+        uint256 _expected3
+    ) {
         e1 = _expected1;
         e2 = _expected2;
         e3 = _expected3;
@@ -71,37 +75,52 @@ contract HiddenParamDestTest is HiddenParameters {
         emit AllGood(true);
     }
 
-
-
     // Same functions, but called explicitly
-    function funcNoParamsExplicit(uint256 a1, uint256 a2, uint256 a3) external {
+    function funcNoParamsExplicit(
+        uint256 a1,
+        uint256 a2,
+        uint256 a3
+    ) external {
         check3(a1, a2, a3);
         emit AllGood(true);
     }
-    function funcOneParamExplicit(uint256 _val, uint256 a1, uint256 a2, uint256 a3) external {
+
+    function funcOneParamExplicit(
+        uint256 _val,
+        uint256 a1,
+        uint256 a2,
+        uint256 a3
+    ) external {
         check3(a1, a2, a3);
         require(_val == 17, "Error: Val");
         emit AllGood(true);
     }
 
-    function funcTwoParamsExplicit(uint256 _val1, uint256 _val2, uint256 a1, uint256 a2, uint256 a3) external {
+    function funcTwoParamsExplicit(
+        uint256 _val1,
+        uint256 _val2,
+        uint256 a1,
+        uint256 a2,
+        uint256 a3
+    ) external {
         check3(a1, a2, a3);
         require(_val1 == 17, "Error: Val1");
         require(_val2 == 23, "Error: Val2");
         emit AllGood(true);
     }
 
-
     function check2(uint256 _a1, uint256 _a2) private view {
         require(_a1 == e1, "First param not correct");
         require(_a2 == e2, "Second param not correct");
     }
 
-    function check3(uint256 _a1, uint256 _a2, uint256 _a3) private view {
+    function check3(
+        uint256 _a1,
+        uint256 _a2,
+        uint256 _a3
+    ) private view {
         require(_a1 == e1, "First param not correct");
         require(_a2 == e2, "Second param not correct");
         require(_a3 == e3, "Third param not correct");
     }
-
 }
-

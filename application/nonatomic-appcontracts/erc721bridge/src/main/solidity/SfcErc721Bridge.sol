@@ -28,7 +28,8 @@ import "./ERC721RemoteBlockchain.sol";
 contract SfcErc721Bridge is HiddenParameters, Pausable, AccessControl {
     bytes32 public constant MAPPING_ROLE = keccak256("MAPPING_ROLE");
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
-    bytes32 public constant ADMINTRANSFER_ROLE = keccak256("ADMINTRANSFER_ROLE");
+    bytes32 public constant ADMINTRANSFER_ROLE =
+        keccak256("ADMINTRANSFER_ROLE");
     bytes32 public constant DENYLIST_ROLE = keccak256("DENYLIST_ROLE");
 
     // Token contract configuration.
@@ -42,7 +43,6 @@ contract SfcErc721Bridge is HiddenParameters, Pausable, AccessControl {
     uint256 private constant TOKEN_CONTRACT_CONF_REMOTE = 2;
     // The maximum token contract configuration value.
     uint256 private constant TOKEN_CONTRACT_CONF_MAX = 2;
-
 
     // Simple Function Call bridge.
     CrosschainFunctionCallInterface private crosschainBridge;
@@ -64,8 +64,8 @@ contract SfcErc721Bridge is HiddenParameters, Pausable, AccessControl {
     //
     // Map (token contract address on this blockchain =>
     //  Map (destination blockchain Id => address on remote contract)
-    mapping(address => mapping(uint256 => address)) private tokenContractAddressMapping;
-
+    mapping(address => mapping(uint256 => address))
+        private tokenContractAddressMapping;
 
     // Addresses of ERC 721 bridges on other blockchains.
     mapping(uint256 => address) private remoteErc721Bridges;
@@ -84,7 +84,14 @@ contract SfcErc721Bridge is HiddenParameters, Pausable, AccessControl {
      * @param _recipient          Address to transfer the tokens to on the target blockchain.
      * @param _tokenId            Id of token transferred.
      */
-    event TransferTo(uint256 _destBcId, address _srcTokenContract, address _destTokenContract, address _sender, address _recipient, uint256 _tokenId);
+    event TransferTo(
+        uint256 _destBcId,
+        address _srcTokenContract,
+        address _destTokenContract,
+        address _sender,
+        address _recipient,
+        uint256 _tokenId
+    );
 
     /**
      * @dev Indicates a transfer request has been received on this blockchain.
@@ -96,7 +103,13 @@ contract SfcErc721Bridge is HiddenParameters, Pausable, AccessControl {
      * @param _recipient          Address to transfer the tokens to on the this blockchain.
      * @param _tokenId            Id of token transferred.
      */
-    event ReceivedFrom(uint256 _srcBcId, address _srcTokenContract, address _destTokenContract, address _recipient, uint256 _tokenId);
+    event ReceivedFrom(
+        uint256 _srcBcId,
+        address _srcTokenContract,
+        address _destTokenContract,
+        address _recipient,
+        uint256 _tokenId
+    );
 
     /**
      * @dev Update the mapping between an ERC 721 contract on this blockchain and an ERC 721
@@ -106,7 +119,11 @@ contract SfcErc721Bridge is HiddenParameters, Pausable, AccessControl {
      * @param _otherBcId            Blockchain ID where the corresponding ERC 721 contract resides.
      * @param _othercTokenContract  Address of ERC 721 contract on the other blockchain.
      */
-    event TokenContractAddressMappingChanged(address _thisBcTokenContract, uint256 _otherBcId, address _othercTokenContract);
+    event TokenContractAddressMappingChanged(
+        address _thisBcTokenContract,
+        uint256 _otherBcId,
+        address _othercTokenContract
+    );
 
     /**
      * @dev Indicate an administrative transfer has occurred.
@@ -115,27 +132,31 @@ contract SfcErc721Bridge is HiddenParameters, Pausable, AccessControl {
      * @param _recipient        Address to transfer the tokens to.
      * @param _tokenId          Id of token transferred.
      */
-    event AdminTransfer(address _erc721Contract, address _recipient, uint256 _tokenId);
+    event AdminTransfer(
+        address _erc721Contract,
+        address _recipient,
+        uint256 _tokenId
+    );
 
     /**
-    * @dev  Indicates that the specified address has been denylisted, and cannot transfer or receive ERC721 tokens through the bridge.
-    *
-    * @param _address   The address added to the denylist
-    */
+     * @dev  Indicates that the specified address has been denylisted, and cannot transfer or receive ERC721 tokens through the bridge.
+     *
+     * @param _address   The address added to the denylist
+     */
     event AddressDenylisted(address _address);
 
     /**
-    * @dev  Indicates that the specified address has been removed from the denylist,
-    *       and can resume transferring and receiving ERC721 tokens through the bridge.
-    *
-    * @param _address The address removed from the denylist
-    */
+     * @dev  Indicates that the specified address has been removed from the denylist,
+     *       and can resume transferring and receiving ERC721 tokens through the bridge.
+     *
+     * @param _address The address removed from the denylist
+     */
     event AddressRemovedFromDenylist(address _address);
 
     /**
      * @param _sfcCbcContract  Simple Function Call protocol implementation.
      */
-    constructor (address _sfcCbcContract) {
+    constructor(address _sfcCbcContract) {
         address sender = _msgSender();
         _setupRole(DEFAULT_ADMIN_ROLE, sender);
 
@@ -148,39 +169,45 @@ contract SfcErc721Bridge is HiddenParameters, Pausable, AccessControl {
     }
 
     /**
-    * @dev Adds the specified address to a denylist, preventing it from transferring or receiving tokens through the bridge.
-    *
-    * Requirements:
-    *   - the caller must have the `DENYLIST_ROLE`.
-    *
-    * @param _address The address to denylist
-    */
+     * @dev Adds the specified address to a denylist, preventing it from transferring or receiving tokens through the bridge.
+     *
+     * Requirements:
+     *   - the caller must have the `DENYLIST_ROLE`.
+     *
+     * @param _address The address to denylist
+     */
     function addToDenylist(address _address) external {
-        require(hasRole(DENYLIST_ROLE, _msgSender()), "ERC721 Bridge: Must have DENYLIST role");
+        require(
+            hasRole(DENYLIST_ROLE, _msgSender()),
+            "ERC721 Bridge: Must have DENYLIST role"
+        );
         denylist[_address] = true;
         emit AddressDenylisted(_address);
     }
 
     /**
-    * @dev Removes the specified address from the denylist, allowing it to resume transferring or receiving tokens through the bridge.
-    *
-    * Requirements:
-    *   - the caller must have the `DENYLIST_ROLE`.
-    *
-    * @param _address The address to remove from the denylist
-    */
+     * @dev Removes the specified address from the denylist, allowing it to resume transferring or receiving tokens through the bridge.
+     *
+     * Requirements:
+     *   - the caller must have the `DENYLIST_ROLE`.
+     *
+     * @param _address The address to remove from the denylist
+     */
     function removeFromDenylist(address _address) external {
-        require(hasRole(DENYLIST_ROLE, _msgSender()), "ERC721 Bridge: Must have DENYLIST role");
+        require(
+            hasRole(DENYLIST_ROLE, _msgSender()),
+            "ERC721 Bridge: Must have DENYLIST role"
+        );
         denylist[_address] = false;
         emit AddressRemovedFromDenylist(_address);
     }
-   
+
     /**
-    * @dev Checks whether a given address is in the denylist.
-    *
-    * @param _address   The address to check against the denylist
-    * @return true if the address is in the denylist, false otherwise.
-    */
+     * @dev Checks whether a given address is in the denylist.
+     *
+     * @param _address   The address to check against the denylist
+     * @return true if the address is in the denylist, false otherwise.
+     */
     function isDenylisted(address _address) public view returns (bool) {
         return denylist[_address];
     }
@@ -192,10 +219,12 @@ contract SfcErc721Bridge is HiddenParameters, Pausable, AccessControl {
      * - the caller must have the `PAUSER_ROLE`.
      */
     function pause() external {
-        require(hasRole(PAUSER_ROLE, _msgSender()), "ERC721 Bridge: Must have PAUSER role");
+        require(
+            hasRole(PAUSER_ROLE, _msgSender()),
+            "ERC721 Bridge: Must have PAUSER role"
+        );
         _pause();
     }
-
 
     /**
      * @dev Unpauses the bridge.
@@ -204,10 +233,12 @@ contract SfcErc721Bridge is HiddenParameters, Pausable, AccessControl {
      * - the caller must have the `PAUSER_ROLE`.
      */
     function unpause() external {
-        require(hasRole(PAUSER_ROLE, _msgSender()), "ERC721 Bridge: Must have PAUSER role");
+        require(
+            hasRole(PAUSER_ROLE, _msgSender()),
+            "ERC721 Bridge: Must have PAUSER role"
+        );
         _unpause();
     }
-
 
     /**
      * @dev Add a token mapping and set the token contract configuration. This can
@@ -218,12 +249,27 @@ contract SfcErc721Bridge is HiddenParameters, Pausable, AccessControl {
      * @param _otherTokenContract  Address of ERC 721 contract on the other blockchain.
      * @param _thisIsTheHomeBlockchain  True if this blockchain is the home blockchain for the token.
      */
-    function addContractFirstMapping(address _thisBcTokenContract, uint256 _otherBcId, address _otherTokenContract, bool _thisIsTheHomeBlockchain) external {
-        require(hasRole(MAPPING_ROLE, _msgSender()), "ERC721 Bridge: Must have MAPPING role");
-        require(!tokenExists(_thisBcTokenContract), "ERC721 Bridge: token already configured");
+    function addContractFirstMapping(
+        address _thisBcTokenContract,
+        uint256 _otherBcId,
+        address _otherTokenContract,
+        bool _thisIsTheHomeBlockchain
+    ) external {
+        require(
+            hasRole(MAPPING_ROLE, _msgSender()),
+            "ERC721 Bridge: Must have MAPPING role"
+        );
+        require(
+            !tokenExists(_thisBcTokenContract),
+            "ERC721 Bridge: token already configured"
+        );
 
         setTokenConfigInternal(_thisBcTokenContract, _thisIsTheHomeBlockchain);
-        changeContractMappingInternal(_thisBcTokenContract, _otherBcId, _otherTokenContract);
+        changeContractMappingInternal(
+            _thisBcTokenContract,
+            _otherBcId,
+            _otherTokenContract
+        );
     }
 
     /**
@@ -234,13 +280,20 @@ contract SfcErc721Bridge is HiddenParameters, Pausable, AccessControl {
      * @param _thisBcTokenContract      Address of ERC 721 contract on this blockchain.
      * @param _thisIsTheHomeBlockchain  True if this blockchain is the home blockchain for the token.
      */
-    function setTokenConfig(address _thisBcTokenContract, bool _thisIsTheHomeBlockchain) external {
-        require(hasRole(MAPPING_ROLE, _msgSender()), "ERC721 Bridge: Must have MAPPING role");
-        require(tokenExists(_thisBcTokenContract), "ERC721 Bridge: token not configured");
+    function setTokenConfig(
+        address _thisBcTokenContract,
+        bool _thisIsTheHomeBlockchain
+    ) external {
+        require(
+            hasRole(MAPPING_ROLE, _msgSender()),
+            "ERC721 Bridge: Must have MAPPING role"
+        );
+        require(
+            tokenExists(_thisBcTokenContract),
+            "ERC721 Bridge: token not configured"
+        );
         setTokenConfigInternal(_thisBcTokenContract, _thisIsTheHomeBlockchain);
     }
-
-
 
     /**
      * @dev Update the mapping between an ERC 721 contract on this blockchain and an ERC 721
@@ -253,12 +306,25 @@ contract SfcErc721Bridge is HiddenParameters, Pausable, AccessControl {
      * @param _otherBcId            Blockchain ID where the corresponding ERC 721 contract resides.
      * @param _otherTokenContract  Address of ERC 721 contract on the other blockchain.
      */
-    function changeContractMapping(address _thisBcTokenContract, uint256 _otherBcId, address _otherTokenContract) external {
-        require(hasRole(MAPPING_ROLE, _msgSender()), "ERC721 Bridge: Must have MAPPING role");
-        require(tokenExists(_thisBcTokenContract), "ERC721 Bridge: token not configured");
-        changeContractMappingInternal(_thisBcTokenContract, _otherBcId, _otherTokenContract);
+    function changeContractMapping(
+        address _thisBcTokenContract,
+        uint256 _otherBcId,
+        address _otherTokenContract
+    ) external {
+        require(
+            hasRole(MAPPING_ROLE, _msgSender()),
+            "ERC721 Bridge: Must have MAPPING role"
+        );
+        require(
+            tokenExists(_thisBcTokenContract),
+            "ERC721 Bridge: token not configured"
+        );
+        changeContractMappingInternal(
+            _thisBcTokenContract,
+            _otherBcId,
+            _otherTokenContract
+        );
     }
-
 
     /**
      * Connect this ERC721 Bridge contract to an ERC721 Bridge contract on another blockchain.
@@ -269,11 +335,16 @@ contract SfcErc721Bridge is HiddenParameters, Pausable, AccessControl {
      * @param _otherBcId            Blockchain ID where the corresponding ERC721 bridge contract resides.
      * @param _otherErc721Bridge    Address of ERC721 Bridge contract on other blockchain.
      */
-    function changeBlockchainMapping(uint256 _otherBcId, address _otherErc721Bridge) external {
-        require(hasRole(MAPPING_ROLE, _msgSender()), "ERC721 Bridge: Must have MAPPING role");
+    function changeBlockchainMapping(
+        uint256 _otherBcId,
+        address _otherErc721Bridge
+    ) external {
+        require(
+            hasRole(MAPPING_ROLE, _msgSender()),
+            "ERC721 Bridge: Must have MAPPING role"
+        );
         remoteErc721Bridges[_otherBcId] = _otherErc721Bridge;
     }
-
 
     /**
      * Transfer tokens from msg.sender to this contract on this blockchain,
@@ -286,29 +357,65 @@ contract SfcErc721Bridge is HiddenParameters, Pausable, AccessControl {
      * @param _recipient        Address of account to transfer tokens to on the destination blockchain.
      * @param _tokenId            Id of token transferred.
      */
-    function transferToOtherBlockchain(uint256 _destBcId, address _srcTokenContract, address _recipient, uint256 _tokenId) whenNotPaused public {
-        require(!isDenylisted(msg.sender), "ERC 721 Bridge: Sender is denylisted");
-        require(!isDenylisted(_recipient), "ERC 721 Bridge: Recipient is denylisted");
-        require(!isDenylisted(tx.origin), "ERC 721 Bridge: Transaction originator is denylisted");
+    function transferToOtherBlockchain(
+        uint256 _destBcId,
+        address _srcTokenContract,
+        address _recipient,
+        uint256 _tokenId
+    ) public whenNotPaused {
+        require(
+            !isDenylisted(msg.sender),
+            "ERC 721 Bridge: Sender is denylisted"
+        );
+        require(
+            !isDenylisted(_recipient),
+            "ERC 721 Bridge: Recipient is denylisted"
+        );
+        require(
+            !isDenylisted(tx.origin),
+            "ERC 721 Bridge: Transaction originator is denylisted"
+        );
 
         address destErc721BridgeContract = remoteErc721Bridges[_destBcId];
-        require(destErc721BridgeContract != address(0), "ERC 721 Bridge: Blockchain not supported");
+        require(
+            destErc721BridgeContract != address(0),
+            "ERC 721 Bridge: Blockchain not supported"
+        );
 
         // The token must be able to be transferred to the target blockchain.
-        address destTokenContract = tokenContractAddressMapping[_srcTokenContract][_destBcId];
-        require(destTokenContract != address(0), "ERC 721 Bridge: Token not transferable to requested blockchain");
+        address destTokenContract = tokenContractAddressMapping[
+            _srcTokenContract
+        ][_destBcId];
+        require(
+            destTokenContract != address(0),
+            "ERC 721 Bridge: Token not transferable to requested blockchain"
+        );
 
         // Transfer tokens from the user to this contract.
         // The transfer will revert if the account has inadequate balance or if adequate
         // allowance hasn't been set-up.
         transferOrBurn(_srcTokenContract, msg.sender, _tokenId);
 
-        crosschainBridge.crossBlockchainCall(_destBcId, destErc721BridgeContract,
-            abi.encodeWithSelector(this.receiveFromOtherBlockchain.selector, destTokenContract, _recipient, _tokenId));
+        crosschainBridge.crossBlockchainCall(
+            _destBcId,
+            destErc721BridgeContract,
+            abi.encodeWithSelector(
+                this.receiveFromOtherBlockchain.selector,
+                destTokenContract,
+                _recipient,
+                _tokenId
+            )
+        );
 
-        emit TransferTo(_destBcId, _srcTokenContract, destTokenContract, msg.sender, _recipient, _tokenId);
+        emit TransferTo(
+            _destBcId,
+            _srcTokenContract,
+            destTokenContract,
+            msg.sender,
+            _recipient,
+            _tokenId
+        );
     }
-
 
     /**
      * Transfer tokens that are owned by this contract to a recipient. The tokens have
@@ -318,24 +425,55 @@ contract SfcErc721Bridge is HiddenParameters, Pausable, AccessControl {
      * @param _recipient          Account to transfer ownership of the tokens to.
      * @param _tokenId            Id of token transferred.
      */
-    function receiveFromOtherBlockchain(address _destTokenContract, address _recipient, uint256 _tokenId) whenNotPaused external {
-        require(!isDenylisted(tx.origin), "ERC 721 Bridge: Transaction originator is denylisted");
-        require(!isDenylisted(_recipient), "ERC 721 Bridge: Recipient is denylisted");
+    function receiveFromOtherBlockchain(
+        address _destTokenContract,
+        address _recipient,
+        uint256 _tokenId
+    ) external whenNotPaused {
+        require(
+            !isDenylisted(tx.origin),
+            "ERC 721 Bridge: Transaction originator is denylisted"
+        );
+        require(
+            !isDenylisted(_recipient),
+            "ERC 721 Bridge: Recipient is denylisted"
+        );
 
-        require(_msgSender() == address(crosschainBridge), "ERC 721 Bridge: Can not process transfers from contracts other than the bridge contract");
-        (uint256 sourceBcId, uint256 sourceContract1) = extractTwoHiddenParams();
+        require(
+            _msgSender() == address(crosschainBridge),
+            "ERC 721 Bridge: Can not process transfers from contracts other than the bridge contract"
+        );
+        (
+            uint256 sourceBcId,
+            uint256 sourceContract1
+        ) = extractTwoHiddenParams();
         address sourceContract = address(uint160(sourceContract1));
         // The source blockchain id is validated at the function call layer. No need to check
         // that it isn't zero.
 
-        require(sourceContract != address(0), "ERC 721 Bridge: caller contract is 0");
+        require(
+            sourceContract != address(0),
+            "ERC 721 Bridge: caller contract is 0"
+        );
         address remoteErc721Bridge = remoteErc721Bridges[sourceBcId];
-        require(remoteErc721Bridge != address(0), "ERC 721 Bridge: No ERC721 Bridge supported for source blockchain");
-        require(sourceContract == remoteErc721Bridge, "ERC 721 Bridge: Incorrect source ERC721 Bridge");
+        require(
+            remoteErc721Bridge != address(0),
+            "ERC 721 Bridge: No ERC721 Bridge supported for source blockchain"
+        );
+        require(
+            sourceContract == remoteErc721Bridge,
+            "ERC 721 Bridge: Incorrect source ERC721 Bridge"
+        );
 
         transferOrMint(_destTokenContract, _recipient, _tokenId);
 
-        emit ReceivedFrom(sourceBcId, sourceContract, _destTokenContract, _recipient, _tokenId);
+        emit ReceivedFrom(
+            sourceBcId,
+            sourceContract,
+            _destTokenContract,
+            _recipient,
+            _tokenId
+        );
     }
 
     /**
@@ -355,8 +493,15 @@ contract SfcErc721Bridge is HiddenParameters, Pausable, AccessControl {
      * @param _recipient        Address to transfer the tokens to.
      * @param _tokenId            Id of token transferred.
      */
-    function adminTransfer(address _erc721Contract, address _recipient, uint256 _tokenId) external {
-        require(hasRole(ADMINTRANSFER_ROLE, _msgSender()), "ERC721 Bridge: Must have ADMINTRANSFER role");
+    function adminTransfer(
+        address _erc721Contract,
+        address _recipient,
+        uint256 _tokenId
+    ) external {
+        require(
+            hasRole(ADMINTRANSFER_ROLE, _msgSender()),
+            "ERC721 Bridge: Must have ADMINTRANSFER role"
+        );
         transferOrMint(_erc721Contract, _recipient, _tokenId);
         emit AdminTransfer(_erc721Contract, _recipient, _tokenId);
     }
@@ -368,7 +513,11 @@ contract SfcErc721Bridge is HiddenParameters, Pausable, AccessControl {
      * @param _tokenContract Address of ERC 721 token contract on this blockchain.
      * @return bool          True if the token can be transferred to (or from) a blockchain.
      */
-    function isBcIdTokenAllowed(uint256 _bcId, address _tokenContract) public view returns (bool) {
+    function isBcIdTokenAllowed(uint256 _bcId, address _tokenContract)
+        public
+        view
+        returns (bool)
+    {
         return address(0) != tokenContractAddressMapping[_tokenContract][_bcId];
     }
 
@@ -380,11 +529,19 @@ contract SfcErc721Bridge is HiddenParameters, Pausable, AccessControl {
      * @param _tokenContract Address of ERC 721 token contract on this blockchain.
      * @return address       Contract address of ERC 721 token contract on other blockchain.
      */
-    function getBcIdTokenMaping(uint256 _bcId, address _tokenContract) public view returns (address) {
+    function getBcIdTokenMaping(uint256 _bcId, address _tokenContract)
+        public
+        view
+        returns (address)
+    {
         return tokenContractAddressMapping[_tokenContract][_bcId];
     }
 
-    function getRemoteErc721BridgeContract(uint256 _bcId) external view returns (address) {
+    function getRemoteErc721BridgeContract(uint256 _bcId)
+        external
+        view
+        returns (address)
+    {
         return remoteErc721Bridges[_bcId];
     }
 
@@ -399,11 +556,21 @@ contract SfcErc721Bridge is HiddenParameters, Pausable, AccessControl {
      * @param _recipient          Account to transfer ownership of the tokens to.
      * @param _tokenId            Id of token transferred.
      */
-    function transferOrMint(address _tokenContract, address _recipient, uint256 _tokenId) private {
-        if (tokenContractConfiguration[_tokenContract] == TOKEN_CONTRACT_CONF_HOME) {
-            IERC721(_tokenContract).transferFrom(address(this), _recipient, _tokenId);
-        }
-        else {
+    function transferOrMint(
+        address _tokenContract,
+        address _recipient,
+        uint256 _tokenId
+    ) private {
+        if (
+            tokenContractConfiguration[_tokenContract] ==
+            TOKEN_CONTRACT_CONF_HOME
+        ) {
+            IERC721(_tokenContract).transferFrom(
+                address(this),
+                _recipient,
+                _tokenId
+            );
+        } else {
             ERC721RemoteBlockchain(_tokenContract).mint(_recipient, _tokenId);
         }
     }
@@ -416,27 +583,54 @@ contract SfcErc721Bridge is HiddenParameters, Pausable, AccessControl {
      * @param _spender            Account to transfer ownership of the tokens from.
      * @param _tokenId            Id of token transferred.
      */
-    function transferOrBurn(address _tokenContract, address _spender, uint256 _tokenId) private {
-        if (tokenContractConfiguration[_tokenContract] == TOKEN_CONTRACT_CONF_HOME) {
-            IERC721(_tokenContract).transferFrom(_spender, address(this), _tokenId);
-        }
-        else {
+    function transferOrBurn(
+        address _tokenContract,
+        address _spender,
+        uint256 _tokenId
+    ) private {
+        if (
+            tokenContractConfiguration[_tokenContract] ==
+            TOKEN_CONTRACT_CONF_HOME
+        ) {
+            IERC721(_tokenContract).transferFrom(
+                _spender,
+                address(this),
+                _tokenId
+            );
+        } else {
             ERC721RemoteBlockchain(_tokenContract).burn(_tokenId);
         }
     }
 
     function tokenExists(address _tokenContract) private view returns (bool) {
-        return tokenContractConfiguration[_tokenContract] != TOKEN_CONTRACT_CONF_NONE;
+        return
+            tokenContractConfiguration[_tokenContract] !=
+            TOKEN_CONTRACT_CONF_NONE;
     }
 
-    function setTokenConfigInternal(address _thisBcTokenContract, bool _thisIsTheHomeBlockchain) private {
-        tokenContractConfiguration[_thisBcTokenContract] =
-        _thisIsTheHomeBlockchain ? TOKEN_CONTRACT_CONF_HOME : TOKEN_CONTRACT_CONF_REMOTE;
+    function setTokenConfigInternal(
+        address _thisBcTokenContract,
+        bool _thisIsTheHomeBlockchain
+    ) private {
+        tokenContractConfiguration[
+            _thisBcTokenContract
+        ] = _thisIsTheHomeBlockchain
+            ? TOKEN_CONTRACT_CONF_HOME
+            : TOKEN_CONTRACT_CONF_REMOTE;
     }
 
-    function changeContractMappingInternal(address _thisBcTokenContract, uint256 _otherBcId, address _othercTokenContract) private {
-        tokenContractAddressMapping[_thisBcTokenContract][_otherBcId] = _othercTokenContract;
-        emit TokenContractAddressMappingChanged(_thisBcTokenContract, _otherBcId, _othercTokenContract);
+    function changeContractMappingInternal(
+        address _thisBcTokenContract,
+        uint256 _otherBcId,
+        address _othercTokenContract
+    ) private {
+        tokenContractAddressMapping[_thisBcTokenContract][
+            _otherBcId
+        ] = _othercTokenContract;
+        emit TokenContractAddressMappingChanged(
+            _thisBcTokenContract,
+            _otherBcId,
+            _othercTokenContract
+        );
     }
-
 }

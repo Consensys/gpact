@@ -15,13 +15,17 @@
 pragma solidity >=0.7.1;
 
 contract Stock {
-    mapping (address => uint256) private stock;
+    mapping(address => uint256) private stock;
 
     function setStock(address _account, uint256 _newBalance) external {
         stock[_account] = _newBalance;
     }
 
-    function delivery(address _from, address _to, uint256 _amount) external {
+    function delivery(
+        address _from,
+        address _to,
+        uint256 _amount
+    ) external {
         uint256 fromBalance = getStock(_from);
         uint256 toBalance = getStock(_to);
         require(fromBalance >= _amount, "Stock transfer: insufficient balance");
@@ -30,9 +34,7 @@ contract Stock {
         stock[_to] = toBalance + _amount;
     }
 
-
     function getStock(address _account) public view returns (uint256) {
         return stock[_account];
     }
-
 }

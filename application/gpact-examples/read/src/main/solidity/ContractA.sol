@@ -22,25 +22,31 @@ contract ContractA is LockableStorage {
     uint256 otherBcId;
     ContractB contractB;
 
-    uint256 constant private KEY_VAL = 0;
+    uint256 private constant KEY_VAL = 0;
 
     event ValueRead(uint256 _val);
 
-    constructor (address _cbc, uint256 _otherBcId, address _contractBAddress)
-        LockableStorage(_cbc) {
-
+    constructor(
+        address _cbc,
+        uint256 _otherBcId,
+        address _contractBAddress
+    ) LockableStorage(_cbc) {
         otherBcId = _otherBcId;
         contractB = ContractB(_contractBAddress);
     }
 
     function doCrosschainRead() external {
-        uint256 val = CrosschainFunctionCallReturnInterface(address(cbc)).crossBlockchainCallReturnsUint256(
-            otherBcId, address(contractB), abi.encodeWithSelector(contractB.get.selector));
+        uint256 val = CrosschainFunctionCallReturnInterface(address(cbc))
+            .crossBlockchainCallReturnsUint256(
+                otherBcId,
+                address(contractB),
+                abi.encodeWithSelector(contractB.get.selector)
+            );
         setUint256(KEY_VAL, val);
         emit ValueRead(val);
     }
 
-    function getVal() external view returns(uint256) {
+    function getVal() external view returns (uint256) {
         return getUint256(KEY_VAL);
     }
 }

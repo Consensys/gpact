@@ -15,13 +15,12 @@
 pragma solidity >=0.7.1;
 import "./OldLockableStorage.sol";
 
-contract OldLockableStorageWrapper  {
+contract OldLockableStorageWrapper {
     OldLockableStorage public storageContract;
 
-    constructor (address _storageContract) {
+    constructor(address _storageContract) {
         storageContract = OldLockableStorage(_storageContract);
     }
-
 
     function setUint256(uint256 _key, uint256 _val) internal {
         try storageContract.setUint256(_key, _val) {
@@ -45,21 +44,27 @@ contract OldLockableStorageWrapper  {
         storageContract.setBytes(_key, _val);
     }
 
-
-    function setArrayValue(uint256 _key, uint256 _index, uint256 _val) internal {
+    function setArrayValue(
+        uint256 _key,
+        uint256 _index,
+        uint256 _val
+    ) internal {
         // Location of the key is the length.
         uint256 len = storageContract.getUint256(_key);
         require(_index < len, "Index out of bounds");
         // Keccak256(_key) is the location of the array elements.
         bytes32 startOfArrayLocation = keccak256(abi.encodePacked(_key));
-        storageContract.setUint256(uint256(startOfArrayLocation) + _index, _val);
+        storageContract.setUint256(
+            uint256(startOfArrayLocation) + _index,
+            _val
+        );
     }
 
     function pushArrayValue(uint256 _key, uint256 _val) internal {
         uint256 len = storageContract.getUint256(_key);
         bytes32 startOfArrayLocation = keccak256(abi.encodePacked(_key));
         storageContract.setUint256(uint256(startOfArrayLocation) + len, _val);
-        storageContract.setUint256(_key, len+1);
+        storageContract.setUint256(_key, len + 1);
     }
 
     function popArrayValue(uint256 _key) internal {
@@ -67,45 +72,56 @@ contract OldLockableStorageWrapper  {
         require(len > 0, "Pop called onzero length array");
         bytes32 startOfArrayLocation = keccak256(abi.encodePacked(_key));
         storageContract.setUint256(uint256(startOfArrayLocation) + len, 0);
-        storageContract.setUint256(_key, len-1);
+        storageContract.setUint256(_key, len - 1);
     }
 
-    function setMapValue(uint256 _key, uint256 _mapKey, uint256 _val) internal {
+    function setMapValue(
+        uint256 _key,
+        uint256 _mapKey,
+        uint256 _val
+    ) internal {
         bytes32 index = keccak256(abi.encodePacked(_key, _mapKey));
         storageContract.setUint256(uint256(index), _val);
     }
 
-
-    function getUint256(uint256 _key) internal view returns(uint256) {
+    function getUint256(uint256 _key) internal view returns (uint256) {
         return storageContract.getUint256(_key);
     }
 
-    function getBool(uint256 _key) internal view returns(bool) {
+    function getBool(uint256 _key) internal view returns (bool) {
         return storageContract.getUint256(_key) == 1 ? true : false;
     }
 
-    function getAddress(uint256 _key) internal view returns(address) {
+    function getAddress(uint256 _key) internal view returns (address) {
         return address(uint160(storageContract.getUint256(_key)));
     }
 
-    function getBytes(uint256 _key) internal view returns(bytes memory) {
+    function getBytes(uint256 _key) internal view returns (bytes memory) {
         return storageContract.getBytes(_key);
     }
 
-    function getArrayLength(uint256 _key) internal view returns(uint256) {
+    function getArrayLength(uint256 _key) internal view returns (uint256) {
         return storageContract.getUint256(_key);
     }
 
-    function getArrayValue(uint256 _key, uint256 _index) internal view returns(uint256) {
+    function getArrayValue(uint256 _key, uint256 _index)
+        internal
+        view
+        returns (uint256)
+    {
         uint256 len = storageContract.getUint256(_key);
         require(len > _index, "Index out of bounds");
         bytes32 startOfArrayLocation = keccak256(abi.encodePacked(_key));
-        return storageContract.getUint256(uint256(startOfArrayLocation) + _index);
+        return
+            storageContract.getUint256(uint256(startOfArrayLocation) + _index);
     }
 
-    function getMapValue(uint256 _key, uint256 _mapKey) internal view returns(uint256) {
+    function getMapValue(uint256 _key, uint256 _mapKey)
+        internal
+        view
+        returns (uint256)
+    {
         bytes32 index = keccak256(abi.encodePacked(_key, _mapKey));
         return storageContract.getUint256(uint256(index));
     }
-
 }

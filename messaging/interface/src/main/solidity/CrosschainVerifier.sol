@@ -15,7 +15,6 @@
 pragma solidity >=0.8;
 
 interface CrosschainVerifier {
-
     /**
      * Decode and verify event information. Use require to fail the transaction
      * if any of the information is invalid.
@@ -31,7 +30,10 @@ interface CrosschainVerifier {
      * @param _signature Signatures or proof information that an implementation can
      *    use to check that _signedEventInfo is valid.
      */
-    function decodeAndVerifyEvent(uint256 _blockchainId, bytes32 _eventSig,
-        bytes calldata _signedEventInfo, bytes calldata _signature)
-         external view;
+    function decodeAndVerifyEvent(
+        uint256 _blockchainId,
+        bytes32 _eventSig,
+        bytes calldata _signedEventInfo,
+        bytes calldata _signature
+    ) external view;
 }

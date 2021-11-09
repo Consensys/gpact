@@ -22,7 +22,7 @@ import "../extensions/TraditionalERC20Adaptor.sol";
  * @dev This contract aims to mirror the Open Zeppelin ERC20PresetFixedSupply:
  * https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/presets/ERC20PresetFixedSupply.sol
  *
-  * {ERC20} token, including:
+ * {ERC20} token, including:
  *
  *  - Preminted initial supply
  *  - Ability for holders to burn (destroy) their tokens
@@ -31,7 +31,10 @@ import "../extensions/TraditionalERC20Adaptor.sol";
  * This contract uses {LockableERC20Burnable} to include burn capabilities - head to
  * its documentation for details.
  */
-contract LockableERC20PresetTraditionalPresetFixedSupply is LockableERC20Burnable, TraditionalERC20Adaptor {
+contract LockableERC20PresetTraditionalPresetFixedSupply is
+    LockableERC20Burnable,
+    TraditionalERC20Adaptor
+{
     /**
      * @dev Mints `initialSupply` amount of token and transfers them to `owner`.
      *
