@@ -19,8 +19,10 @@ import static junit.framework.TestCase.assertFalse;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import net.consensys.gpact.attestorsign.soliditywrappers.AttestorSignRegistrar;
 import net.consensys.gpact.common.AnIdentity;
@@ -215,41 +217,45 @@ public class TxRootAddTest extends AbstractWeb3Test {
     Credentials[] creds = new Credentials[numTransactionsPerBlock];
     FastTxManager[] tms = new FastTxManager[numTransactionsPerBlock];
     TestEvents[] testContracts = new TestEvents[numTransactionsPerBlock];
-    for (int i = 0; i < numTransactionsPerBlock; i++) {
-      String privateKey0 = new KeyPairGen().generateKeyPairGetPrivateKey();
-      creds[i] = Credentials.create(privateKey0);
-
-      TransactionReceiptProcessor txrProcessor =
-          new PollingTransactionReceiptProcessor(this.web3j, POLLING_INTERVAL, RETRY);
-      tms[i] =
-          TxManagerCache.getOrCreate(this.web3j, creds[i], BLOCKCHAIN_ID.longValue(), txrProcessor);
-      testContracts[i] =
-          TestEvents.load(testContractAddress, this.web3j, tms[i], this.freeGasProvider);
-    }
-
-    BigInteger id = BigInteger.TWO;
-
-    //    CompletableFuture<TransactionReceipt>[] transactionReceiptCompletableFutures =
-    //        (CompletableFuture<TransactionReceipt>[]) new Object[numTransactionsPerBlock];
-    CompletableFuture<?>[] transactionReceiptCompletableFutures =
-        new CompletableFuture<?>[numTransactionsPerBlock];
-    for (int i = 0; i < numTransactionsPerBlock; i++) {
-      transactionReceiptCompletableFutures[i] = testContracts[i].start(id).sendAsync();
-      id = id.add(BigInteger.ONE);
-    }
-    CompletableFuture<Void> combinedFuture =
-        CompletableFuture.allOf(transactionReceiptCompletableFutures);
-    combinedFuture.get();
-
     final TransactionReceipt[] receipts = new TransactionReceipt[numTransactionsPerBlock];
-    for (int i = 0; i < numTransactionsPerBlock; i++) {
-      receipts[i] = (TransactionReceipt) transactionReceiptCompletableFutures[i].get();
-      // Show the receipts root that has been included in the block.
-      assert (receipts[i] != null && receipts[i].getBlockHash() != null);
-      // TODO check that all transactions ended up in the same block, and hence have the same block
-      // hash
+    while (true) {
+      for (int i = 0; i < numTransactionsPerBlock; i++) {
+        String privateKey0 = new KeyPairGen().generateKeyPairGetPrivateKey();
+        creds[i] = Credentials.create(privateKey0);
+  
+        TransactionReceiptProcessor txrProcessor =
+            new PollingTransactionReceiptProcessor(this.web3j, POLLING_INTERVAL, RETRY);
+        tms[i] =
+            TxManagerCache.getOrCreate(this.web3j, creds[i], BLOCKCHAIN_ID.longValue(), txrProcessor);
+        testContracts[i] =
+            TestEvents.load(testContractAddress, this.web3j, tms[i], this.freeGasProvider);
+      }
+  
+      BigInteger id = BigInteger.TWO;
+  
+      //    CompletableFuture<TransactionReceipt>[] transactionReceiptCompletableFutures =
+      //        (CompletableFuture<TransactionReceipt>[]) new Object[numTransactionsPerBlock];
+      CompletableFuture<?>[] transactionReceiptCompletableFutures =
+          new CompletableFuture<?>[numTransactionsPerBlock];
+      for (int i = 0; i < numTransactionsPerBlock; i++) {
+        transactionReceiptCompletableFutures[i] = testContracts[i].start(id).sendAsync();
+        id = id.add(BigInteger.ONE);
+      }
+      CompletableFuture<Void> combinedFuture =
+          CompletableFuture.allOf(transactionReceiptCompletableFutures);
+      combinedFuture.get();
+  
+      Set<String> headers = new HashSet<String>();
+      for (int i = 0; i < numTransactionsPerBlock; i++) {
+        receipts[i] = (TransactionReceipt) transactionReceiptCompletableFutures[i].get();
+        // Show the receipts root that has been included in the block.
+        assert (receipts[i] != null && receipts[i].getBlockHash() != null);
+        headers.add(receipts[i].getBlockHash());
+      }
+      if (headers.size() == 1) {
+        break;
+      }
     }
-
     EthBlock block = web3j.ethGetBlockByHash(receipts[0].getBlockHash(), false).send();
     EthBlock.Block b1 = block.getBlock();
     String receiptsRoot = b1.getReceiptsRoot();
