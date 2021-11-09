@@ -37,6 +37,7 @@ allprojects {
 
 ext {
     log4JVersion = '2.14.1'
+    okHttpVersion = '4.9.1'
 }
 
 subprojects {
@@ -47,6 +48,8 @@ subprojects {
         implementation group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: log4JVersion
         implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: log4JVersion
         implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: log4JVersion
+        implementation group: 'com.squareup.okhttp3', name: 'okhttp', version: okHttpVersion
+        implementation group: 'com.squareup.okhttp3', name: 'logging-interceptor', version: okHttpVersion
 
         testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.1'
         testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'

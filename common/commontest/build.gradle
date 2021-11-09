@@ -30,8 +30,7 @@ dependencies {
     implementation files('../../../web3j-abi/crypto/build/libs/crypto-4.8.7-SNAPSHOT.jar')
     implementation files('../../../web3j-abi/rlp/build/libs/rlp-4.8.7-SNAPSHOT.jar')
     implementation files('../../../web3j-abi/utils/build/libs/utils-4.8.7-SNAPSHOT.jar')
-    implementation "com.squareup.okhttp3:okhttp:4.9.0"
-    implementation "com.squareup.okhttp3:logging-interceptor:4.9.0"
+
 
     implementation "org.bouncycastle:bcprov-jdk15on:1.65"
 

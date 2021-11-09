@@ -14,8 +14,7 @@ dependencies {
     implementation "io.reactivex.rxjava2:rxjava:2.2.2"
     //    compile ('org.web3j:core:4.6.3')
 
-    implementation "com.squareup.okhttp3:okhttp:4.9.0"
-    implementation "com.squareup.okhttp3:logging-interceptor:4.9.0"
+
 
     // https://mvnrepository.com/artifact/org.apache.tuweni/tuweni-bytes
     implementation group: 'org.apache.tuweni', name: 'tuweni-bytes', version: '1.0.0'
