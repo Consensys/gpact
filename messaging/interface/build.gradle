@@ -21,7 +21,6 @@ dependencies {
 
     implementation group: 'com.google.guava', name: 'guava', version: '14.0'
 
-
     testImplementation project(':commontest')
 }
 

@@ -3,7 +3,6 @@ dependencies {
 
     implementation group: 'com.google.guava', name: 'guava', version: '14.0'
 
-
     implementation files('../../../../web3j-abi/abi/build/libs/abi.jar')
     implementation files('../../../../web3j-abi/core/build/libs/core.jar')
     implementation files('../../../../web3j-abi/crypto/build/libs/crypto.jar')

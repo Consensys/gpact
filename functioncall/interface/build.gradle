@@ -2,8 +2,6 @@ dependencies {
     implementation project (':common')
     implementation project (':mes-interface')
 
-
-
     implementation files('../../../web3j-abi/abi/build/libs/abi-4.8.7-SNAPSHOT.jar')
     implementation files('../../../web3j-abi/core/build/libs/core-4.8.7-SNAPSHOT.jar')
     implementation files('../../../web3j-abi/crypto/build/libs/crypto-4.8.7-SNAPSHOT.jar')
@@ -12,8 +10,6 @@ dependencies {
     implementation files('../../../web3j-abi/tuples/build/libs/tuples-4.8.7-SNAPSHOT.jar')
     implementation "io.reactivex.rxjava2:rxjava:2.2.2"
 
-
-
     // https://mvnrepository.com/artifact/org.apache.tuweni/tuweni-bytes
     implementation group: 'org.apache.tuweni', name: 'tuweni-bytes', version: '1.0.0'
     // https://mvnrepository.com/artifact/org.apache.tuweni/tuweni-units
@@ -21,7 +17,6 @@ dependencies {
 
     testImplementation project(':commontest')
 }
-
 
 // Generate Solidity wrapper code before build.
 task generateSources {
