@@ -15,23 +15,21 @@
 pragma solidity >=0.7.1;
 import "../../../../../atomic-appcontracts/lockablestorage/src/main/solidity/LockableStorage.sol";
 
-
-
 contract ContractB is LockableStorage {
-    uint256 constant private KEY_VAL = 0;
-
+    uint256 private constant KEY_VAL = 0;
 
     event ValueWritten(uint256 _val);
 
-    constructor(address _crossBlockchainControl) LockableStorage(_crossBlockchainControl) {
-    }
+    constructor(address _crossBlockchainControl)
+        LockableStorage(_crossBlockchainControl)
+    {}
 
     function set(uint256 _val) external {
         setUint256(KEY_VAL, _val);
         emit ValueWritten(_val);
     }
 
-    function getVal() external view returns(uint256) {
+    function getVal() external view returns (uint256) {
         return getUint256(KEY_VAL);
     }
 }

@@ -24,7 +24,7 @@ contract ContractB {
         emit ValueWritten(_val);
     }
 
-    function getVal() external view returns(uint256) {
+    function getVal() external view returns (uint256) {
         return val;
     }
 }

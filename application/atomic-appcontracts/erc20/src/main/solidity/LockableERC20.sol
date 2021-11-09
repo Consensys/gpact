@@ -29,7 +29,13 @@ import "../../../../../../functioncall/interface/src/main/solidity/CrosschainFun
  * call. See CrosschainERC20 for additional functions that allow tokens to be
  * transferred across blockchains.
  */
-abstract contract LockableERC20 is Context, IERC20, IERC20Metadata, Ownable, LockableStorage {
+abstract contract LockableERC20 is
+    Context,
+    IERC20,
+    IERC20Metadata,
+    Ownable,
+    LockableStorage
+{
     // Number of crosschain transfers to or from an account that can
     // execute in parallel.
     uint256 public accountPallelizationFactor;
@@ -45,16 +51,16 @@ abstract contract LockableERC20 is Context, IERC20, IERC20Metadata, Ownable, Loc
     // SUM(_ADD(for all indices)) - SUM(_SUB(for all indices))
 
     // mapping (address => mapping (index => uint256))
-    uint256 constant private BALANCES_ADD = 0;
-    uint256 constant private BALANCES_SUB = 1;
+    uint256 private constant BALANCES_ADD = 0;
+    uint256 private constant BALANCES_SUB = 1;
 
     // mapping (address => mapping (address => mapping(index => uint256))) private _allowances;
-    uint256 constant private ALLOWANCES_ADD = 2;
-    uint256 constant private ALLOWANCES_SUB = 3;
+    uint256 private constant ALLOWANCES_ADD = 2;
+    uint256 private constant ALLOWANCES_SUB = 3;
 
     // mapping(index => uint256)
-    uint256 constant private TOTAL_SUPPLY_ADD = 4;
-    uint256 constant private TOTAL_SUPPLY_SUB = 5;
+    uint256 private constant TOTAL_SUPPLY_ADD = 4;
+    uint256 private constant TOTAL_SUPPLY_SUB = 5;
 
     // Token name and symbol are immutable.
     string private erc20Name;
@@ -71,7 +77,11 @@ abstract contract LockableERC20 is Context, IERC20, IERC20Metadata, Ownable, Loc
      * All two of these values are immutable: they can only be set once during
      * construction.
      */
-    constructor (string memory _name, string memory _symbol, address _cbc) LockableStorage(_cbc) {
+    constructor(
+        string memory _name,
+        string memory _symbol,
+        address _cbc
+    ) LockableStorage(_cbc) {
         erc20Name = _name;
         erc20Symbol = _symbol;
 
@@ -79,25 +89,29 @@ abstract contract LockableERC20 is Context, IERC20, IERC20Metadata, Ownable, Loc
         erc20PallelizationFactor = 10;
     }
 
-    function increaseAccountParallelizartionFactor(uint256 amount) onlyOwner external {
+    function increaseAccountParallelizartionFactor(uint256 amount)
+        external
+        onlyOwner
+    {
         accountPallelizationFactor += amount;
     }
 
-    function increaseERC20ParallelizartionFactor(uint256 amount) onlyOwner external {
+    function increaseERC20ParallelizartionFactor(uint256 amount)
+        external
+        onlyOwner
+    {
         erc20PallelizationFactor += amount;
     }
 
-    function addTrustedBridge(address bridge) onlyOwner external {
+    function addTrustedBridge(address bridge) external onlyOwner {
         trustedErc20Bridges[bridge] = true;
         emit TrustedBridge(bridge, true);
     }
 
-    function removeTrustedBridge(address bridge) onlyOwner external {
+    function removeTrustedBridge(address bridge) external onlyOwner {
         trustedErc20Bridges[bridge] = false;
         emit TrustedBridge(bridge, false);
     }
-
-
 
     /**
      * @dev See {IERC20-transfer}.
@@ -107,7 +121,12 @@ abstract contract LockableERC20 is Context, IERC20, IERC20Metadata, Ownable, Loc
      * - `recipient` cannot be the zero address.
      * - the caller must have a balance of at least `amount`.
      */
-    function transfer(address recipient, uint256 amount) public virtual override returns (bool) {
+    function transfer(address recipient, uint256 amount)
+        public
+        virtual
+        override
+        returns (bool)
+    {
         transferInternal(_msgSender(), recipient, amount);
         return true;
     }
@@ -119,7 +138,12 @@ abstract contract LockableERC20 is Context, IERC20, IERC20Metadata, Ownable, Loc
      *
      * - `spender` cannot be the zero address.
      */
-    function approve(address spender, uint256 amount) public virtual override returns (bool) {
+    function approve(address spender, uint256 amount)
+        public
+        virtual
+        override
+        returns (bool)
+    {
         require(cbc.isSingleBlockchainCall(), "Must be single blockchain call");
         approveInternal(_msgSender(), spender, amount);
         return true;
@@ -138,7 +162,11 @@ abstract contract LockableERC20 is Context, IERC20, IERC20Metadata, Ownable, Loc
      * - the caller must have allowance for ``sender``'s tokens of at least
      * `amount`.
      */
-    function transferFrom(address sender, address recipient, uint256 amount) public virtual override returns (bool) {
+    function transferFrom(
+        address sender,
+        address recipient,
+        uint256 amount
+    ) public virtual override returns (bool) {
         address spender = _msgSender();
         transferFromInternal(spender, sender, recipient, amount);
         return true;
@@ -147,11 +175,15 @@ abstract contract LockableERC20 is Context, IERC20, IERC20Metadata, Ownable, Loc
     /**
      * Allow a trusted bridge to transfer from a specific account.
      */
-    function transferFromAccount(address spender, address sender, address recipient, uint256 amount) public virtual {
+    function transferFromAccount(
+        address spender,
+        address sender,
+        address recipient,
+        uint256 amount
+    ) public virtual {
         require(trustedErc20Bridges[msg.sender], "ERC20: not trusted bridge");
         transferFromInternal(spender, sender, recipient, amount);
     }
-
 
     /**
      * @dev Atomically increases the allowance granted to `spender` by the caller.
@@ -165,7 +197,11 @@ abstract contract LockableERC20 is Context, IERC20, IERC20Metadata, Ownable, Loc
      *
      * - `spender` cannot be the zero address.
      */
-    function increaseAllowance(address spender, uint256 addedValue) public virtual returns (bool) {
+    function increaseAllowance(address spender, uint256 addedValue)
+        public
+        virtual
+        returns (bool)
+    {
         increaseAllowanceInternal(_msgSender(), spender, addedValue);
         return true;
     }
@@ -184,21 +220,26 @@ abstract contract LockableERC20 is Context, IERC20, IERC20Metadata, Ownable, Loc
      * - `spender` must have allowance for the caller of at least
      * `subtractedValue`.
      */
-    function decreaseAllowance(address spender, uint256 subtractedValue) public virtual returns (bool) {
+    function decreaseAllowance(address spender, uint256 subtractedValue)
+        public
+        virtual
+        returns (bool)
+    {
         uint256 currentAllowance = allowanceMin(_msgSender(), spender);
-        require(currentAllowance >= subtractedValue, "ERC20: decreased allowance below zero");
+        require(
+            currentAllowance >= subtractedValue,
+            "ERC20: decreased allowance below zero"
+        );
         decreaseAllowanceInternal(_msgSender(), spender, subtractedValue);
 
         return true;
     }
-
 
     /************************************************************************/
     /************************************************************************/
     /*****                        VIEW BELOW HERE                       *****/
     /************************************************************************/
     /************************************************************************/
-
 
     /**
      * @dev Returns the name of the token.
@@ -238,49 +279,49 @@ abstract contract LockableERC20 is Context, IERC20, IERC20Metadata, Ownable, Loc
     function totalSupply() public view virtual override returns (uint256) {
         uint256 total = 0;
 
-        for (uint256 i=0; i < erc20PallelizationFactor; i++) {
+        for (uint256 i = 0; i < erc20PallelizationFactor; i++) {
             total += getMapValueCommitted(TOTAL_SUPPLY_ADD, i);
         }
         // There is no checks for totalSupply going negative. It should be
         // impossible for total supply to go negative, as it is only adjusted
         // in line with balances being burned.
-        for (uint256 i=0; i < erc20PallelizationFactor; i++) {
+        for (uint256 i = 0; i < erc20PallelizationFactor; i++) {
             total -= getMapValueCommitted(TOTAL_SUPPLY_SUB, i);
         }
         return total;
     }
 
     /**
-    * Returns the total supply, assuming all provisional updates are applied.
-    */
+     * Returns the total supply, assuming all provisional updates are applied.
+     */
     function totalSupplyProvisional() public view returns (uint256) {
         uint256 total = 0;
 
-        for (uint256 i=0; i < erc20PallelizationFactor; i++) {
+        for (uint256 i = 0; i < erc20PallelizationFactor; i++) {
             total += getMapValueProvisional(TOTAL_SUPPLY_ADD, i);
         }
         // There is no checks for totalSupply going negative. It should be
         // impossible for total supply to go negative, as it is only adjusted
         // in line with balances being burned.
-        for (uint256 i=0; i < erc20PallelizationFactor; i++) {
+        for (uint256 i = 0; i < erc20PallelizationFactor; i++) {
             total -= getMapValueProvisional(TOTAL_SUPPLY_SUB, i);
         }
         return total;
     }
 
     /**
-    * Returns the total supply, assuming all negative provisional updates are applied.
-    */
+     * Returns the total supply, assuming all negative provisional updates are applied.
+     */
     function totalSupplyMin() public view returns (uint256) {
         uint256 total = 0;
 
-        for (uint256 i=0; i < erc20PallelizationFactor; i++) {
+        for (uint256 i = 0; i < erc20PallelizationFactor; i++) {
             total += getMapValueCommitted(TOTAL_SUPPLY_ADD, i);
         }
         // There is no checks for totalSupply going negative. It should be
         // impossible for total supply to go negative, as it is only adjusted
         // in line with balances being burned.
-        for (uint256 i=0; i < erc20PallelizationFactor; i++) {
+        for (uint256 i = 0; i < erc20PallelizationFactor; i++) {
             total -= getMapValueProvisional(TOTAL_SUPPLY_SUB, i);
         }
         return total;
@@ -292,13 +333,13 @@ abstract contract LockableERC20 is Context, IERC20, IERC20Metadata, Ownable, Loc
     function totalSupplyMax() public view returns (uint256) {
         uint256 total = 0;
 
-        for (uint256 i=0; i < erc20PallelizationFactor; i++) {
+        for (uint256 i = 0; i < erc20PallelizationFactor; i++) {
             total += getMapValueProvisional(TOTAL_SUPPLY_ADD, i);
         }
         // There is no checks for totalSupply going negative. It should be
         // impossible for total supply to go negative, as it is only adjusted
         // in line with balances being burned.
-        for (uint256 i=0; i < erc20PallelizationFactor; i++) {
+        for (uint256 i = 0; i < erc20PallelizationFactor; i++) {
             total -= getMapValueCommitted(TOTAL_SUPPLY_SUB, i);
         }
         return total;
@@ -307,50 +348,60 @@ abstract contract LockableERC20 is Context, IERC20, IERC20Metadata, Ownable, Loc
     /**
      * Balance assuming no provisional updates are applied.
      */
-    function balanceOf(address account) public view virtual override returns (uint256) {
+    function balanceOf(address account)
+        public
+        view
+        virtual
+        override
+        returns (uint256)
+    {
         uint256 acc = uint256(uint160(account));
         uint256 balance = 0;
-        for (uint256 i=0; i < accountPallelizationFactor; i++) {
+        for (uint256 i = 0; i < accountPallelizationFactor; i++) {
             balance += getDoubleMapValueCommitted(BALANCES_ADD, acc, i);
         }
         // There are no checks for balance going negative as this should be
         // impossible.
-        for (uint256 i=0; i < accountPallelizationFactor; i++) {
+        for (uint256 i = 0; i < accountPallelizationFactor; i++) {
             balance -= getDoubleMapValueCommitted(BALANCES_SUB, acc, i);
         }
         return balance;
     }
 
     /**
-    * Balance assuming all provisional updates are applied.
-    */
-    function balanceOfProvisional(address account) public view returns (uint256) {
+     * Balance assuming all provisional updates are applied.
+     */
+    function balanceOfProvisional(address account)
+        public
+        view
+        returns (uint256)
+    {
         uint256 acc = uint256(uint160(account));
         uint256 balance = 0;
-        for (uint256 i=0; i < accountPallelizationFactor; i++) {
+        for (uint256 i = 0; i < accountPallelizationFactor; i++) {
             balance += getDoubleMapValueProvisional(BALANCES_ADD, acc, i);
         }
         // There are no checks for balance going negative as this should be
         // impossible.
-        for (uint256 i=0; i < accountPallelizationFactor; i++) {
+        for (uint256 i = 0; i < accountPallelizationFactor; i++) {
             balance -= getDoubleMapValueProvisional(BALANCES_SUB, acc, i);
         }
         return balance;
     }
 
     /**
-    * Balance assuming all provisional withdraws are applied and no provisional
-    * deposits are applied.
-    */
+     * Balance assuming all provisional withdraws are applied and no provisional
+     * deposits are applied.
+     */
     function balanceOfMin(address account) public view returns (uint256) {
         uint256 acc = uint256(uint160(account));
         uint256 balance = 0;
-        for (uint256 i=0; i < accountPallelizationFactor; i++) {
+        for (uint256 i = 0; i < accountPallelizationFactor; i++) {
             balance += getDoubleMapValueCommitted(BALANCES_ADD, acc, i);
         }
         // There are no checks for balance going negative as this should be
         // impossible.
-        for (uint256 i=0; i < accountPallelizationFactor; i++) {
+        for (uint256 i = 0; i < accountPallelizationFactor; i++) {
             balance -= getDoubleMapValueProvisional(BALANCES_SUB, acc, i);
         }
         return balance;
@@ -360,78 +411,135 @@ abstract contract LockableERC20 is Context, IERC20, IERC20Metadata, Ownable, Loc
      * Return the amount committed, ignoring any provisional updates.
      *
      */
-    function allowance(address owner, address spender) public view virtual override returns (uint256) {
+    function allowance(address owner, address spender)
+        public
+        view
+        virtual
+        override
+        returns (uint256)
+    {
         require(owner != address(0), "ERC20: approve from the zero address");
         require(spender != address(0), "ERC20: approve to the zero address");
 
         uint256 ownerAcc = uint256(uint160(owner));
         uint256 spenderAcc = uint256(uint160(spender));
         uint256 total = 0;
-        for (uint256 i=0; i < accountPallelizationFactor; i++) {
-            total += getTripleMapValueCommitted(ALLOWANCES_ADD, ownerAcc, spenderAcc, i);
+        for (uint256 i = 0; i < accountPallelizationFactor; i++) {
+            total += getTripleMapValueCommitted(
+                ALLOWANCES_ADD,
+                ownerAcc,
+                spenderAcc,
+                i
+            );
         }
         // There are no checks for balance going negative as this should be
         // impossible.
-        for (uint256 i=0; i < accountPallelizationFactor; i++) {
-            total -= getTripleMapValueCommitted(ALLOWANCES_SUB, ownerAcc, spenderAcc, i);
+        for (uint256 i = 0; i < accountPallelizationFactor; i++) {
+            total -= getTripleMapValueCommitted(
+                ALLOWANCES_SUB,
+                ownerAcc,
+                spenderAcc,
+                i
+            );
         }
         return total;
     }
 
-    function allowanceMin(address owner, address spender) public view returns (uint256) {
+    function allowanceMin(address owner, address spender)
+        public
+        view
+        returns (uint256)
+    {
         require(owner != address(0), "ERC20: approve from the zero address");
         require(spender != address(0), "ERC20: approve to the zero address");
 
         uint256 ownerAcc = uint256(uint160(owner));
         uint256 spenderAcc = uint256(uint160(spender));
         uint256 total = 0;
-        for (uint256 i=0; i < accountPallelizationFactor; i++) {
-            total += getTripleMapValueCommitted(ALLOWANCES_ADD, ownerAcc, spenderAcc, i);
+        for (uint256 i = 0; i < accountPallelizationFactor; i++) {
+            total += getTripleMapValueCommitted(
+                ALLOWANCES_ADD,
+                ownerAcc,
+                spenderAcc,
+                i
+            );
         }
         // There are no checks for balance going negative as this should be
         // impossible.
-        for (uint256 i=0; i < accountPallelizationFactor; i++) {
-            total -= getTripleMapValueProvisional(ALLOWANCES_SUB, ownerAcc, spenderAcc, i);
+        for (uint256 i = 0; i < accountPallelizationFactor; i++) {
+            total -= getTripleMapValueProvisional(
+                ALLOWANCES_SUB,
+                ownerAcc,
+                spenderAcc,
+                i
+            );
         }
         return total;
     }
 
-    function allowanceMax(address owner, address spender) public view returns (uint256) {
+    function allowanceMax(address owner, address spender)
+        public
+        view
+        returns (uint256)
+    {
         require(owner != address(0), "ERC20: approve from the zero address");
         require(spender != address(0), "ERC20: approve to the zero address");
 
         uint256 ownerAcc = uint256(uint160(owner));
         uint256 spenderAcc = uint256(uint160(spender));
         uint256 total = 0;
-        for (uint256 i=0; i < accountPallelizationFactor; i++) {
-            total += getTripleMapValueProvisional(ALLOWANCES_ADD, ownerAcc, spenderAcc, i);
+        for (uint256 i = 0; i < accountPallelizationFactor; i++) {
+            total += getTripleMapValueProvisional(
+                ALLOWANCES_ADD,
+                ownerAcc,
+                spenderAcc,
+                i
+            );
         }
         // There are no checks for balance going negative as this should be
         // impossible.
-        for (uint256 i=0; i < accountPallelizationFactor; i++) {
-            total -= getTripleMapValueCommitted(ALLOWANCES_SUB, ownerAcc, spenderAcc, i);
+        for (uint256 i = 0; i < accountPallelizationFactor; i++) {
+            total -= getTripleMapValueCommitted(
+                ALLOWANCES_SUB,
+                ownerAcc,
+                spenderAcc,
+                i
+            );
         }
         return total;
     }
 
-    function allowanceProvisional(address owner, address spender) public view returns (uint256) {
+    function allowanceProvisional(address owner, address spender)
+        public
+        view
+        returns (uint256)
+    {
         require(owner != address(0), "ERC20: approve from the zero address");
         require(spender != address(0), "ERC20: approve to the zero address");
 
         uint256 ownerAcc = uint256(uint160(owner));
         uint256 spenderAcc = uint256(uint160(spender));
         uint256 total = 0;
-        for (uint256 i=0; i < accountPallelizationFactor; i++) {
-            total += getTripleMapValueProvisional(ALLOWANCES_ADD, ownerAcc, spenderAcc, i);
+        for (uint256 i = 0; i < accountPallelizationFactor; i++) {
+            total += getTripleMapValueProvisional(
+                ALLOWANCES_ADD,
+                ownerAcc,
+                spenderAcc,
+                i
+            );
         }
         // There are no checks for balance going negative as this should be
         // impossible.
-        for (uint256 i=0; i < accountPallelizationFactor; i++) {
-            total -= getTripleMapValueProvisional(ALLOWANCES_SUB, ownerAcc, spenderAcc, i);
+        for (uint256 i = 0; i < accountPallelizationFactor; i++) {
+            total -= getTripleMapValueProvisional(
+                ALLOWANCES_SUB,
+                ownerAcc,
+                spenderAcc,
+                i
+            );
         }
         return total;
     }
-
 
     /************************************************************************/
     /************************************************************************/
@@ -439,14 +547,21 @@ abstract contract LockableERC20 is Context, IERC20, IERC20Metadata, Ownable, Loc
     /************************************************************************/
     /************************************************************************/
 
-    function transferFromInternal(address spender, address sender, address recipient, uint256 amount) private {
+    function transferFromInternal(
+        address spender,
+        address sender,
+        address recipient,
+        uint256 amount
+    ) private {
         transferInternal(sender, recipient, amount);
 
         uint256 currentAllowance = allowanceMin(sender, spender);
-        require(currentAllowance >= amount, "ERC20: transfer amount exceeds allowance");
+        require(
+            currentAllowance >= amount,
+            "ERC20: transfer amount exceeds allowance"
+        );
         decreaseAllowanceInternal(sender, spender, amount);
     }
-
 
     /**
      * @dev Moves tokens `amount` from `sender` to `recipient`.
@@ -462,7 +577,11 @@ abstract contract LockableERC20 is Context, IERC20, IERC20Metadata, Ownable, Loc
      * - `recipient` cannot be the zero address.
      * - `sender` must have a balance of at least `amount`.
      */
-    function transferInternal(address sender, address recipient, uint256 amount) internal virtual {
+    function transferInternal(
+        address sender,
+        address recipient,
+        uint256 amount
+    ) internal virtual {
         require(sender != address(0), "ERC20: transfer from the zero address");
         require(recipient != address(0), "ERC20: transfer to the zero address");
 
@@ -471,7 +590,6 @@ abstract contract LockableERC20 is Context, IERC20, IERC20Metadata, Ownable, Loc
         increaseBalance(recipient, amount);
         emit Transfer(sender, recipient, amount);
     }
-
 
     /** @dev Creates `amount` tokens and assigns them to `account`, increasing
      * the total supply.
@@ -521,44 +639,102 @@ abstract contract LockableERC20 is Context, IERC20, IERC20Metadata, Ownable, Loc
      * - `owner` cannot be the zero address.
      * - `spender` cannot be the zero address.
      */
-    function approveInternal(address owner, address spender, uint256 amount) internal virtual {
+    function approveInternal(
+        address owner,
+        address spender,
+        uint256 amount
+    ) internal virtual {
         require(owner != address(0), "ERC20: approve from the zero address");
         require(spender != address(0), "ERC20: approve to the zero address");
 
         uint256 ownerAcc = uint256(uint160(owner));
         uint256 spenderAcc = uint256(uint160(spender));
         uint256 total = 0;
-        for (uint256 i=0; i<accountPallelizationFactor; i++) {
-            require(!isTripleMapValueLocked(ALLOWANCES_ADD, ownerAcc, spenderAcc, i), "Increase allowance slot locked");
+        for (uint256 i = 0; i < accountPallelizationFactor; i++) {
+            require(
+                !isTripleMapValueLocked(
+                    ALLOWANCES_ADD,
+                    ownerAcc,
+                    spenderAcc,
+                    i
+                ),
+                "Increase allowance slot locked"
+            );
             total += getTripleMapValue(ALLOWANCES_ADD, ownerAcc, spenderAcc, i);
         }
-        for (uint256 i=0; i<accountPallelizationFactor; i++) {
-            require(!isTripleMapValueLocked(ALLOWANCES_SUB, ownerAcc, spenderAcc, i), "Decrease allowance slot locked");
+        for (uint256 i = 0; i < accountPallelizationFactor; i++) {
+            require(
+                !isTripleMapValueLocked(
+                    ALLOWANCES_SUB,
+                    ownerAcc,
+                    spenderAcc,
+                    i
+                ),
+                "Decrease allowance slot locked"
+            );
             total -= getTripleMapValue(ALLOWANCES_SUB, ownerAcc, spenderAcc, i);
         }
         if (total < amount) {
-            uint256 cur = getTripleMapValue(ALLOWANCES_ADD, ownerAcc, spenderAcc, 0);
-            setTripleMapValue(ALLOWANCES_ADD, ownerAcc, spenderAcc, 0, cur + amount - total);
-        }
-        else if (total > amount) {
-            uint256 cur = getTripleMapValue(ALLOWANCES_SUB, ownerAcc, spenderAcc, 0);
-            setTripleMapValue(ALLOWANCES_SUB, ownerAcc, spenderAcc, 0, cur + total - amount);
+            uint256 cur = getTripleMapValue(
+                ALLOWANCES_ADD,
+                ownerAcc,
+                spenderAcc,
+                0
+            );
+            setTripleMapValue(
+                ALLOWANCES_ADD,
+                ownerAcc,
+                spenderAcc,
+                0,
+                cur + amount - total
+            );
+        } else if (total > amount) {
+            uint256 cur = getTripleMapValue(
+                ALLOWANCES_SUB,
+                ownerAcc,
+                spenderAcc,
+                0
+            );
+            setTripleMapValue(
+                ALLOWANCES_SUB,
+                ownerAcc,
+                spenderAcc,
+                0,
+                cur + total - amount
+            );
         }
         emit Approval(owner, spender, amount);
     }
 
-    function increaseAllowanceInternal(address owner, address spender, uint256 amount) internal virtual {
+    function increaseAllowanceInternal(
+        address owner,
+        address spender,
+        uint256 amount
+    ) internal virtual {
         require(owner != address(0), "ERC20: approve from the zero address");
         require(spender != address(0), "ERC20: approve to the zero address");
 
         uint256 ownerAcc = uint256(uint160(owner));
         uint256 spenderAcc = uint256(uint160(spender));
         bool foundUnlockedSlot = false;
-        for (uint256 i=0; i<accountPallelizationFactor; i++) {
-            if (!isTripleMapValueLocked(ALLOWANCES_ADD, ownerAcc, spenderAcc, i)) {
+        for (uint256 i = 0; i < accountPallelizationFactor; i++) {
+            if (
+                !isTripleMapValueLocked(ALLOWANCES_ADD, ownerAcc, spenderAcc, i)
+            ) {
                 foundUnlockedSlot = true;
-                uint256 cur = getTripleMapValue(ALLOWANCES_ADD, ownerAcc, spenderAcc, i);
-                setTripleMapValue(ALLOWANCES_ADD, ownerAcc, spenderAcc, i, cur + amount);
+                uint256 cur = getTripleMapValue(
+                    ALLOWANCES_ADD,
+                    ownerAcc,
+                    spenderAcc,
+                    i
+                );
+                setTripleMapValue(
+                    ALLOWANCES_ADD,
+                    ownerAcc,
+                    spenderAcc,
+                    i,
+                    cur + amount
+                );
                 break;
             }
         }
@@ -566,18 +742,35 @@ abstract contract LockableERC20 is Context, IERC20, IERC20Metadata, Ownable, Loc
         emit ApprovalIncrease(owner, spender, amount);
     }
 
-    function decreaseAllowanceInternal(address owner, address spender, uint256 amount) internal virtual {
+    function decreaseAllowanceInternal(
+        address owner,
+        address spender,
+        uint256 amount
+    ) internal virtual {
         require(owner != address(0), "ERC20: approve from the zero address");
         require(spender != address(0), "ERC20: approve to the zero address");
 
         uint256 ownerAcc = uint256(uint160(owner));
         uint256 spenderAcc = uint256(uint160(spender));
         bool foundUnlockedSlot = false;
-        for (uint256 i=0; i<accountPallelizationFactor; i++) {
-            if (!isTripleMapValueLocked(ALLOWANCES_SUB, ownerAcc, spenderAcc, i)) {
+        for (uint256 i = 0; i < accountPallelizationFactor; i++) {
+            if (
+                !isTripleMapValueLocked(ALLOWANCES_SUB, ownerAcc, spenderAcc, i)
+            ) {
                 foundUnlockedSlot = true;
-                uint256 cur = getTripleMapValue(ALLOWANCES_SUB, ownerAcc, spenderAcc, i);
-                setTripleMapValue(ALLOWANCES_SUB, ownerAcc, spenderAcc, i, cur + amount);
+                uint256 cur = getTripleMapValue(
+                    ALLOWANCES_SUB,
+                    ownerAcc,
+                    spenderAcc,
+                    i
+                );
+                setTripleMapValue(
+                    ALLOWANCES_SUB,
+                    ownerAcc,
+                    spenderAcc,
+                    i,
+                    cur + amount
+                );
                 break;
             }
         }
@@ -585,14 +778,15 @@ abstract contract LockableERC20 is Context, IERC20, IERC20Metadata, Ownable, Loc
         emit ApprovalDecrease(owner, spender, amount);
     }
 
-
-
     function increaseBalance(address account, uint256 amount) internal {
-        require(account != address(0), "ERC20: recipient account is zero address");
+        require(
+            account != address(0),
+            "ERC20: recipient account is zero address"
+        );
 
         uint256 accAddr = uint256(uint160(account));
         bool foundUnlockedSlot = false;
-        for (uint256 i=0; i<accountPallelizationFactor; i++) {
+        for (uint256 i = 0; i < accountPallelizationFactor; i++) {
             if (!isDoubleMapValueLocked(BALANCES_ADD, accAddr, i)) {
                 foundUnlockedSlot = true;
                 uint256 cur = getDoubleMapValue(BALANCES_ADD, accAddr, i);
@@ -603,16 +797,18 @@ abstract contract LockableERC20 is Context, IERC20, IERC20Metadata, Ownable, Loc
         require(foundUnlockedSlot, "All increase balance slots in use");
     }
 
-
     function decreaseBalance(address account, uint256 amount) internal {
         require(account != address(0), "ERC20: From account: zero address");
 
         uint256 accountBalance = balanceOfMin(account);
-        require(accountBalance >= amount, "ERC20: amount exceeds min balance of from account");
+        require(
+            accountBalance >= amount,
+            "ERC20: amount exceeds min balance of from account"
+        );
 
         uint256 accAddr = uint256(uint160(account));
         bool foundUnlockedSlot = false;
-        for (uint256 i=0; i<accountPallelizationFactor; i++) {
+        for (uint256 i = 0; i < accountPallelizationFactor; i++) {
             if (!isDoubleMapValueLocked(BALANCES_SUB, accAddr, i)) {
                 foundUnlockedSlot = true;
                 uint256 cur = getDoubleMapValue(BALANCES_SUB, accAddr, i);
@@ -625,7 +821,7 @@ abstract contract LockableERC20 is Context, IERC20, IERC20Metadata, Ownable, Loc
 
     function increaseTotalSupply(uint256 amount) internal {
         bool foundUnlockedSlot = false;
-        for (uint256 i=0; i<erc20PallelizationFactor; i++) {
+        for (uint256 i = 0; i < erc20PallelizationFactor; i++) {
             if (!isMapValueLocked(TOTAL_SUPPLY_ADD, i)) {
                 foundUnlockedSlot = true;
                 uint256 cur = getMapValue(TOTAL_SUPPLY_ADD, i);
@@ -638,7 +834,7 @@ abstract contract LockableERC20 is Context, IERC20, IERC20Metadata, Ownable, Loc
 
     function decreaseTotalSupply(uint256 amount) internal {
         bool foundUnlockedSlot = false;
-        for (uint256 i=0; i<erc20PallelizationFactor; i++) {
+        for (uint256 i = 0; i < erc20PallelizationFactor; i++) {
             if (!isMapValueLocked(TOTAL_SUPPLY_SUB, i)) {
                 foundUnlockedSlot = true;
                 uint256 cur = getMapValue(TOTAL_SUPPLY_SUB, i);
@@ -650,22 +846,34 @@ abstract contract LockableERC20 is Context, IERC20, IERC20Metadata, Ownable, Loc
     }
 
     /**
-    * @dev Hook that is called before any transfer of tokens. This includes
-    * minting and burning.
-    *
-    * Calling conditions:
-    *
-    * - when `from` and `to` are both non-zero, `amount` of ``from``'s tokens
-    * will be to transferred to `to`.
-    * - when `from` is zero, `amount` tokens will be minted for `to`.
-    * - when `to` is zero, `amount` of ``from``'s tokens will be burned.
-    * - `from` and `to` are never both zero.
-    *
-    * To learn more about hooks, head to xref:ROOT:extending-contracts.adoc#using-hooks[Using Hooks].
-    */
-    function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual { }
+     * @dev Hook that is called before any transfer of tokens. This includes
+     * minting and burning.
+     *
+     * Calling conditions:
+     *
+     * - when `from` and `to` are both non-zero, `amount` of ``from``'s tokens
+     * will be to transferred to `to`.
+     * - when `from` is zero, `amount` tokens will be minted for `to`.
+     * - when `to` is zero, `amount` of ``from``'s tokens will be burned.
+     * - `from` and `to` are never both zero.
+     *
+     * To learn more about hooks, head to xref:ROOT:extending-contracts.adoc#using-hooks[Using Hooks].
+     */
+    function _beforeTokenTransfer(
+        address from,
+        address to,
+        uint256 amount
+    ) internal virtual {}
 
-    event ApprovalIncrease(address indexed owner, address indexed spender, uint256 value);
-    event ApprovalDecrease(address indexed owner, address indexed spender, uint256 value);
+    event ApprovalIncrease(
+        address indexed owner,
+        address indexed spender,
+        uint256 value
+    );
+    event ApprovalDecrease(
+        address indexed owner,
+        address indexed spender,
+        uint256 value
+    );
     event TrustedBridge(address bridge, bool added);
 }

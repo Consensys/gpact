@@ -17,11 +17,12 @@ pragma solidity >=0.8;
 import "../../../../../../functioncall/interface/src/main/solidity/CrosschainFunctionCallInterface.sol";
 import "../../../../../../functioncall/interface/src/main/solidity/CrosschainLockingInterface.sol";
 
-
-contract MockCbcForERC20Test is CrosschainFunctionCallInterface, CrosschainLockingInterface {
+contract MockCbcForERC20Test is
+    CrosschainFunctionCallInterface,
+    CrosschainLockingInterface
+{
     bytes32 private crossRootTxId;
     address[] activeCallLockedContracts;
-
 
     function setCrosschainRootTxId(bytes32 _txId) external {
         crossRootTxId = _txId;
@@ -30,24 +31,31 @@ contract MockCbcForERC20Test is CrosschainFunctionCallInterface, CrosschainLocki
     /**
      * @return false if the current transaction execution is part of a cross-blockchain call\.
      */
-    function isSingleBlockchainCall() external override view returns (bool) {
+    function isSingleBlockchainCall() external view override returns (bool) {
         return crossRootTxId == (0);
     }
 
-    function getActiveCallCrosschainRootTxId() external override view returns (bytes32) {
+    function getActiveCallCrosschainRootTxId()
+        external
+        view
+        override
+        returns (bytes32)
+    {
         return crossRootTxId;
     }
 
-
-
     // ****** Functions below here not used in this test ****
 
-    function crossBlockchainCall(uint256 /* _blockchain */, address /* _contract */, bytes calldata /* _functionCallData */) external override {
+    function crossBlockchainCall(
+        uint256, /* _blockchain */
+        address, /* _contract */
+        bytes calldata /* _functionCallData */
+    ) external override {}
 
-    }
-
-
-    function addToListOfLockedContracts(address _contractToLock) external override {
+    function addToListOfLockedContracts(address _contractToLock)
+        external
+        override
+    {
         // Don't add the same contract twice. So, check the contract isn't in
         // the array first.
         for (uint256 i = 0; i < activeCallLockedContracts.length; i++) {

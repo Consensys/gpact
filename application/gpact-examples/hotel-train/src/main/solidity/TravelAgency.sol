@@ -15,8 +15,6 @@
 pragma solidity >=0.8;
 import "./Hotel.sol";
 
-
-
 contract TravelAgency is LockableStorage {
     address owner;
 
@@ -29,9 +27,15 @@ contract TravelAgency is LockableStorage {
     // Confirmed bookings.
     // Map (bookingId => date)
     // mapping (uint256 => uint256) private confirmedBookigs;
-    uint256 constant private CONFIRMED_BOOKINGS_MAP = 0;
+    uint256 private constant CONFIRMED_BOOKINGS_MAP = 0;
 
-    constructor(uint256 _hotelBlockchainId, address _hotelContract, uint256 _trainBlockchainId, address _trainContract, address _cbc) LockableStorage(_cbc) {
+    constructor(
+        uint256 _hotelBlockchainId,
+        address _hotelContract,
+        uint256 _trainBlockchainId,
+        address _trainContract,
+        address _cbc
+    ) LockableStorage(_cbc) {
         owner = msg.sender;
         hotelBlockchainId = _hotelBlockchainId;
         hotelContract = Hotel(_hotelContract);
@@ -40,17 +44,35 @@ contract TravelAgency is LockableStorage {
     }
 
     function bookHotelAndTrain(uint256 _date, uint256 _bookingId) public {
-        require(msg.sender == address(cbc), "Should only be called by Crosschain Control Contract");
+        require(
+            msg.sender == address(cbc),
+            "Should only be called by Crosschain Control Contract"
+        );
         require(tx.origin == owner, "Only owner can do bookings");
 
-        CrosschainFunctionCallInterface(address(cbc)).crossBlockchainCall(hotelBlockchainId, address(hotelContract),
-            abi.encodeWithSelector(hotelContract.bookRoom.selector, _date, _bookingId, 100));
-        CrosschainFunctionCallInterface(address(cbc)).crossBlockchainCall(trainBlockchainId, address(trainContract),
-            abi.encodeWithSelector(trainContract.bookRoom.selector, _date, _bookingId, 100));
+        CrosschainFunctionCallInterface(address(cbc)).crossBlockchainCall(
+            hotelBlockchainId,
+            address(hotelContract),
+            abi.encodeWithSelector(
+                hotelContract.bookRoom.selector,
+                _date,
+                _bookingId,
+                100
+            )
+        );
+        CrosschainFunctionCallInterface(address(cbc)).crossBlockchainCall(
+            trainBlockchainId,
+            address(trainContract),
+            abi.encodeWithSelector(
+                trainContract.bookRoom.selector,
+                _date,
+                _bookingId,
+                100
+            )
+        );
 
         setMapValue(CONFIRMED_BOOKINGS_MAP, _bookingId, _date);
     }
-
 
     function bookingConfirmed(uint256 _bookingId) public view returns (bool) {
         uint256 date = getMapValue(CONFIRMED_BOOKINGS_MAP, _bookingId);

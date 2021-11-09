@@ -21,7 +21,11 @@ contract Balances {
         balances[_account] = _newBalance;
     }
 
-    function transfer(address _from, address _to, uint256 _amount) external {
+    function transfer(
+        address _from,
+        address _to,
+        uint256 _amount
+    ) external {
         uint256 fromBalance = getBalance(_from);
         uint256 toBalance = getBalance(_to);
         require(fromBalance >= _amount, "Value transfer: insufficient balance");
@@ -29,7 +33,6 @@ contract Balances {
         balances[_from] = fromBalance - _amount;
         balances[_to] = toBalance + _amount;
     }
-
 
     function getBalance(address _account) public view returns (uint256) {
         return balances[_account];

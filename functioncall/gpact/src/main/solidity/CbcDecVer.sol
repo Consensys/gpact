@@ -17,29 +17,37 @@ pragma solidity >=0.8;
 import "../../../../../messaging/interface/src/main/solidity/CrosschainVerifier.sol";
 import "../../../../../common/openzeppelin/src/main/solidity/access/Ownable.sol";
 
-
 abstract contract CbcDecVer is Ownable {
     // 	0x77dab611
-    bytes32 constant internal START_EVENT_SIGNATURE = keccak256("Start(uint256,address,uint256,bytes)");
+    bytes32 internal constant START_EVENT_SIGNATURE =
+        keccak256("Start(uint256,address,uint256,bytes)");
     // 0xb01557f1
-    bytes32 constant internal SEGMENT_EVENT_SIGNATURE = keccak256("Segment(uint256,bytes32,uint256[],address[],bool,bytes)");
+    bytes32 internal constant SEGMENT_EVENT_SIGNATURE =
+        keccak256("Segment(uint256,bytes32,uint256[],address[],bool,bytes)");
     // 0xe6763dd9
-    bytes32 constant internal ROOT_EVENT_SIGNATURE = keccak256("Root(uint256,bool)");
+    bytes32 internal constant ROOT_EVENT_SIGNATURE =
+        keccak256("Root(uint256,bool)");
 
     // Address of verifier contract to be used for a certain blockchain id.
-    mapping (uint256 => CrosschainVerifier) private verifiers;
+    mapping(uint256 => CrosschainVerifier) private verifiers;
 
     // Address of Crosschain Control Contract on another blockchain.
-    mapping (uint256 => address) private remoteCrosschainControlContracts;
+    mapping(uint256 => address) private remoteCrosschainControlContracts;
 
-    function addVerifier(uint256 _blockchainId, address _verifier) external onlyOwner {
+    function addVerifier(uint256 _blockchainId, address _verifier)
+        external
+        onlyOwner
+    {
         require(_blockchainId != 0, "Invalid blockchain id");
         require(_verifier != address(0), "Invalid verifier address");
         verifiers[_blockchainId] = CrosschainVerifier(_verifier);
     }
 
     // TODO this must be only owner
-    function addRemoteCrosschainControl(uint256 _blockchainId, address _cbc) external onlyOwner {
+    function addRemoteCrosschainControl(uint256 _blockchainId, address _cbc)
+        external
+        onlyOwner
+    {
         remoteCrosschainControlContracts[_blockchainId] = _cbc;
     }
 
@@ -49,28 +57,52 @@ abstract contract CbcDecVer is Ownable {
         bytes32[] calldata _eventFunctionSignatures,
         bytes[] calldata _eventData,
         bytes[] calldata _signatures,
-        bool _expectStart) internal view {
-
+        bool _expectStart
+    ) internal view {
         // The minimum number of events is 1: start and no segment, used to end a timed-out
         // crosschain transactions.
         uint256 numEvents = _blockchainIds.length;
         require(numEvents > 0, "Must be at least one event");
-        require(numEvents == _cbcAddresses.length, "Number of blockchain Ids and cbcAddresses must match");
-        require(numEvents == _eventFunctionSignatures.length, "Number of blockchain Ids and event function signatures must match");
-        require(numEvents == _eventData.length, "Number of blockchain Ids and event data must match");
-        require(numEvents == _signatures.length, "Number of events and signatures match");
-
+        require(
+            numEvents == _cbcAddresses.length,
+            "Number of blockchain Ids and cbcAddresses must match"
+        );
+        require(
+            numEvents == _eventFunctionSignatures.length,
+            "Number of blockchain Ids and event function signatures must match"
+        );
+        require(
+            numEvents == _eventData.length,
+            "Number of blockchain Ids and event data must match"
+        );
+        require(
+            numEvents == _signatures.length,
+            "Number of events and signatures match"
+        );
 
         for (uint256 i = 0; i < numEvents; i++) {
             if (i == 0) {
-                bytes32 eventSig = _expectStart ? START_EVENT_SIGNATURE : ROOT_EVENT_SIGNATURE;
-                require(eventSig == _eventFunctionSignatures[i], "Unexpected first event function signature");
-            }
-            else {
-                require(SEGMENT_EVENT_SIGNATURE == _eventFunctionSignatures[i], "Event function signature not for a segment");
+                bytes32 eventSig = _expectStart
+                    ? START_EVENT_SIGNATURE
+                    : ROOT_EVENT_SIGNATURE;
+                require(
+                    eventSig == _eventFunctionSignatures[i],
+                    "Unexpected first event function signature"
+                );
+            } else {
+                require(
+                    SEGMENT_EVENT_SIGNATURE == _eventFunctionSignatures[i],
+                    "Event function signature not for a segment"
+                );
             }
 
-            decodeAndVerifyEvent(_blockchainIds[i], _cbcAddresses[i], _eventFunctionSignatures[i], _eventData[i], _signatures[i]);
+            decodeAndVerifyEvent(
+                _blockchainIds[i],
+                _cbcAddresses[i],
+                _eventFunctionSignatures[i],
+                _eventData[i],
+                _signatures[i]
+            );
         }
     }
 
@@ -89,18 +121,32 @@ abstract contract CbcDecVer is Ownable {
         address _cbcAddress,
         bytes32 _eventFunctionSignature,
         bytes calldata _eventData,
-        bytes calldata _signature) internal view {
-
+        bytes calldata _signature
+    ) internal view {
         // This indirectly checks that _blockchainId is an authorised source blockchain
         // by checking that there is a verifier for the blockchain.
         CrosschainVerifier verifier = verifiers[_blockchainId];
-        require(address(verifier) != address(0), "No registered verifier for blockchain");
+        require(
+            address(verifier) != address(0),
+            "No registered verifier for blockchain"
+        );
 
-        require(_cbcAddress == remoteCrosschainControlContracts[_blockchainId],
-                "Data not emitted by approved contract");
+        require(
+            _cbcAddress == remoteCrosschainControlContracts[_blockchainId],
+            "Data not emitted by approved contract"
+        );
 
-        bytes memory encodedEvent = abi.encodePacked(_blockchainId, _cbcAddress, _eventFunctionSignature, _eventData);
+        bytes memory encodedEvent = abi.encodePacked(
+            _blockchainId,
+            _cbcAddress,
+            _eventFunctionSignature,
+            _eventData
+        );
         verifier.decodeAndVerifyEvent(
-            _blockchainId, _eventFunctionSignature, encodedEvent, _signature);
+            _blockchainId,
+            _eventFunctionSignature,
+            encodedEvent,
+            _signature
+        );
     }
 }

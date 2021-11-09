@@ -19,19 +19,23 @@ import "../../../../attestor-sign/src/main/solidity/AttestorSignRegistrar.sol";
 import "../../../../../common/common/src/main/solidity/ERC165MappingImplementation.sol";
 import "../../../../../common/common/src/main/solidity/BytesUtil.sol";
 
-
-contract TxReceiptsRootStorage is TxReceiptsRootStorageInterface, ERC165MappingImplementation, BytesUtil {
+contract TxReceiptsRootStorage is
+    TxReceiptsRootStorageInterface,
+    ERC165MappingImplementation,
+    BytesUtil
+{
     AttestorSignRegistrar registrar;
 
     // Mapping (blockchain Id => mapping(transaction receipt root) => bool)
     // The bool is true if the transaction receipt root exists for the blockchain
-    mapping(uint256=>mapping(bytes32 => bool)) private txReceiptsRoots;
-
+    mapping(uint256 => mapping(bytes32 => bool)) private txReceiptsRoots;
 
     constructor(address _registrar) {
         registrar = AttestorSignRegistrar(_registrar);
 
-        supportedInterfaces[type(TxReceiptsRootStorageInterface).interfaceId] = true;
+        supportedInterfaces[
+            type(TxReceiptsRootStorageInterface).interfaceId
+        ] = true;
     }
 
     function addTxReceiptRoot(
@@ -40,43 +44,62 @@ contract TxReceiptsRootStorage is TxReceiptsRootStorageInterface, ERC165MappingI
         bytes32[] calldata _sigR,
         bytes32[] calldata _sigS,
         uint8[] calldata _sigV,
-        bytes32 _txReceiptsRoot) external override(TxReceiptsRootStorageInterface) {
-
+        bytes32 _txReceiptsRoot
+    ) external override(TxReceiptsRootStorageInterface) {
         bytes memory txReceiptsRootBytes = abi.encodePacked(_txReceiptsRoot);
-        registrar.verify(_blockchainId, _signers, _sigR, _sigS, _sigV, txReceiptsRootBytes);
+        registrar.verify(
+            _blockchainId,
+            _signers,
+            _sigR,
+            _sigS,
+            _sigV,
+            txReceiptsRootBytes
+        );
         txReceiptsRoots[_blockchainId][_txReceiptsRoot] = true;
     }
 
     function verify(
         uint256 _blockchainId,
-        address , // _cbcContract
+        address, // _cbcContract
         bytes32 _txReceiptsRoot,
         bytes calldata _txReceipt,
         uint256[] calldata _proofOffsets,
         bytes[] calldata _proof
     ) external view override(TxReceiptsRootStorageInterface) returns (bool) {
-        require(txReceiptsRoots[_blockchainId][_txReceiptsRoot], "Transaction receipt root does not exist for blockchain id");
-        require(_proof.length == _proofOffsets.length, "Length of proofs and proofsOffsets does not match");
+        require(
+            txReceiptsRoots[_blockchainId][_txReceiptsRoot],
+            "Transaction receipt root does not exist for blockchain id"
+        );
+        require(
+            _proof.length == _proofOffsets.length,
+            "Length of proofs and proofsOffsets does not match"
+        );
         // Check the CBC contract is done in the CrosschainControl.
         //registrar.verifyContract(_blockchainId, _cbcContract);
 
         bytes32 hash = keccak256(_txReceipt);
         for (uint256 i = 0; i < _proof.length; i++) {
-            bytes32 candidateHash = BytesUtil.bytesToBytes32(_proof[i], _proofOffsets[i]);
-            require(candidateHash == hash, "Candidate Hash did not match calculated hash");
+            bytes32 candidateHash = BytesUtil.bytesToBytes32(
+                _proof[i],
+                _proofOffsets[i]
+            );
+            require(
+                candidateHash == hash,
+                "Candidate Hash did not match calculated hash"
+            );
             hash = keccak256(_proof[i]);
         }
-        require(_txReceiptsRoot == hash, "Root Hash did not match calculated hash");
+        require(
+            _txReceiptsRoot == hash,
+            "Root Hash did not match calculated hash"
+        );
         return true;
     }
 
-
     function containsTxReceiptRoot(
         uint256 _blockchainId,
-        bytes32 _txReceiptsRoot) external override(TxReceiptsRootStorageInterface) view returns (bool){
-
+        bytes32 _txReceiptsRoot
+    ) external view override(TxReceiptsRootStorageInterface) returns (bool) {
         return (txReceiptsRoots[_blockchainId][_txReceiptsRoot]);
     }
-
-
 }

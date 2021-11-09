@@ -14,13 +14,12 @@
  */
 pragma solidity >=0.7.1;
 
-
 contract PriceOracle {
     uint256 price;
 
     address owner;
 
-    constructor () {
+    constructor() {
         owner = msg.sender;
     }
 
@@ -38,5 +37,4 @@ contract PriceOracle {
     function getPrice() external view returns (uint256) {
         return price;
     }
-
 }

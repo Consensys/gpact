@@ -15,9 +15,7 @@
 pragma solidity >=0.8;
 import "./Hotel.sol";
 
-
-
-contract TravelAgency  {
+contract TravelAgency {
     address owner;
 
     uint256 public hotelBlockchainId;
@@ -29,10 +27,12 @@ contract TravelAgency  {
     uint256[] public confirmedBookingIds;
     uint256[] public confirmedBookingDates;
 
-
-
-
-    constructor(uint256 _hotelBlockchainId, address _hotelContract, uint256 _trainBlockchainId, address _trainContract) {
+    constructor(
+        uint256 _hotelBlockchainId,
+        address _hotelContract,
+        uint256 _trainBlockchainId,
+        address _trainContract
+    ) {
         owner = msg.sender;
         hotelBlockchainId = _hotelBlockchainId;
         hotelContract = Hotel(_hotelContract);
@@ -49,7 +49,9 @@ contract TravelAgency  {
         confirmedBookingDates.push(_date);
     }
 
-    function separatedBookHotelAndTrain(uint256 _date, uint256 _uniqueId) public {
+    function separatedBookHotelAndTrain(uint256 _date, uint256 _uniqueId)
+        public
+    {
         require(msg.sender == owner, "Only owner can do bookings");
         confirmedBookingIds.push(_uniqueId);
         confirmedBookingDates.push(_date);
@@ -57,7 +59,7 @@ contract TravelAgency  {
 
     function bookingConfirmed(uint256 _bookingId) public view returns (bool) {
         // TODO use a maps as well as array
-        for (uint i = 0; i < confirmedBookingDates.length; i++) {
+        for (uint256 i = 0; i < confirmedBookingDates.length; i++) {
             if (confirmedBookingIds[i] == _bookingId) {
                 return true;
             }

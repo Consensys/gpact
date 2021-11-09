@@ -17,10 +17,7 @@ pragma solidity >=0.7.1;
 import "../../main/solidity/LockableStorage.sol";
 
 contract TestLockableStorageWrapper is LockableStorage {
-
-    constructor (address _cbc) LockableStorage(_cbc){
-    }
-
+    constructor(address _cbc) LockableStorage(_cbc) {}
 
     function test_setUint256(uint256 _key, uint256 _val) external {
         setUint256(_key, _val);
@@ -34,12 +31,15 @@ contract TestLockableStorageWrapper is LockableStorage {
         setAddress(_key, _address);
     }
 
-//    function test_setBytes(uint256 _key, bytes calldata _val) external {
-//        setBytes(_key, _val);
-//    }
+    //    function test_setBytes(uint256 _key, bytes calldata _val) external {
+    //        setBytes(_key, _val);
+    //    }
 
-
-    function test_setArrayValue(uint256 _key, uint256 _index, uint256 _val) external {
+    function test_setArrayValue(
+        uint256 _key,
+        uint256 _index,
+        uint256 _val
+    ) external {
         setArrayValue(_key, _index, _val);
     }
 
@@ -51,45 +51,63 @@ contract TestLockableStorageWrapper is LockableStorage {
         popArrayValue(_key);
     }
 
-    function test_setMapValue(uint256 _key, uint256 _mapKey, uint256 _val) external {
+    function test_setMapValue(
+        uint256 _key,
+        uint256 _mapKey,
+        uint256 _val
+    ) external {
         setMapValue(_key, _mapKey, _val);
     }
 
-
-    function test_getUint256(uint256 _key) external view returns(uint256) {
+    function test_getUint256(uint256 _key) external view returns (uint256) {
         return getUint256(_key);
     }
 
-    function test_getBool(uint256 _key) external view returns(bool) {
+    function test_getBool(uint256 _key) external view returns (bool) {
         return getBool(_key);
     }
 
-    function test_getAddress(uint256 _key) external view returns(address) {
+    function test_getAddress(uint256 _key) external view returns (address) {
         return getAddress(_key);
     }
 
-    function test_getUint256Committed(uint256 _key) external view returns(uint256) {
+    function test_getUint256Committed(uint256 _key)
+        external
+        view
+        returns (uint256)
+    {
         return getUint256Committed(_key);
     }
 
-    function test_getUint256Provisional(uint256 _key) external view returns(uint256) {
+    function test_getUint256Provisional(uint256 _key)
+        external
+        view
+        returns (uint256)
+    {
         return getUint256Provisional(_key);
     }
 
+    //    function test_getBytes(uint256 _key) external view returns(bytes memory) {
+    //        return getBytes(_key);
+    //    }
 
-//    function test_getBytes(uint256 _key) external view returns(bytes memory) {
-//        return getBytes(_key);
-//    }
-
-    function test_getArrayLength(uint256 _key) external view returns(uint256) {
+    function test_getArrayLength(uint256 _key) external view returns (uint256) {
         return getArrayLength(_key);
     }
 
-    function test_getArrayValue(uint256 _key, uint256 _index) external view returns(uint256) {
+    function test_getArrayValue(uint256 _key, uint256 _index)
+        external
+        view
+        returns (uint256)
+    {
         return getArrayValue(_key, _index);
     }
 
-    function test_getMapValue(uint256 _key, uint256 _mapKey) external view returns(uint256) {
+    function test_getMapValue(uint256 _key, uint256 _mapKey)
+        external
+        view
+        returns (uint256)
+    {
         return getMapValue(_key, _mapKey);
     }
 }

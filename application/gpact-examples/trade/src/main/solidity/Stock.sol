@@ -18,16 +18,19 @@ import "../../../../../atomic-appcontracts/lockablestorage/src/main/solidity/Loc
 import "../../../../../../functioncall/interface/src/main/solidity/CrosschainFunctionCallInterface.sol";
 
 contract Stock is LockableStorage {
-    uint256 constant private KEY_MAP1 = 0;
+    uint256 private constant KEY_MAP1 = 0;
 
-    constructor (address _cbc) LockableStorage(_cbc) {
-    }
+    constructor(address _cbc) LockableStorage(_cbc) {}
 
     function setStock(address _account, uint256 _newBalance) external {
         setMapValue(KEY_MAP1, uint256(uint160(_account)), _newBalance);
     }
 
-    function delivery(address _from, address _to, uint256 _amount) external {
+    function delivery(
+        address _from,
+        address _to,
+        uint256 _amount
+    ) external {
         uint256 fromBalance = getStock(_from);
         uint256 toBalance = getStock(_to);
         require(fromBalance >= _amount, "Stock transfer: insufficient balance");

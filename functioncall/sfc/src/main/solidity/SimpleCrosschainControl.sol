@@ -19,10 +19,14 @@ import "../../../../../messaging/interface/src/main/solidity/CrosschainVerifier.
 import "../../../../gpact/src/main/solidity/CbcDecVer.sol";
 import "../../../../interface/src/main/solidity/HiddenParameters.sol";
 
-
-contract SimpleCrosschainControl is CrosschainFunctionCallInterface, CbcDecVer, HiddenParameters {
+contract SimpleCrosschainControl is
+    CrosschainFunctionCallInterface,
+    CbcDecVer,
+    HiddenParameters
+{
     // 	0x77dab611
-    bytes32 constant internal CROSS_CALL_EVENT_SIGNATURE = keccak256("CrossCall(bytes32,uint256,address,uint256,address,bytes)");
+    bytes32 internal constant CROSS_CALL_EVENT_SIGNATURE =
+        keccak256("CrossCall(bytes32,uint256,address,uint256,address,bytes)");
 
     // How old events can be before they are not accepted.
     // Also used as a time after which crosschain transaction ids can be purged from the
@@ -31,10 +35,9 @@ contract SimpleCrosschainControl is CrosschainFunctionCallInterface, CbcDecVer, 
 
     // Used to prevent replay attacks in transaction.
     // Mapping of txId to transaction expiry time.
-    mapping (bytes32=> uint256) public replayPrevention;
+    mapping(bytes32 => uint256) public replayPrevention;
 
     uint256 public myBlockchainId;
-
 
     /**
      * Crosschain Transaction event.
@@ -46,12 +49,16 @@ contract SimpleCrosschainControl is CrosschainFunctionCallInterface, CbcDecVer, 
      * @param _destContract Contract to be called on the destination blockchain.
      * @param _destFunctionCall The function selector and parameters in ABI packed format.
      */
-    event CrossCall(bytes32 _txId, uint256 _timestamp, address _caller,
-        uint256 _destBcId, address _destContract, bytes _destFunctionCall);
+    event CrossCall(
+        bytes32 _txId,
+        uint256 _timestamp,
+        address _caller,
+        uint256 _destBcId,
+        address _destContract,
+        bytes _destFunctionCall
+    );
 
     event CallFailure(string _revertReason);
-
-
 
     /**
      * @param _myBlockchainId Blockchain identifier of this blockchain.
@@ -63,15 +70,32 @@ contract SimpleCrosschainControl is CrosschainFunctionCallInterface, CbcDecVer, 
         timeHorizon = _timeHorizon;
     }
 
-
-    function crossBlockchainCall(uint256 _destBcId, address _destContract, bytes calldata _destData) override external {
+    function crossBlockchainCall(
+        uint256 _destBcId,
+        address _destContract,
+        bytes calldata _destData
+    ) external override {
         // Note that this limits the number of calls to the same contract
         // from this blockchain with the same function call data to one per
         // block.
-        bytes32 txId = keccak256(abi.encodePacked(block.timestamp, myBlockchainId, _destBcId, _destContract, _destData));
-        emit CrossCall(txId, block.timestamp, msg.sender, _destBcId, _destContract, _destData);
+        bytes32 txId = keccak256(
+            abi.encodePacked(
+                block.timestamp,
+                myBlockchainId,
+                _destBcId,
+                _destContract,
+                _destData
+            )
+        );
+        emit CrossCall(
+            txId,
+            block.timestamp,
+            msg.sender,
+            _destBcId,
+            _destContract,
+            _destData
+        );
     }
-
 
     /**
      * Call the crossCallHandler, but first specify a set of old transaction
@@ -79,9 +103,13 @@ contract SimpleCrosschainControl is CrosschainFunctionCallInterface, CbcDecVer, 
      * overall transaction (15,000 gas is returned for each storage location
      * that has a non-zero value that is set to zero).
      */
-    function crossCallHandlerSaveGas(uint256 _sourceBcId, address _cbcAddress,
-        bytes calldata _eventData, bytes calldata _signature, bytes32[] calldata _oldTxIds) external {
-
+    function crossCallHandlerSaveGas(
+        uint256 _sourceBcId,
+        address _cbcAddress,
+        bytes calldata _eventData,
+        bytes calldata _signature,
+        bytes32[] calldata _oldTxIds
+    ) external {
         // Go through the array of old crosschain transaction ids. If they
         for (uint256 i = 0; i < _oldTxIds.length; i++) {
             bytes32 oldTxId = _oldTxIds[i];
@@ -95,10 +123,19 @@ contract SimpleCrosschainControl is CrosschainFunctionCallInterface, CbcDecVer, 
         crossCallHandler(_sourceBcId, _cbcAddress, _eventData, _signature);
     }
 
-
-    function crossCallHandler(uint256 _sourceBcId, address _cbcAddress,
-        bytes calldata _eventData, bytes calldata _signature) public {
-        decodeAndVerifyEvent(_sourceBcId, _cbcAddress, CROSS_CALL_EVENT_SIGNATURE, _eventData, _signature);
+    function crossCallHandler(
+        uint256 _sourceBcId,
+        address _cbcAddress,
+        bytes calldata _eventData,
+        bytes calldata _signature
+    ) public {
+        decodeAndVerifyEvent(
+            _sourceBcId,
+            _cbcAddress,
+            CROSS_CALL_EVENT_SIGNATURE,
+            _eventData,
+            _signature
+        );
 
         // Decode _eventData
         // Recall that the cross call event is:
@@ -110,23 +147,35 @@ contract SimpleCrosschainControl is CrosschainFunctionCallInterface, CbcDecVer, 
         uint256 destBcId;
         address destContract;
         bytes memory functionCall;
-        (txId, timestamp, caller, destBcId, destContract, functionCall) =
-            abi.decode(_eventData, (bytes32,uint256,address,uint256,address,bytes));
+        (txId, timestamp, caller, destBcId, destContract, functionCall) = abi
+            .decode(
+                _eventData,
+                (bytes32, uint256, address, uint256, address, bytes)
+            );
 
         require(replayPrevention[txId] == 0, "Transaction already exists");
 
-        require(timestamp < block.timestamp, "Event timestamp is in the future");
+        require(
+            timestamp < block.timestamp,
+            "Event timestamp is in the future"
+        );
         require(timestamp + timeHorizon > block.timestamp, "Event is too old");
         replayPrevention[txId] = timestamp;
 
         require(destBcId == myBlockchainId);
 
         // Add authentication information to the function call.
-        bytes memory functionCallWithAuth = encodeTwoHiddenParams(functionCall, _sourceBcId, uint256(uint160(caller)));
+        bytes memory functionCallWithAuth = encodeTwoHiddenParams(
+            functionCall,
+            _sourceBcId,
+            uint256(uint160(caller))
+        );
 
         bool isSuccess;
         bytes memory returnValueEncoded;
-        (isSuccess, returnValueEncoded) = destContract.call(functionCallWithAuth);
+        (isSuccess, returnValueEncoded) = destContract.call(
+            functionCallWithAuth
+        );
 
         if (!isSuccess) {
             emit CallFailure(getRevertMsg(returnValueEncoded));
@@ -137,7 +186,11 @@ contract SimpleCrosschainControl is CrosschainFunctionCallInterface, CbcDecVer, 
     // **************************** PRIVATE BELOW HERE ***************************
     // **************************** PRIVATE BELOW HERE ***************************
 
-    function getRevertMsg(bytes memory _returnData) internal pure returns (string memory) {
+    function getRevertMsg(bytes memory _returnData)
+        internal
+        pure
+        returns (string memory)
+    {
         // A string will be 4 bytes for the function selector + 32 bytes for string length +
         // 32 bytes for first part of string. Hence, if the length is less than 68, then
         // this is a panic.
@@ -160,21 +213,25 @@ contract SimpleCrosschainControl is CrosschainFunctionCallInterface, CbcDecVer, 
     }
 
     // TODO Move this to a utility sol file.
-    function uint2str(uint _i) internal pure returns (string memory _uintAsString) {
+    function uint2str(uint256 _i)
+        internal
+        pure
+        returns (string memory _uintAsString)
+    {
         if (_i == 0) {
             return "0";
         }
-        uint j = _i;
-        uint len;
+        uint256 j = _i;
+        uint256 len;
         while (j != 0) {
             len++;
             j /= 10;
         }
         bytes memory bstr = new bytes(len);
-        uint k = len;
+        uint256 k = len;
         while (_i != 0) {
-            k = k-1;
-            uint8 temp = (48 + uint8(_i - _i / 10 * 10));
+            k = k - 1;
+            uint8 temp = (48 + uint8(_i - (_i / 10) * 10));
             bytes1 b1 = bytes1(temp);
             bstr[k] = b1;
             _i /= 10;

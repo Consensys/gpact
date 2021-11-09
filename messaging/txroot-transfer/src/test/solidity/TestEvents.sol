@@ -11,11 +11,10 @@
  * specific language governing permissions and limitations under the License.
  *
  * SPDX-License-Identifier: Apache-2.0
-*/
+ */
 pragma solidity >=0.7.1;
 
 contract TestEvents {
-
     function start(uint256 _Id) external {
         emit Event1(_Id);
         emit Event2(_Id + 1);
@@ -23,9 +22,7 @@ contract TestEvents {
         emit Event1(_Id + 3);
     }
 
-
     event Event1(uint256 id);
     event Event2(uint256 id);
     event Event3(uint256 id);
-
 }

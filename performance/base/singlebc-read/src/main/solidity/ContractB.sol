@@ -18,7 +18,7 @@ contract ContractB {
     uint256 private val;
     event Dump(uint256 _val);
 
-    constructor (uint256 _val) {
+    constructor(uint256 _val) {
         val = _val;
     }
 
@@ -29,5 +29,4 @@ contract ContractB {
     function getAsTransaction() external {
         emit Dump(get());
     }
-
 }

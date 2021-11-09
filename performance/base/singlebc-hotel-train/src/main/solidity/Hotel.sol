@@ -22,7 +22,7 @@ contract Hotel {
         // Map: date to who booked room
         mapping(uint256 => address) bookedBy;
     }
-    mapping (uint256 => HotelRoom) private rooms;
+    mapping(uint256 => HotelRoom) private rooms;
     uint256 numRooms;
 
     // Map: booking reference to room number
@@ -45,49 +45,79 @@ contract Hotel {
         erc20 = IERC20(_erc20);
     }
 
-    function addApprovedTravelAgency(address _travelAgencyContract, address spendingAccount) onlyOwner external {
+    function addApprovedTravelAgency(
+        address _travelAgencyContract,
+        address spendingAccount
+    ) external onlyOwner {
         approvedTravelAgencies[_travelAgencyContract] = spendingAccount;
     }
 
-    function addRooms(uint256 _roomRate, uint256 _numberOfRooms) onlyOwner external {
-        for (uint i=0; i < _numberOfRooms; i++) {
+    function addRooms(uint256 _roomRate, uint256 _numberOfRooms)
+        external
+        onlyOwner
+    {
+        for (uint256 i = 0; i < _numberOfRooms; i++) {
             HotelRoom storage room = rooms[numRooms++];
             room.roomRate = _roomRate;
         }
     }
 
-    function changeRoomRate(uint256 _roomNumber, uint256 _roomRate) onlyOwner external {
+    function changeRoomRate(uint256 _roomNumber, uint256 _roomRate)
+        external
+        onlyOwner
+    {
         rooms[_roomNumber].roomRate = _roomRate;
     }
 
-
     // TODO improve data structures so for loop not needed.
-    function bookRoom(uint256 _date, uint256 _uniqueId, uint256 _maxAmountToPay) external {
-        require(approvedTravelAgencies[msg.sender] != address(0), "Sender is not an approved travel agency");
+    function bookRoom(
+        uint256 _date,
+        uint256 _uniqueId,
+        uint256 _maxAmountToPay
+    ) external {
+        require(
+            approvedTravelAgencies[msg.sender] != address(0),
+            "Sender is not an approved travel agency"
+        );
 
         require(_date != 0, "Date can not be zero");
-        for (uint i = 0; i < numRooms; i++) {
+        for (uint256 i = 0; i < numRooms; i++) {
             uint256 rate = rooms[i].roomRate;
             // If amount is OK and the room is available.
-            if (rate <= _maxAmountToPay && rooms[i].bookedBy[_date] == address(0)) {
+            if (
+                rate <= _maxAmountToPay &&
+                rooms[i].bookedBy[_date] == address(0)
+            ) {
                 // Book room
                 rooms[i].bookedBy[_date] = tx.origin;
                 bookingRefToRoomNumber[_uniqueId] = i;
                 bookingRefToDate[_uniqueId] = _date;
                 // Pay for room.
-                erc20.transferFrom(approvedTravelAgencies[msg.sender], owner, rate);
+                erc20.transferFrom(
+                    approvedTravelAgencies[msg.sender],
+                    owner,
+                    rate
+                );
                 return;
             }
         }
         require(false, "No rooms available");
     }
 
-    function separatedBookRoom(uint256 _date, uint256 _uniqueId, uint256 _maxAmountToPay, address _travelAgencySpender)  onlyOwner external {
+    function separatedBookRoom(
+        uint256 _date,
+        uint256 _uniqueId,
+        uint256 _maxAmountToPay,
+        address _travelAgencySpender
+    ) external onlyOwner {
         require(_date != 0, "Date can not be zero");
-        for (uint i = 0; i < numRooms; i++) {
+        for (uint256 i = 0; i < numRooms; i++) {
             uint256 rate = rooms[i].roomRate;
             // If amount is OK and the room is available.
-            if (rate <= _maxAmountToPay && rooms[i].bookedBy[_date] == address(0)) {
+            if (
+                rate <= _maxAmountToPay &&
+                rooms[i].bookedBy[_date] == address(0)
+            ) {
                 // Book room
                 rooms[i].bookedBy[_date] = tx.origin;
                 bookingRefToRoomNumber[_uniqueId] = i;
@@ -100,21 +130,30 @@ contract Hotel {
         require(false, "No rooms available");
     }
 
-
-    function getBookingInformation(uint256 _uniqueId) external view returns (uint256 amountPaid, uint256 roomId, uint256 date) {
+    function getBookingInformation(uint256 _uniqueId)
+        external
+        view
+        returns (
+            uint256 amountPaid,
+            uint256 roomId,
+            uint256 date
+        )
+    {
         roomId = bookingRefToRoomNumber[_uniqueId];
         date = bookingRefToDate[_uniqueId];
         if (date == 0) {
             amountPaid = 0;
-        }
-        else {
+        } else {
             amountPaid = rooms[roomId].roomRate;
         }
     }
 
-
-    function getNumberRoomsAvailable(uint256 _date) public view returns (uint256 numRoomsAvailable) {
-        for (uint i=0; i<numRooms; i++) {
+    function getNumberRoomsAvailable(uint256 _date)
+        public
+        view
+        returns (uint256 numRoomsAvailable)
+    {
+        for (uint256 i = 0; i < numRooms; i++) {
             address bookedBy = rooms[i].bookedBy[_date];
             if (bookedBy == address(0)) {
                 numRoomsAvailable++;
@@ -122,16 +161,19 @@ contract Hotel {
         }
     }
 
-    function getBookings(uint256 _date) external view returns (address[] memory bookings) {
+    function getBookings(uint256 _date)
+        external
+        view
+        returns (address[] memory bookings)
+    {
         uint256 numAvailable = getNumberRoomsAvailable(_date);
         bookings = new address[](numRooms - numAvailable);
         uint256 index = 0;
-        for (uint i=0; i<numRooms; i++) {
+        for (uint256 i = 0; i < numRooms; i++) {
             address bookedBy = rooms[i].bookedBy[_date];
             if (bookedBy != address(0)) {
                 bookings[index++] = bookedBy;
             }
         }
     }
-
 }
