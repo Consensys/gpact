@@ -26,7 +26,6 @@ dependencies {
 
     // compile ('org.web3j:core:4.6.3')
     testImplementation project(':commontest')
-    testImplementation group: 'junit', name: 'junit', version: '4.12'
 }
 
 task generateSources {

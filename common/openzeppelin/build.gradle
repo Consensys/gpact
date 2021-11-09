@@ -1,4 +1,3 @@
-
 dependencies {
     implementation ('org.web3j:core:4.6.3')
 }

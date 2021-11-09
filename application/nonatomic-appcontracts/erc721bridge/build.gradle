@@ -25,7 +25,6 @@ dependencies {
     implementation group: 'org.apache.tuweni', name: 'tuweni-units', version: '1.0.0'
 
     testImplementation project (':commontest')
-    testImplementation group: 'junit', name: 'junit', version: '4.13'
     testImplementation "com.fasterxml.jackson.core:jackson-databind:2.8.11.6"
 }
 

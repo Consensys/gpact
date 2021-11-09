@@ -24,9 +24,7 @@ dependencies {
     // https://mvnrepository.com/artifact/io.reactivex.rxjava2/rxjava
     implementation group: 'io.reactivex.rxjava2', name: 'rxjava', version: '2.2.2'
 
-    // compile ('org.web3j:core:4.6.3')
     testImplementation project (':commontest')
-    testImplementation group: 'junit', name: 'junit', version: '4.12'
 }
 
 task generateSources {

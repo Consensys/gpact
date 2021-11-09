@@ -35,6 +35,18 @@ allprojects {
     }
 }
 
+subprojects {
+    test {
+        useJUnitPlatform()
+    }
+    dependencies {
+        testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.1'
+        testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+        testRuntimeOnly 'org.junit.vintage:junit-vintage-engine'
+        testCompileOnly 'junit:junit:4.13'
+    }
+}
+
 task solFormat {
     dependsOn npm_run_solFormat
 }
