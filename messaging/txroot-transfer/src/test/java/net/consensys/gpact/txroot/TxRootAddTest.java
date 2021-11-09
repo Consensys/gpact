@@ -218,19 +218,21 @@ public class TxRootAddTest extends AbstractWeb3Test {
     FastTxManager[] tms = new FastTxManager[numTransactionsPerBlock];
     TestEvents[] testContracts = new TestEvents[numTransactionsPerBlock];
     final TransactionReceipt[] receipts = new TransactionReceipt[numTransactionsPerBlock];
+
+    for (int i = 0; i < numTransactionsPerBlock; i++) {
+      String privateKey0 = new KeyPairGen().generateKeyPairGetPrivateKey();
+      creds[i] = Credentials.create(privateKey0);
+
+      TransactionReceiptProcessor txrProcessor =
+          new PollingTransactionReceiptProcessor(this.web3j, POLLING_INTERVAL, RETRY);
+      tms[i] =
+          TxManagerCache.getOrCreate(this.web3j, creds[i], BLOCKCHAIN_ID.longValue(), txrProcessor);
+      testContracts[i] =
+          TestEvents.load(testContractAddress, this.web3j, tms[i], this.freeGasProvider);
+    }
+
     while (true) {
-      for (int i = 0; i < numTransactionsPerBlock; i++) {
-        String privateKey0 = new KeyPairGen().generateKeyPairGetPrivateKey();
-        creds[i] = Credentials.create(privateKey0);
-  
-        TransactionReceiptProcessor txrProcessor =
-            new PollingTransactionReceiptProcessor(this.web3j, POLLING_INTERVAL, RETRY);
-        tms[i] =
-            TxManagerCache.getOrCreate(this.web3j, creds[i], BLOCKCHAIN_ID.longValue(), txrProcessor);
-        testContracts[i] =
-            TestEvents.load(testContractAddress, this.web3j, tms[i], this.freeGasProvider);
-      }
-  
+      
       BigInteger id = BigInteger.TWO;
   
       //    CompletableFuture<TransactionReceipt>[] transactionReceiptCompletableFutures =
