@@ -3,7 +3,7 @@
     "chainId":32,
     "constantinoplefixblock": 0,
     "clique":{
-      "blockperiodseconds":1,
+      "blockperiodseconds":2,
       "epochlength":30000
     }
   },
