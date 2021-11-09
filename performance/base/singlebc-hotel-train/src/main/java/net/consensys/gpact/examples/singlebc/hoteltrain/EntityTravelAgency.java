@@ -33,7 +33,7 @@ public class EntityTravelAgency extends AbstractBlockchain {
 
   private BigInteger notRandom = BigInteger.ONE;
   TravelAgency travelAgency;
-  private static final String PKEY = "40000000000000000000000000000000000000000000000000000000003";
+  private static final String PKEY = "50000000000000000000000000000000000000000000000000000000003";
 
   public EntityTravelAgency(
       BlockchainId bcId, String uri, DynamicGasProvider.Strategy gasPriceStrategy, int blockPeriod)

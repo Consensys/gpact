@@ -206,7 +206,6 @@ jobs:
       - run:
           name: Build and test
           command: ./gradlew test
-          # command: ./gradlew --parallel test
       - run:
           name: Stop blockchains
           working_directory: test-blockchains

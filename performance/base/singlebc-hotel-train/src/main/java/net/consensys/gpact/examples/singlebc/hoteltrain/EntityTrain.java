@@ -29,7 +29,7 @@ public class EntityTrain extends EntityBase {
 
   public static final BigInteger STANDARD_RATE = BigInteger.valueOf(9);
   public static final BigInteger NUM_SEATS = BigInteger.valueOf(4);
-  private static final String PKEY = "40000000000000000000000000000000000000000000000000000000002";
+  private static final String PKEY = "50000000000000000000000000000000000000000000000000000000002";
 
   public EntityTrain(
       BlockchainId bcId, String uri, DynamicGasProvider.Strategy gasPriceStrategy, int blockPeriod)
