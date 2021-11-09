@@ -2,9 +2,7 @@ dependencies {
     implementation project (':common')
 
     implementation group: 'com.google.guava', name: 'guava', version: '14.0'
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.12.0'
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.12.0'
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.12.0'
+
 
     implementation files('../../../../web3j-abi/abi/build/libs/abi.jar')
     implementation files('../../../../web3j-abi/core/build/libs/core.jar')
