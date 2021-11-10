@@ -11,7 +11,7 @@ dependencies {
     testImplementation project (path: ':common')
     testImplementation project (path: ':commontest')
 
-    testImplementation "com.fasterxml.jackson.core:jackson-databind:2.8.11.6"
+    testImplementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
 }
 
 task generateSources {

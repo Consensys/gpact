@@ -38,6 +38,7 @@ allprojects {
 ext {
     log4JVersion = '2.14.1'
     okHttpVersion = '4.9.1'
+    jacksonVersion = '2.13.0'
 }
 
 subprojects {
