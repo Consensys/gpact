@@ -232,9 +232,9 @@ public class TxRootAddTest extends AbstractWeb3Test {
     }
 
     while (true) {
-      
+
       BigInteger id = BigInteger.TWO;
-  
+
       //    CompletableFuture<TransactionReceipt>[] transactionReceiptCompletableFutures =
       //        (CompletableFuture<TransactionReceipt>[]) new Object[numTransactionsPerBlock];
       CompletableFuture<?>[] transactionReceiptCompletableFutures =
@@ -246,7 +246,7 @@ public class TxRootAddTest extends AbstractWeb3Test {
       CompletableFuture<Void> combinedFuture =
           CompletableFuture.allOf(transactionReceiptCompletableFutures);
       combinedFuture.get();
-  
+
       Set<String> headers = new HashSet<String>();
       for (int i = 0; i < numTransactionsPerBlock; i++) {
         receipts[i] = (TransactionReceipt) transactionReceiptCompletableFutures[i].get();
