@@ -19,7 +19,7 @@ dependencies {
     // https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-annotations
     //implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.12.5'
 
-    testImplementation "io.reactivex.rxjava2:rxjava:2.2.2"
+    testImplementation "io.reactivex.rxjava2:rxjava:${rxJavaVersion}"
 
     implementation group: 'com.google.guava', name: 'guava', version: '14.0'
 

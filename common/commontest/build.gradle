@@ -32,6 +32,6 @@ dependencies {
     implementation "org.bouncycastle:bcprov-jdk15on:1.65"
 
     testImplementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
-    testImplementation "io.reactivex.rxjava2:rxjava:2.2.2"
+    testImplementation "io.reactivex.rxjava2:rxjava:${rxJavaVersion}"
 }
 

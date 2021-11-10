@@ -15,7 +15,7 @@ dependencies {
     implementation files('../../../../web3j-abi/tuples/build/libs/tuples-4.8.7-SNAPSHOT.jar')
 
     // https://mvnrepository.com/artifact/io.reactivex.rxjava2/rxjava
-    implementation group: 'io.reactivex.rxjava2', name: 'rxjava', version: '2.2.2'
+    implementation group: 'io.reactivex.rxjava2', name: 'rxjava', version: rxJavaVersion
 
     testImplementation project (':commontest')
 }

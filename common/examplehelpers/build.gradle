@@ -12,7 +12,7 @@ dependencies {
     implementation files('../../../web3j-abi/rlp/build/libs/rlp-4.8.7-SNAPSHOT.jar')
     implementation files('../../../web3j-abi/utils/build/libs/utils-4.8.7-SNAPSHOT.jar')
     implementation files('../../../web3j-abi/tuples/build/libs/tuples-4.8.7-SNAPSHOT.jar')
-    implementation "io.reactivex.rxjava2:rxjava:2.2.2"
+    implementation "io.reactivex.rxjava2:rxjava:${rxJavaVersion}"
 
     // https://mvnrepository.com/artifact/org.apache.tuweni/tuweni-bytes
     implementation group: 'org.apache.tuweni', name: 'tuweni-bytes', version: '1.0.0'
