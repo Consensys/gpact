@@ -27,8 +27,8 @@ import org.web3j.tx.response.TransactionReceiptProcessor;
 public abstract class AbstractBlockchain {
   private static final Logger LOG = LogManager.getLogger(AbstractBlockchain.class);
 
-  // Retry requests to Ethereum Clients up to five times.
-  protected static final int RETRY = 20;
+  // Retry requests to Ethereum Clients up to 100 times.
+  protected static final int RETRY = 100;
 
   protected Credentials credentials;
 

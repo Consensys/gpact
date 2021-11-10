@@ -30,7 +30,7 @@ public class EntityHotel extends EntityBase {
   public static final BigInteger STANDARD_RATE = BigInteger.valueOf(13);
   public static final BigInteger NUM_ROOMS = BigInteger.valueOf(3);
 
-  private static final String PKEY = "40000000000000000000000000000000000000000000000000000000001";
+  private static final String PKEY = "50000000000000000000000000000000000000000000000000000000001";
 
   public EntityHotel(
       BlockchainId bcId, String uri, DynamicGasProvider.Strategy gasPriceStrategy, int blockPeriod)

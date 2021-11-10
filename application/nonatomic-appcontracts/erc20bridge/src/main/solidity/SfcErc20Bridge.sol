@@ -476,9 +476,14 @@ contract SfcErc20Bridge is HiddenParameters, Pausable, AccessControl {
     // ******* Internal below here ***********************************************
     // ***************************************************************************
     /**
-     * Mass Conservation: Transfer tokens that are owned by this contract to a recipient.
+     * @dev Mass Conservation: Transfer tokens that are owned by this contract to a recipient.
      * OR
      * Minting Burning: Mint token and assign them to a recipient.
+     *
+     * NOTE: The calls to the ERC 20 contracts are not wrapped. If they revert, the
+     * entire call will revert. This will allow the user to see the revert message
+     * from the ERC 20 contract. This will hopefully make it easier for a user to
+     * debug the issue.
      *
      * @param _tokenContract      ERC 20 contract of the token being transferred or minted.
      * @param _recipient          Account to transfer ownership of the tokens to.
@@ -502,9 +507,14 @@ contract SfcErc20Bridge is HiddenParameters, Pausable, AccessControl {
     }
 
     /**
-     * Mass Conservation: TransferFrom tokens from a spender to this contract.
+     * @dev Mass Conservation: TransferFrom tokens from a spender to this contract.
      * OR
      * Minting Burning: BurnFrom a spender's tokens.
+     *
+     * NOTE: The calls to the ERC 20 contracts are not wrapped. If they revert, the
+     * entire call will revert. This will allow the user to see the revert message
+     * from the ERC 20 contract. This will hopefully make it easier for a user to
+     * debug the issue.
      *
      * @param _tokenContract      ERC 20 contract of the token being transferred or burned.
      * @param _spender            Account to transfer ownership of the tokens from.
