@@ -206,7 +206,7 @@ jobs:
       - run:
           name: Spotless
           command: ./gradlew spotlessCheck
-     - run:
+      - run:
           name: Build and test
           command: ./gradlew test
       - run:
