@@ -15,7 +15,7 @@
 package net.consensys.gpact.lockablestorage.test;
 
 import java.math.BigInteger;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * Check operation of the contract prior to any data being added to the contract. That is, check the

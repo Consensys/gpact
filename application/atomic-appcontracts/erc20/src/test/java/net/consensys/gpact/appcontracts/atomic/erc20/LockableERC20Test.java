@@ -16,7 +16,7 @@ package net.consensys.gpact.appcontracts.atomic.erc20;
 
 import java.math.BigInteger;
 import net.consensys.gpact.common.RevertReason;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.exceptions.TransactionException;
 

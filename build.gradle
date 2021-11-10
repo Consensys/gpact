@@ -41,6 +41,7 @@ ext {
     jacksonVersion = '2.13.0'
     rxJavaVersion = '2.2.21'
     guavaVersion = '31.0.1-jre'
+    junitVersion = '5.7.1'
 }
 
 subprojects {
@@ -54,10 +55,8 @@ subprojects {
         implementation group: 'com.squareup.okhttp3', name: 'okhttp', version: okHttpVersion
         implementation group: 'com.squareup.okhttp3', name: 'logging-interceptor', version: okHttpVersion
 
-        testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.1'
-        testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
-        testRuntimeOnly 'org.junit.vintage:junit-vintage-engine'
-        testCompileOnly 'junit:junit:4.13'
+        testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: junitVersion
+        testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: junitVersion
     }
 }
 

@@ -1,6 +1,6 @@
 package net.consensys.gpact.crypto;
 
-import static junit.framework.TestCase.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.math.BigInteger;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -8,7 +8,7 @@ import net.consensys.gpact.common.TxManagerCache;
 import net.consensys.gpact.test.soliditywrappers.EcdsaSignatureTest;
 import net.consensys.gpact.utils.crypto.EcdsaSignatureConversion;
 import net.consensys.gpact.utils.crypto.KeyPairGen;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.ECKeyPair;
 import org.web3j.crypto.Keys;

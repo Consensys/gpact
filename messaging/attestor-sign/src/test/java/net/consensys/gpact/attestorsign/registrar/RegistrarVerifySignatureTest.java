@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import net.consensys.gpact.common.AnIdentity;
 import net.consensys.gpact.common.RevertReason;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.web3j.crypto.Sign;
 import org.web3j.protocol.exceptions.TransactionException;
 
