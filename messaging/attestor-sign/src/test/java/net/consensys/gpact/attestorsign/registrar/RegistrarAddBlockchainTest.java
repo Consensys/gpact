@@ -15,7 +15,7 @@
 package net.consensys.gpact.attestorsign.registrar;
 
 import java.math.BigInteger;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.web3j.protocol.exceptions.TransactionException;
 
 public class RegistrarAddBlockchainTest extends AbstractRegistrarTest {

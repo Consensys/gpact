@@ -1,6 +1,6 @@
 package net.consensys.gpact.exampletest;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /** Run all of the single blockchain tests. */
 public class SingleChainReadTest extends AbstractExampleTest {

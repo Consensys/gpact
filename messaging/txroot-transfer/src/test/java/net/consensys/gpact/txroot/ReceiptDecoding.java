@@ -14,8 +14,8 @@
  */
 package net.consensys.gpact.txroot;
 
-import static junit.framework.TestCase.assertEquals;
 import static org.hyperledger.besu.crypto.Hash.keccak256;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -26,7 +26,7 @@ import org.apache.tuweni.bytes.Bytes;
 import org.hyperledger.besu.ethereum.core.Hash;
 import org.hyperledger.besu.ethereum.core.LogTopic;
 import org.hyperledger.besu.ethereum.rlp.RLP;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.web3j.protocol.core.methods.response.Log;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 

@@ -6,7 +6,7 @@ import java.util.List;
 import net.consensys.gpact.cbc.calltree.soliditywrappers.CallExecutionTreeTest;
 import net.consensys.gpact.common.FormatConversion;
 import net.consensys.gpact.common.Tuple;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.web3j.tuples.generated.Tuple3;
 
 public class SolidityCallExecutionTreeTest extends CallExecutionTreeTestCommon {
@@ -34,7 +34,7 @@ public class SolidityCallExecutionTreeTest extends CallExecutionTreeTestCommon {
     }
   }
 
-  @Before
+  @BeforeEach
   public void setup() throws Exception {
     setupWeb3();
     this.callExecutionTreeContract =

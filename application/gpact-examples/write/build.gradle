@@ -3,10 +3,7 @@ dependencies {
     implementation project (':gpact')
     implementation project (':examplehelpers')
 
-    implementation group: 'com.google.guava', name: 'guava', version: '14.0'
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: '2.12.0'
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.12.0'
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.12.0'
+    implementation group: 'com.google.guava', name: 'guava', version: guavaVersion
 
     implementation files('../../../../web3j-abi/abi/build/libs/abi-4.8.7-SNAPSHOT.jar')
     implementation files('../../../../web3j-abi/core/build/libs/core-4.8.7-SNAPSHOT.jar')
@@ -14,14 +11,11 @@ dependencies {
     implementation files('../../../../web3j-abi/rlp/build/libs/rlp-4.8.7-SNAPSHOT.jar')
     implementation files('../../../../web3j-abi/utils/build/libs/utils-4.8.7-SNAPSHOT.jar')
 
-    implementation "com.squareup.okhttp3:okhttp:4.9.0"
-    implementation "com.squareup.okhttp3:logging-interceptor:4.9.0"
-
     // https://mvnrepository.com/artifact/io.reactivex.rxjava2/rxjava
-    implementation group: 'io.reactivex.rxjava2', name: 'rxjava', version: '2.2.2'
+    implementation group: 'io.reactivex.rxjava2', name: 'rxjava', version: rxJavaVersion
 
     testImplementation project (':commontest')
-    testImplementation group: 'junit', name: 'junit', version: '4.12'
+
 }
 
 task generateSources {

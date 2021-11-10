@@ -13,7 +13,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -22,8 +22,8 @@ import net.consensys.gpact.common.RevertReason;
 import net.consensys.gpact.common.test.AbstractWeb3Test;
 import net.consensys.gpact.common.test.DummyAddressGenerator;
 import org.apache.logging.log4j.util.Strings;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.core.RemoteFunctionCall;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
@@ -38,7 +38,7 @@ public class SfcErc721BridgeTest extends AbstractWeb3Test {
   private Credentials fixDeniedCred;
   private SfcErc721Bridge fixBridgeWithAdminCred;
 
-  @Before
+  @BeforeEach
   public void setup() throws Exception {
     setupWeb3();
     fixDeniedCred = createNewIdentity();

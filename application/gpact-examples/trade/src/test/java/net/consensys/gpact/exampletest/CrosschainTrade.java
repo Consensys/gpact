@@ -1,8 +1,8 @@
 package net.consensys.gpact.exampletest;
 
 import net.consensys.gpact.examples.trade.Main;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 public class CrosschainTrade extends AbstractExampleTest {
 
@@ -13,7 +13,7 @@ public class CrosschainTrade extends AbstractExampleTest {
   }
 
   // Does not work
-  @Ignore
+  @Disabled
   @Test
   public void directSignParallelSingleBlockchain() throws Exception {
     String tempPropsFile = createPropertiesFile(true, false, true);
@@ -27,7 +27,7 @@ public class CrosschainTrade extends AbstractExampleTest {
   }
 
   // Does not work
-  @Ignore
+  @Disabled
   @Test
   public void transferParallelSingleBlockchain() throws Exception {
     String tempPropsFile = createPropertiesFile(false, false, true);
@@ -35,7 +35,7 @@ public class CrosschainTrade extends AbstractExampleTest {
   }
 
   // Needs five blockchains configured
-  @Ignore
+  @Disabled
   @Test
   public void directSignSerialMultiBlockchain() throws Exception {
     String tempPropsFile = createPropertiesFile(true, true, false);
@@ -43,7 +43,7 @@ public class CrosschainTrade extends AbstractExampleTest {
   }
 
   // Needs five blockchains configured
-  @Ignore
+  @Disabled
   @Test
   public void directSignParallelMultiBlockchain() throws Exception {
     String tempPropsFile = createPropertiesFile(true, false, false);
@@ -51,7 +51,7 @@ public class CrosschainTrade extends AbstractExampleTest {
   }
 
   // Needs five blockchains configured
-  @Ignore
+  @Disabled
   @Test
   public void transferSerialMultiBlockchain() throws Exception {
     String tempPropsFile = createPropertiesFile(false, true, false);
@@ -59,7 +59,7 @@ public class CrosschainTrade extends AbstractExampleTest {
   }
 
   // Does not currently work.
-  @Ignore
+  @Disabled
   @Test
   public void transferParallelMultiBlockchain() throws Exception {
     String tempPropsFile = createPropertiesFile(false, false, false);

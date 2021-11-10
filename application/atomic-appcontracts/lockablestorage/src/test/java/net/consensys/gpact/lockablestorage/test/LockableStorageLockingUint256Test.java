@@ -1,7 +1,7 @@
 package net.consensys.gpact.lockablestorage.test;
 
 import java.math.BigInteger;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.web3j.protocol.exceptions.TransactionException;
 import org.web3j.tx.exceptions.ContractCallException;
 

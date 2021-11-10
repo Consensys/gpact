@@ -1,7 +1,7 @@
 package net.consensys.gpact.exampletest;
 
 import net.consensys.gpact.examples.hoteltrain.HotelTrain;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class CrosschainHotelTrain extends AbstractExampleTest {
 

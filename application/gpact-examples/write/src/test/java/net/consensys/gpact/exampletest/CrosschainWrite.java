@@ -1,33 +1,33 @@
 package net.consensys.gpact.exampletest;
 
 import net.consensys.gpact.examples.write.GpactCrosschainWrite;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 public class CrosschainWrite extends AbstractExampleTest {
 
-  @Ignore
+  @Disabled
   @Test
   public void directSignSerialSingleBlockchain() throws Exception {
     String tempPropsFile = createPropertiesFile(true, true, true);
     GpactCrosschainWrite.main(new String[] {tempPropsFile});
   }
 
-  @Ignore
+  @Disabled
   @Test
   public void directSignParallelSingleBlockchain() throws Exception {
     String tempPropsFile = createPropertiesFile(true, false, true);
     GpactCrosschainWrite.main(new String[] {tempPropsFile});
   }
 
-  @Ignore
+  @Disabled
   @Test
   public void transferSerialSingleBlockchain() throws Exception {
     String tempPropsFile = createPropertiesFile(false, true, true);
     GpactCrosschainWrite.main(new String[] {tempPropsFile});
   }
 
-  @Ignore
+  @Disabled
   @Test
   public void transferParallelSingleBlockchain() throws Exception {
     String tempPropsFile = createPropertiesFile(false, false, true);

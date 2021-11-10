@@ -22,9 +22,9 @@ import net.consensys.gpact.funcioninterfaces.soliditywrappers.HiddenParamDestTes
 import net.consensys.gpact.funcioninterfaces.soliditywrappers.HiddenParamSourceTest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.exceptions.TransactionException;
 
@@ -43,7 +43,7 @@ public class HiddenParamsTest extends AbstractWeb3Test {
   public static final BigInteger EXPECTED2 = BigInteger.valueOf(47);
   public static final BigInteger EXPECTED3 = BigInteger.valueOf(53);
 
-  @Before
+  @BeforeEach
   public void setup() throws Exception {
     setupWeb3();
     LOG.info("Deploying contracts");
@@ -188,7 +188,7 @@ public class HiddenParamsTest extends AbstractWeb3Test {
   }
 
   // This is just to create comparison gas costs.
-  @Ignore
+  @Disabled
   @Test
   public void explicitParams() throws Exception {
     LOG.info("callFuncNoParams Explicit Params");

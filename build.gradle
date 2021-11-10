@@ -35,6 +35,31 @@ allprojects {
     }
 }
 
+ext {
+    log4JVersion = '2.14.1'
+    okHttpVersion = '4.9.1'
+    jacksonVersion = '2.13.0'
+    rxJavaVersion = '2.2.21'
+    guavaVersion = '31.0.1-jre'
+    junitVersion = '5.7.1'
+}
+
+subprojects {
+    test {
+        useJUnitPlatform()
+    }
+    dependencies {
+        implementation group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: log4JVersion
+        implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: log4JVersion
+        implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: log4JVersion
+        implementation group: 'com.squareup.okhttp3', name: 'okhttp', version: okHttpVersion
+        implementation group: 'com.squareup.okhttp3', name: 'logging-interceptor', version: okHttpVersion
+
+        testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: junitVersion
+        testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: junitVersion
+    }
+}
+
 task solFormat {
     dependsOn npm_run_solFormat
 }
