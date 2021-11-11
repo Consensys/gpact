@@ -26,14 +26,22 @@ import java.security.DrbgParameters;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.SecureRandom;
+import java.security.Security;
 import java.security.interfaces.ECPrivateKey;
 import java.security.spec.ECGenParameterSpec;
 import java.util.Arrays;
 import java.util.Enumeration;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 /** Generate one or more key pairs for use in the sample code. */
 public class KeyPairGen {
   private final KeyPairGenerator keyPairGenerator;
+
+  static {
+    if (Security.getProvider(BouncyCastleProvider.PROVIDER_NAME) == null) {
+      Security.addProvider(new BouncyCastleProvider());
+    }
+  }
 
   public KeyPairGen() {
     // TODO don't create a PRNG each call
@@ -41,7 +49,7 @@ public class KeyPairGen {
       final SecureRandom rand =
           SecureRandom.getInstance(
               "DRBG", DrbgParameters.instantiation(256, RESEED_ONLY, getPersonalizationString()));
-      this.keyPairGenerator = KeyPairGenerator.getInstance("EC");
+      this.keyPairGenerator = KeyPairGenerator.getInstance("ECDSA", "BC");
       final ECGenParameterSpec ecGenParameterSpec = new ECGenParameterSpec("secp256k1");
       this.keyPairGenerator.initialize(ecGenParameterSpec, rand);
     } catch (final Exception e) {
