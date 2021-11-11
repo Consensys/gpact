@@ -20,15 +20,15 @@ import "./CallPathCallExecutionTree.sol";
 import "../../../../interface/src/main/solidity/LockableStorageInterface.sol";
 import "../../../../interface/src/main/solidity/CrosschainLockingInterface.sol";
 import "../../../../interface/src/main/solidity/CrosschainFunctionCallReturnInterface.sol";
-import "../../../../interface/src/main/solidity/HiddenParameters.sol";
 import "../../../../../common/common/src/main/solidity/ResponseProcessUtil.sol";
+import "../../../../interface/src/main/solidity/AtomicHiddenAuthParameters.sol";
 
 contract CrosschainControl is
     CrosschainFunctionCallReturnInterface,
     CbcDecVer,
     CallPathCallExecutionTree,
     CrosschainLockingInterface,
-    HiddenParameters,
+    AtomicHiddenAuthParameters,
     ResponseProcessUtil
 {
     event Start(
@@ -539,11 +539,11 @@ contract CrosschainControl is
 
             ) = extractTargetFromCallGraph(_callGraph, parentCallPath, false);
         }
-        bytes memory functionCallWithAuth = encodeThreeHiddenParams(
+        bytes memory functionCallWithAuth = encodeAtomicAuthParams(
             functionCall,
             _rootBcId,
             parentBcId,
-            uint256(uint160(parentContract))
+            parentContract
         );
 
         bool isSuccess;

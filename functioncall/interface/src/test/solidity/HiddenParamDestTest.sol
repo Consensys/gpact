@@ -14,19 +14,20 @@
  */
 pragma solidity >=0.8;
 
-import "../../main/solidity/HiddenParameters.sol";
+import "../../main/solidity/NonAtomicHiddenAuthParameters.sol";
+import "../../main/solidity/AtomicHiddenAuthParameters.sol";
 
-contract HiddenParamDestTest is HiddenParameters {
+contract HiddenParamDestTest is NonAtomicHiddenAuthParameters, AtomicHiddenAuthParameters {
     uint256 private e1;
     uint256 private e2;
-    uint256 private e3;
+    address private e3;
 
     event AllGood(bool happy);
 
     constructor(
         uint256 _expected1,
         uint256 _expected2,
-        uint256 _expected3
+        address _expected3
     ) {
         e1 = _expected1;
         e2 = _expected2;
@@ -34,20 +35,20 @@ contract HiddenParamDestTest is HiddenParameters {
     }
 
     function funcNoParams() external {
-        (uint256 a1, uint256 a2, uint256 a3) = extractThreeHiddenParams();
+        (uint256 a1, uint256 a2, address a3) = decodeAtomicAuthParams();
         check3(a1, a2, a3);
         emit AllGood(true);
     }
 
     function funcOneParam(uint256 _val) external {
-        (uint256 a1, uint256 a2, uint256 a3) = extractThreeHiddenParams();
+        (uint256 a1, uint256 a2, address a3) = decodeAtomicAuthParams();
         check3(a1, a2, a3);
         require(_val == 17, "Error: Val");
         emit AllGood(true);
     }
 
     function funcTwoParams(uint256 _val1, uint256 _val2) external {
-        (uint256 a1, uint256 a2, uint256 a3) = extractThreeHiddenParams();
+        (uint256 a1, uint256 a2, address a3) = decodeAtomicAuthParams();
         check3(a1, a2, a3);
         require(_val1 == 17, "Error: Val1");
         require(_val2 == 23, "Error: Val2");
@@ -55,20 +56,20 @@ contract HiddenParamDestTest is HiddenParameters {
     }
 
     function twoParamFuncNoParams() external {
-        (uint256 a1, uint256 a2) = extractTwoHiddenParams();
+        (uint256 a1, address a2) = decodeNonAtomicAuthParams();
         check2(a1, a2);
         emit AllGood(true);
     }
 
     function twoParamFuncOneParam(uint256 _val) external {
-        (uint256 a1, uint256 a2) = extractTwoHiddenParams();
-        check2(a1, a2);
+        (uint256 a1, address a3) = decodeNonAtomicAuthParams();
+        check2(a1, a3);
         require(_val == 17, "Error: Val");
         emit AllGood(true);
     }
 
     function twoParamFuncTwoParams(uint256 _val1, uint256 _val2) external {
-        (uint256 a1, uint256 a2) = extractTwoHiddenParams();
+        (uint256 a1, address a2) = decodeNonAtomicAuthParams();
         check2(a1, a2);
         require(_val1 == 17, "Error: Val1");
         require(_val2 == 23, "Error: Val2");
@@ -79,7 +80,7 @@ contract HiddenParamDestTest is HiddenParameters {
     function funcNoParamsExplicit(
         uint256 a1,
         uint256 a2,
-        uint256 a3
+        address a3
     ) external {
         check3(a1, a2, a3);
         emit AllGood(true);
@@ -89,7 +90,7 @@ contract HiddenParamDestTest is HiddenParameters {
         uint256 _val,
         uint256 a1,
         uint256 a2,
-        uint256 a3
+        address a3
     ) external {
         check3(a1, a2, a3);
         require(_val == 17, "Error: Val");
@@ -101,7 +102,7 @@ contract HiddenParamDestTest is HiddenParameters {
         uint256 _val2,
         uint256 a1,
         uint256 a2,
-        uint256 a3
+        address a3
     ) external {
         check3(a1, a2, a3);
         require(_val1 == 17, "Error: Val1");
@@ -109,15 +110,15 @@ contract HiddenParamDestTest is HiddenParameters {
         emit AllGood(true);
     }
 
-    function check2(uint256 _a1, uint256 _a2) private view {
+    function check2(uint256 _a1, address _a3) private view {
         require(_a1 == e1, "First param not correct");
-        require(_a2 == e2, "Second param not correct");
+        require(_a3 == e3, "Second param not correct");
     }
 
     function check3(
         uint256 _a1,
         uint256 _a2,
-        uint256 _a3
+        address _a3
     ) private view {
         require(_a1 == e1, "First param not correct");
         require(_a2 == e2, "Second param not correct");

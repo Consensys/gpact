@@ -41,7 +41,7 @@ public class HiddenParamsTest extends AbstractWeb3Test {
 
   public static final BigInteger EXPECTED1 = BigInteger.valueOf(41);
   public static final BigInteger EXPECTED2 = BigInteger.valueOf(47);
-  public static final BigInteger EXPECTED3 = BigInteger.valueOf(53);
+  public static final String EXPECTED3 = "627306090abaB3A6e1400e9345bC60c78a8BEf57";
 
   @BeforeEach
   public void setup() throws Exception {

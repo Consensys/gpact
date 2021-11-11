@@ -16,12 +16,12 @@ pragma solidity >=0.8;
 
 import "./HiddenParamDestTest.sol";
 
-contract HiddenParamSourceTest is HiddenParameters {
+contract HiddenParamSourceTest is NonAtomicHiddenAuthParameters, AtomicHiddenAuthParameters {
     HiddenParamDestTest dest;
 
     uint256 private e1;
     uint256 private e2;
-    uint256 private e3;
+    address private e3;
 
     event Dump(bytes _b);
 
@@ -29,7 +29,7 @@ contract HiddenParamSourceTest is HiddenParameters {
         address _dest,
         uint256 _expected1,
         uint256 _expected2,
-        uint256 _expected3
+        address _expected3
     ) {
         dest = HiddenParamDestTest(_dest);
         e1 = _expected1;
@@ -68,7 +68,7 @@ contract HiddenParamSourceTest is HiddenParameters {
     }
 
     function doCallThreeParams(bytes memory functionCall) private {
-        bytes memory functionCallWithAuth = encodeThreeHiddenParams(
+        bytes memory functionCallWithAuth = encodeAtomicAuthParams(
             functionCall,
             e1,
             e2,
@@ -105,10 +105,10 @@ contract HiddenParamSourceTest is HiddenParameters {
     }
 
     function doCallTwoParams(bytes memory functionCall) private {
-        bytes memory functionCallWithAuth = encodeTwoHiddenParams(
+        bytes memory functionCallWithAuth = encodeNonAtomicAuthParams(
             functionCall,
             e1,
-            e2
+            e3
         );
 
         bool isSuccess;
