@@ -41,7 +41,7 @@ public class HiddenParamsTest extends AbstractWeb3Test {
 
   public static final BigInteger EXPECTED1 = BigInteger.valueOf(41);
   public static final BigInteger EXPECTED2 = BigInteger.valueOf(47);
-  public static final String EXPECTED3 = "627306090abaB3A6e1400e9345bC60c78a8BEf57";
+  public static final String EXPECTED_Address = "627306090abaB3A6e1400e9345bC60c78a8BEf57";
 
   @BeforeEach
   public void setup() throws Exception {
@@ -49,7 +49,7 @@ public class HiddenParamsTest extends AbstractWeb3Test {
     LOG.info("Deploying contracts");
     this.destContract =
         HiddenParamDestTest.deploy(
-                this.web3j, this.tm, this.freeGasProvider, EXPECTED1, EXPECTED2, EXPECTED3)
+                this.web3j, this.tm, this.freeGasProvider, EXPECTED1, EXPECTED2, EXPECTED_Address)
             .send();
     String destContractAddress = this.destContract.getContractAddress();
     LOG.info(" destContract deployed to address: {}", destContractAddress);
@@ -62,7 +62,7 @@ public class HiddenParamsTest extends AbstractWeb3Test {
                 destContractAddress,
                 EXPECTED1,
                 EXPECTED2,
-                EXPECTED3)
+                EXPECTED_Address)
             .send();
     LOG.info(" sourceContract deployed to address: {}", this.sourceContract.getContractAddress());
   }
