@@ -198,14 +198,14 @@ jobs:
             cd ../web3j-abi
             ./gradlew --parallel --stacktrace --info --build-cache installDist
       - run:
+          name: Check code formatting
+          command: ./gradlew solCheckFormat spotlessCheck
+      - run:
           name: Create and Start blockchains
           working_directory: test-blockchains
           background: true
           command: docker-compose up
       - run: sleep 30
-      - run:
-          name: Check code formatting
-          command: ./gradlew solCheckFormat spotlessCheck
       - run:
           name: Build and test
           command: ./gradlew test
