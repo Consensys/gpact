@@ -25,7 +25,11 @@ import "../../../../../../functioncall/interface/src/main/solidity/NonAtomicHidd
  * ERC 20 bridge using the Simple Function Call protocol.
  *
  */
-contract SfcErc721Bridge is NonAtomicHiddenAuthParameters, Pausable, AccessControl {
+contract SfcErc721Bridge is
+    NonAtomicHiddenAuthParameters,
+    Pausable,
+    AccessControl
+{
     bytes32 public constant MAPPING_ROLE = keccak256("MAPPING_ROLE");
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
     bytes32 public constant ADMINTRANSFER_ROLE =

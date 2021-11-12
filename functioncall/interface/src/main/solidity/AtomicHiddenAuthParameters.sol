@@ -29,7 +29,15 @@ abstract contract AtomicHiddenAuthParameters {
         uint256 _sourceBlockchainId,
         address _sourceContract
     ) internal pure returns (bytes memory) {
-        return bytes.concat(_functionCall, abi.encodePacked(_rootBlockchainId, _sourceBlockchainId, _sourceContract));
+        return
+            bytes.concat(
+                _functionCall,
+                abi.encodePacked(
+                    _rootBlockchainId,
+                    _sourceBlockchainId,
+                    _sourceContract
+                )
+            );
     }
 
     /**
@@ -40,9 +48,15 @@ abstract contract AtomicHiddenAuthParameters {
      * @return _sourceBlockchainId Blockchain identifier of the blockchain that is calling the function.
      * @return _sourceContract     The address of the contract that is calling the function.
      */
-    function decodeAtomicAuthParams()internal pure returns (
-        uint256 _rootBlockchainId, uint256 _sourceBlockchainId, address _sourceContract) {
-
+    function decodeAtomicAuthParams()
+        internal
+        pure
+        returns (
+            uint256 _rootBlockchainId,
+            uint256 _sourceBlockchainId,
+            address _sourceContract
+        )
+    {
         bytes calldata allParams = msg.data;
         uint256 len = allParams.length;
 

@@ -16,7 +16,10 @@ pragma solidity >=0.8;
 
 import "./HiddenParamDestTest.sol";
 
-contract HiddenParamSourceTest is NonAtomicHiddenAuthParameters, AtomicHiddenAuthParameters {
+contract HiddenParamSourceTest is
+    NonAtomicHiddenAuthParameters,
+    AtomicHiddenAuthParameters
+{
     HiddenParamDestTest dest;
 
     uint256 private expectedUint256_1;
@@ -39,15 +42,30 @@ contract HiddenParamSourceTest is NonAtomicHiddenAuthParameters, AtomicHiddenAut
 
     // These functions call with explicit parameters
     function callFuncNoParamsExplicit() external {
-        dest.funcNoParamsExplicit(expectedUint256_1, expectedUint256_2, expectedAddress);
+        dest.funcNoParamsExplicit(
+            expectedUint256_1,
+            expectedUint256_2,
+            expectedAddress
+        );
     }
 
     function callFuncOneParamExplicit() external {
-        dest.funcOneParamExplicit(17, expectedUint256_1, expectedUint256_2, expectedAddress);
+        dest.funcOneParamExplicit(
+            17,
+            expectedUint256_1,
+            expectedUint256_2,
+            expectedAddress
+        );
     }
 
     function callFuncTwoParamsExplicit() external {
-        dest.funcTwoParamsExplicit(17, 23, expectedUint256_1, expectedUint256_2, expectedAddress);
+        dest.funcTwoParamsExplicit(
+            17,
+            23,
+            expectedUint256_1,
+            expectedUint256_2,
+            expectedAddress
+        );
     }
 
     // These functions call with hidden parameters

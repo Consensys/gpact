@@ -26,7 +26,11 @@ import "../../../../../../functioncall/interface/src/main/solidity/AtomicHiddenA
  * ERC 20 bridge using the General Purpose Atomic Crosschain Transaction protocol.
  *
  */
-contract GpactERC20Bridge is AtomicHiddenAuthParameters, Pausable, AccessControl {
+contract GpactERC20Bridge is
+    AtomicHiddenAuthParameters,
+    Pausable,
+    AccessControl
+{
     bytes32 public constant MAPPING_ROLE = keccak256("MAPPING_ROLE");
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
 
