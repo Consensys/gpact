@@ -14,6 +14,8 @@
  */
 pragma solidity >=0.7.1;
 
+import "../../../../openzeppelin/src/main/solidity/utils/Strings.sol";
+
 abstract contract ResponseProcessUtil {
     function getRevertMsg(bytes memory _returnData)
         internal
@@ -32,7 +34,7 @@ abstract contract ResponseProcessUtil {
                 string(
                     abi.encodePacked(
                         "Revert for unknown error. Error length: ",
-                        uint2str(_returnData.length)
+                        Strings.toString(_returnData.length)
                     )
                 );
         }
@@ -44,34 +46,11 @@ abstract contract ResponseProcessUtil {
         }
         if (isPanic) {
             uint256 errorCode = abi.decode(_returnData, (uint256));
-            return string(abi.encodePacked("Panic: ", uint2str(errorCode)));
+            return
+                string(
+                    abi.encodePacked("Panic: ", Strings.toString(errorCode))
+                );
         }
         return abi.decode(_returnData, (string)); // All that remains is the revert string
-    }
-
-    function uint2str(uint256 _i)
-        internal
-        pure
-        returns (string memory _uintAsString)
-    {
-        if (_i == 0) {
-            return "0";
-        }
-        uint256 j = _i;
-        uint256 len;
-        while (j != 0) {
-            len++;
-            j /= 10;
-        }
-        bytes memory bstr = new bytes(len);
-        uint256 k = len;
-        while (_i != 0) {
-            k = k - 1;
-            uint8 temp = (48 + uint8(_i - (_i / 10) * 10));
-            bytes1 b1 = bytes1(temp);
-            bstr[k] = b1;
-            _i /= 10;
-        }
-        return string(bstr);
     }
 }
