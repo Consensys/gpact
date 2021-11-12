@@ -17,13 +17,13 @@ pragma solidity >=0.8;
 import "../../../../interface/src/main/solidity/CrosschainFunctionCallInterface.sol";
 import "../../../../../messaging/interface/src/main/solidity/CrosschainVerifier.sol";
 import "../../../../gpact/src/main/solidity/CbcDecVer.sol";
-import "../../../../interface/src/main/solidity/HiddenParameters.sol";
 import "../../../../../common/common/src/main/solidity/ResponseProcessUtil.sol";
+import "../../../../interface/src/main/solidity/NonAtomicHiddenAuthParameters.sol";
 
 contract SimpleCrosschainControl is
     CrosschainFunctionCallInterface,
     CbcDecVer,
-    HiddenParameters,
+    NonAtomicHiddenAuthParameters,
     ResponseProcessUtil
 {
     // 	0x77dab611
@@ -167,10 +167,10 @@ contract SimpleCrosschainControl is
         require(destBcId == myBlockchainId);
 
         // Add authentication information to the function call.
-        bytes memory functionCallWithAuth = encodeTwoHiddenParams(
+        bytes memory functionCallWithAuth = encodeNonAtomicAuthParams(
             functionCall,
             _sourceBcId,
-            uint256(uint160(caller))
+            caller
         );
 
         bool isSuccess;

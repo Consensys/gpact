@@ -16,12 +16,15 @@ pragma solidity >=0.8;
 
 import "./HiddenParamDestTest.sol";
 
-contract HiddenParamSourceTest is HiddenParameters {
+contract HiddenParamSourceTest is
+    NonAtomicHiddenAuthParameters,
+    AtomicHiddenAuthParameters
+{
     HiddenParamDestTest dest;
 
-    uint256 private e1;
-    uint256 private e2;
-    uint256 private e3;
+    uint256 private expectedUint256_1;
+    uint256 private expectedUint256_2;
+    address private expectedAddress;
 
     event Dump(bytes _b);
 
@@ -29,25 +32,40 @@ contract HiddenParamSourceTest is HiddenParameters {
         address _dest,
         uint256 _expected1,
         uint256 _expected2,
-        uint256 _expected3
+        address _expected3
     ) {
         dest = HiddenParamDestTest(_dest);
-        e1 = _expected1;
-        e2 = _expected2;
-        e3 = _expected3;
+        expectedUint256_1 = _expected1;
+        expectedUint256_2 = _expected2;
+        expectedAddress = _expected3;
     }
 
     // These functions call with explicit parameters
     function callFuncNoParamsExplicit() external {
-        dest.funcNoParamsExplicit(e1, e2, e3);
+        dest.funcNoParamsExplicit(
+            expectedUint256_1,
+            expectedUint256_2,
+            expectedAddress
+        );
     }
 
     function callFuncOneParamExplicit() external {
-        dest.funcOneParamExplicit(17, e1, e2, e3);
+        dest.funcOneParamExplicit(
+            17,
+            expectedUint256_1,
+            expectedUint256_2,
+            expectedAddress
+        );
     }
 
     function callFuncTwoParamsExplicit() external {
-        dest.funcTwoParamsExplicit(17, 23, e1, e2, e3);
+        dest.funcTwoParamsExplicit(
+            17,
+            23,
+            expectedUint256_1,
+            expectedUint256_2,
+            expectedAddress
+        );
     }
 
     // These functions call with hidden parameters
@@ -68,11 +86,11 @@ contract HiddenParamSourceTest is HiddenParameters {
     }
 
     function doCallThreeParams(bytes memory functionCall) private {
-        bytes memory functionCallWithAuth = encodeThreeHiddenParams(
+        bytes memory functionCallWithAuth = encodeAtomicAuthParams(
             functionCall,
-            e1,
-            e2,
-            e3
+            expectedUint256_1,
+            expectedUint256_2,
+            expectedAddress
         );
 
         bool isSuccess;
@@ -105,10 +123,10 @@ contract HiddenParamSourceTest is HiddenParameters {
     }
 
     function doCallTwoParams(bytes memory functionCall) private {
-        bytes memory functionCallWithAuth = encodeTwoHiddenParams(
+        bytes memory functionCallWithAuth = encodeNonAtomicAuthParams(
             functionCall,
-            e1,
-            e2
+            expectedUint256_1,
+            expectedAddress
         );
 
         bool isSuccess;

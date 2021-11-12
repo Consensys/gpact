@@ -18,14 +18,18 @@ import "../../../../../../common/openzeppelin/src/main/solidity/token/ERC20/IERC
 import "../../../../../../functioncall/interface/src/main/solidity/CrosschainFunctionCallInterface.sol";
 import "../../../../../../common/openzeppelin/src/main/solidity/access/AccessControl.sol";
 import "../../../../../../common/openzeppelin/src/main/solidity/security/Pausable.sol";
-import "../../../../../../functioncall/interface/src/main/solidity/HiddenParameters.sol";
 import "../../../../../../common/openzeppelin/src/main/solidity/token/ERC20/presets/ERC20PresetMinterPauser.sol";
+import "../../../../../../functioncall/interface/src/main/solidity/NonAtomicHiddenAuthParameters.sol";
 
 /**
  * ERC 20 bridge using the Simple Function Call protocol.
  *
  */
-contract SfcErc20Bridge is HiddenParameters, Pausable, AccessControl {
+contract SfcErc20Bridge is
+    NonAtomicHiddenAuthParameters,
+    Pausable,
+    AccessControl
+{
     bytes32 public constant MAPPING_ROLE = keccak256("MAPPING_ROLE");
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
     bytes32 public constant ADMINTRANSFER_ROLE =
@@ -372,9 +376,8 @@ contract SfcErc20Bridge is HiddenParameters, Pausable, AccessControl {
 
         (
             uint256 sourceBcId,
-            uint256 sourceContract1
-        ) = extractTwoHiddenParams();
-        address sourceContract = address(uint160(sourceContract1));
+            address sourceContract
+        ) = decodeNonAtomicAuthParams();
         // The source blockchain id is validated at the function call layer. No need to check
         // that it isn't zero.
 

@@ -17,9 +17,9 @@ pragma solidity >=0.8;
 import "../../../../../../common/openzeppelin/src/main/solidity/token/ERC20/IERC20.sol";
 import "../../../../../atomic-appcontracts/lockablestorage/src/main/solidity/LockableStorage.sol";
 import "../../../../../../functioncall/interface/src/main/solidity/CrosschainFunctionCallInterface.sol";
-import "../../../../../../functioncall/interface/src/main/solidity/HiddenParameters.sol";
+import "../../../../../../functioncall/interface/src/main/solidity/AtomicHiddenAuthParameters.sol";
 
-contract Hotel is LockableStorage, HiddenParameters {
+contract Hotel is LockableStorage, AtomicHiddenAuthParameters {
     // Room rate.
     // Map (room number => room rate)
     // mapping (uint256 => uint256) private roomRate;
@@ -105,9 +105,8 @@ contract Hotel is LockableStorage, HiddenParameters {
         (
             ,
             uint256 sourceBlockchainId,
-            uint256 sourceContract1
-        ) = extractThreeHiddenParams();
-        address sourceContract = address(uint160(sourceContract1));
+            address sourceContract
+        ) = decodeAtomicAuthParams();
         require(
             sourceContract == approvedTravelAgencies[sourceBlockchainId],
             "Sender is not an approved travel agency"
