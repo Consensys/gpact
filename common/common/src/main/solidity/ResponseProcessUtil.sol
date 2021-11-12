@@ -46,7 +46,10 @@ abstract contract ResponseProcessUtil {
         }
         if (isPanic) {
             uint256 errorCode = abi.decode(_returnData, (uint256));
-            return string(abi.encodePacked("Panic: ", Strings.toString(errorCode)));
+            return
+                string(
+                    abi.encodePacked("Panic: ", Strings.toString(errorCode))
+                );
         }
         return abi.decode(_returnData, (string)); // All that remains is the revert string
     }
