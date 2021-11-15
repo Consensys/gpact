@@ -25,6 +25,7 @@ import net.consensys.gpact.sfccbc.SimpleCrossControlManagerGroup;
 import net.consensys.gpact.sfccbc.SimpleCrosschainExecutor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.util.Strings;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.RemoteFunctionCall;
@@ -162,7 +163,7 @@ public class Erc721User {
             sourceERC20ContractAddress,
             recipient,
             tokenId,
-            "".getBytes());
+            Strings.EMPTY.getBytes());
 
     SimpleCrosschainExecutor executor = new SimpleCrosschainExecutor(crossControlManagerGroup);
     Tuple<TransactionReceipt[], String, Boolean> results =
