@@ -120,7 +120,10 @@ public class SfcErc721BridgeTest extends AbstractWeb3Test {
 
     RemoteFunctionCall<TransactionReceipt> receipt =
         fixBridgeWithAdminCred.receiveFromOtherBlockchain(
-            DummyAddressGenerator.gen(), fixDeniedAddress, BigInteger.ZERO);
+            DummyAddressGenerator.gen(),
+            fixDeniedAddress,
+            BigInteger.ZERO,
+            Strings.EMPTY.getBytes());
     TransactionException te = assertThrows(TransactionException.class, receipt::send);
     assertEquals(RECIPIENT_DENYLISTED_REVERT_MSG, getRevertReason(te));
   }
@@ -132,7 +135,10 @@ public class SfcErc721BridgeTest extends AbstractWeb3Test {
 
     RemoteFunctionCall<TransactionReceipt> receipt =
         fixBridgeWithAdminCred.receiveFromOtherBlockchain(
-            DummyAddressGenerator.gen(), fixDeniedAddress, BigInteger.ZERO);
+            DummyAddressGenerator.gen(),
+            fixDeniedAddress,
+            BigInteger.ZERO,
+            Strings.EMPTY.getBytes());
     TransactionException te = assertThrows(TransactionException.class, receipt::send);
     assertNotEquals(RECIPIENT_DENYLISTED_REVERT_MSG, getRevertReason(te));
   }

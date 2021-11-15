@@ -38,8 +38,6 @@ import org.web3j.tx.response.TransactionReceiptProcessor;
 public class Erc721User {
   private static final Logger LOG = LogManager.getLogger(Erc721User.class);
 
-  // protected static final int RETRY = 20;
-
   private final String name;
 
   protected Credentials creds;
@@ -160,7 +158,11 @@ public class Erc721User {
         " Call: BcId: {}, ERC 721 Bridge: {}", sourceBlockchainId, sourceBridgeContractAddress);
     RemoteFunctionCall<TransactionReceipt> functionCall =
         sfcErc721Bridge.transferToOtherBlockchain(
-            destinationBlockchainId.asBigInt(), sourceERC20ContractAddress, recipient, tokenId);
+            destinationBlockchainId.asBigInt(),
+            sourceERC20ContractAddress,
+            recipient,
+            tokenId,
+            "".getBytes());
 
     SimpleCrosschainExecutor executor = new SimpleCrosschainExecutor(crossControlManagerGroup);
     Tuple<TransactionReceipt[], String, Boolean> results =

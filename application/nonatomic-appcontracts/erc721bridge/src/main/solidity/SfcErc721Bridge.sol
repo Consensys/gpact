@@ -367,6 +367,34 @@ contract SfcErc721Bridge is
         address _recipient,
         uint256 _tokenId
     ) public whenNotPaused {
+        transferToOtherBlockchain(
+            _destBcId,
+            _srcTokenContract,
+            _recipient,
+            _tokenId,
+            ""
+        );
+    }
+
+    /**
+     * Transfer tokens from msg.sender to this contract on this blockchain,
+     * and request tokens on the remote blockchain be given to the requested
+     * account on the destination blockchain.
+     *
+     * NOTE: msg.sender must have called approve() on the token contract.
+     *
+     * @param _srcTokenContract Address of ERC 20 contract on this blockchain.
+     * @param _recipient        Address of account to transfer tokens to on the destination blockchain.
+     * @param _tokenId          Id of token transferred.
+     * @param _data             Data to send to recipient, as part of the transfer.
+     */
+    function transferToOtherBlockchain(
+        uint256 _destBcId,
+        address _srcTokenContract,
+        address _recipient,
+        uint256 _tokenId,
+        bytes memory _data
+    ) public whenNotPaused {
         require(
             !isDenylisted(msg.sender),
             "ERC 721 Bridge: Sender is denylisted"
@@ -407,7 +435,8 @@ contract SfcErc721Bridge is
                 this.receiveFromOtherBlockchain.selector,
                 destTokenContract,
                 _recipient,
-                _tokenId
+                _tokenId,
+                _data
             )
         );
 
@@ -428,11 +457,13 @@ contract SfcErc721Bridge is
      * @param _destTokenContract  ERC 721 contract of the token being transferred.
      * @param _recipient          Account to transfer ownership of the tokens to.
      * @param _tokenId            Id of token transferred.
+     * @param _data               Data sent to recipient, as part of the transfer.
      */
     function receiveFromOtherBlockchain(
         address _destTokenContract,
         address _recipient,
-        uint256 _tokenId
+        uint256 _tokenId,
+        bytes memory _data
     ) external whenNotPaused {
         require(
             !isDenylisted(tx.origin),
@@ -468,7 +499,7 @@ contract SfcErc721Bridge is
             "ERC 721 Bridge: Incorrect source ERC721 Bridge"
         );
 
-        transferOrMint(_destTokenContract, _recipient, _tokenId);
+        transferOrMint(_destTokenContract, _recipient, _tokenId, _data);
 
         emit ReceivedFrom(
             sourceBcId,
@@ -564,17 +595,40 @@ contract SfcErc721Bridge is
         address _recipient,
         uint256 _tokenId
     ) private {
+        transferOrMint(_tokenContract, _recipient, _tokenId, "");
+    }
+
+    /**
+     * Home Blockchains: Transfer tokens that are owned by this contract to a recipient.
+     * Remote Blockchains: Mints tokens.
+     *
+     * @param _tokenContract      ERC 721 contract of the token being transferred or minted.
+     * @param _recipient          Account to transfer ownership of the tokens to.
+     * @param _tokenId            Id of token transferred.
+     * @param _data               Data to send to recipient, as part of the transfer.
+     */
+    function transferOrMint(
+        address _tokenContract,
+        address _recipient,
+        uint256 _tokenId,
+        bytes memory _data
+    ) private {
         if (
             tokenContractConfiguration[_tokenContract] ==
             TOKEN_CONTRACT_CONF_HOME
         ) {
-            IERC721(_tokenContract).transferFrom(
+            IERC721(_tokenContract).safeTransferFrom(
                 address(this),
                 _recipient,
-                _tokenId
+                _tokenId,
+                _data
             );
         } else {
-            ERC721RemoteBlockchain(_tokenContract).mint(_recipient, _tokenId);
+            ERC721RemoteBlockchain(_tokenContract).mint(
+                _recipient,
+                _tokenId,
+                _data
+            );
         }
     }
 
