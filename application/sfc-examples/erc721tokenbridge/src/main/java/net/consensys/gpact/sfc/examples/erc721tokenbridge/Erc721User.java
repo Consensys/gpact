@@ -25,6 +25,7 @@ import net.consensys.gpact.sfccbc.SimpleCrossControlManagerGroup;
 import net.consensys.gpact.sfccbc.SimpleCrosschainExecutor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.util.Strings;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.RemoteFunctionCall;
@@ -37,8 +38,6 @@ import org.web3j.tx.response.TransactionReceiptProcessor;
 /** An owner of ERC 20 tokens transferring tokens from one blockchain to another. */
 public class Erc721User {
   private static final Logger LOG = LogManager.getLogger(Erc721User.class);
-
-  // protected static final int RETRY = 20;
 
   private final String name;
 
@@ -160,7 +159,11 @@ public class Erc721User {
         " Call: BcId: {}, ERC 721 Bridge: {}", sourceBlockchainId, sourceBridgeContractAddress);
     RemoteFunctionCall<TransactionReceipt> functionCall =
         sfcErc721Bridge.transferToOtherBlockchain(
-            destinationBlockchainId.asBigInt(), sourceERC20ContractAddress, recipient, tokenId);
+            destinationBlockchainId.asBigInt(),
+            sourceERC20ContractAddress,
+            recipient,
+            tokenId,
+            Strings.EMPTY.getBytes());
 
     SimpleCrosschainExecutor executor = new SimpleCrosschainExecutor(crossControlManagerGroup);
     Tuple<TransactionReceipt[], String, Boolean> results =

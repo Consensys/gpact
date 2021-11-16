@@ -70,13 +70,17 @@ contract ERC721RemoteBlockchain is
      * Requirements:
      * - the caller must have the `MINTER_ROLE`.
      */
-    function mint(address _recipient, uint256 _tokenId) public virtual {
+    function mint(
+        address _recipient,
+        uint256 _tokenId,
+        bytes memory _data
+    ) public virtual {
         require(
             hasRole(MINTER_ROLE, _msgSender()),
             "ERC721CrosschainEndPoint: must have minter role to mint"
         );
 
-        _safeMint(_recipient, _tokenId);
+        _safeMint(_recipient, _tokenId, _data);
     }
 
     /**
