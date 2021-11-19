@@ -51,7 +51,7 @@ The Message Dispatcher receives messages from the Relayer core through a message
 The need to process messages and route them to one or more destinations is largely protocol-agnostic. These capabilities are thus provided as part of the Relayer core, which acts on network messages,  after they have been transformed/wrapped in a protocol-independent message data-model, by a Message Observer.  The service is responsible for receiving blockchain messages, identifying how the specific message should be processed, attesting to the message if required, and finally handing the message to the appropriate Message Dispatcher. The services utilises a number of configurable and extensible components to achieve these capabilities.
 
 #### Message Router
-A Message Router, maps message types to specific message handling workflows. When a message is received by the Relayer Core, the router is responsible for determining what specific message handling workflow needs to be triggered, based on context information provided in the message, and pre-specified message routing configurations.   
+A Message Router, maps message types and destination information to specific message handling workflows. When a message is received by the Relayer Core, the router is responsible for determining what specific message handling workflow needs to be triggered, based on context information provided in the message, and pre-specified message routing configurations.   
 
 <img src="images/message-router-example.png" width="720"/>
 
@@ -63,8 +63,42 @@ The Message Signer, is responsible for signing and attesting to the validity of 
 
 <img src="images/message-signer.png" width="520"/>
 
+### Message Format
+Messages communicated across the different components are encoded as JSON, and adhere to the data scheme specified [here](./relay-schema.json) and exemplified below:
+
+**Message**
+```jsonc
+{
+   "id":"", // Unique identifier for a message generated in a source blockchain
+   "meta":{
+      "type":"",  // Message type discriminator
+      "timestamp": "2021-11-19T20:00:10Z"  // Timestamp for when message was generated
+      "destination":[ // Details of one or more destination contracts to relay message to
+         {
+            "networkId":"",
+            "bridgeAddress":"", // The bridge contract to deliver message to.
+            "contractAddress":"" // The ultimate contract that will consume this message
+         }
+      ],
+      "source":{ // Details of the originator of this message
+         "networkId":"",
+         "bridgeAddress":"",   // The bridge contract that initiated the cross-chain message.
+         "contractAddress":"" // The address of the contract that initiated the cross-chain message
+      },
+   },
+   "proofs":[
+      {
+         "type":"EcdsaSecp256k1Signature2019", // Type of cryptographic method used to prove authenticity or validity of message
+         "created":"2021-11-19T20:00:10Z",  // Timestamp of when the proof was created
+         "proof":"Base64EncodedString" // Base64 encoding of proof
+      }
+   ],
+   "payload":"Base64EncodedString" // Base64 encoded of message from source blockchain
+}
+```
+
 #### TODOs
-- [ ] Message format
+- [x] Message format
 - [ ] Interface definitions for Components
 - [ ] Example flow
 - [ ] Example sequence diagrams
