@@ -72,13 +72,13 @@ Messages communicated across the different components are encoded as JSON, and a
    "id":"", // Unique identifier for a message generated in a source blockchain
    "meta":{
       "type":"",  // Message type discriminator
-      "timestamp": "2021-11-19T20:00:10Z"  // Timestamp for when message was generated
-      "destination":[ // Details of one or more destination contracts to relay message to
-         {
+      "timestamp": "2021-11-19T20:00:10Z",  // Timestamp for when message was generated
+      "destination": [ // Details of one or more destination contracts to relay message to  
+      {
             "networkId":"",
             "bridgeAddress":"", // The bridge contract to deliver message to.
             "contractAddress":"" // The ultimate contract that will consume this message
-         }
+      }
       ],
       "source":{ // Details of the originator of this message
          "networkId":"",
