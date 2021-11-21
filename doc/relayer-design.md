@@ -6,26 +6,25 @@ Date: 18/11/2021
 ## Overview
 The Relayer is an off-chain system that is responsible for receiving cross-chain communication messages from a source network and delivering them to one or more destination networks. A Relayer might perform additional duties such as attesting to the validity of messages being communicated. A Relayer will generally interface with two or more networks and support a wide range of message communication needs. A Relayer might operate independently or in coordination with other distinct Relayers that are owned and managed by other parties.
 
-## Core Capabilities
+## Key Features
 The Relayer offers the following set of core capabilities:
 1. Listen to cross-chain communication messages originating from a source network
 1. Attest to the validity of the given message, based on the finalised state on the source ledger
 1. Coordinate with other Relayers as required to attest to messages
 1. Deliver cross-chain communication messages to one or more destination networks
-1. Serve as part of one or more bridges, to perform the above capabilities.
 
 In addition to these core capabilities, a relay might offer several supportive capabilities, such as use-case specific message processing requirements, service administration functionalities etc.
 
 ## Design Considerations
- The capabilities of the system can be seen in two parts, a) the protocol-specific capabilities, such as reading and writing to specific network protocols b) the protocol-agnostic capabilities, such as processing and signing messages and communicating with other relayers as required. The design of a Relayer has to afford a significant amount of extensibility for the former while allowing for flexibility and variability in the operations of the latter. Such a design would enable a Relayer to cater for a growing number of network protocols, while at the same time catering to a wide array of use-cases with different message processing and attestation requirements.
+ The capabilities of the system can be seen in two parts, a) protocol-specific capabilities, such as reading and writing to specific network protocols b) protocol-agnostic capabilities, such as processing and signing messages and communicating with other relayers as required. The design of a Relayer has to afford a significant amount of extensibility for the former while enabling flexibility and variability in the operations of the latter. Such a design would enable a Relayer to integrate with a growing number of network protocols while addressing a wide array of use-cases with different message processing and attestation requirements.
 
-From a process perspective, the operations of a Relayer can be seen as consisting of three distinct phases, receiving messages, processing messages and delivering messages. Each of these phases has different non-functional requirements and constraints (latency, scalability, security etc). Minimising the coupling of these phases would enable freedom to serve the needs of each independently.
+From a process perspective, the operations of a Relayer can be seen as consisting of three distinct phases, a) receiving messages, b) processing messages and c) delivering messages. Each of these phases has different non-functional requirements and constraints (latency, scalability, security etc). Minimising the coupling of these phases increases flexibility in how the needs of each of these phases are addressed.
 
 ## Architecture
 The core aspects of the proposed architecture can be summarised as follows:
 - Separate protocol-specific functionality from protocol-agnostic ones.
-- Decouple the three phases of relaying cross-chain messages, i.e. 1) receiving 2) processing and 3) delivering
-- Enable variability and extensibility at the edges (1 and 3), and consistency with flexibility at the core (2).
+- Decouple the three phases of relaying cross-chain messages, i.e. a) receiving b) processing and c) delivering
+- Enable variability and extensibility at the edges (a and c), and consistency with flexibility at the core (b).
 - Decouple network Read from Write operations, as these might have different non-functional requirements (performance, scalability, security etc.)
 
 The proposed architecture involves three distinct component types: 1) *Message Observer*, 2) *Message Dispatcher* and 3) the *Relayer Core*. 1 and 2 are *platform adapters* (*network adapters*) that interact with networks to read and write messages respectively to networks, while the Relayer Core is responsible for performing common message processing operations and routing messages between protocol adapters. The Relayer core interacts with protocol adapters through a message queue.
