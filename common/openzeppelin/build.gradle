@@ -1,7 +1,3 @@
-dependencies {
-    implementation ('org.web3j:core:4.6.3')
-}
-
 task generateSources {
     def script = "common/openzeppelin/gen.sh".execute()
     script.waitForProcessOutput(System.out, System.err)

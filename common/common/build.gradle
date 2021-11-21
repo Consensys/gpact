@@ -21,12 +21,6 @@ dependencies {
 
     implementation group: 'com.google.guava', name: 'guava', version: guavaVersion
 
-    implementation files('../../../web3j-abi/abi/build/libs/abi-4.8.7-SNAPSHOT.jar')
-    implementation files('../../../web3j-abi/core/build/libs/core-4.8.7-SNAPSHOT.jar')
-    implementation files('../../../web3j-abi/crypto/build/libs/crypto-4.8.7-SNAPSHOT.jar')
-    implementation files('../../../web3j-abi/rlp/build/libs/rlp-4.8.7-SNAPSHOT.jar')
-    implementation files('../../../web3j-abi/utils/build/libs/utils-4.8.7-SNAPSHOT.jar')
-
     implementation "org.bouncycastle:bcprov-jdk15on:1.69"
 
     testImplementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"

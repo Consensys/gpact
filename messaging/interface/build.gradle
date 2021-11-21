@@ -6,12 +6,6 @@ dependencies {
     // https://mvnrepository.com/artifact/org.apache.tuweni/tuweni-units
     implementation group: 'org.apache.tuweni', name: 'tuweni-units', version: '1.0.0'
 
-    implementation files('../../../web3j-abi/abi/build/libs/abi-4.8.7-SNAPSHOT.jar')
-    implementation files('../../../web3j-abi/core/build/libs/core-4.8.7-SNAPSHOT.jar')
-    implementation files('../../../web3j-abi/crypto/build/libs/crypto-4.8.7-SNAPSHOT.jar')
-    implementation files('../../../web3j-abi/rlp/build/libs/rlp-4.8.7-SNAPSHOT.jar')
-    implementation files('../../../web3j-abi/utils/build/libs/utils-4.8.7-SNAPSHOT.jar')
-
     // https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: jacksonVersion
 // https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-annotations

@@ -2,11 +2,5 @@ dependencies {
     implementation project (':common')
 
     implementation group: 'com.google.guava', name: 'guava', version: guavaVersion
-
-    implementation files('../../../../web3j-abi/abi/build/libs/abi.jar')
-    implementation files('../../../../web3j-abi/core/build/libs/core.jar')
-    implementation files('../../../../web3j-abi/crypto/build/libs/crypto.jar')
-    implementation files('../../../../web3j-abi/rlp/build/libs/rlp.jar')
-    implementation files('../../../../web3j-abi/utils/build/libs/utils.jar')
 }
 
