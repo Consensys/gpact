@@ -1,6 +1,7 @@
 {
   "config":{
     "chainId":34,
+    "muirglacierblock":12965000,
     "constantinoplefixblock": 0,
     "clique":{
       "blockperiodseconds":1,
