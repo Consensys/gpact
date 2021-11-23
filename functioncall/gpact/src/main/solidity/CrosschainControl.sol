@@ -192,7 +192,7 @@ contract CrosschainControl is
                 segmentTransactionExecuted[mapKey] == false,
                 "Segment transaction already executed"
             );
-            segmentTransactionExecuted[mapKey] == true;
+            segmentTransactionExecuted[mapKey] = true;
         }
         bytes32 hashOfCallGraph = keccak256(callGraph);
 
