@@ -23,7 +23,6 @@ import "../interface/CrosschainFunctionCallReturnInterface.sol";
 import "../interface/AtomicHiddenAuthParameters.sol";
 import "../../common/ResponseProcessUtil.sol";
 
-
 contract CrosschainControl is
     CrosschainFunctionCallReturnInterface,
     CbcDecVer,
