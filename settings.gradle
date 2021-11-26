@@ -2,7 +2,14 @@ rootProject.name = 'gpact'
 include 'common'
 include 'commontest'
 include 'openzeppelin'
-include 'contracts'
+
+include 'contracts-common'
+include 'contracts-functioncall-gpact'
+include 'contracts-functioncall-interface'
+include 'contracts-functioncall-sfc'
+include 'contracts-messaging-attestor-sign'
+include 'contracts-messaging-interface'
+include 'contracts-messaging-txroot-transfer'
 
 include 'mes-interface'
 include 'mes-attestor-sign'
@@ -38,7 +45,14 @@ include 'examples-singlebc-write'
 project(":common").projectDir = file("common/common")
 project(":commontest").projectDir = file("common/commontest")
 project(":openzeppelin").projectDir = file("common/openzeppelin")
-project(":contracts").projectDir = file("contracts")
+
+project(":contracts-common").projectDir = file("contracts/common")
+project(":contracts-functioncall-gpact").projectDir = file("contracts/functioncall/gpact")
+project(":contracts-functioncall-interface").projectDir = file("contracts/functioncall/interface")
+project(":contracts-functioncall-sfc").projectDir = file("contracts/functioncall/sfc")
+project(":contracts-messaging-attestor-sign").projectDir = file("contracts/messaging/attestor-sign")
+project(":contracts-messaging-interface").projectDir = file("contracts/messaging/interface")
+project(":contracts-messaging-txroot-transfer").projectDir = file("contracts/messaging/txroot-transfer")
 
 project(":mes-interface").projectDir = file("messaging/interface")
 project(":mes-attestor-sign").projectDir = file("messaging/attestor-sign")

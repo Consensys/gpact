@@ -1,0 +1,23 @@
+plugins {
+    id 'java'
+    id "org.web3j"
+    id "org.web3j.solidity"
+    id "com.github.node-gradle.node"
+}
+
+node {
+    nodeProjectDir = file("../../../")
+}
+
+web3j {
+    generatedPackageName = 'net.consensys.gpact.generated.functioncall.sfc.{0}'
+}
+
+solidity {
+    pathRemappings = [
+        '@openzeppelin/': '../../../node_modules/@openzeppelin/',
+        'gpact': '../gpact',
+        'interface': '../interface',
+        'common': '../../common',
+        'messaging': '../../messaging']
+}
