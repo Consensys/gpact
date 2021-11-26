@@ -70,6 +70,10 @@ subprojects {
     }
 }
 
+node {
+    nodeProjectDir = file(".")
+}
+
 task solFormat {
     dependsOn npm_run_solFormat
 }
