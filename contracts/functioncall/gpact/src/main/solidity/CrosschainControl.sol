@@ -23,7 +23,6 @@ import "../../../../interface/src/main/solidity/CrosschainFunctionCallReturnInte
 import "../../../../interface/src/main/solidity/AtomicHiddenAuthParameters.sol";
 import "../../../../../common/src/main/solidity/ResponseProcessUtil.sol";
 
-
 contract CrosschainControl is
     CrosschainFunctionCallReturnInterface,
     CbcDecVer,
