@@ -14,8 +14,6 @@ solidity {
 }
 
 sourceSets {
-    main {}
-    test {}
     common {
         solidity {
             srcDir {
@@ -24,12 +22,132 @@ sourceSets {
             outputDir = file('./build/resources/common/')
         }
     }
+    functioncallgpact {
+        solidity {
+            srcDir {
+                "./functioncall/gpact"
+            }
+            outputDir = file("./build/resources/functioncall/gpact")
+        }
+    }
+    functioncallinterface {
+        solidity {
+            srcDir {
+                "./functioncall/interface"
+            }
+            outputDir = file("./build/resources/functioncall/interface")
+        }
+    }
+    functioncallsfc {
+        solidity {
+            srcDir {
+                "./functioncall/sfc"
+            }
+            outputDir = file("./build/resources/functioncall/sfc")
+        }
+    }
     messagingattestorsign {
         solidity {
             srcDir {
                 "./messaging/attestor-sign"
             }
             outputDir = file('./build/resources/messaging/attestor-sign')
+        }
+    }
+    messaginginterface {
+        solidity {
+            srcDir {
+                "./messaging/interface"
+            }
+            outputDir = file('./build/resources/messaging/interface')
+        }
+    }
+    messagingtxroottransfer {
+        solidity {
+            srcDir {
+                "./messaging/txroot-transfer"
+            }
+            outputDir = file('./build/resources/messaging/txroot-transfer')
+        }
+    }
+    applicationatomicappcontractserc20 {
+        solidity {
+            srcDir {
+                "./application/atomic-appcontracts/erc20"
+            }
+            outputDir = file('./build/resources/application/atomic-appcontracts/erc20')
+        }
+    }
+    applicationatomicappcontractslockablestorage {
+        solidity {
+            srcDir {
+                "./application/atomic-appcontracts/lockablestorage"
+            }
+            outputDir = file('./build/resources/application/atomic-appcontracts/lockablestorage')
+        }
+    }
+    applicationgpactexamplesconditional {
+        solidity {
+            srcDir {
+                "./application/gpact-examples/conditional"
+            }
+            outputDir = file('./build/resources/application/gpact-examples/conditional')
+        }
+    }
+    applicationgpactexampleshoteltrain {
+        solidity {
+            srcDir {
+                "./application/gpact-examples/hotel-train"
+            }
+            outputDir = file('./build/resources/application/gpact-examples/hotel-train')
+        }
+    }
+    applicationgpactexamplesread {
+        solidity {
+            srcDir {
+                "./application/gpact-examples/read"
+            }
+            outputDir = file('./build/resources/application/gpact-examples/read')
+        }
+    }
+    applicationgpactexamplestrade {
+        solidity {
+            srcDir {
+                "./application/gpact-examples/trade"
+            }
+            outputDir = file('./build/resources/application/gpact-examples/trade')
+        }
+    }
+    applicationgpactexampleswrite {
+        solidity {
+            srcDir {
+                "./application/gpact-examples/write"
+            }
+            outputDir = file('./build/resources/application/gpact-examples/write')
+        }
+    }
+    applicationnonatomicappcontractserc20bridge {
+        solidity {
+            srcDir {
+                "./application/nonatomic-appcontracts/erc20bridge"
+            }
+            outputDir = file('./build/resources/application/nonatomic-appcontracts/erc20bridge')
+        }
+    }
+    applicationnonatomicappcontractserc721bridge {
+        solidity {
+            srcDir {
+                "./application/nonatomic-appcontracts/erc721bridge"
+            }
+            outputDir = file('./build/resources/application/nonatomic-appcontracts/erc721bridge')
+        }
+    }
+    applicationsfcexampleswrite {
+        solidity {
+            srcDir {
+                "./application/sfc-examples/write"
+            }
+            outputDir = file('./build/resources/application/sfc-examples/write')
         }
     }
 }

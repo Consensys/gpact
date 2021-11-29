@@ -14,11 +14,11 @@ dependencies {
 }
 
 task generateSources {
-    def script = "application/gpact-examples/hotel-train/gen.sh".execute()
-    script.waitForProcessOutput(System.out, System.err)
-    if (script.exitValue() != 0) {
-        throw new GradleException("Solidity compile error")
-    }
+    // def script = "application/gpact-examples/hotel-train/gen.sh".execute()
+    // script.waitForProcessOutput(System.out, System.err)
+    // if (script.exitValue() != 0) {
+    //     throw new GradleException("Solidity compile error")
+    // }
 }
 
 project.afterEvaluate {
