@@ -1,0 +1,45 @@
+plugins {
+    id 'java'
+    id "org.web3j"
+    id "org.web3j.solidity"
+    id "com.github.node-gradle.node"
+}
+
+node {
+    nodeProjectDir = file("../")
+}
+
+solidity {
+    pathRemappings = ['@openzeppelin/': '../node_modules/@openzeppelin/']
+}
+
+sourceSets {
+    main {}
+    test {}
+    common {
+        solidity {
+            srcDir {
+                "./common"
+            }
+            outputDir = file('./build/resources/common/')
+        }
+    }
+    messagingattestorsign {
+        solidity {
+            srcDir {
+                "./messaging/attestor-sign"
+            }
+            outputDir = file('./build/resources/messaging/attestor-sign')
+        }
+    }
+}
+
+project.tasks.matching {
+    task -> task.name.endsWith('ContractWrappers')
+}.configureEach {task -> task.doFirst {
+    task.setProperty('generatedJavaPackageName', 'net.consensys.gpact.' + task.name)
+}}
+
+build.finalizedBy project.tasks.matching {
+    task -> task.group == 'web3j' && task.name != 'generateContractWrappers' && task.name != 'generateTestContractWrappers'
+}
