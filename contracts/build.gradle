@@ -155,7 +155,7 @@ sourceSets {
 project.tasks.matching {
     task -> task.name.endsWith('ContractWrappers')
 }.configureEach {task -> task.doFirst {
-    task.setProperty('generatedJavaPackageName', 'net.consensys.gpact.' + task.name)
+    task.setProperty('generatedJavaPackageName', 'net.consensys.gpact.contracts.' + task.name)
 }}
 
 build.finalizedBy project.tasks.matching {
