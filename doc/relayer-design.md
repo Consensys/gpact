@@ -85,6 +85,7 @@ Messages communicated across the different components are encoded as JSON, and a
    "id":"", // Unique identifier for a message generated in a source blockchain
    "meta":{
       "timestamp": "2021-11-19T20:00:10Z",  // Timestamp for when message was generated
+      "version": "0.0.1" // version number of message schema
     },
     "destination": [{ // Details of one or more destination contracts to relay message to
             "networkId":"",
