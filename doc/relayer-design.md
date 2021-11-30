@@ -34,7 +34,7 @@ The proposed architecture follows a microservice pattern involving three distinc
 The platform adapters are Blockchain protocol specific components that interact with a given network. They act as clients on a network, able to read or write to the ledger according to the protocol specifications of the underlying network. They leverage existing tools and SDKs for a protocol and can be built using different languages or frameworks.
 
 ![High Level Architecture](images/hla-details.png)
-<p align="center">Figure 2: Platform adapters offer extension points for different chains and message types</p>
+<p align="center">Figure 2: Platform adapters offer extension points for different chains</p>
 
 #### Message Observer
 The Message Observer subscribes to state-change events on a designated Blockchain, annotates these events with additional metadata, wraps them onto a common message data model and places them onto a queue for processing by the Relayer core. An observer could be configured to listen to all state-change events or employ filtering based on the requirements of a use-case. The default implementations of Message Observer enable listening to all events (*Block Event Observer*) or filter based on simple criteria (*Filtered Event Observer*), however,  the Message Observer, interface can be extended to listen to other types of state-change events (see Figure 3 below for examples).
@@ -58,7 +58,7 @@ The Relayer Core maintains two message queues,  an *Ingress queue* and and *Egre
 <p align="center">Figure 4: Relayer Core </p>
 
 #### Message Router
-A Message Router maps messages to workflows. When a message is received by the Relayer Core, the router is responsible for determining what specific message handling workflow needs to be triggered, based on context information provided in the message (message type, destination etc.). Conceptually, a Router is a map of keys to values, where keys can be as simple as a message destination identifier, and values are pointers to a workflow (see *Message Processor* for details). A router can be extended to offer more complex key types, enabling more sophisticated routing logic.
+A Message Router maps messages to workflows. When a message is received by the Relayer Core, the router is responsible for determining what specific message handling workflow needs to be triggered, based on context information provided in the message (e.g. destination information). Conceptually, a Router is a map of keys to values, where keys can be as simple as a message destination identifier, and values are pointers to a workflow (see *Message Processor* for details). A router can be extended to offer more complex key types, enabling more sophisticated routing logic.
 
 <p align="center">
 <img src="images/message-router-example.png" width="720"/>
@@ -84,7 +84,6 @@ Messages communicated across the different components are encoded as JSON, and a
 {
    "id":"", // Unique identifier for a message generated in a source blockchain
    "meta":{
-      "type":"",  // Message type discriminator
       "timestamp": "2021-11-19T20:00:10Z",  // Timestamp for when message was generated
     },
     "destination": [{ // Details of one or more destination contracts to relay message to
