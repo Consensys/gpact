@@ -1,4 +1,4 @@
-package net.consensys.gpact.attestorsign.soliditywrappers;
+package net.consensys.gpact.txroot.soliditywrappers;
 
 import io.reactivex.Flowable;
 import io.reactivex.functions.Function;

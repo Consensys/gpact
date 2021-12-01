@@ -1,5 +1,6 @@
 dependencies {
     implementation project (':common')
+    implementation project (':contracts')
 
     // https://mvnrepository.com/artifact/org.apache.tuweni/tuweni-bytes
     implementation group: 'org.apache.tuweni', name: 'tuweni-bytes', version: '1.0.0'

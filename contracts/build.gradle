@@ -70,30 +70,38 @@ sourceSets {
             outputDir = file("./build/resources/functioncall/sfc/src/main")
         }
     }
-    // messagingattestorsign {
-    //     solidity {
-    //         srcDir {
-    //             "./messaging/attestor-sign"
-    //         }
-    //         outputDir = file('./build/resources/messaging/attestor-sign')
-    //     }
-    // }
-    // messaginginterface {
-    //     solidity {
-    //         srcDir {
-    //             "./messaging/interface"
-    //         }
-    //         outputDir = file('./build/resources/messaging/interface')
-    //     }
-    // }
-    // messagingtxroottransfer {
-    //     solidity {
-    //         srcDir {
-    //             "./messaging/txroot-transfer"
-    //         }
-    //         outputDir = file('./build/resources/messaging/txroot-transfer')
-    //     }
-    // }
+    messaging__attestor_sign__src__main__java__net__consensys__gpact__attestorsign__soliditywrappers {
+        solidity {
+            srcDir {
+                "./messaging/attestor-sign/src/main"
+            }
+            outputDir = file('./build/resources/messaging/attestor-sign/src/main')
+        }
+    }
+    messaging__interface__src__main__java__net__consensys__gpact__messaging__soliditywrappers {
+        solidity {
+            srcDir {
+                "./messaging/interface/src/main"
+            }
+            outputDir = file('./build/resources/messaging/interface/src/main')
+        }
+    }
+    messaging__txroot_transfer__src__main__java__net__consensys__gpact__txroot__soliditywrappers {
+        solidity {
+            srcDir {
+                "./messaging/txroot-transfer/src/main"
+            }
+            outputDir = file('./build/resources/messaging/txroot-transfer/src/main')
+        }
+    }
+    messaging__txroot_transfer__src__test__java__net__consensys__gpact__txroot__soliditywrappers {
+        solidity {
+            srcDir {
+                "./messaging/txroot-transfer/src/test"
+            }
+            outputDir = file('./build/resources/messaging/txroot-transfer/src/test')
+        }
+    }
     // application__atomic_appcontracts__erc20 {
     //     solidity {
     //         srcDir {

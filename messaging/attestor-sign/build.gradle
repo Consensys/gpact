@@ -1,5 +1,6 @@
 dependencies {
     implementation project (path: ':common')
+    implementation project (path: ':contracts')
     implementation project (path: ':mes-interface')
 
     implementation "io.reactivex.rxjava2:rxjava:${rxJavaVersion}"
@@ -11,16 +12,4 @@ dependencies {
 
     testImplementation project(':commontest')
     testImplementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
-}
-
-// Generate Solidity wrapper code before build.
-task generateSources {
-    // def script = "messaging/attestor-sign/gen.sh".execute()
-    // script.waitForProcessOutput(System.out, System.err)
-    // if (script.exitValue() != 0) {
-    //     throw new GradleException("Solidity compile error")
-    // }
-}
-project.afterEvaluate {
-    build.dependsOn generateSources
 }

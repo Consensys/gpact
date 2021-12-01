@@ -1,5 +1,6 @@
 dependencies {
     implementation project(':common')
+    implementation project(':contracts')
     implementation project(':mes-interface')
     implementation project(':mes-attestor-sign')
 
@@ -18,18 +19,6 @@ dependencies {
     implementation group: 'com.google.guava', name: 'guava', version: guavaVersion
 
     testImplementation project(':commontest')
-}
-
-task generateSources {
-    // def script = "messaging/txroot-transfer/gen.sh".execute()
-    // script.waitForProcessOutput(System.out, System.err)
-    // if (script.exitValue() != 0) {
-    //     throw new GradleException("Solidity compile error")
-    // }
-}
-
-project.afterEvaluate {
-    build.dependsOn generateSources
 }
 
 test {
