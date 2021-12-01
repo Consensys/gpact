@@ -1,6 +1,6 @@
 dependencies {
     implementation project(':common')
-    implementation project(':openzeppelin')
+    implementation project(':contracts')
     implementation project(':gpact')
     implementation project (':examplehelpers')
 
@@ -11,16 +11,4 @@ dependencies {
 
     // compile ('org.web3j:core:4.6.3')
     testImplementation project(':commontest')
-}
-
-task generateSources {
-    // def script = "performance/base/singlebc-hotel-train/gen.sh".execute()
-    // script.waitForProcessOutput(System.out, System.err)
-    // if (script.exitValue() != 0) {
-    //     throw new GradleException("Solidity compile error")
-    // }
-}
-
-project.afterEvaluate {
-    build.dependsOn generateSources
 }

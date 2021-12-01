@@ -198,6 +198,38 @@ sourceSets {
             outputDir = file('./build/resources/application/sfc-examples/write/src/main')
         }
     }
+    performance__base__singlebc_hotel_train__src__main__java__net__consensys__gpact__examples__singlebc__hoteltrain__soliditywrappers {
+        solidity {
+            srcDir {
+                "./performance/base/singlebc-hotel-train/src/main"
+            }
+            outputDir = file('./build/resources/performance/base/singlebc-hotel-train/src/main')
+        }
+    }
+    performance__base__singlebc_read__src__main__java__net__consensys__gpact__examples__singlebc__read__soliditywrappers {
+        solidity {
+            srcDir {
+                "./performance/base/singlebc-read/src/main"
+            }
+            outputDir = file('./build/resources/performance/base/singlebc-read/src/main')
+        }
+    }
+    performance__base__singlebc_trade__src__main__java__net__consensys__gpact__examples__singlebc__trade__soliditywrappers {
+        solidity {
+            srcDir {
+                "./performance/base/singlebc-trade/src/main"
+            }
+            outputDir = file('./build/resources/performance/base/singlebc-trade/src/main')
+        }
+    }
+    performance__base__singlebc_write__src__main__java__net__consensys__gpact__examples__singlebc__write__soliditywrappers {
+        solidity {
+            srcDir {
+                "./performance/base/singlebc-write/src/main"
+            }
+            outputDir = file('./build/resources/performance/base/singlebc-write/src/main')
+        }
+    }
 }
 
 project.tasks.matching {

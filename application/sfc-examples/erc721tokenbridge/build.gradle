@@ -1,6 +1,5 @@
 dependencies {
     implementation project (':common')
-    implementation project (':openzeppelin')
     implementation project (':sfc')
     implementation project (':mes-interface')
     implementation project (':examplehelpers')

@@ -1,7 +1,6 @@
 rootProject.name = 'gpact'
 include 'common'
 include 'commontest'
-include 'openzeppelin'
 include 'contracts'
 
 include 'mes-interface'
@@ -37,7 +36,6 @@ include 'examples-singlebc-write'
 
 project(":common").projectDir = file("common/common")
 project(":commontest").projectDir = file("common/commontest")
-project(":openzeppelin").projectDir = file("common/openzeppelin")
 
 project(":contracts").projectDir = file("contracts")
 
