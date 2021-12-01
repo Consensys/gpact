@@ -16,7 +16,7 @@ package net.consensys.gpact.sfc.examples.erc721tokenbridge;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import net.consensys.gpact.appcontracts.nonatomic.erc721bridge.soliditywrappers.ERC721RemoteBlockchain;
+import net.consensys.gpact.appcontracts.nonatomic.erc721bridge.soliditywrappers.ERC721AutoURIRemoteBlockchain;
 import net.consensys.gpact.appcontracts.nonatomic.erc721bridge.soliditywrappers.SfcErc721Bridge;
 import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.common.DynamicGasProvider;
@@ -36,7 +36,7 @@ public class RemoteBcERC721Bridge extends AbstractERC721Bridge {
   public static final byte[] MINTER_ROLE =
       Hash.keccak256(Bytes.wrap("MINTER_ROLE".getBytes())).toArray();
 
-  ERC721RemoteBlockchain erc721;
+  ERC721AutoURIRemoteBlockchain erc721;
 
   public RemoteBcERC721Bridge(
       final String entity,
@@ -53,7 +53,7 @@ public class RemoteBcERC721Bridge extends AbstractERC721Bridge {
     String name = this.entity;
     String symbol = this.entity;
     this.erc721 =
-        ERC721RemoteBlockchain.deploy(
+        ERC721AutoURIRemoteBlockchain.deploy(
                 this.web3j, this.tm, this.gasProvider, name, symbol, TOKEN_URI)
             .send();
     this.erc721Address = this.erc721.getContractAddress();

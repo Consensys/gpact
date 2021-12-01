@@ -18,7 +18,7 @@ import "../../../../../../common/openzeppelin/src/main/solidity/token/ERC721/IER
 import "../../../../../../functioncall/interface/src/main/solidity/CrosschainFunctionCallInterface.sol";
 import "../../../../../../common/openzeppelin/src/main/solidity/access/AccessControl.sol";
 import "../../../../../../common/openzeppelin/src/main/solidity/security/Pausable.sol";
-import "./ERC721RemoteBlockchain.sol";
+import "./ERC721AutoURIRemoteBlockchain.sol";
 import "../../../../../../functioncall/interface/src/main/solidity/NonAtomicHiddenAuthParameters.sol";
 
 /**
