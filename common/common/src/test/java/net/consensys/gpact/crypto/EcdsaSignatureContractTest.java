@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import java.math.BigInteger;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import net.consensys.gpact.common.TxManagerCache;
-import net.consensys.gpact.test.soliditywrappers.EcdsaSignatureTest;
+import net.consensys.gpact.common.soliditywrappers.EcdsaSignatureTest;
 import net.consensys.gpact.utils.crypto.EcdsaSignatureConversion;
 import net.consensys.gpact.utils.crypto.KeyPairGen;
 import org.junit.jupiter.api.Test;

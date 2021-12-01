@@ -22,14 +22,14 @@ sourceSets {
             outputDir = file('./build/resources/common/src/main')
         }
     }
-    // common__common__src__test__java__net__consensys__gpact__common__soliditywrappers {
-    //     solidity {
-    //         srcDir {
-    //             "./common/src/test"
-    //         }
-    //         outputDir = file('./build/resources/common/src/test')
-    //     }
-    // }
+    common__common__src__test__java__net__consensys__gpact__common__soliditywrappers {
+        solidity {
+            srcDir {
+                "./common/src/test"
+            }
+            outputDir = file('./build/resources/common/src/test')
+        }
+    }
     // functioncallgpact {
     //     solidity {
     //         srcDir {
