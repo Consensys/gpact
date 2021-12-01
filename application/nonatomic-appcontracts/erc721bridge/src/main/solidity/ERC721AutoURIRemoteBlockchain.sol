@@ -61,6 +61,7 @@ contract ERC721AutoURIRemoteBlockchain is ERC721RemoteBlockchain {
      *
      * @param _recipient    Address to assign the token to.
      * @param _tokenId      Token to create.
+     * @param _data         Additional data to forward to the recipient.
      *
      * Requirements:
      * - the caller must have the `MINTER_ROLE`.

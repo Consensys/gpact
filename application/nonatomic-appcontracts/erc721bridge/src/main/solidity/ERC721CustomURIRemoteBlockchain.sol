@@ -41,7 +41,7 @@ contract ERC721CustomURIRemoteBlockchain is
      *
      * @param _recipient    Address to assign the token to.
      * @param _tokenId      Token to create.
-     *
+     * @param _data         The URI to assign to the token
      * Requirements:
      * - the caller must have the `MINTER_ROLE`.
      */
