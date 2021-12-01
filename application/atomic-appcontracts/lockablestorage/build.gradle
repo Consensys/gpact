@@ -1,5 +1,6 @@
 dependencies {
     implementation project(':common')
+    implementation project(':contracts')
     implementation project(':mes-txroot-transfer')
     implementation project(':mes-attestor-sign')
 

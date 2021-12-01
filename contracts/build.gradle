@@ -102,22 +102,38 @@ sourceSets {
             outputDir = file('./build/resources/messaging/txroot-transfer/src/test')
         }
     }
-    // application__atomic_appcontracts__erc20 {
-    //     solidity {
-    //         srcDir {
-    //             "./application/atomic-appcontracts/erc20"
-    //         }
-    //         outputDir = file('./build/resources/application/atomic-appcontracts/erc20')
-    //     }
-    // }
-    // applicationatomicappcontractslockablestorage {
-    //     solidity {
-    //         srcDir {
-    //             "./application/atomic-appcontracts/lockablestorage"
-    //         }
-    //         outputDir = file('./build/resources/application/atomic-appcontracts/lockablestorage')
-    //     }
-    // }
+    application__atomic_appcontracts__erc20__src__main__java__net__consensys__gpact__appcontracts__atomic__erc20__soliditywrappers {
+        solidity {
+            srcDir {
+                "./application/atomic-appcontracts/erc20/src/main"
+            }
+            outputDir = file('./build/resources/application/atomic-appcontracts/erc20/src/main')
+        }
+    }
+    application__atomic_appcontracts__erc20__src__test__java__net__consensys__gpact__appcontracts__atomic__erc20__soliditywrappers {
+        solidity {
+            srcDir {
+                "./application/atomic-appcontracts/erc20/src/test"
+            }
+            outputDir = file('./build/resources/application/atomic-appcontracts/erc20/src/test')
+        }
+    }
+    application__atomic_appcontracts__lockablestorage__src__main__java__net__consensys__gpact__lockablestorage__soliditywrappers {
+        solidity {
+            srcDir {
+                "./application/atomic-appcontracts/lockablestorage/src/main"
+            }
+            outputDir = file('./build/resources/application/atomic-appcontracts/lockablestorage/src/main')
+        }
+    }
+    application__atomic_appcontracts__lockablestorage__src__test__java__net__consensys__gpact__lockablestorage__soliditywrappers {
+        solidity {
+            srcDir {
+                "./application/atomic-appcontracts/lockablestorage/src/test"
+            }
+            outputDir = file('./build/resources/application/atomic-appcontracts/lockablestorage/src/test')
+        }
+    }
     // applicationgpactexamplesconditional {
     //     solidity {
     //         srcDir {
