@@ -1,5 +1,6 @@
 dependencies {
     implementation project (':common')
+    implementation project (':contracts')
     implementation project (':mes-interface')
 
     implementation "io.reactivex.rxjava2:rxjava:${rxJavaVersion}"
@@ -10,16 +11,4 @@ dependencies {
     implementation group: 'org.apache.tuweni', name: 'tuweni-units', version: '1.0.0'
 
     testImplementation project(':commontest')
-}
-
-// Generate Solidity wrapper code before build.
-task generateSources {
-    // def script = "functioncall/sfc/gen.sh".execute()
-    // script.waitForProcessOutput(System.out, System.err)
-    // if (script.exitValue() != 0) {
-    //     throw new GradleException("Solidity compile error")
-    // }
-}
-project.afterEvaluate {
-    build.dependsOn generateSources
 }

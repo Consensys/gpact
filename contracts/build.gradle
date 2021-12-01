@@ -62,14 +62,14 @@ sourceSets {
             outputDir = file("./build/resources/functioncall/interface/src/test")
         }
     }
-    // functioncallsfc {
-    //     solidity {
-    //         srcDir {
-    //             "./functioncall/sfc"
-    //         }
-    //         outputDir = file("./build/resources/functioncall/sfc")
-    //     }
-    // }
+    functioncall__sfc__src__main__java__net__consensys__gpact__sfccbc__soliditywrappers {
+        solidity {
+            srcDir {
+                "./functioncall/sfc/src/main"
+            }
+            outputDir = file("./build/resources/functioncall/sfc/src/main")
+        }
+    }
     // messagingattestorsign {
     //     solidity {
     //         srcDir {
