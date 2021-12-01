@@ -33,8 +33,7 @@ contract ERC721CustomURIRemoteBlockchain is
             _msgSender(),
             _msgSender()
         )
-    {
-    }
+    {}
 
     /**
      * @dev Creates a new token with the specified token ID. This should be called by the

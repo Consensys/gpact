@@ -1,12 +1,11 @@
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.math.BigInteger;
 import net.consensys.gpact.appcontracts.nonatomic.erc721bridge.soliditywrappers.ERC721CustomURIRemoteBlockchain;
 import net.consensys.gpact.common.test.AbstractWeb3Test;
 import net.consensys.gpact.common.test.DummyAddressGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import java.math.BigInteger;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ERC721CustomURIRemoteBlockchainTest extends AbstractWeb3Test {
 
