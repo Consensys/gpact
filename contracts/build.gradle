@@ -14,149 +14,184 @@ solidity {
 }
 
 sourceSets {
-    common {
+    common__common__src__main__java__net__consensys__gpact__common__soliditywrappers {
         solidity {
             srcDir {
-                "./common"
+                "./common/src/main"
             }
-            outputDir = file('./build/resources/common/')
+            outputDir = file('./build/resources/common/src/main')
         }
     }
-    functioncallgpact {
-        solidity {
-            srcDir {
-                "./functioncall/gpact"
-            }
-            outputDir = file("./build/resources/functioncall/gpact")
-        }
-    }
-    functioncallinterface {
-        solidity {
-            srcDir {
-                "./functioncall/interface"
-            }
-            outputDir = file("./build/resources/functioncall/interface")
-        }
-    }
-    functioncallsfc {
-        solidity {
-            srcDir {
-                "./functioncall/sfc"
-            }
-            outputDir = file("./build/resources/functioncall/sfc")
-        }
-    }
-    messagingattestorsign {
-        solidity {
-            srcDir {
-                "./messaging/attestor-sign"
-            }
-            outputDir = file('./build/resources/messaging/attestor-sign')
-        }
-    }
-    messaginginterface {
-        solidity {
-            srcDir {
-                "./messaging/interface"
-            }
-            outputDir = file('./build/resources/messaging/interface')
-        }
-    }
-    messagingtxroottransfer {
-        solidity {
-            srcDir {
-                "./messaging/txroot-transfer"
-            }
-            outputDir = file('./build/resources/messaging/txroot-transfer')
-        }
-    }
-    applicationatomicappcontractserc20 {
-        solidity {
-            srcDir {
-                "./application/atomic-appcontracts/erc20"
-            }
-            outputDir = file('./build/resources/application/atomic-appcontracts/erc20')
-        }
-    }
-    applicationatomicappcontractslockablestorage {
-        solidity {
-            srcDir {
-                "./application/atomic-appcontracts/lockablestorage"
-            }
-            outputDir = file('./build/resources/application/atomic-appcontracts/lockablestorage')
-        }
-    }
-    applicationgpactexamplesconditional {
-        solidity {
-            srcDir {
-                "./application/gpact-examples/conditional"
-            }
-            outputDir = file('./build/resources/application/gpact-examples/conditional')
-        }
-    }
-    applicationgpactexampleshoteltrain {
-        solidity {
-            srcDir {
-                "./application/gpact-examples/hotel-train"
-            }
-            outputDir = file('./build/resources/application/gpact-examples/hotel-train')
-        }
-    }
-    applicationgpactexamplesread {
-        solidity {
-            srcDir {
-                "./application/gpact-examples/read"
-            }
-            outputDir = file('./build/resources/application/gpact-examples/read')
-        }
-    }
-    applicationgpactexamplestrade {
-        solidity {
-            srcDir {
-                "./application/gpact-examples/trade"
-            }
-            outputDir = file('./build/resources/application/gpact-examples/trade')
-        }
-    }
-    applicationgpactexampleswrite {
-        solidity {
-            srcDir {
-                "./application/gpact-examples/write"
-            }
-            outputDir = file('./build/resources/application/gpact-examples/write')
-        }
-    }
-    applicationnonatomicappcontractserc20bridge {
-        solidity {
-            srcDir {
-                "./application/nonatomic-appcontracts/erc20bridge"
-            }
-            outputDir = file('./build/resources/application/nonatomic-appcontracts/erc20bridge')
-        }
-    }
-    applicationnonatomicappcontractserc721bridge {
-        solidity {
-            srcDir {
-                "./application/nonatomic-appcontracts/erc721bridge"
-            }
-            outputDir = file('./build/resources/application/nonatomic-appcontracts/erc721bridge')
-        }
-    }
-    applicationsfcexampleswrite {
-        solidity {
-            srcDir {
-                "./application/sfc-examples/write"
-            }
-            outputDir = file('./build/resources/application/sfc-examples/write')
+    // common__common__src__test__java__net__consensys__gpact__common__soliditywrappers {
+    //     solidity {
+    //         srcDir {
+    //             "./common/src/test"
+    //         }
+    //         outputDir = file('./build/resources/common/src/test')
+    //     }
+    // }
+    // functioncallgpact {
+    //     solidity {
+    //         srcDir {
+    //             "./functioncall/gpact"
+    //         }
+    //         outputDir = file("./build/resources/functioncall/gpact")
+    //     }
+    // }
+    // functioncallinterface {
+    //     solidity {
+    //         srcDir {
+    //             "./functioncall/interface"
+    //         }
+    //         outputDir = file("./build/resources/functioncall/interface")
+    //     }
+    // }
+    // functioncallsfc {
+    //     solidity {
+    //         srcDir {
+    //             "./functioncall/sfc"
+    //         }
+    //         outputDir = file("./build/resources/functioncall/sfc")
+    //     }
+    // }
+    // messagingattestorsign {
+    //     solidity {
+    //         srcDir {
+    //             "./messaging/attestor-sign"
+    //         }
+    //         outputDir = file('./build/resources/messaging/attestor-sign')
+    //     }
+    // }
+    // messaginginterface {
+    //     solidity {
+    //         srcDir {
+    //             "./messaging/interface"
+    //         }
+    //         outputDir = file('./build/resources/messaging/interface')
+    //     }
+    // }
+    // messagingtxroottransfer {
+    //     solidity {
+    //         srcDir {
+    //             "./messaging/txroot-transfer"
+    //         }
+    //         outputDir = file('./build/resources/messaging/txroot-transfer')
+    //     }
+    // }
+    // application__atomic_appcontracts__erc20 {
+    //     solidity {
+    //         srcDir {
+    //             "./application/atomic-appcontracts/erc20"
+    //         }
+    //         outputDir = file('./build/resources/application/atomic-appcontracts/erc20')
+    //     }
+    // }
+    // applicationatomicappcontractslockablestorage {
+    //     solidity {
+    //         srcDir {
+    //             "./application/atomic-appcontracts/lockablestorage"
+    //         }
+    //         outputDir = file('./build/resources/application/atomic-appcontracts/lockablestorage')
+    //     }
+    // }
+    // applicationgpactexamplesconditional {
+    //     solidity {
+    //         srcDir {
+    //             "./application/gpact-examples/conditional"
+    //         }
+    //         outputDir = file('./build/resources/application/gpact-examples/conditional')
+    //     }
+    // }
+    // applicationgpactexampleshoteltrain {
+    //     solidity {
+    //         srcDir {
+    //             "./application/gpact-examples/hotel-train"
+    //         }
+    //         outputDir = file('./build/resources/application/gpact-examples/hotel-train')
+    //     }
+    // }
+    // applicationgpactexamplesread {
+    //     solidity {
+    //         srcDir {
+    //             "./application/gpact-examples/read"
+    //         }
+    //         outputDir = file('./build/resources/application/gpact-examples/read')
+    //     }
+    // }
+    // applicationgpactexamplestrade {
+    //     solidity {
+    //         srcDir {
+    //             "./application/gpact-examples/trade"
+    //         }
+    //         outputDir = file('./build/resources/application/gpact-examples/trade')
+    //     }
+    // }
+    // applicationgpactexampleswrite {
+    //     solidity {
+    //         srcDir {
+    //             "./application/gpact-examples/write"
+    //         }
+    //         outputDir = file('./build/resources/application/gpact-examples/write')
+    //     }
+    // }
+    // applicationnonatomicappcontractserc20bridge {
+    //     solidity {
+    //         srcDir {
+    //             "./application/nonatomic-appcontracts/erc20bridge"
+    //         }
+    //         outputDir = file('./build/resources/application/nonatomic-appcontracts/erc20bridge')
+    //     }
+    // }
+    // applicationnonatomicappcontractserc721bridge {
+    //     solidity {
+    //         srcDir {
+    //             "./application/nonatomic-appcontracts/erc721bridge"
+    //         }
+    //         outputDir = file('./build/resources/application/nonatomic-appcontracts/erc721bridge')
+    //     }
+    // }
+    // applicationsfcexampleswrite {
+    //     solidity {
+    //         srcDir {
+    //             "./application/sfc-examples/write"
+    //         }
+    //         outputDir = file('./build/resources/application/sfc-examples/write')
+    //     }
+    // }
+}
+
+project.tasks.matching {
+    task -> task.name.endsWith('Solidity') && task.name.startsWith('compile')
+}.configureEach {task ->
+    task.doLast {
+        def src = project.buildDir.toString() + "/generated/sources/web3j:" + task.name.split('compile')[1].split('Solidity')[0].toLowerCase() + ":java"
+        def command = "rm -rf " + src
+        def res = command.execute()
+        res.waitForProcessOutput(System.out, System.err)
+        if (res.exitValue() != 0) {
+            throw new GradleException("Solidity compile error")
         }
     }
 }
 
 project.tasks.matching {
     task -> task.name.endsWith('ContractWrappers')
-}.configureEach {task -> task.doFirst {
-    task.setProperty('generatedJavaPackageName', 'net.consensys.gpact.contracts.' + task.name)
-}}
+}.configureEach {task -> 
+    task.doFirst {
+        def pkg = task.name.split('java__')[1].split('ContractWrappers')[0].replace("__", ".")
+        task.setProperty('generatedJavaPackageName', pkg)
+    }
+    task.doLast {
+        def src = project.buildDir.toString() + "/generated/sources/web3j:" + task.name.split('generate')[1].split('ContractWrappers')[0].toLowerCase() + ":java/" + task.name.split('java__')[1].split('ContractWrappers')[0].replace("__", "/")
+        def dest = project.rootDir.toString() + "/" + task.name.split('generate')[1].split('ContractWrappers')[0].toLowerCase().replace('__', '/').replace('_', '-')
+        def command = "cp -r " + src + "/ " + dest + "/"
+        def res = command.execute()
+        res.waitForProcessOutput(System.out, System.err)
+        if (res.exitValue() != 0) {
+            throw new GradleException("Solidity compile error")
+        }
+    }
+}
 
 build.finalizedBy project.tasks.matching {
     task -> task.group == 'web3j' && task.name != 'generateContractWrappers' && task.name != 'generateTestContractWrappers'
