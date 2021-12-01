@@ -30,22 +30,38 @@ sourceSets {
             outputDir = file('./build/resources/common/src/test')
         }
     }
-    // functioncallgpact {
-    //     solidity {
-    //         srcDir {
-    //             "./functioncall/gpact"
-    //         }
-    //         outputDir = file("./build/resources/functioncall/gpact")
-    //     }
-    // }
-    // functioncallinterface {
-    //     solidity {
-    //         srcDir {
-    //             "./functioncall/interface"
-    //         }
-    //         outputDir = file("./build/resources/functioncall/interface")
-    //     }
-    // }
+    functioncall__gpact__src__main__java__net__consensys__gpact__cbc__soliditywrappers {
+        solidity {
+            srcDir {
+                "./functioncall/gpact/src/main"
+            }
+            outputDir = file("./build/resources/functioncall/gpact/src/main")
+        }
+    }
+    functioncall__gpact__src__test__java__net__consensys__gpact__cbc__calltree__soliditywrappers {
+        solidity {
+            srcDir {
+                "./functioncall/gpact/src/test"
+            }
+            outputDir = file("./build/resources/functioncall/gpact/src/test")
+        }
+    }
+    functioncall__interface__src__main__java__net__consensys__gpact__functioninterfaces__soliditywrappers {
+        solidity {
+            srcDir {
+                "./functioncall/interface/src/main"
+            }
+            outputDir = file("./build/resources/functioncall/interface/src/main")
+        }
+    }
+    functioncall__interface__src__test__java__net__consensys__gpact__functioninterfaces__soliditywrappers {
+        solidity {
+            srcDir {
+                "./functioncall/interface/src/test"
+            }
+            outputDir = file("./build/resources/functioncall/interface/src/test")
+        }
+    }
     // functioncallsfc {
     //     solidity {
     //         srcDir {
@@ -184,7 +200,10 @@ project.tasks.matching {
     task.doLast {
         def src = project.buildDir.toString() + "/generated/sources/web3j:" + task.name.split('generate')[1].split('ContractWrappers')[0].toLowerCase() + ":java/" + task.name.split('java__')[1].split('ContractWrappers')[0].replace("__", "/")
         def dest = project.rootDir.toString() + "/" + task.name.split('generate')[1].split('ContractWrappers')[0].toLowerCase().replace('__', '/').replace('_', '-')
+        println src
+        println dest
         def command = "cp -r " + src + "/ " + dest + "/"
+        println command
         def res = command.execute()
         res.waitForProcessOutput(System.out, System.err)
         if (res.exitValue() != 0) {
