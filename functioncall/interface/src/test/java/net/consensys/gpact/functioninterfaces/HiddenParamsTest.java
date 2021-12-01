@@ -20,7 +20,6 @@ import net.consensys.gpact.common.RevertReason;
 import net.consensys.gpact.common.test.AbstractWeb3Test;
 import net.consensys.gpact.functioninterfaces.soliditywrappers.HiddenParamDestTest;
 import net.consensys.gpact.functioninterfaces.soliditywrappers.HiddenParamSourceTest;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeEach;
