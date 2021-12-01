@@ -134,30 +134,30 @@ sourceSets {
             outputDir = file('./build/resources/application/atomic-appcontracts/lockablestorage/src/test')
         }
     }
-    // applicationgpactexamplesconditional {
-    //     solidity {
-    //         srcDir {
-    //             "./application/gpact-examples/conditional"
-    //         }
-    //         outputDir = file('./build/resources/application/gpact-examples/conditional')
-    //     }
-    // }
-    // applicationgpactexampleshoteltrain {
-    //     solidity {
-    //         srcDir {
-    //             "./application/gpact-examples/hotel-train"
-    //         }
-    //         outputDir = file('./build/resources/application/gpact-examples/hotel-train')
-    //     }
-    // }
-    // applicationgpactexamplesread {
-    //     solidity {
-    //         srcDir {
-    //             "./application/gpact-examples/read"
-    //         }
-    //         outputDir = file('./build/resources/application/gpact-examples/read')
-    //     }
-    // }
+    application__gpact_examples__conditional__src__main__java__net__consensys__gpact__examples__conditional__soliditywrappers {
+        solidity {
+            srcDir {
+                "./application/gpact-examples/conditional/src/main"
+            }
+            outputDir = file('./build/resources/application/gpact-examples/conditional/src/main')
+        }
+    }
+    application__gpact_examples__hotel_train__src__main__java__net__consensys__gpact__examples__hoteltrain__soliditywrappers {
+        solidity {
+            srcDir {
+                "./application/gpact-examples/hotel-train/src/main"
+            }
+            outputDir = file('./build/resources/application/gpact-examples/hotel-train/src/main')
+        }
+    }
+    application__gpact_examples__read__src__main__java__net__consensys__gpact__examples__read__soliditywrappers {
+        solidity {
+            srcDir {
+                "./application/gpact-examples/read/src/main"
+            }
+            outputDir = file('./build/resources/application/gpact-examples/read/src/main')
+        }
+    }
     // applicationgpactexamplestrade {
     //     solidity {
     //         srcDir {

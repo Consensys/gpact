@@ -1,6 +1,7 @@
 
 dependencies {
     implementation project (':common')
+    implementation project (':contracts')
     implementation project (':gpact')
     implementation project (':examplehelpers')
 

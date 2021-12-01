@@ -2,7 +2,6 @@ package net.consensys.gpact.examples.read.soliditywrappers;
 
 import java.math.BigInteger;
 import java.util.Arrays;
-import java.util.Collections;
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.TypeReference;
 import org.web3j.abi.datatypes.Function;
@@ -23,11 +22,11 @@ import org.web3j.tx.gas.ContractGasProvider;
  * or the org.web3j.codegen.SolidityFunctionWrapperGenerator in the 
  * <a href="https://github.com/web3j/web3j/tree/master/codegen">codegen module</a> to update.
  *
- * <p>Generated with web3j version 4.8.7-SNAPSHOT.
+ * <p>Generated with web3j version 4.8.8.
  */
 @SuppressWarnings("rawtypes")
 public class ContractB extends Contract {
-    public static final String BINARY = "608060405234801561001057600080fd5b506040516100d63803806100d683398101604081905261002f91610037565b600055610050565b60006020828403121561004957600080fd5b5051919050565b60788061005e6000396000f3fe6080604052348015600f57600080fd5b506004361060285760003560e01c80636d4ce63c14602d575b600080fd5b60005460405190815260200160405180910390f3fea2646970667358221220e63bce75137a2b65362a3c2f27b1673fab92de44ce6e8e3d207630f1ad8127fc64736f6c63430008090033";
+    public static final String BINARY = "608060405234801561001057600080fd5b506040516100f23803806100f283398101604081905261002f91610037565b600055610050565b60006020828403121561004957600080fd5b5051919050565b60948061005e6000396000f3fe6080604052348015600f57600080fd5b50600436106044577c010000000000000000000000000000000000000000000000000000000060003504636d4ce63c81146049575b600080fd5b60005460405190815260200160405180910390f3fea264697066735822122070686445a563738fd89fce6bc393e5ccf5b38f1879478d046fb9d8bc25ad610164736f6c63430008090033";
 
     public static final String FUNC_GET = "get";
 
@@ -54,14 +53,6 @@ public class ContractB extends Contract {
                 Arrays.<Type>asList(), 
                 Arrays.<TypeReference<?>>asList(new TypeReference<Uint256>() {}));
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
-    }
-
-    public String getABI_get() {
-        final Function function = new Function(
-                FUNC_GET, 
-                Arrays.<Type>asList(), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
     }
 
     @Deprecated

@@ -1,4 +1,4 @@
-package net.consensys.gpact.examples.conditional.soliditywrappers;
+package net.consensys.gpact.examples.read.soliditywrappers;
 
 import java.math.BigInteger;
 import java.util.Arrays;
