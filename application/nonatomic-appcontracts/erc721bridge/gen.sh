@@ -14,9 +14,11 @@ WEB3J=../web3j-abi/codegen/build/install/codegen/bin/codegen
 
 
 solc $CONTRACTSDIR/SfcErc721Bridge.sol --allow-paths . --bin --abi --optimize -o $BUILDDIR --overwrite
-solc $CONTRACTSDIR/ERC721RemoteBlockchain.sol --allow-paths . --bin --abi --optimize -o $BUILDDIR --overwrite
+solc $CONTRACTSDIR/ERC721AutoURIRemoteBlockchain.sol --allow-paths . --bin --abi --optimize -o $BUILDDIR --overwrite
+solc $CONTRACTSDIR/ERC721CustomURIRemoteBlockchain.sol --allow-paths . --bin --abi --optimize -o $BUILDDIR --overwrite
 
 $WEB3J solidity generate -a=$BUILDDIR/SfcErc721Bridge.abi -b=$BUILDDIR/SfcErc721Bridge.bin -o=$OUTPUTDIR -p=$PACKAGE
-$WEB3J solidity generate -a=$BUILDDIR/ERC721RemoteBlockchain.abi -b=$BUILDDIR/ERC721RemoteBlockchain.bin -o=$OUTPUTDIR -p=$PACKAGE
+$WEB3J solidity generate -a=$BUILDDIR/ERC721AutoURIRemoteBlockchain.abi -b=$BUILDDIR/ERC721AutoURIRemoteBlockchain.bin -o=$OUTPUTDIR -p=$PACKAGE
+$WEB3J solidity generate -a=$BUILDDIR/ERC721CustomURIRemoteBlockchain.abi -b=$BUILDDIR/ERC721CustomURIRemoteBlockchain.bin -o=$OUTPUTDIR -p=$PACKAGE
 
 

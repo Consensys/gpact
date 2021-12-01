@@ -18,7 +18,7 @@ import "../../../../../../common/openzeppelin/src/main/solidity/token/ERC721/IER
 import "../../../../../../functioncall/interface/src/main/solidity/CrosschainFunctionCallInterface.sol";
 import "../../../../../../common/openzeppelin/src/main/solidity/access/AccessControl.sol";
 import "../../../../../../common/openzeppelin/src/main/solidity/security/Pausable.sol";
-import "./ERC721RemoteBlockchain.sol";
+import "./ERC721AutoURIRemoteBlockchain.sol";
 import "../../../../../../functioncall/interface/src/main/solidity/NonAtomicHiddenAuthParameters.sol";
 
 /**
@@ -386,7 +386,8 @@ contract SfcErc721Bridge is
      * @param _srcTokenContract Address of ERC 20 contract on this blockchain.
      * @param _recipient        Address of account to transfer tokens to on the destination blockchain.
      * @param _tokenId          Id of token transferred.
-     * @param _data             Data to send to recipient, as part of the transfer.
+     * @param _data             Additional data to send as part of the transfer.
+     contract.
      */
     function transferToOtherBlockchain(
         uint256 _destBcId,
@@ -457,7 +458,7 @@ contract SfcErc721Bridge is
      * @param _destTokenContract  ERC 721 contract of the token being transferred.
      * @param _recipient          Account to transfer ownership of the tokens to.
      * @param _tokenId            Id of token transferred.
-     * @param _data               Data sent to recipient, as part of the transfer.
+     * @param _data               Additional data sent as part of the transfer.
      */
     function receiveFromOtherBlockchain(
         address _destTokenContract,
@@ -605,7 +606,7 @@ contract SfcErc721Bridge is
      * @param _tokenContract      ERC 721 contract of the token being transferred or minted.
      * @param _recipient          Account to transfer ownership of the tokens to.
      * @param _tokenId            Id of token transferred.
-     * @param _data               Data to send to recipient, as part of the transfer.
+     * @param _data               Additional data to send as part of the transfer or minting operation.
      */
     function transferOrMint(
         address _tokenContract,
