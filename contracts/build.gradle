@@ -158,46 +158,46 @@ sourceSets {
             outputDir = file('./build/resources/application/gpact-examples/read/src/main')
         }
     }
-    // applicationgpactexamplestrade {
-    //     solidity {
-    //         srcDir {
-    //             "./application/gpact-examples/trade"
-    //         }
-    //         outputDir = file('./build/resources/application/gpact-examples/trade')
-    //     }
-    // }
-    // applicationgpactexampleswrite {
-    //     solidity {
-    //         srcDir {
-    //             "./application/gpact-examples/write"
-    //         }
-    //         outputDir = file('./build/resources/application/gpact-examples/write')
-    //     }
-    // }
-    // applicationnonatomicappcontractserc20bridge {
-    //     solidity {
-    //         srcDir {
-    //             "./application/nonatomic-appcontracts/erc20bridge"
-    //         }
-    //         outputDir = file('./build/resources/application/nonatomic-appcontracts/erc20bridge')
-    //     }
-    // }
-    // applicationnonatomicappcontractserc721bridge {
-    //     solidity {
-    //         srcDir {
-    //             "./application/nonatomic-appcontracts/erc721bridge"
-    //         }
-    //         outputDir = file('./build/resources/application/nonatomic-appcontracts/erc721bridge')
-    //     }
-    // }
-    // applicationsfcexampleswrite {
-    //     solidity {
-    //         srcDir {
-    //             "./application/sfc-examples/write"
-    //         }
-    //         outputDir = file('./build/resources/application/sfc-examples/write')
-    //     }
-    // }
+    application__gpact_examples__trade__src__main__java__net__consensys__gpact__examples__trade__soliditywrappers {
+        solidity {
+            srcDir {
+                "./application/gpact-examples/trade/src/main"
+            }
+            outputDir = file('./build/resources/application/gpact-examples/trade/src/main')
+        }
+    }
+    application__gpact_examples__write__src__main__java__net__consensys__gpact__examples__write__soliditywrappers {
+        solidity {
+            srcDir {
+                "./application/gpact-examples/write/src/main"
+            }
+            outputDir = file('./build/resources/application/gpact-examples/write/src/main')
+        }
+    }
+    application__nonatomic_appcontracts__erc20bridge__src__main__java__net__consensys__gpact__nonatomic__appcontracts__erc20bridge__soliditywrappers {
+        solidity {
+            srcDir {
+                "./application/nonatomic-appcontracts/erc20bridge/src/main"
+            }
+            outputDir = file('./build/resources/application/nonatomic-appcontracts/erc20bridge/src/main')
+        }
+    }
+    application__nonatomic_appcontracts__erc721bridge__src__main__java__net__consensys__gpact__appcontracts__nonatomic__erc721bridge__soliditywrappers {
+        solidity {
+            srcDir {
+                "./application/nonatomic-appcontracts/erc721bridge/src/main"
+            }
+            outputDir = file('./build/resources/application/nonatomic-appcontracts/erc721bridge/src/main')
+        }
+    }
+    application__sfc_examples__write__src__main__java__net__consensys__gpact__sfc__examples__write__soliditywrappers {
+        solidity {
+            srcDir {
+                "./application/sfc-examples/write/src/main"
+            }
+            outputDir = file('./build/resources/application/sfc-examples/write/src/main')
+        }
+    }
 }
 
 project.tasks.matching {

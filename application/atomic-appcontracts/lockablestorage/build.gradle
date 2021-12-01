@@ -13,15 +13,3 @@ dependencies {
 
     testImplementation project(':commontest')
 }
-
-// Generate Solidity wrapper code before build.
-task generateSources {
-    // def script = "application/atomic-appcontracts/lockablestorage/gen.sh".execute()
-    // script.waitForProcessOutput(System.out, System.err)
-    // if (script.exitValue() != 0) {
-    //     throw new GradleException("Solidity compile error")
-    // }
-}
-project.afterEvaluate {
-    build.dependsOn generateSources
-}

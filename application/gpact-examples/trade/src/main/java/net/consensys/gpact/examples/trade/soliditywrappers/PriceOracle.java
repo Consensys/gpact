@@ -23,11 +23,11 @@ import org.web3j.tx.gas.ContractGasProvider;
  * or the org.web3j.codegen.SolidityFunctionWrapperGenerator in the 
  * <a href="https://github.com/web3j/web3j/tree/master/codegen">codegen module</a> to update.
  *
- * <p>Generated with web3j version 4.8.7-SNAPSHOT.
+ * <p>Generated with web3j version 4.8.8.
  */
 @SuppressWarnings("rawtypes")
 public class PriceOracle extends Contract {
-    public static final String BINARY = "608060405234801561001057600080fd5b50600180546001600160a01b0319163317905560fa806100316000396000f3fe6080604052348015600f57600080fd5b506004361060325760003560e01c806391b7f5ed14603757806398d5fdca146048575b600080fd5b6046604236600460ac565b605d565b005b60005460405190815260200160405180910390f35b6001546001600160a01b0316331460a75760405162461bcd60e51b815260206004820152600a60248201526927b7363c9037bbb732b960b11b604482015260640160405180910390fd5b600055565b60006020828403121560bd57600080fd5b503591905056fea2646970667358221220eaf3559ed7d4c89e0e9f9a583a98533e812309272d68c57c3aeb0fb8a0ae8cda64736f6c63430008090033";
+    public static final String BINARY = "608060405234801561001057600080fd5b5060018054600160a060020a0319163317905561015a806100326000396000f3fe608060405234801561001057600080fd5b5060043610610052577c0100000000000000000000000000000000000000000000000000000000600035046391b7f5ed811461005757806398d5fdca1461006c575b600080fd5b61006a61006536600461010b565b610081565b005b60005460405190815260200160405180910390f35b60015473ffffffffffffffffffffffffffffffffffffffff163314610106576040517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152600a60248201527f4f6e6c79206f776e657200000000000000000000000000000000000000000000604482015260640160405180910390fd5b600055565b60006020828403121561011d57600080fd5b503591905056fea264697066735822122021eaf0967454e8212a237c9c152d8194a1692c09b52974ccdfa76d01cea1feae64736f6c63430008090033";
 
     public static final String FUNC_GETPRICE = "getPrice";
 
@@ -58,28 +58,12 @@ public class PriceOracle extends Contract {
         return executeRemoteCallSingleValueReturn(function, BigInteger.class);
     }
 
-    public String getABI_getPrice() {
-        final Function function = new Function(
-                FUNC_GETPRICE, 
-                Arrays.<Type>asList(), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
-    }
-
     public RemoteFunctionCall<TransactionReceipt> setPrice(BigInteger _newPrice) {
         final Function function = new Function(
                 FUNC_SETPRICE, 
                 Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_newPrice)), 
                 Collections.<TypeReference<?>>emptyList());
         return executeRemoteCallTransaction(function);
-    }
-
-    public String getABI_setPrice(BigInteger _newPrice) {
-        final Function function = new Function(
-                FUNC_SETPRICE, 
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.generated.Uint256(_newPrice)), 
-                Collections.<TypeReference<?>>emptyList());
-        return org.web3j.abi.FunctionEncoder.encode(function);
     }
 
     @Deprecated

@@ -1,6 +1,7 @@
 
 dependencies {
     implementation project (':common')
+    implementation project (':contracts')
 
     implementation group: 'com.google.guava', name: 'guava', version: guavaVersion
 
@@ -15,16 +16,4 @@ dependencies {
 
     testImplementation project (':commontest')
     testImplementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
-}
-
-task generateSources {
-    // def script = "application/nonatomic-appcontracts/erc721bridge/gen.sh".execute()
-    // script.waitForProcessOutput(System.out, System.err)
-    // if (script.exitValue() != 0) {
-    //     throw new GradleException("Solidity compile error")
-    // }
-}
-
-project.afterEvaluate {
-    build.dependsOn generateSources
 }
