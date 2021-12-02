@@ -244,6 +244,29 @@ jobs:
 
 
 
+  relayer-build-and-test:
+    machine: # TODO reduce this to a simpler docker container
+      docker_layer_caching: true
+      image: ubuntu-2004:202104-01 # https://circleci.com/docs/2.0/configuration-reference/#available-machine-images
+    resource_class: 2xlarge
+    working_directory: ~/messaging/relayer
+    environment:
+      TERM: xterm-256color
+      COLORTERM: 24bit
+    steps:
+      - checkout
+
+      - run:
+          name: Verify checkout and create cache.sum
+          command: |
+            date -Is
+            echo; git -P reflog --date=iso
+            go version >cache.sum
+            (shasum go.sum || true) >>cache.sum
+            shasum */go.sum >>cache.sum
+
+      - run: make build utest
+
 
 
 
@@ -251,6 +274,7 @@ workflows:
   version: 2
   default:
     jobs:
+      - relayer-build-and-test
       - unitTestsMachine
       #- assemble
       #- unitTestsMachine:
