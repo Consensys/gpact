@@ -259,7 +259,10 @@ jobs:
             date -Is
             echo; git -P reflog --date=iso
             go version
-      - run: make build
+      - run:
+          command: |
+            pwd
+            make build
       - run: make utest
 
 
