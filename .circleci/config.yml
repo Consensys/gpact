@@ -262,6 +262,10 @@ jobs:
           command: |
             pwd
             ls -al
+      - run:
+          command: |
+            pwd
+            ls -al
             make build
           working_directory: ~/messaging/relayer
       - run:
