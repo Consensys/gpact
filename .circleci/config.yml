@@ -259,7 +259,10 @@ jobs:
             echo; git -P reflog --date=iso
             go version
       - run:
-          command: make build
+          command: |
+            pwd
+            ls -al
+            make build
           working_directory: ~/messaging/relayer
       - run:
           command: make utest
