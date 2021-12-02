@@ -245,10 +245,8 @@ jobs:
 
 
   relayer-build-and-test:
-    machine: # TODO reduce this to a simpler docker container
-      docker_layer_caching: true
-      image: ubuntu-2004:202104-01 # https://circleci.com/docs/2.0/configuration-reference/#available-machine-images
-    resource_class: 2xlarge
+    docker:
+      - image: cimg/go:1.17.3
     working_directory: ~/messaging/relayer
     environment:
       TERM: xterm-256color
