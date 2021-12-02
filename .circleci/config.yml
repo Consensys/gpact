@@ -253,17 +253,14 @@ jobs:
       COLORTERM: 24bit
     steps:
       - checkout
-
       - run:
           name: Verify checkout and create cache.sum
           command: |
             date -Is
             echo; git -P reflog --date=iso
-            go version >cache.sum
-            (shasum go.sum || true) >>cache.sum
-            shasum */go.sum >>cache.sum
-
-      - run: make build utest
+            go version
+      - run: make build
+      - run: make utest
 
 
 
