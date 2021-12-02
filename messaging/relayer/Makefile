@@ -6,6 +6,6 @@ build:
 clean:
 	rm -rf ./build/*
 
-
 utest:
-    go test ./...
+	go test  ./...
+
