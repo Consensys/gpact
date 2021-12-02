@@ -262,6 +262,8 @@ jobs:
       - run:
           command: |
             pwd
+            ls -al
+            make utest
             make build
       - run: make utest
 
