@@ -247,25 +247,23 @@ jobs:
   relayer-build-and-test:
     docker:
       - image: cimg/go:1.17.3
-    working_directory: ~/messaging/relayer
     environment:
       TERM: xterm-256color
       COLORTERM: 24bit
     steps:
       - checkout
       - run:
-          name: Verify checkout and create cache.sum
+          name: Verify checkout
           command: |
             date -Is
             echo; git -P reflog --date=iso
             go version
       - run:
-          command: |
-            pwd
-            ls -al
-            make utest
-            make build
-      - run: make utest
+          command: make build
+          working_directory: ~/messaging/relayer
+      - run:
+          command: make utest
+          working_directory: ~/messaging/relayer
 
 
 
