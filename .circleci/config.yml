@@ -259,16 +259,11 @@ jobs:
             echo; git -P reflog --date=iso
             go version
       - run:
-          command: |
-            pwd
-            ls -al
-      - run:
-          command: |
-            pwd
-            ls -al
-            make build
+          name: Build production code
+          command: make build
           working_directory: ~/project/messaging/relayer
       - run:
+          name: Build test code and execute unit tests
           command: make utest
           working_directory: ~/project/messaging/relayer
 
