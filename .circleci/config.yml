@@ -267,10 +267,10 @@ jobs:
             pwd
             ls -al
             make build
-          working_directory: ~/messaging/relayer
+          working_directory: ~/project/messaging/relayer
       - run:
           command: make utest
-          working_directory: ~/messaging/relayer
+          working_directory: ~/project/messaging/relayer
 
 
 
