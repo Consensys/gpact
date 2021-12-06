@@ -60,11 +60,14 @@ func ExampleInfo() {
 }
 
 func Example_setLogLevel(t *testing.T) {
+	assert.Equal(t, zerolog.GlobalLevel(), "info")
+
 	conf := viper.New()
 	conf.Set("LOG_LEVEL", "AA")
 	setLogLevel(conf)
-	conf.Set("LOG_LEVEL", "debug")
 	assert.Equal(t, zerolog.GlobalLevel(), "info")
+
+	conf.Set("LOG_LEVEL", "debug")
 	setLogLevel(conf)
 	assert.Equal(t, zerolog.GlobalLevel(), "debug")
 }
