@@ -244,6 +244,29 @@ jobs:
 
 
 
+  relayer-build-and-test:
+    docker:
+      - image: cimg/go:1.17.3
+    environment:
+      TERM: xterm-256color
+      COLORTERM: 24bit
+    steps:
+      - checkout
+      - run:
+          name: Verify checkout
+          command: |
+            date -Is
+            echo; git -P reflog --date=iso
+            go version
+      - run:
+          name: Build production code
+          command: make build
+          working_directory: ~/project/messaging/relayer
+      - run:
+          name: Build test code and execute unit tests
+          command: make utest
+          working_directory: ~/project/messaging/relayer
+
 
 
 
@@ -251,8 +274,10 @@ workflows:
   version: 2
   default:
     jobs:
-      - unitTestsMachine
-      #- assemble
+      - relayer-build-and-test
+      - unitTestsMachine:
+          requires:
+            - relayer-build-and-test
       #- unitTestsMachine:
       #    requires:
       #      - build
