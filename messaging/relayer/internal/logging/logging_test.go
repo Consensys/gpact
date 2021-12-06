@@ -20,9 +20,11 @@ package logging
 
 import (
 	"fmt"
+	"testing"
 
 	"github.com/rs/zerolog"
 	"github.com/spf13/viper"
+	"github.com/stretchr/testify/assert"
 )
 
 func ExampleInit() {
@@ -57,26 +59,26 @@ func ExampleInfo() {
 	// Output:
 }
 
-func Example_setLogLevel() {
+func Example_setLogLevel(t *testing.T) {
 	conf := viper.New()
 	conf.Set("LOG_LEVEL", "AA")
 	setLogLevel(conf)
 	conf.Set("LOG_LEVEL", "debug")
+	assert.Equal(t, zerolog.GlobalLevel(), "info")
 	setLogLevel(conf)
-	fmt.Printf("%v\n", zerolog.GlobalLevel())
-	// Output:
-	// debug
+	assert.Equal(t, zerolog.GlobalLevel(), "debug")
 }
 
-func ExampleSetLogLevel() {
-	SetLogLevel("AA")
+func ExampleSetLogLevel(t *testing.T) {
+	err := SetLogLevel("AA")
+	assert.NotEmpty(t, err)
 	SetLogLevel("debug")
-	fmt.Printf("%v\n", zerolog.GlobalLevel())
-	// Output:
-	// debug
+	assert.Empty(t, err)
+	assert.Equal(t, zerolog.GlobalLevel(), "debug")
 }
 
 func ExamplePanic() {
+	SetLogLevel("error")
 	defer func() {
 		if err := recover(); err != nil {
 			fmt.Println(err)

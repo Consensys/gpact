@@ -19,6 +19,7 @@ package logging
  */
 
 import (
+	"errors"
 	"io"
 	"os"
 	"path"
@@ -51,7 +52,8 @@ func InitWithoutConfig(logLevel string, logTarget string, logServiceName string,
 	return Init(conf)
 }
 
-// setLogLevel sets the logging level.
+// setLogLevel sets the logging level. Set to "info" level if the log level is invalid.
+// As this function is called from the init function, it must set a log level.
 func setLogLevel(conf *viper.Viper) {
 	logLevel := conf.GetString("LOG_LEVEL")
 	level, err := zerolog.ParseLevel(logLevel)
@@ -64,12 +66,14 @@ func setLogLevel(conf *viper.Viper) {
 }
 
 // SetLogLevel sets the logging level.
-func SetLogLevel(logLevel string) {
+func SetLogLevel(logLevel string) error {
 	level, err := zerolog.ParseLevel(logLevel)
 	if err != nil {
 		log.Error().Err(err).Str("level", logLevel).Msg("can't parse log level")
+		return errors.New("ignoring invalid log level")
 	} else {
 		zerolog.SetGlobalLevel(level)
+		return nil
 	}
 }
 
