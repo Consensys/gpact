@@ -1,4 +1,4 @@
-package messages
+package v1
 
 /*
  * Copyright 2021 ConsenSys Software Inc
@@ -18,11 +18,12 @@ package messages
 import (
 	"testing"
 
+	"github.com/consensys/gpact/messaging/relayer/internal/messages"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestMessageV1RoundTrip(t *testing.T) {
-	msg := &MessageV1{
+func TestMessageRoundTrip(t *testing.T) {
+	msg := &Message{
 		ID:        "test_id",
 		Timestamp: 100,
 		Destination: ApplicationAddressV1{
@@ -48,7 +49,7 @@ func TestMessageV1RoundTrip(t *testing.T) {
 		Payload: "test_payload",
 	}
 	data := msg.ToBytes()
-	msg2, err := DecodeMessage(Version1, MessageV1Type, data)
+	msg2, err := messages.DecodeMessage(Version, MessageType, data)
 	assert.Empty(t, err)
 	assert.Equal(t, msg, msg2)
 }

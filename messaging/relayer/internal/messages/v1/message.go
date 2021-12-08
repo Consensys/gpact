@@ -1,4 +1,4 @@
-package messages
+package v1
 
 /*
  * Copyright 2021 ConsenSys Software Inc
@@ -18,10 +18,17 @@ package messages
 import (
 	"encoding/json"
 	"fmt"
+
+	"github.com/consensys/gpact/messaging/relayer/internal/messages"
 )
 
-// MessageV1 implements message interface.
-type MessageV1 struct {
+const (
+	Version     = "0.0.1"
+	MessageType = "message_version_0_0_1"
+)
+
+// Message implements message interface.
+type Message struct {
 	// ID of the message
 	ID string `json:"id"`
 
@@ -48,10 +55,10 @@ type MessageV1 struct {
 }
 
 // ToBytes is used for serialization.
-func (msg *MessageV1) ToBytes() []byte {
+func (msg *Message) ToBytes() []byte {
 	// Enforce the msg type and version to be the correct.
-	msg.MsgType = MessageV1Type
-	msg.Version = Version1
+	msg.MsgType = MessageType
+	msg.Version = Version
 	data, err := json.Marshal(msg)
 	if err != nil {
 		// It shouldn't have error.
@@ -61,17 +68,17 @@ func (msg *MessageV1) ToBytes() []byte {
 }
 
 // FromBytes is used for de-serialization.
-func (msg *MessageV1) FromBytes(data []byte) (Message, error) {
-	maybeMsg := MessageV1{}
+func (msg *Message) FromBytes(data []byte) (messages.Message, error) {
+	maybeMsg := Message{}
 	err := json.Unmarshal(data, &maybeMsg)
 	if err != nil {
 		return nil, err
 	}
-	if maybeMsg.MsgType != MessageV1Type {
-		return nil, fmt.Errorf("message type mismatch, expect %v got %v", MessageV1Type, maybeMsg.MsgType)
+	if maybeMsg.MsgType != MessageType {
+		return nil, fmt.Errorf("message type mismatch, expect %v got %v", MessageType, maybeMsg.MsgType)
 	}
-	if maybeMsg.Version != Version1 {
-		return nil, fmt.Errorf("message version mismatch, expect %v got %v", Version1, maybeMsg.Version)
+	if maybeMsg.Version != Version {
+		return nil, fmt.Errorf("message version mismatch, expect %v got %v", Version, maybeMsg.Version)
 	}
 	return &maybeMsg, nil
 }
@@ -87,4 +94,9 @@ type ProofV1 struct {
 	ProofType string `json:"proof_type"`
 	Created   int64  `json:"created"`
 	Proof     string `json:"proof"`
+}
+
+// init is used to register the decoder.
+func init() {
+	messages.RegisterDecoder(Version, MessageType, (&Message{}).FromBytes)
 }

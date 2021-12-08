@@ -35,10 +35,16 @@ var registeredDecoders map[string]map[string]func([]byte) (Message, error)
 // init is used to initialise the package.
 func init() {
 	registeredDecoders = make(map[string]map[string]func([]byte) (Message, error))
-	// Register supported message versions
-	registeredDecoders[Version1] = make(map[string]func([]byte) (Message, error))
-	// Register supported message decoders
-	registeredDecoders[Version1][MessageV1Type] = (&MessageV1{}).FromBytes
+}
+
+// RegisterDecoder registers a decoder for given version and given message type.
+func RegisterDecoder(version string, msgType string, decoder func([]byte) (Message, error)) {
+	decoders, ok := registeredDecoders[version]
+	if !ok {
+		decoders = make(map[string]func([]byte) (Message, error))
+		registeredDecoders[version] = decoders
+	}
+	decoders[msgType] = decoder
 }
 
 // DecodeMessage is used to decode message based on version and message type.
