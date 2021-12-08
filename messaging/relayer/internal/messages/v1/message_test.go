@@ -26,15 +26,15 @@ func TestMessageRoundTrip(t *testing.T) {
 	msg := &Message{
 		ID:        "test_id",
 		Timestamp: 100,
-		Destination: ApplicationAddressV1{
+		Destination: ApplicationAddress{
 			NetworkID:       "test_dest_net_id",
 			ContractAddress: "test_dest_contract_addr",
 		},
-		Source: ApplicationAddressV1{
+		Source: ApplicationAddress{
 			NetworkID:       "test_src_net_id",
 			ContractAddress: "test_src_contract_addr",
 		},
-		Proofs: []ProofV1{
+		Proofs: []Proof{
 			{
 				ProofType: "test_proof_type_1",
 				Created:   101,
