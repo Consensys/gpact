@@ -34,3 +34,5 @@ site/
 **/node_modules
 .vscode/
 
+*.html
+*.out
