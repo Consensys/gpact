@@ -25,11 +25,11 @@ func TestMessageV1RoundTrip(t *testing.T) {
 	msg := &MessageV1{
 		ID:        "test_id",
 		Timestamp: 100,
-		Destination: DestinationV1{
+		Destination: ApplicationAddressV1{
 			NetworkID:       "test_dest_net_id",
 			ContractAddress: "test_dest_contract_addr",
 		},
-		Source: SourceV1{
+		Source: ApplicationAddressV1{
 			NetworkID:       "test_src_net_id",
 			ContractAddress: "test_src_contract_addr",
 		},

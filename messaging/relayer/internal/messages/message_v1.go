@@ -35,10 +35,10 @@ type MessageV1 struct {
 	Version string `json:"version"`
 
 	// Destination info
-	Destination DestinationV1 `json:"destination"`
+	Destination ApplicationAddressV1 `json:"destination"`
 
 	// Source info
-	Source SourceV1 `json:"source"`
+	Source ApplicationAddressV1 `json:"source"`
 
 	// All the proofs
 	Proofs []ProofV1 `json:"proofs"`
@@ -76,14 +76,8 @@ func (msg *MessageV1) FromBytes(data []byte) (Message, error) {
 	return &maybeMsg, nil
 }
 
-// DestinationV1 is the version 1 Destination info.
-type DestinationV1 struct {
-	NetworkID       string `json:"network_id"`
-	ContractAddress string `json:"contract_address"`
-}
-
-// SourceV1 is the version 1 source info.
-type SourceV1 struct {
+// ApplicationAddressV1 is the version 1 application address info.
+type ApplicationAddressV1 struct {
 	NetworkID       string `json:"network_id"`
 	ContractAddress string `json:"contract_address"`
 }
