@@ -42,13 +42,13 @@ type Message struct {
 	Version string `json:"version"`
 
 	// Destination info
-	Destination ApplicationAddressV1 `json:"destination"`
+	Destination ApplicationAddress `json:"destination"`
 
 	// Source info
-	Source ApplicationAddressV1 `json:"source"`
+	Source ApplicationAddress `json:"source"`
 
 	// All the proofs
-	Proofs []ProofV1 `json:"proofs"`
+	Proofs []Proof `json:"proofs"`
 
 	// The payload
 	Payload string `json:"payload"`
@@ -83,14 +83,14 @@ func (msg *Message) FromBytes(data []byte) (messages.Message, error) {
 	return &maybeMsg, nil
 }
 
-// ApplicationAddressV1 is the version 1 application address info.
-type ApplicationAddressV1 struct {
+// ApplicationAddress is the application address info.
+type ApplicationAddress struct {
 	NetworkID       string `json:"network_id"`
 	ContractAddress string `json:"contract_address"`
 }
 
-// ProofV1 is the version 1 proof struct.
-type ProofV1 struct {
+// Proof is the proof struct.
+type Proof struct {
 	ProofType string `json:"proof_type"`
 	Created   int64  `json:"created"`
 	Proof     string `json:"proof"`
