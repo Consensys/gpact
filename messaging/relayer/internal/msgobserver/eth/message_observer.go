@@ -5,8 +5,8 @@ import (
 )
 
 type MessageObserver struct {
-	Listener *FilteredEventListener
-	Handler  *EventHandler
+	Listener EventListener
+	Handler  EventHandler
 }
 
 type MessageObserverConfig struct {
@@ -14,16 +14,16 @@ type MessageObserverConfig struct {
 	FilterAddress string
 }
 
-func CreateMessageObserver(config MessageObserverConfig) (*MessageObserver, error) {
-	listener, err := CreateFilteredEventListener(config.EventLogWSURL, config.FilterAddress, context.Background())
+func NewMessageObserver(config MessageObserverConfig) (*MessageObserver, error) {
+	listener, err := NewFilteredEventListener(config.EventLogWSURL, config.FilterAddress, context.Background())
 	if err != nil {
 		return nil, err
 	}
-	transformer := BridgeEventToMessageTransformer{}
-	handler := CreateSendEventToQueueHandler(transformer, MessageQueueSender{})
-	return &MessageObserver{Listener: listener, Handler: &handler}, nil
+	transformer := SFCBridgeEventTransformer{}
+	handler := NewSimpleEventHandler(&transformer, MessageQueueSender{})
+	return &MessageObserver{Listener: listener, Handler: handler}, nil
 }
 
 func (o *MessageObserver) Start() {
-	o.Listener.StreamEvents()
+	o.Listener.StartListener()
 }

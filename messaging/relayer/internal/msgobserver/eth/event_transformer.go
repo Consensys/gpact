@@ -2,21 +2,52 @@ package eth
 
 import (
 	"fmt"
-	"math/rand"
-
 	v1 "github.com/consensys/gpact/messaging/relayer/internal/messages/v1"
+	"github.com/consensys/gpact/messaging/relayer/internal/msgobserver/eth/soliditywrappers/sfc"
+	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/core/types"
+	"strings"
 )
 
-type EventToMessageTransformer interface {
-	ToMessage(log types.Log) v1.Message
+type EventTransformer interface {
+	ToMessage(event types.Log) (*v1.Message, error)
 }
 
-type BridgeEventToMessageTransformer struct {
+const SFCEventName = "CrossCall"
+
+type SFCBridgeEventTransformer struct {
+	ContractABI abi.ABI
 }
 
-func (h BridgeEventToMessageTransformer) ToMessage(event types.Log) v1.Message {
-	// TODO: decode log based on contract ABI
-	// TODO: construct a Message object that encapsulates things
-	return v1.Message{ID:fmt.Sprintf("some-random-id-%d", rand.Intn(10000))}
+func (t *SFCBridgeEventTransformer) ToMessage(event types.Log) (*v1.Message, error) {
+	//TODO: addressing events that are being removed because of a reorg
+	e, err := t.ContractABI.Unpack(SFCEventName, event.Data)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if len(e) == 0 {
+		return nil, fmt.Errorf("failed to transform event to message: %v", event)
+	}
+
+	sfcEvent := e[0].(sfc.SfcCrossCall)
+	message := v1.Message{
+		ID:          string(sfcEvent.TxId[:]), // TODO: replace with a proper message id scheme
+		Timestamp:   sfcEvent.Timestamp.Int64(),
+		MsgType:     v1.MessageType,
+		Version:     v1.Version,
+		Destination: v1.ApplicationAddress{NetworkID: sfcEvent.DestBcId.String(), ContractAddress: string(sfcEvent.DestContract[:])},
+		Payload:     string(sfcEvent.DestFunctionCall),
+	}
+
+	return &message, nil
+}
+
+func NewSFCBridgeEventTransformer() (*SFCBridgeEventTransformer, error) {
+	abi, err := abi.JSON(strings.NewReader(string(sfc.SfcMetaData.ABI)))
+	if err != nil {
+		return nil, err
+	}
+	return &SFCBridgeEventTransformer{abi}, nil
 }

@@ -9,7 +9,7 @@ import (
 func main() {
 	config := ethobserver.MessageObserverConfig{EventLogWSURL: "", FilterAddress: ""}
 
-	observer, err := ethobserver.CreateMessageObserver(config)
+	observer, err := ethobserver.NewMessageObserver(config)
 	if err != nil {
 		log.Fatal(err)
 	}

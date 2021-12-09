@@ -10,6 +10,10 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
+type EventListener interface {
+	StartListener()
+}
+
 type FilteredEventListener struct {
 	Client  *ethclient.Client
 	Filter  ethereum.FilterQuery
@@ -17,7 +21,9 @@ type FilteredEventListener struct {
 	Context context.Context
 }
 
-func (l FilteredEventListener) StreamEvents() {
+// StartListener starts listening for events that match the specified filter criteria and
+// dispatching them to the configured handler for processsing.
+func (l *FilteredEventListener) StartListener() {
 	chanEvents := make(chan types.Log)
 	sub, err := l.Client.SubscribeFilterLogs(l.Context, l.Filter, chanEvents)
 	if err != nil {
@@ -27,6 +33,7 @@ func (l FilteredEventListener) StreamEvents() {
 	for {
 		select {
 		case err := <-sub.Err():
+			// TODO: better error handling
 			log.Fatal(err)
 		case log := <-chanEvents:
 			l.Handler.Handle(log)
@@ -34,7 +41,7 @@ func (l FilteredEventListener) StreamEvents() {
 	}
 }
 
-func CreateFilteredEventListener(wsURL string, contractAddressHex string, context context.Context) (*FilteredEventListener, error) {
+func NewFilteredEventListener(wsURL string, contractAddressHex string, context context.Context) (EventListener, error) {
 	client, err := ethclient.DialContext(context, wsURL)
 
 	if err != nil {
@@ -44,7 +51,6 @@ func CreateFilteredEventListener(wsURL string, contractAddressHex string, contex
 	var contractAddress []common.Address
 	if contractAddressHex != "" {
 		contractAddress = []common.Address{common.HexToAddress(contractAddressHex)}
-
 	}
 
 	query := ethereum.FilterQuery{Addresses: contractAddress}
