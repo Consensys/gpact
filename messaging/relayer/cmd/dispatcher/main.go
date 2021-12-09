@@ -49,7 +49,7 @@ func main() {
 		panic(err)
 	}
 	s.Start()
-	logging.Info("Relayer started.")
+	logging.Info("Dispatcher started.")
 	for {
 	}
 }
@@ -58,9 +58,5 @@ func main() {
 func simpleHandler(req messages.Message) {
 	// Received request from observer
 	msg := req.(*v1.Message)
-	logging.Info("Process message with ID: %v", msg.ID)
-	// Do a small modification
-	msg.Payload = "processed:" + msg.Payload
-	// Send it to dispatcher
-	s.Request(msg.Version, msg.MsgType, msg)
+	logging.Info("Received message with ID %v and payload %v", msg.ID, msg.Payload)
 }

@@ -36,3 +36,4 @@ site/
 
 *.html
 *.out
+.env
