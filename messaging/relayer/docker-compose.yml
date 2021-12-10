@@ -1,0 +1,57 @@
+version: "3.8"
+services:
+
+  rabbitmq:
+    image: rabbitmq:3.9-management
+    container_name: rabbitmq
+    networks:
+      - shared
+    ports:
+      - 5672:5672
+      - 15672:15672
+    healthcheck:
+        test: ["CMD", "curl", "-f", "http://localhost:15672"]
+        interval: 30s
+        timeout: 10s
+        retries: 5
+
+  observer:
+    image: consensys/gpact/messaging/relayer
+    container_name: observer
+    networks:
+      - shared
+    env_file:
+      - ./env/.env.observer.example
+    command: /app/build/observer
+    depends_on:
+      - rabbitmq
+    restart: on-failure
+  
+  relayer:
+    image: consensys/gpact/messaging/relayer
+    container_name: relayer
+    networks:
+      - shared
+    env_file:
+      - ./env/.env.relayer.example
+    command: /app/build/relayer
+    depends_on:
+      - rabbitmq
+    restart: on-failure
+
+  dispatcher:
+    image: consensys/gpact/messaging/relayer
+    container_name: dispatcher
+    networks:
+      - shared
+    env_file:
+      - ./env/.env.dispatcher.example
+    command: /app/build/dispatcher
+    depends_on:
+      - rabbitmq
+    restart: on-failure
+
+networks:
+  shared:
+    name: shared
+    external: false
