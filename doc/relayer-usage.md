@@ -61,7 +61,7 @@ Note that this scheme does not work with GPACT. This simple scheme
 does not require the application to have the ability to submit the
 transaction on the destination blockchain.
 
-![Event Relay with Separate Signing](https://raw.githubusercontent.com/ConsenSys/gpact/main/doc/images/event-relay-separate-signing.png "Event Relay with Separate Signing")
+![Event Relay with Separate Signing](images/event-relay-separate-signing.png "Event Relay with Separate Signing")
 
 Walking through the diagram:
 <ol>
@@ -125,7 +125,7 @@ transactions to the destination blockchain, or a cooperative signing
 approach where relayers work together to sign an event and then
 submit just one transaction per event.
 
-![Block Header Relay](https://raw.githubusercontent.com/ConsenSys/gpact/main/doc/images/block-header-relate-separate-signing.png "Block Header Relay")
+![Block Header Relay](images/block-header-relate-separate-signing.png "Block Header Relay")
 
 Walking through the diagram:
 <ol>
@@ -188,7 +188,7 @@ transactions to the destination blockchain, or a cooperative signing
 approach where relayers work together to sign an event and then
 submit just one transaction per event.
 
-![Event Attestation](https://raw.githubusercontent.com/ConsenSys/gpact/main/doc/images/event-attestation.png "Event Attestation")
+![Event Attestation](images/event-attestation.png "Event Attestation")
 
 Walking through the diagram:
 <ol>
