@@ -16,19 +16,51 @@ package main
  */
 
 import (
-	"context"
-	"fmt"
-
-	"github.com/libp2p/go-libp2p"
+	"github.com/consensys/gpact/messaging/relayer/internal/config"
+	"github.com/consensys/gpact/messaging/relayer/internal/logging"
+	"github.com/consensys/gpact/messaging/relayer/internal/messages"
+	v1 "github.com/consensys/gpact/messaging/relayer/internal/messages/v1"
+	"github.com/consensys/gpact/messaging/relayer/internal/mqserver"
+	_ "github.com/joho/godotenv/autoload"
 )
 
+// TODO, Need a separate package to put all core components.
+var s *mqserver.MQServer
+
 func main() {
-	ctx := context.Background()
-	h, err := libp2p.New(ctx)
+	// Load config
+	conf := config.NewConfig()
+
+	// Create handlers.
+	handlers := make(map[string]map[string]func(msg messages.Message))
+	handlers[v1.Version] = make(map[string]func(msg messages.Message))
+	handlers[v1.Version][v1.MessageType] = simpleHandler
+
+	// Start the server
+	var err error
+	s, err = mqserver.NewMQServer(
+		conf.InboundMQAddr,
+		conf.InboundChName,
+		conf.OutboundMQAddr,
+		conf.OutboundChName,
+		handlers,
+	)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("Relayer listens on: %v\n", h.Addrs())
+	s.Start()
+	logging.Info("Relayer started.")
 	for {
 	}
+}
+
+// simpleHandler only does a message forward with some slightly message change.
+func simpleHandler(req messages.Message) {
+	// Received request from observer
+	msg := req.(*v1.Message)
+	logging.Info("Process message with ID: %v", msg.ID)
+	// Do a small modification
+	msg.Payload = "processed:" + msg.Payload
+	// Send it to dispatcher
+	s.Request(msg.Version, msg.MsgType, msg)
 }
