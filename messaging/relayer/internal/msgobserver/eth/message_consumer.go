@@ -9,11 +9,15 @@ type MessageConsumer interface {
 	Consume(m *v1.Message)
 }
 
-type MessageQueueSender struct {
+type SendToQueueConsumer struct {
 	Queue string
 }
 
-func (mq MessageQueueSender) Consume(m *v1.Message) {
+func (mq SendToQueueConsumer) Consume(m *v1.Message) {
 	//TODO: send to mq
-	logging.Info("sending message '%v' to queue '%s'", m.ID, mq.Queue)
+	logging.Info("sending message '%v' to queue '%s'", m, "some queue")
+}
+
+func NewSendToQueueConsumer() MessageConsumer {
+	return SendToQueueConsumer{}
 }

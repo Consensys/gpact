@@ -3,6 +3,7 @@ package eth
 import (
 	"context"
 	"log"
+	"math/big"
 
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
@@ -41,7 +42,7 @@ func (l *FilteredEventListener) StartListener() {
 	}
 }
 
-func NewFilteredEventListener(wsURL string, contractAddressHex string, context context.Context) (EventListener, error) {
+func NewFilteredEventListener(wsURL string, contractAddressHex string, handler EventHandler, context context.Context) (EventListener, error) {
 	client, err := ethclient.DialContext(context, wsURL)
 
 	if err != nil {
@@ -55,5 +56,5 @@ func NewFilteredEventListener(wsURL string, contractAddressHex string, context c
 
 	query := ethereum.FilterQuery{Addresses: contractAddress}
 
-	return &FilteredEventListener{Client: client, Filter: query, Context: context}, nil
+	return &FilteredEventListener{Client: client, Filter: query, Context: context, Handler: handler}, nil
 }

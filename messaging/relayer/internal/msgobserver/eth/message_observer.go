@@ -14,14 +14,15 @@ type MessageObserverConfig struct {
 	FilterAddress string
 }
 
-func NewMessageObserver(config MessageObserverConfig) (*MessageObserver, error) {
-	listener, err := NewFilteredEventListener(config.EventLogWSURL, config.FilterAddress, context.Background())
+func NewSFCBridgeObserver(config MessageObserverConfig) (*MessageObserver, error) {
+	sfcEventTransformer := SFCBridgeEventTransformer{}
+	sendToQHandler := NewSimpleEventHandler(&sfcEventTransformer, SendToQueueConsumer{})
+	listener, err := NewFilteredEventListener(config.EventLogWSURL, config.FilterAddress, sendToQHandler, context.Background())
 	if err != nil {
 		return nil, err
 	}
-	transformer := SFCBridgeEventTransformer{}
-	handler := NewSimpleEventHandler(&transformer, MessageQueueSender{})
-	return &MessageObserver{Listener: listener, Handler: handler}, nil
+
+	return &MessageObserver{Listener: listener, Handler: sendToQHandler}, nil
 }
 
 func (o *MessageObserver) Start() {
