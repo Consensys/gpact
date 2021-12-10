@@ -16,9 +16,12 @@ package main
  */
 
 import (
+	"crypto/rand"
+	"encoding/hex"
+	"time"
+
 	"github.com/consensys/gpact/messaging/relayer/internal/config"
 	"github.com/consensys/gpact/messaging/relayer/internal/logging"
-	"github.com/consensys/gpact/messaging/relayer/internal/messages"
 	v1 "github.com/consensys/gpact/messaging/relayer/internal/messages/v1"
 	"github.com/consensys/gpact/messaging/relayer/internal/mqserver"
 	_ "github.com/joho/godotenv/autoload"
@@ -31,11 +34,6 @@ func main() {
 	// Load config
 	conf := config.NewConfig()
 
-	// Create handlers.
-	handlers := make(map[string]map[string]func(msg messages.Message))
-	handlers[v1.Version] = make(map[string]func(msg messages.Message))
-	handlers[v1.Version][v1.MessageType] = simpleHandler
-
 	// Start the server
 	var err error
 	s, err = mqserver.NewMQServer(
@@ -43,24 +41,48 @@ func main() {
 		conf.InboundChName,
 		conf.OutboundMQAddr,
 		conf.OutboundChName,
-		handlers,
+		nil,
 	)
 	if err != nil {
 		panic(err)
 	}
 	s.Start()
-	logging.Info("Relayer started.")
+	logging.Info("Observer started.")
 	for {
+		// Send a random message every 3 seconds.
+		go sendRandomMessage()
+		time.Sleep(3 * time.Second)
 	}
 }
 
-// simpleHandler only does a message forward with some slightly message change.
-func simpleHandler(req messages.Message) {
-	// Received request from observer
-	msg := req.(*v1.Message)
-	logging.Info("Process message with ID: %v", msg.ID)
-	// Do a small modification
-	msg.Payload = "processed:" + msg.Payload
-	// Send it to dispatcher
-	s.Request(msg.Version, msg.MsgType, msg)
+// sendRandomMessage creates and send a random message.
+func sendRandomMessage() {
+	msg := &v1.Message{
+		ID:        hex.EncodeToString(randomBytes(16)),
+		Timestamp: time.Now().UnixMilli(),
+		Destination: v1.ApplicationAddress{
+			NetworkID:       hex.EncodeToString(randomBytes(2)),
+			ContractAddress: hex.EncodeToString(randomBytes(16)),
+		},
+		Source: v1.ApplicationAddress{
+			NetworkID:       hex.EncodeToString(randomBytes(2)),
+			ContractAddress: hex.EncodeToString(randomBytes(16)),
+		},
+		Proofs: []v1.Proof{
+			{
+				ProofType: hex.EncodeToString(randomBytes(4)),
+				Created:   time.Now().UnixMilli(),
+				Proof:     hex.EncodeToString(randomBytes(32)),
+			},
+		},
+		Payload: hex.EncodeToString(randomBytes(16)),
+	}
+	logging.Info("Send message with ID: %v", msg.ID)
+	s.Request(v1.Version, v1.MessageType, msg)
+}
+
+func randomBytes(n int) []byte {
+	res := make([]byte, n)
+	rand.Read(res)
+	return res
 }
