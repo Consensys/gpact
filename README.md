@@ -109,7 +109,7 @@ on one blockchain from other blockchains. Unlike previous atomic crosschain prot
 that only offer atomic asset swaps, this protocol allows for general purpose application logic.
 
 
-![Trade Finance using GPACT protocol](https://raw.githubusercontent.com/ConsenSys/gpact/master/doc/images/trade.png "Trade Finance using GPACT protocol")
+![Trade Finance using GPACT protocol](doc/images/trade.png "Trade Finance using GPACT protocol")
 
 The figure above shows a logical representation of a crosschain call graph using the protocol. 
 A trade finance application creates a crosschain function 
