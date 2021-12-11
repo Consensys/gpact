@@ -1,31 +1,32 @@
 package eth
 
 import (
-	"github.com/consensys/gpact/messaging/relayer/internal/logging"
+	"fmt"
 	"github.com/ethereum/go-ethereum/core/types"
 )
 
 type EventHandler interface {
-	Handle(types.Log)
+	Handle(types.Log) error
 }
 
 // SimpleEventHandler executes a simple workflow of first transforming an event to a message and the
-// forwarding it to a message consumer to process.
+// forwarding it to a message handler to process.
 type SimpleEventHandler struct {
 	EventTransformer EventTransformer
-	MessageConsumer  MessageConsumer
+	MessageHandler  MessageHandler
 }
 
-// Handle transforms the provided even to a Message then forwards it to a message consumer to process.
-func (h *SimpleEventHandler) Handle(event types.Log) {
+// Handle transforms the provided even to a Message then forwards it to a message handler to process.
+func (h *SimpleEventHandler) Handle(event types.Log) error {
 	message, err := h.EventTransformer.ToMessage(event)
 	if err != nil {
-		logging.Error("error transforming event. %v", err)
-		return
+		return fmt.Errorf("error transforming event. %v", err)
+
 	}
-	h.MessageConsumer.Consume(message)
+	h.MessageHandler.Handle(message)
+	return nil
 }
 
-func NewSimpleEventHandler(transformer EventTransformer, sender MessageConsumer) EventHandler {
-	return &SimpleEventHandler{EventTransformer: transformer, MessageConsumer: sender}
+func NewSimpleEventHandler(transformer EventTransformer, sender MessageHandler) EventHandler {
+	return &SimpleEventHandler{EventTransformer: transformer, MessageHandler: sender}
 }

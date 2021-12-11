@@ -16,13 +16,9 @@ package main
  */
 
 import (
-	"crypto/rand"
-	"encoding/hex"
 	"time"
-
 	"github.com/consensys/gpact/messaging/relayer/internal/config"
 	"github.com/consensys/gpact/messaging/relayer/internal/logging"
-	v1 "github.com/consensys/gpact/messaging/relayer/internal/messages/v1"
 	"github.com/consensys/gpact/messaging/relayer/internal/mqserver"
 	_ "github.com/joho/godotenv/autoload"
 )
@@ -50,39 +46,7 @@ func main() {
 	logging.Info("Observer started.")
 	for {
 		// Send a random message every 3 seconds.
-		go sendRandomMessage()
+		// go sendRandomMessage()
 		time.Sleep(3 * time.Second)
 	}
-}
-
-// sendRandomMessage creates and send a random message.
-func sendRandomMessage() {
-	msg := &v1.Message{
-		ID:        hex.EncodeToString(randomBytes(16)),
-		Timestamp: time.Now().UnixMilli(),
-		Destination: v1.ApplicationAddress{
-			NetworkID:       hex.EncodeToString(randomBytes(2)),
-			ContractAddress: hex.EncodeToString(randomBytes(16)),
-		},
-		Source: v1.ApplicationAddress{
-			NetworkID:       hex.EncodeToString(randomBytes(2)),
-			ContractAddress: hex.EncodeToString(randomBytes(16)),
-		},
-		Proofs: []v1.Proof{
-			{
-				ProofType: hex.EncodeToString(randomBytes(4)),
-				Created:   time.Now().UnixMilli(),
-				Proof:     hex.EncodeToString(randomBytes(32)),
-			},
-		},
-		Payload: hex.EncodeToString(randomBytes(16)),
-	}
-	logging.Info("Send message with ID: %v", msg.ID)
-	s.Request(v1.Version, v1.MessageType, msg)
-}
-
-func randomBytes(n int) []byte {
-	res := make([]byte, n)
-	rand.Read(res)
-	return res
 }

@@ -15,11 +15,11 @@ type EventTransformer interface {
 
 const SFCEventName = "CrossCall"
 
-type SFCBridgeEventTransformer struct {
+type SFCEventTransformer struct {
 	ContractABI abi.ABI
 }
 
-func (t *SFCBridgeEventTransformer) ToMessage(event types.Log) (*v1.Message, error) {
+func (t *SFCEventTransformer) ToMessage(event types.Log) (*v1.Message, error) {
 	//TODO: addressing events that are being removed because of a reorg
 	e, err := t.ContractABI.Unpack(SFCEventName, event.Data)
 
@@ -44,10 +44,10 @@ func (t *SFCBridgeEventTransformer) ToMessage(event types.Log) (*v1.Message, err
 	return &message, nil
 }
 
-func NewSFCBridgeEventTransformer() (*SFCBridgeEventTransformer, error) {
+func NewSFCEventTransformer() (EventTransformer, error) {
 	abi, err := abi.JSON(strings.NewReader(string(sfc.SfcMetaData.ABI)))
 	if err != nil {
 		return nil, err
 	}
-	return &SFCBridgeEventTransformer{abi}, nil
+	return &SFCEventTransformer{abi}, nil
 }

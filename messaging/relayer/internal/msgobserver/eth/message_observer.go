@@ -2,6 +2,8 @@ package eth
 
 import (
 	"context"
+
+	"github.com/consensys/gpact/messaging/relayer/internal/mqserver"
 )
 
 type MessageObserver struct {
@@ -14,15 +16,19 @@ type MessageObserverConfig struct {
 	FilterAddress string
 }
 
-func NewSFCBridgeObserver(config MessageObserverConfig) (*MessageObserver, error) {
-	sfcEventTransformer := SFCBridgeEventTransformer{}
-	sendToQHandler := NewSimpleEventHandler(&sfcEventTransformer, SendToQueueConsumer{})
-	listener, err := NewFilteredEventListener(config.EventLogWSURL, config.FilterAddress, sendToQHandler, context.Background())
+func NewSFCObserver(config MessageObserverConfig, mq mqserver.MQServer) (*MessageObserver, error) {
+	transformer, err := NewSFCEventTransformer()
 	if err != nil {
 		return nil, err
 	}
 
-	return &MessageObserver{Listener: listener, Handler: sendToQHandler}, nil
+	handler := NewSimpleEventHandler(transformer, NewSendToQueueHandler(mq))
+	listener, err := NewFilteredEventListener(config.EventLogWSURL, config.FilterAddress, handler, context.Background())
+	if err != nil {
+		return nil, err
+	}
+
+	return &MessageObserver{Listener: listener, Handler: handler}, nil
 }
 
 func (o *MessageObserver) Start() {
