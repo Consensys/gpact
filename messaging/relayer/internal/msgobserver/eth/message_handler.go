@@ -8,24 +8,25 @@ import (
 
 type MessageHandler interface {
 	Handle(m *v1.Message)
+	//TODO: handle fault method
 }
 
-type SendToQHandler struct {
+type MessageEnqueueHandler struct {
 	MQ mqserver.MQServer
 }
 
 // Handle sends the provided message to the configured message queue.
 // The method assumes that the message queue is configured and started.
-func (mq *SendToQHandler) Handle(m *v1.Message) {
+func (mq *MessageEnqueueHandler) Handle(m *v1.Message) {
 	logging.Info("sending message '%v' to queue '%s'", m, "some queue")
 	mq.sendMessage(m)
 }
 
-func NewSendToQueueHandler(qServer mqserver.MQServer) MessageHandler {
-	return &SendToQHandler{qServer}
+func NewMessageEnqueueHandler(qServer mqserver.MQServer) MessageHandler {
+	return &MessageEnqueueHandler{qServer}
 }
 
-func (s *SendToQHandler) sendMessage(msg *v1.Message) {
+func (s *MessageEnqueueHandler) sendMessage(msg *v1.Message) {
 	logging.Info("Send message with ID: %v", msg.ID)
 	s.MQ.Request(v1.Version, v1.MessageType, msg)
 }

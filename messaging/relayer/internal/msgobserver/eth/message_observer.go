@@ -22,7 +22,7 @@ func NewSFCObserver(config MessageObserverConfig, mq mqserver.MQServer) (*Messag
 		return nil, err
 	}
 
-	handler := NewSimpleEventHandler(transformer, NewSendToQueueHandler(mq))
+	handler := NewSimpleEventHandler(transformer, NewMessageEnqueueHandler(mq))
 	listener, err := NewFilteredEventListener(config.EventLogWSURL, config.FilterAddress, handler, context.Background())
 	if err != nil {
 		return nil, err
