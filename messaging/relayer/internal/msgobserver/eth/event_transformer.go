@@ -1,53 +1,59 @@
 package eth
 
 import (
+	"errors"
 	"fmt"
 	v1 "github.com/consensys/gpact/messaging/relayer/internal/messages/v1"
 	"github.com/consensys/gpact/messaging/relayer/internal/msgobserver/eth/soliditywrappers/sfc"
-	"github.com/ethereum/go-ethereum/accounts/abi"
-	"github.com/ethereum/go-ethereum/core/types"
-	"strings"
+	"github.com/ethereum/go-ethereum/common"
 )
 
 type EventTransformer interface {
-	ToMessage(event types.Log) (*v1.Message, error)
+	ToMessage(event interface{}) (*v1.Message, error)
 }
 
 const SFCEventName = "CrossCall"
 
 type SFCEventTransformer struct {
-	ContractABI abi.ABI
+	SourceNetwork string
 }
 
-func (t *SFCEventTransformer) ToMessage(event types.Log) (*v1.Message, error) {
-	//TODO: addressing events that are being removed because of a reorg
-	e, err := t.ContractABI.Unpack(SFCEventName, event.Data)
+func (t *SFCEventTransformer) ToMessage(event interface{}) (*v1.Message, error) {
+	sfcEvent := event.(sfc.SfcCrossCall)
 
-	if err != nil {
+	if err := t.validate(sfcEvent); err != nil {
 		return nil, err
 	}
 
-	if len(e) == 0 {
-		return nil, fmt.Errorf("failed to transform event to message: %v", event)
-	}
-
-	sfcEvent := e[0].(sfc.SfcCrossCall)
+	source := v1.ApplicationAddress{NetworkID: t.SourceNetwork, ContractAddress: sfcEvent.DestContract.String()}
 	message := v1.Message{
 		ID:          string(sfcEvent.TxId[:]), // TODO: replace with a proper message id scheme
 		Timestamp:   sfcEvent.Timestamp.Int64(),
 		MsgType:     v1.MessageType,
 		Version:     v1.Version,
 		Destination: v1.ApplicationAddress{NetworkID: sfcEvent.DestBcId.String(), ContractAddress: string(sfcEvent.DestContract[:])},
+		Source:      source,
 		Payload:     string(sfcEvent.DestFunctionCall),
 	}
 
 	return &message, nil
 }
 
-func NewSFCEventTransformer() (EventTransformer, error) {
-	abi, err := abi.JSON(strings.NewReader(string(sfc.SfcMetaData.ABI)))
-	if err != nil {
-		return nil, err
+func (t *SFCEventTransformer) validate(event sfc.SfcCrossCall) error {
+	if event.DestBcId == nil {
+		return errors.New("destination network id cannot be empty")
 	}
-	return &SFCEventTransformer{abi}, nil
+	if len(event.DestContract) != common.AddressLength {
+		return fmt.Errorf("destination contract address is invalid: '%s'", event.DestContract)
+	}
+
+	if event.Timestamp == nil || event.Timestamp.Int64() <= 0 {
+		return fmt.Errorf("invalid timestamp '%s'", event.Timestamp)
+	}
+
+	return nil
+}
+
+func NewSFCEventTransformer(sourceNetwork string) *SFCEventTransformer {
+	return &SFCEventTransformer{sourceNetwork}
 }

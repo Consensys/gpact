@@ -7,8 +7,8 @@ import (
 )
 
 type MessageHandler interface {
+	//TODO: error handling
 	Handle(m *v1.Message)
-	//TODO: handle fault method
 }
 
 type MessageEnqueueHandler struct {
@@ -22,11 +22,11 @@ func (mq *MessageEnqueueHandler) Handle(m *v1.Message) {
 	mq.sendMessage(m)
 }
 
-func NewMessageEnqueueHandler(qServer mqserver.MQServer) MessageHandler {
+func NewMessageEnqueueHandler(qServer mqserver.MQServer) *MessageEnqueueHandler {
 	return &MessageEnqueueHandler{qServer}
 }
 
 func (s *MessageEnqueueHandler) sendMessage(msg *v1.Message) {
 	logging.Info("Send message with ID: %v", msg.ID)
-	s.MQ.Request(v1.Version, v1.MessageType, msg)
+	// TODO: s.MQ.Request(v1.Version, v1.MessageType, msg)
 }
