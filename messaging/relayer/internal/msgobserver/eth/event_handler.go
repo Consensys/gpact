@@ -17,7 +17,6 @@ type SimpleEventHandler struct {
 
 // Handle transforms the provided even to a Message then forwards it to a message handler to process.
 func (h *SimpleEventHandler) Handle(event interface{}) error {
-	// TODO: handle removed events
 	message, err := h.EventTransformer.ToMessage(event)
 	if err != nil {
 		return fmt.Errorf("error transforming event. %v", err)

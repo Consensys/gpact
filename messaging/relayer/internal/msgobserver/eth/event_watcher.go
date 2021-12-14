@@ -9,22 +9,23 @@ import (
 	"github.com/ethereum/go-ethereum/event"
 )
 
-type EventListener interface {
-	Start()
+type EventWatcher interface {
+	Watch()
 }
 
-type EventListenerConfig struct {
+type EventWatcherConfig struct {
+	Start *uint64
 	Context context.Context
 	Handler EventHandler
 }
 
-type SFCCrossCallListener struct {
-	EventListenerConfig
+type SFCCrossCallWatcher struct {
+	EventWatcherConfig
 	SfcContract *sfc.Sfc
 }
 
-func (l *SFCCrossCallListener) Start() {
-	opts := bind.WatchOpts{Context: l.Context}
+func (l *SFCCrossCallWatcher) Watch() {
+	opts := bind.WatchOpts{Start: l.Start, Context: l.Context}
 	chanEvents := make(chan *sfc.SfcCrossCall)
 	sub, err := l.SfcContract.WatchCrossCall(&opts, chanEvents)
 	if err != nil {
@@ -33,7 +34,7 @@ func (l *SFCCrossCallListener) Start() {
 	l.start(sub, chanEvents)
 }
 
-func (l *SFCCrossCallListener) start(sub event.Subscription, chanEvents <-chan *sfc.SfcCrossCall) {
+func (l *SFCCrossCallWatcher) start(sub event.Subscription, chanEvents <-chan *sfc.SfcCrossCall) {
 	for {
 		select {
 		case err := <-sub.Err():
@@ -44,6 +45,6 @@ func (l *SFCCrossCallListener) start(sub event.Subscription, chanEvents <-chan *
 	}
 }
 
-func NewSFCCrossCallListener(context context.Context, handler EventHandler, contract *sfc.Sfc) *SFCCrossCallListener {
-	return &SFCCrossCallListener{EventListenerConfig: EventListenerConfig{Context: context, Handler: handler}, SfcContract: contract}
+func NewSFCCrossCallWatcher(context context.Context, handler EventHandler, contract *sfc.Sfc) *SFCCrossCallWatcher {
+	return &SFCCrossCallWatcher{EventWatcherConfig: EventWatcherConfig{Context: context, Handler: handler}, SfcContract: contract}
 }

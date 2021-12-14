@@ -6,20 +6,21 @@ import (
 	"github.com/consensys/gpact/messaging/relayer/internal/msgobserver/eth/soliditywrappers/sfc"
 )
 
-type SFCObserver struct {
-	Listener *SFCCrossCallListener
-	Handler  *SimpleEventHandler
-	Source   string
+type SFCBridgeObserver struct {
+	EventWatcher  *SFCCrossCallWatcher
+	EventHandler  *SimpleEventHandler
+	SourceNetwork string
 }
 
-func NewSFCObserver(source string, contract *sfc.Sfc, mq *mqserver.MQServer) (*SFCObserver, error) {
-	transformer := NewSFCEventTransformer(source)
-	handler := NewSimpleEventHandler(transformer, NewMessageEnqueueHandler(mq))
-	listener := NewSFCCrossCallListener(context.Background(), handler, contract)
+func NewSFCBridgeObserver(source string, contract *sfc.Sfc, mq *mqserver.MQServer) (*SFCBridgeObserver, error) {
+	eventTransformer := NewSFCEventTransformer(source)
+	messageHandler := NewMessageEnqueueHandler(mq)
+	eventHandler := NewSimpleEventHandler(eventTransformer, messageHandler)
+	eventWatcher := NewSFCCrossCallWatcher(context.Background(), eventHandler, contract)
 
-	return &SFCObserver{Listener: listener, Handler: handler, Source: source}, nil
+	return &SFCBridgeObserver{EventWatcher: eventWatcher, EventHandler: eventHandler, SourceNetwork: source}, nil
 }
 
-func (o *SFCObserver) Start() {
-	o.Listener.Start()
+func (o *SFCBridgeObserver) Start() {
+	o.EventWatcher.Watch()
 }
