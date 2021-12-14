@@ -3,29 +3,34 @@ package eth
 import (
 	"math/big"
 	"testing"
+
+	"github.com/stretchr/testify/mock"
 )
 
-type MockHandler struct {
-	CalledTimes uint16
+type MockEventHandler struct {
+	mock.Mock
 }
 
-func (m *MockHandler) Handle(event interface{}) error {
-	m.CalledTimes += 1
-	return nil
+func (m *MockEventHandler) Handle(event interface{}) error {
+	args := m.Called(event)
+	return args.Error(0)
 }
 
-func TestSFCCrossCallListener(t *testing.T) {
-	// setup simulated backend
-	// check that handler receives events
+func TestSFCCrossCallWatcher(t *testing.T) {
 	simBackend, auth := simulatedBackend(t)
 	contract := deployContract(t, simBackend, auth)
 
-	handler := &MockHandler{}
+	handler := new(MockEventHandler)
+	handler.On("Handle", mock.AnythingOfType("*sfc.SfcCrossCall")).Once().Return(nil)
+
 	watcher := NewSFCCrossCallWatcher(auth.Context, handler, contract)
-	watcher.Watch()
+	go watcher.Watch()
 
 	_, err := contract.SfcTransactor.CrossBlockchainCall(auth, big.NewInt(100), auth.From, []byte("payload"))
 	if err != nil {
 		failNow(t, "failed to transact: %v", err)
 	}
+
+	simBackend.Commit()
+	handler.AssertExpectations(t)
 }
