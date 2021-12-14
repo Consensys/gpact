@@ -36,7 +36,7 @@ allprojects {
 }
 
 ext {
-    log4JVersion = '2.14.1'
+    log4JVersion = '2.16.0'
     okHttpVersion = '4.9.1'
     jacksonVersion = '2.13.0'
     rxJavaVersion = '2.2.21'
