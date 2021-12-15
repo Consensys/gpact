@@ -1,14 +1,15 @@
 package eth
 
 import (
+	"math/big"
+	"testing"
+
 	"github.com/consensys/gpact/messaging/relayer/internal/msgobserver/eth/soliditywrappers/sfc"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind/backends"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core"
 	"github.com/ethereum/go-ethereum/crypto"
-	"math/big"
-	"testing"
 )
 
 func simulatedBackend(t *testing.T) (*backends.SimulatedBackend, *bind.TransactOpts) {
