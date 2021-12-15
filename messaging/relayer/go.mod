@@ -5,7 +5,6 @@ go 1.17
 require (
 	github.com/davidlazar/go-crypto v0.0.0-20200604182044-b73af7476f6c
 	github.com/ethereum/go-ethereum v1.10.13
-	github.com/ipsn/go-secp256k1 v0.0.0-20180726113642-9d62b9f0bc52
 	github.com/joho/godotenv v1.4.0
 	github.com/rs/zerolog v1.26.0
 	github.com/spf13/viper v1.3.2

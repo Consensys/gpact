@@ -20,8 +20,7 @@ import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"io"
-
-	secp256k1 "github.com/ipsn/go-secp256k1"
+	secp256k1 "github.com/ethereum/go-ethereum/crypto/secp256k1"
 )
 
 // This file is very similar to https://github.com/filecoin-project/go-crypto/blob/master/crypto.go

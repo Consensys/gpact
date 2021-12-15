@@ -1,13 +1,14 @@
 package eth
 
 import (
-	"crypto/rand"
 	"encoding/base64"
+
+	"github.com/consensys/gpact/messaging/relayer/internal/crypto"
 )
 
 func randomBytes(n int) []byte {
 	res := make([]byte, n)
-	rand.Read(res)
+	crypto.GetPrivatePRNG().ReadBytes(res)
 	return res
 }
 
