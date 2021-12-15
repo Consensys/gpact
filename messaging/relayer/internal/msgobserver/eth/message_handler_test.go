@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestMessageEnqueuHandler(t *testing.T) {
+func TestMessageEnqueueHandler(t *testing.T) {
 	fixMsg := v1.Message{
 		ID:          "msg-0001",
 		Timestamp:   2384923489234,
