@@ -3,6 +3,7 @@ package eth
 import (
 	"math/big"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/mock"
 )
@@ -32,5 +33,6 @@ func TestSFCCrossCallWatcher(t *testing.T) {
 	}
 
 	simBackend.Commit()
+	time.Sleep(2 * time.Second)
 	handler.AssertExpectations(t)
 }
