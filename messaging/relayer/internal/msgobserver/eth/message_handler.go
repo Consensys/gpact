@@ -11,7 +11,7 @@ type MessageHandler interface {
 }
 
 type MessageEnqueueHandler struct {
-	MQ *mqserver.MQServer
+	MQ mqserver.MessageQueue
 }
 
 // Handle sends the provided message to the configured message queue.
@@ -20,7 +20,7 @@ func (mq *MessageEnqueueHandler) Handle(m *v1.Message) {
 	mq.sendMessage(m)
 }
 
-func NewMessageEnqueueHandler(qServer *mqserver.MQServer) *MessageEnqueueHandler {
+func NewMessageEnqueueHandler(qServer mqserver.MessageQueue) *MessageEnqueueHandler {
 	return &MessageEnqueueHandler{qServer}
 }
 
