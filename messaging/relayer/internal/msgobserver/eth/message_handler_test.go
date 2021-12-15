@@ -4,7 +4,9 @@ import (
 	"testing"
 
 	v1 "github.com/consensys/gpact/messaging/relayer/internal/messages/v1"
+	"github.com/stretchr/testify/assert"
 )
+
 func TestMessageEnqueuHandler(t *testing.T) {
 	fixMsg := v1.Message{
 		ID:          "msg-0001",
@@ -19,7 +21,8 @@ func TestMessageEnqueuHandler(t *testing.T) {
 
 	mockMQ.On("Request", fixMsg.Version, fixMsg.MsgType, &fixMsg).Once()
 	handler := NewMessageEnqueueHandler(mockMQ)
-	handler.Handle(&fixMsg)
+	err := handler.Handle(&fixMsg)
+	assert.Nil(t, err)
 
 	mockMQ.AssertExpectations(t)
 }

@@ -10,13 +10,18 @@ import (
 )
 
 type EventTransformer interface {
+	// ToMessage converts a given event to a relayer message
 	ToMessage(event interface{}) (*v1.Message, error)
 }
 
+// SFCEventTransformer converts events from a simple-function-call bridge contract to relayer messages
 type SFCEventTransformer struct {
 	Source string
 }
 
+// ToMessage converts a 'CrossCall' event emited from a simple-function-call bridge contract to relayer message
+// It returns an error if the event contains an invalid timestamp or destination information
+// It panics if the event is not of an sfc.SfcCrossCall type
 func (t *SFCEventTransformer) ToMessage(event interface{}) (*v1.Message, error) {
 	sfcEvent := event.(*sfc.SfcCrossCall)
 
