@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 
-	"github.com/consensys/gpact/messaging/relayer/internal/msgobserver/eth/soliditywrappers/sfc"
+	"github.com/consensys/gpact/messaging/relayer/internal/soliditywrappers/sfc"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/event"
 )

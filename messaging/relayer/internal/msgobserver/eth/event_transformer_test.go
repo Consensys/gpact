@@ -4,7 +4,7 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/consensys/gpact/messaging/relayer/internal/msgobserver/eth/soliditywrappers/sfc"
+	"github.com/consensys/gpact/messaging/relayer/internal/soliditywrappers/sfc"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/assert"
 )

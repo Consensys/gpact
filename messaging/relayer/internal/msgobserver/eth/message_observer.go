@@ -2,8 +2,9 @@ package eth
 
 import (
 	"context"
+
 	"github.com/consensys/gpact/messaging/relayer/internal/mqserver"
-	"github.com/consensys/gpact/messaging/relayer/internal/msgobserver/eth/soliditywrappers/sfc"
+	"github.com/consensys/gpact/messaging/relayer/internal/soliditywrappers/sfc"
 )
 
 // SFCBridgeObserver listens to incoming events from an SFC contract, transforms them into relayer messages

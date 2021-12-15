@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	v1 "github.com/consensys/gpact/messaging/relayer/internal/messages/v1"
-	"github.com/consensys/gpact/messaging/relayer/internal/msgobserver/eth/soliditywrappers/sfc"
+	"github.com/consensys/gpact/messaging/relayer/internal/soliditywrappers/sfc"
 )
 
 type EventTransformer interface {
