@@ -12,7 +12,7 @@ type SFCBridgeObserver struct {
 	SourceNetwork string
 }
 
-func NewSFCBridgeObserver(source string, contract *sfc.Sfc, mq *mqserver.MQServer) (*SFCBridgeObserver, error) {
+func NewSFCBridgeObserver(source string, contract *sfc.Sfc, mq mqserver.MessageQueue) (*SFCBridgeObserver, error) {
 	eventTransformer := NewSFCEventTransformer(source)
 	messageHandler := NewMessageEnqueueHandler(mq)
 	eventHandler := NewSimpleEventHandler(eventTransformer, messageHandler)

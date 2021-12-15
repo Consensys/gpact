@@ -47,3 +47,5 @@ func TestSFCTransformerFailsOnInvalidDestination(t *testing.T) {
 	assert.NotNil(t, err)
 	assert.Regexp(t, "destination network id", err.Error())
 }
+
+// TODO: verify encoded payload

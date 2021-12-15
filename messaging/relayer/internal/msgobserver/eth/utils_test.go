@@ -4,13 +4,28 @@ import (
 	"math/big"
 	"testing"
 
+	"github.com/consensys/gpact/messaging/relayer/internal/messages"
 	"github.com/consensys/gpact/messaging/relayer/internal/msgobserver/eth/soliditywrappers/sfc"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind/backends"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core"
 	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/stretchr/testify/mock"
 )
+
+type MockMQ struct {
+	mock.Mock
+	LastMessage messages.Message
+}
+
+func (mk *MockMQ) Request(version string, msgType string, msg messages.Message) {
+	mk.LastMessage = msg
+	mk.Called(version, msgType, msg)
+}
+
+func (mk *MockMQ) Start() {}
+
 
 func simulatedBackend(t *testing.T) (*backends.SimulatedBackend, *bind.TransactOpts) {
 	key, err := crypto.GenerateKey()
