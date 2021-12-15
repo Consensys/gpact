@@ -21,6 +21,14 @@ import (
 	"github.com/streadway/amqp"
 )
 
+type MessageQueue interface {
+	// Request sends a message to the message queue.
+	Request(version string, msgType string, msg messages.Message)
+
+	// Start starts the message handling routine.
+	Start()
+}
+
 // MQServer provides a wrapper over the message queue.
 type MQServer struct {
 	// connIn is the connection to message queue for incoming messages.
