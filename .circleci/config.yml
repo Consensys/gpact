@@ -244,7 +244,7 @@ jobs:
 
 
 
-  relayer-build-and-test:
+  relayer-build:
     docker:
       - image: cimg/go:1.17.3
     environment:
@@ -262,11 +262,58 @@ jobs:
           name: Build production code
           command: make build
           working_directory: ~/project/messaging/relayer
+
+  relayer-test:
+    machine:
+      image: ubuntu-2004:202111-01
+    resource_class: large
+    steps:
+      - checkout
+      - run:
+          name: Verify checkout
+          command: |
+            date -Is
+            echo; git -P reflog --date=iso
+            go version
+            pwd
+            ls -al
+            echo GOROOT: $GOROOT
+      - run:
+          name: Build production code
+          command: make build
+          working_directory: messaging/relayer
+      - run:
+          name: Create and Start blockchains
+          working_directory: test-blockchains
+          background: true
+          command: docker-compose up
+      - run: sleep 30
       - run:
           name: Build test code and execute unit tests
           command: make utest
-          working_directory: ~/project/messaging/relayer
-
+          working_directory: messaging/relayer
+      - run:
+          name: Stop blockchains
+          working_directory: test-blockchains
+          command: docker-compose stop
+          when: always
+      - run:
+          name: Logs from bc31
+          working_directory: test-blockchains
+          command: |
+            docker container logs test-blockchains_bc31node1_1
+          when: always
+      - run:
+          name: Logs from bc32
+          working_directory: test-blockchains
+          command: |
+            docker container logs test-blockchains_bc32node1_1
+          when: always
+      - run:
+          name: Remove blockchains
+          working_directory: test-blockchains
+          command: docker-compose down
+          when: always
 
 
 
@@ -274,12 +321,12 @@ workflows:
   version: 2
   default:
     jobs:
-      - relayer-build-and-test
+      - relayer-build
+      - relayer-test:
+          requires:
+            - relayer-build
       - unitTestsMachine:
           requires:
-            - relayer-build-and-test
-      #- unitTestsMachine:
-      #    requires:
-      #      - build
+            - relayer-build
 
 
