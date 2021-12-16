@@ -265,7 +265,7 @@ jobs:
 
   relayer-test:
     machine:
-      image: ubuntu-2004:202107-02
+      image: ubuntu-2004:202111-01
     resource_class: large
     steps:
       - checkout
@@ -278,15 +278,6 @@ jobs:
             pwd
             ls -al
             echo GOROOT: $GOROOT
-      - run:
-          name: Upgrade golang
-          command: |
-            sudo rm -rf /usr/local/go
-            curl -O https://dl.google.com/go/go1.17.1.linux-amd64.tar.gz
-            tar -xvf go1.17.1.linux-amd64.tar.gz
-            sudo mv go /usr/local
-            export GOROOT=/usr/local/go
-
       - run:
           name: Build production code
           command: make build
