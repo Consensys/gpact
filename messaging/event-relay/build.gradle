@@ -10,6 +10,8 @@ dependencies {
     implementation group: 'org.apache.tuweni', name: 'tuweni-units', version: '1.0.0'
 
     testImplementation project(':commontest')
+    testImplementation project(':mes-attestor-sign')
+    testImplementation project(':sfc')
     testImplementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
 }
 

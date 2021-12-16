@@ -33,6 +33,7 @@ contract SimpleCrosschainControl is
     // How old events can be before they are not accepted.
     // Also used as a time after which crosschain transaction ids can be purged from the
     // replayProvention map, thus reducing the cost of the crosschain transaction.
+    // Measured in seconds.
     uint256 public timeHorizon;
 
     // Used to prevent replay attacks in transaction.
@@ -164,7 +165,10 @@ contract SimpleCrosschainControl is
         require(timestamp + timeHorizon > block.timestamp, "Event is too old");
         replayPrevention[txId] = timestamp;
 
-        require(destBcId == myBlockchainId);
+        require(
+            destBcId == myBlockchainId,
+            "Incorrect destination blockchain id"
+        );
 
         // Add authentication information to the function call.
         bytes memory functionCallWithAuth = encodeNonAtomicAuthParams(

@@ -23,6 +23,10 @@ contract SignedEventStore is CrosschainVerifier, BytesUtil {
     AttestorSignRegistrar registrar;
     SimpleCrosschainControl functionCall;
 
+    // 	0x77dab611
+    bytes32 internal constant CROSS_CALL_EVENT_SIGNATURE =
+        keccak256("CrossCall(bytes32,uint256,address,uint256,address,bytes)");
+
     struct SignedEvents {
         // The event to be actioned.
         bytes encodedEvent;
@@ -72,9 +76,9 @@ contract SignedEventStore is CrosschainVerifier, BytesUtil {
      * Note that replay protection and time outs are handled by the function call layer.
      */
     function relayEvent(
-        uint256 _blockchainId,
-        address _cbcAddress,
-        bytes calldata _encodedEvent,
+        uint256 _sourceBlockchainId,
+        address _sourceCbcAddress,
+        bytes calldata _eventData,
         bytes calldata _signature
     ) external {
         // Step 1: Check the signatures of signers.
@@ -107,44 +111,51 @@ contract SignedEventStore is CrosschainVerifier, BytesUtil {
                 offset += 1;
             }
         }
+
+        bytes memory encodedEvent = abi.encodePacked(
+            _sourceBlockchainId,
+            _sourceCbcAddress,
+            CROSS_CALL_EVENT_SIGNATURE,
+            _eventData
+        );
+
         registrar.verify(
-            _blockchainId,
+            _sourceBlockchainId,
             signers,
             sigRs,
             sigSs,
             sigVs,
-            _encodedEvent
+            encodedEvent
         );
 
         // Step 2: Record who signed the event.
-        bytes32 signedEventDigest = keccak256(_encodedEvent);
+        bytes32 eventDigest = keccak256(encodedEvent);
 
         for (uint256 i = 0; i < len; i++) {
             require(
-                signedEvents[signedEventDigest].whoVotedMap[signers[i]] ==
-                    false,
+                signedEvents[eventDigest].whoVotedMap[signers[i]] == false,
                 "Relayer has already signed event"
             );
-            signedEvents[signedEventDigest].whoVotedMap[signers[i]] = true;
-            signedEvents[signedEventDigest].whoVoted.push(signers[i]);
+            signedEvents[eventDigest].whoVotedMap[signers[i]] = true;
+            signedEvents[eventDigest].whoVoted.push(signers[i]);
         }
 
         // Action the event if enough relayers have signed.
-        if (signedEvents[signedEventDigest].actioned) {
+        if (signedEvents[eventDigest].actioned) {
             // There is no more to do. The signers have been recorded. This could
             // be important for determining who to pay.
             return;
         }
-        uint256 threshold = registrar.getSigningThreshold(_blockchainId);
-        if (signedEvents[signedEventDigest].whoVoted.length >= threshold) {
+        uint256 threshold = registrar.getSigningThreshold(_sourceBlockchainId);
+        if (signedEvents[eventDigest].whoVoted.length >= threshold) {
             // NOTE: In the call below, the _signature parameter isn't used. Could be cheaper to pass bytes("")
             functionCall.crossCallHandler(
-                _blockchainId,
-                _cbcAddress,
-                _encodedEvent,
+                _sourceBlockchainId,
+                _sourceCbcAddress,
+                _eventData,
                 _signature
             );
-            signedEvents[signedEventDigest].actioned = true;
+            signedEvents[eventDigest].actioned = true;
         }
     }
 }
