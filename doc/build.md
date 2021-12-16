@@ -30,3 +30,38 @@ To build and test:
 ```$xslt
 ./gradlew test
 ```
+
+To build the relayer:
+```$xslt
+cd messaging/relayer
+make build
+```
+
+To test the relayer:
+```$xslt
+cd messaging/relayer
+make utest
+```
+
+##Code Style Checks
+To check Solidity for compliance with code style:
+```$xslt
+./gradlew solFormatCheck
+```
+
+To apply Solidity format:
+```$xslt
+./gradlew solFormat
+```
+
+To check Java style:
+```$xslt
+./gradlew spotlessCheck
+```
+
+To apply Java format:
+```$xslt
+./gradlew spotlessApply
+```
+
+
