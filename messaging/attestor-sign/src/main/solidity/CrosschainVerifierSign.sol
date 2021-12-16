@@ -63,7 +63,7 @@ contract CrosschainVerifierSign is CrosschainVerifier, BytesUtil {
                 offset += 1;
             }
         }
-        registrar.verify(
+        registrar.verifyAndCheckThreshold(
             _blockchainId,
             signers,
             sigRs,
