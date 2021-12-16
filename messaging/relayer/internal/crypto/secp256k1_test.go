@@ -25,49 +25,46 @@ import (
 func TestSecP256K1GenerateKey(t *testing.T) {
 	rand.Seed(time.Now().UnixNano())
 
-	sk, err := secp256k1GenerateKey()
+	sk, err := Secp256k1GenerateKey()
 	assert.NoError(t, err)
 
 	assert.Equal(t, len(sk), 32)
 
-	msg := make([]byte, 32)
-	for i := 0; i < len(msg); i++ {
-		msg[i] = byte(i)
+	digest := make([]byte, 32)
+	for i := 0; i < len(digest); i++ {
+		digest[i] = byte(i)
 	}
 
-	digest, err := secp256k1Sign(sk, msg)
+	signature, err := Secp256k1SignDigest(sk, digest)
 	assert.NoError(t, err)
-	assert.Equal(t, len(digest), 65)
-	pk := secp256k1PublicKey(sk)
+	assert.Equal(t, len(signature), 65)
+	pk := Secp256k1PublicKey(sk)
 
 	// valid signature
-	assert.True(t, secp256k1Verify(pk, msg, digest))
+	assert.True(t, Secp256k1VerifyDigest(pk, digest, signature))
 
 	// invalid signature - different message (too short)
-	assert.False(t, secp256k1Verify(pk, msg[3:], digest))
+	assert.False(t, Secp256k1VerifyDigest(pk, digest[3:], signature))
 
 	// invalid signature - different message
 	msg2 := make([]byte, 32)
-	copy(msg2, msg)
+	copy(msg2, digest)
 	rand.Shuffle(len(msg2), func(i, j int) { msg2[i], msg2[j] = msg2[j], msg2[i] })
-	assert.False(t, secp256k1Verify(pk, msg2, digest))
+	assert.False(t, Secp256k1VerifyDigest(pk, msg2, signature))
 
 	// invalid signature - different digest
-	digest2 := make([]byte, 65)
-	copy(digest2, digest)
-	rand.Shuffle(len(digest2), func(i, j int) { digest2[i], digest2[j] = digest2[j], digest2[i] })
-	assert.False(t, secp256k1Verify(pk, msg, digest2))
+	signature2 := make([]byte, 65)
+	copy(signature2, signature)
+	rand.Shuffle(len(signature2), func(i, j int) { signature2[i], signature2[j] = signature2[j], signature2[i] })
+	assert.False(t, Secp256k1VerifyDigest(pk, digest, signature2))
 
-	// invalid signature - digest too short
-	assert.False(t, secp256k1Verify(pk, msg, digest[3:]))
-	assert.False(t, secp256k1Verify(pk, msg, digest[:29]))
+	// invalid signature - signature too long
+	signature3 := make([]byte, 70)
+	copy(signature3, signature)
+	assert.False(t, Secp256k1VerifyDigest(pk, digest, signature3))
 
-	// invalid signature - digest too long
-	digest3 := make([]byte, 70)
-	copy(digest3, digest)
-	assert.False(t, secp256k1Verify(pk, msg, digest3))
-
-	recovered, err := secp256k1EcRecover(msg, digest)
+	// Check that public key can be recovered from the signature.
+	recovered, err := Secp256k1EcRecover(digest, signature)
 	assert.NoError(t, err)
-	assert.Equal(t, recovered, secp256k1PublicKey(sk))
+	assert.Equal(t, recovered, Secp256k1PublicKey(sk))
 }
