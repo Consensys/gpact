@@ -90,7 +90,7 @@ contract AttestorSignRegistrar is EcdsaSignatureVerification, Ownable {
         );
     }
 
-    function verify(
+    function verifyAndCheckThreshold(
         uint256 _blockchainId,
         address[] calldata _signers,
         bytes32[] calldata _sigR,
@@ -98,15 +98,23 @@ contract AttestorSignRegistrar is EcdsaSignatureVerification, Ownable {
         uint8[] calldata _sigV,
         bytes calldata _plainText
     ) external view returns (bool) {
+        checkThreshold(_blockchainId, _signers);
+        return verify(_blockchainId, _signers, _sigR, _sigS, _sigV, _plainText);
+    }
+
+
+    function verify(
+        uint256 _blockchainId,
+        address[] calldata _signers,
+        bytes32[] calldata _sigR,
+        bytes32[] calldata _sigS,
+        uint8[] calldata _sigV,
+        bytes calldata _plainText
+    ) public view returns (bool) {
         uint256 signersLength = _signers.length;
         require(signersLength == _sigR.length, "sigR length mismatch");
         require(signersLength == _sigS.length, "sigS length mismatch");
         require(signersLength == _sigV.length, "sigV length mismatch");
-
-        require(
-            signersLength >= blockchains[_blockchainId].signingThreshold,
-            "Not enough signers"
-        );
 
         for (uint256 i = 0; i < signersLength; i++) {
             // Check that signer is a signer for this blockchain
@@ -128,6 +136,19 @@ contract AttestorSignRegistrar is EcdsaSignatureVerification, Ownable {
         }
         return true;
     }
+
+    function checkThreshold(
+        uint256 _blockchainId,
+        address[] calldata _signers
+    ) public view returns (bool) {
+        uint256 signersLength = _signers.length;
+        require(
+            signersLength >= blockchains[_blockchainId].signingThreshold,
+            "Not enough signers"
+        );
+        return true;
+    }
+
 
     function getSigningThreshold(uint256 _blockchainId)
         external
