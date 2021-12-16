@@ -20,6 +20,8 @@ import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"io"
+
+	//	secp256k1 "github.com/ipsn/go-secp256k1"
 	secp256k1 "github.com/ethereum/go-ethereum/crypto/secp256k1"
 )
 
@@ -31,62 +33,74 @@ import (
 // Having all usages of SecP256K1 go through this file means that if
 // the underlying library needs to be changed, it will only need to be changed here.
 
-// PrivateKeyBytes is the size of a serialized private key.
-const secp256k1PrivateKeyBytes = 32
+// Secp256k1PrivateKeyBytes is the size of a serialized private key.
+const Secp256k1PrivateKeyBytes = 32
 
-// PublicKeyBytes is the size of a serialized public key.
-const secp256k1PublicKeyBytes = 65
+// Secp256k1PublicKeyBytes is the size of a serialized public key.
+const Secp256k1PublicKeyBytes = 65
 
-// PublicKey returns the public key for this private key.
-func secp256k1PublicKey(sk []byte) []byte {
+// Secp256k1PublicKey returns the public key for this private key.
+func Secp256k1PublicKey(sk []byte) []byte {
 	x, y := secp256k1.S256().ScalarBaseMult(sk)
 	return elliptic.Marshal(secp256k1.S256(), x, y)
 }
 
-// Sign signs the given message, which must be 32 bytes long.
-func secp256k1Sign(sk, msg []byte) ([]byte, error) {
+// Sign signs some data and returns the signature.
+func SecP256k1Sign(sk, toBeSigned []byte) ([]byte, error) {
+	digest := Keccak256(toBeSigned)
+	return Secp256k1SignDigest(sk, digest)
+}
+
+// Secp256k1SignDigest signs the given message, which must be 32 bytes long.
+func Secp256k1SignDigest(sk, msg []byte) ([]byte, error) {
 	return secp256k1.Sign(msg, sk)
 }
 
-// Equals compares two private key for equality and returns true if they are the same.
-func secp256k1Equals(sk, other []byte) bool {
+// Secp256k1Equals compares two private key for equality and returns true if they are the same.
+func Secp256k1Equals(sk, other []byte) bool {
 	return bytes.Equal(sk, other)
 }
 
-// Verify checks the given signature and returns true if it is valid.
-func secp256k1Verify(pk, msg, signature []byte) bool {
+// Secp256k1Verify checks the given signature and returns true if it is valid.
+func Secp256k1Verify(pk, toBeVerified, signature []byte) bool {
+	digest := Keccak256(toBeVerified)
+	return Secp256k1VerifyDigest(pk, digest, signature)
+}
+
+// Secp256k1Verify checks the given signature and returns true if it is valid.
+func Secp256k1VerifyDigest(pk, digest, signature []byte) bool {
 	if len(signature) == 65 {
 		// Drop the V (1byte) in [R | S | V] style signatures.
 		// The V (1byte) is the recovery bit and is not apart of the signature verification.
-		return secp256k1.VerifySignature(pk[:], msg, signature[:len(signature)-1])
+		return secp256k1.VerifySignature(pk[:], digest, signature[:len(signature)-1])
 	}
 
-	return secp256k1.VerifySignature(pk[:], msg, signature)
+	return secp256k1.VerifySignature(pk[:], digest, signature)
 }
 
-// GenerateKeyFromSeed generates a new key from the given reader.
-func secp256k1GenerateKeyFromSeed(seed io.Reader) ([]byte, error) {
+// Secp256k1GenerateKeyFromSeed generates a new key from the given reader.
+func Secp256k1GenerateKeyFromSeed(seed io.Reader) ([]byte, error) {
 	key, err := ecdsa.GenerateKey(secp256k1.S256(), seed)
 	if err != nil {
 		return nil, err
 	}
 
-	privkey := make([]byte, secp256k1PrivateKeyBytes)
+	privkey := make([]byte, Secp256k1PrivateKeyBytes)
 	blob := key.D.Bytes()
 
 	// the length is guaranteed to be fixed, given the serialization rules for secp2561k curve points.
-	copy(privkey[secp256k1PrivateKeyBytes-len(blob):], blob)
+	copy(privkey[Secp256k1PrivateKeyBytes-len(blob):], blob)
 
 	return privkey, nil
 }
 
-// GenerateKey creates a new key using the private PRNG
-func secp256k1GenerateKey() ([]byte, error) {
+// Secp256k1GenerateKey creates a new key using the private PRNG
+func Secp256k1GenerateKey() ([]byte, error) {
 	prng := GetPrivatePRNG()
-	return secp256k1GenerateKeyFromSeed(prng.GetReader())
+	return Secp256k1GenerateKeyFromSeed(prng.GetReader())
 }
 
-// EcRecover recovers the public key from a message, signature pair.
-func secp256k1EcRecover(msg, signature []byte) ([]byte, error) {
+// Secp256k1EcRecover recovers the public key from a message, signature pair.
+func Secp256k1EcRecover(msg, signature []byte) ([]byte, error) {
 	return secp256k1.RecoverPubkey(msg, signature)
 }
