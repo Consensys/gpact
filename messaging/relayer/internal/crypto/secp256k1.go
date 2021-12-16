@@ -45,8 +45,8 @@ func Secp256k1PublicKey(sk []byte) []byte {
 	return elliptic.Marshal(secp256k1.S256(), x, y)
 }
 
-// Sign signs some data and returns the signature.
-func SecP256k1Sign(sk, toBeSigned []byte) ([]byte, error) {
+// Secp256k1Sign signs some data and returns the signature.
+func Secp256k1Sign(sk, toBeSigned []byte) ([]byte, error) {
 	digest := Keccak256(toBeSigned)
 	return Secp256k1SignDigest(sk, digest)
 }
@@ -67,7 +67,7 @@ func Secp256k1Verify(pk, toBeVerified, signature []byte) bool {
 	return Secp256k1VerifyDigest(pk, digest, signature)
 }
 
-// Secp256k1Verify checks the given signature and returns true if it is valid.
+// Secp256k1VerifyDigest checks the given signature and returns true if it is valid.
 func Secp256k1VerifyDigest(pk, digest, signature []byte) bool {
 	if len(signature) == 65 {
 		// Drop the V (1byte) in [R | S | V] style signatures.
