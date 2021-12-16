@@ -29,18 +29,16 @@ contract SignedEventStore is CrosschainVerifier, BytesUtil {
 
     struct SignedEvents {
         // The event to be actioned.
-        bytes  encodedEvent;
+        bytes encodedEvent;
         // Replay protection is the responsibility of the function call layer.
         // This variable ensures the signers who submit the event are recorded, even
         // if it is after the event is actioned.
         bool actioned;
         // List of which signers voted.
         address[] whoVoted;
-        mapping (address => bool) whoVotedMap;
+        mapping(address => bool) whoVotedMap;
     }
     mapping(bytes32 => SignedEvents) private signedEvents;
-
-
 
     constructor(address _registrar, address _functionCall) {
         registrar = AttestorSignRegistrar(_registrar);
@@ -61,11 +59,16 @@ contract SignedEventStore is CrosschainVerifier, BytesUtil {
         bytes calldata /* _signature */
     ) external view override {
         bytes32 signedEventDigest = keccak256(_encodedEvent);
-        require(signedEvents[signedEventDigest].actioned == false, "Already actioned");
+        require(
+            signedEvents[signedEventDigest].actioned == false,
+            "Already actioned"
+        );
         uint256 threshold = registrar.getSigningThreshold(_blockchainId);
-        require(signedEvents[signedEventDigest].whoVoted.length >= threshold, "Not enough signers");
+        require(
+            signedEvents[signedEventDigest].whoVoted.length >= threshold,
+            "Not enough signers"
+        );
     }
-
 
     /**
      * Relay event from one or more relayers.
@@ -78,7 +81,6 @@ contract SignedEventStore is CrosschainVerifier, BytesUtil {
         bytes calldata _eventData,
         bytes calldata _signature
     ) external {
-
         // Step 1: Check the signatures of signers.
         address[] memory signers;
         bytes32[] memory sigRs;
@@ -147,7 +149,12 @@ contract SignedEventStore is CrosschainVerifier, BytesUtil {
         uint256 threshold = registrar.getSigningThreshold(_sourceBlockchainId);
         if (signedEvents[eventDigest].whoVoted.length >= threshold) {
             // NOTE: In the call below, the _signature parameter isn't used. Could be cheaper to pass bytes("")
-            functionCall.crossCallHandler(_sourceBlockchainId, _sourceCbcAddress, _eventData, _signature);
+            functionCall.crossCallHandler(
+                _sourceBlockchainId,
+                _sourceCbcAddress,
+                _eventData,
+                _signature
+            );
             signedEvents[eventDigest].actioned = true;
         }
     }
