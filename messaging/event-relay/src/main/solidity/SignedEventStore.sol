@@ -58,14 +58,10 @@ contract SignedEventStore is CrosschainVerifier, BytesUtil {
         bytes calldata _encodedEvent,
         bytes calldata /* _signature */
     ) external view override {
-        bytes32 signedEventDigest = keccak256(_encodedEvent);
-        require(
-            signedEvents[signedEventDigest].actioned == false,
-            "Already actioned"
-        );
+        bytes32 eventDigest = keccak256(_encodedEvent);
         uint256 threshold = registrar.getSigningThreshold(_blockchainId);
         require(
-            signedEvents[signedEventDigest].whoVoted.length >= threshold,
+            signedEvents[eventDigest].whoVoted.length >= threshold,
             "Not enough signers"
         );
     }
