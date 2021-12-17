@@ -6,6 +6,7 @@ include 'openzeppelin'
 include 'mes-interface'
 include 'mes-attestor-sign'
 include 'mes-txroot-transfer'
+include 'mes-event-relay'
 
 include 'func-interface'
 include 'gpact'
@@ -41,6 +42,7 @@ project(":openzeppelin").projectDir = file("common/openzeppelin")
 project(":mes-interface").projectDir = file("messaging/interface")
 project(":mes-attestor-sign").projectDir = file("messaging/attestor-sign")
 project(":mes-txroot-transfer").projectDir = file("messaging/txroot-transfer")
+project(":mes-event-relay").projectDir = file("messaging/event-relay")
 project(":func-interface").projectDir = file("functioncall/interface")
 project(":gpact").projectDir = file("functioncall/gpact")
 project(":sfc").projectDir = file("functioncall/sfc")

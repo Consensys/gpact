@@ -47,7 +47,7 @@ contract TxReceiptsRootStorage is
         bytes32 _txReceiptsRoot
     ) external override(TxReceiptsRootStorageInterface) {
         bytes memory txReceiptsRootBytes = abi.encodePacked(_txReceiptsRoot);
-        registrar.verify(
+        registrar.verifyAndCheckThreshold(
             _blockchainId,
             _signers,
             _sigR,
