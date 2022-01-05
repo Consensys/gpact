@@ -177,7 +177,7 @@ func simpleHandler(req messages.Message) {
 		logging.Error("Empty proofs received.")
 		return
 	}
-	signature, err := hex.DecodeString(msg.Proofs[1].Proof)
+	signature, err := hex.DecodeString(msg.Proofs[0].Proof)
 	if err != nil {
 		logging.Error(err.Error())
 		return
