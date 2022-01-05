@@ -20,8 +20,8 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/consensys/gpact/messaging/relayer/internal/contracts/functioncall"
 	v1 "github.com/consensys/gpact/messaging/relayer/internal/messages/v1"
-	"github.com/consensys/gpact/messaging/relayer/internal/soliditywrappers/sfc"
 )
 
 type EventTransformer interface {
@@ -38,7 +38,7 @@ type SFCEventTransformer struct {
 // It returns an error if the event contains an invalid timestamp or destination information
 // It panics if the event is not of an sfc.SfcCrossCall type
 func (t *SFCEventTransformer) ToMessage(event interface{}) (*v1.Message, error) {
-	sfcEvent := event.(*sfc.SfcCrossCall)
+	sfcEvent := event.(*functioncall.SfcCrossCall)
 
 	if err := t.validate(sfcEvent); err != nil {
 		return nil, err
@@ -60,7 +60,7 @@ func (t *SFCEventTransformer) ToMessage(event interface{}) (*v1.Message, error) 
 	return &message, nil
 }
 
-func (t *SFCEventTransformer) validate(event *sfc.SfcCrossCall) error {
+func (t *SFCEventTransformer) validate(event *functioncall.SfcCrossCall) error {
 	if event.DestBcId == nil {
 		return errors.New("destination network id cannot be empty")
 	}

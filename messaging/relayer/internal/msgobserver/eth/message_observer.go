@@ -18,8 +18,8 @@ package eth
 import (
 	"context"
 
+	"github.com/consensys/gpact/messaging/relayer/internal/contracts/functioncall"
 	"github.com/consensys/gpact/messaging/relayer/internal/mqserver"
-	"github.com/consensys/gpact/messaging/relayer/internal/soliditywrappers/sfc"
 )
 
 // SFCBridgeObserver listens to incoming events from an SFC contract, transforms them into relayer messages
@@ -30,7 +30,7 @@ type SFCBridgeObserver struct {
 	SourceNetwork string
 }
 
-func NewSFCBridgeObserver(source string, contract *sfc.Sfc, mq mqserver.MessageQueue) (*SFCBridgeObserver, error) {
+func NewSFCBridgeObserver(source string, contract *functioncall.Sfc, mq mqserver.MessageQueue) (*SFCBridgeObserver, error) {
 	eventTransformer := NewSFCEventTransformer(source)
 	messageHandler := NewMessageEnqueueHandler(mq)
 	eventHandler := NewSimpleEventHandler(eventTransformer, messageHandler)

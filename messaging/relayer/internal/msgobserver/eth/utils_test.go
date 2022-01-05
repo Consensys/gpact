@@ -19,8 +19,8 @@ import (
 	"math/big"
 	"testing"
 
+	"github.com/consensys/gpact/messaging/relayer/internal/contracts/functioncall"
 	"github.com/consensys/gpact/messaging/relayer/internal/messages"
-	"github.com/consensys/gpact/messaging/relayer/internal/soliditywrappers/sfc"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind/backends"
 	"github.com/ethereum/go-ethereum/common"
@@ -39,8 +39,11 @@ func (mk *MockMQ) Request(version string, msgType string, msg messages.Message) 
 	mk.Called(version, msgType, msg)
 }
 
-func (mk *MockMQ) Start() {}
+func (mk *MockMQ) Start() error {
+	return nil
+}
 
+func (mk *MockMQ) Stop() {}
 
 func simulatedBackend(t *testing.T) (*backends.SimulatedBackend, *bind.TransactOpts) {
 	key, err := crypto.GenerateKey()
@@ -60,8 +63,8 @@ func simulatedBackend(t *testing.T) (*backends.SimulatedBackend, *bind.TransactO
 	return backends.NewSimulatedBackend(genesisAlloc, blockGasLimit), auth
 }
 
-func deployContract(t *testing.T, simBackend *backends.SimulatedBackend, auth *bind.TransactOpts) *sfc.Sfc {
-	_, _, contract, err := sfc.DeploySfc(auth, simBackend, big.NewInt(10), big.NewInt(10))
+func deployContract(t *testing.T, simBackend *backends.SimulatedBackend, auth *bind.TransactOpts) *functioncall.Sfc {
+	_, _, contract, err := functioncall.DeploySfc(auth, simBackend, big.NewInt(10), big.NewInt(10))
 
 	if err != nil {
 		failNow(t, "failed to deploy contract: %v", err)

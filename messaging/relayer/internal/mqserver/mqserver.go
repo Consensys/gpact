@@ -26,7 +26,10 @@ type MessageQueue interface {
 	Request(version string, msgType string, msg messages.Message)
 
 	// Start starts the message handling routine.
-	Start()
+	Start() error
+
+	// Stop shuts down the message handling routine.
+	Stop()
 }
 
 // MQServer provides a wrapper over the message queue.
@@ -136,8 +139,9 @@ func NewMQServer(
 }
 
 // Start starts the message handling routine.
-func (s *MQServer) Start() {
+func (s *MQServer) Start() error {
 	go s.handleIncomingMsgRoutine()
+	return nil
 }
 
 // Request sends a message to the message queue.
@@ -199,8 +203,8 @@ func (s *MQServer) handleIncomingMsgRoutine() {
 	}
 }
 
-// Shutdown shuts down the server.
-func (s *MQServer) Shutdown() {
+// Stop shuts down the server.
+func (s *MQServer) Stop() {
 	s.shutdown <- true
 	if s.chanIn != nil {
 		s.chanIn.Close()
