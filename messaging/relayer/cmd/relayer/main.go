@@ -77,6 +77,11 @@ func main() {
 		key = req
 		return []byte{0}, nil
 	}
+	api = adminserver.NewAdminServerImpl(conf.APIPort, apiHandlers)
+	err = api.Start()
+	if err != nil {
+		panic(err)
+	}
 
 	for {
 	}
