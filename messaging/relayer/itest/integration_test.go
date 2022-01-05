@@ -44,6 +44,7 @@ var userB *bind.TransactOpts
 var erc20A common.Address
 var erc20B common.Address
 var bridgeA common.Address
+var bridgeB common.Address
 
 // TestERC20Setup setups a crosschain erc20 transfer.
 func TestERC20Setup(t *testing.T) {
@@ -206,6 +207,7 @@ func TestERC20Setup(t *testing.T) {
 	t.Log(bridgeAddrB)
 	admin.Nonce.Add(admin.Nonce, big.NewInt(1))
 	bridgeA = bridgeAddrA
+	bridgeB = bridgeAddrB
 
 	// Setup bridge
 	t.Log("Change blockchain mapping on chainA...")
@@ -239,7 +241,7 @@ func TestERC20Setup(t *testing.T) {
 	t.Log("Done")
 	admin.Nonce.Add(admin.Nonce, big.NewInt(1))
 
-	// Transfer userA & bridgeB some balance
+	// Transfer userA & bridges some balance
 	t.Log("Transfer tokens to userA...")
 	tx, err = ierc20A.Transfer(admin, userA.From, big.NewInt(100))
 	if err != nil {
@@ -247,6 +249,15 @@ func TestERC20Setup(t *testing.T) {
 	}
 	waitForReceipt(chainA, tx)
 	t.Log("Done")
+	admin.Nonce.Add(admin.Nonce, big.NewInt(1))
+	t.Log("Transfer tokens to bridgeA...")
+	tx, err = ierc20A.Transfer(admin, bridgeAddrA, big.NewInt(1000))
+	if err != nil {
+		panic(err)
+	}
+	waitForReceipt(chainA, tx)
+	t.Log("Done")
+	admin.Nonce.Sub(admin.Nonce, big.NewInt(1))
 	t.Log("Transfer tokens to bridgeB...")
 	tx, err = ierc20B.Transfer(admin, bridgeAddrB, big.NewInt(1000))
 	if err != nil {
@@ -258,8 +269,10 @@ func TestERC20Setup(t *testing.T) {
 	// Setup relayers
 	t.Log("Setup relayers...")
 	assert.Empty(t, setupObserver("127.0.0.1:9525", 31, "ws://bc31node1:8546", sfcAddrA.Hex()))
+	assert.Empty(t, setupObserver("127.0.0.1:9525", 32, "ws://bc32node1:8546", sfcAddrB.Hex()))
 	assert.Empty(t, setupRelayer("127.0.0.1:9625", relayerKey))
 	assert.Empty(t, setupDispatcher("127.0.0.1:9725", 32, dispatcherKey, 0, "ws://bc32node1:8546", verifierAddrB.Hex()))
+	assert.Empty(t, setupDispatcher("127.0.0.1:9725", 31, dispatcherKey, 0, "ws://bc31node1:8546", verifierAddrA.Hex()))
 	t.Log("Setup done")
 }
 
@@ -291,6 +304,10 @@ func TestERC20Transfer(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
+	ibridgeB, err := application.NewSfcERC20Bridge(bridgeB, chainB)
+	if err != nil {
+		panic(err)
+	}
 
 	balA, err := ierc20A.BalanceOf(nil, userA.From)
 	if err != nil {
@@ -308,13 +325,13 @@ func TestERC20Transfer(t *testing.T) {
 	t.Log("UserA crosschain transfer to UserB with 10 tokens...")
 	tx, err := ierc20A.Approve(userA, bridgeA, big.NewInt(10))
 	if err != nil {
-		t.Fatal(err)
+		panic(err)
 	}
 	waitForReceipt(chainA, tx)
 	userA.Nonce.Add(userA.Nonce, big.NewInt(1))
 	tx, err = ibridgeA.TransferToOtherBlockchain(userA, big.NewInt(32), erc20A, userB.From, big.NewInt(10))
 	if err != nil {
-		t.Fatal(err)
+		panic(err)
 	}
 	waitForReceipt(chainA, tx)
 	userA.Nonce.Add(userA.Nonce, big.NewInt(1))
@@ -329,6 +346,32 @@ func TestERC20Transfer(t *testing.T) {
 	assert.Equal(t, 0, balA.Cmp(big.NewInt(90)))
 	assert.Equal(t, 0, balB.Cmp(big.NewInt(10)))
 	t.Log("Balances after transfer: ", balA, balB)
+
+	// Transfer back
+	t.Log("UserB crosschain transfer back to UserA with 5 tokens...")
+	tx, err = ierc20B.Approve(userB, bridgeB, big.NewInt(5))
+	if err != nil {
+		panic(err)
+	}
+	waitForReceipt(chainB, tx)
+	userB.Nonce.Add(userB.Nonce, big.NewInt(1))
+	tx, err = ibridgeB.TransferToOtherBlockchain(userB, big.NewInt(31), erc20B, userA.From, big.NewInt(5))
+	if err != nil {
+		panic(err)
+	}
+	waitForReceipt(chainB, tx)
+	userB.Nonce.Add(userB.Nonce, big.NewInt(1))
+	t.Log("Done")
+
+	// Wait for 5 seconds, TODO: Monitor bridge contracts to know current step.
+	t.Log("Wait for relayers to process events...")
+	time.Sleep(5 * time.Second)
+	t.Log("Done")
+	balA, _ = ierc20A.BalanceOf(nil, userA.From)
+	balB, _ = ierc20B.BalanceOf(nil, userB.From)
+	assert.Equal(t, 0, balA.Cmp(big.NewInt(95)))
+	assert.Equal(t, 0, balB.Cmp(big.NewInt(5)))
+	t.Log("Balances after transfer back: ", balA, balB)
 }
 
 // createUser creates a user with random key.
