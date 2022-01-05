@@ -37,7 +37,7 @@ func TestSFCCrossCallWatcher(t *testing.T) {
 	contract := deployContract(t, simBackend, auth)
 
 	handler := new(MockEventHandler)
-	handler.On("Handle", mock.AnythingOfType("*sfc.SfcCrossCall")).Once().Return(nil)
+	handler.On("Handle", mock.AnythingOfType("*functioncall.SfcCrossCall")).Once().Return(nil)
 
 	watcher := NewSFCCrossCallWatcher(auth.Context, handler, contract)
 	go watcher.Watch()
