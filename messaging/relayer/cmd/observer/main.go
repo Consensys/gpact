@@ -34,6 +34,7 @@ import (
 // TODO, Need a separate package to put all core components.
 var s mqserver.MessageQueue
 var api adminserver.AdminServer
+var activeChains map[string]chan bool
 
 func main() {
 	// Load config
@@ -58,6 +59,7 @@ func main() {
 	logging.Info("Observer started.")
 
 	// For now just have one single handler for observing chain with type 1.
+	activeChains = make(map[string]chan bool)
 	apiHandlers := make(map[byte]func(req []byte) ([]byte, error))
 	apiHandlers[1] = func(req []byte) ([]byte, error) {
 		request := Request{}
@@ -65,6 +67,13 @@ func main() {
 		if err != nil {
 			return nil, err
 		}
+		end, ok := activeChains[request.BcID]
+		if ok {
+			end <- true
+		}
+		end = make(chan bool)
+		activeChains[request.BcID] = end
+
 		go func() {
 			// TODO: User msgobserver.
 			chain, err := ethclient.Dial(request.Chain)
@@ -85,6 +94,7 @@ func main() {
 				logging.Error(err.Error())
 				return
 			}
+			logging.Info("Start observing contract %v.", request.SFCAddr)
 			for {
 				select {
 				case log := <-event.Err():
@@ -116,6 +126,8 @@ func main() {
 					}
 					s.Request(v1.Version, v1.MessageType, msg)
 					logging.Info("Event processed.")
+				case <-end:
+					logging.Info("Stop observing contract %v.", request.SFCAddr)
 				}
 			}
 		}()
