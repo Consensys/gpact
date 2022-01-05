@@ -16,8 +16,10 @@ package main
  */
 
 import (
+	"crypto/ecdsa"
 	"encoding/hex"
 	"encoding/json"
+	"math/big"
 	"strconv"
 	"time"
 
@@ -28,8 +30,10 @@ import (
 	"github.com/consensys/gpact/messaging/relayer/internal/messages"
 	v1 "github.com/consensys/gpact/messaging/relayer/internal/messages/v1"
 	"github.com/consensys/gpact/messaging/relayer/internal/mqserver"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/crypto/secp256k1"
 	_ "github.com/joho/godotenv/autoload"
 )
 
@@ -37,6 +41,7 @@ import (
 var s *mqserver.MQServer
 var api adminserver.AdminServer
 var key []byte
+var addr []byte
 
 func main() {
 	// Load config
@@ -75,6 +80,16 @@ func main() {
 	apiHandlers := make(map[byte]func(req []byte) ([]byte, error))
 	apiHandlers[1] = func(req []byte) ([]byte, error) {
 		key = req
+		x, y := secp256k1.S256().ScalarBaseMult(key)
+		prv := &ecdsa.PrivateKey{}
+		prv.D = big.NewInt(0).SetBytes(key)
+		prv.PublicKey = ecdsa.PublicKey{
+			X:     x,
+			Y:     y,
+			Curve: secp256k1.S256(),
+		}
+		auth := bind.NewKeyedTransactor(prv)
+		addr = auth.From.Bytes()
 		return []byte{0}, nil
 	}
 	api = adminserver.NewAdminServerImpl(conf.APIPort, apiHandlers)
@@ -123,6 +138,7 @@ func simpleHandler(req messages.Message) {
 		panic(err)
 	}
 	signature[len(signature)-1] += 27
+	signature = append([]byte{0, 0, 0, 1}, append(addr, signature...)...)
 
 	// Add proof
 	msg.Proofs = append(msg.Proofs, v1.Proof{
