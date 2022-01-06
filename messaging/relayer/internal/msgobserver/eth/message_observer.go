@@ -30,11 +30,11 @@ type SFCBridgeObserver struct {
 	SourceNetwork string
 }
 
-func NewSFCBridgeObserver(source string, contract *functioncall.Sfc, mq mqserver.MessageQueue) (*SFCBridgeObserver, error) {
-	eventTransformer := NewSFCEventTransformer(source)
+func NewSFCBridgeObserver(source string, sourceAddr string, contract *functioncall.Sfc, mq mqserver.MessageQueue, end chan bool) (*SFCBridgeObserver, error) {
+	eventTransformer := NewSFCEventTransformer(source, sourceAddr)
 	messageHandler := NewMessageEnqueueHandler(mq)
 	eventHandler := NewSimpleEventHandler(eventTransformer, messageHandler)
-	eventWatcher := NewSFCCrossCallWatcher(context.Background(), eventHandler, contract)
+	eventWatcher := NewSFCCrossCallWatcher(context.Background(), eventHandler, contract, end)
 
 	return &SFCBridgeObserver{EventWatcher: eventWatcher, EventHandler: eventHandler, SourceNetwork: source}, nil
 }
