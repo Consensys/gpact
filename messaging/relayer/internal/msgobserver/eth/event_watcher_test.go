@@ -39,7 +39,7 @@ func TestSFCCrossCallWatcher(t *testing.T) {
 	handler := new(MockEventHandler)
 	handler.On("Handle", mock.AnythingOfType("*functioncall.SfcCrossCall")).Once().Return(nil)
 
-	watcher := NewSFCCrossCallWatcher(auth.Context, handler, contract)
+	watcher := NewSFCCrossCallWatcher(auth.Context, handler, contract, make(chan bool))
 	go watcher.Watch()
 
 	_, err := contract.SfcTransactor.CrossBlockchainCall(auth, big.NewInt(100), auth.From, []byte("payload"))

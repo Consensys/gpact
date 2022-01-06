@@ -20,6 +20,7 @@ import (
 	"log"
 
 	"github.com/consensys/gpact/messaging/relayer/internal/contracts/functioncall"
+	"github.com/consensys/gpact/messaging/relayer/internal/logging"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/event"
 )
@@ -39,6 +40,8 @@ type EventWatcherConfig struct {
 type SFCCrossCallWatcher struct {
 	EventWatcherConfig
 	SfcContract *functioncall.Sfc
+
+	end chan bool
 }
 
 // Watch subscribes and starts listening to 'CrossCall' events from a given simple-function-call contract.
@@ -55,17 +58,21 @@ func (l *SFCCrossCallWatcher) Watch() {
 }
 
 func (l *SFCCrossCallWatcher) start(sub event.Subscription, chanEvents <-chan *functioncall.SfcCrossCall) {
+	logging.Info("Start watching %v...", l.SfcContract)
 	for {
 		select {
 		case err := <-sub.Err():
 			// TODO: communicate this to the calling context
-			log.Fatalf("error in log subscription %v", err)
+			logging.Error("error in log subscription %v", err)
 		case log := <-chanEvents:
 			l.Handler.Handle(log)
+		case <-l.end:
+			logging.Info("Stop watching %v.", l.SfcContract)
+			return
 		}
 	}
 }
 
-func NewSFCCrossCallWatcher(context context.Context, handler EventHandler, contract *functioncall.Sfc) *SFCCrossCallWatcher {
-	return &SFCCrossCallWatcher{EventWatcherConfig: EventWatcherConfig{Context: context, Handler: handler}, SfcContract: contract}
+func NewSFCCrossCallWatcher(context context.Context, handler EventHandler, contract *functioncall.Sfc, end chan bool) *SFCCrossCallWatcher {
+	return &SFCCrossCallWatcher{EventWatcherConfig: EventWatcherConfig{Context: context, Handler: handler}, SfcContract: contract, end: end}
 }

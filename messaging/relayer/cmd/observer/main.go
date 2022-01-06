@@ -16,16 +16,14 @@ package main
  */
 
 import (
-	"encoding/hex"
 	"encoding/json"
 
 	"github.com/consensys/gpact/messaging/relayer/internal/adminserver"
 	"github.com/consensys/gpact/messaging/relayer/internal/config"
 	"github.com/consensys/gpact/messaging/relayer/internal/contracts/functioncall"
 	"github.com/consensys/gpact/messaging/relayer/internal/logging"
-	v1 "github.com/consensys/gpact/messaging/relayer/internal/messages/v1"
 	"github.com/consensys/gpact/messaging/relayer/internal/mqserver"
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/consensys/gpact/messaging/relayer/internal/msgobserver/eth"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	_ "github.com/joho/godotenv/autoload"
@@ -75,7 +73,6 @@ func main() {
 		activeChains[request.BcID] = end
 
 		go func() {
-			// TODO: User msgobserver.
 			chain, err := ethclient.Dial(request.Chain)
 			if err != nil {
 				logging.Error(err.Error())
@@ -88,48 +85,13 @@ func main() {
 				logging.Error(err.Error())
 				return
 			}
-			sink := make(chan *functioncall.SfcCrossCall)
-			event, err := sfc.WatchCrossCall(&bind.WatchOpts{Start: nil, Context: nil}, sink)
+
+			observer, err := eth.NewSFCBridgeObserver(request.BcID, request.SFCAddr, sfc, s, end)
 			if err != nil {
 				logging.Error(err.Error())
 				return
 			}
-			logging.Info("Start observing contract %v.", request.SFCAddr)
-			for {
-				select {
-				case log := <-event.Err():
-					logging.Error(log.Error())
-					return
-				case call := <-sink:
-					// Pack & Send to message queue.
-					logging.Info("Event observed: %v.", call)
-					data, err := json.Marshal(call.Raw)
-					if err != nil {
-						logging.Error(err.Error())
-						return
-					}
-					msg := &v1.Message{
-						ID:        "TBD", //TODO
-						Timestamp: call.Timestamp.Int64(),
-						MsgType:   v1.MessageType,
-						Version:   v1.Version,
-						Destination: v1.ApplicationAddress{
-							NetworkID:       call.DestBcId.String(),
-							ContractAddress: call.DestContract.String(),
-						},
-						Source: v1.ApplicationAddress{
-							NetworkID:       request.BcID,
-							ContractAddress: request.SFCAddr,
-						},
-						Proofs:  []v1.Proof{},
-						Payload: hex.EncodeToString(data),
-					}
-					s.Request(v1.Version, v1.MessageType, msg)
-					logging.Info("Event processed.")
-				case <-end:
-					logging.Info("Stop observing contract %v.", request.SFCAddr)
-				}
-			}
+			observer.Start()
 		}()
 		return []byte{0}, nil
 	}

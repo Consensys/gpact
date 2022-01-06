@@ -17,6 +17,7 @@ package eth
 
 import (
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 
@@ -31,7 +32,8 @@ type EventTransformer interface {
 
 // SFCEventTransformer converts events from a simple-function-call bridge contract to relayer messages
 type SFCEventTransformer struct {
-	Source string
+	Source     string
+	SourceAddr string
 }
 
 // ToMessage converts a 'CrossCall' event emited from a simple-function-call bridge contract to relayer message
@@ -44,8 +46,13 @@ func (t *SFCEventTransformer) ToMessage(event interface{}) (*v1.Message, error) 
 		return nil, err
 	}
 
-	source := v1.ApplicationAddress{NetworkID: t.Source, ContractAddress: sfcEvent.DestContract.String()}
+	source := v1.ApplicationAddress{NetworkID: t.Source, ContractAddress: t.SourceAddr}
 	destination := v1.ApplicationAddress{NetworkID: sfcEvent.DestBcId.String(), ContractAddress: sfcEvent.DestContract.String()}
+
+	data, err := json.Marshal(sfcEvent.Raw)
+	if err != nil {
+		return nil, err
+	}
 
 	message := v1.Message{
 		ID:          hex.EncodeToString(randomBytes(16)), // TODO: replace with a proper message id scheme
@@ -54,7 +61,8 @@ func (t *SFCEventTransformer) ToMessage(event interface{}) (*v1.Message, error) 
 		Version:     v1.Version,
 		Destination: destination,
 		Source:      source,
-		Payload:     toBase64String(sfcEvent.DestFunctionCall),
+		Proofs:      []v1.Proof{},
+		Payload:     hex.EncodeToString(data),
 	}
 
 	return &message, nil
@@ -72,6 +80,6 @@ func (t *SFCEventTransformer) validate(event *functioncall.SfcCrossCall) error {
 	return nil
 }
 
-func NewSFCEventTransformer(sourceNetwork string) *SFCEventTransformer {
-	return &SFCEventTransformer{sourceNetwork}
+func NewSFCEventTransformer(sourceNetwork string, sourceAddr string) *SFCEventTransformer {
+	return &SFCEventTransformer{sourceNetwork, sourceAddr}
 }
