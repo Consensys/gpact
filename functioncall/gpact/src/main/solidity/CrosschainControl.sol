@@ -684,8 +684,8 @@ contract CrosschainControl is
 
     function verifySegmentEvents(
         bytes[] memory _segmentEvents,
-        uint256[] memory callPath,
-        bytes32 hashOfCallGraph,
+        uint256[] memory _callPath,
+        bytes32 _hashOfCallGraph,
         uint256 _crosschainTxId
     ) private returns (bool) {
         //Verify the event information in the Segment Events.
@@ -694,8 +694,6 @@ contract CrosschainControl is
         // Exit if the information doesn’t match.
         //If any of the Segment Events indicate an error, Goto Ignore.
         for (uint256 i = 1; i < _segmentEvents.length; i++) {
-            //bytes memory segmentEvent = _segmentEvents[i];
-
             // event Segment(uint256 _crossBlockchainTransactionId, bytes32 _hashOfCallGraph, uint256[] _callPath,
             //        address[] _lockedContracts, bool _success, bytes _returnValue);
             uint256 crossBlockchainTxId;
@@ -716,45 +714,48 @@ contract CrosschainControl is
                 (uint256, bytes32, uint256[], address[], bool, bytes)
             );
 
-            // Recall Segment event is defined as:
-            // event Segment(uint256 _crossBlockchainTransactionId, bytes32 _hashOfCallGraph, uint256[] _callPath,
-            //        address[] _lockedContracts, bool _success, bytes _returnValue);
-            //            uint256 crossBlockchainTxId = BytesUtil.bytesToUint256(segmentEvent, 0);
-            //            bytes32 hashOfCallGraphFromSegment = BytesUtil.bytesToBytes32(segmentEvent, 0x20);
-            //            uint256 locationOfCallPath = BytesUtil.bytesToUint256(segmentEvent, 0x40);
-            // Not needed: uint256 locationOfLockedContracts = BytesUtil.bytesToUint256(segmentEvent, 0x60);
-            //            uint256 success = BytesUtil.bytesToUint256(segmentEvent, 0x80);
-            //            uint256 locationOfReturnValue = BytesUtil.bytesToUint256(segmentEvent, 0xA0);
-            //            uint256 lenOfReturnValue = BytesUtil.bytesToUint256(segmentEvent, locationOfReturnValue);
-            //            bytes memory returnValue = BytesUtil.slice(segmentEvent, locationOfReturnValue + 0x20, lenOfReturnValue);
-            //            uint256 lenOfCallPath = BytesUtil.bytesToUint256(segmentEvent, locationOfCallPath);
-
             require(
                 crossBlockchainTxId == _crosschainTxId,
                 "Transaction id from segment and root do not match"
             );
             require(
-                hashOfCallGraph == hashOfCallGraphFromSegment,
+                _hashOfCallGraph == hashOfCallGraphFromSegment,
                 "Call graph from segment and root do not match"
             );
 
-            // Segments with offset zero of Root calls are the only ones that can call segments.
-            require(callPath[callPath.length - 1] == 0);
-            //            require(lenOfCallPath == callPath.length || lenOfCallPath == callPath.length+1, "Bad call path length for segment");
+            // The caller must be a segment that is calling other segments or the
+            // root call (which also is calling segments). These both have the call path
+            // for the caller will have 0 as the offset in the call path array for the
+            // previous level in the call path.
+            require(_callPath[_callPath.length - 1] == 0, "Invalid caller");
+
+            // The segment will be the same as the call path length of the caller
+            // if it doesn't call any other segments. It will be one longer if
+            // it calls one or more segments. In this case, the last entry in
+            // the array will be 0.
             require(
-                segCallPath.length == callPath.length ||
-                    segCallPath.length == callPath.length + 1,
+                segCallPath.length == _callPath.length ||
+                    segCallPath.length == _callPath.length + 1,
                 "Bad call path length for segment"
             );
-            // TODO walk through call path to ensure the call path from the segment event is correct
-            //            if (lenOfCallPath == callPath.length+1) {
-            //                uint256 callPathFinalValue = BytesUtil.bytesToUint256(segmentEvent, locationOfCallPath + 0x20 * (lenOfCallPath-1));
-            //                require(callPathFinalValue == 0, "Call path optional second element not zero");
-            //            }
+            if (segCallPath.length == _callPath.length + 1) {
+                require(
+                    segCallPath[segCallPath.length - 1] == 0,
+                    "Final call path element not zero"
+                );
+            }
+
+            // Check that the call path for the segment matches that of the
+            // caller.
+            for (uint256 j = 0; j < _callPath.length - 1; j++) {
+                require(
+                    segCallPath[j] == _callPath[j],
+                    "Segment call path does not match caller"
+                );
+            }
 
             // Fail the root transaction is one of the segments failed.
             if (!success) {
-                //                if (success == 0) {
                 failRootTransaction(_crosschainTxId);
                 cleanupAfterCallSegment();
                 return true;
