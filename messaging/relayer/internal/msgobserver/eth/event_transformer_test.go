@@ -19,12 +19,12 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/consensys/gpact/messaging/relayer/internal/soliditywrappers/sfc"
+	"github.com/consensys/gpact/messaging/relayer/internal/contracts/functioncall"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/assert"
 )
 
-var fixValidEvent = sfc.SfcCrossCall{
+var fixValidEvent = functioncall.SfcCrossCall{
 	DestBcId:         big.NewInt(1),
 	DestContract:     common.HexToAddress("0x8e215d06ea7ec1fdb4fc5fd21768f4b34ee92ef4"),
 	Timestamp:        big.NewInt(1639527190),

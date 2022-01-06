@@ -1,5 +1,44 @@
 version: "3.8"
+
+x-besu-bootnode-def:
+  &besu-bootnode-def
+  restart: "on-failure"
+  image: hyperledger/besu:${BESU_VERSION:-latest}
+  entrypoint:
+    - /bin/bash
+    - -c
+    - |
+      /opt/besu/bin/besu public-key export --to=/tmp/bootnode_pubkey;
+      /opt/besu/bin/besu \
+      --config-file=/config/config.toml \
+      --genesis-file=/config/genesis.json \
+      --node-private-key-file=/opt/besu/keys/key ;
+
 services:
+
+  bc31node1:
+    << : *besu-bootnode-def
+    environment:
+      - OTEL_RESOURCE_ATTRIBUTES=service.name=bc31node1,service.version=${BESU_VERSION:-latest}
+    volumes:
+      - ./env/blockchains/bc31:/config
+      - ./env/blockchains/keys:/opt/besu/keys
+    networks:
+      - shared
+    ports:
+      - 8311:8546
+
+  bc32node1:
+    << : *besu-bootnode-def
+    environment:
+      - OTEL_RESOURCE_ATTRIBUTES=service.name=bc32node1,service.version=${BESU_VERSION:-latest}
+    volumes:
+      - ./env/blockchains/bc32:/config
+      - ./env/blockchains/keys:/opt/besu/keys
+    networks:
+      - shared
+    ports:
+      - 8321:8546
 
   rabbitmq:
     image: rabbitmq:3.9-management
@@ -14,12 +53,17 @@ services:
         interval: 30s
         timeout: 10s
         retries: 5
+    depends_on:
+      - bc31node1
+      - bc32node1
 
   observer:
     image: consensys/gpact/messaging/relayer
     container_name: observer
     networks:
       - shared
+    ports:
+      - 9525:9425
     env_file:
       - ./env/.env.observer.example
     command: /app/build/observer
@@ -32,6 +76,8 @@ services:
     container_name: relayer
     networks:
       - shared
+    ports:
+      - 9625:9425
     env_file:
       - ./env/.env.relayer.example
     command: /app/build/relayer
@@ -44,6 +90,8 @@ services:
     container_name: dispatcher
     networks:
       - shared
+    ports:
+      - 9725:9425
     env_file:
       - ./env/.env.dispatcher.example
     command: /app/build/dispatcher

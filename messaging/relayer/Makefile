@@ -12,5 +12,5 @@ clean:
 	rm -rf ./build/*
 
 utest:
-	go test  ./...
-
+	go test -v --count=1 ./internal/...
+	go test -v --count=1 ./itest/

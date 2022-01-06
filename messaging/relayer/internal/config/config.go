@@ -39,6 +39,9 @@ type Config struct {
 	InboundChName  string `mapstructure:"INBOUND_CH_NAME"`  // Inbound message queue name
 	OutboundMQAddr string `mapstructure:"OUTBOUND_MQ_ADDR"` // Outbound message queue addr
 	OutboundChName string `mapstructure:"OUTBOUND_CH_NAME"` // Outbound message queue name
+
+	// Admin server related
+	APIPort int `mapstructure:"API_PORT"` // API Port: 9425
 }
 
 // NewConfig reads environmental variables and creates a new configuration.
@@ -63,5 +66,7 @@ func NewConfig() Config {
 		InboundChName:  conf.GetString("INBOUND_CH_NAME"),
 		OutboundMQAddr: conf.GetString("OUTBOUND_MQ_ADDR"),
 		OutboundChName: conf.GetString("OUTBOUND_CH_NAME"),
+
+		APIPort: conf.GetInt("API_PORT"),
 	}
 }

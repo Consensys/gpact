@@ -279,12 +279,12 @@ jobs:
             ls -al
             echo GOROOT: $GOROOT
       - run:
-          name: Build production code
-          command: make build
+          name: Build test docker container
+          command: make docker
           working_directory: messaging/relayer
       - run:
-          name: Create and Start blockchains
-          working_directory: test-blockchains
+          name: Create and Start blockchains & Relayers
+          working_directory: messaging/relayer
           background: true
           command: docker-compose up
       - run: sleep 30
@@ -293,25 +293,13 @@ jobs:
           command: make utest
           working_directory: messaging/relayer
       - run:
-          name: Stop blockchains
-          working_directory: test-blockchains
+          name: Stop blockchains & Relayers
+          working_directory: messaging/relayer
           command: docker-compose stop
           when: always
       - run:
-          name: Logs from bc31
-          working_directory: test-blockchains
-          command: |
-            docker container logs test-blockchains_bc31node1_1
-          when: always
-      - run:
-          name: Logs from bc32
-          working_directory: test-blockchains
-          command: |
-            docker container logs test-blockchains_bc32node1_1
-          when: always
-      - run:
-          name: Remove blockchains
-          working_directory: test-blockchains
+          name: Remove blockchains & Relayers
+          working_directory: messaging/relayer
           command: docker-compose down
           when: always
 
