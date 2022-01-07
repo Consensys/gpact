@@ -56,7 +56,7 @@ public class CrosschainExecutor {
   private SignedEvent signedStartEvent;
   private SignedEvent signedRootEvent;
   // Key for this map is the call path of the caller.
-  private final Map<BigInteger, List<SignedEvent>> signedSegmentEvents = new ConcurrentHashMap<>();
+  private final Map<BigInteger, SignedEvent[]> signedSegmentEvents = new ConcurrentHashMap<>();
 
   // Key for this map is the call path of the caller.
   private final Map<BigInteger, TransactionReceipt> transactionReceipts = new HashMap<>();
@@ -108,21 +108,25 @@ public class CrosschainExecutor {
   }
 
   public void segment(
-      BlockchainId blockchainId, BlockchainId callerBlockchainId, List<BigInteger> callPath)
+      BlockchainId blockchainId,
+      BlockchainId callerBlockchainId,
+      List<BigInteger> callPath,
+      final int parentNumCalledFunctions)
       throws Exception {
     if (callPath.size() == 0) {
       throw new Exception("Invalid call path length for segment: " + 0);
     }
 
     BigInteger mapKey = callPathToMapKey(callPath);
+    int callPathIndex = (callPath.get(callPath.size() - 1)).intValue();
 
     CrossControlManager segmentCbcContract =
         this.crossControlManagerGroup.getCbcContract(blockchainId);
     MessagingVerificationInterface messaging =
         this.crossControlManagerGroup.getMessageVerification(blockchainId);
 
-    List<SignedEvent> signedEvents =
-        this.signedSegmentEvents.computeIfAbsent(mapKey, k -> new ArrayList<>());
+    SignedEvent signedEvents[] =
+        this.signedSegmentEvents.computeIfAbsent(mapKey, k -> new SignedEvent[] {});
     Tuple<TransactionReceipt, byte[], Boolean> result =
         segmentCbcContract.segment(this.signedStartEvent, signedEvents, callPath);
     TransactionReceipt txr = result.getFirst();
@@ -138,18 +142,21 @@ public class CrosschainExecutor {
             CrossControlManager.SEGMENT_EVENT_SIGNATURE);
     this.transactionReceipts.put(mapKey, txr);
 
-    // Add the proof for the call that has just occurred to the map so it can be accessed when the
-    // next
+    // Store the segment event for the call that has just occurred to the map so it can be accessed
+    // when needed.
     BigInteger parentMapKey = determineMapKeyOfCaller(callPath);
-    signedEvents = this.signedSegmentEvents.computeIfAbsent(parentMapKey, k -> new ArrayList<>());
-    signedEvents.add(signedSegEvent);
+    signedEvents =
+        this.signedSegmentEvents.computeIfAbsent(
+            parentMapKey, k -> new SignedEvent[parentNumCalledFunctions]);
+    // Make sure the events are in the same order as they are called by the calling function.
+    signedEvents[callPathIndex - 1] = signedSegEvent;
 
     // Add the proof to the list of segments that have contracts that need to be unlocked.
     if (!noLockedContracts) {
-      signedEvents =
+      List<SignedEvent> signedEvents1 =
           this.signedSegmentEventsWithLockedContracts.computeIfAbsent(
               blockchainId, k -> new ArrayList<>());
-      signedEvents.add(signedSegEvent);
+      signedEvents1.add(signedSegEvent);
     }
   }
 
@@ -158,7 +165,7 @@ public class CrosschainExecutor {
         this.crossControlManagerGroup.getCbcContract(this.rootBcId);
     MessagingVerificationInterface messaging =
         this.crossControlManagerGroup.getMessageVerification(this.rootBcId);
-    List<SignedEvent> signedSegEvents = this.signedSegmentEvents.get(ROOT_CALL_MAP_KEY);
+    SignedEvent[] signedSegEvents = this.signedSegmentEvents.get(ROOT_CALL_MAP_KEY);
     Tuple<TransactionReceipt, byte[], Boolean> result =
         rootCbcContract.root(this.signedStartEvent, signedSegEvents);
     TransactionReceipt txr = result.getFirst();

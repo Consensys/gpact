@@ -138,8 +138,7 @@ public class CrossControlManager extends AbstractBlockchain {
   }
 
   public Tuple<TransactionReceipt, byte[], Boolean> segment(
-      SignedEvent startEvent, List<SignedEvent> segEvents, List<BigInteger> callPath)
-      throws Exception {
+      SignedEvent startEvent, SignedEvent segEvents[], List<BigInteger> callPath) throws Exception {
     List<BigInteger> bcIds = new ArrayList<>();
     List<String> cbcAddresses = new ArrayList<>();
     List<byte[]> eventFunctionSignatures = new ArrayList<>();
@@ -211,7 +210,7 @@ public class CrossControlManager extends AbstractBlockchain {
   }
 
   public Tuple<TransactionReceipt, byte[], Boolean> root(
-      SignedEvent startEvent, List<SignedEvent> segEvents) throws Exception {
+      SignedEvent startEvent, SignedEvent[] segEvents) throws Exception {
     List<BigInteger> bcIds = new ArrayList<>();
     List<String> cbcAddresses = new ArrayList<>();
     List<byte[]> eventFunctionSignatures = new ArrayList<>();
