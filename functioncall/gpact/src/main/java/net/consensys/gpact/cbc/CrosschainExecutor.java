@@ -119,6 +119,9 @@ public class CrosschainExecutor {
 
     BigInteger mapKey = callPathToMapKey(callPath);
     int callPathIndex = (callPath.get(callPath.size() - 1)).intValue();
+    if (callPathIndex == 0) {
+      callPathIndex = (callPath.get(callPath.size() - 2)).intValue();
+    }
 
     CrossControlManager segmentCbcContract =
         this.crossControlManagerGroup.getCbcContract(blockchainId);
