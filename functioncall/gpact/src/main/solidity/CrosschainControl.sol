@@ -682,17 +682,43 @@ contract CrosschainControl is
         return (false, retVal);
     }
 
+    /**
+     * Verify the event information in the Segment Events. This will be called by
+     * the segment or root processing.  The segment events represent functions
+     * that have been called by the function being executed in the segment or
+     * root processing.
+     *
+     * Check that the Segment Events correspond to function calls that the
+     * call execute tree in the Start Event indicates should have been called
+     * by the function that is currently executing.
+     *
+     * For details of the call path format see: https://github.com/ConsenSys/gpact/blob/main/doc/callpath.md
+     *
+     * @param _segmentEvents   Encoded segment event information for each function
+     *           called from the function being executed. The array elements must
+     *           be in the order that the functions are called by the code.
+     *           Note that offset 0 is the start event, and all other offsets
+     *           are segment events.
+     * @param _callPath        The call path of of the function being executed.
+     * @param _hashOfCallGraph The message digest of the call execution tree in the
+     *           Start Event.
+     * @param _crosschainTxId  The crosschain transaction id of the function being
+     *           executed.
+     * @return True if all of the segment event information can be verified.
+     */
     function verifySegmentEvents(
         bytes[] memory _segmentEvents,
         uint256[] memory _callPath,
         bytes32 _hashOfCallGraph,
         uint256 _crosschainTxId
     ) private returns (bool) {
-        //Verify the event information in the Segment Events.
-        // Check that the Segment Events correspond to function calls that the Start Event indicates that the
-        //  root function call should have been called.
-        // Exit if the information doesn’t match.
-        //If any of the Segment Events indicate an error, Goto Ignore.
+        // The caller must be a segment that is calling other segments or the
+        // root call (which also is calling segments). The call path for the
+        // caller in both cases will have 0 as the offset in the call path
+        // array for the final element in the array.
+        require(_callPath[_callPath.length - 1] == 0, "Invalid caller");
+
+        // Start at offset 1 as offset 0 is the start event.
         for (uint256 i = 1; i < _segmentEvents.length; i++) {
             // event Segment(uint256 _crossBlockchainTransactionId, bytes32 _hashOfCallGraph, uint256[] _callPath,
             //        address[] _lockedContracts, bool _success, bytes _returnValue);
@@ -723,12 +749,6 @@ contract CrosschainControl is
                 "Call graph from segment and root do not match"
             );
 
-            // The caller must be a segment that is calling other segments or the
-            // root call (which also is calling segments). These both have the call path
-            // for the caller will have 0 as the offset in the call path array for the
-            // previous level in the call path.
-            require(_callPath[_callPath.length - 1] == 0, "Invalid caller");
-
             // The segment will be the same as the call path length of the caller
             // if it doesn't call any other segments. It will be one longer if
             // it calls one or more segments. In this case, the last entry in
@@ -753,6 +773,16 @@ contract CrosschainControl is
                     "Segment call path does not match caller"
                 );
             }
+
+            // Check that the final element in the call path matches the offset
+            // for the segment. That is, for example, if this is the second
+            // function to be called by the function currently being executed,
+            // then the final element of the call path should be 2 and this should
+            // be the second element in the _segmentEvents array.
+            require(
+                segCallPath[_callPath.length - 1] == i,
+                "Segment events array out of order"
+            );
 
             // Fail the root transaction is one of the segments failed.
             if (!success) {
