@@ -22,7 +22,6 @@ import (
 	"encoding/json"
 	"math/big"
 	"strconv"
-	"time"
 
 	"github.com/consensys/gpact/messaging/relayer/internal/adminserver"
 	"github.com/consensys/gpact/messaging/relayer/internal/config"
@@ -182,13 +181,28 @@ func simpleHandler(req messages.Message) {
 		logging.Error(err.Error())
 		return
 	}
-	tx, err := verifier.RelayEvent(info.auth, big.NewInt(int64(srcID)), sfcAddr, raw.Data, signature)
+	nonce, err := chain.NonceAt(context.Background(), info.auth.From, nil)
 	if err != nil {
 		logging.Error(err.Error())
 		return
 	}
-	waitForReceipt(chain, tx)
-	info.auth.Nonce = big.NewInt(0).Add(info.auth.Nonce, big.NewInt(1))
+	info.auth.Nonce = big.NewInt(int64(nonce))
+	info.auth.GasPrice, err = chain.SuggestGasPrice(context.Background())
+	// We double the gas price to make sure it goes through.
+	info.auth.GasPrice.Mul(info.auth.GasPrice, big.NewInt(2))
+	if err != nil {
+		logging.Error(err.Error())
+		return
+	}
+	// Try three times.
+	for i := 0; i < 3; i++ {
+		tx, err := verifier.RelayEvent(info.auth, big.NewInt(int64(srcID)), sfcAddr, raw.Data, signature)
+		if err == nil {
+			logging.Info("Submit transaction hash: %v", tx.Hash().String())
+			break
+		}
+		logging.Error(err.Error())
+	}
 }
 
 // TODO: Create a package to place all admin APIs.
@@ -198,20 +212,4 @@ type Request struct {
 	Nonce  int    `json:"nonce"`
 	Chain  string `json:"chain"`
 	EsAddr string `json:"es_addr"`
-}
-
-func waitForReceipt(conn *ethclient.Client, tx *types.Transaction) error {
-	for {
-		rept, err := conn.TransactionReceipt(context.Background(), tx.Hash())
-		if err == nil {
-			if rept.Status != types.ReceiptStatusSuccessful {
-				logging.Error("Transaction failed... ", rept)
-				return nil
-			} else {
-			}
-			break
-		}
-		time.Sleep(1 * time.Second)
-	}
-	return nil
 }
