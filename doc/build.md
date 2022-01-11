@@ -23,7 +23,7 @@ The special version of Web3J needs to end up in the directory `./gpact/..`. To c
 Start blockchain nodes:
 ```$xslt
 cd test-blockchains
-docker compose up
+docker-compose up
 ```
 
 To build and test:
