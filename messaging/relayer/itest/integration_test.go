@@ -31,6 +31,8 @@ import (
 	"github.com/consensys/gpact/messaging/relayer/internal/contracts/functioncall"
 	"github.com/consensys/gpact/messaging/relayer/internal/contracts/messaging"
 	"github.com/consensys/gpact/messaging/relayer/internal/crypto"
+	"github.com/consensys/gpact/messaging/relayer/internal/msgrelayer/eth/api"
+	"github.com/consensys/gpact/messaging/relayer/internal/msgrelayer/eth/signer"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
@@ -270,7 +272,8 @@ func TestERC20Setup(t *testing.T) {
 	t.Log("Setup relayers...")
 	assert.Empty(t, setupObserver("127.0.0.1:9525", 31, "ws://bc31node1:8546", sfcAddrA.Hex()))
 	assert.Empty(t, setupObserver("127.0.0.1:9525", 32, "ws://bc32node1:8546", sfcAddrB.Hex()))
-	assert.Empty(t, setupRelayer("127.0.0.1:9625", relayerKey))
+	assert.Empty(t, setupRelayer("127.0.0.1:9625", big.NewInt(31), bridgeAddrA, signer.SECP256K1_KEY_TYPE, relayerKey))
+	assert.Empty(t, setupRelayer("127.0.0.1:9625", big.NewInt(32), bridgeAddrB, signer.SECP256K1_KEY_TYPE, relayerKey))
 	assert.Empty(t, setupDispatcher("127.0.0.1:9725", 32, dispatcherKey, 0, "ws://bc32node1:8546", verifierAddrB.Hex()))
 	assert.Empty(t, setupDispatcher("127.0.0.1:9725", 31, dispatcherKey, 0, "ws://bc31node1:8546", verifierAddrA.Hex()))
 	t.Log("Setup done")
@@ -438,13 +441,13 @@ func setupObserver(url string, bcID byte, chain string, sfcAddr string) error {
 }
 
 // setupRelayer sets up relayer.
-func setupRelayer(url string, key []byte) error {
-	resp, err := adminserver.Request(url, 1, key)
+func setupRelayer(url string, chainID *big.Int, contractAddr common.Address, keyType byte, key []byte) error {
+	success, err := api.RequestSetKey(url, chainID, contractAddr, keyType, key)
 	if err != nil {
 		return err
 	}
-	if resp[0] != 0 {
-		return fmt.Errorf("Request failed.")
+	if !success {
+		return fmt.Errorf("failed.")
 	}
 	return nil
 }

@@ -42,6 +42,9 @@ type Config struct {
 
 	// Admin server related
 	APIPort int `mapstructure:"API_PORT"` // API Port: 9425
+
+	// Signer datastore location
+	SignerDSPath string `mapstructure:"SIGNER_DS_PATH"` // Signer DS Path: /var/.relayer/ds
 }
 
 // NewConfig reads environmental variables and creates a new configuration.
@@ -67,6 +70,7 @@ func NewConfig() Config {
 		OutboundMQAddr: conf.GetString("OUTBOUND_MQ_ADDR"),
 		OutboundChName: conf.GetString("OUTBOUND_CH_NAME"),
 
-		APIPort: conf.GetInt("API_PORT"),
+		APIPort:      conf.GetInt("API_PORT"),
+		SignerDSPath: conf.GetString("SIGNER_DS_PATH"),
 	}
 }
