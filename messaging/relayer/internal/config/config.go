@@ -47,10 +47,13 @@ type Config struct {
 	SignerDSPath string `mapstructure:"SIGNER_DS_PATH"` // Signer DS Path: /var/.relayer/ds0
 
 	// Transactor datastore location
-	TransactorDSPath string `mapstructure:"TRANSACTOR_DS_PATH"` // Signer DS Path: /var/.relayer/ds1
+	TransactorDSPath string `mapstructure:"TRANSACTOR_DS_PATH"` // Transactor DS Path: /var/.relayer/ds1
 
 	// Verifier datastore location
-	VerifierDSPath string `mapstructure:"VERIFIER_DS_PATH"` // Signer DS Path: /var/.relayer/ds2
+	VerifierDSPath string `mapstructure:"VERIFIER_DS_PATH"` // Verifier DS Path: /var/.relayer/ds2
+
+	// Observer datastore locaion
+	ObserverDSPath string `mapstructure:"OBSERVER_DS_PATH"` // Observer DS Path: /var/.relayer/ds3
 }
 
 // NewConfig reads environmental variables and creates a new configuration.
@@ -80,5 +83,6 @@ func NewConfig() Config {
 		SignerDSPath:     conf.GetString("SIGNER_DS_PATH"),
 		TransactorDSPath: conf.GetString("TRANSACTOR_DS_PATH"),
 		VerifierDSPath:   conf.GetString("VERIFIER_DS_PATH"),
+		ObserverDSPath:   conf.GetString("OBSERVER_DS_PATH"),
 	}
 }
