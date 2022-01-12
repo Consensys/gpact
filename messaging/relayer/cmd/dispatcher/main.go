@@ -16,200 +16,77 @@ package main
  */
 
 import (
-	"context"
-	"crypto/ecdsa"
-	"encoding/hex"
-	"encoding/json"
-	"math/big"
-	"strconv"
+	"os"
+	"os/signal"
 
-	"github.com/consensys/gpact/messaging/relayer/internal/adminserver"
 	"github.com/consensys/gpact/messaging/relayer/internal/config"
-	"github.com/consensys/gpact/messaging/relayer/internal/contracts/messaging"
 	"github.com/consensys/gpact/messaging/relayer/internal/logging"
-	"github.com/consensys/gpact/messaging/relayer/internal/messages"
-	v1 "github.com/consensys/gpact/messaging/relayer/internal/messages/v1"
 	"github.com/consensys/gpact/messaging/relayer/internal/mqserver"
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/crypto/secp256k1"
-	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/consensys/gpact/messaging/relayer/internal/msgdispatcher/eth/api"
+	"github.com/consensys/gpact/messaging/relayer/internal/msgdispatcher/eth/mq"
+	"github.com/consensys/gpact/messaging/relayer/internal/msgdispatcher/eth/node"
+	"github.com/consensys/gpact/messaging/relayer/internal/msgdispatcher/eth/transactor"
+	"github.com/consensys/gpact/messaging/relayer/internal/msgdispatcher/eth/verifier"
+	"github.com/consensys/gpact/messaging/relayer/internal/rpc"
 	_ "github.com/joho/godotenv/autoload"
 )
 
-// TODO, Need a separate package to put all core components.
-var s *mqserver.MQServer
-var api adminserver.AdminServer
-var chainInfos map[byte]chainInfo
-
-type chainInfo struct {
-	auth   *bind.TransactOpts
-	chain  string
-	esAddr string
-}
-
+// main entrypoint of dispatcher.
 func main() {
 	// Load config
 	conf := config.NewConfig()
-
-	// Create handlers.
-	handlers := make(map[string]map[string]func(msg messages.Message))
-	handlers[v1.Version] = make(map[string]func(msg messages.Message))
-	handlers[v1.Version][v1.MessageType] = simpleHandler
+	node := node.GetSingleInstance()
 
 	// Start the server
 	var err error
-	s, err = mqserver.NewMQServer(
+	mq, err := mqserver.NewMQServer(
 		conf.InboundMQAddr,
 		conf.InboundChName,
 		conf.OutboundMQAddr,
 		conf.OutboundChName,
-		handlers,
+		mq.Handlers,
 	)
 	if err != nil {
 		panic(err)
 	}
-	err = s.Start()
+	err = mq.Start()
 	if err != nil {
 		panic(err)
 	}
+	node.MQ = mq
+	defer mq.Stop()
+	// Start the Transactor
+	transactor := transactor.NewTransactorImplV1(conf.TransactorDSPath)
+	err = transactor.Start()
+	if err != nil {
+		panic(err)
+	}
+	node.Transactor = transactor
+	defer transactor.Stop()
+	// Start the Verifier
+	verifier := verifier.NewVerifierImplV1(conf.VerifierDSPath)
+	err = verifier.Start()
+	if err != nil {
+		panic(err)
+	}
+	node.Verifier = verifier
+	defer verifier.Stop()
+	// Start the RPC Server
+	rpc := rpc.NewServerImplV1(conf.APIPort).
+		AddHandler(api.SetTransactionOptsReqType, api.HandleSetTransactionOpts).
+		AddHandler(api.GetChainAPReqType, api.HandleGetChainAP).
+		AddHandler(api.GetAuthAddrReqType, api.HandleGetAuthAddr).
+		AddHandler(api.SetVerifierAddrReqType, api.HandleSetVerifierAddr).
+		AddHandler(api.GetVerifierAddrReqType, api.HandleGetVerifierAddr)
+	err = rpc.Start()
+	if err != nil {
+		panic(err)
+	}
+	node.RPC = rpc
+	defer rpc.Stop()
 	logging.Info("Dispatcher started.")
 
-	// For now just have one single handler for dispatching chain with type 1.
-	chainInfos = make(map[byte]chainInfo)
-	apiHandlers := make(map[byte]func(req []byte) ([]byte, error))
-	apiHandlers[1] = func(req []byte) ([]byte, error) {
-		request := Request{}
-		err = json.Unmarshal(req, &request)
-		if err != nil {
-			return nil, err
-		}
-		key, err := hex.DecodeString(request.Key)
-		if err != nil {
-			return nil, err
-		}
-
-		x, y := secp256k1.S256().ScalarBaseMult(key)
-		prv := &ecdsa.PrivateKey{}
-		prv.D = big.NewInt(0).SetBytes(key)
-		prv.PublicKey = ecdsa.PublicKey{
-			X:     x,
-			Y:     y,
-			Curve: secp256k1.S256(),
-		}
-		auth := bind.NewKeyedTransactor(prv)
-		auth.Nonce = big.NewInt(int64(request.Nonce))
-		auth.Value = big.NewInt(0)      // in wei
-		auth.GasLimit = uint64(3000000) // in units
-		auth.GasPrice = big.NewInt(0)
-
-		chainInfos[request.BcID] = chainInfo{
-			auth:   auth,
-			chain:  request.Chain,
-			esAddr: request.EsAddr,
-		}
-		return []byte{0}, nil
-	}
-	api = adminserver.NewAdminServerImpl(conf.APIPort, apiHandlers)
-	err = api.Start()
-	if err != nil {
-		panic(err)
-	}
-	for {
-	}
-}
-
-// simpleHandler only does a message forward with some slightly message change.
-func simpleHandler(req messages.Message) {
-	// Received request from observer
-	msg := req.(*v1.Message)
-	logging.Info("Process message with ID: %v", msg.ID)
-
-	destID, err := strconv.Atoi(msg.Destination.NetworkID)
-	if err != nil {
-		logging.Error(err.Error())
-		return
-	}
-
-	info, ok := chainInfos[byte(destID)]
-	if !ok {
-		logging.Error("chain id %v not supported", destID)
-		return
-	}
-
-	chain, err := ethclient.Dial(info.chain)
-	if err != nil {
-		logging.Error(err.Error())
-		return
-	}
-	defer chain.Close()
-
-	srcID, err := strconv.Atoi(msg.Source.NetworkID)
-	if err != nil {
-		logging.Error(err.Error())
-		return
-	}
-	sfcAddr := common.HexToAddress(msg.Source.ContractAddress)
-	esAddr := common.HexToAddress(info.esAddr)
-
-	// Load verifier
-	verifier, err := messaging.NewSignedEventStore(esAddr, chain)
-	if err != nil {
-		logging.Error(err.Error())
-		return
-	}
-
-	// Get proof
-	data, err := hex.DecodeString(msg.Payload)
-	if err != nil {
-		logging.Error(err.Error())
-		return
-	}
-	raw := types.Log{}
-	err = json.Unmarshal(data, &raw)
-	if err != nil {
-		logging.Error(err.Error())
-		return
-	}
-	if len(msg.Proofs) == 0 {
-		logging.Error("Empty proofs received.")
-		return
-	}
-	signature, err := hex.DecodeString(msg.Proofs[0].Proof)
-	if err != nil {
-		logging.Error(err.Error())
-		return
-	}
-	nonce, err := chain.NonceAt(context.Background(), info.auth.From, nil)
-	if err != nil {
-		logging.Error(err.Error())
-		return
-	}
-	info.auth.Nonce = big.NewInt(int64(nonce))
-	info.auth.GasPrice, err = chain.SuggestGasPrice(context.Background())
-	// We double the gas price to make sure it goes through.
-	info.auth.GasPrice.Mul(info.auth.GasPrice, big.NewInt(2))
-	if err != nil {
-		logging.Error(err.Error())
-		return
-	}
-	// Try three times.
-	for i := 0; i < 3; i++ {
-		tx, err := verifier.RelayEvent(info.auth, big.NewInt(int64(srcID)), sfcAddr, raw.Data, signature)
-		if err == nil {
-			logging.Info("Submit transaction hash: %v", tx.Hash().String())
-			break
-		}
-		logging.Error(err.Error())
-	}
-}
-
-// TODO: Create a package to place all admin APIs.
-type Request struct {
-	BcID   byte   `json:"bc_id"`
-	Key    string `json:"key"`
-	Nonce  int    `json:"nonce"`
-	Chain  string `json:"chain"`
-	EsAddr string `json:"es_addr"`
+	c := make(chan os.Signal)
+	signal.Notify(c, os.Interrupt)
+	<-c
 }

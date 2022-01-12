@@ -18,7 +18,6 @@ package itest
 import (
 	"context"
 	"crypto/ecdsa"
-	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -31,7 +30,8 @@ import (
 	"github.com/consensys/gpact/messaging/relayer/internal/contracts/functioncall"
 	"github.com/consensys/gpact/messaging/relayer/internal/contracts/messaging"
 	"github.com/consensys/gpact/messaging/relayer/internal/crypto"
-	"github.com/consensys/gpact/messaging/relayer/internal/msgrelayer/eth/api"
+	dispatcherapi "github.com/consensys/gpact/messaging/relayer/internal/msgdispatcher/eth/api"
+	relayerapi "github.com/consensys/gpact/messaging/relayer/internal/msgrelayer/eth/api"
 	"github.com/consensys/gpact/messaging/relayer/internal/msgrelayer/eth/signer"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
@@ -274,8 +274,9 @@ func TestERC20Setup(t *testing.T) {
 	assert.Empty(t, setupObserver("127.0.0.1:9525", 32, "ws://bc32node1:8546", sfcAddrB.Hex()))
 	assert.Empty(t, setupRelayer("127.0.0.1:9625", big.NewInt(31), bridgeAddrA, signer.SECP256K1_KEY_TYPE, relayerKey))
 	assert.Empty(t, setupRelayer("127.0.0.1:9625", big.NewInt(32), bridgeAddrB, signer.SECP256K1_KEY_TYPE, relayerKey))
-	assert.Empty(t, setupDispatcher("127.0.0.1:9725", 32, dispatcherKey, 0, "ws://bc32node1:8546", verifierAddrB.Hex()))
-	assert.Empty(t, setupDispatcher("127.0.0.1:9725", 31, dispatcherKey, 0, "ws://bc31node1:8546", verifierAddrA.Hex()))
+	assert.Empty(t, setupDispatcher("127.0.0.1:9725", big.NewInt(31), "ws://bc31node1:8546", dispatcherKey, bridgeAddrA, verifierAddrA))
+	assert.Empty(t, setupDispatcher("127.0.0.1:9725", big.NewInt(32), "ws://bc32node1:8546", dispatcherKey, bridgeAddrB, verifierAddrB))
+
 	t.Log("Setup done")
 }
 
@@ -442,7 +443,7 @@ func setupObserver(url string, bcID byte, chain string, sfcAddr string) error {
 
 // setupRelayer sets up relayer.
 func setupRelayer(url string, chainID *big.Int, contractAddr common.Address, keyType byte, key []byte) error {
-	success, err := api.RequestSetKey(url, chainID, contractAddr, keyType, key)
+	success, err := relayerapi.RequestSetKey(url, chainID, contractAddr, keyType, key)
 	if err != nil {
 		return err
 	}
@@ -453,29 +454,20 @@ func setupRelayer(url string, chainID *big.Int, contractAddr common.Address, key
 }
 
 // setupDispatcher sets up dispatcher.
-func setupDispatcher(url string, bcID byte, key []byte, nonce int, chain string, esAddr string) error {
-	data, err := json.Marshal(struct {
-		BcID   byte   `json:"bc_id"`
-		Key    string `json:"key"`
-		Nonce  int    `json:"nonce"`
-		Chain  string `json:"chain"`
-		EsAddr string `json:"es_addr"`
-	}{
-		BcID:   bcID,
-		Key:    hex.EncodeToString(key),
-		Nonce:  nonce,
-		Chain:  chain,
-		EsAddr: esAddr,
-	})
+func setupDispatcher(url string, chainID *big.Int, chainAP string, key []byte, contractAddr common.Address, esAddr common.Address) error {
+	success, err := dispatcherapi.RequestSetTransactionOpts(url, chainID, chainAP, key)
 	if err != nil {
 		return err
 	}
-	resp, err := adminserver.Request(url, 1, data)
+	if !success {
+		return fmt.Errorf("failed.")
+	}
+	success, err = dispatcherapi.RequestSetVerifierAddr(url, chainID, contractAddr, esAddr)
 	if err != nil {
 		return err
 	}
-	if resp[0] != 0 {
-		return fmt.Errorf("Request failed.")
+	if !success {
+		return fmt.Errorf("failed.")
 	}
 	return nil
 }
