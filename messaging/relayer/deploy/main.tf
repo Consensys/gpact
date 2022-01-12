@@ -44,16 +44,18 @@ resource "aws_instance" "relayer" {
     cd gpact/messaging/relayer
     make build
     export IP="${aws_instance.relayer-monitor.public_ip}"
-    echo "      host: relayer" >> ../../../promtail-cloud-config.yaml
+    echo "      host: node1" >> ../../../promtail-cloud-config.yaml
     echo "clients:" >> ../../../promtail-cloud-config.yaml
     echo "  - url: http://$IP:3100/loki/api/v1/push" >> ../../../promtail-cloud-config.yaml
-    nohup ../../../promtail-linux-amd64 -config.file=../../../promtail-cloud-config.yaml &
     docker run -d -it --rm --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3.9-management
     sleep 30
     cd ./build
     LOG_SERVICE_NAME=observer LOG_LEVEL=debug LOG_TARGET=STDOUT LOG_DIR=.observer/log LOG_FILE=observer.log LOG_MAX_BACKUPS=3 LOG_MAX_AGE=28 LOG_MAX_SIZE=500 LOG_COMPRESS=true LOG_TIME_FORMAT=RFC3339 OUTBOUND_MQ_ADDR=amqp://guest:guest@localhost:5672/ OUTBOUND_CH_NAME=channel1 API_PORT=9425 OBSERVER_DS_PATH=.relayer-observer/ nohup ./observer >> /home/ubuntu/all.log 2>&1 &
     LOG_SERVICE_NAME=relayer LOG_LEVEL=debug LOG_TARGET=STDOUT LOG_DIR=.relayer/log LOG_FILE=relayer.log LOG_MAX_BACKUPS=3 LOG_MAX_AGE=28 LOG_MAX_SIZE=500 LOG_COMPRESS=true LOG_TIME_FORMAT=RFC3339 INBOUND_MQ_ADDR=amqp://guest:guest@localhost:5672/ INBOUND_CH_NAME=channel1 OUTBOUND_MQ_ADDR=amqp://guest:guest@localhost:5672/ OUTBOUND_CH_NAME=channel2 API_PORT=9426 SIGNER_DS_PATH=.relayer-signer/ nohup ./relayer >> /home/ubuntu/all.log 2>&1 &
     LOG_SERVICE_NAME=dispatcher LOG_LEVEL=debug LOG_TARGET=STDOUT LOG_DIR=.dispatcher/log LOG_FILE=dispatcher.log LOG_MAX_BACKUPS=3 LOG_MAX_AGE=28 LOG_MAX_SIZE=500 LOG_COMPRESS=true LOG_TIME_FORMAT=RFC3339 INBOUND_MQ_ADDR=amqp://guest:guest@localhost:5672/ INBOUND_CH_NAME=channel2 API_PORT=9427 TRANSACTOR_DS_PATH=.relayer-transactor/ VERIFIER_DS_PATH=.relayer-verifier/ nohup ./dispatcher >> /home/ubuntu/all.log 2>&1 &
+    cd ../../../../
+    sleep 5
+    nohup ./promtail-linux-amd64 -config.file=./promtail-cloud-config.yaml >> /home/ubuntu/promtail.log 2>&1 &
   EOF
 }
 
@@ -72,8 +74,15 @@ resource "aws_instance" "relayer-monitor" {
     wget https://github.com/grafana/loki/releases/download/v2.3.0/loki-linux-amd64.zip
     wget https://dl.grafana.com/oss/release/grafana-8.1.5.linux-amd64.tar.gz
     wget https://raw.githubusercontent.com/grafana/loki/v2.3.0/cmd/loki/loki-local-config.yaml
+    wget https://raw.githubusercontent.com/ConsenSys/ipfs-lookup-measurement/main/monitor/grafana-datasources.yml
+    wget https://raw.githubusercontent.com/ConsenSys/ipfs-lookup-measurement/main/monitor/grafana-dashboards.yml
+    wget https://raw.githubusercontent.com/ConsenSys/ipfs-lookup-measurement/main/monitor/ipfs-dashboard.json
     unzip loki-linux-amd64.zip
     tar -zxvf grafana-8.1.5.linux-amd64.tar.gz
+    mv grafana-datasources.yml ./grafana-8.1.5/conf/provisioning/datasources/datasources.yml
+    mv grafana-dashboards.yml ./grafana-8.1.5/conf/provisioning/dashboards/dashboards.yml
+    sudo mkdir --parents /var/lib/grafana/dashboards
+    mv ipfs-dashboard.json /var/lib/grafana/dashboards/
     nohup ./loki-linux-amd64 -config.file=loki-local-config.yaml &
     cd ./grafana-8.1.5/bin
     nohup ./grafana-server &
@@ -88,13 +97,6 @@ resource "aws_security_group" "security_relayer_monitor" {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
@@ -125,13 +127,6 @@ resource "aws_security_group" "security_relayer" {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
