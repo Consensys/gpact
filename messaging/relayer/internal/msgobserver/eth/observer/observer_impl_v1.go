@@ -189,6 +189,7 @@ func (o *ObserverImplV1) ListObserves() (map[string][]common.Address, error) {
 			res[id.String()] = addrs
 		}
 		addrs = append(addrs, addr)
+		res[id.String()] = addrs
 	}
 
 	return res, nil
