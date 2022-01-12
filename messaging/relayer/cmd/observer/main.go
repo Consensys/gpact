@@ -23,7 +23,7 @@ import (
 	"github.com/consensys/gpact/messaging/relayer/internal/contracts/functioncall"
 	"github.com/consensys/gpact/messaging/relayer/internal/logging"
 	"github.com/consensys/gpact/messaging/relayer/internal/mqserver"
-	"github.com/consensys/gpact/messaging/relayer/internal/msgobserver/eth"
+	"github.com/consensys/gpact/messaging/relayer/internal/msgobserver/eth/observer"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	_ "github.com/joho/godotenv/autoload"
@@ -86,7 +86,7 @@ func main() {
 				return
 			}
 
-			observer, err := eth.NewSFCBridgeObserver(request.BcID, request.SFCAddr, sfc, s, end)
+			observer, err := observer.NewSFCBridgeObserver(request.BcID, request.SFCAddr, sfc, s, end)
 			if err != nil {
 				logging.Error(err.Error())
 				return
