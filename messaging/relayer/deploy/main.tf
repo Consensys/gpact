@@ -41,7 +41,9 @@ resource "aws_instance" "relayer" {
     export GOPATH=/home/ubuntu/go
     export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
     git clone https://github.com/ConsenSys/gpact.git
-    cd gpact/messaging/relayer
+    cd ./gpact
+    git checkout cros-15-message-signer
+    cd ./messaging/relayer
     make build
     export IP="${aws_instance.relayer-monitor.public_ip}"
     echo "      host: node1" >> ../../../promtail-cloud-config.yaml
