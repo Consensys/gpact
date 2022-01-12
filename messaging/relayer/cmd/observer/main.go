@@ -16,31 +16,28 @@ package main
  */
 
 import (
-	"encoding/json"
+	"os"
+	"os/signal"
 
-	"github.com/consensys/gpact/messaging/relayer/internal/adminserver"
 	"github.com/consensys/gpact/messaging/relayer/internal/config"
-	"github.com/consensys/gpact/messaging/relayer/internal/contracts/functioncall"
 	"github.com/consensys/gpact/messaging/relayer/internal/logging"
 	"github.com/consensys/gpact/messaging/relayer/internal/mqserver"
+	"github.com/consensys/gpact/messaging/relayer/internal/msgobserver/eth/api"
+	"github.com/consensys/gpact/messaging/relayer/internal/msgobserver/eth/node"
 	"github.com/consensys/gpact/messaging/relayer/internal/msgobserver/eth/observer"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/consensys/gpact/messaging/relayer/internal/rpc"
 	_ "github.com/joho/godotenv/autoload"
 )
 
-// TODO, Need a separate package to put all core components.
-var s mqserver.MessageQueue
-var api adminserver.AdminServer
-var activeChains map[string]chan bool
-
+// main entrypoint of observer.
 func main() {
 	// Load config
 	conf := config.NewConfig()
+	node := node.GetSingleInstance()
 
 	// Start the server
 	var err error
-	s, err = mqserver.NewMQServer(
+	mq, err := mqserver.NewMQServer(
 		conf.InboundMQAddr,
 		conf.InboundChName,
 		conf.OutboundMQAddr,
@@ -50,63 +47,34 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	err = s.Start()
+	err = mq.Start()
 	if err != nil {
 		panic(err)
 	}
+	node.MQ = mq
+	defer mq.Stop()
+	// Start the observer
+	observer := observer.NewObserverImplV1(conf.ObserverDSPath, mq)
+	err = observer.Start()
+	if err != nil {
+		panic(err)
+	}
+	node.Observer = observer
+	defer observer.Stop()
+	// Start the RPC Server
+	rpc := rpc.NewServerImplV1(conf.APIPort).
+		AddHandler(api.StartObserveReqType, api.HandleStartObserve).
+		AddHandler(api.StopObserveReqType, api.HandleStopObserve).
+		AddHandler(api.ListObservesReqType, api.HandleListObserves)
+	err = rpc.Start()
+	if err != nil {
+		panic(err)
+	}
+	node.RPC = rpc
+	defer rpc.Stop()
 	logging.Info("Observer started.")
 
-	// For now just have one single handler for observing chain with type 1.
-	activeChains = make(map[string]chan bool)
-	apiHandlers := make(map[byte]func(req []byte) ([]byte, error))
-	apiHandlers[1] = func(req []byte) ([]byte, error) {
-		request := Request{}
-		err = json.Unmarshal(req, &request)
-		if err != nil {
-			return nil, err
-		}
-		end, ok := activeChains[request.BcID]
-		if ok {
-			end <- true
-		}
-		end = make(chan bool)
-		activeChains[request.BcID] = end
-
-		go func() {
-			chain, err := ethclient.Dial(request.Chain)
-			if err != nil {
-				logging.Error(err.Error())
-				return
-			}
-			defer chain.Close()
-
-			sfc, err := functioncall.NewSfc(common.HexToAddress(request.SFCAddr), chain)
-			if err != nil {
-				logging.Error(err.Error())
-				return
-			}
-
-			observer, err := observer.NewSFCBridgeObserver(request.BcID, request.SFCAddr, sfc, s, end)
-			if err != nil {
-				logging.Error(err.Error())
-				return
-			}
-			observer.Start()
-		}()
-		return []byte{0}, nil
-	}
-	api = adminserver.NewAdminServerImpl(conf.APIPort, apiHandlers)
-	err = api.Start()
-	if err != nil {
-		panic(err)
-	}
-	for {
-	}
-}
-
-// TODO: Create a package to place all admin APIs.
-type Request struct {
-	BcID    string `json:"bc_id"`
-	Chain   string `json:"chain"`
-	SFCAddr string `json:"sfc_addr"`
+	c := make(chan os.Signal)
+	signal.Notify(c, os.Interrupt)
+	<-c
 }

@@ -18,19 +18,18 @@ package itest
 import (
 	"context"
 	"crypto/ecdsa"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"math/big"
 	"testing"
 	"time"
 
-	"github.com/consensys/gpact/messaging/relayer/internal/adminserver"
 	"github.com/consensys/gpact/messaging/relayer/internal/contracts/application"
 	"github.com/consensys/gpact/messaging/relayer/internal/contracts/functioncall"
 	"github.com/consensys/gpact/messaging/relayer/internal/contracts/messaging"
 	"github.com/consensys/gpact/messaging/relayer/internal/crypto"
 	dispatcherapi "github.com/consensys/gpact/messaging/relayer/internal/msgdispatcher/eth/api"
+	observerapi "github.com/consensys/gpact/messaging/relayer/internal/msgobserver/eth/api"
 	relayerapi "github.com/consensys/gpact/messaging/relayer/internal/msgrelayer/eth/api"
 	"github.com/consensys/gpact/messaging/relayer/internal/msgrelayer/eth/signer"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -270,12 +269,16 @@ func TestERC20Setup(t *testing.T) {
 
 	// Setup relayers
 	t.Log("Setup relayers...")
-	assert.Empty(t, setupObserver("127.0.0.1:9525", 31, "ws://bc31node1:8546", sfcAddrA.Hex()))
-	assert.Empty(t, setupObserver("127.0.0.1:9525", 32, "ws://bc32node1:8546", sfcAddrB.Hex()))
+
+	assert.Empty(t, setupObserver("127.0.0.1:9525", big.NewInt(31), "ws://bc31node1:8546", sfcAddrA))
+	assert.Empty(t, setupObserver("127.0.0.1:9525", big.NewInt(32), "ws://bc32node1:8546", sfcAddrB))
 	assert.Empty(t, setupRelayer("127.0.0.1:9625", big.NewInt(31), bridgeAddrA, signer.SECP256K1_KEY_TYPE, relayerKey))
 	assert.Empty(t, setupRelayer("127.0.0.1:9625", big.NewInt(32), bridgeAddrB, signer.SECP256K1_KEY_TYPE, relayerKey))
 	assert.Empty(t, setupDispatcher("127.0.0.1:9725", big.NewInt(31), "ws://bc31node1:8546", dispatcherKey, bridgeAddrA, verifierAddrA))
 	assert.Empty(t, setupDispatcher("127.0.0.1:9725", big.NewInt(32), "ws://bc32node1:8546", dispatcherKey, bridgeAddrB, verifierAddrB))
+
+	res, _ := observerapi.RequestListObserves("127.0.0.1:9525")
+	t.Log(res)
 
 	t.Log("Setup done")
 }
@@ -418,25 +421,13 @@ func waitForReceipt(conn *ethclient.Client, tx *types.Transaction) error {
 }
 
 // setupObserver sets up observer.
-func setupObserver(url string, bcID byte, chain string, sfcAddr string) error {
-	data, err := json.Marshal(struct {
-		BcID    string `json:"bc_id"`
-		Chain   string `json:"chain"`
-		SFCAddr string `json:"sfc_addr"`
-	}{
-		BcID:    fmt.Sprintf("%v", bcID),
-		Chain:   chain,
-		SFCAddr: sfcAddr,
-	})
+func setupObserver(url string, chainID *big.Int, chainAP string, contractAddr common.Address) error {
+	success, err := observerapi.RequestStartObserve(url, chainID, chainAP, contractAddr)
 	if err != nil {
 		return err
 	}
-	resp, err := adminserver.Request(url, 1, data)
-	if err != nil {
-		return err
-	}
-	if resp[0] != 0 {
-		return fmt.Errorf("Request failed.")
+	if !success {
+		return fmt.Errorf("failed.")
 	}
 	return nil
 }
