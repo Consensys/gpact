@@ -107,6 +107,5 @@ func (s *SignerImplV1) Sign(chainID *big.Int, contractAddr common.Address, msg [
 
 // dsKey gets the datastore key from given chainID and contract address.
 func dsKey(chainID *big.Int, contractAddr common.Address) datastore.Key {
-	fmt.Printf("key: %v\n", fmt.Sprintf("%v-%v", chainID.String(), contractAddr.String()))
 	return datastore.NewKey(fmt.Sprintf("%v-%v", chainID.String(), contractAddr.String()))
 }
