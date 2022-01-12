@@ -39,7 +39,7 @@ type SignerImplV1 struct {
 }
 
 // NewSignerImplV1 creates a new Signer.
-func NewSignerImplV1(path string) *SignerImplV1 {
+func NewSignerImplV1(path string) Signer {
 	return &SignerImplV1{path: path}
 }
 
