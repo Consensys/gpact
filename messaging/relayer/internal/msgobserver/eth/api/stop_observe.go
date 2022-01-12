@@ -66,7 +66,7 @@ func HandleStopObserve(data []byte) ([]byte, error) {
 }
 
 // RequestStopObserve requests a stop observe.
-func RequestStopObserve(addr string, chainID *big.Int, chainAP string, contractAddr common.Address) (bool, error) {
+func RequestStopObserve(addr string, chainID *big.Int, contractAddr common.Address) (bool, error) {
 	req := StopObserveReq{
 		ChainID:      chainID.String(),
 		ContractAddr: contractAddr.String(),

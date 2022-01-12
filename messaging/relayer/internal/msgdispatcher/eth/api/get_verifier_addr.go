@@ -65,7 +65,7 @@ func HandleGetVerifierAddr(data []byte) ([]byte, error) {
 }
 
 // RequestGetVerifierAddr requests get verifier addr.
-func RequestGetVerifierAddr(addr string, chainID *big.Int, contractAddr common.Address, esAddr common.Address) (common.Address, error) {
+func RequestGetVerifierAddr(addr string, chainID *big.Int, contractAddr common.Address) (common.Address, error) {
 	req := GetVerifierAddrReq{
 		ChainID:      chainID.String(),
 		ContractAddr: contractAddr.String(),
