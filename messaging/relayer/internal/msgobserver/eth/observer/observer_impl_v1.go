@@ -42,7 +42,7 @@ type ObserverImplV1 struct {
 
 // NewObserverImplV1 creates a new observer.
 func NewObserverImplV1(path string, mq *mqserver.MQServer) Observer {
-	return &ObserverImplV1{path: path}
+	return &ObserverImplV1{path: path, mq: mq}
 }
 
 // Start starts the observer's routine.
