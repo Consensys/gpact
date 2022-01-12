@@ -37,5 +37,3 @@ site/
 *.html
 *.out
 .env
-.terraform*
-terraform*
