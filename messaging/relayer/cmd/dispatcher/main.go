@@ -23,6 +23,7 @@ import (
 	"github.com/consensys/gpact/messaging/relayer/internal/logging"
 	"github.com/consensys/gpact/messaging/relayer/internal/mqserver"
 	"github.com/consensys/gpact/messaging/relayer/internal/msgdispatcher/eth/api"
+	"github.com/consensys/gpact/messaging/relayer/internal/msgdispatcher/eth/dispatcher"
 	"github.com/consensys/gpact/messaging/relayer/internal/msgdispatcher/eth/mq"
 	"github.com/consensys/gpact/messaging/relayer/internal/msgdispatcher/eth/node"
 	"github.com/consensys/gpact/messaging/relayer/internal/msgdispatcher/eth/transactor"
@@ -71,6 +72,14 @@ func main() {
 	}
 	node.Verifier = verifier
 	defer verifier.Stop()
+	// Start the Dispatcher.
+	dispatcher := dispatcher.NewDispatcherImplV1()
+	err = dispatcher.Start()
+	if err != nil {
+		panic(err)
+	}
+	node.Dispatcher = dispatcher
+	defer dispatcher.Stop()
 	// Start the RPC Server
 	rpc := rpc.NewServerImplV1(conf.APIPort).
 		AddHandler(api.SetTransactionOptsReqType, api.HandleSetTransactionOpts).

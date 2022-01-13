@@ -19,6 +19,7 @@ import (
 	"sync"
 
 	"github.com/consensys/gpact/messaging/relayer/internal/mqserver"
+	"github.com/consensys/gpact/messaging/relayer/internal/msgdispatcher/eth/dispatcher"
 	"github.com/consensys/gpact/messaging/relayer/internal/msgdispatcher/eth/transactor"
 	"github.com/consensys/gpact/messaging/relayer/internal/msgdispatcher/eth/verifier"
 	"github.com/consensys/gpact/messaging/relayer/internal/rpc"
@@ -33,6 +34,8 @@ type Node struct {
 	Transactor transactor.Transactor
 
 	Verifier verifier.Verifier
+
+	Dispatcher dispatcher.Dispatcher
 }
 
 // Single instance of the gateway

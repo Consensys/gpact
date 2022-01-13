@@ -16,21 +16,17 @@ package mq
  */
 
 import (
-	"context"
 	"encoding/hex"
 	"encoding/json"
 	"math/big"
 	"strconv"
-	"time"
 
-	"github.com/consensys/gpact/messaging/relayer/internal/contracts/messaging"
 	"github.com/consensys/gpact/messaging/relayer/internal/logging"
 	"github.com/consensys/gpact/messaging/relayer/internal/messages"
 	v1 "github.com/consensys/gpact/messaging/relayer/internal/messages/v1"
 	"github.com/consensys/gpact/messaging/relayer/internal/msgdispatcher/eth/node"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/ethclient"
 )
 
 // handleV1 handles message v1 with type v1.
@@ -58,46 +54,6 @@ func handleV1(req messages.Message) {
 	destAddr := common.HexToAddress(msg.Destination.ContractAddress)
 	logging.Info("Received message for bridging from contract %v on chain %v to contract %v on chain %v", srcAddr.String(), srcID, destAddr.String(), destID)
 
-	link, err := node.Transactor.GetChainAP(big.NewInt(int64(destID)))
-	if err != nil {
-		logging.Error(err.Error())
-		return
-	}
-	auth, err := node.Transactor.GetAuth(big.NewInt(int64(destID)))
-	if err != nil {
-		logging.Error(err.Error())
-		return
-	}
-	esAddr, err := node.Verifier.GetVerifierAddr(big.NewInt(int64(destID)), destAddr)
-	if err != nil {
-		logging.Error(err.Error())
-		return
-	}
-	logging.Info("Obtain event store address: %v", esAddr.String())
-
-	var chain *ethclient.Client
-	// Retry 3 times, 3 seconds apart.
-	for i := 0; i < 3; i++ {
-		chain, err = ethclient.Dial(link)
-		if err == nil {
-			break
-		}
-		logging.Error("Error in connecting to chain, retry...: %v", err.Error())
-		time.Sleep(3 * time.Second)
-	}
-	if err != nil {
-		logging.Error("Error in connecting to chain, stop retry: %v", err.Error())
-		return
-	}
-	logging.Info("Connected to chain %v", destID)
-
-	// Load verifier
-	verifier, err := messaging.NewSignedEventStore(esAddr, chain)
-	if err != nil {
-		logging.Error(err.Error())
-		return
-	}
-
 	// Get proof
 	data, err := hex.DecodeString(msg.Payload)
 	if err != nil {
@@ -120,34 +76,26 @@ func handleV1(req messages.Message) {
 		return
 	}
 
-	// Dispatching
-	logging.Info("Start dispatching...")
-	// TODO: Need to estimate the gas involved in the call.
-	auth.GasLimit = uint64(3000000)
-	auth.GasPrice, err = chain.SuggestGasPrice(context.Background())
+	link, err := node.Transactor.GetChainAP(big.NewInt(int64(destID)))
 	if err != nil {
 		logging.Error(err.Error())
 		return
 	}
-	nonce, err := chain.NonceAt(context.Background(), auth.From, nil)
+	auth, err := node.Transactor.GetAuth(big.NewInt(int64(destID)))
 	if err != nil {
 		logging.Error(err.Error())
 		return
 	}
-	auth.Nonce = big.NewInt(int64(nonce))
+	esAddr, err := node.Verifier.GetVerifierAddr(big.NewInt(int64(destID)), destAddr)
+	if err != nil {
+		logging.Error(err.Error())
+		return
+	}
+	logging.Info("Obtain event store address: %v", esAddr.String())
 
-	// Try 5 times, 3 seconds apart.
-	for i := 0; i < 5; i++ {
-		var tx *types.Transaction
-		tx, err = verifier.RelayEvent(auth, big.NewInt(int64(srcID)), srcAddr, raw.Data, signature)
-		if err == nil {
-			logging.Info("Transaction submitted with hash: %v", tx.Hash().String())
-			return
-		}
-		logging.Error("Error submitting transaction, Retry...: %v", err.Error())
-		time.Sleep(3 * time.Second)
-	}
-	logging.Error("Error submitting transaction, stop retry: %v", err.Error())
+	logging.Info("Adding message %v to queue for process...", msg.ID)
+	node.Dispatcher.AddToQueue(link, auth, msg.ID, big.NewInt(int64(destID)), esAddr, big.NewInt(int64(srcID)), srcAddr, raw.Data, signature)
+	logging.Info("Message %v is added to queue.", msg.ID)
 }
 
 // initV1 inits the handler.
