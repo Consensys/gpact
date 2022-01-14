@@ -25,7 +25,7 @@ import (
 // SFCBridgeObserver listens to incoming events from an SFC contract, transforms them into relayer messages
 // and then enqueues them onto a message queue them for further processing by other Relayer components
 type SFCBridgeObserver struct {
-	EventWatcher  *SFCCrossCallWatcher
+	EventWatcher  *SFCCrossCallRealtimeEventWatcher
 	EventHandler  *SimpleEventHandler
 	SourceNetwork string
 }
@@ -34,7 +34,7 @@ func NewSFCBridgeObserver(source string, sourceAddr string, contract *functionca
 	eventTransformer := NewSFCEventTransformer(source, sourceAddr)
 	messageHandler := NewMessageEnqueueHandler(mq)
 	eventHandler := NewSimpleEventHandler(eventTransformer, messageHandler)
-	eventWatcher := NewSFCCrossCallWatcher(context.Background(), eventHandler, contract, end)
+	eventWatcher := NewSFCCrossCallRealtimeEventWatcher(context.Background(), eventHandler, contract, end)
 
 	return &SFCBridgeObserver{EventWatcher: eventWatcher, EventHandler: eventHandler, SourceNetwork: source}, nil
 }
