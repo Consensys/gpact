@@ -18,6 +18,8 @@ package eth
 import (
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
+	"github.com/ethereum/go-ethereum/core/types"
 	"math/big"
 	"testing"
 
@@ -26,12 +28,20 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+var fixLog = types.Log{
+	BlockNumber: uint64(12234),
+	TxIndex:     uint(2),
+	Index:       uint(1),
+}
+
 var fixValidEvent = functioncall.SfcCrossCall{
 	DestBcId:         big.NewInt(1),
 	DestContract:     common.HexToAddress("0x8e215d06ea7ec1fdb4fc5fd21768f4b34ee92ef4"),
 	Timestamp:        big.NewInt(1639527190),
 	DestFunctionCall: randomBytes(10),
+	Raw:              fixLog,
 }
+
 var transformer = NewSFCEventTransformer("network-001", "0x8e215d06ea7ec1fdb4fc5fd21768f4b34ee92ef4")
 
 func TestSFCTransformer(t *testing.T) {
@@ -45,10 +55,16 @@ func TestSFCTransformer(t *testing.T) {
 	assert.Equal(t, fixValidEvent.DestContract.String(), message.Destination.ContractAddress)
 	assert.Equal(t, fixValidEvent.Timestamp, big.NewInt(message.Timestamp))
 	assert.Equal(t, hex.EncodeToString(data), message.Payload)
+
+	expectedID := fmt.Sprintf("%s/%s/%d/%d/%d", transformer.Source, transformer.SourceAddr,
+		fixLog.BlockNumber, fixLog.TxIndex, fixLog.Index)
+	assert.Equal(t, expectedID, message.ID)
 }
+
 func TestSFCTransformerFailsOnInvalidEventType(t *testing.T) {
 	assert.Panics(t, func() { transformer.ToMessage("invalid event") })
 }
+
 func TestSFCTransformerFailsOnInvalidTimestamp(t *testing.T) {
 	invalidTimestamp := fixValidEvent
 	invalidTimestamp.Timestamp = big.NewInt(-1)
@@ -56,7 +72,6 @@ func TestSFCTransformerFailsOnInvalidTimestamp(t *testing.T) {
 	_, err := transformer.ToMessage(&invalidTimestamp)
 	assert.NotNil(t, err)
 	assert.Regexp(t, "invalid timestamp", err.Error())
-
 }
 
 func TestSFCTransformerFailsOnInvalidDestination(t *testing.T) {
@@ -67,5 +82,3 @@ func TestSFCTransformerFailsOnInvalidDestination(t *testing.T) {
 	assert.NotNil(t, err)
 	assert.Regexp(t, "destination network id", err.Error())
 }
-
-// TODO: verify encoded payload

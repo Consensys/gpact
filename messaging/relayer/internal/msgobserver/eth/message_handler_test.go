@@ -41,5 +41,3 @@ func TestMessageEnqueueHandler(t *testing.T) {
 
 	mockMQ.AssertExpectations(t)
 }
-
-// TODO: verify encoded payload

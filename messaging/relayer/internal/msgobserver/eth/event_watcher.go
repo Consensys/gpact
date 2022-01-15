@@ -134,13 +134,14 @@ func (l *SFCCrossCallFinalisedEventWatcher) processFinalisedEvents(latest *types
 
 		logging.Debug("Finalising blocks '%d' to '%d'", firstFinalised, lastFinalised)
 
-		eventsIter, err := l.SfcContract.FilterCrossCall(&bind.FilterOpts{Start: firstFinalised, End: &lastFinalised, Context: l.Context})
+		filterOpts := &bind.FilterOpts{Start: firstFinalised, End: &lastFinalised, Context: l.Context}
+		events, err := l.SfcContract.FilterCrossCall(filterOpts)
 		if err != nil {
 			logging.Error("error filtering logs from block: %d to %d, error: %v", firstFinalised, lastFinalised, err)
 			return err
 		}
 
-		err = l.handleEvents(eventsIter)
+		err = l.handleEvents(events)
 		if err != nil {
 			return err
 		}

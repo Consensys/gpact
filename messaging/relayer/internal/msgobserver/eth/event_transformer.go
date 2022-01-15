@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/ethereum/go-ethereum/core/types"
 
 	"github.com/consensys/gpact/messaging/relayer/internal/contracts/functioncall"
 	v1 "github.com/consensys/gpact/messaging/relayer/internal/messages/v1"
@@ -55,7 +56,7 @@ func (t *SFCEventTransformer) ToMessage(event interface{}) (*v1.Message, error) 
 	}
 
 	message := v1.Message{
-		ID:          hex.EncodeToString(randomBytes(16)), // TODO: replace with a proper message id scheme
+		ID:          t.getIDForEvent(sfcEvent.Raw),
 		Timestamp:   sfcEvent.Timestamp.Int64(),
 		MsgType:     v1.MessageType,
 		Version:     v1.Version,
@@ -78,6 +79,11 @@ func (t *SFCEventTransformer) validate(event *functioncall.SfcCrossCall) error {
 	}
 
 	return nil
+}
+
+// getIDForEvent generates a deterministic ID for an event of the format {network_id}/{contract_address}/{block_number}/{tx_index}/{log_index}
+func (t *SFCEventTransformer) getIDForEvent(event types.Log) string {
+	return fmt.Sprintf("%s/%s/%d/%d/%d", t.Source, t.SourceAddr, event.BlockNumber, event.TxIndex, event.Index)
 }
 
 func NewSFCEventTransformer(sourceNetwork string, sourceAddr string) *SFCEventTransformer {
