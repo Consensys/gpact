@@ -67,8 +67,8 @@ func (l *SFCCrossCallRealtimeEventWatcher) start(sub event.Subscription, chanEve
 		case err := <-sub.Err():
 			// TODO: communicate this to the calling context
 			logging.Error("error in log subscription %v", err)
-		case log := <-chanEvents:
-			l.Handler.Handle(log)
+		case ev := <-chanEvents:
+			l.Handler.Handle(ev)
 		case <-l.end:
 			logging.Info("Stop watching %v.", l.SfcContract)
 			return
@@ -121,6 +121,7 @@ func (l *SFCCrossCallFinalisedEventWatcher) Watch() {
 }
 
 func (l *SFCCrossCallFinalisedEventWatcher) processFinalisedEvents(latest *types.Header) error {
+	// TODO: maintain persistent state about last finalised block and observed messages
 	latestBlock := latest.Number.Uint64()
 	confirmations := (latestBlock - l.nextBlockToProcess) + 1
 
@@ -128,25 +129,30 @@ func (l *SFCCrossCallFinalisedEventWatcher) processFinalisedEvents(latest *types
 		confirmations, l.confirmationsForFinality)
 
 	if latestBlock >= l.nextBlockToProcess && confirmations >= l.confirmationsForFinality {
-		finalisedBlocks := confirmations - l.confirmationsForFinality
-		firstFinalised := l.nextBlockToProcess
-		lastFinalised := firstFinalised + finalisedBlocks
+		numFinalisedBlocks := confirmations - l.confirmationsForFinality
+		startFinalisedBlock := l.nextBlockToProcess
+		lastFinalisedBlock := startFinalisedBlock + numFinalisedBlocks
 
-		logging.Debug("Finalising blocks '%d' to '%d'", firstFinalised, lastFinalised)
+		logging.Debug("Finalising blocks '%d' to '%d'", startFinalisedBlock, lastFinalisedBlock)
 
-		filterOpts := &bind.FilterOpts{Start: firstFinalised, End: &lastFinalised, Context: l.Context}
-		events, err := l.SfcContract.FilterCrossCall(filterOpts)
+		filterOpts := &bind.FilterOpts{Start: startFinalisedBlock, End: &lastFinalisedBlock, Context: l.Context}
+		finalisedEvs, err := l.SfcContract.FilterCrossCall(filterOpts)
 		if err != nil {
-			logging.Error("error filtering logs from block: %d to %d, error: %v", firstFinalised, lastFinalised, err)
+			logging.Error("error filtering logs from block: %d to %d, error: %v", startFinalisedBlock, lastFinalisedBlock, err)
 			return err
 		}
 
-		err = l.handleEvents(events)
+		// TODO: Handle partial failure scenarios when handling events.
+		// Three cases to consider:
+		// 1. A range of blocks are being processed and some blocks fail
+		// 2. A block is being processed and some events in the block fail processing
+		// 3. Combination of 1 and 2
+		err = l.handleEvents(finalisedEvs)
 		if err != nil {
 			return err
 		}
 
-		l.nextBlockToProcess = lastFinalised + 1
+		l.nextBlockToProcess = lastFinalisedBlock + 1
 	}
 	return nil
 }
