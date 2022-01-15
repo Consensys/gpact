@@ -48,8 +48,7 @@ func TestSFCCrossCallRealtimeEventWatcher(t *testing.T) {
 
 	makeCrossContractCallTx(t, contract, auth)
 
-	commit(simBackend)
-	sleep()
+	commitAndSleep(simBackend)
 	handler.AssertExpectations(t)
 }
 
@@ -59,6 +58,7 @@ func TestSFCCrossCallFinalisedEventWatcher_FailsIfConfirmationTooLow(t *testing.
 	assert.NotNil(t, err)
 }
 
+// tests the watcher behaviour under different confirmation number settings
 func TestSFCCrossCallFinalisedEventWatcher(t *testing.T) {
 	cases := map[string]struct{ confirmations, start uint64 }{
 		"1 Confirmation":  {1, 2},
@@ -80,25 +80,22 @@ func TestSFCCrossCallFinalisedEventWatcher(t *testing.T) {
 
 		makeCrossContractCallTx(t, contract, auth)
 
-		// build blocks on top of the last cross-chain call
-		for i := uint64(0); i < v.confirmations-1; i++ {
-			commit(simBackend)
-			// panics if the event is incorrectly handled within this window
-		}
+		mineConfirmingBlocks(v.confirmations-1, simBackend)
+		handler.AssertNotCalled(t, "Handle", mock.AnythingOfType("*functioncall.SfcCrossCall"))
 
 		handler.On("Handle", mock.AnythingOfType("*functioncall.SfcCrossCall")).Once().Return(nil)
-		commit(simBackend)
-		sleep()
+		commitAndSleep(simBackend)
 		handler.AssertExpectations(t)
 	}
 }
 
+// tests scenarios where events in multiple blocks have been finalised but not yet been processed
 func TestSFCCrossCallFinalisedEventWatcher_MultipleBlocksFinalised(t *testing.T) {
 	cases := map[string]struct {
 		confirmations, start                uint64
 		ccEventsToCommit, expectedFinalised int
 	}{
-		"Multi-Block-Event-Finalisation-1-Confirmation":       {1, 0, 4, 4},
+		"Multi-Block-Event-Finalisation-with-1-Confirmation":  {1, 0, 4, 4},
 		"Multi-Block-Event-Finalisation-with-2-Confirmations": {2, 0, 4, 3},
 	}
 
@@ -121,9 +118,43 @@ func TestSFCCrossCallFinalisedEventWatcher_MultipleBlocksFinalised(t *testing.T)
 		go watcher.Watch()
 
 		handler.On("Handle", mock.AnythingOfType("*functioncall.SfcCrossCall")).Times(v.expectedFinalised).Return(nil)
-		commit(simBackend)
-		sleep()
+		commitAndSleep(simBackend)
 		handler.AssertExpectations(t)
+	}
+}
+
+/*
+Scenario: event is included in a block (b2') that is not part of the canonical chain.
+Given: number of confirmation = 2
+Expectation: the event is not processed at height b3
+	b1 <-- b2 <-- b3 <-- b4
+	  \_ b2'(ev)
+*/
+func TestSFCCrossCallFinalisedEventWatcher_Reorg(t *testing.T) {
+	simBackend, auth := simulatedBackend(t)
+	handler := new(MockEventHandler)
+	contract := deployContract(t, simBackend, auth)
+
+	watcher, e := NewSFCCrossCallFinalisedEventWatcher(auth.Context, 2, handler, contract, 1, simBackend, make(chan bool))
+	assert.Nil(t, e)
+	go watcher.Watch()
+
+	makeCrossContractCallTx(t, contract, auth)
+	b1 := simBackend.Blockchain().CurrentBlock().Hash()
+	commit(simBackend)
+	err := simBackend.Fork(auth.Context, b1)
+	assert.Nil(t, err, "could not simulate forking blockchain")
+
+	mineConfirmingBlocks(2, simBackend)
+	time.Sleep(2 * time.Second)
+
+	// handler would panic if it had been called, so this line is a redundant check for clarity
+	handler.AssertNotCalled(t, "Handle", mock.AnythingOfType("*functioncall.SfcCrossCall"))
+}
+
+func mineConfirmingBlocks(confirms uint64, simBackend *backends.SimulatedBackend) {
+	for i := uint64(0); i < confirms; i++ {
+		commit(simBackend)
 	}
 }
 
@@ -138,6 +169,7 @@ func commit(backend *backends.SimulatedBackend) {
 	backend.Commit()
 }
 
-func sleep() {
+func commitAndSleep(backend *backends.SimulatedBackend) {
+	backend.Commit()
 	time.Sleep(2 * time.Second)
 }

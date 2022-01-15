@@ -38,14 +38,16 @@ type EventWatcherConfig struct {
 	Handler EventHandler
 }
 
-// SFCCrossCallRealtimeEventWatcher subscribes and listens to events from a simple-function-call bridge contract
+// SFCCrossCallRealtimeEventWatcher subscribes and listens to events from a Simple Function Call bridge contract.
+// The events produced by this watcher are generated the instant they are mined (i.e. 1 confirmation).
+// Note: The watcher does not check to see if the event is affected by any reorgs.
 type SFCCrossCallRealtimeEventWatcher struct {
 	EventWatcherConfig
 	SfcContract *functioncall.Sfc
 	end         chan bool
 }
 
-// Watch subscribes and starts listening to 'CrossCall' events from a given simple-function-call contract.
+// Watch subscribes and starts listening to 'CrossCall' events from a given Simple Function Call contract.
 // Events received are passed to an event handler for processing.
 // The method fails if subscribing to the event with the underlying network is not successful.
 func (l *SFCCrossCallRealtimeEventWatcher) Watch() {
@@ -82,9 +84,13 @@ type BlockHeadProducer interface {
 	SubscribeNewHead(ctx context.Context, ch chan<- *types.Header) (ethereum.Subscription, error)
 }
 
+// SFCCrossCallFinalisedEventWatcher listens for events from a Simple Function Call bridge and returns processes these events only once they are
+// finalised. An event is considered finalised once it receives a configurable number of block confirmations.
+// One block confirmation means the instant the transaction generating the event is mined,
+// and is equivalent in behaviour to the SFCCrossCallRealtimeEventWatcher
 type SFCCrossCallFinalisedEventWatcher struct {
 	EventWatcherConfig
-	// confirmationsForFinality refers to the number of block confirmations required before an event is considered finalised
+	// confirmationsForFinality refers to the number of block confirmations required before an event is considered finalised.
 	confirmationsForFinality uint64
 	SfcContract              *functioncall.Sfc
 	nextBlockToProcess       uint64
@@ -92,6 +98,8 @@ type SFCCrossCallFinalisedEventWatcher struct {
 	end                      chan bool
 }
 
+// Watch subscribes and starts listening to 'CrossCall' events from a given Simple Function Call contract.
+// Once an events receives sufficient block confirmations, it is passed to an event handler for processing.
 func (l *SFCCrossCallFinalisedEventWatcher) Watch() {
 	l.nextBlockToProcess = l.Start
 	headers := make(chan *types.Header)
@@ -100,57 +108,64 @@ func (l *SFCCrossCallFinalisedEventWatcher) Watch() {
 	if err != nil {
 		log.Fatalf("failed to subscribe to new block headers %v", err)
 	}
-	// TODO: better handling and retries
 	for {
 		select {
 		case err := <-sub.Err():
 			// TODO: communicate this to the calling context
 			logging.Error("error in log subscription %v", err)
 		case latestHead := <-headers:
+			// TODO: communicate err to the calling context
 			l.processFinalisedEvents(latestHead)
 		}
 	}
 }
 
-func (l *SFCCrossCallFinalisedEventWatcher) processFinalisedEvents(latest *types.Header) {
+func (l *SFCCrossCallFinalisedEventWatcher) processFinalisedEvents(latest *types.Header) error {
 	latestBlock := latest.Number.Uint64()
-
-	if latestBlock < l.nextBlockToProcess {
-		return
-	}
-
 	confirmations := (latestBlock - l.nextBlockToProcess) + 1
-	logging.Debug("Latest: '%d', Next to Process: '%d', Confirmations: '%d', Required Confirmations: %d", latestBlock, l.nextBlockToProcess,
+
+	logging.Debug("latest: '%d', next to process: '%d', confirmations: '%d', required confirmations: %d", latestBlock, l.nextBlockToProcess,
 		confirmations, l.confirmationsForFinality)
 
 	if latestBlock >= l.nextBlockToProcess && confirmations >= l.confirmationsForFinality {
-		numFinalisedBlocks := confirmations - l.confirmationsForFinality
-		blockFrom := l.nextBlockToProcess
-		blockTo := blockFrom + numFinalisedBlocks
-		logging.Debug("Finalising blocks '%d' to '%d'", blockFrom, blockTo)
+		finalisedBlocks := confirmations - l.confirmationsForFinality
+		firstFinalised := l.nextBlockToProcess
+		lastFinalised := firstFinalised + finalisedBlocks
 
-		opts := bind.FilterOpts{Start: blockFrom, End: &blockTo, Context: l.Context}
-		eventsIter, err := l.SfcContract.FilterCrossCall(&opts)
+		logging.Debug("Finalising blocks '%d' to '%d'", firstFinalised, lastFinalised)
+
+		eventsIter, err := l.SfcContract.FilterCrossCall(&bind.FilterOpts{Start: firstFinalised, End: &lastFinalised, Context: l.Context})
 		if err != nil {
-			//TODO: better error handling and retries
-			logging.Error("error filtering logs from block: %d to %d, error: %v", blockFrom, blockTo, err)
-			return
+			logging.Error("error filtering logs from block: %d to %d, error: %v", firstFinalised, lastFinalised, err)
+			return err
 		}
 
-		for eventsIter.Next() {
-			ev := eventsIter.Event
-			err := l.Handler.Handle(ev)
-			if err != nil {
-				//TODO: better error handling
-				logging.Error("failed to handle event: %v, error: %v", ev, err)
-			}
+		err = l.handleEvents(eventsIter)
+		if err != nil {
+			return err
 		}
-		l.nextBlockToProcess = blockTo + 1
+
+		l.nextBlockToProcess = lastFinalised + 1
 	}
+	return nil
 }
+
+func (l *SFCCrossCallFinalisedEventWatcher) handleEvents(events *functioncall.SfcCrossCallIterator) error {
+	for events.Next() {
+		ev := events.Event
+		err := l.Handler.Handle(ev)
+		if err != nil {
+			logging.Error("failed to handle event: %v, error: %v", ev, err)
+			return err
+		}
+	}
+	return nil
+}
+
+// NewSFCCrossCallFinalisedEventWatcher creates an SFCCrossCall event watcher that only returns events once they receive a configured number of
+// confirmations. Note: 1 block confirmation means the instant the transaction generating the event is mined
 func NewSFCCrossCallFinalisedEventWatcher(context context.Context, blockConfirmations uint64, handler EventHandler, contract *functioncall.Sfc,
 	start uint64, client BlockHeadProducer, end chan bool) (*SFCCrossCallFinalisedEventWatcher, error) {
-
 	if blockConfirmations < 1 {
 		return nil, fmt.Errorf("block confirmationsForFinality cannot be less than 1. supplied value: %d", blockConfirmations)
 	}
