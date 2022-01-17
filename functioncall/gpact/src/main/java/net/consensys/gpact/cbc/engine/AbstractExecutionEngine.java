@@ -43,7 +43,8 @@ public abstract class AbstractExecutionEngine implements ExecutionEngine {
     this.executor.init(
         callGraph.encode(), timeoutBig, crossBlockchainTransactionId, rootBlockchainId);
     this.executor.startCall();
-    callSegmentsAndRoot(callGraph, new ArrayList<>(), rootBlockchainId);
+    callSegmentsAndRoot(
+        callGraph, new ArrayList<>(), rootBlockchainId, callGraph.getNumCalledFunctions());
 
     this.executor.doSignallingCalls();
 
@@ -51,7 +52,10 @@ public abstract class AbstractExecutionEngine implements ExecutionEngine {
   }
 
   protected void callSegmentsAndRoot(
-      CallExecutionTree callGraph, List<BigInteger> callPath, BlockchainId callerBlockchainId)
+      CallExecutionTree callGraph,
+      List<BigInteger> callPath,
+      BlockchainId callerBlockchainId,
+      final int numCallsFromParent)
       throws Exception {
     BlockchainId thisCallsBcId = callGraph.getBlockchainId();
     if (!callGraph.isLeaf()) {
@@ -63,10 +67,10 @@ public abstract class AbstractExecutionEngine implements ExecutionEngine {
       } else {
         List<BigInteger> nextCallPath = new ArrayList<>(callPath);
         nextCallPath.add(BigInteger.ZERO);
-        this.executor.segment(thisCallsBcId, callerBlockchainId, nextCallPath);
+        this.executor.segment(thisCallsBcId, callerBlockchainId, nextCallPath, numCallsFromParent);
       }
     } else {
-      this.executor.segment(thisCallsBcId, callerBlockchainId, callPath);
+      this.executor.segment(thisCallsBcId, callerBlockchainId, callPath, numCallsFromParent);
     }
   }
 

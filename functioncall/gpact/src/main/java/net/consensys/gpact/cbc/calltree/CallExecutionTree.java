@@ -61,6 +61,10 @@ public class CallExecutionTree {
     return calledFunctions;
   }
 
+  public int getNumCalledFunctions() {
+    return this.calledFunctions.size();
+  }
+
   public boolean isLeaf() {
     return this.calledFunctions == null || this.calledFunctions.isEmpty();
   }

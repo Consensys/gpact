@@ -35,7 +35,7 @@ public class SerialExecutionEngine extends AbstractExecutionEngine {
     for (CallExecutionTree segCall : calls) {
       List<BigInteger> nextCallPath = new ArrayList<>(callPath);
       nextCallPath.add(callOffset);
-      callSegmentsAndRoot(segCall, nextCallPath, theCallerBlockchainId);
+      callSegmentsAndRoot(segCall, nextCallPath, theCallerBlockchainId, calls.size());
       callOffset = callOffset.add(BigInteger.ONE);
     }
   }

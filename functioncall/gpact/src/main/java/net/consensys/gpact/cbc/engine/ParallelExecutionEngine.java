@@ -39,7 +39,7 @@ public class ParallelExecutionEngine extends AbstractExecutionEngine {
   protected void executeCalls(
       List<CallExecutionTree> calls, List<BigInteger> callPath, BlockchainId theCallerBlockchainId)
       throws Exception {
-    int numCalls = calls.size();
+    final int numCalls = calls.size();
     Executor executor = Executors.newFixedThreadPool(numCalls);
     CompletionService<String> completionService = new ExecutorCompletionService<String>(executor);
     BigInteger callOffset = BigInteger.ONE;
@@ -49,7 +49,7 @@ public class ParallelExecutionEngine extends AbstractExecutionEngine {
       completionService.submit(
           new Callable<String>() {
             public String call() throws Exception {
-              callSegmentsAndRoot(segCall, nextCallPath, theCallerBlockchainId);
+              callSegmentsAndRoot(segCall, nextCallPath, theCallerBlockchainId, numCalls);
               return "Not used";
             }
           });
@@ -60,7 +60,7 @@ public class ParallelExecutionEngine extends AbstractExecutionEngine {
       Future<String> resultFuture = completionService.take(); // blocks if none available
       try {
         String result = resultFuture.get();
-        LOG.info("Finished {} of {} parallel calls", received + 1, numCalls - 1);
+        LOG.info("Finished {} of {} parallel calls", received + 1, numCalls);
         received++;
       } catch (Exception e) {
         LOG.error("Error for call: {}: {}", received, e.getMessage());
