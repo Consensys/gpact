@@ -84,7 +84,7 @@ type BlockHeadProducer interface {
 	SubscribeNewHead(ctx context.Context, ch chan<- *types.Header) (ethereum.Subscription, error)
 }
 
-// SFCCrossCallFinalisedEventWatcher listens for events from a Simple Function Call bridge and returns processes these events only once they are
+// SFCCrossCallFinalisedEventWatcher listens for events from a Simple Function Call bridge and processes these events only once they are
 // finalised. An event is considered finalised once it receives a configurable number of block confirmations.
 // One block confirmation means the instant the transaction generating the event is mined,
 // and is equivalent in behaviour to the SFCCrossCallRealtimeEventWatcher
