@@ -16,136 +16,65 @@ package main
  */
 
 import (
-	"crypto/ecdsa"
-	"encoding/hex"
-	"encoding/json"
-	"math/big"
-	"strconv"
-	"time"
+	"os"
+	"os/signal"
 
-	"github.com/consensys/gpact/messaging/relayer/internal/adminserver"
 	"github.com/consensys/gpact/messaging/relayer/internal/config"
-	"github.com/consensys/gpact/messaging/relayer/internal/crypto"
 	"github.com/consensys/gpact/messaging/relayer/internal/logging"
-	"github.com/consensys/gpact/messaging/relayer/internal/messages"
-	v1 "github.com/consensys/gpact/messaging/relayer/internal/messages/v1"
 	"github.com/consensys/gpact/messaging/relayer/internal/mqserver"
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/crypto/secp256k1"
+	"github.com/consensys/gpact/messaging/relayer/internal/msgrelayer/eth/api"
+	"github.com/consensys/gpact/messaging/relayer/internal/msgrelayer/eth/mq"
+	"github.com/consensys/gpact/messaging/relayer/internal/msgrelayer/eth/node"
+	"github.com/consensys/gpact/messaging/relayer/internal/msgrelayer/eth/signer"
+	"github.com/consensys/gpact/messaging/relayer/internal/rpc"
 	_ "github.com/joho/godotenv/autoload"
 )
 
-// TODO, Need a separate package to put all core components.
-var s *mqserver.MQServer
-var api adminserver.AdminServer
-var key []byte
-var addr []byte
-
+// main entrypoint of relayer.
 func main() {
 	// Load config
 	conf := config.NewConfig()
+	node := node.GetSingleInstance()
 
-	// Create handlers.
-	handlers := make(map[string]map[string]func(msg messages.Message))
-	handlers[v1.Version] = make(map[string]func(msg messages.Message))
-	handlers[v1.Version][v1.MessageType] = simpleHandler
-
-	// Start the server
+	// Start the MQ server
 	var err error
-	s, err = mqserver.NewMQServer(
+	mq, err := mqserver.NewMQServer(
 		conf.InboundMQAddr,
 		conf.InboundChName,
 		conf.OutboundMQAddr,
 		conf.OutboundChName,
-		handlers,
+		mq.Handlers,
 	)
 	if err != nil {
 		panic(err)
 	}
-	err = s.Start()
+	err = mq.Start()
 	if err != nil {
 		panic(err)
 	}
+	node.MQ = mq
+	defer mq.Stop()
+	// Start the Signer
+	signer := signer.NewSignerImplV1(conf.SignerDSPath)
+	err = signer.Start()
+	if err != nil {
+		panic(err)
+	}
+	node.Signer = signer
+	defer signer.Stop()
+	// Start the RPC Server
+	rpc := rpc.NewServerImplV1(conf.APIPort).
+		AddHandler(api.SetKeyReqType, api.HandleSetKey).
+		AddHandler(api.GetAddrReqType, api.HandleGetAddr)
+	err = rpc.Start()
+	if err != nil {
+		panic(err)
+	}
+	node.RPC = rpc
+	defer rpc.Stop()
 	logging.Info("Relayer started.")
 
-	// Generate a random key
-	key, err = crypto.Secp256k1GenerateKey()
-	if err != nil {
-		panic(err)
-	}
-
-	// For now just have one single handler for setting up relayer key with type 1.
-	apiHandlers := make(map[byte]func(req []byte) ([]byte, error))
-	apiHandlers[1] = func(req []byte) ([]byte, error) {
-		key = req
-		x, y := secp256k1.S256().ScalarBaseMult(key)
-		prv := &ecdsa.PrivateKey{}
-		prv.D = big.NewInt(0).SetBytes(key)
-		prv.PublicKey = ecdsa.PublicKey{
-			X:     x,
-			Y:     y,
-			Curve: secp256k1.S256(),
-		}
-		auth := bind.NewKeyedTransactor(prv)
-		addr = auth.From.Bytes()
-		return []byte{0}, nil
-	}
-	api = adminserver.NewAdminServerImpl(conf.APIPort, apiHandlers)
-	err = api.Start()
-	if err != nil {
-		panic(err)
-	}
-
-	for {
-	}
-}
-
-// simpleHandler only does a message forward with some slightly message change.
-func simpleHandler(req messages.Message) {
-	// Received request from observer
-	msg := req.(*v1.Message)
-	logging.Info("Process message with ID: %v", msg.ID)
-
-	// TODO, For now, just one single relayer. Sign & Send to dispatcher.
-	data, err := hex.DecodeString(msg.Payload)
-	if err != nil {
-		logging.Error(err.Error())
-		return
-	}
-	raw := types.Log{}
-	err = json.Unmarshal(data, &raw)
-	if err != nil {
-		logging.Error(err.Error())
-		return
-	}
-	srcID, err := strconv.Atoi(msg.Source.NetworkID)
-	if err != nil {
-		logging.Error(err.Error())
-		return
-	}
-	sfcAddr := common.HexToAddress(msg.Source.ContractAddress)
-
-	toSign := make([]byte, 32)
-	toSign[31] = byte(srcID)
-	toSign = append(toSign, sfcAddr.Bytes()...)
-	toSign = append(toSign, []byte{89, 247, 54, 220, 94, 21, 196, 177, 37, 38, 72, 117, 2, 100, 84, 3, 176, 164, 49, 109, 130, 235, 167, 233, 236, 220, 42, 5, 12, 16, 173, 39}...)
-	toSign = append(toSign, raw.Data...)
-
-	signature, err := crypto.Secp256k1Sign(key, toSign)
-	if err != nil {
-		panic(err)
-	}
-	signature[len(signature)-1] += 27
-	signature = append([]byte{0, 0, 0, 1}, append(addr, signature...)...)
-
-	// Add proof
-	msg.Proofs = append(msg.Proofs, v1.Proof{
-		ProofType: "secp256k1",
-		Created:   time.Now().UnixMilli(), // Milli seconds?
-		Proof:     hex.EncodeToString(signature),
-	})
-
-	s.Request(msg.Version, msg.MsgType, msg)
+	c := make(chan os.Signal)
+	signal.Notify(c, os.Interrupt)
+	<-c
 }

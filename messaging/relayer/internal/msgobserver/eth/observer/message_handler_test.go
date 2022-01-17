@@ -1,4 +1,4 @@
-package eth
+package observer
 
 /*
  * Copyright 2021 ConsenSys Software Inc.
