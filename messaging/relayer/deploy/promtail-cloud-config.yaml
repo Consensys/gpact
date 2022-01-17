@@ -1,0 +1,15 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+scrape_configs:
+- job_name: relayer
+  static_configs:
+  - targets:
+      - localhost
+    labels:
+      job: relayerlogs
+      __path__: /home/ubuntu/all.log
