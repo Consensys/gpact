@@ -67,27 +67,29 @@ func (o *ObserverImplV1) Start() error {
 		if err != nil {
 			return err
 		}
+		defer func() {
+			if err != nil {
+				o.ds.Close()
+			}
+		}()
 		exists, err := o.ds.Has(context.Background(), datastore.NewKey(activeKey))
 		if err != nil {
-			o.ds.Close()
 			return err
 		}
 		if exists {
 			data, err := o.ds.Get(context.Background(), datastore.NewKey(activeKey))
 			if err != nil {
-				o.ds.Close()
 				return err
 			}
 			val := observation{}
 			err = json.Unmarshal(data, &val)
 			if err != nil {
-				o.ds.Close()
 				return err
 			}
 			chainID, ok := big.NewInt(0).SetString(val.ChainID, 10)
 			if !ok {
-				o.ds.Close()
-				return fmt.Errorf("error in setting chain id")
+				err = fmt.Errorf("error in setting chain id")
+				return err
 			}
 			o.stop = make(chan bool)
 			go o.routine(chainID, val.AP, common.HexToAddress(val.ContractAddr), o.stop)
