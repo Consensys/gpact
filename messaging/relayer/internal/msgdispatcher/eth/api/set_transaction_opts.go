@@ -41,7 +41,7 @@ type SetTransactionOptsResp struct {
 // HandleSetTransactionOpts handles set transaction opts request.
 func HandleSetTransactionOpts(data []byte) ([]byte, error) {
 	// Get node
-	node := node.GetSingleInstance()
+	instance := node.GetSingleInstance()
 
 	req := &SetTransactionOptsReq{}
 	err := json.Unmarshal(data, req)
@@ -58,7 +58,7 @@ func HandleSetTransactionOpts(data []byte) ([]byte, error) {
 		return nil, err
 	}
 	conn.Close()
-	err = node.Transactor.SetTransactionOpts(chainID, req.ChainAP, req.Key)
+	err = instance.Transactor.SetTransactionOpts(chainID, req.ChainAP, req.Key)
 	if err != nil {
 		return nil, err
 	}

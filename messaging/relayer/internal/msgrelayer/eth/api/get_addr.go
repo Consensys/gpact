@@ -40,7 +40,7 @@ type GetAddrResp struct {
 // HandleGetAddr handles get addr request.
 func HandleGetAddr(data []byte) ([]byte, error) {
 	// Get node
-	node := node.GetSingleInstance()
+	instance := node.GetSingleInstance()
 
 	req := &GetAddrReq{}
 	err := json.Unmarshal(data, req)
@@ -51,7 +51,7 @@ func HandleGetAddr(data []byte) ([]byte, error) {
 	if !ok {
 		return nil, fmt.Errorf("fail to decode chain id")
 	}
-	keyType, addr, err := node.Signer.GetAddr(chainID, common.HexToAddress(req.ContractAddr))
+	keyType, addr, err := instance.Signer.GetAddr(chainID, common.HexToAddress(req.ContractAddr))
 	if err != nil {
 		return nil, err
 	}

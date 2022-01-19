@@ -40,7 +40,7 @@ type SetVerifierAddrResp struct {
 // HandleSetVerifierAddr handles set verifier addr.
 func HandleSetVerifierAddr(data []byte) ([]byte, error) {
 	// Get node
-	node := node.GetSingleInstance()
+	instance := node.GetSingleInstance()
 
 	req := &SetVerifierAddrReq{}
 	err := json.Unmarshal(data, req)
@@ -51,7 +51,7 @@ func HandleSetVerifierAddr(data []byte) ([]byte, error) {
 	if !ok {
 		return nil, fmt.Errorf("fail to decode chain id")
 	}
-	err = node.Verifier.SetVerifierAddr(chainID, common.HexToAddress(req.ContractAddr), common.HexToAddress(req.EsAddr))
+	err = instance.Verifier.SetVerifierAddr(chainID, common.HexToAddress(req.ContractAddr), common.HexToAddress(req.EsAddr))
 	if err != nil {
 		return nil, err
 	}

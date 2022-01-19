@@ -41,7 +41,7 @@ type SetKeyResp struct {
 // HandleSetKey handles set key request.
 func HandleSetKey(data []byte) ([]byte, error) {
 	// Get node
-	node := node.GetSingleInstance()
+	instance := node.GetSingleInstance()
 
 	req := &SetKeyReq{}
 	err := json.Unmarshal(data, req)
@@ -52,7 +52,7 @@ func HandleSetKey(data []byte) ([]byte, error) {
 	if !ok {
 		return nil, fmt.Errorf("fail to decode chain id")
 	}
-	err = node.Signer.SetKey(chainID, common.HexToAddress(req.ContractAddr), req.KeyType, req.Key)
+	err = instance.Signer.SetKey(chainID, common.HexToAddress(req.ContractAddr), req.KeyType, req.Key)
 	if err != nil {
 		return nil, err
 	}

@@ -36,7 +36,7 @@ import (
 func main() {
 	// Load config
 	conf := config.NewConfig()
-	node := node.GetSingleInstance()
+	instance := node.GetSingleInstance()
 
 	// Start the server
 	var err error
@@ -54,7 +54,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	node.MQ = mq
+	instance.MQ = mq
 	defer mq.Stop()
 	// Start the Transactor
 	transactor := transactor.NewTransactorImplV1(conf.TransactorDSPath)
@@ -62,7 +62,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	node.Transactor = transactor
+	instance.Transactor = transactor
 	defer transactor.Stop()
 	// Start the Verifier
 	verifier := verifier.NewVerifierImplV1(conf.VerifierDSPath)
@@ -70,7 +70,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	node.Verifier = verifier
+	instance.Verifier = verifier
 	defer verifier.Stop()
 	// Start the Dispatcher.
 	dispatcher := dispatcher.NewDispatcherImplV1()
@@ -78,7 +78,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	node.Dispatcher = dispatcher
+	instance.Dispatcher = dispatcher
 	defer dispatcher.Stop()
 	// Start the RPC Server
 	rpc := rpc.NewServerImplV1(conf.APIPort).
@@ -91,7 +91,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	node.RPC = rpc
+	instance.RPC = rpc
 	defer rpc.Stop()
 	logging.Info("Dispatcher started.")
 

@@ -40,7 +40,7 @@ type StartObserveResp struct {
 // HandleStartObserve handles start observe request.
 func HandleStartObserve(data []byte) ([]byte, error) {
 	// Get node
-	node := node.GetSingleInstance()
+	instance := node.GetSingleInstance()
 
 	req := &StartObserveReq{}
 	err := json.Unmarshal(data, req)
@@ -52,7 +52,7 @@ func HandleStartObserve(data []byte) ([]byte, error) {
 		return nil, fmt.Errorf("fail to decode chain id")
 	}
 
-	err = node.Observer.StartObserve(chainID, req.ChainAP, common.HexToAddress(req.ContractAddr))
+	err = instance.Observer.StartObserve(chainID, req.ChainAP, common.HexToAddress(req.ContractAddr))
 	if err != nil {
 		return nil, err
 	}

@@ -37,7 +37,7 @@ type GetChainAPResp struct {
 // HandleGetChainAP handles get chain ap request.
 func HandleGetChainAP(data []byte) ([]byte, error) {
 	// Get node
-	node := node.GetSingleInstance()
+	instance := node.GetSingleInstance()
 
 	req := &GetChainAPReq{}
 	err := json.Unmarshal(data, req)
@@ -48,7 +48,7 @@ func HandleGetChainAP(data []byte) ([]byte, error) {
 	if !ok {
 		return nil, fmt.Errorf("fail to decode chain id")
 	}
-	chainAP, err := node.Transactor.GetChainAP(chainID)
+	chainAP, err := instance.Transactor.GetChainAP(chainID)
 	if err != nil {
 		return nil, err
 	}

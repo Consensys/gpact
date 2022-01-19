@@ -33,7 +33,7 @@ import (
 
 // handleV1 handles message v1 with type v1.
 func handleV1(req messages.Message) {
-	node := node.GetSingleInstance()
+	instance := node.GetSingleInstance()
 
 	msg, ok := req.(*v1.Message)
 	if !ok {
@@ -73,12 +73,12 @@ func handleV1(req messages.Message) {
 	toSign = append(toSign, raw.Data...)
 	logging.Info("Generated data to be signed: %v", hex.EncodeToString(toSign))
 
-	_, addr, err := node.Signer.GetAddr(big.NewInt(int64(destID)), destAddr)
+	_, addr, err := instance.Signer.GetAddr(big.NewInt(int64(destID)), destAddr)
 	if err != nil {
 		logging.Error(err.Error())
 		return
 	}
-	sigType, signature, err := node.Signer.Sign(big.NewInt(int64(destID)), destAddr, toSign)
+	sigType, signature, err := instance.Signer.Sign(big.NewInt(int64(destID)), destAddr, toSign)
 	if err != nil {
 		logging.Error(err.Error())
 		return
@@ -97,7 +97,7 @@ func handleV1(req messages.Message) {
 	})
 
 	// Pass message to MQ.
-	node.MQ.Request(msg.Version, msg.MsgType, msg)
+	instance.MQ.Request(msg.Version, msg.MsgType, msg)
 }
 
 // initV1 inits the handler.

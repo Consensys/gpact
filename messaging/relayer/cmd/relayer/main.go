@@ -34,7 +34,7 @@ import (
 func main() {
 	// Load config
 	conf := config.NewConfig()
-	node := node.GetSingleInstance()
+	instance := node.GetSingleInstance()
 
 	// Start the MQ server
 	var err error
@@ -52,7 +52,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	node.MQ = mq
+	instance.MQ = mq
 	defer mq.Stop()
 	// Start the Signer
 	signer := signer.NewSignerImplV1(conf.SignerDSPath)
@@ -60,7 +60,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	node.Signer = signer
+	instance.Signer = signer
 	defer signer.Stop()
 	// Start the RPC Server
 	rpc := rpc.NewServerImplV1(conf.APIPort).
@@ -70,7 +70,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	node.RPC = rpc
+	instance.RPC = rpc
 	defer rpc.Stop()
 	logging.Info("Relayer started.")
 

@@ -33,7 +33,7 @@ import (
 func main() {
 	// Load config
 	conf := config.NewConfig()
-	node := node.GetSingleInstance()
+	instance := node.GetSingleInstance()
 
 	// Start the server
 	var err error
@@ -51,7 +51,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	node.MQ = mq
+	instance.MQ = mq
 	defer mq.Stop()
 	// Start the observer
 	observer := observer.NewObserverImplV1(conf.ObserverDSPath, mq)
@@ -59,7 +59,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	node.Observer = observer
+	instance.Observer = observer
 	defer observer.Stop()
 	// Start the RPC Server
 	rpc := rpc.NewServerImplV1(conf.APIPort).
@@ -69,7 +69,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	node.RPC = rpc
+	instance.RPC = rpc
 	defer rpc.Stop()
 	logging.Info("Observer started.")
 

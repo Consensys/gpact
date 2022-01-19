@@ -34,9 +34,9 @@ type StopObserveResp struct {
 // HandleStopObserve handles the request to stop observe.
 func HandleStopObserve(data []byte) ([]byte, error) {
 	// Get node
-	node := node.GetSingleInstance()
+	instance := node.GetSingleInstance()
 
-	err := node.Observer.StopObserve()
+	err := instance.Observer.StopObserve()
 	if err != nil {
 		return nil, err
 	}
