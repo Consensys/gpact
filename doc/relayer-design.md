@@ -39,6 +39,7 @@ The platform adapters are Blockchain protocol specific components that interact 
 #### Message Observer
 The Message Observer subscribes to state-change events on a designated Blockchain, annotates these events with additional metadata, wraps them onto a common message data model and places them onto a queue for processing by the Relayer core. An observer could be configured to listen to all state-change events or employ filtering based on the requirements of a use-case. The default implementations of Message Observer enable listening to all events (*Block Event Observer*) or filter based on simple criteria (*Filtered Event Observer*), however,  the Message Observer, interface can be extended to listen to other types of state-change events (see Figure 3 below for examples).
 
+More information about a message observer can be found [here](./message-observer.md)
 <p align="center">
 <img src="images/protocol-adapter-observer.png" width="700"/>
 </p>
