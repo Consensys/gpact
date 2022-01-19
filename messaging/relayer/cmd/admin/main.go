@@ -69,15 +69,10 @@ func main() {
 					{
 						Name:      "stop",
 						Usage:     "Stop observing contract",
-						ArgsUsage: "[url chainID contractAddr]",
+						ArgsUsage: "[url]",
 						Action: func(c *cli.Context) error {
 							url := c.Args().Get(0)
-							chainID, err := strconv.ParseUint(c.Args().Get(1), 10, 64)
-							if err != nil {
-								return fmt.Errorf("error parsing chain id: %v", err.Error())
-							}
-							contractAddr := c.Args().Get(2)
-							success, err := observerapi.RequestStopObserve(url, big.NewInt(int64(chainID)), common.HexToAddress(contractAddr))
+							success, err := observerapi.RequestStopObserve(url)
 							if err != nil {
 								return err
 							}
@@ -85,25 +80,6 @@ func main() {
 								fmt.Println("Success.")
 							} else {
 								fmt.Println("Failed.")
-							}
-							return nil
-						},
-					},
-					{
-						Name:      "list",
-						Usage:     "List observing contracts",
-						ArgsUsage: "[url]",
-						Action: func(c *cli.Context) error {
-							url := c.Args().Get(0)
-							res, err := observerapi.RequestListObserves(url)
-							if err != nil {
-								return err
-							}
-							for chain, addrs := range res {
-								fmt.Printf("Chain %v:\n", chain)
-								for _, addr := range addrs {
-									fmt.Printf("\t%v\n", addr.String())
-								}
 							}
 							return nil
 						},

@@ -31,7 +31,7 @@ import (
 
 // handleV1 handles message v1 with type v1.
 func handleV1(req messages.Message) {
-	node := node.GetSingleInstance()
+	instance := node.GetSingleInstance()
 
 	msg, ok := req.(*v1.Message)
 	if !ok {
@@ -76,17 +76,17 @@ func handleV1(req messages.Message) {
 		return
 	}
 
-	link, err := node.Transactor.GetChainAP(big.NewInt(int64(destID)))
+	link, err := instance.Transactor.GetChainAP(big.NewInt(int64(destID)))
 	if err != nil {
 		logging.Error(err.Error())
 		return
 	}
-	auth, err := node.Transactor.GetAuth(big.NewInt(int64(destID)))
+	auth, err := instance.Transactor.GetAuth(big.NewInt(int64(destID)))
 	if err != nil {
 		logging.Error(err.Error())
 		return
 	}
-	esAddr, err := node.Verifier.GetVerifierAddr(big.NewInt(int64(destID)), destAddr)
+	esAddr, err := instance.Verifier.GetVerifierAddr(big.NewInt(int64(destID)), destAddr)
 	if err != nil {
 		logging.Error(err.Error())
 		return
@@ -94,7 +94,7 @@ func handleV1(req messages.Message) {
 	logging.Info("Obtain event store address: %v", esAddr.String())
 
 	logging.Info("Adding message %v to queue for process...", msg.ID)
-	node.Dispatcher.AddToQueue(link, auth, msg.ID, big.NewInt(int64(destID)), esAddr, big.NewInt(int64(srcID)), srcAddr, raw.Data, signature)
+	instance.Dispatcher.AddToQueue(link, auth, msg.ID, big.NewInt(int64(destID)), esAddr, big.NewInt(int64(srcID)), srcAddr, raw.Data, signature)
 	logging.Info("Message %v is added to queue.", msg.ID)
 }
 

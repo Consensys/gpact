@@ -38,7 +38,7 @@ type GetAuthAddrResp struct {
 // HandleGetAuthAddr handles get auth addr.
 func HandleGetAuthAddr(data []byte) ([]byte, error) {
 	// Get node
-	node := node.GetSingleInstance()
+	instance := node.GetSingleInstance()
 
 	req := &GetAuthAddrReq{}
 	err := json.Unmarshal(data, req)
@@ -49,7 +49,7 @@ func HandleGetAuthAddr(data []byte) ([]byte, error) {
 	if !ok {
 		return nil, fmt.Errorf("fail to decode chain id")
 	}
-	auth, err := node.Transactor.GetAuth(chainID)
+	auth, err := instance.Transactor.GetAuth(chainID)
 	if err != nil {
 		return nil, err
 	}

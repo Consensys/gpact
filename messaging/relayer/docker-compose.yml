@@ -57,13 +57,27 @@ services:
       - bc31node1
       - bc32node1
 
-  observer:
+  observer1:
     image: consensys/gpact/messaging/relayer
-    container_name: observer
+    container_name: observer1
     networks:
       - shared
     ports:
       - 9525:9425
+    env_file:
+      - ./env/.env.observer.example
+    command: /app/build/observer
+    depends_on:
+      - rabbitmq
+    restart: on-failure
+
+  observer2:
+    image: consensys/gpact/messaging/relayer
+    container_name: observer2
+    networks:
+      - shared
+    ports:
+      - 9526:9425
     env_file:
       - ./env/.env.observer.example
     command: /app/build/observer

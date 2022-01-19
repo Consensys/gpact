@@ -39,7 +39,7 @@ type GetVerifierAddrResp struct {
 // HandleGetVerifierAddr handles get verifier addr.
 func HandleGetVerifierAddr(data []byte) ([]byte, error) {
 	// Get node
-	node := node.GetSingleInstance()
+	instance := node.GetSingleInstance()
 
 	req := &GetVerifierAddrReq{}
 	err := json.Unmarshal(data, req)
@@ -50,7 +50,7 @@ func HandleGetVerifierAddr(data []byte) ([]byte, error) {
 	if !ok {
 		return nil, fmt.Errorf("fail to decode chain id")
 	}
-	esAddr, err := node.Verifier.GetVerifierAddr(chainID, common.HexToAddress(req.ContractAddr))
+	esAddr, err := instance.Verifier.GetVerifierAddr(chainID, common.HexToAddress(req.ContractAddr))
 	if err != nil {
 		return nil, err
 	}

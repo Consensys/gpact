@@ -17,18 +17,13 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
-	"math/big"
 
 	"github.com/consensys/gpact/messaging/relayer/internal/msgobserver/eth/node"
 	"github.com/consensys/gpact/messaging/relayer/internal/rpc"
-	"github.com/ethereum/go-ethereum/common"
 )
 
 // StopObserveReq is the request to stop observe.
 type StopObserveReq struct {
-	ChainID      string `json:"chain_id"`
-	ContractAddr string `json:"contract_addr"`
 }
 
 // StopObserveResp is the response to stop observe.
@@ -39,19 +34,9 @@ type StopObserveResp struct {
 // HandleStopObserve handles the request to stop observe.
 func HandleStopObserve(data []byte) ([]byte, error) {
 	// Get node
-	node := node.GetSingleInstance()
+	instance := node.GetSingleInstance()
 
-	req := &StopObserveReq{}
-	err := json.Unmarshal(data, req)
-	if err != nil {
-		return nil, err
-	}
-	chainID, ok := big.NewInt(0).SetString(req.ChainID, 10)
-	if !ok {
-		return nil, fmt.Errorf("fail to decode chain id")
-	}
-
-	err = node.Observer.StopObserve(chainID, common.HexToAddress(req.ContractAddr))
+	err := instance.Observer.StopObserve()
 	if err != nil {
 		return nil, err
 	}
@@ -66,16 +51,8 @@ func HandleStopObserve(data []byte) ([]byte, error) {
 }
 
 // RequestStopObserve requests a stop observe.
-func RequestStopObserve(addr string, chainID *big.Int, contractAddr common.Address) (bool, error) {
-	req := StopObserveReq{
-		ChainID:      chainID.String(),
-		ContractAddr: contractAddr.String(),
-	}
-	data, err := json.Marshal(req)
-	if err != nil {
-		return false, err
-	}
-	data, err = rpc.Request(addr, StopObserveReqType, data)
+func RequestStopObserve(addr string) (bool, error) {
+	data, err := rpc.Request(addr, StopObserveReqType, []byte{1})
 	if err != nil {
 		return false, err
 	}

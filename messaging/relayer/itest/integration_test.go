@@ -271,14 +271,11 @@ func TestERC20Setup(t *testing.T) {
 	t.Log("Setup relayers...")
 
 	assert.Empty(t, setupObserver("127.0.0.1:9525", big.NewInt(31), "ws://bc31node1:8546", sfcAddrA))
-	assert.Empty(t, setupObserver("127.0.0.1:9525", big.NewInt(32), "ws://bc32node1:8546", sfcAddrB))
+	assert.Empty(t, setupObserver("127.0.0.1:9526", big.NewInt(32), "ws://bc32node1:8546", sfcAddrB))
 	assert.Empty(t, setupRelayer("127.0.0.1:9625", big.NewInt(31), bridgeAddrA, signer.SECP256K1_KEY_TYPE, relayerKey))
 	assert.Empty(t, setupRelayer("127.0.0.1:9625", big.NewInt(32), bridgeAddrB, signer.SECP256K1_KEY_TYPE, relayerKey))
 	assert.Empty(t, setupDispatcher("127.0.0.1:9725", big.NewInt(31), "ws://bc31node1:8546", dispatcherKey, bridgeAddrA, verifierAddrA))
 	assert.Empty(t, setupDispatcher("127.0.0.1:9725", big.NewInt(32), "ws://bc32node1:8546", dispatcherKey, bridgeAddrB, verifierAddrB))
-
-	res, _ := observerapi.RequestListObserves("127.0.0.1:9525")
-	t.Log(res)
 
 	t.Log("Setup done")
 }
