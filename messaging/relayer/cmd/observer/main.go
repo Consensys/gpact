@@ -64,8 +64,7 @@ func main() {
 	// Start the RPC Server
 	rpc := rpc.NewServerImplV1(conf.APIPort).
 		AddHandler(api.StartObserveReqType, api.HandleStartObserve).
-		AddHandler(api.StopObserveReqType, api.HandleStopObserve).
-		AddHandler(api.ListObservesReqType, api.HandleListObserves)
+		AddHandler(api.StopObserveReqType, api.HandleStopObserve)
 	err = rpc.Start()
 	if err != nil {
 		panic(err)

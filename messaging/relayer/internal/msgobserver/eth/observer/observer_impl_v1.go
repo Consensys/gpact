@@ -17,6 +17,7 @@ package observer
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"math/big"
 	"strings"
@@ -27,17 +28,27 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ipfs/go-datastore"
-	dsq "github.com/ipfs/go-datastore/query"
 	badgerds "github.com/ipfs/go-ds-badger"
 )
+
+const (
+	activeKey = "active"
+)
+
+// observation stores the information of an active observation.
+type observation struct {
+	ChainID      string `json:"chain_id"`
+	ContractAddr string `json:"contract_addr"`
+	AP           string `json:"ap"`
+}
 
 // ObserverImplV1 implements observer.
 type ObserverImplV1 struct {
 	path string
 	mq   *mqserver.MQServer
 
-	ds       datastore.Datastore
-	stopsMap map[string](*map[string]chan bool)
+	ds   datastore.Datastore
+	stop chan bool
 }
 
 // NewObserverImplV1 creates a new observer.
@@ -56,36 +67,30 @@ func (o *ObserverImplV1) Start() error {
 		if err != nil {
 			return err
 		}
-		o.stopsMap = make(map[string]*map[string]chan bool)
-		observers, err := o.ListObserves()
+		exists, err := o.ds.Has(context.Background(), datastore.NewKey(activeKey))
 		if err != nil {
 			o.ds.Close()
 			return err
 		}
-		for chainID, addrs := range observers {
-			for _, addr := range addrs {
-				id, _ := big.NewInt(0).SetString(chainID, 10)
-				ap, err := o.ds.Get(context.Background(), dsKey(id, addr))
-				if err != nil {
-					o.ds.Close()
-					return err
-				}
-				chain, err := ethclient.Dial(string(ap))
-				if err != nil {
-					o.ds.Close()
-					return err
-				}
-				end := make(chan bool, 1)
-				go o.routine(id, chain, addr, end)
-
-				stops, ok := o.stopsMap[id.String()]
-				if !ok {
-					stopsNew := make(map[string]chan bool)
-					stops = &stopsNew
-					o.stopsMap[id.String()] = stops
-				}
-				(*stops)[addr.String()] = end
+		if exists {
+			data, err := o.ds.Get(context.Background(), datastore.NewKey(activeKey))
+			if err != nil {
+				o.ds.Close()
+				return err
 			}
+			val := observation{}
+			err = json.Unmarshal(data, &val)
+			if err != nil {
+				o.ds.Close()
+				return err
+			}
+			chainID, ok := big.NewInt(0).SetString(val.ChainID, 10)
+			if !ok {
+				o.ds.Close()
+				return fmt.Errorf("error in setting chain id")
+			}
+			o.stop = make(chan bool)
+			go o.routine(chainID, val.AP, common.HexToAddress(val.ContractAddr), o.stop)
 		}
 	}
 	return nil
@@ -93,110 +98,56 @@ func (o *ObserverImplV1) Start() error {
 
 // Stop safely stops the observer.
 func (o *ObserverImplV1) Stop() {
-	if o.ds != nil {
-		for _, stops := range o.stopsMap {
-			for _, stop := range *stops {
-				stop <- true
-			}
-		}
-		if err := o.ds.Close(); err != nil {
-			logging.Error("Error in closing the db %v", err.Error())
-		}
+	if o.ds != nil && o.stop != nil {
+		o.stop <- true
 	}
 }
 
 // StartObserve starts a new observe.
 func (o *ObserverImplV1) StartObserve(chainID *big.Int, chainAP string, contractAddr common.Address) error {
 	// First, close any existing observe.
-	stops, ok := o.stopsMap[chainID.String()]
-	if ok {
-		stop, ok := (*stops)[contractAddr.String()]
-		if ok {
-			stop <- true
-		}
-	} else {
-		stopsNew := make(map[string]chan bool)
-		stops = &stopsNew
-		o.stopsMap[chainID.String()] = stops
+	if o.stop != nil {
+		o.stop <- true
 	}
-	err := o.ds.Put(context.Background(), dsKey(chainID, contractAddr), []byte(chainAP))
+	val := observation{
+		ChainID:      chainID.String(),
+		ContractAddr: contractAddr.String(),
+		AP:           chainAP,
+	}
+	data, err := json.Marshal(val)
 	if err != nil {
 		return err
 	}
-	chain, err := ethclient.Dial(chainAP)
+	err = o.ds.Put(context.Background(), datastore.NewKey(activeKey), data)
 	if err != nil {
 		return err
 	}
-	end := make(chan bool, 1)
-	go o.routine(chainID, chain, contractAddr, end)
-	(*stops)[contractAddr.String()] = end
+	o.stop = make(chan bool)
+	go o.routine(chainID, chainAP, contractAddr, o.stop)
 	return nil
 }
 
 // StopObserve stops observe.
-func (o *ObserverImplV1) StopObserve(chainID *big.Int, contractAddr common.Address) error {
+func (o *ObserverImplV1) StopObserve() error {
 	// Close any existing observe.
-	stops, ok := o.stopsMap[chainID.String()]
-	if ok {
-		stop, ok := (*stops)[contractAddr.String()]
-		if ok {
-			stop <- true
-			err := o.ds.Delete(context.Background(), dsKey(chainID, contractAddr))
-			if err != nil {
-				return err
-			}
-			delete(*stops, contractAddr.String())
-		}
+	if o.stop != nil {
+		o.stop <- true
+		o.stop = nil
+	}
+	err := o.ds.Delete(context.Background(), datastore.NewKey(activeKey))
+	if err != nil {
+		return err
 	}
 	return nil
 }
 
-// ListObserves lists all observes stored.
-func (o *ObserverImplV1) ListObserves() (map[string][]common.Address, error) {
-	res := make(map[string][]common.Address)
-	q := dsq.Query{KeysOnly: true}
-	tempRes, err := o.ds.Query(context.Background(), q)
-	if err != nil {
-		return nil, err
-	}
-	output := make(chan string, dsq.KeysOnlyBufSize)
-
-	go func() {
-		defer func() {
-			tempRes.Close()
-			close(output)
-		}()
-		for {
-			e, ok := tempRes.NextSync()
-			if !ok {
-				break
-			}
-			if e.Error != nil {
-				logging.Error("error querying from storage: %v", e.Error.Error())
-				return
-			}
-			select {
-			case output <- e.Key[1:]:
-			}
-		}
-	}()
-
-	for key := range output {
-		id, addr := splitKey(key)
-		addrs, ok := res[id.String()]
-		if !ok {
-			addrs = make([]common.Address, 0)
-			res[id.String()] = addrs
-		}
-		addrs = append(addrs, addr)
-		res[id.String()] = addrs
-	}
-
-	return res, nil
-}
-
 // routine is the observe routine.
-func (o *ObserverImplV1) routine(chainID *big.Int, chain *ethclient.Client, addr common.Address, end chan bool) {
+func (o *ObserverImplV1) routine(chainID *big.Int, chainAP string, addr common.Address, end chan bool) {
+	chain, err := ethclient.Dial(chainAP)
+	if err != nil {
+		logging.Error(err.Error())
+		return
+	}
 	defer chain.Close()
 
 	sfc, err := functioncall.NewSfc(addr, chain)

@@ -33,8 +33,5 @@ type Observer interface {
 	StartObserve(chainID *big.Int, chainAP string, contractAddr common.Address) error
 
 	// StopObserve stops observe.
-	StopObserve(chainID *big.Int, contractAddr common.Address) error
-
-	// ListObserves lists all observes stored.
-	ListObserves() (map[string][]common.Address, error)
+	StopObserve() error
 }

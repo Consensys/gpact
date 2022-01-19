@@ -18,5 +18,4 @@ package api
 const (
 	StartObserveReqType = byte(1)
 	StopObserveReqType  = byte(2)
-	ListObservesReqType = byte(3)
 )
