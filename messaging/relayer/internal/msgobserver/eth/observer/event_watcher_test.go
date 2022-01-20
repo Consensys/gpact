@@ -43,7 +43,8 @@ func TestSFCCrossCallRealtimeEventWatcher(t *testing.T) {
 	handler := new(MockEventHandler)
 	handler.On("Handle", mock.AnythingOfType("*functioncall.SfcCrossCall")).Once().Return(nil)
 
-	watcher := NewSFCCrossCallRealtimeEventWatcher(auth.Context, handler, contract, make(chan bool))
+	watcher, err := NewSFCCrossCallRealtimeEventWatcher(auth.Context, handler, handler, contract, make(chan bool))
+	assert.Nil(t, err, "failed to create a realtime event watcher")
 	go watcher.Watch()
 
 	makeCrossContractCallTx(t, contract, auth)
@@ -52,8 +53,43 @@ func TestSFCCrossCallRealtimeEventWatcher(t *testing.T) {
 	handler.AssertExpectations(t)
 }
 
+func TestSFCCrossCallRealtimeEventWatcher_RemovedEvent(t *testing.T) {
+	simBackend, auth := simulatedBackend(t)
+	contract := deployContract(t, simBackend, auth)
+
+	handler := new(MockEventHandler)
+	handler.On("Handle", mock.AnythingOfType("*functioncall.SfcCrossCall")).Once().Return(nil)
+
+	removedHandler := new(MockEventHandler)
+	removedHandler.On("Handle", mock.AnythingOfType("*functioncall.SfcCrossCall")).Once().Return(nil)
+
+	watcher, err := NewSFCCrossCallRealtimeEventWatcher(auth.Context, handler, removedHandler, contract, make(chan bool))
+	assert.Nil(t, err, "failed to create a realtime event watcher")
+	go watcher.Watch()
+
+	b1 := simBackend.Blockchain().CurrentBlock().Hash()
+
+	makeCrossContractCallTx(t, contract, auth)
+	commit(simBackend)
+
+	err = simBackend.Fork(auth.Context, b1)
+	assert.Nil(t, err, "could not simulate forking blockchain")
+	mineConfirmingBlocks(1, simBackend)
+	commitAndSleep(simBackend)
+
+	handler.AssertExpectations(t)
+	removedHandler.AssertExpectations(t)
+}
+
 func TestSFCCrossCallFinalisedEventWatcher_FailsIfConfirmationTooLow(t *testing.T) {
-	_, err := NewSFCCrossCallFinalisedEventWatcher(nil, 0, nil, nil, 0,
+	handler := new(MockEventHandler)
+	_, err := NewSFCCrossCallFinalisedEventWatcher(nil, 0, handler, nil, 0,
+		nil, make(chan bool))
+	assert.NotNil(t, err)
+}
+
+func TestSFCCrossCallFinalisedEventWatcher_FailsIfEventHandlerNil(t *testing.T) {
+	_, err := NewSFCCrossCallFinalisedEventWatcher(nil, 2, nil, nil, 0,
 		nil, make(chan bool))
 	assert.NotNil(t, err)
 }
@@ -139,12 +175,12 @@ func TestSFCCrossCallFinalisedEventWatcher_Reorg(t *testing.T) {
 	assert.Nil(t, e)
 	go watcher.Watch()
 
-	makeCrossContractCallTx(t, contract, auth)
 	b1 := simBackend.Blockchain().CurrentBlock().Hash()
+	makeCrossContractCallTx(t, contract, auth)
 	commit(simBackend)
+
 	err := simBackend.Fork(auth.Context, b1)
 	assert.Nil(t, err, "could not simulate forking blockchain")
-
 	mineConfirmingBlocks(2, simBackend)
 	time.Sleep(2 * time.Second)
 
@@ -170,6 +206,6 @@ func commit(backend *backends.SimulatedBackend) {
 }
 
 func commitAndSleep(backend *backends.SimulatedBackend) {
-	backend.Commit()
+	commit(backend)
 	time.Sleep(2 * time.Second)
 }

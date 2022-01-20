@@ -33,9 +33,9 @@ type EventWatcher interface {
 }
 
 type EventWatcherConfig struct {
-	Start   uint64
-	Context context.Context
-	Handler EventHandler
+	Start        uint64
+	Context      context.Context
+	EventHandler EventHandler
 }
 
 // SFCCrossCallRealtimeEventWatcher subscribes and listens to events from a Simple Function Call bridge contract.
@@ -43,8 +43,9 @@ type EventWatcherConfig struct {
 // Note: The watcher does not check to see if the event is affected by any reorgs.
 type SFCCrossCallRealtimeEventWatcher struct {
 	EventWatcherConfig
-	SfcContract *functioncall.Sfc
-	end         chan bool
+	RemovedEventHandler EventHandler
+	SfcContract         *functioncall.Sfc
+	end                 chan bool
 }
 
 // Watch subscribes and starts listening to 'CrossCall' events from a given Simple Function Call contract.
@@ -68,7 +69,11 @@ func (l *SFCCrossCallRealtimeEventWatcher) start(sub event.Subscription, chanEve
 			// TODO: communicate this to the calling context
 			logging.Error("error in log subscription %v", err)
 		case ev := <-chanEvents:
-			l.Handler.Handle(ev)
+			if ev.Raw.Removed {
+				l.RemovedEventHandler.Handle(ev)
+			} else {
+				l.EventHandler.Handle(ev)
+			}
 		case <-l.end:
 			logging.Info("Stop watching %v.", l.SfcContract)
 			return
@@ -76,8 +81,13 @@ func (l *SFCCrossCallRealtimeEventWatcher) start(sub event.Subscription, chanEve
 	}
 }
 
-func NewSFCCrossCallRealtimeEventWatcher(context context.Context, handler EventHandler, contract *functioncall.Sfc, end chan bool) *SFCCrossCallRealtimeEventWatcher {
-	return &SFCCrossCallRealtimeEventWatcher{EventWatcherConfig: EventWatcherConfig{Context: context, Handler: handler}, SfcContract: contract, end: end}
+func NewSFCCrossCallRealtimeEventWatcher(context context.Context, eventHandler EventHandler, removedEventHandler EventHandler, contract *functioncall.Sfc,
+	end chan bool) (*SFCCrossCallRealtimeEventWatcher, error) {
+	if eventHandler == nil || removedEventHandler == nil {
+		return nil, fmt.Errorf("handler cannot be nil")
+	}
+	return &SFCCrossCallRealtimeEventWatcher{EventWatcherConfig: EventWatcherConfig{Context: context, EventHandler: eventHandler},
+		RemovedEventHandler: removedEventHandler, SfcContract: contract, end: end}, nil
 }
 
 type BlockHeadProducer interface {
@@ -116,6 +126,9 @@ func (l *SFCCrossCallFinalisedEventWatcher) Watch() {
 		case latestHead := <-headers:
 			// TODO: communicate err to the calling context
 			l.processFinalisedEvents(latestHead)
+		case <-l.end:
+			logging.Info("Stop watching %v.", l.SfcContract)
+			return
 		}
 	}
 }
@@ -160,7 +173,7 @@ func (l *SFCCrossCallFinalisedEventWatcher) processFinalisedEvents(latest *types
 func (l *SFCCrossCallFinalisedEventWatcher) handleEvents(events *functioncall.SfcCrossCallIterator) error {
 	for events.Next() {
 		ev := events.Event
-		err := l.Handler.Handle(ev)
+		err := l.EventHandler.Handle(ev)
 		if err != nil {
 			logging.Error("failed to handle event: %v, error: %v", ev, err)
 			return err
@@ -171,11 +184,14 @@ func (l *SFCCrossCallFinalisedEventWatcher) handleEvents(events *functioncall.Sf
 
 // NewSFCCrossCallFinalisedEventWatcher creates an SFCCrossCall event watcher that only returns events once they receive a configured number of
 // confirmations. Note: 1 block confirmation means the instant the transaction generating the event is mined
-func NewSFCCrossCallFinalisedEventWatcher(context context.Context, blockConfirmations uint64, handler EventHandler, contract *functioncall.Sfc,
-	start uint64, client BlockHeadProducer, end chan bool) (*SFCCrossCallFinalisedEventWatcher, error) {
+func NewSFCCrossCallFinalisedEventWatcher(context context.Context, blockConfirmations uint64, eventHandler EventHandler,
+	contract *functioncall.Sfc, start uint64, client BlockHeadProducer, end chan bool) (*SFCCrossCallFinalisedEventWatcher, error) {
 	if blockConfirmations < 1 {
 		return nil, fmt.Errorf("block confirmationsForFinality cannot be less than 1. supplied value: %d", blockConfirmations)
 	}
-	return &SFCCrossCallFinalisedEventWatcher{EventWatcherConfig: EventWatcherConfig{Context: context, Handler: handler, Start: start},
+	if eventHandler == nil {
+		return nil, fmt.Errorf("handler cannot be nil")
+	}
+	return &SFCCrossCallFinalisedEventWatcher{EventWatcherConfig: EventWatcherConfig{Context: context, EventHandler: eventHandler, Start: start},
 		SfcContract: contract, confirmationsForFinality: blockConfirmations, client: client, end: end}, nil
 }
