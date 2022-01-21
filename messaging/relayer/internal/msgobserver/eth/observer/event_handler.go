@@ -17,6 +17,7 @@ package observer
 
 import (
 	"fmt"
+	"github.com/consensys/gpact/messaging/relayer/internal/logging"
 )
 
 type EventHandler interface {
@@ -43,4 +44,18 @@ func (h *SimpleEventHandler) Handle(event interface{}) error {
 
 func NewSimpleEventHandler(transformer EventTransformer, sender MessageHandler) *SimpleEventHandler {
 	return &SimpleEventHandler{EventTransformer: transformer, MessageHandler: sender}
+}
+
+// LogEventHandler logs the details of a given event at an `Info` level
+type LogEventHandler struct {
+	LogMessagePrefix string
+}
+
+func (h *LogEventHandler) Handle(event interface{}) error {
+	logging.Info("%s: %v", h.LogMessagePrefix, event)
+	return nil
+}
+
+func NewLogEventHandler(logPrefix string) *LogEventHandler {
+	return &LogEventHandler{logPrefix}
 }

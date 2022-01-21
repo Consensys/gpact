@@ -34,8 +34,11 @@ func NewSFCBridgeObserver(source string, sourceAddr string, contract *functionca
 	eventTransformer := NewSFCEventTransformer(source, sourceAddr)
 	messageHandler := NewMessageEnqueueHandler(mq)
 	eventHandler := NewSimpleEventHandler(eventTransformer, messageHandler)
-	eventWatcher := NewSFCCrossCallRealtimeEventWatcher(context.Background(), eventHandler, contract, end)
-
+	removedEvHandler := NewLogEventHandler("removed event")
+	eventWatcher, err := NewSFCCrossCallRealtimeEventWatcher(context.Background(), eventHandler, removedEvHandler, contract, end)
+	if err != nil {
+		return nil, err
+	}
 	return &SFCBridgeObserver{EventWatcher: eventWatcher, EventHandler: eventHandler, SourceNetwork: source}, nil
 }
 
