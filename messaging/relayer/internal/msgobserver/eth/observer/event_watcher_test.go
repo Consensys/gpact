@@ -72,6 +72,8 @@ func TestSFCCrossCallRealtimeEventWatcher_RemovedEvent(t *testing.T) {
 	makeCrossContractCallTx(t, contract, auth)
 	commit(simBackend)
 
+	// create a fork of the chain that excludes the event. turn this chain into the longer chain.
+	// this will cause the event log to be re-sent with a 'removed' flag set
 	err = simBackend.Fork(auth.Context, b1)
 	assert.Nil(t, err, "could not simulate forking blockchain")
 	mineConfirmingBlocks(1, simBackend)
