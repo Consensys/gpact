@@ -14,7 +14,6 @@
  */
 package net.consensys.gpact.functioncall.gpact.engine;
 
-
 import net.consensys.gpact.functioncall.gpact.calltree.CallExecutionTree;
 
 public interface ExecutionEngine {

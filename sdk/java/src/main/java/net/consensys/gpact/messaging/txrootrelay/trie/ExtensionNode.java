@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-
 import net.consensys.gpact.messaging.txrootrelay.besuethereum.rlp.BytesValueRLPOutput;
 import net.consensys.gpact.messaging.txrootrelay.besuethereum.rlp.RLP;
 import org.apache.logging.log4j.Logger;

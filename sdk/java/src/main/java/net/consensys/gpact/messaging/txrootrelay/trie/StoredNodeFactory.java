@@ -21,7 +21,6 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
-
 import net.consensys.gpact.messaging.txrootrelay.besuethereum.rlp.RLP;
 import net.consensys.gpact.messaging.txrootrelay.besuethereum.rlp.RLPException;
 import net.consensys.gpact.messaging.txrootrelay.besuethereum.rlp.RLPInput;

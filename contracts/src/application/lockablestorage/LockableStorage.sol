@@ -14,8 +14,8 @@
  */
 pragma solidity >=0.7.1;
 
-import "../../../../../../functioncall/interface/src/main/solidity/LockableStorageInterface.sol";
-import "../../../../../../functioncall/interface/src/main/solidity/CrosschainLockingInterface.sol";
+import "../../functioncall/interface/LockableStorageInterface.sol";
+import "../../functioncall/interface/CrosschainLockingInterface.sol";
 
 /**
  * Lockable storage contract:

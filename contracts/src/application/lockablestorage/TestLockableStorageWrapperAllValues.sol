@@ -14,7 +14,7 @@
  */
 pragma solidity >=0.7.1;
 
-import "../../main/solidity/LockableStorageAllValues.sol";
+import "./LockableStorageAllValues.sol";
 
 contract TestLockableStorageWrapperAllValues is LockableStorageAllValues {
     constructor(address _cbc) LockableStorageAllValues(_cbc) {}

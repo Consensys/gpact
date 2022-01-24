@@ -13,8 +13,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 pragma solidity >=0.7.1;
-
-import "../../../../../../functioncall/interface/src/main/solidity/CrosschainFunctionCallInterface.sol";
+import "../../functioncall/interface/CrosschainFunctionCallInterface.sol";
 
 /**
  * Lockable storage contract.

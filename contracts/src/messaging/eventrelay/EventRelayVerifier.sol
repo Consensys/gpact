@@ -41,7 +41,7 @@ contract EventRelayVerifier is CrosschainVerifier, BytesUtil {
     mapping(bytes32 => SignedEvents) private signedEvents;
 
     constructor(address _registrar, address _functionCall) {
-        registrar = AttestorSignRegistrar(_registrar);
+        registrar = MessagingRegistrar(_registrar);
         functionCall = SimpleCrosschainControl(_functionCall);
     }
 

@@ -52,7 +52,7 @@ public class TxRootTransferManager extends RegistrarManager {
     LOG.debug(
         " TxReceiptsRootStorage Contract: {}", this.txReceiptsRootStorage.getContractAddress());
     this.verifier =
-            TxRootRelayVerifier.deploy(
+        TxRootRelayVerifier.deploy(
                 this.web3j,
                 this.tm,
                 this.gasProvider,
@@ -75,7 +75,7 @@ public class TxRootTransferManager extends RegistrarManager {
     this.txReceiptsRootStorage =
         TxReceiptsRootStorage.load(addresses.get(1), this.web3j, this.tm, this.gasProvider);
     this.verifier =
-            TxRootRelayVerifier.load(addresses.get(2), this.web3j, this.tm, this.gasProvider);
+        TxRootRelayVerifier.load(addresses.get(2), this.web3j, this.tm, this.gasProvider);
   }
 
   @Override

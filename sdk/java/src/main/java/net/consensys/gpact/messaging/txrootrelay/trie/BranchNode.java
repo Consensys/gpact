@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
-
 import net.consensys.gpact.messaging.txrootrelay.besuethereum.rlp.BytesValueRLPOutput;
 import net.consensys.gpact.messaging.txrootrelay.besuethereum.rlp.RLP;
 import org.apache.logging.log4j.Logger;

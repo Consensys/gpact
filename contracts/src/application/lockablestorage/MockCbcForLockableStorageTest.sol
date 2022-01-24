@@ -12,10 +12,9 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-pragma solidity >=0.7.1;
-pragma experimental ABIEncoderV2;
+pragma solidity >=0.8;
 
-import "../../../../../../functioncall/interface/src/main/solidity/CrosschainLockingInterface.sol";
+import "../../functioncall/interface/CrosschainLockingInterface.sol";
 
 contract MockCbcForLockableStorageTest is CrosschainLockingInterface {
     bytes32 private rootTxId;

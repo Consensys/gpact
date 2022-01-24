@@ -18,7 +18,6 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import java.util.List;
 import java.util.Objects;
-
 import net.consensys.gpact.messaging.txrootrelay.besuethereum.rlp.RLPInput;
 import net.consensys.gpact.messaging.txrootrelay.besuethereum.rlp.RLPOutput;
 import org.apache.tuweni.bytes.Bytes;

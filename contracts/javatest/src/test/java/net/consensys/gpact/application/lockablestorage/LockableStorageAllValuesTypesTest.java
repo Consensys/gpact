@@ -12,7 +12,7 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package net.consensys.gpact.lockablestorage.test;
+package net.consensys.gpact.application.lockablestorage;
 
 import java.math.BigInteger;
 import org.junit.jupiter.api.Test;

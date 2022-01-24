@@ -12,25 +12,25 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package net.consensys.gpact.txroot;
+package net.consensys.gpact.messaging.txrootrelay;
 
-import static org.hyperledger.besu.crypto.Hash.keccak256;
+import static net.consensys.gpact.common.besucrypto.Hash.keccak256;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import net.consensys.gpact.common.test.AbstractWeb3Test;
-import net.consensys.gpact.txroot.soliditywrappers.TestReceipts;
+import net.consensys.gpact.AbstractWeb3JavaTest;
+import net.consensys.gpact.messaging.txrootrelay.besuethereum.core.Hash;
+import net.consensys.gpact.messaging.txrootrelay.besuethereum.core.LogTopic;
+import net.consensys.gpact.messaging.txrootrelay.besuethereum.rlp.RLP;
+import net.consensys.gpact.soliditywrappers.messaging.txrootrelay.TestReceipts;
 import org.apache.tuweni.bytes.Bytes;
-import org.hyperledger.besu.ethereum.core.Hash;
-import org.hyperledger.besu.ethereum.core.LogTopic;
-import org.hyperledger.besu.ethereum.rlp.RLP;
 import org.junit.jupiter.api.Test;
 import org.web3j.protocol.core.methods.response.Log;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
-public class ReceiptDecoding extends AbstractWeb3Test {
+public class ReceiptDecoding extends AbstractWeb3JavaTest {
   @Test
   public void numLogsFound() throws Exception {
     setupWeb3();
@@ -97,14 +97,16 @@ public class ReceiptDecoding extends AbstractWeb3Test {
   }
 
   private static byte[] web3JReceiptToBytes(TransactionReceipt receipt) {
-    org.hyperledger.besu.ethereum.core.TransactionReceipt txR = web3JReceiptToBesuReceipt(receipt);
+    net.consensys.gpact.messaging.txrootrelay.besuethereum.core.TransactionReceipt txR =
+        web3JReceiptToBesuReceipt(receipt);
     return RLP.encode(txR::writeTo).toArray();
   }
 
-  private static org.hyperledger.besu.ethereum.core.TransactionReceipt web3JReceiptToBesuReceipt(
-      TransactionReceipt receipt) {
+  private static net.consensys.gpact.messaging.txrootrelay.besuethereum.core.TransactionReceipt
+      web3JReceiptToBesuReceipt(TransactionReceipt receipt) {
     // Convert to Besu objects
-    List<org.hyperledger.besu.ethereum.core.Log> besuLogs = new ArrayList<>();
+    List<net.consensys.gpact.messaging.txrootrelay.besuethereum.core.Log> besuLogs =
+        new ArrayList<>();
 
     String stateRootFromReceipt = receipt.getRoot();
     Hash root = (stateRootFromReceipt == null) ? null : Hash.fromHexString(receipt.getRoot());
@@ -112,8 +114,9 @@ public class ReceiptDecoding extends AbstractWeb3Test {
     int status =
         statusFromReceipt == null ? -1 : Integer.parseInt(statusFromReceipt.substring(2), 16);
     for (Log web3jLog : receipt.getLogs()) {
-      org.hyperledger.besu.ethereum.core.Address addr =
-          org.hyperledger.besu.ethereum.core.Address.fromHexString(web3jLog.getAddress());
+      net.consensys.gpact.messaging.txrootrelay.besuethereum.core.Address addr =
+          net.consensys.gpact.messaging.txrootrelay.besuethereum.core.Address.fromHexString(
+              web3jLog.getAddress());
       Bytes data = Bytes.fromHexString(web3jLog.getData());
       List<String> topics = web3jLog.getTopics();
       List<LogTopic> logTopics = new ArrayList<>();
@@ -121,19 +124,21 @@ public class ReceiptDecoding extends AbstractWeb3Test {
         LogTopic logTopic = LogTopic.create(Bytes.fromHexString(topic));
         logTopics.add(logTopic);
       }
-      besuLogs.add(new org.hyperledger.besu.ethereum.core.Log(addr, data, logTopics));
+      besuLogs.add(
+          new net.consensys.gpact.messaging.txrootrelay.besuethereum.core.Log(
+              addr, data, logTopics));
     }
     String revertReasonFromReceipt = receipt.getRevertReason();
     Bytes revertReason =
         revertReasonFromReceipt == null ? null : Bytes.fromHexString(receipt.getRevertReason());
-    org.hyperledger.besu.ethereum.core.TransactionReceipt txReceipt =
+    net.consensys.gpact.messaging.txrootrelay.besuethereum.core.TransactionReceipt txReceipt =
         root == null
-            ? new org.hyperledger.besu.ethereum.core.TransactionReceipt(
+            ? new net.consensys.gpact.messaging.txrootrelay.besuethereum.core.TransactionReceipt(
                 status,
                 receipt.getCumulativeGasUsed().longValue(),
                 besuLogs,
                 java.util.Optional.ofNullable(revertReason))
-            : new org.hyperledger.besu.ethereum.core.TransactionReceipt(
+            : new net.consensys.gpact.messaging.txrootrelay.besuethereum.core.TransactionReceipt(
                 root,
                 receipt.getCumulativeGasUsed().longValue(),
                 besuLogs,

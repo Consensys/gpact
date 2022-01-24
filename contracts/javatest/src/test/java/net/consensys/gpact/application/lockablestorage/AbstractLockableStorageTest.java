@@ -12,17 +12,17 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package net.consensys.gpact.lockablestorage.test;
+package net.consensys.gpact.application.lockablestorage;
 
-import net.consensys.gpact.common.test.AbstractWeb3Test;
-import net.consensys.gpact.lockablestorage.soliditywrappers.MockCbcForLockableStorageTest;
-import net.consensys.gpact.lockablestorage.soliditywrappers.TestLockableStorageWrapper;
+import net.consensys.gpact.AbstractWeb3JavaTest;
+import net.consensys.gpact.soliditywrappers.application.lockablestorage.MockCbcForLockableStorageTest;
+import net.consensys.gpact.soliditywrappers.application.lockablestorage.TestLockableStorageWrapper;
 
 /**
  * Check operation, assuming the calls are single blockchain (that is not part of a
  * cross-blockchain) call.
  */
-public class AbstractLockableStorageTest extends AbstractWeb3Test {
+public class AbstractLockableStorageTest extends AbstractWeb3JavaTest {
   static byte[] crosschainRootTxId;
   static byte[] zero;
 

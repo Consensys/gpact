@@ -12,7 +12,7 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package net.consensys.gpact.eventrelay;
+package net.consensys.gpact.messaging.eventrelay;
 
 import static net.consensys.gpact.common.FormatConversion.addressStringToBytes;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -20,44 +20,44 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
-import net.consensys.gpact.attestorsign.soliditywrappers.AttestorSignRegistrar;
+import net.consensys.gpact.AbstractWeb3JavaTest;
 import net.consensys.gpact.common.*;
-import net.consensys.gpact.common.test.AbstractWeb3Test;
-import net.consensys.gpact.eventrelay.soliditywrappers.AppTest;
-import net.consensys.gpact.eventrelay.soliditywrappers.SignedEventStore;
+import net.consensys.gpact.functioncall.sfc.SimpleCrossControlManager;
 import net.consensys.gpact.messaging.SignedEvent;
-import net.consensys.gpact.sfccbc.SimpleCrossControlManager;
-import net.consensys.gpact.sfccbc.soliditywrappers.SimpleCrosschainControl;
+import net.consensys.gpact.soliditywrappers.functioncall.sfc.SimpleCrosschainControl;
+import net.consensys.gpact.soliditywrappers.messaging.common.MessagingRegistrar;
+import net.consensys.gpact.soliditywrappers.messaging.eventrelay.EventRelayAppTest;
+import net.consensys.gpact.soliditywrappers.messaging.eventrelay.EventRelayVerifier;
 import org.apache.tuweni.bytes.Bytes;
 import org.junit.jupiter.api.Test;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.exceptions.TransactionException;
 
-public class EventRelayTest extends AbstractWeb3Test {
-  private AttestorSignRegistrar registrarContract;
-  private SignedEventStore eventStoreContract;
+public class EventRelayTest extends AbstractWeb3JavaTest {
+  private MessagingRegistrar registrarContract;
+  private EventRelayVerifier eventStoreContract;
   private SimpleCrosschainControl sfc;
 
-  private AppTest appTest;
+  private EventRelayAppTest appTest;
 
   private void deployContracts(BlockchainId sourceBcId, String sourceCbc, BlockchainId myBcId)
       throws Exception {
     BigInteger timeHorizon = BigInteger.valueOf(1000);
     this.registrarContract =
-        AttestorSignRegistrar.deploy(this.web3j, this.tm, this.freeGasProvider).send();
+        MessagingRegistrar.deploy(this.web3j, this.tm, this.freeGasProvider).send();
     this.sfc =
         SimpleCrosschainControl.deploy(
                 this.web3j, this.tm, this.freeGasProvider, myBcId.asBigInt(), timeHorizon)
             .send();
     this.eventStoreContract =
-        SignedEventStore.deploy(
+        EventRelayVerifier.deploy(
                 this.web3j,
                 this.tm,
                 this.freeGasProvider,
                 this.registrarContract.getContractAddress(),
                 this.sfc.getContractAddress())
             .send();
-    this.appTest = AppTest.deploy(this.web3j, this.tm, this.freeGasProvider).send();
+    this.appTest = EventRelayAppTest.deploy(this.web3j, this.tm, this.freeGasProvider).send();
 
     this.sfc
         .addVerifier(sourceBcId.asBigInt(), this.eventStoreContract.getContractAddress())

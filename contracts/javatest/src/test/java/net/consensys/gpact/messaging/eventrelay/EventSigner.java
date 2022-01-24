@@ -12,7 +12,7 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package net.consensys.gpact.eventrelay;
+package net.consensys.gpact.messaging.eventrelay;
 
 import static net.consensys.gpact.common.FormatConversion.addressStringToBytes;
 

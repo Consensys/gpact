@@ -1,8 +1,8 @@
 rootProject.name = 'gpact'
 include 'sdk'
+include 'contracttest'
 
 /*
-include 'commontest'
 include 'openzeppelin'
 
 include 'mes-interface'
@@ -40,7 +40,8 @@ include 'examples-singlebc-write'
 
 project(":sdk").projectDir = file("sdk/java")
 
-/* project(":commontest").projectDir = file("common/commontest")
+project(":contracttest").projectDir = file("contracts/javatest")
+/*
 project(":openzeppelin").projectDir = file("common/openzeppelin")
 
 project(":mes-interface").projectDir = file("messaging/interface")

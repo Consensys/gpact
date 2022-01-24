@@ -14,17 +14,15 @@
  */
 package net.consensys.gpact.messaging.txrootrelay.trie;
 
+import static net.consensys.gpact.common.besucrypto.Hash.keccak256;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
-
 import net.consensys.gpact.messaging.txrootrelay.besuethereum.rlp.RLP;
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.Bytes32;
-
-import static net.consensys.gpact.common.besucrypto.Hash.keccak256;
 
 /** An Merkle Patricial Trie. */
 public interface MerklePatriciaTrie<K, V> {

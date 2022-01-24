@@ -33,7 +33,7 @@ $WEB3J solidity generate -a=$BUILDDIR/BlsSignatureTest.abi -b=$BUILDDIR/BlsSigna
 $WEB3J solidity generate -a=$BUILDDIR/EcdsaSignatureTest.abi -b=$BUILDDIR/EcdsaSignatureTest.bin -o=$OUTPUTDIR -p=$BASEPACKAGE.common
 
 $WEB3J solidity generate -a=$BUILDDIR/CrosschainControl.abi -b=$BUILDDIR/CrosschainControl.bin -o=$OUTPUTDIR -p=$BASEPACKAGE.functioncall.gpact
-$WEB3J solidity generate -a=$BUILDDIR/CallExecutionTreeTest.abi -b=$BUILDDIR/CallExecutionTreeTest.bin -o=$TESTOUTPUTDIR -p=$BASEPACKAGE.functioncall.gpact
+$WEB3J solidity generate -a=$BUILDDIR/CallExecutionTreeTest.abi -b=$BUILDDIR/CallExecutionTreeTest.bin -o=$OUTPUTDIR -p=$BASEPACKAGE.functioncall.gpact
 
 $WEB3J solidity generate -a=$BUILDDIR/SimpleCrosschainControl.abi -b=$BUILDDIR/SimpleCrosschainControl.bin -o=$OUTPUTDIR -p=$BASEPACKAGE.functioncall.sfc
 

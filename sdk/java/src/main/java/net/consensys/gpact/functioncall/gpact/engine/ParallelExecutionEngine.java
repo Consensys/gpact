@@ -37,7 +37,7 @@ public class ParallelExecutionEngine extends AbstractExecutionEngine {
   }
 
   protected void executeCalls(
-          List<CallExecutionTree> calls, List<BigInteger> callPath, BlockchainId theCallerBlockchainId)
+      List<CallExecutionTree> calls, List<BigInteger> callPath, BlockchainId theCallerBlockchainId)
       throws Exception {
     final int numCalls = calls.size();
     Executor executor = Executors.newFixedThreadPool(numCalls);

@@ -15,7 +15,6 @@
 package net.consensys.gpact.common;
 
 import java.math.BigInteger;
-
 import net.consensys.gpact.common.crypto.KeyPairGen;
 import org.web3j.crypto.ECKeyPair;
 import org.web3j.crypto.Keys;

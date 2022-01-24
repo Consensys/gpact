@@ -12,30 +12,30 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package net.consensys.gpact.attestorsign.registrar;
+package net.consensys.gpact.messaging.common;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import net.consensys.gpact.attestorsign.soliditywrappers.AttestorSignRegistrar;
-import net.consensys.gpact.common.test.AbstractWeb3Test;
+import net.consensys.gpact.AbstractWeb3JavaTest;
+import net.consensys.gpact.soliditywrappers.messaging.common.MessagingRegistrar;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.tx.TransactionManager;
 
-public abstract class AbstractRegistrarTest extends AbstractWeb3Test {
-  protected AttestorSignRegistrar registrarContract;
+public abstract class AbstractRegistrarTest extends AbstractWeb3JavaTest {
+  protected MessagingRegistrar registrarContract;
 
   protected void deployRegistrarContract() throws Exception {
     this.registrarContract =
-        AttestorSignRegistrar.deploy(this.web3j, this.tm, this.freeGasProvider).send();
+        MessagingRegistrar.deploy(this.web3j, this.tm, this.freeGasProvider).send();
   }
 
-  protected AttestorSignRegistrar deployRegistrarContract(TransactionManager tm1) throws Exception {
-    return AttestorSignRegistrar.deploy(this.web3j, tm1, this.freeGasProvider).send();
+  protected MessagingRegistrar deployRegistrarContract(TransactionManager tm1) throws Exception {
+    return MessagingRegistrar.deploy(this.web3j, tm1, this.freeGasProvider).send();
   }
 
-  protected AttestorSignRegistrar loadContract(TransactionManager tm1) throws Exception {
-    return AttestorSignRegistrar.load(
+  protected MessagingRegistrar loadContract(TransactionManager tm1) throws Exception {
+    return MessagingRegistrar.load(
         this.registrarContract.getContractAddress(), this.web3j, tm1, this.freeGasProvider);
   }
 

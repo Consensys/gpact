@@ -12,7 +12,7 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package net.consensys.gpact.txroot;
+package net.consensys.gpact.messaging.txrootrelay;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -24,26 +24,26 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import net.consensys.gpact.attestorsign.soliditywrappers.AttestorSignRegistrar;
+import net.consensys.gpact.AbstractWeb3JavaTest;
 import net.consensys.gpact.common.AnIdentity;
 import net.consensys.gpact.common.FastTxManager;
 import net.consensys.gpact.common.RevertReason;
 import net.consensys.gpact.common.TxManagerCache;
-import net.consensys.gpact.common.test.AbstractWeb3Test;
-import net.consensys.gpact.trie.MerklePatriciaTrie;
-import net.consensys.gpact.trie.Proof;
-import net.consensys.gpact.trie.SimpleMerklePatriciaTrie;
-import net.consensys.gpact.txroot.soliditywrappers.TestEvents;
-import net.consensys.gpact.txroot.soliditywrappers.TxReceiptsRootStorage;
-import net.consensys.gpact.utils.crypto.KeyPairGen;
+import net.consensys.gpact.common.crypto.KeyPairGen;
+import net.consensys.gpact.messaging.txrootrelay.besuethereum.core.Hash;
+import net.consensys.gpact.messaging.txrootrelay.besuethereum.core.LogTopic;
+import net.consensys.gpact.messaging.txrootrelay.besuethereum.rlp.RLP;
+import net.consensys.gpact.messaging.txrootrelay.trie.MerklePatriciaTrie;
+import net.consensys.gpact.messaging.txrootrelay.trie.Proof;
+import net.consensys.gpact.messaging.txrootrelay.trie.SimpleMerklePatriciaTrie;
+import net.consensys.gpact.soliditywrappers.messaging.common.MessagingRegistrar;
+import net.consensys.gpact.soliditywrappers.messaging.txrootrelay.TestEvents;
+import net.consensys.gpact.soliditywrappers.messaging.txrootrelay.TxReceiptsRootStorage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.Bytes32;
 import org.apache.tuweni.units.bigints.UInt256;
-import org.hyperledger.besu.ethereum.core.Hash;
-import org.hyperledger.besu.ethereum.core.LogTopic;
-import org.hyperledger.besu.ethereum.rlp.RLP;
 import org.junit.jupiter.api.Test;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.Sign;
@@ -60,26 +60,26 @@ import org.web3j.tx.exceptions.ContractCallException;
 import org.web3j.tx.response.PollingTransactionReceiptProcessor;
 import org.web3j.tx.response.TransactionReceiptProcessor;
 
-public class TxRootAddTest extends AbstractWeb3Test {
+public class TxRootAddTest extends AbstractWeb3JavaTest {
   static final Logger LOG = LogManager.getLogger(TxRootAddTest.class);
 
   final byte[] txReceiptRoot = new byte[32];
 
   TxReceiptsRootStorage txReceiptRootStorageContract;
 
-  protected AttestorSignRegistrar registrarContract;
+  protected MessagingRegistrar registrarContract;
 
   protected void deployRegistrarContract() throws Exception {
     this.registrarContract =
-        AttestorSignRegistrar.deploy(this.web3j, this.tm, this.freeGasProvider).send();
+        MessagingRegistrar.deploy(this.web3j, this.tm, this.freeGasProvider).send();
   }
 
-  protected AttestorSignRegistrar deployRegistrarContract(TransactionManager tm1) throws Exception {
-    return AttestorSignRegistrar.deploy(this.web3j, tm1, this.freeGasProvider).send();
+  protected MessagingRegistrar deployRegistrarContract(TransactionManager tm1) throws Exception {
+    return MessagingRegistrar.deploy(this.web3j, tm1, this.freeGasProvider).send();
   }
 
-  protected AttestorSignRegistrar loadContract(TransactionManager tm1) throws Exception {
-    return AttestorSignRegistrar.load(
+  protected MessagingRegistrar loadContract(TransactionManager tm1) throws Exception {
+    return MessagingRegistrar.load(
         this.registrarContract.getContractAddress(), this.web3j, tm1, this.freeGasProvider);
   }
 
@@ -289,7 +289,8 @@ public class TxRootAddTest extends AbstractWeb3Test {
         web3j.ethGetBlockTransactionCountByHash(blockHash).send();
     BigInteger txCount = transactionCountByHash.getTransactionCount();
 
-    List<org.hyperledger.besu.ethereum.core.TransactionReceipt> besuReceipts = new ArrayList<>();
+    List<net.consensys.gpact.messaging.txrootrelay.besuethereum.core.TransactionReceipt>
+        besuReceipts = new ArrayList<>();
 
     BigInteger transactionIndex = BigInteger.ZERO;
     do {
@@ -305,7 +306,8 @@ public class TxRootAddTest extends AbstractWeb3Test {
       TransactionReceipt receipt = mayBeReceipt.get();
 
       // Convert to Besu objects
-      List<org.hyperledger.besu.ethereum.core.Log> besuLogs = new ArrayList<>();
+      List<net.consensys.gpact.messaging.txrootrelay.besuethereum.core.Log> besuLogs =
+          new ArrayList<>();
 
       String stateRootFromReceipt = receipt.getRoot();
       Hash root = (stateRootFromReceipt == null) ? null : Hash.fromHexString(receipt.getRoot());
@@ -313,8 +315,9 @@ public class TxRootAddTest extends AbstractWeb3Test {
       int status =
           statusFromReceipt == null ? -1 : Integer.parseInt(statusFromReceipt.substring(2), 16);
       for (Log web3jLog : receipt.getLogs()) {
-        org.hyperledger.besu.ethereum.core.Address addr =
-            org.hyperledger.besu.ethereum.core.Address.fromHexString(web3jLog.getAddress());
+        net.consensys.gpact.messaging.txrootrelay.besuethereum.core.Address addr =
+            net.consensys.gpact.messaging.txrootrelay.besuethereum.core.Address.fromHexString(
+                web3jLog.getAddress());
         Bytes data = Bytes.fromHexString(web3jLog.getData());
         List<String> topics = web3jLog.getTopics();
         List<LogTopic> logTopics = new ArrayList<>();
@@ -322,19 +325,21 @@ public class TxRootAddTest extends AbstractWeb3Test {
           LogTopic logTopic = LogTopic.create(Bytes.fromHexString(topic));
           logTopics.add(logTopic);
         }
-        besuLogs.add(new org.hyperledger.besu.ethereum.core.Log(addr, data, logTopics));
+        besuLogs.add(
+            new net.consensys.gpact.messaging.txrootrelay.besuethereum.core.Log(
+                addr, data, logTopics));
       }
       String revertReasonFromReceipt = receipt.getRevertReason();
       Bytes revertReason =
           revertReasonFromReceipt == null ? null : Bytes.fromHexString(receipt.getRevertReason());
-      org.hyperledger.besu.ethereum.core.TransactionReceipt txReceipt =
+      net.consensys.gpact.messaging.txrootrelay.besuethereum.core.TransactionReceipt txReceipt =
           root == null
-              ? new org.hyperledger.besu.ethereum.core.TransactionReceipt(
+              ? new net.consensys.gpact.messaging.txrootrelay.besuethereum.core.TransactionReceipt(
                   status,
                   receipt.getCumulativeGasUsed().longValue(),
                   besuLogs,
                   java.util.Optional.ofNullable(revertReason))
-              : new org.hyperledger.besu.ethereum.core.TransactionReceipt(
+              : new net.consensys.gpact.messaging.txrootrelay.besuethereum.core.TransactionReceipt(
                   root,
                   receipt.getCumulativeGasUsed().longValue(),
                   besuLogs,
@@ -365,7 +370,7 @@ public class TxRootAddTest extends AbstractWeb3Test {
       // Leaf nodes in Ethereum, leaves of Merkle Patricia Tries could be less than 32 bytes,
       // but no other nodes. For transaction receipts, it isn't possible even the leaf nodes
       // to be 32 bytes.
-      Bytes32 nodeHash = org.hyperledger.besu.crypto.Hash.keccak256(transactionReceipt);
+      Bytes32 nodeHash = net.consensys.gpact.common.besucrypto.Hash.keccak256(transactionReceipt);
 
       List<Bytes> proofList1 = simpleProof.getProofRelatedNodes();
       List<BigInteger> proofOffsets = new ArrayList<>();
@@ -374,11 +379,11 @@ public class TxRootAddTest extends AbstractWeb3Test {
         rlpOfNode = proofList1.get(j);
         proofOffsets.add(BigInteger.valueOf(findOffset(rlpOfNode, nodeHash)));
         proofs.add(rlpOfNode.toArray());
-        nodeHash = org.hyperledger.besu.crypto.Hash.keccak256(rlpOfNode);
+        nodeHash = net.consensys.gpact.common.besucrypto.Hash.keccak256(rlpOfNode);
       }
       assertEquals(
           besuCalculatedReceiptsRoot.toHexString(),
-          org.hyperledger.besu.crypto.Hash.keccak256(rlpOfNode).toHexString());
+          net.consensys.gpact.common.besucrypto.Hash.keccak256(rlpOfNode).toHexString());
 
       BigInteger bcId = sourceBlockchainId;
       if (!correctBlockchain) {

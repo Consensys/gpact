@@ -12,7 +12,7 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package net.consensys.gpact.attestorsign.registrar;
+package net.consensys.gpact.messaging.common;
 
 import java.math.BigInteger;
 import org.junit.jupiter.api.Test;

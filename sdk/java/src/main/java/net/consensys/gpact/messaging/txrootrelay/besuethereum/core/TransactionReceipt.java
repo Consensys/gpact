@@ -18,7 +18,6 @@ import com.google.common.base.MoreObjects;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-
 import net.consensys.gpact.messaging.txrootrelay.besuethereum.mainnet.TransactionReceiptType;
 import net.consensys.gpact.messaging.txrootrelay.besuethereum.rlp.RLPException;
 import net.consensys.gpact.messaging.txrootrelay.besuethereum.rlp.RLPInput;

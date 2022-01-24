@@ -14,8 +14,8 @@
  */
 package net.consensys.gpact.messaging.txrootrelay.trie;
 
-import static org.apache.logging.log4j.LogManager.getLogger;
 import static net.consensys.gpact.common.besucrypto.Hash.keccak256;
+import static org.apache.logging.log4j.LogManager.getLogger;
 
 import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
-
 import net.consensys.gpact.messaging.txrootrelay.besuethereum.rlp.BytesValueRLPOutput;
 import net.consensys.gpact.messaging.txrootrelay.besuethereum.rlp.RLP;
 import org.apache.logging.log4j.Logger;

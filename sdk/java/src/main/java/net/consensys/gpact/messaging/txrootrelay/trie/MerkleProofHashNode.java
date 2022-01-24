@@ -17,7 +17,6 @@ package net.consensys.gpact.messaging.txrootrelay.trie;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-
 import net.consensys.gpact.messaging.txrootrelay.besuethereum.rlp.RLP;
 import org.apache.tuweni.bytes.Bytes;
 import org.apache.tuweni.bytes.Bytes32;

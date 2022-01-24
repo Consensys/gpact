@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-
 import net.consensys.gpact.common.AbstractWeb3Test;
 import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.common.Tuple;

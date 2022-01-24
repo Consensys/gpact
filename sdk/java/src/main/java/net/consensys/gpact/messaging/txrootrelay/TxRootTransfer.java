@@ -101,8 +101,10 @@ public class TxRootTransfer extends AbstractBlockchain implements MessagingVerif
         this.web3j.ethGetBlockTransactionCountByHash(blockHash).send();
     BigInteger txCount = transactionCountByHash.getTransactionCount();
 
-    List<net.consensys.gpact.messaging.txrootrelay.besuethereum.core.TransactionReceipt> besuReceipts = new ArrayList<>();
-//    List<org.hyperledger.besu.ethereum.core.TransactionReceipt> besuReceipts = new ArrayList<>();
+    List<net.consensys.gpact.messaging.txrootrelay.besuethereum.core.TransactionReceipt>
+        besuReceipts = new ArrayList<>();
+    //    List<org.hyperledger.besu.ethereum.core.TransactionReceipt> besuReceipts = new
+    // ArrayList<>();
 
     BigInteger transactionIndex = BigInteger.ZERO;
     do {
@@ -118,7 +120,8 @@ public class TxRootTransfer extends AbstractBlockchain implements MessagingVerif
       TransactionReceipt receipt = mayBeReceipt.get();
 
       // Convert to Besu objects
-      List<net.consensys.gpact.messaging.txrootrelay.besuethereum.core.Log> besuLogs = new ArrayList<>();
+      List<net.consensys.gpact.messaging.txrootrelay.besuethereum.core.Log> besuLogs =
+          new ArrayList<>();
 
       String stateRootFromReceipt = receipt.getRoot();
       Hash root = (stateRootFromReceipt == null) ? null : Hash.fromHexString(receipt.getRoot());
@@ -127,7 +130,8 @@ public class TxRootTransfer extends AbstractBlockchain implements MessagingVerif
           statusFromReceipt == null ? -1 : Integer.parseInt(statusFromReceipt.substring(2), 16);
       for (Log web3jLog : receipt.getLogs()) {
         net.consensys.gpact.messaging.txrootrelay.besuethereum.core.Address addr =
-                net.consensys.gpact.messaging.txrootrelay.besuethereum.core.Address.fromHexString(web3jLog.getAddress());
+            net.consensys.gpact.messaging.txrootrelay.besuethereum.core.Address.fromHexString(
+                web3jLog.getAddress());
         Bytes data = Bytes.fromHexString(web3jLog.getData());
         List<String> topics = web3jLog.getTopics();
         List<LogTopic> logTopics = new ArrayList<>();
@@ -135,7 +139,9 @@ public class TxRootTransfer extends AbstractBlockchain implements MessagingVerif
           LogTopic logTopic = LogTopic.create(Bytes.fromHexString(topic));
           logTopics.add(logTopic);
         }
-        besuLogs.add(new net.consensys.gpact.messaging.txrootrelay.besuethereum.core.Log(addr, data, logTopics));
+        besuLogs.add(
+            new net.consensys.gpact.messaging.txrootrelay.besuethereum.core.Log(
+                addr, data, logTopics));
       }
       String revertReasonFromReceipt = receipt.getRevertReason();
       Bytes revertReason =

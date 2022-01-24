@@ -12,14 +12,14 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package net.consensys.gpact.funcioninterfaces;
+package net.consensys.gpact.functioncall;
 
 import java.math.BigInteger;
 import java.util.List;
+import net.consensys.gpact.AbstractWeb3JavaTest;
 import net.consensys.gpact.common.RevertReason;
-import net.consensys.gpact.common.test.AbstractWeb3Test;
-import net.consensys.gpact.funcioninterfaces.soliditywrappers.HiddenParamDestTest;
-import net.consensys.gpact.funcioninterfaces.soliditywrappers.HiddenParamSourceTest;
+import net.consensys.gpact.soliditywrappers.functioncall.HiddenParamDestTest;
+import net.consensys.gpact.soliditywrappers.functioncall.HiddenParamSourceTest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,7 +28,7 @@ import org.junit.jupiter.api.Test;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.exceptions.TransactionException;
 
-public class HiddenParamsTest extends AbstractWeb3Test {
+public class HiddenParamsTest extends AbstractWeb3JavaTest {
   private static final Logger LOG = LogManager.getLogger(HiddenParamsTest.class);
 
   // Have the polling interval equal to the block time.

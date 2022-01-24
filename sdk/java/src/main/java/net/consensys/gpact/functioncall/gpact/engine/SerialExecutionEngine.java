@@ -29,7 +29,7 @@ public class SerialExecutionEngine extends AbstractExecutionEngine {
   }
 
   protected void executeCalls(
-          List<CallExecutionTree> calls, List<BigInteger> callPath, BlockchainId theCallerBlockchainId)
+      List<CallExecutionTree> calls, List<BigInteger> callPath, BlockchainId theCallerBlockchainId)
       throws Exception {
     BigInteger callOffset = BigInteger.ONE;
     for (CallExecutionTree segCall : calls) {
