@@ -2,11 +2,11 @@
 
 pragma solidity ^0.8.0;
 
-import "../../../../../../common/openzeppelin/src/main/solidity/utils/Context.sol";
-import "../../../../../../common/openzeppelin/src/main/solidity/access/AccessControlEnumerable.sol";
-import "../../../../../../common/openzeppelin/src/main/solidity/token/ERC721/extensions/ERC721Enumerable.sol";
-import "../../../../../../common/openzeppelin/src/main/solidity/token/ERC721/extensions/ERC721Burnable.sol";
-import "../../../../../../common/openzeppelin/src/main/solidity/token/ERC721/extensions/ERC721Pausable.sol";
+import "../../../../contracts/src/openzeppelin/utils/Context.sol";
+import "../../../../contracts/src/openzeppelin/access/AccessControlEnumerable.sol";
+import "../../../../contracts/src/openzeppelin/token/ERC721/extensions/ERC721Enumerable.sol";
+import "../../../../contracts/src/openzeppelin/token/ERC721/extensions/ERC721Burnable.sol";
+import "../../../../contracts/src/openzeppelin/token/ERC721/extensions/ERC721Pausable.sol";
 
 /**
  * This ERC 721 implementation is for the situation when an ERC 721 was issued on another

@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 
 import "../extensions/LockableERC20Burnable.sol";
 import "../extensions/LockableERC20Pausable.sol";
-import "../../../../../../../common/openzeppelin/src/main/solidity/access/AccessControlEnumerable.sol";
+import "../../../../../contracts/src/openzeppelin/access/AccessControlEnumerable.sol";
 
 /**
  * @dev This contract aims to mirror the Open Zeppelin ERC20PresetFixedSupply:

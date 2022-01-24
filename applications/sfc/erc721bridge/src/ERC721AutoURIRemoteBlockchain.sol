@@ -2,11 +2,6 @@
 
 pragma solidity ^0.8.0;
 
-import "../../../../../../common/openzeppelin/src/main/solidity/utils/Context.sol";
-import "../../../../../../common/openzeppelin/src/main/solidity/access/AccessControlEnumerable.sol";
-import "../../../../../../common/openzeppelin/src/main/solidity/token/ERC721/extensions/ERC721Enumerable.sol";
-import "../../../../../../common/openzeppelin/src/main/solidity/token/ERC721/extensions/ERC721Burnable.sol";
-import "../../../../../../common/openzeppelin/src/main/solidity/token/ERC721/extensions/ERC721Pausable.sol";
 import "./ERC721RemoteBlockchain.sol";
 
 /**

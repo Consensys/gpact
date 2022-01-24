@@ -1,14 +1,10 @@
 
 dependencies {
-//    implementation "io.reactivex.rxjava2:rxjava:${rxJavaVersion}"
-
-    testImplementation project (path: ':commontest')
-
-//    testImplementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
+    testImplementation project (":sdk")
 }
 
 task generateSources {
-    def script = "application/atomic-appcontracts/erc20/gen.sh".execute()
+    def script = "applications/gpact/erc20bridge/javatest/gen.sh".execute()
     script.waitForProcessOutput(System.out, System.err)
     if (script.exitValue() != 0) {
         throw new GradleException("Solidity compile error")

@@ -14,7 +14,6 @@
  */
 pragma solidity ^0.8.0;
 
-import "../../../../../../../common/openzeppelin/src/main/solidity/token/ERC20/IERC20.sol";
 import "../LockableERC20.sol";
 
 /**

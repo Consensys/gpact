@@ -13,13 +13,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 pragma solidity ^0.8.0;
-
-import "../../../../../../common/openzeppelin/src/main/solidity/utils/Context.sol";
-import "../../../../../../common/openzeppelin/src/main/solidity/token/ERC20/IERC20.sol";
-import "../../../../../../common/openzeppelin/src/main/solidity/token/ERC20/extensions/IERC20Metadata.sol";
-import "../../../../../../common/openzeppelin/src/main/solidity/access/Ownable.sol";
-import "../../../../lockablestorage/src/main/solidity/LockableStorage.sol";
-import "../../../../../../functioncall/interface/src/main/solidity/CrosschainFunctionCallInterface.sol";
+import "../../../../contracts/src/openzeppelin/utils/Context.sol";
+import "../../../../contracts/src/openzeppelin/token/ERC20/IERC20.sol";
+import "../../../../contracts/src/openzeppelin/token/ERC20/extensions/IERC20Metadata.sol";
+import "../../../../contracts/src/openzeppelin/access/Ownable.sol";
+import "../../../../contracts/src/application/lockablestorage/LockableStorage.sol";
 
 /**
  * Implementation of the {IERC20} interface that provides lockable storage for

@@ -14,8 +14,8 @@
  */
 pragma solidity >=0.8;
 
-import "../../../../../../functioncall/interface/src/main/solidity/CrosschainFunctionCallInterface.sol";
-import "../../../../../../functioncall/interface/src/main/solidity/CrosschainLockingInterface.sol";
+import "../../../../contracts/src/functioncall/interface/CrosschainFunctionCallInterface.sol";
+import "../../../../contracts/src/functioncall/interface/CrosschainLockingInterface.sol";
 
 contract MockCbcForERC20Test is
     CrosschainFunctionCallInterface,

@@ -14,8 +14,8 @@
  */
 pragma solidity ^0.8.0;
 
-import "../../../../../../../common/openzeppelin/src/main/solidity/security/Pausable.sol";
 import "../LockableERC20.sol";
+import "../../../../../contracts/src/openzeppelin/security/Pausable.sol";
 
 /**
  * @dev ERC20 token with pausable token transfers, minting and burning.

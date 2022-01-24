@@ -14,12 +14,9 @@
  */
 pragma solidity >=0.8.0;
 
-import "../../../../../../common/openzeppelin/src/main/solidity/token/ERC721/IERC721.sol";
-import "../../../../../../functioncall/interface/src/main/solidity/CrosschainFunctionCallInterface.sol";
-import "../../../../../../common/openzeppelin/src/main/solidity/access/AccessControl.sol";
-import "../../../../../../common/openzeppelin/src/main/solidity/security/Pausable.sol";
 import "./ERC721AutoURIRemoteBlockchain.sol";
-import "../../../../../../functioncall/interface/src/main/solidity/NonAtomicHiddenAuthParameters.sol";
+import "../../../../contracts/src/functioncall/interface/NonAtomicHiddenAuthParameters.sol";
+import "../../../../contracts/src/functioncall/interface/CrosschainFunctionCallInterface.sol";
 
 /**
  * ERC 20 bridge using the Simple Function Call protocol.

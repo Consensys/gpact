@@ -14,12 +14,12 @@
  */
 pragma solidity >=0.8.0;
 
-import "../../../../../../common/openzeppelin/src/main/solidity/token/ERC20/IERC20.sol";
-import "../../../../../../functioncall/interface/src/main/solidity/CrosschainFunctionCallInterface.sol";
-import "../../../../../../common/openzeppelin/src/main/solidity/access/AccessControl.sol";
-import "../../../../../../common/openzeppelin/src/main/solidity/security/Pausable.sol";
-import "../../../../../../common/openzeppelin/src/main/solidity/token/ERC20/presets/ERC20PresetMinterPauser.sol";
-import "../../../../../../functioncall/interface/src/main/solidity/NonAtomicHiddenAuthParameters.sol";
+import "../../../../contracts/src/functioncall/interface/NonAtomicHiddenAuthParameters.sol";
+import "../../../../contracts/src/openzeppelin/security/Pausable.sol";
+import "../../../../contracts/src/openzeppelin/access/AccessControl.sol";
+import "../../../../contracts/src/functioncall/interface/CrosschainFunctionCallInterface.sol";
+import "../../../../contracts/src/openzeppelin/token/ERC20/IERC20.sol";
+import "../../../../contracts/src/openzeppelin/token/ERC20/presets/ERC20PresetMinterPauser.sol";
 
 /**
  * ERC 20 bridge using the Simple Function Call protocol.

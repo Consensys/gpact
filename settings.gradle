@@ -2,8 +2,8 @@ rootProject.name = 'gpact'
 include 'sdk'
 include 'contracttest'
 
-//include 'app-gpact-erc20bridge'
-//include 'app-sfc-erc20bridge'
+include 'app-gpact-erc20bridge'
+include 'app-sfc-erc20bridge'
 //include 'app-sfc-erc721bridge'
 
 
@@ -34,8 +34,8 @@ include 'examples-singlebc-write'
 project(":sdk").projectDir = file("sdk/java")
 project(":contracttest").projectDir = file("contracts/javatest")
 
-//project(":app-gpact-erc20bridge").projectDir = file("applications/gpact/erc20bridge/javatest")
-//project(":app-sfc-erc20bridge").projectDir = file("applications/sfc/erc20bridge/javatest")
+project(":app-gpact-erc20bridge").projectDir = file("applications/gpact/erc20bridge/javatest")
+project(":app-sfc-erc20bridge").projectDir = file("applications/sfc/erc20bridge/javatest")
 //project(":app-sfc-erc721bridge").projectDir = file("applications/sfc/erc721bridge/javatest")
 
 

@@ -14,13 +14,12 @@
  */
 pragma solidity >=0.8.0;
 
-import "../../../../../../common/openzeppelin/src/main/solidity/token/ERC20/IERC20.sol";
-import "../../../../../../functioncall/interface/src/main/solidity/CrosschainFunctionCallInterface.sol";
-import "../../../../../../common/openzeppelin/src/main/solidity/access/AccessControl.sol";
-import "../../../../../../common/openzeppelin/src/main/solidity/security/Pausable.sol";
 import "./presets/LockableERC20PresetMinterPauser.sol";
 import "./LockableERC20.sol";
-import "../../../../../../functioncall/interface/src/main/solidity/AtomicHiddenAuthParameters.sol";
+import "../../../../contracts/src/functioncall/interface/AtomicHiddenAuthParameters.sol";
+import "../../../../contracts/src/openzeppelin/security/Pausable.sol";
+import "../../../../contracts/src/openzeppelin/access/AccessControl.sol";
+import "../../../../contracts/src/functioncall/interface/CrosschainFunctionCallInterface.sol";
 
 /**
  * ERC 20 bridge using the General Purpose Atomic Crosschain Transaction protocol.

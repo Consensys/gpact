@@ -1,14 +1,12 @@
 #!/usr/bin/env bash
 set -e
-rm -rf build
+# rm -rf build
 
-HERE=application/nonatomic-appcontracts/erc721bridge
+HERE=applications/sfc/erc721bridge/javatest
 BUILDDIR=$HERE/build
-CONTRACTSDIR=$HERE/src/main/solidity
-TESTCONTRACTSDIR=$HERE/src/test/solidity
-OUTPUTDIR=$HERE/src/main/java
-TESTOUTPUTDIR=$HERE/src/test/java
-PACKAGE=net.consensys.gpact.appcontracts.nonatomic.erc721bridge.soliditywrappers
+CONTRACTSDIR=applications/sfc/erc721bridge/src
+OUTPUTDIR=$HERE/src/test/java
+PACKAGE=net.consensys.gpact.soliditywrappers.applications.sfc.erc721bridge
 #WEB3J=web3j
 WEB3J=../web3j-abi/codegen/build/install/codegen/bin/codegen
 
