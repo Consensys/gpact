@@ -20,8 +20,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
-import net.consensys.gpact.AbstractWeb3JavaTest;
 import net.consensys.gpact.common.*;
+import net.consensys.gpact.common.test.AbstractWeb3Test;
 import net.consensys.gpact.functioncall.sfc.SimpleCrossControlManager;
 import net.consensys.gpact.messaging.SignedEvent;
 import net.consensys.gpact.soliditywrappers.functioncall.sfc.SimpleCrosschainControl;
@@ -33,7 +33,7 @@ import org.junit.jupiter.api.Test;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.exceptions.TransactionException;
 
-public class EventRelayTest extends AbstractWeb3JavaTest {
+public class EventRelayTest extends AbstractWeb3Test {
   private MessagingRegistrar registrarContract;
   private EventRelayVerifier eventStoreContract;
   private SimpleCrosschainControl sfc;

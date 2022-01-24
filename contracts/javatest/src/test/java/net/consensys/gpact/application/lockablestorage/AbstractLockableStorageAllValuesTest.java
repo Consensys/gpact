@@ -14,7 +14,7 @@
  */
 package net.consensys.gpact.application.lockablestorage;
 
-import net.consensys.gpact.AbstractWeb3JavaTest;
+import net.consensys.gpact.common.test.AbstractWeb3Test;
 import net.consensys.gpact.soliditywrappers.application.lockablestorage.MockCbcForLockableStorageTest;
 import net.consensys.gpact.soliditywrappers.application.lockablestorage.TestLockableStorageWrapperAllValues;
 
@@ -22,7 +22,7 @@ import net.consensys.gpact.soliditywrappers.application.lockablestorage.TestLock
  * Check operation, assuming the calls are single blockchain (that is not part of a
  * cross-blockchain) call.
  */
-public class AbstractLockableStorageAllValuesTest extends AbstractWeb3JavaTest {
+public class AbstractLockableStorageAllValuesTest extends AbstractWeb3Test {
   static byte[] crosschainRootTxId;
   static byte[] zero;
 

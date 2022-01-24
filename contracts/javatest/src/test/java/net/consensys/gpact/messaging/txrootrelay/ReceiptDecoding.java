@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import net.consensys.gpact.AbstractWeb3JavaTest;
+import net.consensys.gpact.common.test.AbstractWeb3Test;
 import net.consensys.gpact.messaging.txrootrelay.besuethereum.core.Hash;
 import net.consensys.gpact.messaging.txrootrelay.besuethereum.core.LogTopic;
 import net.consensys.gpact.messaging.txrootrelay.besuethereum.rlp.RLP;
@@ -30,7 +30,7 @@ import org.junit.jupiter.api.Test;
 import org.web3j.protocol.core.methods.response.Log;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
-public class ReceiptDecoding extends AbstractWeb3JavaTest {
+public class ReceiptDecoding extends AbstractWeb3Test {
   @Test
   public void numLogsFound() throws Exception {
     setupWeb3();

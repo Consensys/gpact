@@ -24,12 +24,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import net.consensys.gpact.AbstractWeb3JavaTest;
 import net.consensys.gpact.common.AnIdentity;
 import net.consensys.gpact.common.FastTxManager;
 import net.consensys.gpact.common.RevertReason;
 import net.consensys.gpact.common.TxManagerCache;
 import net.consensys.gpact.common.crypto.KeyPairGen;
+import net.consensys.gpact.common.test.AbstractWeb3Test;
 import net.consensys.gpact.messaging.txrootrelay.besuethereum.core.Hash;
 import net.consensys.gpact.messaging.txrootrelay.besuethereum.core.LogTopic;
 import net.consensys.gpact.messaging.txrootrelay.besuethereum.rlp.RLP;
@@ -60,7 +60,7 @@ import org.web3j.tx.exceptions.ContractCallException;
 import org.web3j.tx.response.PollingTransactionReceiptProcessor;
 import org.web3j.tx.response.TransactionReceiptProcessor;
 
-public class TxRootAddTest extends AbstractWeb3JavaTest {
+public class TxRootAddTest extends AbstractWeb3Test {
   static final Logger LOG = LogManager.getLogger(TxRootAddTest.class);
 
   final byte[] txReceiptRoot = new byte[32];

@@ -2,22 +2,15 @@ rootProject.name = 'gpact'
 include 'sdk'
 include 'contracttest'
 
+//include 'app-gpact-erc20bridge'
+//include 'app-sfc-erc20bridge'
+//include 'app-sfc-erc721bridge'
+
+
 /*
 include 'openzeppelin'
 
-include 'mes-interface'
-include 'mes-attestor-sign'
-include 'mes-txroot-transfer'
-include 'mes-event-relay'
 
-include 'func-interface'
-include 'gpact'
-include 'sfc'
-
-include 'app-erc20'
-include 'app-lockablestorage'
-include 'app-nonatomic-erc20bridge'
-include 'app-nonatomic-erc721bridge'
 
 include 'examplehelpers'
 include 'examples-conditional'
@@ -39,23 +32,14 @@ include 'examples-singlebc-write'
 */
 
 project(":sdk").projectDir = file("sdk/java")
-
 project(":contracttest").projectDir = file("contracts/javatest")
+
+//project(":app-gpact-erc20bridge").projectDir = file("applications/gpact/erc20bridge/javatest")
+//project(":app-sfc-erc20bridge").projectDir = file("applications/sfc/erc20bridge/javatest")
+//project(":app-sfc-erc721bridge").projectDir = file("applications/sfc/erc721bridge/javatest")
+
+
 /*
-project(":openzeppelin").projectDir = file("common/openzeppelin")
-
-project(":mes-interface").projectDir = file("messaging/interface")
-project(":mes-attestor-sign").projectDir = file("messaging/attestor-sign")
-project(":mes-txroot-transfer").projectDir = file("messaging/txroot-transfer")
-project(":mes-event-relay").projectDir = file("messaging/event-relay")
-project(":func-interface").projectDir = file("functioncall/interface")
-project(":gpact").projectDir = file("functioncall/gpact")
-project(":sfc").projectDir = file("functioncall/sfc")
-
-project(":app-erc20").projectDir = file("application/atomic-appcontracts/erc20")
-project(":app-lockablestorage").projectDir = file("application/atomic-appcontracts/lockablestorage")
-project(":app-nonatomic-erc20bridge").projectDir = file("application/nonatomic-appcontracts/erc20bridge")
-project(":app-nonatomic-erc721bridge").projectDir = file("application/nonatomic-appcontracts/erc721bridge")
 
 project(":examplehelpers").projectDir = file("common/examplehelpers")
 project(":examples-conditional").projectDir = file("application/gpact-examples/conditional")

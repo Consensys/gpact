@@ -1,11 +1,10 @@
 
 dependencies {
-    implementation "io.reactivex.rxjava2:rxjava:${rxJavaVersion}"
+//    implementation "io.reactivex.rxjava2:rxjava:${rxJavaVersion}"
 
-    testImplementation project (path: ':common')
     testImplementation project (path: ':commontest')
 
-    testImplementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
+//    testImplementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
 }
 
 task generateSources {

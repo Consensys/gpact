@@ -16,8 +16,8 @@ package net.consensys.gpact.functioncall;
 
 import java.math.BigInteger;
 import java.util.List;
-import net.consensys.gpact.AbstractWeb3JavaTest;
 import net.consensys.gpact.common.RevertReason;
+import net.consensys.gpact.common.test.AbstractWeb3Test;
 import net.consensys.gpact.soliditywrappers.functioncall.HiddenParamDestTest;
 import net.consensys.gpact.soliditywrappers.functioncall.HiddenParamSourceTest;
 import org.apache.logging.log4j.LogManager;
@@ -28,7 +28,7 @@ import org.junit.jupiter.api.Test;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.exceptions.TransactionException;
 
-public class HiddenParamsTest extends AbstractWeb3JavaTest {
+public class HiddenParamsTest extends AbstractWeb3Test {
   private static final Logger LOG = LogManager.getLogger(HiddenParamsTest.class);
 
   // Have the polling interval equal to the block time.

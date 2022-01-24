@@ -4,12 +4,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import net.consensys.gpact.AbstractWeb3JavaTest;
 import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.common.Tuple;
+import net.consensys.gpact.common.test.AbstractWeb3Test;
 import org.junit.jupiter.api.Test;
 
-public abstract class CallExecutionTreeTestCommon extends AbstractWeb3JavaTest {
+public abstract class CallExecutionTreeTestCommon extends AbstractWeb3Test {
   public static byte[] BIG32 =
       new byte[] {
         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,

@@ -12,7 +12,7 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package net.consensys.gpact;
+package net.consensys.gpact.common.test;
 
 import java.math.BigInteger;
 import java.util.Optional;
@@ -34,8 +34,8 @@ import org.web3j.tx.gas.StaticGasProvider;
 import org.web3j.tx.response.PollingTransactionReceiptProcessor;
 import org.web3j.tx.response.TransactionReceiptProcessor;
 
-public abstract class AbstractWeb3JavaTest {
-  private static final Logger LOG = LogManager.getLogger(AbstractWeb3JavaTest.class);
+public abstract class AbstractWeb3Test {
+  private static final Logger LOG = LogManager.getLogger(AbstractWeb3Test.class);
 
   protected static final BigInteger BLOCKCHAIN_ID = BigInteger.valueOf(31);
   private static final String IP_PORT = "127.0.0.1:8310";
