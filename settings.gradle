@@ -10,18 +10,15 @@ include 'examples-gpact-conditional'
 include 'examples-gpact-erc20bridge'
 include 'examples-gpact-hoteltrain'
 
+include 'examples-sfc-erc20bridge'
+include 'examples-sfc-erc721bridge'
 
 /*
-
-
-
 include 'examples-read'
 include 'examples-trade'
 include 'examples-utilpkey'
 include 'examples-write'
 
-include 'examples-sfc-erc20tokenbridge'
-include 'examples-sfc-erc721tokenbridge'
 include 'examples-sfc-write'
 
 include 'examples-singlebc-hoteltrain'
@@ -42,6 +39,8 @@ project(":examples-gpact-conditional").projectDir = file("examples/gpact/conditi
 project(":examples-gpact-erc20bridge").projectDir = file("examples/gpact/erc20bridge/java")
 project(":examples-gpact-hoteltrain").projectDir = file("examples/gpact/hotel-train/java")
 
+project(":examples-sfc-erc20bridge").projectDir = file("examples/sfc/erc20bridge/java")
+project(":examples-sfc-erc721bridge").projectDir = file("examples/sfc/erc721bridge/java")
 
 /*
 
@@ -50,8 +49,6 @@ project(":examples-trade").projectDir = file("application/gpact-examples/trade")
 project(":examples-utilpkey").projectDir = file("application/gpact-examples/utilpkey")
 project(":examples-write").projectDir = file("application/gpact-examples/write")
 
-project(":examples-sfc-erc20tokenbridge").projectDir = file("application/sfc-examples/erc20tokenbridge")
-project(":examples-sfc-erc721tokenbridge").projectDir = file("application/sfc-examples/erc721tokenbridge")
 project(":examples-sfc-write").projectDir = file("application/sfc-examples/write")
 
 project(":examples-singlebc-hoteltrain").projectDir = file("performance/base/singlebc-hotel-train")
