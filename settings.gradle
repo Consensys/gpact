@@ -10,12 +10,12 @@ include 'examples-gpact-conditional'
 include 'examples-gpact-erc20bridge'
 include 'examples-gpact-hoteltrain'
 include 'examples-gpact-read'
+include 'examples-gpact-trade'
 
 include 'examples-sfc-erc20bridge'
 include 'examples-sfc-erc721bridge'
 
 /*
-include 'examples-trade'
 include 'examples-utilpkey'
 include 'examples-write'
 
@@ -39,13 +39,13 @@ project(":examples-gpact-conditional").projectDir = file("examples/gpact/conditi
 project(":examples-gpact-erc20bridge").projectDir = file("examples/gpact/erc20bridge/java")
 project(":examples-gpact-hoteltrain").projectDir = file("examples/gpact/hotel-train/java")
 project(":examples-gpact-read").projectDir = file("examples/gpact/read/java")
+project(":examples-gpact-trade").projectDir = file("examples/gpact/trade/java")
 
 project(":examples-sfc-erc20bridge").projectDir = file("examples/sfc/erc20bridge/java")
 project(":examples-sfc-erc721bridge").projectDir = file("examples/sfc/erc721bridge/java")
 
 /*
 
-project(":examples-trade").projectDir = file("application/gpact-examples/trade")
 project(":examples-utilpkey").projectDir = file("application/gpact-examples/utilpkey")
 project(":examples-write").projectDir = file("application/gpact-examples/write")
 
