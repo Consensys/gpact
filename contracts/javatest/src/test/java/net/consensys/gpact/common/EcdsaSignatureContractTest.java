@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.math.BigInteger;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
-import net.consensys.gpact.common.crypto.EcdsaSignatureConversion;
 import net.consensys.gpact.common.crypto.KeyPairGen;
 import net.consensys.gpact.soliditywrappers.common.EcdsaSignatureTest;
 import org.junit.jupiter.api.Test;
@@ -67,7 +66,7 @@ public class EcdsaSignatureContractTest {
     String privateKey = keyGen.generateKeyPairGetPrivateKey();
     ECKeyPair keyPair = ECKeyPair.create(Numeric.toBigInt(privateKey));
     Sign.SignatureData signatureData = Sign.signMessage(plainText, keyPair);
-    byte[] signature = EcdsaSignatureConversion.convert(signatureData);
+    byte[] signature = convert(signatureData);
 
     String address = Keys.getAddress(keyPair.getPublicKey().toString(16));
 
@@ -87,7 +86,7 @@ public class EcdsaSignatureContractTest {
     String privateKey = keyGen.generateKeyPairGetPrivateKey();
     ECKeyPair keyPair = ECKeyPair.create(Numeric.toBigInt(privateKey));
     Sign.SignatureData signatureData = Sign.signMessage(plainText, keyPair);
-    byte[] signature = EcdsaSignatureConversion.convert(signatureData);
+    byte[] signature = convert(signatureData);
 
     String address = Keys.getAddress(keyPair.getPublicKey().toString(16));
 
@@ -152,5 +151,18 @@ public class EcdsaSignatureContractTest {
     //    LOG.info("Deploying contracts");
     this.ecdsaTestContract =
         EcdsaSignatureTest.deploy(this.web3j, this.tm, this.freeGasProvider).send();
+  }
+
+  /** Convert from Web3J signature class to an array of bytes. */
+  public static byte[] convert(final Sign.SignatureData signatureData) {
+    final int lengthR = 32;
+    final int lengthS = 32;
+    final int lengthV = 1;
+    final int signatureLength = lengthR + lengthS + lengthV;
+    byte[] signature = new byte[signatureLength];
+    System.arraycopy(signatureData.getR(), 0, signature, 0, lengthR);
+    System.arraycopy(signatureData.getS(), 0, signature, lengthR, lengthS);
+    System.arraycopy(signatureData.getV(), 0, signature, lengthR + lengthS, lengthV);
+    return signature;
   }
 }
