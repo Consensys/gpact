@@ -12,7 +12,7 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package net.consensys.gpact.examples.read;
+package net.consensys.gpact.examples.gpact.read;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -20,7 +20,7 @@ import java.util.List;
 import net.consensys.gpact.common.AbstractBlockchain;
 import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.common.DynamicGasProvider;
-import net.consensys.gpact.examples.read.soliditywrappers.ContractA;
+import net.consensys.gpact.soliditywrappers.examples.gpact.read.ContractA;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;

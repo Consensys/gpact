@@ -15,8 +15,8 @@
 pragma solidity >=0.7.1;
 
 import "./ContractB.sol";
-import "../../../../../atomic-appcontracts/lockablestorage/src/main/solidity/LockableStorage.sol";
-import "../../../../../../functioncall/interface/src/main/solidity/CrosschainFunctionCallReturnInterface.sol";
+import "../../../../contracts/src/application/lockablestorage/LockableStorage.sol";
+import "../../../../contracts/src/functioncall/interface/CrosschainFunctionCallReturnInterface.sol";
 
 contract ContractA is LockableStorage {
     uint256 otherBcId;

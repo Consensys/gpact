@@ -12,18 +12,18 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package net.consensys.gpact.examples.read.sim;
+package net.consensys.gpact.examples.gpact.read.sim;
 
-import net.consensys.gpact.examples.read.Bc1ContractA;
+import net.consensys.gpact.examples.gpact.read.Bc2ContractB;
 
-public class SimContractA {
-  private Bc1ContractA bc1ContractA;
+public class SimContractB {
+  private Bc2ContractB bc2ContractB;
 
-  public SimContractA(Bc1ContractA contract) {
-    this.bc1ContractA = contract;
+  public SimContractB(Bc2ContractB contract) {
+    this.bc2ContractB = contract;
   }
 
-  public String getRlpFunctionSignature_DoCrosschainRead() {
-    return this.bc1ContractA.getRlpFunctionSignature_DoCrosschainRead();
+  public String getRlpFunctionSignature_Get() {
+    return this.bc2ContractB.getRlpFunctionSignature_Get();
   }
 }

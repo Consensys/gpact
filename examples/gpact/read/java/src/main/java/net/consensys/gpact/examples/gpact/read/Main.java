@@ -12,18 +12,18 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package net.consensys.gpact.examples.read;
+package net.consensys.gpact.examples.gpact.read;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import net.consensys.gpact.cbc.CrossControlManagerGroup;
-import net.consensys.gpact.cbc.CrosschainExecutor;
-import net.consensys.gpact.cbc.calltree.CallExecutionTree;
-import net.consensys.gpact.cbc.engine.ExecutionEngine;
 import net.consensys.gpact.common.*;
-import net.consensys.gpact.examples.read.sim.SimContractA;
-import net.consensys.gpact.examples.read.sim.SimContractB;
+import net.consensys.gpact.examples.gpact.read.sim.SimContractA;
+import net.consensys.gpact.examples.gpact.read.sim.SimContractB;
+import net.consensys.gpact.functioncall.gpact.CrossControlManagerGroup;
+import net.consensys.gpact.functioncall.gpact.CrosschainExecutor;
+import net.consensys.gpact.functioncall.gpact.calltree.CallExecutionTree;
+import net.consensys.gpact.functioncall.gpact.engine.ExecutionEngine;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
