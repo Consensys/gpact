@@ -1,5 +1,7 @@
 rootProject.name = 'gpact'
-include 'common'
+include 'sdk'
+
+/*
 include 'commontest'
 include 'openzeppelin'
 
@@ -34,9 +36,11 @@ include 'examples-singlebc-hoteltrain'
 include 'examples-singlebc-read'
 include 'examples-singlebc-trade'
 include 'examples-singlebc-write'
+*/
 
-project(":common").projectDir = file("common/common")
-project(":commontest").projectDir = file("common/commontest")
+project(":sdk").projectDir = file("sdk/java")
+
+/* project(":commontest").projectDir = file("common/commontest")
 project(":openzeppelin").projectDir = file("common/openzeppelin")
 
 project(":mes-interface").projectDir = file("messaging/interface")
@@ -69,4 +73,4 @@ project(":examples-singlebc-hoteltrain").projectDir = file("performance/base/sin
 project(":examples-singlebc-read").projectDir = file("performance/base/singlebc-read")
 project(":examples-singlebc-trade").projectDir = file("performance/base/singlebc-trade")
 project(":examples-singlebc-write").projectDir = file("performance/base/singlebc-write")
-
+*/
