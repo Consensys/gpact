@@ -1,21 +1,19 @@
 #!/usr/bin/env bash
 set -e
-rm -rf build
+#rm -rf build
 
-HERE=application/gpact-examples/conditional
+HERE=examples/gpact/conditional/java
 BUILDDIR=$HERE/build
-CONTRACTSDIR=$HERE/src/main/solidity
-TESTCONTRACTSDIR=$HERE/src/test/solidity
+CONTRACTSDIR=examples/gpact/conditional/src
 OUTPUTDIR=$HERE/src/main/java
-TESTOUTPUTDIR=$HERE/src/test/java
-PACKAGE=net.consensys.gpact.examples.conditional.soliditywrappers
+PACKAGE=net.consensys.gpact.soliditywrappers.examples.conditional
 #WEB3J=web3j
 WEB3J=../web3j-abi/codegen/build/install/codegen/bin/codegen
 
 
 # compiling one file also compiles its dependendencies. We use overwrite to avoid the related warnings.
-solc $CONTRACTSDIR/OtherBlockchainContract.sol --allow-paths . --bin --abi --optimize -o $BUILDDIR --overwrite
-solc $CONTRACTSDIR/RootBlockchainContract.sol --allow-paths . --bin --abi --optimize -o $BUILDDIR --overwrite
+solc $CONTRACTSDIR/OtherBlockchainContract.sol --bin --abi --optimize -o $BUILDDIR --overwrite
+solc $CONTRACTSDIR/RootBlockchainContract.sol --bin --abi --optimize -o $BUILDDIR --overwrite
 # ls -al $BUILDDIR
 
 $WEB3J solidity generate -r -a=$BUILDDIR/OtherBlockchainContract.abi -b=$BUILDDIR/OtherBlockchainContract.bin -o=$OUTPUTDIR -p=$PACKAGE

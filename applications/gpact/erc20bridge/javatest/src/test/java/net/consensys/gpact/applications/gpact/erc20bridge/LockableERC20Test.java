@@ -12,7 +12,7 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package net.consensys.gpact.appcontracts.atomic.erc20;
+package net.consensys.gpact.applications.gpact.erc20bridge;
 
 import java.math.BigInteger;
 import net.consensys.gpact.common.RevertReason;

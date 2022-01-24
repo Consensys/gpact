@@ -14,7 +14,7 @@
  */
 pragma solidity >=0.7.1;
 import "./OtherBlockchainContractInterface.sol";
-import "../../../../../atomic-appcontracts/lockablestorage/src/main/solidity/LockableStorage.sol";
+import "../../../../contracts/src/application/lockablestorage/LockableStorage.sol";
 
 contract OtherBlockchainContract is
     OtherBlockchainContractInterface,

@@ -15,9 +15,9 @@
 pragma solidity >=0.7.1;
 
 import "./OtherBlockchainContractInterface.sol";
-import "../../../../../atomic-appcontracts/lockablestorage/src/main/solidity/LockableStorage.sol";
-import "../../../../../../functioncall/interface/src/main/solidity/CrosschainFunctionCallInterface.sol";
-import "../../../../../../functioncall/interface/src/main/solidity/CrosschainFunctionCallReturnInterface.sol";
+import "../../../../contracts/src/application/lockablestorage/LockableStorage.sol";
+import "../../../../contracts/src/functioncall/interface/CrosschainFunctionCallInterface.sol";
+import "../../../../contracts/src/functioncall/interface/CrosschainFunctionCallReturnInterface.sol";
 
 contract RootBlockchainContract is LockableStorage {
     uint256 private otherBlockchainId;

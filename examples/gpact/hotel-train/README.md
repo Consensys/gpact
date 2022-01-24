@@ -31,7 +31,7 @@ each operating as a node on a separate blockchain.
 
 The diagram below shows the system architecture.
 
-![Architecture Diagram](architecture.png)
+![Architecture Diagram](examples/gpact/hotel-train/architecture.png)
 
 The Hotel operates a blockchain to allow travel agencies and individuals 
 to book and pay for rooms. The Hotel has a Hotel contract to allow booking 

@@ -4,16 +4,15 @@ include 'contracttest'
 
 include 'app-gpact-erc20bridge'
 include 'app-sfc-erc20bridge'
-//include 'app-sfc-erc721bridge'
+include 'app-sfc-erc721bridge'
+include 'examplehelpers'
+include 'examples-gpact-conditional'
 
 
 /*
-include 'openzeppelin'
 
 
 
-include 'examplehelpers'
-include 'examples-conditional'
 include 'examples-hoteltrain'
 include 'examples-read'
 include 'examples-gpact-erc20tokenbridge'
@@ -36,13 +35,14 @@ project(":contracttest").projectDir = file("contracts/javatest")
 
 project(":app-gpact-erc20bridge").projectDir = file("applications/gpact/erc20bridge/javatest")
 project(":app-sfc-erc20bridge").projectDir = file("applications/sfc/erc20bridge/javatest")
-//project(":app-sfc-erc721bridge").projectDir = file("applications/sfc/erc721bridge/javatest")
+project(":app-sfc-erc721bridge").projectDir = file("applications/sfc/erc721bridge/javatest")
+
+project(":examplehelpers").projectDir = file("examples/examplehelpers")
+project(":examples-gpact-conditional").projectDir = file("examples/gpact/conditional/java")
 
 
 /*
 
-project(":examplehelpers").projectDir = file("common/examplehelpers")
-project(":examples-conditional").projectDir = file("application/gpact-examples/conditional")
 project(":examples-hoteltrain").projectDir = file("application/gpact-examples/hotel-train")
 project(":examples-read").projectDir = file("application/gpact-examples/read")
 project(":examples-gpact-erc20tokenbridge").projectDir = file("application/gpact-examples/erc20tokenbridge")
