@@ -7,13 +7,13 @@ include 'app-sfc-erc20bridge'
 include 'app-sfc-erc721bridge'
 include 'examplehelpers'
 include 'examples-gpact-conditional'
+include 'examples-gpact-hoteltrain'
 
 
 /*
 
 
 
-include 'examples-hoteltrain'
 include 'examples-read'
 include 'examples-gpact-erc20tokenbridge'
 include 'examples-trade'
@@ -39,11 +39,11 @@ project(":app-sfc-erc721bridge").projectDir = file("applications/sfc/erc721bridg
 
 project(":examplehelpers").projectDir = file("examples/examplehelpers")
 project(":examples-gpact-conditional").projectDir = file("examples/gpact/conditional/java")
+project(":examples-gpact-hoteltrain").projectDir = file("examples/gpact/hotel-train/java")
 
 
 /*
 
-project(":examples-hoteltrain").projectDir = file("application/gpact-examples/hotel-train")
 project(":examples-read").projectDir = file("application/gpact-examples/read")
 project(":examples-gpact-erc20tokenbridge").projectDir = file("application/gpact-examples/erc20tokenbridge")
 project(":examples-trade").projectDir = file("application/gpact-examples/trade")

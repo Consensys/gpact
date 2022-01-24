@@ -12,7 +12,7 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package net.consensys.gpact.nonatomic.appcontracts.erc20bridge;
+package net.consensys.gpact.applications.sfc.erc20bridge;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -21,7 +21,7 @@ import java.util.List;
 import net.consensys.gpact.common.test.AbstractWeb3Test;
 import net.consensys.gpact.common.test.DummyAddressGenerator;
 import net.consensys.gpact.common.test.DummyBlockchainIdGenerator;
-import net.consensys.gpact.nonatomic.appcontracts.erc20bridge.soliditywrappers.SfcErc20Bridge;
+import net.consensys.gpact.soliditywrappers.applications.sfc.erc20bridge.SfcErc20Bridge;
 import org.junit.jupiter.api.Test;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 

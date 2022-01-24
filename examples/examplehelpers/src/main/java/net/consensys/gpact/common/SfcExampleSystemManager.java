@@ -1,14 +1,14 @@
 package net.consensys.gpact.common;
 
 import java.util.ArrayList;
-import net.consensys.gpact.attestorsign.AttestorSignerGroup;
-import net.consensys.gpact.attestorsign.AttestorSignerManagerGroup;
+import net.consensys.gpact.functioncall.sfc.SimpleCrossControlManager;
+import net.consensys.gpact.functioncall.sfc.SimpleCrossControlManagerGroup;
 import net.consensys.gpact.messaging.MessagingManagerGroupInterface;
-import net.consensys.gpact.sfccbc.SimpleCrossControlManager;
-import net.consensys.gpact.sfccbc.SimpleCrossControlManagerGroup;
-import net.consensys.gpact.txroot.TxRootRelayerGroup;
-import net.consensys.gpact.txroot.TxRootTransferGroup;
-import net.consensys.gpact.txroot.TxRootTransferManagerGroup;
+import net.consensys.gpact.messaging.eventattest.AttestorSignerGroup;
+import net.consensys.gpact.messaging.eventattest.AttestorSignerManagerGroup;
+import net.consensys.gpact.messaging.txrootrelay.TxRootRelayerGroup;
+import net.consensys.gpact.messaging.txrootrelay.TxRootTransferGroup;
+import net.consensys.gpact.messaging.txrootrelay.TxRootTransferManagerGroup;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;

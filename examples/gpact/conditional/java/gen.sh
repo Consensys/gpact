@@ -6,7 +6,7 @@ HERE=examples/gpact/conditional/java
 BUILDDIR=$HERE/build
 CONTRACTSDIR=examples/gpact/conditional/src
 OUTPUTDIR=$HERE/src/main/java
-PACKAGE=net.consensys.gpact.soliditywrappers.examples.conditional
+PACKAGE=net.consensys.gpact.soliditywrappers.examples.gpact.conditional
 #WEB3J=web3j
 WEB3J=../web3j-abi/codegen/build/install/codegen/bin/codegen
 
