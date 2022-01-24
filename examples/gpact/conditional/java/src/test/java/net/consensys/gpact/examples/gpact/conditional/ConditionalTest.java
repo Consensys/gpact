@@ -1,11 +1,10 @@
 package net.consensys.gpact.examples.gpact.conditional;
 
 import net.consensys.gpact.common.AbstractExampleTest;
-import net.consensys.gpact.examples.conditional.Main;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-public class CrosschainConditional extends AbstractExampleTest {
+public class ConditionalTest extends AbstractExampleTest {
 
   @Disabled
   @Test

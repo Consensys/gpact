@@ -12,11 +12,11 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package net.consensys.gpact.examples.erc20tokenbridge;
+package net.consensys.gpact.examples.gpact.erc20bridge;
 
 import java.math.BigInteger;
-import net.consensys.gpact.cbc.CrossControlManagerGroup;
 import net.consensys.gpact.common.*;
+import net.consensys.gpact.functioncall.gpact.CrossControlManagerGroup;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;

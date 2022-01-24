@@ -12,16 +12,16 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package net.consensys.gpact.examples.erc20tokenbridge;
+package net.consensys.gpact.examples.gpact.erc20bridge;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import net.consensys.gpact.appcontracts.atomic.erc20.soliditywrappers.GpactERC20Bridge;
-import net.consensys.gpact.appcontracts.atomic.erc20.soliditywrappers.LockableERC20PresetFixedSupply;
 import net.consensys.gpact.common.AbstractBlockchain;
 import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.common.DynamicGasProvider;
 import net.consensys.gpact.common.RevertReason;
+import net.consensys.gpact.soliditywrappers.examples.gpact.erc20bridge.GpactERC20Bridge;
+import net.consensys.gpact.soliditywrappers.examples.gpact.erc20bridge.LockableERC20PresetFixedSupply;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;

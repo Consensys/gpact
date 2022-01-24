@@ -12,12 +12,12 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package net.consensys.gpact.exampletest;
+package net.consensys.gpact.examples.gpact.erc20bridge;
 
-import net.consensys.gpact.examples.erc20tokenbridge.TokenBridge;
+import net.consensys.gpact.common.AbstractExampleTest;
 import org.junit.jupiter.api.Test;
 
-public class CrosschainTokenBridge extends AbstractExampleTest {
+public class Erc20BridgeTest extends AbstractExampleTest {
 
   @Test
   public void directSignSerialMultiBlockchain() throws Exception {

@@ -1,17 +1,18 @@
-package net.consensys.gpact.examples.erc20tokenbridge;
+package net.consensys.gpact.examples.gpact.erc20bridge;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
-import net.consensys.gpact.appcontracts.atomic.erc20.soliditywrappers.GpactERC20Bridge;
-import net.consensys.gpact.appcontracts.atomic.erc20.soliditywrappers.LockableERC20PresetFixedSupply;
-import net.consensys.gpact.cbc.CrossControlManagerGroup;
-import net.consensys.gpact.cbc.CrosschainExecutor;
-import net.consensys.gpact.cbc.calltree.CallExecutionTree;
-import net.consensys.gpact.cbc.engine.*;
 import net.consensys.gpact.common.*;
+import net.consensys.gpact.functioncall.gpact.CrossControlManagerGroup;
+import net.consensys.gpact.functioncall.gpact.CrosschainExecutor;
+import net.consensys.gpact.functioncall.gpact.calltree.CallExecutionTree;
+import net.consensys.gpact.functioncall.gpact.engine.ExecutionEngine;
+import net.consensys.gpact.functioncall.gpact.engine.SerialExecutionEngine;
 import net.consensys.gpact.messaging.MessagingVerificationInterface;
+import net.consensys.gpact.soliditywrappers.examples.gpact.erc20bridge.GpactERC20Bridge;
+import net.consensys.gpact.soliditywrappers.examples.gpact.erc20bridge.LockableERC20PresetFixedSupply;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
