@@ -1,2 +1,5 @@
-Lockable ERC20 allows ERC 20 tokens to be used as 
-part of a crosschain transaction.
+GPACT ERC 20 Bridge
+----------
+The directory contains contracts for a GPACT
+compatible ERC 20 bridge along with lockable ERC20
+contracts.

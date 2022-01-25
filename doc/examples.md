@@ -3,10 +3,10 @@
 ## Set-up Ethereum nodes
 The samples can be used with Ethereum MainNet, one of the test networks,
 or blockchain nodes that run locally on your computer. To run blockchain 
-nodes on your computer, see https://github.com/ConsenSys/gpact/blob/master/doc/blockchains.md
+nodes on your computer, see [Preparing Test Blockchains](./blockchains.md)
 
 ## Private Key
-The example code needs a private key. Please use the utilpkey example to 
+The example code needs a private key. Please use the [PKey Utility](../utils/pkey/README.md) to 
 generate a private key. ./example.props contains a private key that could 
 be used to test purposes.
 

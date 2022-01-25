@@ -33,13 +33,13 @@ To build and test:
 
 To build the relayer:
 ```$xslt
-cd messaging/relayer
+cd services/relayer
 make build
 ```
 
 To test the relayer:
 ```$xslt
-cd messaging/relayer
+cd services/relayer
 make utest
 ```
 

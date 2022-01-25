@@ -15,62 +15,87 @@ of the protocol stack.
 <thead>
 <tr>
   <th>Crosschain Protocol Layer</th>
-  <th>Atomic Updates</th>
-  <th>Not Atomic Updates</th>
+  <th>GPACT<br>(Atomic Updates)</th>
+  <th>SFC<br>(Not Atomic Updates)</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-  <td rowspan=2>Crosschain Applications</td>
+  <td rowspan=3>Crosschain Application Layer</td>
   <td>Examples: <br>
-    <a href="https://github.com/ConsenSys/gpact/tree/main/application/gpact-examples/conditional">Conditional Execution</a><br>
-    <a href="https://github.com/ConsenSys/gpact/tree/main/application/gpact-examples/hotel-train">Hotel Train problem (3 blockchains)</a><br>
-    <a href="https://github.com/ConsenSys/gpact/tree/main/application/gpact-examples/read">Read across chains</a><br>
-    <a href="https://github.com/ConsenSys/gpact/tree/main/application/gpact-examples/erc20tokenbridge">ERC20 Token Bridge</a><br>
-    <a href="https://github.com/ConsenSys/gpact/tree/main/application/gpact-examples/trade">Trade-Finance (5 blockchains)</a><br>
-    <a href="https://github.com/ConsenSys/gpact/tree/main/application/gpact-examples/write">Write across chains</a><br>
+    <a href="./examples/gpact/conditional/">Conditional Execution</a><br>
+    <a href="./examples/gpact/hotel-train/">Hotel Train problem (3 blockchains)</a><br>
+    <a href="./examples/gpact/read/">Read across chains</a><br>
+    <a href="./examples/gpact/erc20bridge/">ERC 20 Bridge</a><br>
+    <a href="./examples/gpact/trade/">Trade-Finance (5 blockchains)</a><br>
+    <a href="./examples/gpact/write/">Write across chains</a><br>
   </td>
-  <td>Examples:
-    <a href="https://github.com/ConsenSys/gpact/tree/main/application/sfc-examples/erc20tokenbridge">ERC 20 Token Bridge</a><br>
-    <a href="https://github.com/ConsenSys/gpact/tree/main/application/sfc-examples/erc721tokenbridge">ERC 721 Token Bridge</a><br>
-    <a href="https://github.com/ConsenSys/gpact/tree/main/application/sfc-examples/write">Write across chains</a><br>
+  <td>Examples:<br>
+    <a href="./examples/sfc/erc20bridge/">ERC 20 Bridge</a><br>
+    <a href="./examples/sfc/erc721bridge">ERC 721 Bridge</a><br>
+    <a href="./examples/sfc/write/">Write across chains</a><br>
+  </td>
+</tr>
+<tr>
+  <td>Applications:<br>
+    <a href="./applications/gpact/erc20bridge/">ERC 20 Bridge</a><br>
+  </td>
+  <td>Applications:<br>
+    <a href="./applications/sfc/erc20bridge">ERC 20 Bridge</a><br>
+    <a href="./applications/sfc/erc721bridge">ERC 721 Bridge</a><br>
   </td>
 </tr>
 <tr>
   <td>Helper contracts:<br>
-    <a href="https://github.com/ConsenSys/gpact/tree/main/application/atomic-appcontracts/erc20">Crosschain ERC20</a><br>
-    <a href="https://github.com/ConsenSys/gpact/tree/main/application/atomic-appcontracts/erc20">Lockable storage</a><br>
+    <a href="./contracts/src/application/lockablestorage">Lockable storage</a><br>
   </td>
-  <td>Helper contracts:<br>
-    <a href="https://github.com/ConsenSys/gpact/tree/main/application/nonatomic-appcontracts/erc20bridge">ERC20 Token Bridge</a><br>
-    <a href="https://github.com/ConsenSys/gpact/tree/main/application/nonatomic-appcontracts/erc721bridge">ERC721 Token Bridge</a><br>
+  <td>
   </td>
 </tr>
+
+
 <tr>
-  <td rowspan="2">Crosschain Function Calls</td>
+  <td rowspan="2">Crosschain Function Call Layer</td>
   <td colspan=2>
-    <a href="https://github.com/ConsenSys/gpact/tree/main/functioncall/interface">Interfaces</a><br>
+    Interfaces: 
+    <a href="./contracts/src/functioncall/interface">Solidity Contracts</a>, 
+    <a href="./sdk/java/src/main/java/net/consensys/gpact/functioncall">Java SDK</a>
   </td>
 </tr>
 <tr>
   <td>
-    <a href="https://github.com/ConsenSys/gpact/tree/main/functioncall/gpact">General Purpose Atomic Crosschain Transaction (GPACT)</a><br>
+    General Purpose Atomic Crosschain Transaction (GPACT): 
+    <a href="./contracts/src/functioncall/gpact">Solidity Contracts</a>,
+    <a href="./sdk/java/src/main/java/net/consensys/gpact/functioncall/gpact">Java SDK</a>
   </td>
   <td>
-    <a href="https://github.com/ConsenSys/gpact/tree/main/functioncall/sfc">Simple Function Call (SFC)</a><br>
+    Simple Function Call (SFC): 
+    <a href="./contracts/src/functioncall/sfc">Solidity Contracts</a>, 
+    <a href="./sdk/java/src/main/java/net/consensys/gpact/functioncall/sfc">Java SDK</a><br>
   </td>
 </tr>
 <tr>
   <td rowspan="2">Crosschain Messaging</td>
   <td colspan=2>
-    <a href="https://github.com/ConsenSys/gpact/tree/main/messaging/interface">Interfaces</a><br>
+    Interfaces: 
+    <a href="./contracts/src/messaging/interface">Solidity Contracts</a>, 
+    <a href="./sdk/java/src/main/java/net/consensys/gpact/messaging">Java SDK</a><br>
   </td>
 </tr>
 <tr>
   <td colspan=2>
     Messaging implementations:<br>
-    <a href="https://github.com/ConsenSys/gpact/tree/main/messaging/attestor-sign">Attestor Signing</a><br>
-    <a href="https://github.com/ConsenSys/gpact/tree/main/messaging/txroot-transfer">Transaction Receipt Root Transfer</a><br>
+    Event Attestation:
+    <a href="./contracts/src/messaging/eventattest">Solidity Contracts</a>, 
+    <a href="./sdk/java/src/main/java/net/consensys/gpact/messaging/eventattest">Java SDK</a><br>
+    Transaction Receipt Root Transfer:
+    <a href="./contracts/src/messaging/txrootrelay">Solidity Contracts</a>, 
+    <a href="./sdk/java/src/main/java/net/consensys/gpact/messaging/txrootrelay">Java SDK</a><br>
+    Event Relay:
+    <a href="./contracts/src/messaging/eventrelay">Solidity Contracts</a><br>
+    <p></p>Services: <a href="./services/relayer">Relayer / Attestor</a><br>
+    
+
   </td>
 </tr>
 </tbody>
@@ -136,9 +161,11 @@ anonymous. A crosschain transaction capability is needed to meet these requireme
 
 
 ## More information
-[How to build](https://github.com/ConsenSys/gpact/blob/master/doc/build.md)
+[How to build](./doc/build.md)
 
-[Reproducing Performance Results](https://github.com/ConsenSys/gpact/blob/master/doc/perf.md)
+[Reproducing Performance Results](./doc/perf.md)
+
+[Design documentation](./doc/)
 
 
 

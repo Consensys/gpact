@@ -1,6 +1,5 @@
-Non-Atomic App Contracts
+Simple Function Call (SFC) Protocol Applications
 ----------------
 The directory contains contracts that are designed to work
-with non-atomic function call protocols. The contracts may
-be complete applications themselves, or may just be helper
-code to be used within a larger application.
+with the Simple Function Call protocol. 
+This protocol is a non-atomic function call protocol.

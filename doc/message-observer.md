@@ -1,12 +1,12 @@
 ### Overview
-The Message Observer is a [protocol-specific component](https://github.com/ConsenSys/gpact/blob/main/doc/relayer-design.md#design-considerations) that subscribes to state-change events on a Blockchain, annotates these events with additional metadata, transforms them to a common message format and sends them to the Relayer core for processing.  The component abstracts away blockchain specific details from the Relayer core and offers a plugin-point for supporting new network types and messaging schemes, without affecting other Relayer components.  
+The Message Observer is a [protocol-specific component](./relayer-design.md#design-considerations) that subscribes to state-change events on a Blockchain, annotates these events with additional metadata, transforms them to a common message format and sends them to the Relayer core for processing.  The component abstracts away blockchain specific details from the Relayer core and offers a plugin-point for supporting new network types and messaging schemes, without affecting other Relayer components.  
 
 An instance of this service can be very specialised (e.g. specific blockchain network and a bridging contract), or more general in nature. The former is conceptually simpler to work with and is the recommended approach for implementing, instantiating and operating observers.
 
 ### Key Features
 The Message Observer performs the following set of core functionalities:
 - Listen to relevant events originating from a source network
-- Process and transform such events to a [common, protocol-agnostic message format](https://github.com/ConsenSys/gpact/blob/main/doc/relayer-design.md#message-format)
+- Process and transform such events to a [common, protocol-agnostic message format](./relayer-design.md#message-format)
 - Send messages to the core service for further processing, routing and dispatching
 
 ### Design
@@ -43,7 +43,7 @@ Unlike a `Realtime Event Watcher`, a `Finalised Event Watcher` waits until an ev
 Is responsible for initiating (or even managing) a workflow that takes a raw event from an `Event Watcher`, processing it and ultimately sending it to the Relayer core. It relies on other component types for this purpose, i.e. other `Event Handlers`, `Event Transformers` and `Message Handlers`. There is currently a one implementation of this interface, `Simple Event Handler`, which executes a simple workflow that first transforms a raw event to a common message format (using an `Event Transformer`) and then passes the message to a `Message Handler`.
 
 #### Event Transformer
-Converts a raw blockchain event to a [common, protocol-agnostic message format](https://github.com/ConsenSys/gpact/blob/main/doc/relayer-design.md#message-format), that can be consumed by downstream Relayer components. The primary guarantee offered by this component is that its output is always deterministic, for a given event.
+Converts a raw blockchain event to a [common, protocol-agnostic message format](./relayer-design.md#message-format), that can be consumed by downstream Relayer components. The primary guarantee offered by this component is that its output is always deterministic, for a given event.
 
 The event transformer is also responsible for computing a deterministic message ID for a given event. The important properties that the employed ID scheme offers are:
 1. Deterministic: The message ID should be deterministic for two reasons: a) different Relayers should be able to independently compute the same ID for a given event b) a duplicate event can easily be detected by downstream processes.
