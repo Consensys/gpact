@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import net.consensys.gpact.common.*;
-import net.consensys.gpact.common.besucrypto.Hash;
+import net.consensys.gpact.common.crypto.Hash;
 import net.consensys.gpact.messaging.SignedEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

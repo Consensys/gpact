@@ -12,22 +12,12 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package net.consensys.gpact.common.besucrypto;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.Security;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
+dependencies {
+    implementation project (':sdk')
 
-public class MessageDigestFactory {
-
-  static {
-    //    Security.addProvider(new BesuProvider());
-    Security.addProvider(new BouncyCastleProvider());
-  }
-
-  @SuppressWarnings("DoNotInvokeMessageDigestDirectly")
-  public static MessageDigest create(final String algorithm) throws NoSuchAlgorithmException {
-    return MessageDigest.getInstance(algorithm);
-  }
+    // https://mvnrepository.com/artifact/org.apache.tuweni/tuweni-bytes
+    implementation group: 'org.apache.tuweni', name: 'tuweni-bytes', version: '1.0.0'
+    // https://mvnrepository.com/artifact/org.apache.tuweni/tuweni-units
+    implementation group: 'org.apache.tuweni', name: 'tuweni-units', version: '1.0.0'
 }

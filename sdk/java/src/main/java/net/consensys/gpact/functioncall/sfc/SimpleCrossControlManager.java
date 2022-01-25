@@ -19,7 +19,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import net.consensys.gpact.common.*;
-import net.consensys.gpact.common.besucrypto.Hash;
+import net.consensys.gpact.common.crypto.Hash;
 import net.consensys.gpact.messaging.SignedEvent;
 import net.consensys.gpact.soliditywrappers.functioncall.sfc.SimpleCrosschainControl;
 import org.apache.logging.log4j.LogManager;

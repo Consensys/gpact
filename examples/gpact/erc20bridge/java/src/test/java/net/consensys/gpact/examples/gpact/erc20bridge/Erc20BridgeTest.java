@@ -14,7 +14,7 @@
  */
 package net.consensys.gpact.examples.gpact.erc20bridge;
 
-import net.consensys.gpact.common.AbstractExampleTest;
+import net.consensys.gpact.examplehelpers.AbstractExampleTest;
 import org.junit.jupiter.api.Test;
 
 public class Erc20BridgeTest extends AbstractExampleTest {

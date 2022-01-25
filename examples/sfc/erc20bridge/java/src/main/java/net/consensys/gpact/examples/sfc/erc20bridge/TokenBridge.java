@@ -16,6 +16,8 @@ package net.consensys.gpact.examples.sfc.erc20bridge;
 
 import java.math.BigInteger;
 import net.consensys.gpact.common.*;
+import net.consensys.gpact.examplehelpers.CredentialsCreator;
+import net.consensys.gpact.examplehelpers.SfcExampleSystemManager;
 import net.consensys.gpact.functioncall.sfc.SimpleCrossControlManagerGroup;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

@@ -1,5 +1,6 @@
 rootProject.name = 'gpact'
 include 'sdk'
+include 'common-test'
 include 'contracttest'
 
 include 'app-gpact-erc20bridge'
@@ -25,6 +26,7 @@ include 'perf-singlebc-write'
 include 'utils-pkey'
 
 project(":sdk").projectDir = file("sdk/java")
+project(":common-test").projectDir = file("commontest/java")
 project(":contracttest").projectDir = file("contracts/javatest")
 
 project(":app-gpact-erc20bridge").projectDir = file("applications/gpact/erc20bridge/javatest")

@@ -1,4 +1,4 @@
-package net.consensys.gpact.common;
+package net.consensys.gpact.examplehelpers;
 
 import java.io.File;
 import java.io.FileOutputStream;

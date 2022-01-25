@@ -12,10 +12,16 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package net.consensys.gpact.common;
+package net.consensys.gpact.examplehelpers;
 
-public enum CrossBlockchainConsensusType {
-  EVENT_SIGNING,
-  TRANSACTION_RECEIPT_SIGNING,
-  COORDINATION_CHAIN_TX_RECEIPT_SIGNING
+import net.consensys.gpact.common.crypto.KeyPairGen;
+import org.web3j.crypto.Credentials;
+
+public class CredentialsCreator {
+
+  public static Credentials createCredentials() throws Exception {
+    String privateKey = new KeyPairGen().generateKeyPairGetPrivateKey();
+    //    System.out.println("Priv2: " + privateKey);
+    return Credentials.create(privateKey);
+  }
 }

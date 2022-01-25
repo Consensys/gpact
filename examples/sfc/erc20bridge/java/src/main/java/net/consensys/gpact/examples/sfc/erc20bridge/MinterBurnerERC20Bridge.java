@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.common.DynamicGasProvider;
-import net.consensys.gpact.common.besucrypto.Hash;
+import net.consensys.gpact.common.crypto.Hash;
 import net.consensys.gpact.soliditywrappers.examples.sfc.erc20bridge.ERC20PresetMinterPauser;
 import net.consensys.gpact.soliditywrappers.examples.sfc.erc20bridge.SfcErc20Bridge;
 import org.apache.logging.log4j.LogManager;

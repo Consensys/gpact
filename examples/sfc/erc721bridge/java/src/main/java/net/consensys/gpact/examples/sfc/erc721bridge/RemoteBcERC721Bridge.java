@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.common.DynamicGasProvider;
-import net.consensys.gpact.common.besucrypto.Hash;
+import net.consensys.gpact.common.crypto.Hash;
 import net.consensys.gpact.soliditywrappers.examples.sfc.erc721bridge.ERC721AutoURIRemoteBlockchain;
 import net.consensys.gpact.soliditywrappers.examples.sfc.erc721bridge.SfcErc721Bridge;
 import org.apache.logging.log4j.LogManager;

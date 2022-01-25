@@ -14,7 +14,7 @@
  */
 package net.consensys.gpact.messaging.txrootrelay;
 
-import static net.consensys.gpact.common.besucrypto.Hash.keccak256;
+import static net.consensys.gpact.common.crypto.Hash.keccak256;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.math.BigInteger;

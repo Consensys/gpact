@@ -1,6 +1,6 @@
 package net.consensys.gpact.performance.singlebc.write;
 
-import net.consensys.gpact.common.AbstractExampleTest;
+import net.consensys.gpact.examplehelpers.AbstractExampleTest;
 import org.junit.jupiter.api.Test;
 
 /** Run all of the single blockchain tests. */

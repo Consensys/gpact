@@ -240,7 +240,7 @@ public class TxRootTransfer extends AbstractBlockchain implements MessagingVerif
     // Leaf nodes in Ethereum, leaves of Merkle Patricia Tries could be less than 32 bytes,
     // but no other nodes. For transaction receipts, it isn't possible even the leaf nodes
     // to be 32 bytes.
-    Bytes32 nodeHash = net.consensys.gpact.common.besucrypto.Hash.keccak256(rlpOfNode);
+    Bytes32 nodeHash = net.consensys.gpact.common.crypto.Hash.keccak256(rlpOfNode);
 
     List<Bytes> proofList1 = simpleProof.getProofRelatedNodes();
     List<BigInteger> proofOffsets = new ArrayList<>();
@@ -249,7 +249,7 @@ public class TxRootTransfer extends AbstractBlockchain implements MessagingVerif
       rlpOfNode = proofList1.get(j);
       proofOffsets.add(BigInteger.valueOf(findOffset(rlpOfNode, nodeHash)));
       proofs.add(rlpOfNode.toArray());
-      nodeHash = net.consensys.gpact.common.besucrypto.Hash.keccak256(rlpOfNode);
+      nodeHash = net.consensys.gpact.common.crypto.Hash.keccak256(rlpOfNode);
     }
     if (!besuCalculatedReceiptsRoot.toHexString().equalsIgnoreCase(nodeHash.toHexString())) {
       throw new Error(

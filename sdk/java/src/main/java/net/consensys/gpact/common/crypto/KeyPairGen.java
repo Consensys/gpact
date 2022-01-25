@@ -33,7 +33,7 @@ import java.util.Arrays;
 import java.util.Enumeration;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
-/** Generate one or more key pairs for use in the sample code. */
+/** Generate one or more key pairs. */
 public class KeyPairGen {
   private final KeyPairGenerator keyPairGenerator;
 

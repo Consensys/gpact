@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import net.consensys.gpact.common.*;
 import net.consensys.gpact.common.AbstractBlockchain;
+import net.consensys.gpact.examplehelpers.GpactExampleSystemManager;
 import net.consensys.gpact.functioncall.gpact.CrossControlManagerGroup;
 import net.consensys.gpact.functioncall.gpact.CrosschainExecutor;
 import net.consensys.gpact.functioncall.gpact.calltree.CallExecutionTree;

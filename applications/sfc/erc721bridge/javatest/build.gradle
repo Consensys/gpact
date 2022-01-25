@@ -1,6 +1,7 @@
 
 dependencies {
     testImplementation project (":sdk")
+    testImplementation project(':common-test')
 }
 
 task generateSources {

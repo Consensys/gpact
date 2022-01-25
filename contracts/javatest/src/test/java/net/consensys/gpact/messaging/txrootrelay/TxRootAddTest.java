@@ -370,7 +370,7 @@ public class TxRootAddTest extends AbstractWeb3Test {
       // Leaf nodes in Ethereum, leaves of Merkle Patricia Tries could be less than 32 bytes,
       // but no other nodes. For transaction receipts, it isn't possible even the leaf nodes
       // to be 32 bytes.
-      Bytes32 nodeHash = net.consensys.gpact.common.besucrypto.Hash.keccak256(transactionReceipt);
+      Bytes32 nodeHash = net.consensys.gpact.common.crypto.Hash.keccak256(transactionReceipt);
 
       List<Bytes> proofList1 = simpleProof.getProofRelatedNodes();
       List<BigInteger> proofOffsets = new ArrayList<>();
@@ -379,11 +379,11 @@ public class TxRootAddTest extends AbstractWeb3Test {
         rlpOfNode = proofList1.get(j);
         proofOffsets.add(BigInteger.valueOf(findOffset(rlpOfNode, nodeHash)));
         proofs.add(rlpOfNode.toArray());
-        nodeHash = net.consensys.gpact.common.besucrypto.Hash.keccak256(rlpOfNode);
+        nodeHash = net.consensys.gpact.common.crypto.Hash.keccak256(rlpOfNode);
       }
       assertEquals(
           besuCalculatedReceiptsRoot.toHexString(),
-          net.consensys.gpact.common.besucrypto.Hash.keccak256(rlpOfNode).toHexString());
+          net.consensys.gpact.common.crypto.Hash.keccak256(rlpOfNode).toHexString());
 
       BigInteger bcId = sourceBlockchainId;
       if (!correctBlockchain) {

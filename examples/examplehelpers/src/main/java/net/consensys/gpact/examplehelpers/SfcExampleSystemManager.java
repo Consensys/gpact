@@ -1,6 +1,10 @@
-package net.consensys.gpact.common;
+package net.consensys.gpact.examplehelpers;
 
 import java.util.ArrayList;
+import net.consensys.gpact.common.AnIdentity;
+import net.consensys.gpact.common.BlockchainId;
+import net.consensys.gpact.common.BlockchainInfo;
+import net.consensys.gpact.common.StatsHolder;
 import net.consensys.gpact.functioncall.sfc.SimpleCrossControlManager;
 import net.consensys.gpact.functioncall.sfc.SimpleCrossControlManagerGroup;
 import net.consensys.gpact.messaging.MessagingManagerGroupInterface;

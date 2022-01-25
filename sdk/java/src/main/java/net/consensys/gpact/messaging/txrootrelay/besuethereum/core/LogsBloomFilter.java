@@ -15,7 +15,7 @@
 package net.consensys.gpact.messaging.txrootrelay.besuethereum.core;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static net.consensys.gpact.common.besucrypto.Hash.keccak256;
+import static net.consensys.gpact.common.crypto.Hash.keccak256;
 
 import java.util.Collection;
 import net.consensys.gpact.messaging.txrootrelay.besuethereum.rlp.RLPException;

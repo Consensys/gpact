@@ -16,9 +16,9 @@ package net.consensys.gpact.performance.singlebc.write;
 
 import java.math.BigInteger;
 import net.consensys.gpact.common.BlockchainInfo;
-import net.consensys.gpact.common.CredentialsCreator;
-import net.consensys.gpact.common.PropertiesLoader;
 import net.consensys.gpact.common.StatsHolder;
+import net.consensys.gpact.examplehelpers.CredentialsCreator;
+import net.consensys.gpact.examplehelpers.PropertiesLoader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;

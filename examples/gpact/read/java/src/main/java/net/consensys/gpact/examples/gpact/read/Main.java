@@ -18,6 +18,8 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import net.consensys.gpact.common.*;
+import net.consensys.gpact.examplehelpers.CredentialsCreator;
+import net.consensys.gpact.examplehelpers.GpactExampleSystemManager;
 import net.consensys.gpact.examples.gpact.read.sim.SimContractA;
 import net.consensys.gpact.examples.gpact.read.sim.SimContractB;
 import net.consensys.gpact.functioncall.gpact.CrossControlManagerGroup;

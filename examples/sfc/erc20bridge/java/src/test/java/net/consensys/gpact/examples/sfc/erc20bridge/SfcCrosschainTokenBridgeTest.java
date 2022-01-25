@@ -1,6 +1,6 @@
 package net.consensys.gpact.examples.sfc.erc20bridge;
 
-import net.consensys.gpact.common.AbstractExampleTest;
+import net.consensys.gpact.examplehelpers.AbstractExampleTest;
 import org.junit.jupiter.api.Test;
 
 public class SfcCrosschainTokenBridgeTest extends AbstractExampleTest {

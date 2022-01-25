@@ -14,7 +14,7 @@
  */
 package net.consensys.gpact.messaging.txrootrelay.trie;
 
-import static net.consensys.gpact.common.besucrypto.Hash.keccak256;
+import static net.consensys.gpact.common.crypto.Hash.keccak256;
 import static org.apache.logging.log4j.LogManager.getLogger;
 
 import java.util.ArrayList;

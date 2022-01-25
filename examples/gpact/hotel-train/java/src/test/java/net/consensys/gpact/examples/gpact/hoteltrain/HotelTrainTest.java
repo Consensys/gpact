@@ -1,6 +1,6 @@
 package net.consensys.gpact.examples.gpact.hoteltrain;
 
-import net.consensys.gpact.common.AbstractExampleTest;
+import net.consensys.gpact.examplehelpers.AbstractExampleTest;
 import org.junit.jupiter.api.Test;
 
 public class HotelTrainTest extends AbstractExampleTest {

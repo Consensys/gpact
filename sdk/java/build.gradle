@@ -25,6 +25,9 @@ dependencies {
 
     testImplementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
     testImplementation "io.reactivex.rxjava2:rxjava:${rxJavaVersion}"
+
+    testImplementation project (':common-test')
+
 }
 
 
