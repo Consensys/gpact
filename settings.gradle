@@ -15,8 +15,10 @@ include 'examples-gpact-trade'
 include 'examples-sfc-erc20bridge'
 include 'examples-sfc-erc721bridge'
 
+include 'utils-pkey'
+
+
 /*
-include 'examples-utilpkey'
 include 'examples-write'
 
 include 'examples-sfc-write'
@@ -44,9 +46,10 @@ project(":examples-gpact-trade").projectDir = file("examples/gpact/trade/java")
 project(":examples-sfc-erc20bridge").projectDir = file("examples/sfc/erc20bridge/java")
 project(":examples-sfc-erc721bridge").projectDir = file("examples/sfc/erc721bridge/java")
 
+project(":utils-pkey").projectDir = file("utils/pkey")
+
 /*
 
-project(":examples-utilpkey").projectDir = file("application/gpact-examples/utilpkey")
 project(":examples-write").projectDir = file("application/gpact-examples/write")
 
 project(":examples-sfc-write").projectDir = file("application/sfc-examples/write")

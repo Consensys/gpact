@@ -12,14 +12,14 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package net.consensys.gpact.examples.util;
+package net.consensys.gpact.utils;
 
-import net.consensys.gpact.utils.crypto.KeyPairGen;
+import net.consensys.gpact.common.crypto.KeyPairGen;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class Main {
-  static final Logger LOG = LogManager.getLogger(Main.class);
+public class PrivateKeyGenerator {
+  static final Logger LOG = LogManager.getLogger(PrivateKeyGenerator.class);
 
   public static void main(String[] args) throws Exception {
     LOG.info("Example: Generate Key Pair");

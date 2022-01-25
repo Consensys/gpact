@@ -1,5 +1,5 @@
 dependencies {
-    implementation project (':common')
+    implementation project (':sdk')
 
     implementation group: 'com.google.guava', name: 'guava', version: guavaVersion
 }
