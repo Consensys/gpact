@@ -1,7 +1,6 @@
-package net.consensys.gpact.exampletest.sfc;
+package net.consensys.gpact.examples.sfc.write;
 
-import net.consensys.gpact.exampletest.AbstractExampleTest;
-import net.consensys.gpact.sfc.examples.write.SfcCrosschainWrite;
+import net.consensys.gpact.common.AbstractExampleTest;
 import org.junit.jupiter.api.Test;
 
 public class SfcCrosschainWriteTest extends AbstractExampleTest {

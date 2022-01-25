@@ -12,12 +12,12 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package net.consensys.gpact.sfc.examples.write;
+package net.consensys.gpact.examples.sfc.write;
 
 import java.math.BigInteger;
 import net.consensys.gpact.common.*;
-import net.consensys.gpact.sfccbc.SimpleCrossControlManagerGroup;
-import net.consensys.gpact.sfccbc.SimpleCrosschainExecutor;
+import net.consensys.gpact.functioncall.sfc.SimpleCrossControlManagerGroup;
+import net.consensys.gpact.functioncall.sfc.SimpleCrosschainExecutor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;

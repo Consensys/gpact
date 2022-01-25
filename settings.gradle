@@ -15,13 +15,13 @@ include 'examples-gpact-write'
 
 include 'examples-sfc-erc20bridge'
 include 'examples-sfc-erc721bridge'
+include 'examples-sfc-write'
 
 include 'utils-pkey'
 
 
 /*
 
-include 'examples-sfc-write'
 
 include 'examples-singlebc-hoteltrain'
 include 'examples-singlebc-read'
@@ -46,13 +46,13 @@ project(":examples-gpact-write").projectDir = file("examples/gpact/write/java")
 
 project(":examples-sfc-erc20bridge").projectDir = file("examples/sfc/erc20bridge/java")
 project(":examples-sfc-erc721bridge").projectDir = file("examples/sfc/erc721bridge/java")
+project(":examples-sfc-write").projectDir = file("examples/sfc/write/java")
 
 project(":utils-pkey").projectDir = file("utils/pkey")
 
 /*
 
 
-project(":examples-sfc-write").projectDir = file("application/sfc-examples/write")
 
 project(":examples-singlebc-hoteltrain").projectDir = file("performance/base/singlebc-hotel-train")
 project(":examples-singlebc-read").projectDir = file("performance/base/singlebc-read")
