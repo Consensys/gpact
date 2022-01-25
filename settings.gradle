@@ -11,6 +11,7 @@ include 'examples-gpact-erc20bridge'
 include 'examples-gpact-hoteltrain'
 include 'examples-gpact-read'
 include 'examples-gpact-trade'
+include 'examples-gpact-write'
 
 include 'examples-sfc-erc20bridge'
 include 'examples-sfc-erc721bridge'
@@ -19,7 +20,6 @@ include 'utils-pkey'
 
 
 /*
-include 'examples-write'
 
 include 'examples-sfc-write'
 
@@ -42,6 +42,7 @@ project(":examples-gpact-erc20bridge").projectDir = file("examples/gpact/erc20br
 project(":examples-gpact-hoteltrain").projectDir = file("examples/gpact/hotel-train/java")
 project(":examples-gpact-read").projectDir = file("examples/gpact/read/java")
 project(":examples-gpact-trade").projectDir = file("examples/gpact/trade/java")
+project(":examples-gpact-write").projectDir = file("examples/gpact/write/java")
 
 project(":examples-sfc-erc20bridge").projectDir = file("examples/sfc/erc20bridge/java")
 project(":examples-sfc-erc721bridge").projectDir = file("examples/sfc/erc721bridge/java")
@@ -50,7 +51,6 @@ project(":utils-pkey").projectDir = file("utils/pkey")
 
 /*
 
-project(":examples-write").projectDir = file("application/gpact-examples/write")
 
 project(":examples-sfc-write").projectDir = file("application/sfc-examples/write")
 

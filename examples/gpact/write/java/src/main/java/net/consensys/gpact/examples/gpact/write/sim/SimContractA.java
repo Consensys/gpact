@@ -12,10 +12,10 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package net.consensys.gpact.examples.write.sim;
+package net.consensys.gpact.examples.gpact.write.sim;
 
 import java.math.BigInteger;
-import net.consensys.gpact.examples.write.Bc1ContractA;
+import net.consensys.gpact.examples.gpact.write.Bc1ContractA;
 
 public class SimContractA {
   private Bc1ContractA bc1ContractA;

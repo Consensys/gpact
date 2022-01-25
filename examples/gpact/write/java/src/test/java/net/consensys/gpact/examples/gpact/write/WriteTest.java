@@ -1,10 +1,10 @@
-package net.consensys.gpact.exampletest;
+package net.consensys.gpact.examples.gpact.write;
 
-import net.consensys.gpact.examples.write.GpactCrosschainWrite;
+import net.consensys.gpact.common.AbstractExampleTest;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-public class CrosschainWrite extends AbstractExampleTest {
+public class WriteTest extends AbstractExampleTest {
 
   @Disabled
   @Test

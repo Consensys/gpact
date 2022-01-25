@@ -15,7 +15,7 @@
 pragma solidity >=0.7.1;
 
 import "./ContractB.sol";
-import "../../../../../../functioncall/interface/src/main/solidity/CrosschainFunctionCallInterface.sol";
+import "../../../../contracts/src/functioncall/interface/CrosschainFunctionCallInterface.sol";
 
 contract ContractA {
     uint256 otherBcId;

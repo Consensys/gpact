@@ -12,25 +12,25 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package net.consensys.gpact.examples.write.sim;
+pragma solidity >=0.7.1;
 
-import java.math.BigInteger;
-import net.consensys.gpact.examples.write.Bc2ContractB;
+import "../../../../contracts/src/application/lockablestorage/LockableStorage.sol";
 
-public class SimContractB {
-  private Bc2ContractB bc2ContractB;
+contract ContractB is LockableStorage {
+    uint256 private constant KEY_VAL = 0;
 
-  private BigInteger val;
+    event ValueWritten(uint256 _val);
 
-  public SimContractB(Bc2ContractB contract) {
-    this.bc2ContractB = contract;
-  }
+    constructor(address _crossBlockchainControl)
+        LockableStorage(_crossBlockchainControl)
+    {}
 
-  public void set(BigInteger val) {
-    this.val = val;
-  }
+    function set(uint256 _val) external {
+        setUint256(KEY_VAL, _val);
+        emit ValueWritten(_val);
+    }
 
-  public String getRlpFunctionSignature_Set() {
-    return this.bc2ContractB.getRlpFunctionSignature_Set(this.val);
-  }
+    function getVal() external view returns (uint256) {
+        return getUint256(KEY_VAL);
+    }
 }
