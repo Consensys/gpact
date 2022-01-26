@@ -1,5 +1,5 @@
 dependencies {
-    implementation project(':examplehelpers')
+    implementation project(':examples-helpers')
     implementation project(':sdk')
 
     // https://mvnrepository.com/artifact/org.apache.tuweni/tuweni-bytes

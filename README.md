@@ -161,11 +161,11 @@ anonymous. A crosschain transaction capability is needed to meet these requireme
 
 
 ## More information
-[How to build](./doc/build.md)
+[How to build](./docs/build.md)
 
-[Reproducing Performance Results](./doc/perf.md)
+[Reproducing Performance Results](./docs/perf.md)
 
-[Design documentation](./doc/)
+[Design documentation](./docs/)
 
 
 

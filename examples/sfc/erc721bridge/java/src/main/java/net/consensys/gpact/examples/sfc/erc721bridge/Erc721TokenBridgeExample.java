@@ -16,9 +16,9 @@ package net.consensys.gpact.examples.sfc.erc721bridge;
 
 import java.math.BigInteger;
 import net.consensys.gpact.common.*;
-import net.consensys.gpact.examplehelpers.CredentialsCreator;
-import net.consensys.gpact.examplehelpers.SfcExampleSystemManager;
 import net.consensys.gpact.functioncall.sfc.SimpleCrossControlManagerGroup;
+import net.consensys.gpact.helpers.CredentialsCreator;
+import net.consensys.gpact.helpers.SfcExampleSystemManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;

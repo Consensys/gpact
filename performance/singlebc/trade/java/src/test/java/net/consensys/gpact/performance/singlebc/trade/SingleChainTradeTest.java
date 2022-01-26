@@ -1,6 +1,6 @@
 package net.consensys.gpact.performance.singlebc.trade;
 
-import net.consensys.gpact.examplehelpers.AbstractExampleTest;
+import net.consensys.gpact.helpers.AbstractExampleTest;
 import org.junit.jupiter.api.Test;
 
 /** Run all of the single blockchain tests. */

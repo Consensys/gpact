@@ -12,7 +12,7 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package net.consensys.gpact.examplehelpers;
+package net.consensys.gpact.helpers;
 
 import java.io.FileInputStream;
 import java.io.IOException;

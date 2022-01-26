@@ -1,6 +1,6 @@
 package net.consensys.gpact.examples.gpact.write;
 
-import net.consensys.gpact.examplehelpers.AbstractExampleTest;
+import net.consensys.gpact.helpers.AbstractExampleTest;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 

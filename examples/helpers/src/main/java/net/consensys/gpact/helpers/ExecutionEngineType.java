@@ -12,10 +12,9 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package net.consensys.gpact.examplehelpers;
+package net.consensys.gpact.helpers;
 
-public enum CrossBlockchainConsensusType {
-  EVENT_SIGNING,
-  TRANSACTION_RECEIPT_SIGNING,
-  COORDINATION_CHAIN_TX_RECEIPT_SIGNING
+public enum ExecutionEngineType {
+  SERIAL,
+  PARALLEL
 }
