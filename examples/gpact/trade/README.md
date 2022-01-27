@@ -4,7 +4,7 @@ The code in this directory is the trade-finance example described in the
 GPACT paper.
 
 
-![Trade Finance using GPACT protocol](../../../doc/images/trade.png "Trade Finance using GPACT protocol")
+![Trade Finance using GPACT protocol](../../../docs/images/trade.png "Trade Finance using GPACT protocol")
 
 The figure above shows a logical representation of a crosschain call graph using the protocol. 
 A trade finance application creates a crosschain function 
