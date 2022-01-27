@@ -4,7 +4,7 @@ set -e
 
 HERE=performance/singlebc/trade/java
 BUILDDIR=$HERE/build
-CONTRACTSDIR=performance/singlebc/trade/src
+CONTRACTSDIR=$HERE/../contracts/src
 OUTPUTDIR=$HERE/src/main/java
 PACKAGE=net.consensys.gpact.soliditywrappers.performance.singlebc.trade
 #WEB3J=web3j

@@ -4,7 +4,7 @@ set -e
 
 HERE=examples/gpact/hotel-train/java
 BUILDDIR=$HERE/build
-CONTRACTSDIR=examples/gpact/hotel-train/src
+CONTRACTSDIR=$HERE/../contracts/src
 OUTPUTDIR=$HERE/src/main/java
 PACKAGE=net.consensys.gpact.soliditywrappers.examples.gpact.hoteltrain
 #WEB3J=web3j
@@ -18,6 +18,6 @@ solc $CONTRACTSDIR/Hotel.sol --bin --abi --optimize -o $BUILDDIR --overwrite
 $WEB3J solidity generate -r -a=$BUILDDIR/TravelAgency.abi -b=$BUILDDIR/TravelAgency.bin -o=$OUTPUTDIR -p=$PACKAGE
 $WEB3J solidity generate -r -a=$BUILDDIR/Hotel.abi -b=$BUILDDIR/Hotel.bin -o=$OUTPUTDIR -p=$PACKAGE
 
-solc applications/gpact/erc20bridge/src/presets/LockableERC20PresetFixedSupply.sol --bin --abi --optimize -o $BUILDDIR --overwrite
+solc applications/gpact/erc20bridge/contracts/src/presets/LockableERC20PresetFixedSupply.sol --bin --abi --optimize -o $BUILDDIR --overwrite
 $WEB3J solidity generate -r -a=$BUILDDIR/LockableERC20PresetFixedSupply.abi -b=$BUILDDIR/LockableERC20PresetFixedSupply.bin -o=$OUTPUTDIR -p=$PACKAGE
 

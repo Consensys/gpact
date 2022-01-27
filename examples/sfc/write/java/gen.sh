@@ -4,7 +4,7 @@ set -e
 
 HERE=examples/sfc/write/java
 BUILDDIR=$HERE/build
-CONTRACTSDIR=examples/sfc/write/src
+CONTRACTSDIR=$HERE/../contracts/src
 OUTPUTDIR=$HERE/src/main/java
 PACKAGE=net.consensys.gpact.soliditywrappers.examples.sfc.write
 #WEB3J=web3j

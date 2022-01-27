@@ -4,7 +4,7 @@ rm -rf build
 
 HERE=applications/gpact/erc20bridge/javatest
 BUILDDIR=$HERE/build
-CONTRACTSDIR=applications/gpact/erc20bridge/src
+CONTRACTSDIR=$HERE/../contracts/src
 OUTPUTDIR=$HERE/src/test/java
 BASEPACKAGE=net.consensys.gpact.soliditywrappers.applications.gpact.erc20bridge
 #WEB3J=web3j

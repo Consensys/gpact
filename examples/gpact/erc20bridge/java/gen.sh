@@ -4,7 +4,7 @@ set -e
 
 HERE=examples/gpact/erc20bridge/java
 BUILDDIR=$HERE/build
-CONTRACTSDIR=applications/gpact/erc20bridge/src
+CONTRACTSDIR=applications/gpact/erc20bridge/contracts/src
 OUTPUTDIR=$HERE/src/main/java
 PACKAGE=net.consensys.gpact.soliditywrappers.examples.gpact.erc20bridge
 #WEB3J=web3j

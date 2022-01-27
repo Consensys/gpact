@@ -4,7 +4,7 @@ set -e
 
 HERE=examples/gpact/trade/java
 BUILDDIR=$HERE/build
-CONTRACTSDIR=examples/gpact/trade/src
+CONTRACTSDIR=$HERE/../contracts/src
 OUTPUTDIR=$HERE/src/main/java
 PACKAGE=net.consensys.gpact.soliditywrappers.examples.gpact.trade
 #WEB3J=web3j

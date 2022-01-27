@@ -4,14 +4,14 @@ set -e
 
 HERE=examples/sfc/erc20bridge/java
 BUILDDIR=$HERE/build
-CONTRACTSDIR=applications/sfc/erc20bridge/src
+CONTRACTSDIR=applications/sfc/erc20bridge/contracts/src
 OUTPUTDIR=$HERE/src/main/java
 PACKAGE=net.consensys.gpact.soliditywrappers.examples.sfc.erc20bridge
 #WEB3J=web3j
 WEB3J=../web3j-abi/codegen/build/install/codegen/bin/codegen
 
-solc contracts/src/openzeppelin/token/ERC20/presets/ERC20PresetFixedSupply.sol --allow-paths . --bin --abi --optimize -o $BUILDDIR --overwrite
-solc contracts/src/openzeppelin/token/ERC20/presets/ERC20PresetMinterPauser.sol --allow-paths . --bin --abi --optimize -o $BUILDDIR --overwrite
+solc contracts/contracts/src/openzeppelin/token/ERC20/presets/ERC20PresetFixedSupply.sol --allow-paths . --bin --abi --optimize -o $BUILDDIR --overwrite
+solc contracts/contracts/src/openzeppelin/token/ERC20/presets/ERC20PresetMinterPauser.sol --allow-paths . --bin --abi --optimize -o $BUILDDIR --overwrite
 solc $CONTRACTSDIR/SfcErc20Bridge.sol --allow-paths . --bin --abi --optimize -o $BUILDDIR --overwrite
 
 $WEB3J solidity generate -r -a=$BUILDDIR/ERC20PresetFixedSupply.abi -b=$BUILDDIR/ERC20PresetFixedSupply.bin -o=$OUTPUTDIR -p=$PACKAGE

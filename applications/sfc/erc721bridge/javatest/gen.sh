@@ -4,7 +4,7 @@ set -e
 
 HERE=applications/sfc/erc721bridge/javatest
 BUILDDIR=$HERE/build
-CONTRACTSDIR=applications/sfc/erc721bridge/src
+CONTRACTSDIR=$HERE/../contracts/src
 OUTPUTDIR=$HERE/src/test/java
 PACKAGE=net.consensys.gpact.soliditywrappers.applications.sfc.erc721bridge
 #WEB3J=web3j

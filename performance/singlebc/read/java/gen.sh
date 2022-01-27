@@ -4,7 +4,7 @@ set -e
 
 HERE=performance/singlebc/read/java
 BUILDDIR=$HERE/build
-CONTRACTSDIR=performance/singlebc/read/src
+CONTRACTSDIR=$HERE/../contracts/src
 OUTPUTDIR=$HERE/src/main/java
 PACKAGE=net.consensys.gpact.soliditywrappers.performance.singlebc.read
 #WEB3J=web3j

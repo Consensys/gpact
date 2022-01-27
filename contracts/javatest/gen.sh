@@ -4,7 +4,7 @@ set -e
 
 HERE=contracts/javatest
 BUILDDIR=$HERE/build
-CONTRACTSDIR=contracts/src/
+CONTRACTSDIR=$HERE/../contracts/src
 OUTPUTDIR=$HERE/src/test/java
 BASEPACKAGE=net.consensys.gpact.soliditywrappers
 

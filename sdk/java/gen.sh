@@ -4,7 +4,7 @@ set -e
 
 HERE=sdk/java
 BUILDDIR=$HERE/build
-CONTRACTSDIR=contracts/src
+CONTRACTSDIR=contracts/contracts/src
 OUTPUTDIR=$HERE/src/main/java
 BASEPACKAGE=net.consensys.gpact.soliditywrappers
 #WEB3J=web3j

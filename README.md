@@ -47,7 +47,7 @@ of the protocol stack.
 </tr>
 <tr>
   <td>Helper contracts:<br>
-    <a href="./contracts/src/application/lockablestorage">Lockable storage</a><br>
+    <a href="contracts/contracts/src/application/lockablestorage">Lockable storage</a><br>
   </td>
   <td>
   </td>
@@ -58,19 +58,19 @@ of the protocol stack.
   <td rowspan="2">Crosschain Function Call Layer</td>
   <td colspan=2>
     Interfaces: 
-    <a href="./contracts/src/functioncall/interface">Solidity Contracts</a>, 
+    <a href="contracts/contracts/src/functioncall/interface">Solidity Contracts</a>, 
     <a href="./sdk/java/src/main/java/net/consensys/gpact/functioncall">Java SDK</a>
   </td>
 </tr>
 <tr>
   <td>
     General Purpose Atomic Crosschain Transaction (GPACT): 
-    <a href="./contracts/src/functioncall/gpact">Solidity Contracts</a>,
+    <a href="contracts/contracts/src/functioncall/gpact">Solidity Contracts</a>,
     <a href="./sdk/java/src/main/java/net/consensys/gpact/functioncall/gpact">Java SDK</a>
   </td>
   <td>
     Simple Function Call (SFC): 
-    <a href="./contracts/src/functioncall/sfc">Solidity Contracts</a>, 
+    <a href="contracts/contracts/src/functioncall/sfc">Solidity Contracts</a>, 
     <a href="./sdk/java/src/main/java/net/consensys/gpact/functioncall/sfc">Java SDK</a><br>
   </td>
 </tr>
@@ -78,7 +78,7 @@ of the protocol stack.
   <td rowspan="2">Crosschain Messaging</td>
   <td colspan=2>
     Interfaces: 
-    <a href="./contracts/src/messaging/interface">Solidity Contracts</a>, 
+    <a href="contracts/contracts/src/messaging/interface">Solidity Contracts</a>, 
     <a href="./sdk/java/src/main/java/net/consensys/gpact/messaging">Java SDK</a><br>
   </td>
 </tr>
@@ -86,13 +86,13 @@ of the protocol stack.
   <td colspan=2>
     Messaging implementations:<br>
     Event Attestation:
-    <a href="./contracts/src/messaging/eventattest">Solidity Contracts</a>, 
+    <a href="contracts/contracts/src/messaging/eventattest">Solidity Contracts</a>, 
     <a href="./sdk/java/src/main/java/net/consensys/gpact/messaging/eventattest">Java SDK</a><br>
     Transaction Receipt Root Transfer:
-    <a href="./contracts/src/messaging/txrootrelay">Solidity Contracts</a>, 
+    <a href="contracts/contracts/src/messaging/txrootrelay">Solidity Contracts</a>, 
     <a href="./sdk/java/src/main/java/net/consensys/gpact/messaging/txrootrelay">Java SDK</a><br>
     Event Relay:
-    <a href="./contracts/src/messaging/eventrelay">Solidity Contracts</a><br>
+    <a href="contracts/contracts/src/messaging/eventrelay">Solidity Contracts</a><br>
     <p></p>Services: <a href="./services/relayer">Relayer / Attestor</a><br>
     
 

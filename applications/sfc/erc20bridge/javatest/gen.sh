@@ -4,7 +4,7 @@ set -e
 
 HERE=applications/sfc/erc20bridge/javatest
 BUILDDIR=$HERE/build
-CONTRACTSDIR=applications/sfc/erc20bridge/src
+CONTRACTSDIR=$HERE/../contracts/src
 OUTPUTDIR=$HERE/src/test/java
 PACKAGE=net.consensys.gpact.soliditywrappers.applications.sfc.erc20bridge
 #WEB3J=web3j

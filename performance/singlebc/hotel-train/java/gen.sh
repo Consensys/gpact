@@ -4,14 +4,14 @@ set -e
 
 HERE=performance/singlebc/hotel-train/java
 BUILDDIR=$HERE/build
-CONTRACTSDIR=performance/singlebc/hotel-train/src
+CONTRACTSDIR=$HERE/../contracts/src
 OUTPUTDIR=$HERE/src/main/java
 PACKAGE=net.consensys.gpact.soliditywrappers.performance.singlebc.hoteltrain
 #WEB3J=web3j
 WEB3J=../web3j-abi/codegen/build/install/codegen/bin/codegen
 
 
-solc contracts/src/openzeppelin/token/ERC20/presets/ERC20PresetFixedSupply.sol --allow-paths . --bin --abi --optimize -o $BUILDDIR --overwrite
+solc contracts/contracts/src/openzeppelin/token/ERC20/presets/ERC20PresetFixedSupply.sol --allow-paths . --bin --abi --optimize -o $BUILDDIR --overwrite
 solc $CONTRACTSDIR/TravelAgency.sol --bin --abi --optimize -o $BUILDDIR --overwrite
 solc $CONTRACTSDIR/Hotel.sol --bin --abi --optimize -o $BUILDDIR --overwrite
 # ls -al $BUILDDIR

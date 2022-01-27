@@ -4,13 +4,13 @@ set -e
 
 HERE=examples/sfc/erc721bridge/java
 BUILDDIR=$HERE/build
-CONTRACTSDIR=applications/sfc/erc721bridge/src
+CONTRACTSDIR=applications/sfc/erc721bridge/contracts/src
 OUTPUTDIR=$HERE/src/main/java
 PACKAGE=net.consensys.gpact.soliditywrappers.examples.sfc.erc721bridge
 #WEB3J=web3j
 WEB3J=../web3j-abi/codegen/build/install/codegen/bin/codegen
 
-solc contracts/src/openzeppelin/token/ERC721/presets/ERC721PresetMinterPauserAutoId.sol --allow-paths . --bin --abi --optimize -o $BUILDDIR --overwrite
+solc contracts/contracts/src/openzeppelin/token/ERC721/presets/ERC721PresetMinterPauserAutoId.sol --allow-paths . --bin --abi --optimize -o $BUILDDIR --overwrite
 solc $CONTRACTSDIR/ERC721AutoURIRemoteBlockchain.sol --allow-paths . --bin --abi --optimize -o $BUILDDIR --overwrite
 solc $CONTRACTSDIR/SfcErc721Bridge.sol --allow-paths . --bin --abi --optimize -o $BUILDDIR --overwrite
 
