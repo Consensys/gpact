@@ -33,7 +33,7 @@ resource "aws_instance" "relayer" {
     sudo apt-get install -y docker-ce=5:20.10.12~3-0~ubuntu-focal docker-ce-cli=5:20.10.12~3-0~ubuntu-focal containerd.io
     wget https://github.com/grafana/loki/releases/download/v2.3.0/promtail-linux-amd64.zip
     wget https://golang.org/dl/go1.17.1.linux-amd64.tar.gz
-    wget https://raw.githubusercontent.com/ConsenSys/gpact/cros-15-message-signer/messaging/relayer/deploy/promtail-cloud-config.yaml
+    wget https://raw.githubusercontent.com/ConsenSys/gpact/cros-15-fix-single-contract-watch-observer/messaging/relayer/deploy/promtail-cloud-config.yaml
     unzip ./promtail-linux-amd64.zip
     sudo tar -C /usr/local -xzf go1.17.1.linux-amd64.tar.gz
     mkdir /home/ubuntu/go
@@ -52,8 +52,8 @@ resource "aws_instance" "relayer" {
     docker run -d -it --rm --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3.9-management
     sleep 30
     cd ./build
-    LOG_SERVICE_NAME=observer1 LOG_LEVEL=debug LOG_TARGET=STDOUT LOG_DIR=.observer/log1 LOG_FILE=observer1.log LOG_MAX_BACKUPS=3 LOG_MAX_AGE=28 LOG_MAX_SIZE=500 LOG_COMPRESS=true LOG_TIME_FORMAT=RFC3339 OUTBOUND_MQ_ADDR=amqp://guest:guest@localhost:5672/ OUTBOUND_CH_NAME=channel1 API_PORT=9424 OBSERVER_DS_PATH=.relayer-observer/ nohup ./observer >> /home/ubuntu/all.log 2>&1 &
-    LOG_SERVICE_NAME=observer2 LOG_LEVEL=debug LOG_TARGET=STDOUT LOG_DIR=.observer/log2 LOG_FILE=observer2.log LOG_MAX_BACKUPS=3 LOG_MAX_AGE=28 LOG_MAX_SIZE=500 LOG_COMPRESS=true LOG_TIME_FORMAT=RFC3339 OUTBOUND_MQ_ADDR=amqp://guest:guest@localhost:5672/ OUTBOUND_CH_NAME=channel1 API_PORT=9425 OBSERVER_DS_PATH=.relayer-observer/ nohup ./observer >> /home/ubuntu/all.log 2>&1 &
+    LOG_SERVICE_NAME=observer1 LOG_LEVEL=debug LOG_TARGET=STDOUT LOG_DIR=.observer/log1 LOG_FILE=observer1.log LOG_MAX_BACKUPS=3 LOG_MAX_AGE=28 LOG_MAX_SIZE=500 LOG_COMPRESS=true LOG_TIME_FORMAT=RFC3339 OUTBOUND_MQ_ADDR=amqp://guest:guest@localhost:5672/ OUTBOUND_CH_NAME=channel1 API_PORT=9424 OBSERVER_DS_PATH=.relayer-observer1/ nohup ./observer >> /home/ubuntu/all.log 2>&1 &
+    LOG_SERVICE_NAME=observer2 LOG_LEVEL=debug LOG_TARGET=STDOUT LOG_DIR=.observer/log2 LOG_FILE=observer2.log LOG_MAX_BACKUPS=3 LOG_MAX_AGE=28 LOG_MAX_SIZE=500 LOG_COMPRESS=true LOG_TIME_FORMAT=RFC3339 OUTBOUND_MQ_ADDR=amqp://guest:guest@localhost:5672/ OUTBOUND_CH_NAME=channel1 API_PORT=9425 OBSERVER_DS_PATH=.relayer-observer2/ nohup ./observer >> /home/ubuntu/all.log 2>&1 &
     LOG_SERVICE_NAME=relayer LOG_LEVEL=debug LOG_TARGET=STDOUT LOG_DIR=.relayer/log LOG_FILE=relayer.log LOG_MAX_BACKUPS=3 LOG_MAX_AGE=28 LOG_MAX_SIZE=500 LOG_COMPRESS=true LOG_TIME_FORMAT=RFC3339 INBOUND_MQ_ADDR=amqp://guest:guest@localhost:5672/ INBOUND_CH_NAME=channel1 OUTBOUND_MQ_ADDR=amqp://guest:guest@localhost:5672/ OUTBOUND_CH_NAME=channel2 API_PORT=9426 SIGNER_DS_PATH=.relayer-signer/ nohup ./relayer >> /home/ubuntu/all.log 2>&1 &
     LOG_SERVICE_NAME=dispatcher LOG_LEVEL=debug LOG_TARGET=STDOUT LOG_DIR=.dispatcher/log LOG_FILE=dispatcher.log LOG_MAX_BACKUPS=3 LOG_MAX_AGE=28 LOG_MAX_SIZE=500 LOG_COMPRESS=true LOG_TIME_FORMAT=RFC3339 INBOUND_MQ_ADDR=amqp://guest:guest@localhost:5672/ INBOUND_CH_NAME=channel2 API_PORT=9427 TRANSACTOR_DS_PATH=.relayer-transactor/ VERIFIER_DS_PATH=.relayer-verifier/ nohup ./dispatcher >> /home/ubuntu/all.log 2>&1 &
     cd ../../../../
@@ -136,6 +136,13 @@ resource "aws_security_group" "security_relayer" {
   ingress {
     from_port   = 9424
     to_port     = 9427
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
