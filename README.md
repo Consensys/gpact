@@ -75,7 +75,7 @@ of the protocol stack.
   </td>
 </tr>
 <tr>
-  <td rowspan="2">Crosschain Messaging</td>
+  <td rowspan="2">Crosschain Messaging Layer</td>
   <td colspan=2>
     Interfaces: 
     <a href="contracts/contracts/src/messaging/interface">Solidity Contracts</a>, 
@@ -134,7 +134,7 @@ on one blockchain from other blockchains. Unlike previous atomic crosschain prot
 that only offer atomic asset swaps, this protocol allows for general purpose application logic.
 
 
-![Trade Finance using GPACT protocol](doc/images/trade.png "Trade Finance using GPACT protocol")
+![Trade Finance using GPACT protocol](docs/images/trade.png "Trade Finance using GPACT protocol")
 
 The figure above shows a logical representation of a crosschain call graph using the protocol. 
 A trade finance application creates a crosschain function 
