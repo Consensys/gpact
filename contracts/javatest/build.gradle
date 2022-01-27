@@ -1,0 +1,23 @@
+dependencies {
+    implementation project(':sdk')
+    implementation project(':common-test')
+
+    implementation "io.reactivex.rxjava2:rxjava:${rxJavaVersion}"
+
+    // https://mvnrepository.com/artifact/org.apache.tuweni/tuweni-bytes
+    implementation group: 'org.apache.tuweni', name: 'tuweni-bytes', version: '1.0.0'
+    // https://mvnrepository.com/artifact/org.apache.tuweni/tuweni-units
+    implementation group: 'org.apache.tuweni', name: 'tuweni-units', version: '1.0.0'
+}
+
+// Generate Solidity wrapper code before build.
+task generateSources {
+    def script = "contracts/javatest/gen.sh".execute()
+    script.waitForProcessOutput(System.out, System.err)
+    if (script.exitValue() != 0) {
+        throw new GradleException("Solidity compile error")
+    }
+}
+project.afterEvaluate {
+    build.dependsOn generateSources
+}

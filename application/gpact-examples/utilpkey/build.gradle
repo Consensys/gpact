@@ -1,6 +1,0 @@
-dependencies {
-    implementation project (':common')
-
-    implementation group: 'com.google.guava', name: 'guava', version: guavaVersion
-}
-

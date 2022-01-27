@@ -1,0 +1,17 @@
+
+dependencies {
+    implementation project (':examples-helpers')
+    implementation project (':sdk')
+}
+
+task generateSources {
+    def script = "performance/singlebc/write/java/gen.sh".execute()
+    script.waitForProcessOutput(System.out, System.err)
+    if (script.exitValue() != 0) {
+        throw new GradleException("Solidity compile error")
+    }
+}
+
+project.afterEvaluate {
+    build.dependsOn generateSources
+}

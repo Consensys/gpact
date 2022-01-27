@@ -261,7 +261,7 @@ jobs:
       - run:
           name: Build production code
           command: make build
-          working_directory: ~/project/messaging/relayer
+          working_directory: ~/project/services/relayer
 
   relayer-test:
     machine:
@@ -281,25 +281,25 @@ jobs:
       - run:
           name: Build test docker container
           command: make docker
-          working_directory: messaging/relayer
+          working_directory: services/relayer
       - run:
           name: Create and Start blockchains & Relayers
-          working_directory: messaging/relayer
+          working_directory: services/relayer
           background: true
           command: docker-compose up
       - run: sleep 30
       - run:
           name: Build test code and execute unit tests
           command: make utest
-          working_directory: messaging/relayer
+          working_directory: services/relayer
       - run:
           name: Stop blockchains & Relayers
-          working_directory: messaging/relayer
+          working_directory: services/relayer
           command: docker-compose stop
           when: always
       - run:
           name: Remove blockchains & Relayers
-          working_directory: messaging/relayer
+          working_directory: services/relayer
           command: docker-compose down
           when: always
 

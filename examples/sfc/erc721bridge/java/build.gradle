@@ -1,0 +1,22 @@
+dependencies {
+    implementation project(':examples-helpers')
+    implementation project(':sdk')
+
+    // https://mvnrepository.com/artifact/org.apache.tuweni/tuweni-bytes
+    implementation group: 'org.apache.tuweni', name: 'tuweni-bytes', version: '1.0.0'
+    // https://mvnrepository.com/artifact/org.apache.tuweni/tuweni-units
+    implementation group: 'org.apache.tuweni', name: 'tuweni-units', version: '1.0.0'
+
+}
+
+task generateSources {
+    def script = "examples/sfc/erc721bridge/java/gen.sh".execute()
+    script.waitForProcessOutput(System.out, System.err)
+    if (script.exitValue() != 0) {
+        throw new GradleException("Solidity compile error")
+    }
+}
+
+project.afterEvaluate {
+    build.dependsOn generateSources
+}

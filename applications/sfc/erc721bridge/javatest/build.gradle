@@ -1,0 +1,17 @@
+
+dependencies {
+    testImplementation project (":sdk")
+    testImplementation project(':common-test')
+}
+
+task generateSources {
+    def script = "applications/sfc/erc721bridge/javatest/gen.sh".execute()
+    script.waitForProcessOutput(System.out, System.err)
+    if (script.exitValue() != 0) {
+        throw new GradleException("Solidity compile error")
+    }
+}
+
+project.afterEvaluate {
+    build.dependsOn generateSources
+}

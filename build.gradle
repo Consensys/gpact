@@ -19,7 +19,7 @@ allprojects {
     spotless {
         java {
             target fileTree('.') {
-                exclude '**/soliditywrappers/*.*'
+                exclude '**/soliditywrappers/**'
                 exclude '**/*.sol'
                 exclude '**/.gradle/**'
                 exclude '**/resources'
