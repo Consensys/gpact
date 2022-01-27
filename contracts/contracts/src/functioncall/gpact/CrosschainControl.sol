@@ -692,7 +692,7 @@ contract CrosschainControl is
      * call execute tree in the Start Event indicates should have been called
      * by the function that is currently executing.
      *
-     * For details of the call path format see: https://github.com/ConsenSys/gpact/blob/main/doc/callpath.md
+     * For details of the call path format see: https://github.com/ConsenSys/gpact/blob/main/docs/callpath.md
      *
      * @param _segmentEvents   Encoded segment event information for each function
      *           called from the function being executed. The array elements must
