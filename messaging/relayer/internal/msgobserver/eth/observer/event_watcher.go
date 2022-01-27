@@ -18,13 +18,14 @@ package observer
 import (
 	"context"
 	"fmt"
+	"log"
+
 	"github.com/consensys/gpact/messaging/relayer/internal/contracts/functioncall"
 	"github.com/consensys/gpact/messaging/relayer/internal/logging"
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/event"
-	"log"
 )
 
 // EventWatcher listens to blockchain events
@@ -50,28 +51,28 @@ type SFCCrossCallRealtimeEventWatcher struct {
 // Watch subscribes and starts listening to 'CrossCall' events from a given Simple Function Call contract.
 // Events received are passed to an event handler for processing.
 // The method fails if subscribing to the event with the underlying network is not successful.
-func (l *SFCCrossCallRealtimeEventWatcher) Watch() {
+func (l *SFCCrossCallRealtimeEventWatcher) Watch() error {
 	opts := bind.WatchOpts{Start: &l.Start, Context: l.Context}
 	chanEvents := make(chan *functioncall.SfcCrossCall)
 	sub, err := l.SfcContract.WatchCrossCall(&opts, chanEvents)
 	if err != nil {
 		log.Fatalf("failed to subscribe to crosschaincall event %v", err)
 	}
-	l.start(sub, chanEvents)
+	return l.start(sub, chanEvents)
 }
 
-func (l *SFCCrossCallRealtimeEventWatcher) start(sub event.Subscription, chanEvents <-chan *functioncall.SfcCrossCall) {
+func (l *SFCCrossCallRealtimeEventWatcher) start(sub event.Subscription, chanEvents <-chan *functioncall.SfcCrossCall) error {
 	logging.Info("Start watching %v...", l.SfcContract)
 	for {
 		select {
 		case err := <-sub.Err():
 			// TODO: communicate this to the calling context
-			logging.Error("error in log subscription %v", err)
+			return fmt.Errorf("error in log subscription %v", err)
 		case ev := <-chanEvents:
 			l.Handler.Handle(ev)
 		case <-l.end:
 			logging.Info("Stop watching %v.", l.SfcContract)
-			return
+			return nil
 		}
 	}
 }

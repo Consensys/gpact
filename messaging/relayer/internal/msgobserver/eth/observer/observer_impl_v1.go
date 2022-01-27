@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"math/big"
 	"strings"
+	"time"
 
 	"github.com/consensys/gpact/messaging/relayer/internal/contracts/functioncall"
 	"github.com/consensys/gpact/messaging/relayer/internal/logging"
@@ -145,25 +146,33 @@ func (o *ObserverImplV1) StopObserve() error {
 
 // routine is the observe routine.
 func (o *ObserverImplV1) routine(chainID *big.Int, chainAP string, addr common.Address, end chan bool) {
-	chain, err := ethclient.Dial(chainAP)
-	if err != nil {
-		logging.Error(err.Error())
-		return
-	}
-	defer chain.Close()
+	for {
+		chain, err := ethclient.Dial(chainAP)
+		if err != nil {
+			logging.Error(err.Error())
+			return
+		}
+		defer chain.Close()
 
-	sfc, err := functioncall.NewSfc(addr, chain)
-	if err != nil {
-		logging.Error(err.Error())
-		return
-	}
+		sfc, err := functioncall.NewSfc(addr, chain)
+		if err != nil {
+			logging.Error(err.Error())
+			return
+		}
 
-	observer, err := NewSFCBridgeObserver(chainID.String(), addr.String(), sfc, o.mq, end)
-	if err != nil {
-		logging.Error(err.Error())
-		return
+		observer, err := NewSFCBridgeObserver(chainID.String(), addr.String(), sfc, o.mq, end)
+		if err != nil {
+			logging.Error(err.Error())
+			return
+		}
+		if observer.Start() == nil {
+			break
+		} else {
+			logging.Info("Error in observing event. Retry in 3 seconds...")
+			chain.Close()
+			time.Sleep(3 * time.Second)
+		}
 	}
-	observer.Start()
 }
 
 // dsKey gets the datastore key from given chainID and contract address.

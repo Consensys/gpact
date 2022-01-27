@@ -39,6 +39,6 @@ func NewSFCBridgeObserver(source string, sourceAddr string, contract *functionca
 	return &SFCBridgeObserver{EventWatcher: eventWatcher, EventHandler: eventHandler, SourceNetwork: source}, nil
 }
 
-func (o *SFCBridgeObserver) Start() {
-	o.EventWatcher.Watch()
+func (o *SFCBridgeObserver) Start() error {
+	return o.EventWatcher.Watch()
 }
