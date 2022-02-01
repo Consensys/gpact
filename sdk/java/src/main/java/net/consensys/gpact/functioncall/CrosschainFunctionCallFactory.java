@@ -26,14 +26,26 @@ public class CrosschainFunctionCallFactory {
   public static final String SERIAL = "SERIAL";
   public static final String PARALLEL = "PARALLEL";
 
+  private static final Map<String, Class> impls;
+
   static {
+    impls = new HashMap<>();
     registerImpl(GPACT, GpactCrossControlManagerGroup.class);
     registerImpl(SFC, SimpleCrossControlManagerGroup.class);
   }
 
-  private static final Map<String, Class> impls = new HashMap<>();
-
+  /**
+   * Register a crosschain function call protocol implementation. This method can be used to update
+   * the implementation of a protocol by passing in a name that is associated with an existing
+   * implementation.
+   *
+   * @param name Name to associate with an implementation.
+   * @param implClass Protocol implementation class that implements CrossControlManagerGroup.
+   */
   public static void registerImpl(final String name, final Class implClass) {
+    if (implClass == null) {
+      throw new IllegalArgumentException("Attempted to register a null implementation");
+    }
     impls.put(name, implClass);
   }
 
