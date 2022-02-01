@@ -16,19 +16,16 @@ package net.consensys.gpact.examples.gpact.trade;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.List;
 import net.consensys.gpact.common.*;
 import net.consensys.gpact.examples.gpact.trade.sim.*;
-import net.consensys.gpact.functioncall.gpact.CrossControlManagerGroup;
-import net.consensys.gpact.functioncall.gpact.CrosschainExecutor;
-import net.consensys.gpact.functioncall.gpact.calltree.CallExecutionTree;
-import net.consensys.gpact.functioncall.gpact.engine.ExecutionEngine;
+import net.consensys.gpact.functioncall.CrossControlManagerGroup;
+import net.consensys.gpact.functioncall.CrosschainCallResult;
+import net.consensys.gpact.functioncall.calltree.CallExecutionTree;
 import net.consensys.gpact.helpers.CredentialsCreator;
 import net.consensys.gpact.helpers.GpactExampleSystemManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
-import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
 public class Main {
   static final Logger LOG = LogManager.getLogger(Main.class);
@@ -54,7 +51,7 @@ public class Main {
     BlockchainInfo bc5 =
         exampleManager.getBc3Info(); // Change this to 5 if 5 blockchains are available
     CrossControlManagerGroup crossControlManagerGroup =
-        exampleManager.getGpactCrossControlManagerGroup();
+        exampleManager.getCrossControlManagerGroup();
 
     // Set-up classes to manage blockchains.
     Credentials creds = CredentialsCreator.createCredentials();
@@ -163,20 +160,19 @@ public class Main {
     CallExecutionTree callGraph =
         new CallExecutionTree(rootBcId, tradeWalletContractAddress, rlpRootExecuteTrade, rootCalls);
 
-    CrosschainExecutor executor = new CrosschainExecutor(crossControlManagerGroup);
-    ExecutionEngine executionEngine = exampleManager.getExecutionEngine(executor);
+    CrosschainCallResult result =
+        crossControlManagerGroup.executeCrosschainCall(
+            exampleManager.getExecutionEngine(), callGraph, 300);
 
-    boolean success = executionEngine.execute(callGraph, 300);
-
-    LOG.info("Success: {}", success);
+    LOG.info("Success: {}", result.successful());
 
     bc1TradeWalletBlockchain.showAllTrades();
 
-    List<BigInteger> callP = new ArrayList<>();
-    callP.add(BigInteger.ONE);
-    callP.add(BigInteger.ZERO);
-    TransactionReceipt txR = executor.getTransationReceipt(callP);
-    bc2BusLogicBlockchain.showEvents(txR);
+    //    List<BigInteger> callP = new ArrayList<>();
+    //    callP.add(BigInteger.ONE);
+    //    callP.add(BigInteger.ZERO);
+    //    TransactionReceipt txR = executor.getTransationReceipt(callP);
+    //    bc2BusLogicBlockchain.showEvents(txR);
 
     LOG.info(
         "Trade Wallet contract's lockable storaged locked: {}",

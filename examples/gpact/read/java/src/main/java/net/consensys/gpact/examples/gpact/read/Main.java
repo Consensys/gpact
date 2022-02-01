@@ -16,20 +16,17 @@ package net.consensys.gpact.examples.gpact.read;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.List;
 import net.consensys.gpact.common.*;
 import net.consensys.gpact.examples.gpact.read.sim.SimContractA;
 import net.consensys.gpact.examples.gpact.read.sim.SimContractB;
-import net.consensys.gpact.functioncall.gpact.CrossControlManagerGroup;
-import net.consensys.gpact.functioncall.gpact.CrosschainExecutor;
-import net.consensys.gpact.functioncall.gpact.calltree.CallExecutionTree;
-import net.consensys.gpact.functioncall.gpact.engine.ExecutionEngine;
+import net.consensys.gpact.functioncall.CrossControlManagerGroup;
+import net.consensys.gpact.functioncall.CrosschainCallResult;
+import net.consensys.gpact.functioncall.calltree.CallExecutionTree;
 import net.consensys.gpact.helpers.CredentialsCreator;
 import net.consensys.gpact.helpers.GpactExampleSystemManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
-import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
 public class Main {
   static final Logger LOG = LogManager.getLogger(Main.class);
@@ -52,7 +49,7 @@ public class Main {
     BlockchainInfo root = exampleManager.getRootBcInfo();
     BlockchainInfo bc2 = exampleManager.getBc2Info();
     CrossControlManagerGroup crossControlManagerGroup =
-        exampleManager.getGpactCrossControlManagerGroup();
+        exampleManager.getCrossControlManagerGroup();
 
     // Set-up classes to manage blockchains.
     Credentials appCreds = CredentialsCreator.createCredentials();
@@ -97,17 +94,16 @@ public class Main {
       CallExecutionTree callGraph =
           new CallExecutionTree(rootBcId, contractAContractAddress, rlpCrosschainRead, rootCalls);
 
-      CrosschainExecutor executor = new CrosschainExecutor(crossControlManagerGroup);
-      ExecutionEngine executionEngine = exampleManager.getExecutionEngine(executor);
+      CrosschainCallResult result =
+          crossControlManagerGroup.executeCrosschainCall(
+              exampleManager.getExecutionEngine(), callGraph, 300);
 
-      boolean success = executionEngine.execute(callGraph, 300);
+      LOG.info("Success: {}", result.successful());
 
-      LOG.info("Success: {}", success);
-
-      List<BigInteger> callP = new ArrayList<>();
-      callP.add(BigInteger.ZERO);
-      TransactionReceipt txR = executor.getTransationReceipt(callP);
-      bc1ContractABlockchain.showEvents(txR);
+      //      List<BigInteger> callP = new ArrayList<>();
+      //      callP.add(BigInteger.ZERO);
+      //      TransactionReceipt txR = executor.getTransationReceipt(callP);
+      //      bc1ContractABlockchain.showEvents(txR);
       bc1ContractABlockchain.showValueRead();
     }
 

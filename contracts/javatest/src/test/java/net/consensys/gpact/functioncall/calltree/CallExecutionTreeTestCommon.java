@@ -1,4 +1,4 @@
-package net.consensys.gpact.functioncall.gpact.calltree;
+package net.consensys.gpact.functioncall.calltree;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

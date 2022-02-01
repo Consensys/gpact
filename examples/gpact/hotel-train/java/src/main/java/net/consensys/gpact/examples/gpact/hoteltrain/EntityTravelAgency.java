@@ -17,13 +17,12 @@ package net.consensys.gpact.examples.gpact.hoteltrain;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.List;
 import net.consensys.gpact.common.*;
 import net.consensys.gpact.common.AbstractBlockchain;
-import net.consensys.gpact.functioncall.gpact.CrossControlManagerGroup;
-import net.consensys.gpact.functioncall.gpact.CrosschainExecutor;
-import net.consensys.gpact.functioncall.gpact.calltree.CallExecutionTree;
-import net.consensys.gpact.functioncall.gpact.engine.ExecutionEngine;
+import net.consensys.gpact.functioncall.CrossControlManagerGroup;
+import net.consensys.gpact.functioncall.CrosschainCallResult;
+import net.consensys.gpact.functioncall.CrosschainFunctionCallFactory;
+import net.consensys.gpact.functioncall.calltree.CallExecutionTree;
 import net.consensys.gpact.helpers.GpactExampleSystemManager;
 import net.consensys.gpact.messaging.MessagingVerificationInterface;
 import net.consensys.gpact.soliditywrappers.examples.gpact.hoteltrain.LockableERC20PresetFixedSupply;
@@ -90,22 +89,23 @@ public class EntityTravelAgency extends AbstractBlockchain {
 
   public void createCbcManager(
       BlockchainInfo bcInfoTravel,
-      List<String> infratructureContractAddressOnBcTravel,
+      String cbcContractAddressOnBcTravel,
       MessagingVerificationInterface msgVerTravel,
       BlockchainInfo bcInfoHotel,
-      List<String> infrastructureContractAddressOnBcHotel,
+      String cbcContractAddressOnBcHotel,
       MessagingVerificationInterface msgVerHotel,
       BlockchainInfo bcInfoTrain,
-      List<String> infrastructureContractAddressOnBcTrain,
+      String cbcContractAddressOnBcTrain,
       MessagingVerificationInterface msgVerTrain)
       throws Exception {
-    this.crossControlManagerGroup = new CrossControlManagerGroup();
+    this.crossControlManagerGroup =
+        CrosschainFunctionCallFactory.getInstance(CrosschainFunctionCallFactory.GPACT);
     this.crossControlManagerGroup.addBlockchainAndLoadContracts(
-        this.credentials, bcInfoTravel, infratructureContractAddressOnBcTravel, msgVerTravel);
+        this.credentials, bcInfoTravel, cbcContractAddressOnBcTravel, msgVerTravel);
     this.crossControlManagerGroup.addBlockchainAndLoadContracts(
-        this.credentials, bcInfoHotel, infrastructureContractAddressOnBcHotel, msgVerHotel);
+        this.credentials, bcInfoHotel, cbcContractAddressOnBcHotel, msgVerHotel);
     this.crossControlManagerGroup.addBlockchainAndLoadContracts(
-        this.credentials, bcInfoTrain, infrastructureContractAddressOnBcTrain, msgVerTrain);
+        this.credentials, bcInfoTrain, cbcContractAddressOnBcTrain, msgVerTrain);
   }
 
   public BigInteger book(final int dateInt, GpactExampleSystemManager exampleManager)
@@ -138,13 +138,13 @@ public class EntityTravelAgency extends AbstractBlockchain {
         new CallExecutionTree(
             this.blockchainId, this.travelAgencyAddress, rlpBookHotelAndTrain, rootCalls);
 
-    CrosschainExecutor executor = new CrosschainExecutor(this.crossControlManagerGroup);
-    ExecutionEngine executionEngine = exampleManager.getExecutionEngine(executor);
-    boolean success = executionEngine.execute(rootCall, 300);
+    CrosschainCallResult result =
+        this.crossControlManagerGroup.executeCrosschainCall(
+            exampleManager.getExecutionEngine(), rootCall, 300);
 
-    LOG.info("Success: {}", success);
+    LOG.info("Success: {}", result.successful());
 
-    if (!success) {
+    if (!result.successful()) {
       throw new Exception("Crosschain Execution failed. See log for details");
     }
 

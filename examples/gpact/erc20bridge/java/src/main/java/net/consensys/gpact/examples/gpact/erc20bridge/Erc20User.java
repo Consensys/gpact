@@ -2,14 +2,12 @@ package net.consensys.gpact.examples.gpact.erc20bridge;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import net.consensys.gpact.common.*;
-import net.consensys.gpact.functioncall.gpact.CrossControlManagerGroup;
-import net.consensys.gpact.functioncall.gpact.CrosschainExecutor;
-import net.consensys.gpact.functioncall.gpact.calltree.CallExecutionTree;
-import net.consensys.gpact.functioncall.gpact.engine.ExecutionEngine;
-import net.consensys.gpact.functioncall.gpact.engine.SerialExecutionEngine;
+import net.consensys.gpact.functioncall.CrossControlManagerGroup;
+import net.consensys.gpact.functioncall.CrosschainCallResult;
+import net.consensys.gpact.functioncall.CrosschainFunctionCallFactory;
+import net.consensys.gpact.functioncall.calltree.CallExecutionTree;
 import net.consensys.gpact.helpers.CredentialsCreator;
 import net.consensys.gpact.messaging.MessagingVerificationInterface;
 import net.consensys.gpact.soliditywrappers.examples.gpact.erc20bridge.GpactERC20Bridge;
@@ -69,17 +67,18 @@ public class Erc20User {
 
   public void createCbcManager(
       BlockchainInfo bcInfoA,
-      List<String> infrastructureContractAddressOnBcA,
+      String cbcContractAddressOnBcA,
       MessagingVerificationInterface msgVerA,
       BlockchainInfo bcInfoB,
-      List<String> infrastructureContractAddressOnBcB,
+      String cbcContractAddressOnBcB,
       MessagingVerificationInterface msgVerB)
       throws Exception {
-    this.crossControlManagerGroup = new CrossControlManagerGroup();
+    this.crossControlManagerGroup =
+        CrosschainFunctionCallFactory.getInstance(CrosschainFunctionCallFactory.GPACT);
     this.crossControlManagerGroup.addBlockchainAndLoadContracts(
-        this.creds, bcInfoA, infrastructureContractAddressOnBcA, msgVerA);
+        this.creds, bcInfoA, cbcContractAddressOnBcA, msgVerA);
     this.crossControlManagerGroup.addBlockchainAndLoadContracts(
-        this.creds, bcInfoB, infrastructureContractAddressOnBcB, msgVerB);
+        this.creds, bcInfoB, cbcContractAddressOnBcB, msgVerB);
 
     this.bcInfoA = bcInfoA;
     this.bcInfoB = bcInfoB;
@@ -162,15 +161,13 @@ public class Erc20User {
     byte[] encoded = root.encode();
     LOG.info(CallExecutionTree.dump(encoded));
 
-    CrosschainExecutor executor = new CrosschainExecutor(this.crossControlManagerGroup);
-    // Note: There is no point using a parallel execution engine: there is nothing to execute in
-    // parallel!
-    ExecutionEngine executionEngine = new SerialExecutionEngine(executor);
-    boolean success = executionEngine.execute(root, 300);
+    CrosschainCallResult result =
+        this.crossControlManagerGroup.executeCrosschainCall(
+            CrosschainFunctionCallFactory.SERIAL, root, 300);
 
-    LOG.info("Success: {}", success);
+    LOG.info("Success: {}", result.successful());
 
-    if (!success) {
+    if (!result.successful()) {
       throw new Exception("Crosschain Execution failed. See log for details");
     }
   }

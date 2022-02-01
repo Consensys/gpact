@@ -16,7 +16,7 @@ package net.consensys.gpact.examples.gpact.erc20bridge;
 
 import java.math.BigInteger;
 import net.consensys.gpact.common.*;
-import net.consensys.gpact.functioncall.gpact.CrossControlManagerGroup;
+import net.consensys.gpact.functioncall.CrossControlManagerGroup;
 import net.consensys.gpact.helpers.CredentialsCreator;
 import net.consensys.gpact.helpers.GpactExampleSystemManager;
 import org.apache.logging.log4j.LogManager;
@@ -43,7 +43,7 @@ public class TokenBridge {
     BlockchainInfo root = exampleManager.getRootBcInfo();
     BlockchainInfo bc2 = exampleManager.getBc2Info();
     CrossControlManagerGroup crossControlManagerGroup =
-        exampleManager.getGpactCrossControlManagerGroup();
+        exampleManager.getCrossControlManagerGroup();
 
     final int CHAIN_A_TOKEN_SUPPLY = 1000;
     final int CHAIN_B_TOKEN_SUPPLY = 2000;
@@ -120,24 +120,24 @@ public class TokenBridge {
 
     user1.createCbcManager(
         root,
-        crossControlManagerGroup.getInfrastructureAddresses(chainABcId),
+        crossControlManagerGroup.getCbcAddress(chainABcId),
         crossControlManagerGroup.getMessageVerification(chainABcId),
         bc2,
-        crossControlManagerGroup.getInfrastructureAddresses(chainBBcId),
+        crossControlManagerGroup.getCbcAddress(chainBBcId),
         crossControlManagerGroup.getMessageVerification(chainBBcId));
     user2.createCbcManager(
         root,
-        crossControlManagerGroup.getInfrastructureAddresses(chainABcId),
+        crossControlManagerGroup.getCbcAddress(chainABcId),
         crossControlManagerGroup.getMessageVerification(chainABcId),
         bc2,
-        crossControlManagerGroup.getInfrastructureAddresses(chainBBcId),
+        crossControlManagerGroup.getCbcAddress(chainBBcId),
         crossControlManagerGroup.getMessageVerification(chainBBcId));
     user3.createCbcManager(
         root,
-        crossControlManagerGroup.getInfrastructureAddresses(chainABcId),
+        crossControlManagerGroup.getCbcAddress(chainABcId),
         crossControlManagerGroup.getMessageVerification(chainABcId),
         bc2,
-        crossControlManagerGroup.getInfrastructureAddresses(chainBBcId),
+        crossControlManagerGroup.getCbcAddress(chainBBcId),
         crossControlManagerGroup.getMessageVerification(chainBBcId));
 
     // Give some balance to the users

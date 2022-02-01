@@ -12,11 +12,14 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package net.consensys.gpact.functioncall.gpact.engine;
+package net.consensys.gpact.functioncall.calltree;
 
-import net.consensys.gpact.functioncall.CrosschainCallResult;
-import net.consensys.gpact.functioncall.calltree.CallExecutionTree;
+public class CallTreeException extends Exception {
+  public CallTreeException(String msg) {
+    super(msg);
+  }
 
-public interface ExecutionEngine {
-  CrosschainCallResult execute(CallExecutionTree callGraph, long timeout) throws Exception;
+  public CallTreeException(String msg, StringBuilder out) {
+    super(msg + ((out == null) ? "" : "\nCall Execution Tree prior to parsing error:\n" + out));
+  }
 }
