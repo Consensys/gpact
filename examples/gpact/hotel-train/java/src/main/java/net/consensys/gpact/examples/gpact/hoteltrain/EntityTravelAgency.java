@@ -17,12 +17,12 @@ package net.consensys.gpact.examples.gpact.hoteltrain;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import net.consensys.gpact.CrosschainProtocols;
 import net.consensys.gpact.common.*;
 import net.consensys.gpact.common.AbstractBlockchain;
+import net.consensys.gpact.functioncall.CallExecutionTree;
 import net.consensys.gpact.functioncall.CrossControlManagerGroup;
 import net.consensys.gpact.functioncall.CrosschainCallResult;
-import net.consensys.gpact.functioncall.CrosschainFunctionCallFactory;
-import net.consensys.gpact.functioncall.calltree.CallExecutionTree;
 import net.consensys.gpact.helpers.GpactExampleSystemManager;
 import net.consensys.gpact.messaging.MessagingVerificationInterface;
 import net.consensys.gpact.soliditywrappers.examples.gpact.hoteltrain.LockableERC20PresetFixedSupply;
@@ -99,7 +99,7 @@ public class EntityTravelAgency extends AbstractBlockchain {
       MessagingVerificationInterface msgVerTrain)
       throws Exception {
     this.crossControlManagerGroup =
-        CrosschainFunctionCallFactory.getInstance(CrosschainFunctionCallFactory.GPACT);
+        CrosschainProtocols.getFunctionCallInstance(CrosschainProtocols.GPACT);
     this.crossControlManagerGroup.addBlockchainAndLoadContracts(
         this.credentials, bcInfoTravel, cbcContractAddressOnBcTravel, msgVerTravel);
     this.crossControlManagerGroup.addBlockchainAndLoadContracts(

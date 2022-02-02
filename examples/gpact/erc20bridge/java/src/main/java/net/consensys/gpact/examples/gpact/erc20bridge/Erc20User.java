@@ -3,11 +3,11 @@ package net.consensys.gpact.examples.gpact.erc20bridge;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import net.consensys.gpact.CrosschainProtocols;
 import net.consensys.gpact.common.*;
+import net.consensys.gpact.functioncall.CallExecutionTree;
 import net.consensys.gpact.functioncall.CrossControlManagerGroup;
 import net.consensys.gpact.functioncall.CrosschainCallResult;
-import net.consensys.gpact.functioncall.CrosschainFunctionCallFactory;
-import net.consensys.gpact.functioncall.calltree.CallExecutionTree;
 import net.consensys.gpact.helpers.CredentialsCreator;
 import net.consensys.gpact.messaging.MessagingVerificationInterface;
 import net.consensys.gpact.soliditywrappers.examples.gpact.erc20bridge.GpactERC20Bridge;
@@ -74,7 +74,7 @@ public class Erc20User {
       MessagingVerificationInterface msgVerB)
       throws Exception {
     this.crossControlManagerGroup =
-        CrosschainFunctionCallFactory.getInstance(CrosschainFunctionCallFactory.GPACT);
+        CrosschainProtocols.getFunctionCallInstance(CrosschainProtocols.GPACT);
     this.crossControlManagerGroup.addBlockchainAndLoadContracts(
         this.creds, bcInfoA, cbcContractAddressOnBcA, msgVerA);
     this.crossControlManagerGroup.addBlockchainAndLoadContracts(
@@ -162,8 +162,7 @@ public class Erc20User {
     LOG.info(CallExecutionTree.dump(encoded));
 
     CrosschainCallResult result =
-        this.crossControlManagerGroup.executeCrosschainCall(
-            CrosschainFunctionCallFactory.SERIAL, root, 300);
+        this.crossControlManagerGroup.executeCrosschainCall(CrosschainProtocols.SERIAL, root, 300);
 
     LOG.info("Success: {}", result.successful());
 

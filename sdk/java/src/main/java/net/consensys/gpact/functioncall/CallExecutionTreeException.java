@@ -12,14 +12,14 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package net.consensys.gpact.functioncall.calltree;
+package net.consensys.gpact.functioncall;
 
-public class CallTreeException extends Exception {
-  public CallTreeException(String msg) {
+public class CallExecutionTreeException extends Exception {
+  public CallExecutionTreeException(String msg) {
     super(msg);
   }
 
-  public CallTreeException(String msg, StringBuilder out) {
+  public CallExecutionTreeException(String msg, StringBuilder out) {
     super(msg + ((out == null) ? "" : "\nCall Execution Tree prior to parsing error:\n" + out));
   }
 }

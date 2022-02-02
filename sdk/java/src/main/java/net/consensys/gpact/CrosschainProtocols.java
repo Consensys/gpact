@@ -12,26 +12,29 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package net.consensys.gpact.functioncall;
+package net.consensys.gpact;
 
 import java.util.HashMap;
 import java.util.Map;
+import net.consensys.gpact.functioncall.CrossControlManagerGroup;
 import net.consensys.gpact.functioncall.gpact.GpactCrossControlManagerGroup;
 import net.consensys.gpact.functioncall.sfc.SimpleCrossControlManagerGroup;
 
-public class CrosschainFunctionCallFactory {
+/** Entry point class for the Crosschian Protocol Stack SDK. */
+public class CrosschainProtocols {
   public static final String GPACT = "GPACT";
   public static final String SFC = "SFC";
 
+  // Execution engine tpe
   public static final String SERIAL = "SERIAL";
   public static final String PARALLEL = "PARALLEL";
 
-  private static final Map<String, Class> impls;
+  private static final Map<String, Class> functionCallImpls;
 
   static {
-    impls = new HashMap<>();
-    registerImpl(GPACT, GpactCrossControlManagerGroup.class);
-    registerImpl(SFC, SimpleCrossControlManagerGroup.class);
+    functionCallImpls = new HashMap<>();
+    registerFunctionCallImpl(GPACT, GpactCrossControlManagerGroup.class);
+    registerFunctionCallImpl(SFC, SimpleCrossControlManagerGroup.class);
   }
 
   /**
@@ -42,11 +45,11 @@ public class CrosschainFunctionCallFactory {
    * @param name Name to associate with an implementation.
    * @param implClass Protocol implementation class that implements CrossControlManagerGroup.
    */
-  public static void registerImpl(final String name, final Class implClass) {
+  public static void registerFunctionCallImpl(final String name, final Class implClass) {
     if (implClass == null) {
       throw new IllegalArgumentException("Attempted to register a null implementation");
     }
-    impls.put(name, implClass);
+    functionCallImpls.put(name, implClass);
   }
 
   /**
@@ -56,9 +59,9 @@ public class CrosschainFunctionCallFactory {
    * @return Implementation of CrosschainFunctionCall
    * @throws Exception Typically thrown if the implementation has not been registered yet.
    */
-  public static CrossControlManagerGroup getInstance(final String implementationName)
+  public static CrossControlManagerGroup getFunctionCallInstance(final String implementationName)
       throws Exception {
-    final Class<CrossControlManagerGroup> clazz = impls.get(implementationName);
+    final Class<CrossControlManagerGroup> clazz = functionCallImpls.get(implementationName);
     return clazz.getDeclaredConstructor().newInstance();
   }
 }

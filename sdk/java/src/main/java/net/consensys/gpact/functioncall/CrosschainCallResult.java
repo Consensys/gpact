@@ -14,8 +14,6 @@
  */
 package net.consensys.gpact.functioncall;
 
-import net.consensys.gpact.functioncall.calltree.CallExecutionTree;
-
 public interface CrosschainCallResult {
 
   CallExecutionTree getCallTree();

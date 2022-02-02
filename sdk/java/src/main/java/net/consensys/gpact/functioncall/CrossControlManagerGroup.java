@@ -3,7 +3,6 @@ package net.consensys.gpact.functioncall;
 import java.util.ArrayList;
 import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.common.BlockchainInfo;
-import net.consensys.gpact.functioncall.calltree.CallExecutionTree;
 import net.consensys.gpact.messaging.MessagingVerificationInterface;
 import org.web3j.crypto.Credentials;
 

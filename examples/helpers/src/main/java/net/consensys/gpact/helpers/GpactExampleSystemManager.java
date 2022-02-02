@@ -1,13 +1,13 @@
 package net.consensys.gpact.helpers;
 
 import java.util.ArrayList;
+import net.consensys.gpact.CrosschainProtocols;
 import net.consensys.gpact.common.AnIdentity;
 import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.common.BlockchainInfo;
 import net.consensys.gpact.common.StatsHolder;
 import net.consensys.gpact.functioncall.CrossControlManager;
 import net.consensys.gpact.functioncall.CrossControlManagerGroup;
-import net.consensys.gpact.functioncall.CrosschainFunctionCallFactory;
 import net.consensys.gpact.messaging.MessagingManagerGroupInterface;
 import net.consensys.gpact.messaging.eventattest.AttestorSignerGroup;
 import net.consensys.gpact.messaging.eventattest.AttestorSignerManagerGroup;
@@ -60,7 +60,7 @@ public class GpactExampleSystemManager {
     MessagingManagerGroupInterface messagingManagerGroup = null;
 
     this.crossControlManagerGroup =
-        CrosschainFunctionCallFactory.getInstance(CrosschainFunctionCallFactory.GPACT);
+        CrosschainProtocols.getFunctionCallInstance(CrosschainProtocols.GPACT);
 
     // Set-up GPACT contracts: Deploy Crosschain Control and Registrar contracts on
     // each blockchain.
@@ -126,9 +126,9 @@ public class GpactExampleSystemManager {
   public String getExecutionEngine() {
     switch (this.executionEngineType) {
       case SERIAL:
-        return CrosschainFunctionCallFactory.SERIAL;
+        return CrosschainProtocols.SERIAL;
       case PARALLEL:
-        return CrosschainFunctionCallFactory.PARALLEL;
+        return CrosschainProtocols.PARALLEL;
       default:
         throw new RuntimeException("Not implemented yet");
     }

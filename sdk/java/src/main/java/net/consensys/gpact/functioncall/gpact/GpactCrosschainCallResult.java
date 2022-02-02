@@ -1,7 +1,7 @@
 package net.consensys.gpact.functioncall.gpact;
 
+import net.consensys.gpact.functioncall.CallExecutionTree;
 import net.consensys.gpact.functioncall.CrosschainCallResult;
-import net.consensys.gpact.functioncall.calltree.CallExecutionTree;
 
 public class GpactCrosschainCallResult implements CrosschainCallResult {
   private CallExecutionTree callTree;
