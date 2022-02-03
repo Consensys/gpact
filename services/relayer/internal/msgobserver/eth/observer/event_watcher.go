@@ -30,7 +30,7 @@ import (
 
 // EventWatcher listens to blockchain events
 type EventWatcher interface {
-	Watch()
+	Watch() error
 }
 
 type EventWatcherConfig struct {
