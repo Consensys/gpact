@@ -38,7 +38,7 @@ func Init(conf *viper.Viper) zerolog.Logger {
 	writer := getLogTarget(conf)
 	service := getLogServiceName(conf)
 	logger := zerolog.New(writer).With().Timestamp().Str("service", service).Logger()
-	log.Logger = logger
+	log.Logger = logger.With().Caller().Logger()
 	return logger
 }
 
