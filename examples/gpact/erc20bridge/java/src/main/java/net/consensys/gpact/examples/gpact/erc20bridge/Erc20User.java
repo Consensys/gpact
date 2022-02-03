@@ -2,14 +2,12 @@ package net.consensys.gpact.examples.gpact.erc20bridge;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import net.consensys.gpact.CrosschainProtocols;
 import net.consensys.gpact.common.*;
-import net.consensys.gpact.functioncall.gpact.CrossControlManagerGroup;
-import net.consensys.gpact.functioncall.gpact.CrosschainExecutor;
-import net.consensys.gpact.functioncall.gpact.calltree.CallExecutionTree;
-import net.consensys.gpact.functioncall.gpact.engine.ExecutionEngine;
-import net.consensys.gpact.functioncall.gpact.engine.SerialExecutionEngine;
+import net.consensys.gpact.functioncall.CallExecutionTree;
+import net.consensys.gpact.functioncall.CrossControlManagerGroup;
+import net.consensys.gpact.functioncall.CrosschainCallResult;
 import net.consensys.gpact.helpers.CredentialsCreator;
 import net.consensys.gpact.messaging.MessagingVerificationInterface;
 import net.consensys.gpact.soliditywrappers.examples.gpact.erc20bridge.GpactERC20Bridge;
@@ -43,8 +41,8 @@ public class Erc20User {
 
   private CrossControlManagerGroup crossControlManagerGroup;
 
-  private BlockchainInfo bcInfoA;
-  private BlockchainInfo bcInfoB;
+  private BlockchainConfig bcInfoA;
+  private BlockchainConfig bcInfoB;
 
   protected Erc20User(
       String name,
@@ -68,18 +66,19 @@ public class Erc20User {
   }
 
   public void createCbcManager(
-      BlockchainInfo bcInfoA,
-      List<String> infrastructureContractAddressOnBcA,
+      BlockchainConfig bcInfoA,
+      String cbcContractAddressOnBcA,
       MessagingVerificationInterface msgVerA,
-      BlockchainInfo bcInfoB,
-      List<String> infrastructureContractAddressOnBcB,
+      BlockchainConfig bcInfoB,
+      String cbcContractAddressOnBcB,
       MessagingVerificationInterface msgVerB)
       throws Exception {
-    this.crossControlManagerGroup = new CrossControlManagerGroup();
-    this.crossControlManagerGroup.addBlockchainAndLoadContracts(
-        this.creds, bcInfoA, infrastructureContractAddressOnBcA, msgVerA);
-    this.crossControlManagerGroup.addBlockchainAndLoadContracts(
-        this.creds, bcInfoB, infrastructureContractAddressOnBcB, msgVerB);
+    this.crossControlManagerGroup =
+        CrosschainProtocols.getFunctionCallInstance(CrosschainProtocols.GPACT).get();
+    this.crossControlManagerGroup.addBlockchainAndLoadCbcContract(
+        this.creds, bcInfoA, cbcContractAddressOnBcA, msgVerA);
+    this.crossControlManagerGroup.addBlockchainAndLoadCbcContract(
+        this.creds, bcInfoB, cbcContractAddressOnBcB, msgVerB);
 
     this.bcInfoA = bcInfoA;
     this.bcInfoB = bcInfoB;
@@ -111,7 +110,7 @@ public class Erc20User {
         fromAToB ? this.addressOfERC20BcB : this.addressOfERC20BcA;
     String sourceERC20ContractAddress = fromAToB ? this.addressOfERC20BcA : this.addressOfERC20BcB;
 
-    BlockchainInfo bcInfo = fromAToB ? this.bcInfoA : this.bcInfoB;
+    BlockchainConfig bcInfo = fromAToB ? this.bcInfoA : this.bcInfoB;
 
     final int RETRY = 20;
     Web3j web3j =
@@ -162,15 +161,12 @@ public class Erc20User {
     byte[] encoded = root.encode();
     LOG.info(CallExecutionTree.dump(encoded));
 
-    CrosschainExecutor executor = new CrosschainExecutor(this.crossControlManagerGroup);
-    // Note: There is no point using a parallel execution engine: there is nothing to execute in
-    // parallel!
-    ExecutionEngine executionEngine = new SerialExecutionEngine(executor);
-    boolean success = executionEngine.execute(root, 300);
+    CrosschainCallResult result =
+        this.crossControlManagerGroup.executeCrosschainCall(CrosschainProtocols.SERIAL, root, 300);
 
-    LOG.info("Success: {}", success);
+    LOG.info("Success: {}", result.isSuccessful());
 
-    if (!success) {
+    if (!result.isSuccessful()) {
       throw new Exception("Crosschain Execution failed. See log for details");
     }
   }

@@ -12,7 +12,7 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package net.consensys.gpact.functioncall.gpact.calltree;
+package net.consensys.gpact.functioncall.common;
 
 import static net.consensys.gpact.common.FormatConversion.addressStringToBytes;
 
@@ -20,11 +20,12 @@ import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
-import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.common.FormatConversion;
 import net.consensys.gpact.common.Tuple;
+import net.consensys.gpact.functioncall.CallExecutionTree;
+import net.consensys.gpact.functioncall.CallExecutionTreeException;
 
-public class CallExecutionTree {
+public class CallExecutionTreeEncoderV1 {
   private static final int NUM_FUNCS_CALLED_SIZE = 1;
   private static final int OFFSET_SIZE = 4;
   private static final int BLOCKCHAIN_ID_SIZE = 32;
@@ -35,86 +36,26 @@ public class CallExecutionTree {
   public static final int MAX_CALL_EX_TREE_SIZE = 1000000;
   public static final int MAX_CALLED_FUNCTIONS = 255;
 
-  BlockchainId blockchainId;
-  String contractAddress;
-  String functionCallData;
-  // In order list of functions called by this function.
-  ArrayList<CallExecutionTree> calledFunctions;
-
-  public CallExecutionTree(
-      BlockchainId blockchainId, String contractAddress, String functionCallData) {
-    this.blockchainId = blockchainId;
-    this.contractAddress = contractAddress;
-    this.functionCallData = functionCallData;
+  private CallExecutionTreeEncoderV1() {
+    // Block instantiation.
   }
 
-  public CallExecutionTree(
-      BlockchainId blockchainId,
-      String contractAddress,
-      String functionCallData,
-      ArrayList<CallExecutionTree> calledFunctions) {
-    this.blockchainId = blockchainId;
-    this.contractAddress = contractAddress;
-    this.functionCallData = functionCallData;
-    this.calledFunctions = calledFunctions;
+  public static byte[] encode(final CallExecutionTree callTree) throws CallExecutionTreeException {
+    return encodeRecursive(callTree);
   }
 
-  public BlockchainId getBlockchainId() {
-    return blockchainId;
-  }
-
-  public String getContractAddress() {
-    return contractAddress;
-  }
-
-  public String getFunctionCallData() {
-    return functionCallData;
-  }
-
-  public ArrayList<CallExecutionTree> getCalledFunctions() {
-    return calledFunctions;
-  }
-
-  public int getNumCalledFunctions() {
-    return this.calledFunctions.size();
-  }
-
-  public boolean isLeaf() {
-    return this.calledFunctions == null || this.calledFunctions.isEmpty();
-  }
-
-  public byte[] encode() throws CallTreeException {
-    return encodeRecursive(this);
-  }
-
-  public void verify() throws CallTreeException {
-    verify(encode());
-  }
-
-  public String dump() throws CallTreeException {
-    return dump(encode());
-  }
-
-  @Override
-  public String toString() {
-    try {
-      return dump(encode());
-    } catch (CallTreeException ex) {
-      return ex.getMessage();
-    }
-  }
-
-  private byte[] encodeRecursive(CallExecutionTree function) throws CallTreeException {
+  private static byte[] encodeRecursive(CallExecutionTree function)
+      throws CallExecutionTreeException {
     List<CallExecutionTree> calledFunctions = function.getCalledFunctions();
 
     ByteBuffer buf = ByteBuffer.allocate(MAX_CALL_EX_TREE_SIZE);
     boolean isLeafFunction = calledFunctions == null || calledFunctions.isEmpty();
     if (isLeafFunction) {
       buf.put(LEAF_FUNCTION);
-      buf.put(function.encodeFunctionCall());
+      buf.put(encodeFunctionCall(function));
     } else {
       List<byte[]> encodedCalledFunctions = new ArrayList<>();
-      encodedCalledFunctions.add(function.encodeFunctionCall());
+      encodedCalledFunctions.add(encodeFunctionCall(function));
       for (CallExecutionTree func : calledFunctions) {
         encodedCalledFunctions.add(encodeRecursive(func));
       }
@@ -122,7 +63,8 @@ public class CallExecutionTree {
       // Non-leaf function
       int numCalledFunctions = calledFunctions.size();
       if (numCalledFunctions > MAX_CALLED_FUNCTIONS) {
-        throw new CallTreeException("Too many called functions: " + calledFunctions.size());
+        throw new CallExecutionTreeException(
+            "Too many called functions: " + calledFunctions.size());
       }
       buf.put((byte) numCalledFunctions);
       int offset = (numCalledFunctions + 1) * OFFSET_SIZE + NUM_FUNCS_CALLED_SIZE;
@@ -141,13 +83,13 @@ public class CallExecutionTree {
     return output;
   }
 
-  private byte[] encodeFunctionCall() {
+  private static byte[] encodeFunctionCall(final CallExecutionTree callTree) {
     ByteBuffer buf = ByteBuffer.allocate(MAX_CALL_EX_TREE_SIZE);
-    byte[] blockchainIdBytes = this.blockchainId.asBytes();
-    byte[] address = addressStringToBytes(this.contractAddress);
+    byte[] blockchainIdBytes = callTree.getBlockchainId().asBytes();
+    byte[] address = addressStringToBytes(callTree.getContractAddress());
     buf.put(blockchainIdBytes);
     buf.put(address);
-    byte[] data = FormatConversion.hexStringToByteArray(this.functionCallData);
+    byte[] data = FormatConversion.hexStringToByteArray(callTree.getFunctionCallData());
     buf.putShort((short) data.length);
     buf.put(data);
     buf.flip();
@@ -161,7 +103,7 @@ public class CallExecutionTree {
    *
    * @param encodedCallExecutionTree Tree to be processed.
    */
-  public static String dump(byte[] encodedCallExecutionTree) throws CallTreeException {
+  public static String dump(byte[] encodedCallExecutionTree) throws CallExecutionTreeException {
     StringBuilder out = new StringBuilder();
 
     out.append("Encoded Call Execution Tree: ");
@@ -174,7 +116,7 @@ public class CallExecutionTree {
     return out.toString();
   }
 
-  public static void verify(byte[] encodedCallExecutionTree) throws CallTreeException {
+  public static void verify(byte[] encodedCallExecutionTree) throws CallExecutionTreeException {
     process(encodedCallExecutionTree, null);
   }
 
@@ -183,23 +125,23 @@ public class CallExecutionTree {
    *
    * @param encodedCallExecutionTree Tree to be processed.
    */
-  public static void process(final byte[] encodedCallExecutionTree, final StringBuilder out)
-      throws CallTreeException {
+  private static void process(final byte[] encodedCallExecutionTree, final StringBuilder out)
+      throws CallExecutionTreeException {
     ByteBuffer buf = ByteBuffer.wrap(encodedCallExecutionTree);
     int size = processRecursive(out, buf, 0);
     if (buf.remaining() != 0) {
-      throw new CallTreeException(
+      throw new CallExecutionTreeException(
           "Not all bytes from Call Execution Tree processed: " + buf.remaining() + "remaining",
           out);
     }
     if (size != buf.capacity()) {
-      throw new CallTreeException(
+      throw new CallExecutionTreeException(
           "Not all bytes from Call Execution Tree processed: " + size + ", " + buf.capacity(), out);
     }
   }
 
   private static int processRecursive(StringBuilder out, ByteBuffer buf, int level)
-      throws CallTreeException {
+      throws CallExecutionTreeException {
     int size = 0;
     size += NUM_FUNCS_CALLED_SIZE;
     int numFuncsCalled = uint8(buf.get());
@@ -220,7 +162,7 @@ public class CallExecutionTree {
 
       int used = decodeFunction(out, buf, level);
       if (used != offsets[1] - offsets[0]) {
-        throw new CallTreeException(
+        throw new CallExecutionTreeException(
             "Function offsets "
                 + offsets[0]
                 + " and "
@@ -235,7 +177,7 @@ public class CallExecutionTree {
         used = processRecursive(out, buf, level + 1);
         if (i < numFuncsCalled) {
           if (used != offsets[i + 1] - offsets[i]) {
-            throw new CallTreeException(
+            throw new CallExecutionTreeException(
                 "Function offsets "
                     + offsets[i]
                     + " and "
@@ -254,7 +196,7 @@ public class CallExecutionTree {
   }
 
   private static int decodeFunction(StringBuilder out, ByteBuffer buf, int level)
-      throws CallTreeException {
+      throws CallExecutionTreeException {
     byte[] blockchainId = new byte[BLOCKCHAIN_ID_SIZE];
     buf.get(blockchainId);
 
@@ -264,7 +206,7 @@ public class CallExecutionTree {
     // Length is an unsigned short (uint16)
     int len = uint16(buf.getShort());
     if (len > buf.remaining()) {
-      throw new CallTreeException(
+      throw new CallExecutionTreeException(
           "Decoded length "
               + len
               + "bytes, longer than remaining space "
@@ -315,9 +257,14 @@ public class CallExecutionTree {
     return valInt;
   }
 
-  // This code will only work for call trees with at least two functions in them.
+  /**
+   * Given a call path, extract the blockchain id, address and call data. NOTE: This code will only
+   * work for call trees with at least two functions in them.
+   *
+   * @param callExecutionTree Call tree to extract function call from
+   */
   public static Tuple<BigInteger, String, String> extractFunction(
-      byte[] callExecutionTree, int[] callPath) throws CallTreeException {
+      byte[] callExecutionTree, int[] callPath) throws CallExecutionTreeException {
     int index = 0;
     ByteBuffer buf = ByteBuffer.wrap(callExecutionTree);
 
@@ -327,7 +274,8 @@ public class CallExecutionTree {
       int numFuncsCalled = uint8(buf.get());
       if (numFuncsCalled == 0) {
         if (i < callPath.length - 1) {
-          throw new CallTreeException("Reached leaf function but there is more call path.");
+          throw new CallExecutionTreeException(
+              "Reached leaf function but there is more call path.");
         }
       } else {
         // Jump to the location of the offset of the function
@@ -344,7 +292,7 @@ public class CallExecutionTree {
       buf.position(index);
       int numFuncsCalled = uint8(buf.get());
       if (numFuncsCalled != 0) {
-        throw new CallTreeException("Expected leaf function.");
+        throw new CallExecutionTreeException("Expected leaf function.");
       }
       index++;
     }
@@ -359,7 +307,7 @@ public class CallExecutionTree {
     // Length is an unsigned short (uint16)
     int len = uint16(buf.getShort());
     if (len > buf.remaining()) {
-      throw new CallTreeException(
+      throw new CallExecutionTreeException(
           "Decoded length "
               + len
               + " bytes, longer than remaining space "

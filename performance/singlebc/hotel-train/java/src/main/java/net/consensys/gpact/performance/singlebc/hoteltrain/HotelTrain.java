@@ -15,7 +15,7 @@
 package net.consensys.gpact.performance.singlebc.hoteltrain;
 
 import java.math.BigInteger;
-import net.consensys.gpact.common.BlockchainInfo;
+import net.consensys.gpact.common.BlockchainConfig;
 import net.consensys.gpact.common.StatsHolder;
 import net.consensys.gpact.helpers.PropertiesLoader;
 import org.apache.logging.log4j.LogManager;
@@ -42,7 +42,7 @@ public class HotelTrain {
     }
 
     PropertiesLoader propsLoader = new PropertiesLoader(args[0]);
-    BlockchainInfo root = propsLoader.getBlockchainInfo("ROOT");
+    BlockchainConfig root = propsLoader.getBlockchainInfo("ROOT");
 
     EntityHotel hotel = new EntityHotel(root.bcId, root.uri, root.gasPriceStrategy, root.period);
     hotel.deployContracts();

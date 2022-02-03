@@ -16,7 +16,7 @@ package net.consensys.gpact.examples.gpact.hoteltrain;
 
 import java.math.BigInteger;
 import net.consensys.gpact.common.*;
-import net.consensys.gpact.functioncall.gpact.CrossControlManagerGroup;
+import net.consensys.gpact.functioncall.CrossControlManagerGroup;
 import net.consensys.gpact.helpers.GpactExampleSystemManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -43,11 +43,11 @@ public class HotelTrain {
     GpactExampleSystemManager exampleManager = new GpactExampleSystemManager(args[0]);
     exampleManager.gpactStandardExampleConfig(3);
 
-    BlockchainInfo root = exampleManager.getRootBcInfo();
-    BlockchainInfo bc2 = exampleManager.getBc2Info();
-    BlockchainInfo bc3 = exampleManager.getBc3Info();
+    BlockchainConfig root = exampleManager.getRootBcInfo();
+    BlockchainConfig bc2 = exampleManager.getBc2Info();
+    BlockchainConfig bc3 = exampleManager.getBc3Info();
     CrossControlManagerGroup crossControlManagerGroup =
-        exampleManager.getGpactCrossControlManagerGroup();
+        exampleManager.getCrossControlManagerGroup();
 
     // Set-up classes to manage blockchains.
     EntityHotel hotel = new EntityHotel(bc2.bcId, bc2.uri, bc2.gasPriceStrategy, bc2.period);
@@ -70,13 +70,13 @@ public class HotelTrain {
 
     travelAgency.createCbcManager(
         root,
-        crossControlManagerGroup.getInfrastructureAddresses(travelBcId),
+        crossControlManagerGroup.getCbcAddress(travelBcId),
         crossControlManagerGroup.getMessageVerification(travelBcId),
         bc2,
-        crossControlManagerGroup.getInfrastructureAddresses(hotelBcId),
+        crossControlManagerGroup.getCbcAddress(hotelBcId),
         crossControlManagerGroup.getMessageVerification(hotelBcId),
         bc3,
-        crossControlManagerGroup.getInfrastructureAddresses(trainBcId),
+        crossControlManagerGroup.getCbcAddress(trainBcId),
         crossControlManagerGroup.getMessageVerification(trainBcId));
 
     // Set-up application contracts.

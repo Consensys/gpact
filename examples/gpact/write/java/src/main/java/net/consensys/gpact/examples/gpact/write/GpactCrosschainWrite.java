@@ -16,14 +16,12 @@ package net.consensys.gpact.examples.gpact.write;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.List;
 import net.consensys.gpact.common.*;
 import net.consensys.gpact.examples.gpact.write.sim.SimContractA;
 import net.consensys.gpact.examples.gpact.write.sim.SimContractB;
-import net.consensys.gpact.functioncall.gpact.CrossControlManagerGroup;
-import net.consensys.gpact.functioncall.gpact.CrosschainExecutor;
-import net.consensys.gpact.functioncall.gpact.calltree.CallExecutionTree;
-import net.consensys.gpact.functioncall.gpact.engine.ExecutionEngine;
+import net.consensys.gpact.functioncall.CallExecutionTree;
+import net.consensys.gpact.functioncall.CrossControlManagerGroup;
+import net.consensys.gpact.functioncall.CrosschainCallResult;
 import net.consensys.gpact.helpers.CredentialsCreator;
 import net.consensys.gpact.helpers.GpactExampleSystemManager;
 import org.apache.logging.log4j.LogManager;
@@ -49,10 +47,10 @@ public class GpactCrosschainWrite {
     GpactExampleSystemManager exampleManager = new GpactExampleSystemManager(args[0]);
     exampleManager.gpactStandardExampleConfig(2);
 
-    BlockchainInfo root = exampleManager.getRootBcInfo();
-    BlockchainInfo bc2 = exampleManager.getBc2Info();
+    BlockchainConfig root = exampleManager.getRootBcInfo();
+    BlockchainConfig bc2 = exampleManager.getBc2Info();
     CrossControlManagerGroup crossControlManagerGroup =
-        exampleManager.getGpactCrossControlManagerGroup();
+        exampleManager.getCrossControlManagerGroup();
 
     Credentials creds = CredentialsCreator.createCredentials();
     Bc1ContractA bc1ContractABlockchain =
@@ -95,16 +93,13 @@ public class GpactCrosschainWrite {
       CallExecutionTree callGraph =
           new CallExecutionTree(rootBcId, contractAContractAddress, rlpCrosschainWrite, rootCalls);
 
-      CrosschainExecutor executor = new CrosschainExecutor(crossControlManagerGroup);
-      ExecutionEngine executionEngine = exampleManager.getExecutionEngine(executor);
+      CrosschainCallResult result =
+          crossControlManagerGroup.executeCrosschainCall(
+              exampleManager.getExecutionEngine(), callGraph, 300);
 
-      boolean success = executionEngine.execute(callGraph, 300);
+      LOG.info("Success: {}", result.isSuccessful());
 
-      LOG.info("Success: {}", success);
-
-      List<BigInteger> callP = new ArrayList<>();
-      callP.add(BigInteger.ZERO);
-      TransactionReceipt txR = executor.getTransationReceipt(callP);
+      TransactionReceipt txR = result.getTransactionReceipt(CrosschainCallResult.ROOT_CALL);
       bc2ContractBBlockchain.showEvents(txR);
       bc2ContractBBlockchain.showValueWritten();
     }

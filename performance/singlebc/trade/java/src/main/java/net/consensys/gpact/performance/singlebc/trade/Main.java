@@ -17,7 +17,7 @@ package net.consensys.gpact.performance.singlebc.trade;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import net.consensys.gpact.common.BlockchainInfo;
+import net.consensys.gpact.common.BlockchainConfig;
 import net.consensys.gpact.common.StatsHolder;
 import net.consensys.gpact.helpers.CredentialsCreator;
 import net.consensys.gpact.helpers.PropertiesLoader;
@@ -41,7 +41,7 @@ public class Main {
 
     PropertiesLoader propsLoader = new PropertiesLoader(args[0]);
     Credentials creds = CredentialsCreator.createCredentials();
-    BlockchainInfo root = propsLoader.getBlockchainInfo("ROOT");
+    BlockchainConfig root = propsLoader.getBlockchainInfo("ROOT");
 
     Bc1TradeWallet bc1TradeWalletBlockchain =
         new Bc1TradeWallet(creds, root.bcId, root.uri, root.gasPriceStrategy, root.period);
