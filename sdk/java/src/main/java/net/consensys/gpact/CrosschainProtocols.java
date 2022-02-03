@@ -29,7 +29,7 @@ public class CrosschainProtocols {
   public static final String SERIAL = "SERIAL";
   public static final String PARALLEL = "PARALLEL";
 
-  private static final Map<String, Class> functionCallImpls;
+  private static final Map<String, Class<? extends CrossControlManagerGroup>> functionCallImpls;
 
   static {
     functionCallImpls = new HashMap<>();
@@ -45,7 +45,8 @@ public class CrosschainProtocols {
    * @param name Name to associate with an implementation.
    * @param implClass Protocol implementation class that implements CrossControlManagerGroup.
    */
-  public static void registerFunctionCallImpl(final String name, final Class implClass) {
+  public static void registerFunctionCallImpl(
+      final String name, final Class<? extends CrossControlManagerGroup> implClass) {
     if (implClass == null) {
       throw new IllegalArgumentException("Attempted to register a null implementation");
     }
@@ -61,7 +62,8 @@ public class CrosschainProtocols {
    */
   public static CrossControlManagerGroup getFunctionCallInstance(final String implementationName)
       throws Exception {
-    final Class<CrossControlManagerGroup> clazz = functionCallImpls.get(implementationName);
+    final Class<? extends CrossControlManagerGroup> clazz =
+        functionCallImpls.get(implementationName);
     return clazz.getDeclaredConstructor().newInstance();
   }
 }
