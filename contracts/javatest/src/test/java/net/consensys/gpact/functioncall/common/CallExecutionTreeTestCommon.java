@@ -1,4 +1,4 @@
-package net.consensys.gpact.functioncall.gpact.calltree;
+package net.consensys.gpact.functioncall.common;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.common.Tuple;
 import net.consensys.gpact.common.test.AbstractWeb3Test;
+import net.consensys.gpact.functioncall.CallExecutionTree;
+import net.consensys.gpact.functioncall.CallExecutionTreeException;
 import org.junit.jupiter.api.Test;
 
 public abstract class CallExecutionTreeTestCommon extends AbstractWeb3Test {
@@ -48,24 +50,24 @@ public abstract class CallExecutionTreeTestCommon extends AbstractWeb3Test {
   String function8 = "0x410203040a010203040506070809aa09";
 
   abstract Tuple<BigInteger, String, String> extractFunction(byte[] encodedCallTree, int[] callPath)
-      throws CallTreeException;
+      throws CallExecutionTreeException;
 
   @Test
-  public void singleFunc() throws CallTreeException {
+  public void singleFunc() throws CallExecutionTreeException {
     CallExecutionTree seg = new CallExecutionTree(blockchainId1, contract1, function1);
-    seg.dump();
+    seg.toString();
   }
 
   @Test
-  public void singleFuncNoFuncData() throws CallTreeException {
+  public void singleFuncNoFuncData() throws CallExecutionTreeException {
     CallExecutionTree seg = new CallExecutionTree(blockchainId1, contract1, noFuncData);
-    seg.dump();
+    seg.toString();
   }
 
   @Test
-  public void singleFuncOnlyFunctionSelector() throws CallTreeException {
+  public void singleFuncOnlyFunctionSelector() throws CallExecutionTreeException {
     CallExecutionTree seg = new CallExecutionTree(blockchainId1, contract1, onlyFunctionSelection);
-    seg.dump();
+    seg.toString();
   }
 
   @Test
@@ -74,7 +76,7 @@ public abstract class CallExecutionTreeTestCommon extends AbstractWeb3Test {
     ArrayList<CallExecutionTree> rootCalls1 = new ArrayList<>();
     rootCalls1.add(seg);
     CallExecutionTree root = new CallExecutionTree(blockchainId1, contract1, function1, rootCalls1);
-    root.dump();
+    root.toString();
 
     byte[] encoded = root.encode();
     Tuple<BigInteger, String, String> func = extractFunction(encoded, new int[] {0});
@@ -96,7 +98,7 @@ public abstract class CallExecutionTreeTestCommon extends AbstractWeb3Test {
     rootCalls1.add(seg1);
     rootCalls1.add(seg2);
     CallExecutionTree root = new CallExecutionTree(blockchainId1, contract1, function1, rootCalls1);
-    root.dump();
+    root.toString();
 
     byte[] encoded = root.encode();
     Tuple<BigInteger, String, String> func = extractFunction(encoded, new int[] {0});
@@ -137,7 +139,7 @@ public abstract class CallExecutionTreeTestCommon extends AbstractWeb3Test {
     rootCalls1.add(seg6);
     rootCalls1.add(seg7);
     CallExecutionTree root = new CallExecutionTree(blockchainId1, contract1, function1, rootCalls1);
-    root.dump();
+    root.toString();
 
     byte[] encoded = root.encode();
     Tuple<BigInteger, String, String> func = extractFunction(encoded, new int[] {0});

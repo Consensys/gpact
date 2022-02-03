@@ -14,6 +14,9 @@
  */
 package net.consensys.gpact.functioncall.gpact;
 
+import static net.consensys.gpact.functioncall.common.CallPath.calculateRootCallMapKey;
+import static net.consensys.gpact.functioncall.common.CallPath.callPathToMapKey;
+
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,22 +39,10 @@ import org.web3j.protocol.exceptions.TransactionException;
  * Holds the state for a crosschain call. A separate instance of this class is needed for each
  * crosschain call.
  */
-public class CrosschainExecutor {
-  static final Logger LOG = LogManager.getLogger(CrosschainExecutor.class);
-
-  // The maximum number of calls that can be done from any one function. The value
-  // has been set to an aritrarily largish number. If people write complicated
-  // functions that have a 1000 calls, or write functions that have loops and
-  // do many cross-blockchain function calls, then this number might need to be made larger.
-  private static final BigInteger MAX_CALLS_FROM_ONE_FUNCTION = BigInteger.valueOf(1000);
+public class GpactCrosschainExecutor {
+  static final Logger LOG = LogManager.getLogger(GpactCrosschainExecutor.class);
 
   private static final BigInteger ROOT_CALL_MAP_KEY = calculateRootCallMapKey();
-
-  private static BigInteger calculateRootCallMapKey() {
-    List<BigInteger> rootCallPath = new ArrayList<BigInteger>();
-    rootCallPath.add(BigInteger.ZERO);
-    return callPathToMapKey(rootCallPath);
-  }
 
   private SignedEvent signedStartEvent;
   private SignedEvent signedRootEvent;
@@ -65,7 +56,7 @@ public class CrosschainExecutor {
   private final Map<BlockchainId, List<SignedEvent>> signedSegmentEventsWithLockedContracts =
       new ConcurrentHashMap<>();
 
-  CrossControlManagerGroup crossControlManagerGroup;
+  GpactCrossControlManagerGroup crossControlManagerGroup;
 
   protected byte[] callGraph;
 
@@ -75,7 +66,7 @@ public class CrosschainExecutor {
 
   boolean success = false;
 
-  public CrosschainExecutor(CrossControlManagerGroup crossControlManagerGroup) {
+  public GpactCrosschainExecutor(GpactCrossControlManagerGroup crossControlManagerGroup) {
     this.crossControlManagerGroup = crossControlManagerGroup;
   }
 
@@ -88,8 +79,8 @@ public class CrosschainExecutor {
   }
 
   public void startCall() throws Exception {
-    CrossControlManager rootCbcContract =
-        this.crossControlManagerGroup.getCbcContract(this.rootBcId);
+    GpactCrossControlManager rootCbcContract =
+        (GpactCrossControlManager) this.crossControlManagerGroup.getCbcManager(this.rootBcId);
     MessagingVerificationInterface messaging =
         this.crossControlManagerGroup.getMessageVerification(this.rootBcId);
 
@@ -104,7 +95,7 @@ public class CrosschainExecutor {
             txr,
             startEventData,
             rootCbcContract.getCbcContractAddress(),
-            CrossControlManager.START_EVENT_SIGNATURE);
+            GpactCrossControlManager.START_EVENT_SIGNATURE);
   }
 
   public void segment(
@@ -123,8 +114,8 @@ public class CrosschainExecutor {
       callPathIndex = (callPath.get(callPath.size() - 2)).intValue();
     }
 
-    CrossControlManager segmentCbcContract =
-        this.crossControlManagerGroup.getCbcContract(blockchainId);
+    GpactCrossControlManager segmentCbcContract =
+        (GpactCrossControlManager) this.crossControlManagerGroup.getCbcManager(blockchainId);
     MessagingVerificationInterface messaging =
         this.crossControlManagerGroup.getMessageVerification(blockchainId);
 
@@ -142,7 +133,7 @@ public class CrosschainExecutor {
             txr,
             segEventData,
             segmentCbcContract.getCbcContractAddress(),
-            CrossControlManager.SEGMENT_EVENT_SIGNATURE);
+            GpactCrossControlManager.SEGMENT_EVENT_SIGNATURE);
     this.transactionReceipts.put(mapKey, txr);
 
     // Store the segment event for the call that has just occurred to the map so it can be accessed
@@ -164,8 +155,8 @@ public class CrosschainExecutor {
   }
 
   public void root() throws Exception {
-    CrossControlManager rootCbcContract =
-        this.crossControlManagerGroup.getCbcContract(this.rootBcId);
+    GpactCrossControlManager rootCbcContract =
+        (GpactCrossControlManager) this.crossControlManagerGroup.getCbcManager(this.rootBcId);
     MessagingVerificationInterface messaging =
         this.crossControlManagerGroup.getMessageVerification(this.rootBcId);
     SignedEvent[] signedSegEvents = this.signedSegmentEvents.get(ROOT_CALL_MAP_KEY);
@@ -179,7 +170,7 @@ public class CrosschainExecutor {
             txr,
             rootEventData,
             rootCbcContract.getCbcContractAddress(),
-            CrossControlManager.ROOT_EVENT_SIGNATURE);
+            GpactCrossControlManager.ROOT_EVENT_SIGNATURE);
     this.transactionReceipts.put(ROOT_CALL_MAP_KEY, txr);
     this.success = rootCbcContract.getRootEventSuccess();
   }
@@ -202,7 +193,8 @@ public class CrosschainExecutor {
     for (BlockchainId blockchainId : this.signedSegmentEventsWithLockedContracts.keySet()) {
       List<SignedEvent> signedSegEventsLockedContractsCurrentBlockchain =
           this.signedSegmentEventsWithLockedContracts.get(blockchainId);
-      CrossControlManager cbcContract = this.crossControlManagerGroup.getCbcContract(blockchainId);
+      GpactCrossControlManager cbcContract =
+          (GpactCrossControlManager) this.crossControlManagerGroup.getCbcManager(blockchainId);
       transactionReceiptCompletableFutures[i++] =
           cbcContract.signallingAsyncPart1(
               this.signedRootEvent, signedSegEventsLockedContractsCurrentBlockchain);
@@ -227,7 +219,8 @@ public class CrosschainExecutor {
     for (BlockchainId blockchainId : this.signedSegmentEventsWithLockedContracts.keySet()) {
       TransactionReceipt receipt =
           (TransactionReceipt) transactionReceiptCompletableFutures[i++].get();
-      CrossControlManager cbcContract = this.crossControlManagerGroup.getCbcContract(blockchainId);
+      GpactCrossControlManager cbcContract =
+          (GpactCrossControlManager) this.crossControlManagerGroup.getCbcManager(blockchainId);
       cbcContract.signallingAsyncPart2(receipt);
     }
   }
@@ -237,15 +230,12 @@ public class CrosschainExecutor {
   }
 
   /**
-   * Return the transaction receipt for part of the call path. This allows applications to see what
-   * events have been emitted across the call execution tree.
+   * Return all of the transaction receipts.
    *
-   * @param callPath Part of the call execution tree to get the transaction receipt for.
-   * @return the transaction receipt that was returned with callPath part of the call execution tree
-   *     was executed.
+   * @return the transaction receipts
    */
-  public TransactionReceipt getTransationReceipt(List<BigInteger> callPath) {
-    return this.transactionReceipts.get(callPathToMapKey(callPath));
+  public Map<BigInteger, TransactionReceipt> getTransationReceipts() {
+    return this.transactionReceipts;
   }
 
   /**
@@ -267,32 +257,6 @@ public class CrosschainExecutor {
       parentCallPath.set(parentCallPath.size() - 1, BigInteger.ZERO);
 
       return callPathToMapKey(parentCallPath);
-    }
-  }
-
-  /**
-   * Determine a key that can be used for a map that uniquely identifies the call path. A message
-   * digest of the call path could be used, but a simpler multiplication method will work just as
-   * well.
-   *
-   * @param callPath The call path to determine a map key for.
-   * @return The map key representing the call path.
-   */
-  private static BigInteger callPathToMapKey(List<BigInteger> callPath) {
-    if (callPath.size() == 0) {
-      throw new RuntimeException("Invalid call path length: " + 0);
-    } else {
-      BigInteger key = BigInteger.ONE;
-      for (BigInteger call : callPath) {
-        if (call.compareTo(MAX_CALLS_FROM_ONE_FUNCTION) >= 0) {
-          throw new RuntimeException(
-              "Maximum calls from one function is: " + MAX_CALLS_FROM_ONE_FUNCTION);
-        }
-
-        key = key.multiply(MAX_CALLS_FROM_ONE_FUNCTION);
-        key = key.add(call.add(BigInteger.ONE));
-      }
-      return key;
     }
   }
 }

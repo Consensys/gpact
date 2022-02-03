@@ -23,13 +23,11 @@ import net.consensys.gpact.soliditywrappers.examples.sfc.write.ContractA;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
-import org.web3j.protocol.core.RemoteCall;
-import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
 public class Bc1ContractA extends AbstractBlockchain {
   private static final Logger LOG = LogManager.getLogger(Bc1ContractA.class);
 
-  ContractA contractA;
+  private ContractA contractA;
 
   public Bc1ContractA(
       Credentials credentials,
@@ -59,7 +57,11 @@ public class Bc1ContractA extends AbstractBlockchain {
         this.blockchainId);
   }
 
-  public RemoteCall<TransactionReceipt> doCrosschainWrite(BigInteger val) {
-    return this.contractA.doCrosschainWrite(val);
+  public String getABI_doCrosschainWrite(BigInteger val) {
+    return this.contractA.getABI_doCrosschainWrite(val);
+  }
+
+  public String getContractAddress() {
+    return this.contractA.getContractAddress();
   }
 }

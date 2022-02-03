@@ -15,8 +15,8 @@
 package net.consensys.gpact.messaging;
 
 import java.util.ArrayList;
+import net.consensys.gpact.common.BlockchainConfig;
 import net.consensys.gpact.common.BlockchainId;
-import net.consensys.gpact.common.BlockchainInfo;
 import org.web3j.crypto.Credentials;
 
 /** Manage multiple blockchains, each holding a set of registrar and verification contracts */
@@ -29,7 +29,7 @@ public interface MessagingManagerGroupInterface {
    * @param bcInfo Blockchain configuration information.
    * @throws Exception If there is an issue; typically due to issues deploying the contracts.
    */
-  void addBlockchainAndDeployContracts(Credentials creds, BlockchainInfo bcInfo) throws Exception;
+  void addBlockchainAndDeployContracts(Credentials creds, BlockchainConfig bcInfo) throws Exception;
 
   /**
    * Add a blockchain to be managed by this class. Load contracts that have previously been
@@ -41,7 +41,7 @@ public interface MessagingManagerGroupInterface {
    * @throws Exception If there is an issue; typically due to issues deploying the contracts.
    */
   void addBlockchainAndLoadContracts(
-      Credentials creds, BlockchainInfo bcInfo, ArrayList<String> addresses) throws Exception;
+      Credentials creds, BlockchainConfig bcInfo, ArrayList<String> addresses) throws Exception;
 
   void registerSignerOnAllBlockchains(String signersAddress) throws Exception;
 
