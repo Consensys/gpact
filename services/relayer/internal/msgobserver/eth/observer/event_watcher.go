@@ -111,7 +111,7 @@ type SFCCrossCallFinalisedEventWatcher struct {
 
 // Watch subscribes and starts listening to 'CrossCall' events from a given Simple Function Call contract.
 // Once an events receives sufficient block confirmations, it is passed to an event handler for processing.
-func (l *SFCCrossCallFinalisedEventWatcher) Watch() {
+func (l *SFCCrossCallFinalisedEventWatcher) Watch() error {
 	l.nextBlockToProcess = l.Start
 	headers := make(chan *types.Header)
 
@@ -122,14 +122,13 @@ func (l *SFCCrossCallFinalisedEventWatcher) Watch() {
 	for {
 		select {
 		case err := <-sub.Err():
-			// TODO: communicate this to the calling context
-			logging.Error("error in log subscription %v", err)
+			return fmt.Errorf("error in log subscription %v", err)
 		case latestHead := <-headers:
 			// TODO: communicate err to the calling context
 			l.processFinalisedEvents(latestHead)
 		case <-l.end:
 			logging.Info("Stop watching %v.", l.SfcContract)
-			return
+			return nil
 		}
 	}
 }
