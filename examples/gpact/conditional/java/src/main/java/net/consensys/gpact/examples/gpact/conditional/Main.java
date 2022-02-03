@@ -49,8 +49,8 @@ public class Main {
           "This example will not work with a paralell execution engine as it has two segments that interact with the same contract on the same blockchain");
     }
 
-    BlockchainInfo root = exampleManager.getRootBcInfo();
-    BlockchainInfo bc2 = exampleManager.getBc2Info();
+    BlockchainConfig root = exampleManager.getRootBcInfo();
+    BlockchainConfig bc2 = exampleManager.getBc2Info();
     CrossControlManagerGroup crossControlManagerGroup =
         exampleManager.getCrossControlManagerGroup();
 

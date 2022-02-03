@@ -17,8 +17,8 @@ package net.consensys.gpact.functioncall.gpact;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import net.consensys.gpact.common.BlockchainConfig;
 import net.consensys.gpact.common.BlockchainId;
-import net.consensys.gpact.common.BlockchainInfo;
 import net.consensys.gpact.functioncall.CallExecutionTree;
 import net.consensys.gpact.functioncall.CrossControlManager;
 import net.consensys.gpact.functioncall.CrossControlManagerGroup;
@@ -39,7 +39,9 @@ public class GpactCrossControlManagerGroup implements CrossControlManagerGroup {
 
   @Override
   public void addBlockchainAndDeployContracts(
-      Credentials creds, BlockchainInfo bcInfo, MessagingVerificationInterface messageVerification)
+      Credentials creds,
+      BlockchainConfig bcInfo,
+      MessagingVerificationInterface messageVerification)
       throws Exception {
     BlockchainId blockchainId = bcInfo.bcId;
     if (this.blockchains.containsKey(blockchainId)) {
@@ -61,7 +63,7 @@ public class GpactCrossControlManagerGroup implements CrossControlManagerGroup {
   @Override
   public void addBlockchainAndLoadCbcContract(
       Credentials creds,
-      BlockchainInfo bcInfo,
+      BlockchainConfig bcInfo,
       String cbcAddress,
       MessagingVerificationInterface messageVerification)
       throws Exception {

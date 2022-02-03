@@ -72,7 +72,7 @@ public class SimpleCrossControlManager extends AbstractBlockchain implements Cro
         SimpleCrosschainControl.load(cbcAddress, this.web3j, this.tm, this.gasProvider);
   }
 
-  public void addBlockchain(
+  public void addRemoteBlockchain(
       BlockchainId bcId, String cbcContractAddress, String verifierContractAddress)
       throws Exception {
     TransactionReceipt txr =

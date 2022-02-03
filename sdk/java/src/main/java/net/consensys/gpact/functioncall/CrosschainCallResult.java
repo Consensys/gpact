@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
+/** The result of a crosschain function call. */
 public interface CrosschainCallResult {
   // ROOT_CALL is the call path to the root function call.
   List<BigInteger> ROOT_CALL = createRootCall();

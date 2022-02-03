@@ -18,8 +18,8 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import net.consensys.gpact.common.AnIdentity;
+import net.consensys.gpact.common.BlockchainConfig;
 import net.consensys.gpact.common.BlockchainId;
-import net.consensys.gpact.common.BlockchainInfo;
 import net.consensys.gpact.common.RevertReason;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -34,7 +34,7 @@ public class TxRootRelayerGroup {
   Map<BlockchainId, TxRootRelayer> blockchains = new HashMap<>();
 
   public void loadContractForBlockchain(
-      Credentials creds, BlockchainInfo bcInfo, String txRootContract) throws Exception {
+      Credentials creds, BlockchainConfig bcInfo, String txRootContract) throws Exception {
     BlockchainId blockchainId = bcInfo.bcId;
     if (this.blockchains.containsKey(blockchainId)) {
       return;

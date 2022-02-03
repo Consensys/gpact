@@ -14,13 +14,25 @@
  */
 package net.consensys.gpact.common;
 
-public class BlockchainInfo {
+/** Contains information about how to use a blockchain. */
+public class BlockchainConfig {
+  // Blockchain identifier.
   public BlockchainId bcId;
+  // URI of the blockchain node to be used for connecting to the blockchain.
   public String uri;
+  // Strategy to be used for setting gas prices.
   public DynamicGasProvider.Strategy gasPriceStrategy;
+  // How often to poll the blockchain for a response. Typically set to the block period.
   public int period;
 
-  public BlockchainInfo(String bcId, String uri, String gasPriceStrategy, String period) {
+  /**
+   * @param bcId Blockchain identifier.
+   * @param uri URI of the blockchain node to be used for connecting to the blockchain.
+   * @param gasPriceStrategy Strategy to be used for setting gas prices.
+   * @param period How often to poll the blockchain for a response. Typically set to the block
+   *     period.
+   */
+  public BlockchainConfig(String bcId, String uri, String gasPriceStrategy, String period) {
     this.bcId = new BlockchainId(bcId);
     this.uri = uri;
     this.gasPriceStrategy = DynamicGasProvider.Strategy.valueOf(gasPriceStrategy);

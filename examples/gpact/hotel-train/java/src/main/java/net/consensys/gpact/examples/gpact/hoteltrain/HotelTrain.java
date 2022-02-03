@@ -43,9 +43,9 @@ public class HotelTrain {
     GpactExampleSystemManager exampleManager = new GpactExampleSystemManager(args[0]);
     exampleManager.gpactStandardExampleConfig(3);
 
-    BlockchainInfo root = exampleManager.getRootBcInfo();
-    BlockchainInfo bc2 = exampleManager.getBc2Info();
-    BlockchainInfo bc3 = exampleManager.getBc3Info();
+    BlockchainConfig root = exampleManager.getRootBcInfo();
+    BlockchainConfig bc2 = exampleManager.getBc2Info();
+    BlockchainConfig bc3 = exampleManager.getBc3Info();
     CrossControlManagerGroup crossControlManagerGroup =
         exampleManager.getCrossControlManagerGroup();
 

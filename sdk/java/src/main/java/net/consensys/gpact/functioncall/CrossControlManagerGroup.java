@@ -1,8 +1,8 @@
 package net.consensys.gpact.functioncall;
 
 import java.util.ArrayList;
+import net.consensys.gpact.common.BlockchainConfig;
 import net.consensys.gpact.common.BlockchainId;
-import net.consensys.gpact.common.BlockchainInfo;
 import net.consensys.gpact.messaging.MessagingVerificationInterface;
 import org.web3j.crypto.Credentials;
 
@@ -13,34 +13,36 @@ import org.web3j.crypto.Credentials;
 public interface CrossControlManagerGroup {
 
   /**
-   * This method should be only used in testing situation. Importantly, it deploys a new Crosschain
+   * This method should be only used in testing situations. Importantly, it deploys a new Crosschain
    * Control Contract.
    *
    * <p>Configure a blockchain for use by the function call layer.
    *
-   * @param creds Credentials used for signing transactions on the specified blockchain.
+   * @param creds Credentials to be used for signing transactions on the specified blockchain.
    * @param bcInfo Information about the blocchain: Blockchain id, URL, gas pricing strategy.
    * @param messageVerification Implementation used to obtain signed events or proofs of events so
    *     that the events can be used on remote blockchains.
    * @throws Exception If an issue is encountered deploying the crosschain control contract.
    */
   void addBlockchainAndDeployContracts(
-      Credentials creds, BlockchainInfo bcInfo, MessagingVerificationInterface messageVerification)
+      Credentials creds,
+      BlockchainConfig bcInfo,
+      MessagingVerificationInterface messageVerification)
       throws Exception;
 
   /**
    * Configure a blockchain for use by the function call layer.
    *
-   * @param creds Credentials used for signing transactions on the specified blockchain.
-   * @param bcInfo Information about the blocchain: Blockchain id, URL, gas pricing strategy.
-   * @param cbcAddress Address of crosshcain control contract.
+   * @param creds Credentials to be used for signing transactions on the specified blockchain.
+   * @param bcInfo Information about the blockchain: Blockchain id, URL, gas pricing strategy.
+   * @param cbcAddress Address of crosschain control contract.
    * @param messageVerification Implementation used to obtain signed events or proofs of events so
    *     that the events can be used on remote blockchains.
    * @throws Exception If an issue is encountered loading the crosschain control contract.
    */
   void addBlockchainAndLoadCbcContract(
       Credentials creds,
-      BlockchainInfo bcInfo,
+      BlockchainConfig bcInfo,
       String cbcAddress,
       MessagingVerificationInterface messageVerification)
       throws Exception;
@@ -48,11 +50,13 @@ public interface CrossControlManagerGroup {
   /**
    * Execute a crosschain function call.
    *
-   * @param executionEngine The name of the execution engine to use.
+   * @param executionEngine The name of the execution engine to use. The valid options are
+   *     currently: CrosschainProtocols.SERIAL or CrosschainProtocols.PARALLEL.
    * @param callTree The root of the call execution tree to execute.
    * @param timeout The timeout of the crosschain call in seconds.
    * @return Indicates if the overall call succeeds.
-   * @throws CrosschainFunctionCallException if the execution engine is not supported.
+   * @throws CrosschainFunctionCallException if the execution engine is not supported or some other
+   *     error occurs.
    */
   CrosschainCallResult executeCrosschainCall(
       String executionEngine, CallExecutionTree callTree, long timeout)

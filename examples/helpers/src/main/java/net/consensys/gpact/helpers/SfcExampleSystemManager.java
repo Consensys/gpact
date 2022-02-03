@@ -3,8 +3,8 @@ package net.consensys.gpact.helpers;
 import java.util.ArrayList;
 import net.consensys.gpact.CrosschainProtocols;
 import net.consensys.gpact.common.AnIdentity;
+import net.consensys.gpact.common.BlockchainConfig;
 import net.consensys.gpact.common.BlockchainId;
-import net.consensys.gpact.common.BlockchainInfo;
 import net.consensys.gpact.common.StatsHolder;
 import net.consensys.gpact.functioncall.CrossControlManager;
 import net.consensys.gpact.functioncall.CrossControlManagerGroup;
@@ -23,9 +23,9 @@ public class SfcExampleSystemManager {
 
   private final String propsFileName;
 
-  private BlockchainInfo root;
-  private BlockchainInfo bc2;
-  private BlockchainInfo bc3;
+  private BlockchainConfig root;
+  private BlockchainConfig bc2;
+  private BlockchainConfig bc3;
 
   private CrossControlManagerGroup crossControlManagerGroup;
 
@@ -122,15 +122,15 @@ public class SfcExampleSystemManager {
     return CrosschainProtocols.SERIAL;
   }
 
-  public BlockchainInfo getRootBcInfo() {
+  public BlockchainConfig getRootBcInfo() {
     return this.root;
   }
 
-  public BlockchainInfo getBc2Info() {
+  public BlockchainConfig getBc2Info() {
     return this.bc2;
   }
 
-  public BlockchainInfo getBc3Info() {
+  public BlockchainConfig getBc3Info() {
     return this.bc3;
   }
 
@@ -151,7 +151,7 @@ public class SfcExampleSystemManager {
 
       for (BlockchainId bcId2 : bcs) {
         CrossControlManager crossManager2 = crossControlManagerGroup.getCbcManager(bcId2);
-        crossManager2.addBlockchain(bcId1, cbcContractAddress, verifierContractAddress);
+        crossManager2.addRemoteBlockchain(bcId1, cbcContractAddress, verifierContractAddress);
       }
     }
   }
@@ -161,7 +161,7 @@ public class SfcExampleSystemManager {
       CrossControlManagerGroup crossControlManagerGroup,
       AttestorSignerGroup attestorSignerGroup,
       Credentials creds,
-      BlockchainInfo bc)
+      BlockchainConfig bc)
       throws Exception {
     messagingManagerGroup.addBlockchainAndDeployContracts(creds, bc);
     attestorSignerGroup.addBlockchain(bc.bcId);
@@ -175,7 +175,7 @@ public class SfcExampleSystemManager {
       TxRootRelayerGroup relayerGroup,
       TxRootTransferGroup txRootTransferGroup,
       Credentials creds,
-      BlockchainInfo bc)
+      BlockchainConfig bc)
       throws Exception {
     messagingManagerGroup.addBlockchainAndDeployContracts(creds, bc);
     txRootTransferGroup.addBlockchain(relayerGroup, creds, bc);

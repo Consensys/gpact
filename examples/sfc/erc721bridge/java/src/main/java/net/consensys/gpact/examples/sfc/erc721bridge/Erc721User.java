@@ -53,8 +53,8 @@ public class Erc721User {
   private final String addressOfBridgeOnBlockchainA;
   private final String addressOfBridgeOnBlockchainB;
 
-  private BlockchainInfo bcInfoA;
-  private BlockchainInfo bcInfoB;
+  private BlockchainConfig bcInfoA;
+  private BlockchainConfig bcInfoB;
 
   private CrossControlManagerGroup crossControlManagerGroup;
 
@@ -80,10 +80,10 @@ public class Erc721User {
   }
 
   public void createCbcManager(
-      BlockchainInfo bcInfoA,
+      BlockchainConfig bcInfoA,
       String cbcContractAddressOnBcA,
       MessagingVerificationInterface msgVerA,
-      BlockchainInfo bcInfoB,
+      BlockchainConfig bcInfoB,
       String cbcContractAddressOnBcB,
       MessagingVerificationInterface msgVerB)
       throws Exception {
@@ -124,7 +124,7 @@ public class Erc721User {
     String sourceBridgeContractAddress =
         fromAToB ? this.addressOfBridgeOnBlockchainA : this.addressOfBridgeOnBlockchainB;
 
-    BlockchainInfo bcInfo = fromAToB ? this.bcInfoA : this.bcInfoB;
+    BlockchainConfig bcInfo = fromAToB ? this.bcInfoA : this.bcInfoB;
 
     final int RETRY = 20;
     Web3j web3j =

@@ -43,12 +43,12 @@ public class Main {
     // TODO can be configured for 5, however, need to set-up test system for 5 blockchains.
     exampleManager.gpactStandardExampleConfig(3);
 
-    BlockchainInfo root = exampleManager.getRootBcInfo();
-    BlockchainInfo bc2 = exampleManager.getBc2Info();
-    BlockchainInfo bc3 = exampleManager.getBc3Info();
-    BlockchainInfo bc4 =
+    BlockchainConfig root = exampleManager.getRootBcInfo();
+    BlockchainConfig bc2 = exampleManager.getBc2Info();
+    BlockchainConfig bc3 = exampleManager.getBc3Info();
+    BlockchainConfig bc4 =
         exampleManager.getBc2Info(); // Change this to 4 if 5 blockchains are available
-    BlockchainInfo bc5 =
+    BlockchainConfig bc5 =
         exampleManager.getBc3Info(); // Change this to 5 if 5 blockchains are available
     CrossControlManagerGroup crossControlManagerGroup =
         exampleManager.getCrossControlManagerGroup();

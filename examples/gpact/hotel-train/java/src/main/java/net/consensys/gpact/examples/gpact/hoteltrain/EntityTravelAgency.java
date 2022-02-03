@@ -88,13 +88,13 @@ public class EntityTravelAgency extends AbstractBlockchain {
   }
 
   public void createCbcManager(
-      BlockchainInfo bcInfoTravel,
+      BlockchainConfig bcInfoTravel,
       String cbcContractAddressOnBcTravel,
       MessagingVerificationInterface msgVerTravel,
-      BlockchainInfo bcInfoHotel,
+      BlockchainConfig bcInfoHotel,
       String cbcContractAddressOnBcHotel,
       MessagingVerificationInterface msgVerHotel,
-      BlockchainInfo bcInfoTrain,
+      BlockchainConfig bcInfoTrain,
       String cbcContractAddressOnBcTrain,
       MessagingVerificationInterface msgVerTrain)
       throws Exception {

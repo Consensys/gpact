@@ -89,7 +89,7 @@ public class GpactCrossControlManager extends AbstractBlockchain implements Cros
             cbcAddress, this.web3j, this.tm, this.gasProvider);
   }
 
-  public void addBlockchain(
+  public void addRemoteBlockchain(
       BlockchainId bcId, String cbcContractAddress, String verifierContractAddress)
       throws Exception {
     TransactionReceipt txr =

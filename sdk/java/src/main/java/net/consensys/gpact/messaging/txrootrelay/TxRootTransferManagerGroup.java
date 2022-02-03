@@ -16,8 +16,8 @@ package net.consensys.gpact.messaging.txrootrelay;
 
 import java.math.BigInteger;
 import java.util.*;
+import net.consensys.gpact.common.BlockchainConfig;
 import net.consensys.gpact.common.BlockchainId;
-import net.consensys.gpact.common.BlockchainInfo;
 import net.consensys.gpact.messaging.MessagingManagerGroupInterface;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -30,7 +30,7 @@ public class TxRootTransferManagerGroup implements MessagingManagerGroupInterfac
   Map<BlockchainId, TxRootTransferManager> blockchains = new HashMap<>();
 
   @Override
-  public void addBlockchainAndDeployContracts(Credentials creds, BlockchainInfo bcInfo)
+  public void addBlockchainAndDeployContracts(Credentials creds, BlockchainConfig bcInfo)
       throws Exception {
     BlockchainId blockchainId = bcInfo.bcId;
     if (this.blockchains.containsKey(blockchainId)) {
@@ -49,7 +49,7 @@ public class TxRootTransferManagerGroup implements MessagingManagerGroupInterfac
 
   @Override
   public void addBlockchainAndLoadContracts(
-      Credentials creds, BlockchainInfo bcInfo, ArrayList<String> addresses) throws Exception {
+      Credentials creds, BlockchainConfig bcInfo, ArrayList<String> addresses) throws Exception {
     BlockchainId blockchainId = bcInfo.bcId;
     if (this.blockchains.containsKey(blockchainId)) {
       return;

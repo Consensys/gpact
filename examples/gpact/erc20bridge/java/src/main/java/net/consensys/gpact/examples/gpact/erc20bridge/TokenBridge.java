@@ -40,8 +40,8 @@ public class TokenBridge {
     GpactExampleSystemManager exampleManager = new GpactExampleSystemManager(args[0]);
     exampleManager.gpactStandardExampleConfig(2);
 
-    BlockchainInfo root = exampleManager.getRootBcInfo();
-    BlockchainInfo bc2 = exampleManager.getBc2Info();
+    BlockchainConfig root = exampleManager.getRootBcInfo();
+    BlockchainConfig bc2 = exampleManager.getBc2Info();
     CrossControlManagerGroup crossControlManagerGroup =
         exampleManager.getCrossControlManagerGroup();
 
