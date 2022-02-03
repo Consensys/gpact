@@ -88,7 +88,7 @@ public class Erc721User {
       MessagingVerificationInterface msgVerB)
       throws Exception {
     this.crossControlManagerGroup =
-        CrosschainProtocols.getFunctionCallInstance(CrosschainProtocols.SFC);
+        CrosschainProtocols.getFunctionCallInstance(CrosschainProtocols.SFC).get();
     this.crossControlManagerGroup.addBlockchainAndLoadCbcContract(
         this.creds, bcInfoA, cbcContractAddressOnBcA, msgVerA);
     this.crossControlManagerGroup.addBlockchainAndLoadCbcContract(

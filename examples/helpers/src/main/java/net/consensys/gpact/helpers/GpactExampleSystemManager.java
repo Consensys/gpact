@@ -58,7 +58,7 @@ public class GpactExampleSystemManager {
     MessagingManagerGroupInterface messagingManagerGroup = null;
 
     this.crossControlManagerGroup =
-        CrosschainProtocols.getFunctionCallInstance(CrosschainProtocols.GPACT);
+        CrosschainProtocols.getFunctionCallInstance(CrosschainProtocols.GPACT).get();
 
     // Set-up GPACT contracts: Deploy Crosschain Control and Registrar contracts on
     // each blockchain.

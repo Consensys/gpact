@@ -54,7 +54,7 @@ public class SfcExampleSystemManager {
 
     MessagingManagerGroupInterface messagingManagerGroup = null;
     this.crossControlManagerGroup =
-        CrosschainProtocols.getFunctionCallInstance(CrosschainProtocols.SFC);
+        CrosschainProtocols.getFunctionCallInstance(CrosschainProtocols.SFC).get();
 
     // Set-up GPACT contracts: Deploy Crosschain Control and Registrar contracts on
     // each blockchain.

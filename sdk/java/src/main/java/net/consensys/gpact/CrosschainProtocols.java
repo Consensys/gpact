@@ -16,6 +16,7 @@ package net.consensys.gpact;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import net.consensys.gpact.functioncall.CrossControlManagerGroup;
 import net.consensys.gpact.functioncall.gpact.GpactCrossControlManagerGroup;
 import net.consensys.gpact.functioncall.sfc.SimpleCrossControlManagerGroup;
@@ -50,6 +51,14 @@ public class CrosschainProtocols {
     if (implClass == null) {
       throw new IllegalArgumentException("Attempted to register a null implementation");
     }
+    if (name == null) {
+      throw new IllegalArgumentException(
+          "Attempted to register an implementation with a null name");
+    }
+    if (name.length() == 0) {
+      throw new IllegalArgumentException(
+          "Attempted to register an implementation with a zero length name");
+    }
     functionCallImpls.put(name, implClass);
   }
 
@@ -60,10 +69,13 @@ public class CrosschainProtocols {
    * @return Implementation of CrosschainFunctionCall
    * @throws Exception Typically thrown if the implementation has not been registered yet.
    */
-  public static CrossControlManagerGroup getFunctionCallInstance(final String implementationName)
-      throws Exception {
+  public static Optional<CrossControlManagerGroup> getFunctionCallInstance(
+      final String implementationName) throws Exception {
     final Class<? extends CrossControlManagerGroup> clazz =
         functionCallImpls.get(implementationName);
-    return clazz.getDeclaredConstructor().newInstance();
+    if (clazz == null) {
+      return Optional.empty();
+    }
+    return Optional.of(clazz.getDeclaredConstructor().newInstance());
   }
 }

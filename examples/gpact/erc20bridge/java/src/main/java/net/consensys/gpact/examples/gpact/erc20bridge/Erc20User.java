@@ -74,7 +74,7 @@ public class Erc20User {
       MessagingVerificationInterface msgVerB)
       throws Exception {
     this.crossControlManagerGroup =
-        CrosschainProtocols.getFunctionCallInstance(CrosschainProtocols.GPACT);
+        CrosschainProtocols.getFunctionCallInstance(CrosschainProtocols.GPACT).get();
     this.crossControlManagerGroup.addBlockchainAndLoadCbcContract(
         this.creds, bcInfoA, cbcContractAddressOnBcA, msgVerA);
     this.crossControlManagerGroup.addBlockchainAndLoadCbcContract(
