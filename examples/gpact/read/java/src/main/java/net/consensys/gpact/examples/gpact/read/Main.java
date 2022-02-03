@@ -27,6 +27,7 @@ import net.consensys.gpact.helpers.GpactExampleSystemManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
+import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
 public class Main {
   static final Logger LOG = LogManager.getLogger(Main.class);
@@ -100,10 +101,8 @@ public class Main {
 
       LOG.info("Success: {}", result.isSuccessful());
 
-      //      List<BigInteger> callP = new ArrayList<>();
-      //      callP.add(BigInteger.ZERO);
-      //      TransactionReceipt txR = executor.getTransationReceipt(callP);
-      //      bc1ContractABlockchain.showEvents(txR);
+      TransactionReceipt txR = result.getTransactionReceipt(CrosschainCallResult.ROOT_CALL);
+      bc1ContractABlockchain.showEvents(txR);
       bc1ContractABlockchain.showValueRead();
     }
 

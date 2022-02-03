@@ -16,6 +16,7 @@ package net.consensys.gpact.examples.gpact.trade;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.List;
 import net.consensys.gpact.common.*;
 import net.consensys.gpact.examples.gpact.trade.sim.*;
 import net.consensys.gpact.functioncall.CallExecutionTree;
@@ -26,6 +27,7 @@ import net.consensys.gpact.helpers.GpactExampleSystemManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
+import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
 public class Main {
   static final Logger LOG = LogManager.getLogger(Main.class);
@@ -168,11 +170,11 @@ public class Main {
 
     bc1TradeWalletBlockchain.showAllTrades();
 
-    //    List<BigInteger> callP = new ArrayList<>();
-    //    callP.add(BigInteger.ONE);
-    //    callP.add(BigInteger.ZERO);
-    //    TransactionReceipt txR = executor.getTransationReceipt(callP);
-    //    bc2BusLogicBlockchain.showEvents(txR);
+    List<BigInteger> callP = new ArrayList<>();
+    callP.add(BigInteger.ONE);
+    callP.add(BigInteger.ZERO);
+    TransactionReceipt txR = result.getTransactionReceipt(callP);
+    bc2BusLogicBlockchain.showEvents(txR);
 
     LOG.info(
         "Trade Wallet contract's lockable storaged locked: {}",

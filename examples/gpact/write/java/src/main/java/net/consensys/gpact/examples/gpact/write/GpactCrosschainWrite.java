@@ -27,6 +27,7 @@ import net.consensys.gpact.helpers.GpactExampleSystemManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
+import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
 public class GpactCrosschainWrite {
   static final Logger LOG = LogManager.getLogger(GpactCrosschainWrite.class);
@@ -98,10 +99,8 @@ public class GpactCrosschainWrite {
 
       LOG.info("Success: {}", result.isSuccessful());
 
-      //      List<BigInteger> callP = new ArrayList<>();
-      //      callP.add(BigInteger.ZERO);
-      //      TransactionReceipt txR = executor.getTransationReceipt(callP);
-      //      bc2ContractBBlockchain.showEvents(txR);
+      TransactionReceipt txR = result.getTransactionReceipt(CrosschainCallResult.ROOT_CALL);
+      bc2ContractBBlockchain.showEvents(txR);
       bc2ContractBBlockchain.showValueWritten();
     }
 
