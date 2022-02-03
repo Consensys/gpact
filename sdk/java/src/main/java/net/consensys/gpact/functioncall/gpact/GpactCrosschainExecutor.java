@@ -14,6 +14,9 @@
  */
 package net.consensys.gpact.functioncall.gpact;
 
+import static net.consensys.gpact.functioncall.common.CallPath.calculateRootCallMapKey;
+import static net.consensys.gpact.functioncall.common.CallPath.callPathToMapKey;
+
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,19 +42,7 @@ import org.web3j.protocol.exceptions.TransactionException;
 public class GpactCrosschainExecutor {
   static final Logger LOG = LogManager.getLogger(GpactCrosschainExecutor.class);
 
-  // The maximum number of calls that can be done from any one function. The value
-  // has been set to an aritrarily largish number. If people write complicated
-  // functions that have a 1000 calls, or write functions that have loops and
-  // do many cross-blockchain function calls, then this number might need to be made larger.
-  private static final BigInteger MAX_CALLS_FROM_ONE_FUNCTION = BigInteger.valueOf(1000);
-
   private static final BigInteger ROOT_CALL_MAP_KEY = calculateRootCallMapKey();
-
-  private static BigInteger calculateRootCallMapKey() {
-    List<BigInteger> rootCallPath = new ArrayList<BigInteger>();
-    rootCallPath.add(BigInteger.ZERO);
-    return callPathToMapKey(rootCallPath);
-  }
 
   private SignedEvent signedStartEvent;
   private SignedEvent signedRootEvent;
@@ -239,15 +230,12 @@ public class GpactCrosschainExecutor {
   }
 
   /**
-   * Return the transaction receipt for part of the call path. This allows applications to see what
-   * events have been emitted across the call execution tree.
+   * Return all of the transaction receipts.
    *
-   * @param callPath Part of the call execution tree to get the transaction receipt for.
-   * @return the transaction receipt that was returned with callPath part of the call execution tree
-   *     was executed.
+   * @return the transaction receipts
    */
-  public TransactionReceipt getTransationReceipt(List<BigInteger> callPath) {
-    return this.transactionReceipts.get(callPathToMapKey(callPath));
+  public Map<BigInteger, TransactionReceipt> getTransationReceipts() {
+    return this.transactionReceipts;
   }
 
   /**
@@ -269,32 +257,6 @@ public class GpactCrosschainExecutor {
       parentCallPath.set(parentCallPath.size() - 1, BigInteger.ZERO);
 
       return callPathToMapKey(parentCallPath);
-    }
-  }
-
-  /**
-   * Determine a key that can be used for a map that uniquely identifies the call path. A message
-   * digest of the call path could be used, but a simpler multiplication method will work just as
-   * well.
-   *
-   * @param callPath The call path to determine a map key for.
-   * @return The map key representing the call path.
-   */
-  private static BigInteger callPathToMapKey(List<BigInteger> callPath) {
-    if (callPath.size() == 0) {
-      throw new RuntimeException("Invalid call path length: " + 0);
-    } else {
-      BigInteger key = BigInteger.ONE;
-      for (BigInteger call : callPath) {
-        if (call.compareTo(MAX_CALLS_FROM_ONE_FUNCTION) >= 0) {
-          throw new RuntimeException(
-              "Maximum calls from one function is: " + MAX_CALLS_FROM_ONE_FUNCTION);
-        }
-
-        key = key.multiply(MAX_CALLS_FROM_ONE_FUNCTION);
-        key = key.add(call.add(BigInteger.ONE));
-      }
-      return key;
     }
   }
 }

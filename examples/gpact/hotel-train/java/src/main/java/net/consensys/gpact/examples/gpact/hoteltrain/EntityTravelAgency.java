@@ -100,11 +100,11 @@ public class EntityTravelAgency extends AbstractBlockchain {
       throws Exception {
     this.crossControlManagerGroup =
         CrosschainProtocols.getFunctionCallInstance(CrosschainProtocols.GPACT);
-    this.crossControlManagerGroup.addBlockchainAndLoadContracts(
+    this.crossControlManagerGroup.addBlockchainAndLoadCbcContract(
         this.credentials, bcInfoTravel, cbcContractAddressOnBcTravel, msgVerTravel);
-    this.crossControlManagerGroup.addBlockchainAndLoadContracts(
+    this.crossControlManagerGroup.addBlockchainAndLoadCbcContract(
         this.credentials, bcInfoHotel, cbcContractAddressOnBcHotel, msgVerHotel);
-    this.crossControlManagerGroup.addBlockchainAndLoadContracts(
+    this.crossControlManagerGroup.addBlockchainAndLoadCbcContract(
         this.credentials, bcInfoTrain, cbcContractAddressOnBcTrain, msgVerTrain);
   }
 
@@ -142,9 +142,9 @@ public class EntityTravelAgency extends AbstractBlockchain {
         this.crossControlManagerGroup.executeCrosschainCall(
             exampleManager.getExecutionEngine(), rootCall, 300);
 
-    LOG.info("Success: {}", result.successful());
+    LOG.info("Success: {}", result.isSuccessful());
 
-    if (!result.successful()) {
+    if (!result.isSuccessful()) {
       throw new Exception("Crosschain Execution failed. See log for details");
     }
 

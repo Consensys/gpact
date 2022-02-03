@@ -15,5 +15,5 @@ solc $CONTRACTSDIR/ContractA.sol --bin --abi --optimize -o $BUILDDIR --overwrite
 solc $CONTRACTSDIR/ContractB.sol --bin --abi --optimize -o $BUILDDIR --overwrite
 # ls -al $BUILDDIR
 
-$WEB3J solidity generate -a=$BUILDDIR/ContractA.abi -b=$BUILDDIR/ContractA.bin -o=$OUTPUTDIR -p=$PACKAGE
+$WEB3J solidity generate -r -a=$BUILDDIR/ContractA.abi -b=$BUILDDIR/ContractA.bin -o=$OUTPUTDIR -p=$PACKAGE
 $WEB3J solidity generate -a=$BUILDDIR/ContractB.abi -b=$BUILDDIR/ContractB.bin -o=$OUTPUTDIR -p=$PACKAGE

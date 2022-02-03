@@ -141,8 +141,8 @@ public class Main {
         crossControlManagerGroup.executeCrosschainCall(
             exampleManager.getExecutionEngine(), rootCall, 300);
 
-    LOG.info("Success: {}", result.successful());
-    if (result.successful()) {
+    LOG.info("Success: {}", result.isSuccessful());
+    if (result.isSuccessful()) {
       LOG.info(
           " Simulated expected values: Root val1: {}, val2: {}, Other val: {}",
           simRootContract.getVal1(),

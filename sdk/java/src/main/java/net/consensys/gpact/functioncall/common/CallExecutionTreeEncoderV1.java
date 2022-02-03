@@ -12,7 +12,7 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package net.consensys.gpact.functioncall.calltree;
+package net.consensys.gpact.functioncall.common;
 
 import static net.consensys.gpact.common.FormatConversion.addressStringToBytes;
 

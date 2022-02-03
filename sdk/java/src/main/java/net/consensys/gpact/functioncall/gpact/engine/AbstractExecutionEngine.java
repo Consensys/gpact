@@ -20,8 +20,8 @@ import java.util.List;
 import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.functioncall.CallExecutionTree;
 import net.consensys.gpact.functioncall.CrosschainCallResult;
+import net.consensys.gpact.functioncall.common.CrosschainCallResultImpl;
 import net.consensys.gpact.functioncall.gpact.GpactCrossControlManager;
-import net.consensys.gpact.functioncall.gpact.GpactCrosschainCallResult;
 import net.consensys.gpact.functioncall.gpact.GpactCrosschainExecutor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -50,7 +50,8 @@ public abstract class AbstractExecutionEngine implements ExecutionEngine {
 
     this.executor.doSignallingCalls();
 
-    return new GpactCrosschainCallResult(callGraph, this.executor.getRootEventSuccess());
+    return new CrosschainCallResultImpl(
+        callGraph, this.executor.getRootEventSuccess(), this.executor.getTransationReceipts());
   }
 
   protected void callSegmentsAndRoot(

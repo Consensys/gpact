@@ -16,7 +16,7 @@ package net.consensys.gpact.examples.sfc.erc721bridge;
 
 import java.math.BigInteger;
 import net.consensys.gpact.common.*;
-import net.consensys.gpact.functioncall.sfc.SimpleCrossControlManagerGroup;
+import net.consensys.gpact.functioncall.CrossControlManagerGroup;
 import net.consensys.gpact.helpers.CredentialsCreator;
 import net.consensys.gpact.helpers.SfcExampleSystemManager;
 import org.apache.logging.log4j.LogManager;
@@ -41,8 +41,8 @@ public class Erc721TokenBridgeExample {
 
     BlockchainInfo root = exampleManager.getRootBcInfo();
     BlockchainInfo bc2 = exampleManager.getBc2Info();
-    SimpleCrossControlManagerGroup crossControlManagerGroup =
-        exampleManager.getSfcCrossControlManagerGroup();
+    CrossControlManagerGroup crossControlManagerGroup =
+        exampleManager.getCrossControlManagerGroup();
 
     // Set-up classes to manage blockchains.
     Credentials erc20OwnerCreds = CredentialsCreator.createCredentials();
@@ -98,24 +98,24 @@ public class Erc721TokenBridgeExample {
 
     user1.createCbcManager(
         root,
-        crossControlManagerGroup.getInfrastructureAddresses(chainABcId),
+        crossControlManagerGroup.getCbcAddress(chainABcId),
         crossControlManagerGroup.getMessageVerification(chainABcId),
         bc2,
-        crossControlManagerGroup.getInfrastructureAddresses(chainBBcId),
+        crossControlManagerGroup.getCbcAddress(chainBBcId),
         crossControlManagerGroup.getMessageVerification(chainBBcId));
     user2.createCbcManager(
         root,
-        crossControlManagerGroup.getInfrastructureAddresses(chainABcId),
+        crossControlManagerGroup.getCbcAddress(chainABcId),
         crossControlManagerGroup.getMessageVerification(chainABcId),
         bc2,
-        crossControlManagerGroup.getInfrastructureAddresses(chainBBcId),
+        crossControlManagerGroup.getCbcAddress(chainBBcId),
         crossControlManagerGroup.getMessageVerification(chainBBcId));
     user3.createCbcManager(
         root,
-        crossControlManagerGroup.getInfrastructureAddresses(chainABcId),
+        crossControlManagerGroup.getCbcAddress(chainABcId),
         crossControlManagerGroup.getMessageVerification(chainABcId),
         bc2,
-        crossControlManagerGroup.getInfrastructureAddresses(chainBBcId),
+        crossControlManagerGroup.getCbcAddress(chainBBcId),
         crossControlManagerGroup.getMessageVerification(chainBBcId));
 
     // Give some ERC 721 tokens to the users

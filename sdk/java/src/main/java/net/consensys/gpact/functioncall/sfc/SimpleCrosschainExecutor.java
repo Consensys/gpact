@@ -14,45 +14,57 @@
  */
 package net.consensys.gpact.functioncall.sfc;
 
+import static net.consensys.gpact.functioncall.common.CallPath.calculateFirstCallMapKey;
+import static net.consensys.gpact.functioncall.common.CallPath.calculateRootCallMapKey;
+
+import java.math.BigInteger;
+import java.util.HashMap;
+import java.util.Map;
 import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.common.Tuple;
+import net.consensys.gpact.functioncall.CallExecutionTree;
+import net.consensys.gpact.functioncall.CrossControlManager;
+import net.consensys.gpact.functioncall.CrossControlManagerGroup;
+import net.consensys.gpact.functioncall.CrosschainCallResult;
+import net.consensys.gpact.functioncall.common.CrosschainCallResultImpl;
 import net.consensys.gpact.messaging.MessagingVerificationInterface;
 import net.consensys.gpact.messaging.SignedEvent;
 import net.consensys.gpact.soliditywrappers.functioncall.sfc.SimpleCrosschainControl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.web3j.protocol.core.RemoteCall;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
 /**
  * Holds the state for a crosschain call. A separate instance of this class is needed for each
  * crosschain call.
  */
-public class SimpleCrosschainExecutor {
+class SimpleCrosschainExecutor {
   static final Logger LOG = LogManager.getLogger(SimpleCrosschainExecutor.class);
 
-  SimpleCrossControlManagerGroup crossControlManagerGroup;
+  CrossControlManagerGroup crossControlManagerGroup;
 
-  public SimpleCrosschainExecutor(SimpleCrossControlManagerGroup crossControlManagerGroup) {
+  SimpleCrosschainExecutor(CrossControlManagerGroup crossControlManagerGroup) {
     this.crossControlManagerGroup = crossControlManagerGroup;
   }
 
-  public Tuple<TransactionReceipt[], String, Boolean> execute(
-      BlockchainId sourceBcId, RemoteCall<TransactionReceipt> functionCall) throws Exception {
-    SimpleCrossControlManager cbcContract =
-        this.crossControlManagerGroup.getCbcContract(sourceBcId);
+  CrosschainCallResult execute(CallExecutionTree rootCall) throws Exception {
+    Map<BigInteger, TransactionReceipt> transactionReceipts = new HashMap<>();
+
+    CrossControlManager cbcManager =
+        this.crossControlManagerGroup.getCbcManager(rootCall.getBlockchainId());
     MessagingVerificationInterface messaging =
-        this.crossControlManagerGroup.getMessageVerification(sourceBcId);
+        this.crossControlManagerGroup.getMessageVerification(rootCall.getBlockchainId());
 
     Tuple<TransactionReceipt, byte[], SimpleCrosschainControl.CrossCallEventResponse> result =
-        cbcContract.sourceBcCall(functionCall);
+        ((SimpleCrossControlManager) cbcManager).sourceBcCall(rootCall);
     TransactionReceipt txr1 = result.getFirst();
+    transactionReceipts.put(calculateRootCallMapKey(), txr1);
     byte[] crossCallEventData = result.getSecond();
     SimpleCrosschainControl.CrossCallEventResponse crossCallEvent = result.getThird();
 
     if (!txr1.isStatusOK()) {
-      return new Tuple<TransactionReceipt[], String, Boolean>(
-          new TransactionReceipt[] {txr1}, "Source blockchain transaction failed", false);
+      return new CrosschainCallResultImpl(
+          rootCall, false, transactionReceipts, "Source blockchain transaction failed");
     }
 
     SignedEvent signedCrossCallEvent =
@@ -60,17 +72,22 @@ public class SimpleCrosschainExecutor {
             this.crossControlManagerGroup.getAllBlockchainIds(),
             txr1,
             crossCallEventData,
-            cbcContract.getCbcContractAddress(),
+            cbcManager.getCbcContractAddress(),
             SimpleCrossControlManager.CROSSCALL_EVENT_SIGNATURE);
 
     BlockchainId destBcId = new BlockchainId(crossCallEvent._destBcId);
 
-    cbcContract = this.crossControlManagerGroup.getCbcContract(destBcId);
+    cbcManager = this.crossControlManagerGroup.getCbcManager(destBcId);
     Tuple<TransactionReceipt, String, Boolean> result2 =
-        cbcContract.destinationBcCall(signedCrossCallEvent);
-    return new Tuple<TransactionReceipt[], String, Boolean>(
-        new TransactionReceipt[] {txr1, result2.getFirst()},
-        result2.getSecond(),
-        result2.getThird());
+        ((SimpleCrossControlManager) cbcManager).destinationBcCall(signedCrossCallEvent);
+
+    transactionReceipts.put(calculateFirstCallMapKey(), result2.getFirst());
+
+    String errorMsg = result2.getSecond();
+    if (errorMsg != null) {
+      errorMsg = "Destination blockchain transaction failed: " + errorMsg;
+    }
+    return new CrosschainCallResultImpl(
+        rootCall, result2.getThird(), transactionReceipts, errorMsg);
   }
 }

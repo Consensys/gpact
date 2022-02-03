@@ -15,11 +15,12 @@
 package net.consensys.gpact.examples.sfc.erc721bridge;
 
 import java.math.BigInteger;
-import java.util.List;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import net.consensys.gpact.CrosschainProtocols;
 import net.consensys.gpact.common.*;
-import net.consensys.gpact.functioncall.sfc.SimpleCrossControlManagerGroup;
-import net.consensys.gpact.functioncall.sfc.SimpleCrosschainExecutor;
+import net.consensys.gpact.functioncall.CallExecutionTree;
+import net.consensys.gpact.functioncall.CrossControlManagerGroup;
+import net.consensys.gpact.functioncall.CrosschainCallResult;
 import net.consensys.gpact.helpers.CredentialsCreator;
 import net.consensys.gpact.messaging.MessagingVerificationInterface;
 import net.consensys.gpact.soliditywrappers.examples.sfc.erc721bridge.ERC721PresetMinterPauserAutoId;
@@ -29,7 +30,6 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.util.Strings;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
-import org.web3j.protocol.core.RemoteFunctionCall;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.exceptions.TransactionException;
 import org.web3j.protocol.http.HttpService;
@@ -47,8 +47,8 @@ public class Erc721User {
   private final BlockchainId bcIdA;
   private final BlockchainId bcIdB;
 
-  private final String addressOfERC20OnBlockchainA;
-  private final String addressOfERC20OnBlockchainB;
+  private final String addressOfERC721OnBlockchainA;
+  private final String addressOfERC721OnBlockchainB;
 
   private final String addressOfBridgeOnBlockchainA;
   private final String addressOfBridgeOnBlockchainB;
@@ -56,24 +56,24 @@ public class Erc721User {
   private BlockchainInfo bcInfoA;
   private BlockchainInfo bcInfoB;
 
-  private SimpleCrossControlManagerGroup crossControlManagerGroup;
+  private CrossControlManagerGroup crossControlManagerGroup;
 
   protected Erc721User(
       String name,
       BlockchainId bcIdA,
-      String erc20AddressA,
-      String erc20BridgeAddressA,
+      String erc721AddressA,
+      String erc721BridgeAddressA,
       BlockchainId bcIdB,
-      String erc20AddressB,
-      String erc20BridgeAddressB)
+      String erc721AddressB,
+      String erc721BridgeAddressB)
       throws Exception {
 
     this.name = name;
     this.creds = CredentialsCreator.createCredentials();
-    this.addressOfERC20OnBlockchainA = erc20AddressA;
-    this.addressOfERC20OnBlockchainB = erc20AddressB;
-    this.addressOfBridgeOnBlockchainA = erc20BridgeAddressA;
-    this.addressOfBridgeOnBlockchainB = erc20BridgeAddressB;
+    this.addressOfERC721OnBlockchainA = erc721AddressA;
+    this.addressOfERC721OnBlockchainB = erc721AddressB;
+    this.addressOfBridgeOnBlockchainA = erc721BridgeAddressA;
+    this.addressOfBridgeOnBlockchainB = erc721BridgeAddressB;
 
     this.bcIdA = bcIdA;
     this.bcIdB = bcIdB;
@@ -81,17 +81,18 @@ public class Erc721User {
 
   public void createCbcManager(
       BlockchainInfo bcInfoA,
-      List<String> infrastructureContractAddressOnBcA,
+      String cbcContractAddressOnBcA,
       MessagingVerificationInterface msgVerA,
       BlockchainInfo bcInfoB,
-      List<String> infrastructureContractAddressOnBcB,
+      String cbcContractAddressOnBcB,
       MessagingVerificationInterface msgVerB)
       throws Exception {
-    this.crossControlManagerGroup = new SimpleCrossControlManagerGroup();
-    this.crossControlManagerGroup.addBlockchainAndLoadContracts(
-        this.creds, bcInfoA, infrastructureContractAddressOnBcA, msgVerA);
-    this.crossControlManagerGroup.addBlockchainAndLoadContracts(
-        this.creds, bcInfoB, infrastructureContractAddressOnBcB, msgVerB);
+    this.crossControlManagerGroup =
+        CrosschainProtocols.getFunctionCallInstance(CrosschainProtocols.SFC);
+    this.crossControlManagerGroup.addBlockchainAndLoadCbcContract(
+        this.creds, bcInfoA, cbcContractAddressOnBcA, msgVerA);
+    this.crossControlManagerGroup.addBlockchainAndLoadCbcContract(
+        this.creds, bcInfoB, cbcContractAddressOnBcB, msgVerB);
 
     this.bcInfoA = bcInfoA;
     this.bcInfoB = bcInfoB;
@@ -118,8 +119,8 @@ public class Erc721User {
 
     BlockchainId destinationBlockchainId = fromAToB ? this.bcIdB : this.bcIdA;
     BlockchainId sourceBlockchainId = fromAToB ? this.bcIdA : this.bcIdB;
-    String sourceERC20ContractAddress =
-        fromAToB ? this.addressOfERC20OnBlockchainA : this.addressOfERC20OnBlockchainB;
+    String sourceERC721ContractAddress =
+        fromAToB ? this.addressOfERC721OnBlockchainA : this.addressOfERC721OnBlockchainB;
     String sourceBridgeContractAddress =
         fromAToB ? this.addressOfBridgeOnBlockchainA : this.addressOfBridgeOnBlockchainB;
 
@@ -140,7 +141,7 @@ public class Erc721User {
     // NOTE: Both ERC 721 implementations have the required functions.
     // Hence, either can be used.
     ERC721PresetMinterPauserAutoId erc721 =
-        ERC721PresetMinterPauserAutoId.load(sourceERC20ContractAddress, web3j, tm, gasProvider);
+        ERC721PresetMinterPauserAutoId.load(sourceERC721ContractAddress, web3j, tm, gasProvider);
     TransactionReceipt txR;
     try {
       txR = erc721.approve(sourceBridgeContractAddress, tokenId).send();
@@ -158,28 +159,33 @@ public class Erc721User {
         SfcErc721Bridge.load(sourceBridgeContractAddress, web3j, tm, gasProvider);
     LOG.info(
         " Call: BcId: {}, ERC 721 Bridge: {}", sourceBlockchainId, sourceBridgeContractAddress);
-    RemoteFunctionCall<TransactionReceipt> functionCall =
-        sfcErc721Bridge.transferToOtherBlockchain(
+
+    String abiFuncCall =
+        sfcErc721Bridge.getABI_transferToOtherBlockchain(
             destinationBlockchainId.asBigInt(),
-            sourceERC20ContractAddress,
+            sourceERC721ContractAddress,
             recipient,
             tokenId,
             Strings.EMPTY.getBytes());
 
-    SimpleCrosschainExecutor executor = new SimpleCrosschainExecutor(crossControlManagerGroup);
-    Tuple<TransactionReceipt[], String, Boolean> results =
-        executor.execute(sourceBlockchainId, functionCall);
-    boolean success = results.getThird();
-    LOG.info("Success: {}", success);
-    if (!success) {
+    CallExecutionTree rootCall =
+        new CallExecutionTree(sourceBlockchainId, sourceBridgeContractAddress, abiFuncCall);
+
+    CrosschainCallResult result =
+        crossControlManagerGroup.executeCrosschainCall(CrosschainProtocols.SERIAL, rootCall, 300);
+
+    LOG.info("Success: {}", result.isSuccessful());
+    if (!result.isSuccessful()) {
       LOG.error("Crosschain Execution failed. See log for details");
-      String errorMsg = results.getSecond();
+      String errorMsg = result.getAdditionalErrorInfo();
       if (errorMsg != null) {
         LOG.error("Error information: {}", errorMsg);
       }
-      for (TransactionReceipt txr : results.getFirst()) {
-        LOG.error("Transaction Receipt: {}", txr.toString());
-      }
+      TransactionReceipt rootTxr = result.getTransactionReceipt(CrosschainCallResult.ROOT_CALL);
+      LOG.error("Root Call Transaction Receipt: {}", rootTxr.toString());
+      TransactionReceipt firstCallTxr =
+          result.getTransactionReceipt(CrosschainCallResult.FIRST_CALL);
+      LOG.error("Called function Transaction Receipt: {}", firstCallTxr.toString());
       throw new Exception("Crosschain Execution failed. See log for details");
     }
   }

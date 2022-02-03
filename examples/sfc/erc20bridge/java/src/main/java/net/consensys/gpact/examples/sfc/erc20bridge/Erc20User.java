@@ -15,11 +15,12 @@
 package net.consensys.gpact.examples.sfc.erc20bridge;
 
 import java.math.BigInteger;
-import java.util.List;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import net.consensys.gpact.CrosschainProtocols;
 import net.consensys.gpact.common.*;
-import net.consensys.gpact.functioncall.sfc.SimpleCrossControlManagerGroup;
-import net.consensys.gpact.functioncall.sfc.SimpleCrosschainExecutor;
+import net.consensys.gpact.functioncall.CallExecutionTree;
+import net.consensys.gpact.functioncall.CrossControlManagerGroup;
+import net.consensys.gpact.functioncall.CrosschainCallResult;
 import net.consensys.gpact.helpers.CredentialsCreator;
 import net.consensys.gpact.messaging.MessagingVerificationInterface;
 import net.consensys.gpact.soliditywrappers.examples.sfc.erc20bridge.ERC20PresetFixedSupply;
@@ -28,7 +29,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
-import org.web3j.protocol.core.RemoteFunctionCall;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.exceptions.TransactionException;
 import org.web3j.protocol.http.HttpService;
@@ -57,7 +57,7 @@ public class Erc20User {
   private BlockchainInfo bcInfoA;
   private BlockchainInfo bcInfoB;
 
-  private SimpleCrossControlManagerGroup crossControlManagerGroup;
+  private CrossControlManagerGroup crossControlManagerGroup;
 
   protected Erc20User(
       String name,
@@ -82,17 +82,18 @@ public class Erc20User {
 
   public void createCbcManager(
       BlockchainInfo bcInfoA,
-      List<String> infrastructureContractAddressOnBcA,
+      String cbcContractAddressOnBcA,
       MessagingVerificationInterface msgVerA,
       BlockchainInfo bcInfoB,
-      List<String> infrastructureContractAddressOnBcB,
+      String cbcContractAddressOnBcB,
       MessagingVerificationInterface msgVerB)
       throws Exception {
-    this.crossControlManagerGroup = new SimpleCrossControlManagerGroup();
-    this.crossControlManagerGroup.addBlockchainAndLoadContracts(
-        this.creds, bcInfoA, infrastructureContractAddressOnBcA, msgVerA);
-    this.crossControlManagerGroup.addBlockchainAndLoadContracts(
-        this.creds, bcInfoB, infrastructureContractAddressOnBcB, msgVerB);
+    this.crossControlManagerGroup =
+        CrosschainProtocols.getFunctionCallInstance(CrosschainProtocols.SFC);
+    this.crossControlManagerGroup.addBlockchainAndLoadCbcContract(
+        this.creds, bcInfoA, cbcContractAddressOnBcA, msgVerA);
+    this.crossControlManagerGroup.addBlockchainAndLoadCbcContract(
+        this.creds, bcInfoB, cbcContractAddressOnBcB, msgVerB);
 
     this.bcInfoA = bcInfoA;
     this.bcInfoB = bcInfoB;
@@ -157,24 +158,29 @@ public class Erc20User {
     SfcErc20Bridge sfcErc20Bridge =
         SfcErc20Bridge.load(sourceBridgeContractAddress, web3j, tm, gasProvider);
     LOG.info(" Call: BcId: {}, ERC20 Bridge: {}", sourceBlockchainId, sourceBridgeContractAddress);
-    RemoteFunctionCall<TransactionReceipt> functionCall =
-        sfcErc20Bridge.transferToOtherBlockchain(
+
+    String abiFuncCall =
+        sfcErc20Bridge.getABI_transferToOtherBlockchain(
             destinationBlockchainId.asBigInt(), sourceERC20ContractAddress, recipient, amount);
 
-    SimpleCrosschainExecutor executor = new SimpleCrosschainExecutor(crossControlManagerGroup);
-    Tuple<TransactionReceipt[], String, Boolean> results =
-        executor.execute(sourceBlockchainId, functionCall);
-    boolean success = results.getThird();
-    LOG.info("Success: {}", success);
-    if (!success) {
+    CallExecutionTree rootCall =
+        new CallExecutionTree(sourceBlockchainId, sourceBridgeContractAddress, abiFuncCall);
+
+    CrosschainCallResult result =
+        crossControlManagerGroup.executeCrosschainCall(CrosschainProtocols.SERIAL, rootCall, 300);
+
+    LOG.info("Success: {}", result.isSuccessful());
+    if (!result.isSuccessful()) {
       LOG.error("Crosschain Execution failed. See log for details");
-      String errorMsg = results.getSecond();
+      String errorMsg = result.getAdditionalErrorInfo();
       if (errorMsg != null) {
         LOG.error("Error information: {}", errorMsg);
       }
-      for (TransactionReceipt txr : results.getFirst()) {
-        LOG.error("Transaction Receipt: {}", txr.toString());
-      }
+      TransactionReceipt rootTxr = result.getTransactionReceipt(CrosschainCallResult.ROOT_CALL);
+      LOG.error("Root Call Transaction Receipt: {}", rootTxr.toString());
+      TransactionReceipt firstCallTxr =
+          result.getTransactionReceipt(CrosschainCallResult.FIRST_CALL);
+      LOG.error("Called function Transaction Receipt: {}", firstCallTxr.toString());
       throw new Exception("Crosschain Execution failed. See log for details");
     }
   }

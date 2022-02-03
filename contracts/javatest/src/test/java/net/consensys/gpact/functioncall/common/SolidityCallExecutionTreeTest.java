@@ -1,4 +1,4 @@
-package net.consensys.gpact.functioncall.calltree;
+package net.consensys.gpact.functioncall.common;
 
 import java.math.BigInteger;
 import java.util.ArrayList;

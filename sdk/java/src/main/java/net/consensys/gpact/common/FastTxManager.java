@@ -8,6 +8,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.web3j.protocol.exceptions.TransactionException;
 import org.web3j.tx.RawTransactionManager;
 import org.web3j.tx.response.TransactionReceiptProcessor;
 
@@ -64,5 +66,11 @@ public class FastTxManager extends RawTransactionManager {
 
   public synchronized void setNonce(BigInteger value) {
     this.nonce = value;
+  }
+
+  public TransactionReceipt executeTransaction(
+      final BigInteger gasPrice, final BigInteger gasLimit, String address, final String data)
+      throws IOException, TransactionException {
+    return executeTransaction(gasPrice, gasLimit, address, data, BigInteger.ZERO);
   }
 }

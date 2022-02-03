@@ -21,8 +21,7 @@ import org.web3j.crypto.Credentials;
 public class GpactExampleSystemManager {
   static final Logger LOG = LogManager.getLogger(GpactExampleSystemManager.class);
 
-  private String propsFileName;
-  private int numBlockchains;
+  private final String propsFileName;
 
   private BlockchainInfo root;
   private BlockchainInfo bc2;
@@ -36,7 +35,6 @@ public class GpactExampleSystemManager {
   }
 
   public void gpactStandardExampleConfig(int numberOfBlockchains) throws Exception {
-    this.numBlockchains = numberOfBlockchains;
     // Less that two blockchains doesn't make sense for crosschain.
     // The test infrasturcture only supports three blockchains at present.
     if (!(numberOfBlockchains == 2 || numberOfBlockchains == 3)) {
@@ -73,7 +71,7 @@ public class GpactExampleSystemManager {
             messagingManagerGroup, crossControlManagerGroup, attestorSignerGroup, creds, this.root);
         addBcAttestorSign(
             messagingManagerGroup, crossControlManagerGroup, attestorSignerGroup, creds, this.bc2);
-        if (this.numBlockchains == 3) {
+        if (numberOfBlockchains == 3) {
           addBcAttestorSign(
               messagingManagerGroup,
               crossControlManagerGroup,
@@ -102,7 +100,7 @@ public class GpactExampleSystemManager {
             txRootTransferGroup,
             creds,
             this.bc2);
-        if (this.numBlockchains == 3) {
+        if (numberOfBlockchains == 3) {
           addBcTxRootSign(
               messagingManagerGroup,
               crossControlManagerGroup,

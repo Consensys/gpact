@@ -2,21 +2,23 @@ package net.consensys.gpact.functioncall.sfc;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import net.consensys.gpact.CrosschainProtocols;
 import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.common.BlockchainInfo;
+import net.consensys.gpact.functioncall.*;
 import net.consensys.gpact.messaging.MessagingVerificationInterface;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
 
 /** Manage multiple SimpleCrosschainControlManagers, one for each blockchain. */
-public class SimpleCrossControlManagerGroup {
+public class SimpleCrossControlManagerGroup implements CrossControlManagerGroup {
   static final Logger LOG = LogManager.getLogger(SimpleCrossControlManagerGroup.class);
 
-  Map<BlockchainId, BcHolder> blockchains = new HashMap<>();
+  private Map<BlockchainId, BcHolder> blockchains = new HashMap<>();
 
+  @Override
   public void addBlockchainAndDeployContracts(
       Credentials creds, BlockchainInfo bcInfo, MessagingVerificationInterface messageVerification)
       throws Exception {
@@ -30,17 +32,18 @@ public class SimpleCrossControlManagerGroup {
     holder.cbc =
         new SimpleCrossControlManager(
             creds, bcInfo.bcId, bcInfo.uri, bcInfo.gasPriceStrategy, bcInfo.period);
-    holder.cbc.deployContracts();
+    holder.cbc.deployCbcContract();
     holder.cbcContractAddress = holder.cbc.getCbcContractAddress();
     holder.ver = messageVerification;
 
     this.blockchains.put(blockchainId, holder);
   }
 
-  public void addBlockchainAndLoadContracts(
+  @Override
+  public void addBlockchainAndLoadCbcContract(
       Credentials creds,
       BlockchainInfo bcInfo,
-      List<String> addresses,
+      String cbcAddress,
       MessagingVerificationInterface messageVerification)
       throws Exception {
     BlockchainId blockchainId = bcInfo.bcId;
@@ -53,20 +56,39 @@ public class SimpleCrossControlManagerGroup {
         new SimpleCrossControlManager(
             creds, bcInfo.bcId, bcInfo.uri, bcInfo.gasPriceStrategy, bcInfo.period);
 
-    holder.cbc.loadContracts(addresses);
-    holder.cbcContractAddress = addresses.get(0);
+    holder.cbc.loadCbcContract(cbcAddress);
+    holder.cbcContractAddress = cbcAddress;
     holder.ver = messageVerification;
 
     this.blockchains.put(blockchainId, holder);
   }
 
-  public SimpleCrossControlManager getCbcContract(BlockchainId bcId) {
+  @Override
+  public CrosschainCallResult executeCrosschainCall(
+      String executionEngine, CallExecutionTree callTree, long timeout)
+      throws CrosschainFunctionCallException {
+    if (!executionEngine.equalsIgnoreCase(CrosschainProtocols.SERIAL)) {
+      throw new CrosschainFunctionCallException("Unsupported execution engine: " + executionEngine);
+    }
+
+    SimpleCrosschainExecutor executor = new SimpleCrosschainExecutor(this);
+
+    try {
+      return executor.execute(callTree);
+    } catch (Exception ex) {
+      throw new CrosschainFunctionCallException("Exception while executing crosschain call", ex);
+    }
+  }
+
+  @Override
+  public CrossControlManager getCbcManager(BlockchainId bcId) {
     if (!this.blockchains.containsKey(bcId)) {
       throw new RuntimeException("Unknown blockchain: " + bcId);
     }
-    return this.blockchains.get(bcId).cbc;
+    return (CrossControlManager) this.blockchains.get(bcId).cbc;
   }
 
+  @Override
   public MessagingVerificationInterface getMessageVerification(BlockchainId bcId) {
     if (!this.blockchains.containsKey(bcId)) {
       throw new RuntimeException("Unknown blockchain: " + bcId);
@@ -74,6 +96,7 @@ public class SimpleCrossControlManagerGroup {
     return this.blockchains.get(bcId).ver;
   }
 
+  @Override
   public String getCbcAddress(BlockchainId bcId) {
     if (!this.blockchains.containsKey(bcId)) {
       throw new RuntimeException("Unknown blockchain: " + bcId);
@@ -81,13 +104,7 @@ public class SimpleCrossControlManagerGroup {
     return this.blockchains.get(bcId).cbcContractAddress;
   }
 
-  public List<String> getInfrastructureAddresses(BlockchainId bcId) {
-    if (!this.blockchains.containsKey(bcId)) {
-      throw new RuntimeException("Unknown blockchain: " + bcId);
-    }
-    return this.blockchains.get(bcId).cbc.getContractAddresses();
-  }
-
+  @Override
   public ArrayList<BlockchainId> getAllBlockchainIds() {
     ArrayList<BlockchainId> bcIds = new ArrayList<>();
     bcIds.addAll(this.blockchains.keySet());

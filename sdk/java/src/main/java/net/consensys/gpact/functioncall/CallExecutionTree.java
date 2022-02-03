@@ -16,7 +16,7 @@ package net.consensys.gpact.functioncall;
 
 import java.util.ArrayList;
 import net.consensys.gpact.common.BlockchainId;
-import net.consensys.gpact.functioncall.calltree.CallExecutionTreeEncoderV1;
+import net.consensys.gpact.functioncall.common.CallExecutionTreeEncoderV1;
 
 public class CallExecutionTree {
   public static final int ENCODING_V1 = 0;

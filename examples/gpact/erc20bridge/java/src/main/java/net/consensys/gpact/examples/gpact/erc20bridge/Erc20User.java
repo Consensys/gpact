@@ -75,9 +75,9 @@ public class Erc20User {
       throws Exception {
     this.crossControlManagerGroup =
         CrosschainProtocols.getFunctionCallInstance(CrosschainProtocols.GPACT);
-    this.crossControlManagerGroup.addBlockchainAndLoadContracts(
+    this.crossControlManagerGroup.addBlockchainAndLoadCbcContract(
         this.creds, bcInfoA, cbcContractAddressOnBcA, msgVerA);
-    this.crossControlManagerGroup.addBlockchainAndLoadContracts(
+    this.crossControlManagerGroup.addBlockchainAndLoadCbcContract(
         this.creds, bcInfoB, cbcContractAddressOnBcB, msgVerB);
 
     this.bcInfoA = bcInfoA;
@@ -164,9 +164,9 @@ public class Erc20User {
     CrosschainCallResult result =
         this.crossControlManagerGroup.executeCrosschainCall(CrosschainProtocols.SERIAL, root, 300);
 
-    LOG.info("Success: {}", result.successful());
+    LOG.info("Success: {}", result.isSuccessful());
 
-    if (!result.successful()) {
+    if (!result.isSuccessful()) {
       throw new Exception("Crosschain Execution failed. See log for details");
     }
   }

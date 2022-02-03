@@ -59,7 +59,7 @@ public class GpactCrossControlManagerGroup implements CrossControlManagerGroup {
   }
 
   @Override
-  public void addBlockchainAndLoadContracts(
+  public void addBlockchainAndLoadCbcContract(
       Credentials creds,
       BlockchainInfo bcInfo,
       String cbcAddress,

@@ -33,15 +33,15 @@ public interface CrossControlManagerGroup {
    *
    * @param creds Credentials used for signing transactions on the specified blockchain.
    * @param bcInfo Information about the blocchain: Blockchain id, URL, gas pricing strategy.
-   * @param crosschainControlContractAddresses Address of crosshcain control contract.
+   * @param cbcAddress Address of crosshcain control contract.
    * @param messageVerification Implementation used to obtain signed events or proofs of events so
    *     that the events can be used on remote blockchains.
    * @throws Exception If an issue is encountered loading the crosschain control contract.
    */
-  void addBlockchainAndLoadContracts(
+  void addBlockchainAndLoadCbcContract(
       Credentials creds,
       BlockchainInfo bcInfo,
-      String crosschainControlContractAddresses,
+      String cbcAddress,
       MessagingVerificationInterface messageVerification)
       throws Exception;
 

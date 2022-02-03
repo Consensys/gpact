@@ -96,7 +96,7 @@ public class GpactCrosschainWrite {
           crossControlManagerGroup.executeCrosschainCall(
               exampleManager.getExecutionEngine(), callGraph, 300);
 
-      LOG.info("Success: {}", result.successful());
+      LOG.info("Success: {}", result.isSuccessful());
 
       //      List<BigInteger> callP = new ArrayList<>();
       //      callP.add(BigInteger.ZERO);
