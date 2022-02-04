@@ -17,9 +17,9 @@ package observer
 
 import (
 	"testing"
+	"time"
 
 	v1 "github.com/consensys/gpact/messaging/relayer/internal/messages/v1"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestMessageEnqueueHandler(t *testing.T) {
@@ -36,8 +36,8 @@ func TestMessageEnqueueHandler(t *testing.T) {
 
 	mockMQ.On("Request", fixMsg.Version, fixMsg.MsgType, &fixMsg).Once()
 	handler := NewMessageEnqueueHandler(mockMQ)
-	err := handler.Handle(&fixMsg)
-	assert.Nil(t, err)
+	handler.Handle(&fixMsg)
 
+	time.Sleep(time.Second)
 	mockMQ.AssertExpectations(t)
 }

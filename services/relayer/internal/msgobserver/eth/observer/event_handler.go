@@ -16,15 +16,14 @@ package observer
  */
 
 import (
-	"fmt"
 	"github.com/consensys/gpact/messaging/relayer/internal/logging"
 )
 
 type EventHandler interface {
-	Handle(event interface{}) error
+	Handle(event interface{})
 }
 
-// SimpleEventHandler first transforms an event to a relayer message then passes it to a handler to process
+// SimpleEventHandler first transforms an event to a relayer message then passes it to a message handler to process
 type SimpleEventHandler struct {
 	// EventTransformer transforms a given event to a relayer message (v1.Message)
 	EventTransformer EventTransformer
@@ -33,13 +32,13 @@ type SimpleEventHandler struct {
 }
 
 // Handle transforms the provided event to a message then forwards it to a message handler to process.
-func (h *SimpleEventHandler) Handle(event interface{}) error {
+func (h *SimpleEventHandler) Handle(event interface{}) {
 	message, err := h.EventTransformer.ToMessage(event)
 	if err != nil {
-		return fmt.Errorf("error transforming event. %v", err)
-
+		logging.Error("error transforming event: %v, error: %v", event, err)
+		return
 	}
-	return h.MessageHandler.Handle(message)
+	h.MessageHandler.Handle(message)
 }
 
 func NewSimpleEventHandler(transformer EventTransformer, sender MessageHandler) *SimpleEventHandler {
@@ -51,9 +50,8 @@ type LogEventHandler struct {
 	LogMessagePrefix string
 }
 
-func (h *LogEventHandler) Handle(event interface{}) error {
+func (h *LogEventHandler) Handle(event interface{}) {
 	logging.Info("%s: %v", h.LogMessagePrefix, event)
-	return nil
 }
 
 func NewLogEventHandler(logPrefix string) *LogEventHandler {

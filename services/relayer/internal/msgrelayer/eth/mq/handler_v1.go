@@ -97,7 +97,7 @@ func handleV1(req messages.Message) {
 	})
 
 	// Pass message to MQ.
-	instance.MQ.Request(msg.Version, msg.MsgType, msg)
+	go instance.MQ.Request(msg.Version, msg.MsgType, msg)
 }
 
 // initV1 inits the handler.

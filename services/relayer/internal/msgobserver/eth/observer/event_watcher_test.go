@@ -31,9 +31,8 @@ type MockEventHandler struct {
 	mock.Mock
 }
 
-func (m *MockEventHandler) Handle(event interface{}) error {
-	args := m.Called(event)
-	return args.Error(0)
+func (m *MockEventHandler) Handle(event interface{}) {
+	m.Called(event)
 }
 
 func TestSFCCrossCallRealtimeEventWatcher(t *testing.T) {

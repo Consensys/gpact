@@ -3,6 +3,7 @@ module github.com/consensys/gpact/messaging/relayer
 go 1.17
 
 require (
+	github.com/avast/retry-go v3.0.0+incompatible
 	github.com/davidlazar/go-crypto v0.0.0-20200604182044-b73af7476f6c
 	github.com/ethereum/go-ethereum v1.10.13
 	github.com/ipfs/go-datastore v0.5.1

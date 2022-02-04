@@ -18,14 +18,14 @@ package observer
 import (
 	"context"
 	"fmt"
-	"log"
-
+	"github.com/avast/retry-go"
 	"github.com/consensys/gpact/messaging/relayer/internal/contracts/functioncall"
 	"github.com/consensys/gpact/messaging/relayer/internal/logging"
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/event"
+	"log"
 )
 
 // EventWatcher listens to blockchain events
@@ -67,7 +67,6 @@ func (l *SFCCrossCallRealtimeEventWatcher) start(sub event.Subscription, chanEve
 	for {
 		select {
 		case err := <-sub.Err():
-			// TODO: communicate this to the calling context
 			return fmt.Errorf("error in log subscription %v", err)
 		case ev := <-chanEvents:
 			if ev.Raw.Removed {
@@ -124,8 +123,7 @@ func (l *SFCCrossCallFinalisedEventWatcher) Watch() error {
 		case err := <-sub.Err():
 			return fmt.Errorf("error in log subscription %v", err)
 		case latestHead := <-headers:
-			// TODO: communicate err to the calling context
-			l.processFinalisedEvents(latestHead)
+			l.processFinalisedEventsWithRetry(latestHead)
 		case <-l.end:
 			logging.Info("Stop watching %v.", l.SfcContract)
 			return nil
@@ -133,8 +131,7 @@ func (l *SFCCrossCallFinalisedEventWatcher) Watch() error {
 	}
 }
 
-func (l *SFCCrossCallFinalisedEventWatcher) processFinalisedEvents(latest *types.Header) error {
-	// TODO: maintain persistent state about last finalised block and observed messages
+func (l *SFCCrossCallFinalisedEventWatcher) processFinalisedEventsWithRetry(latest *types.Header) {
 	latestBlock := latest.Number.Uint64()
 	confirmations := (latestBlock - l.nextBlockToProcess) + 1
 
@@ -146,40 +143,34 @@ func (l *SFCCrossCallFinalisedEventWatcher) processFinalisedEvents(latest *types
 		startFinalisedBlock := l.nextBlockToProcess
 		lastFinalisedBlock := startFinalisedBlock + numFinalisedBlocks
 
-		logging.Debug("Finalising blocks '%d' to '%d'", startFinalisedBlock, lastFinalisedBlock)
+		logging.Debug("Finalising blocks %d-%d", startFinalisedBlock, lastFinalisedBlock)
 
-		filterOpts := &bind.FilterOpts{Start: startFinalisedBlock, End: &lastFinalisedBlock, Context: l.Context}
-		finalisedEvs, err := l.SfcContract.FilterCrossCall(filterOpts)
+		err := retry.Do(
+			func() error {
+				filterOpts := &bind.FilterOpts{Start: startFinalisedBlock, End: &lastFinalisedBlock, Context: l.Context}
+				finalisedEvs, err := l.SfcContract.FilterCrossCall(filterOpts)
+				if err != nil {
+					return err
+				}
+				l.handleEvents(finalisedEvs)
+				return nil
+			},
+			retry.OnRetry(func(attempt uint, err error) {
+				logging.Error("Failed to process finalised events in blocks %d-%d. Retry attempt: %d, error: %v", startFinalisedBlock,
+					lastFinalisedBlock, attempt, err)
+			}))
 		if err != nil {
-			logging.Error("error filtering logs from block: %d to %d, error: %v", startFinalisedBlock, lastFinalisedBlock, err)
-			return err
+			logging.Error("Failed to process finalised events in blocks %d-%d. Error: %v", startFinalisedBlock, lastFinalisedBlock, err)
 		}
-
-		// TODO: Handle partial failure scenarios when handling events.
-		// Three cases to consider:
-		// 1. A range of blocks are being processed and some blocks fail
-		// 2. A block is being processed and some events in the block fail processing
-		// 3. Combination of 1 and 2
-		err = l.handleEvents(finalisedEvs)
-		if err != nil {
-			return err
-		}
-
 		l.nextBlockToProcess = lastFinalisedBlock + 1
 	}
-	return nil
 }
 
-func (l *SFCCrossCallFinalisedEventWatcher) handleEvents(events *functioncall.SfcCrossCallIterator) error {
+func (l *SFCCrossCallFinalisedEventWatcher) handleEvents(events *functioncall.SfcCrossCallIterator) {
 	for events.Next() {
 		ev := events.Event
-		err := l.EventHandler.Handle(ev)
-		if err != nil {
-			logging.Error("failed to handle event: %v, error: %v", ev, err)
-			return err
-		}
+		l.EventHandler.Handle(ev)
 	}
-	return nil
 }
 
 // NewSFCCrossCallFinalisedEventWatcher creates an SFCCrossCall event watcher that only returns events once they receive a configured number of
