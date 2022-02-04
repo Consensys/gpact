@@ -33,4 +33,6 @@ interface CrosschainFunctionCallInterface {
         address _contract,
         bytes calldata _functionCallData
     ) external;
+
+    function isSingleBlockchainCall() external view returns (bool);
 }

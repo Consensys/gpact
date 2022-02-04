@@ -42,5 +42,4 @@ interface CrosschainLockingInterface {
      */
     function getActiveCallCrosschainRootTxId() external view returns (bytes32);
 
-    function isSingleBlockchainCall() external view returns (bool);
 }
