@@ -36,8 +36,8 @@ type MockMQ struct {
 
 func (mk *MockMQ) Request(version string, msgType string, msg messages.Message) error {
 	mk.LastMessage = msg
-	mk.Called(version, msgType, msg)
-	return nil
+	args := mk.Called(version, msgType, msg)
+	return args.Error(0)
 }
 
 func (mk *MockMQ) Start() error {

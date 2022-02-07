@@ -16,6 +16,7 @@ package observer
  */
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -34,10 +35,31 @@ func TestMessageEnqueueHandler(t *testing.T) {
 
 	mockMQ := new(MockMQ)
 
-	mockMQ.On("Request", fixMsg.Version, fixMsg.MsgType, &fixMsg).Once()
-	handler := NewMessageEnqueueHandler(mockMQ)
+	mockMQ.On("Request", fixMsg.Version, fixMsg.MsgType, &fixMsg).Once().Return(nil)
+	handler := NewMessageEnqueueHandler(mockMQ, DefaultRetryOptions)
 	handler.Handle(&fixMsg)
 
 	time.Sleep(time.Second)
+	mockMQ.AssertExpectations(t)
+}
+func TestMessageEnqueueHandler_RetryOnFailure(t *testing.T) {
+	fixMsg := v1.Message{
+		ID:          "msg-0001",
+		Timestamp:   2384923489234,
+		MsgType:     v1.MessageType,
+		Version:     v1.Version,
+		Destination: v1.ApplicationAddress{NetworkID: "network-001"},
+		Source:      v1.ApplicationAddress{NetworkID: "network-002"},
+	}
+
+	mockMQ := new(MockMQ)
+
+	retryOpts := FailureRetryOpts{RetryDelay: 100 * time.Millisecond, RetryAttempts: 3}
+	mockMQ.On("Request", fixMsg.Version, fixMsg.MsgType, &fixMsg).
+		Times(int(retryOpts.RetryAttempts)).Return(fmt.Errorf("transient failure when calling handler"))
+	handler := NewMessageEnqueueHandler(mockMQ, retryOpts)
+	handler.Handle(&fixMsg)
+
+	time.Sleep(2 * time.Second)
 	mockMQ.AssertExpectations(t)
 }

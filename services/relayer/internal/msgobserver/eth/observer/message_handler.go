@@ -28,11 +28,20 @@ type MessageHandler interface {
 	Handle(m *v1.Message)
 }
 
-// MessageEnqueueHandler enqueues relayer messages onto a configured message queue server
-type MessageEnqueueHandler struct {
-	MQ            mqserver.MessageQueue
+type FailureRetryOpts struct {
 	RetryAttempts uint
 	RetryDelay    time.Duration
+}
+
+var DefaultRetryOptions = FailureRetryOpts{
+	RetryAttempts: 5,
+	RetryDelay:    500 * time.Millisecond,
+}
+
+// MessageEnqueueHandler enqueues relayer messages onto a configured message queue server
+type MessageEnqueueHandler struct {
+	MQ mqserver.MessageQueue
+	FailureRetryOpts
 }
 
 // Handle sends the provided message to the configured message queue.
@@ -53,7 +62,7 @@ func (h *MessageEnqueueHandler) sendAsyncWithRetry(msg *v1.Message) {
 			retry.Attempts(h.RetryAttempts),
 			retry.Delay(h.RetryDelay),
 			retry.OnRetry(func(attempt uint, err error) {
-				logging.Info("Retrying sending message. ID: %s, Attempt: %d, Error: %v", msg.ID, attempt, err)
+				logging.Info("Retrying sending message. ID: %s, Attempt: %d, Error: %v", msg.ID, attempt+1, err)
 			}))
 		if err != nil {
 			logging.Error("Failed to send message. ID: %s. Error: %v", msg.ID, err)
@@ -62,6 +71,6 @@ func (h *MessageEnqueueHandler) sendAsyncWithRetry(msg *v1.Message) {
 	}()
 }
 
-func NewMessageEnqueueHandler(qServer mqserver.MessageQueue) *MessageEnqueueHandler {
-	return &MessageEnqueueHandler{qServer, 10, time.Second}
+func NewMessageEnqueueHandler(qServer mqserver.MessageQueue, retryOpts FailureRetryOpts) *MessageEnqueueHandler {
+	return &MessageEnqueueHandler{qServer, retryOpts}
 }
