@@ -16,7 +16,10 @@ package observer
  */
 
 import (
+	badger "github.com/ipfs/go-ds-badger"
+	"io/ioutil"
 	"math/big"
+	"os"
 	"testing"
 
 	"github.com/consensys/gpact/messaging/relayer/internal/contracts/functioncall"
@@ -78,4 +81,20 @@ func deployContract(t *testing.T, simBackend *backends.SimulatedBackend, auth *b
 func failNow(t *testing.T, message string, args ...interface{}) {
 	t.Errorf(message, args...)
 	t.FailNow()
+}
+
+func newDS(t *testing.T) (*badger.Datastore, func()) {
+	path, err := ioutil.TempDir(os.TempDir(), "testing_badger_")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	d, err := badger.NewDatastore(path, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return d, func() {
+		d.Close()
+		os.RemoveAll(path)
+	}
 }

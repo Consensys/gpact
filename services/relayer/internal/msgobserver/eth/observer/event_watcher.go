@@ -111,16 +111,17 @@ type BlockHeadProducer interface {
 	SubscribeNewHead(ctx context.Context, ch chan<- *types.Header) (ethereum.Subscription, error)
 }
 
+// RetryOpts encapsulates configuration for retry operations
 type RetryOpts struct {
 	retry      uint          // number of attempt to make if saving progress to ds fails
 	retryDelay time.Duration // delay between each retry attempt
 }
 
+// WatcherProgressDsOpts encapsulates configuration details for persisting the progress of a watcher
 type WatcherProgressDsOpts struct {
 	ds        *badgerds.Datastore // datastore for persisting the progress of a watcher
 	dsProgKey datastore.Key       // specific key used in a KV datastore, for storing the latest progress
-	// RetryOpts specifies how retries will be attempted if updating the datastore fails
-	RetryOpts
+	RetryOpts                     // configuration for how retries will be performed if persisting progress fails
 }
 
 var DefaultWatcherProgressDsOpts = WatcherProgressDsOpts{
@@ -163,7 +164,10 @@ func (l *SFCCrossCallFinalisedEventWatcher) Watch() error {
 		return fmt.Errorf("failed to subscribe to new block headers %v", err)
 	}
 
+	// resume processing from last saved progress point if available.
+	//if not, use the SFCCrossCallFinalisedEventWatcher.Start value provided
 	l.setNextBlockToProcess()
+
 	for {
 		select {
 		case err := <-sub.Err():
@@ -196,6 +200,9 @@ func (l *SFCCrossCallFinalisedEventWatcher) GetSavedProgress() (uint64, error) {
 	return progress, nil
 }
 
+// processFinalisedEvents fetches all relevant events between the last processed block and the provided latest block that have received a sufficient
+// number of confirmations, and passes them to the event handler for processing. If fetching or processing these events fails, the action is retried.
+// If the function completes successfully, the last processed block is updated in the datastore.
 func (l *SFCCrossCallFinalisedEventWatcher) processFinalisedEvents(latest *types.Header) {
 	latestBlock := latest.Number.Uint64()
 	confirmations := (latestBlock - l.nextBlockToProcess) + 1
@@ -206,8 +213,6 @@ func (l *SFCCrossCallFinalisedEventWatcher) processFinalisedEvents(latest *types
 	if latestBlock >= l.nextBlockToProcess && confirmations >= l.confirmationsForFinality {
 		numFinalisedBlocks := confirmations - l.confirmationsForFinality
 		lastFinalisedBlock := l.nextBlockToProcess + numFinalisedBlocks
-
-		logging.Debug("Finalising events from blocks %d to %d", l.nextBlockToProcess, lastFinalisedBlock)
 
 		err := l.handleEventsWithRetry(l.nextBlockToProcess, lastFinalisedBlock)
 		if err == nil {
@@ -222,6 +227,7 @@ func (l *SFCCrossCallFinalisedEventWatcher) processFinalisedEvents(latest *types
 // handleEventsWithRetry fetches relevant events that occurred within the given block range and passes them to an event handler for processing.
 // If fetching the events from the network fails, the action is retried.
 func (l *SFCCrossCallFinalisedEventWatcher) handleEventsWithRetry(startBlock uint64, lastBlock uint64) error {
+	logging.Debug("Processing events from blocks %d to %d", startBlock, lastBlock)
 	return retry.Do(
 		func() error {
 			filterOpts := &bind.FilterOpts{Start: startBlock, End: &lastBlock, Context: l.Context}
@@ -240,6 +246,8 @@ func (l *SFCCrossCallFinalisedEventWatcher) handleEventsWithRetry(startBlock uin
 		}))
 }
 
+// saveProgressToDsWithRetry updates the progress of the watcher in the datastore and retries if it fails.
+// This information is useful to track the progress of the observer and to resume processing if the observer fails or is restarted.
 func (l *SFCCrossCallFinalisedEventWatcher) saveProgressToDsWithRetry(lastFinalisedBlock uint64) {
 	err := retry.Do(
 		func() error {
@@ -259,10 +267,15 @@ func (l *SFCCrossCallFinalisedEventWatcher) saveProgressToDsWithRetry(lastFinali
 func (l *SFCCrossCallFinalisedEventWatcher) handleEvents(events *functioncall.SfcCrossCallIterator) {
 	for events.Next() {
 		ev := events.Event
+		logging.Debug("Processing event, Block: %d, Tx: %d, Log: %d", ev.Raw.BlockNumber, ev.Raw.TxIndex, ev.Raw.Index)
 		l.EventHandler.Handle(ev)
 	}
 }
 
+// setNextBlockToProcess sets the next block to process to either the progress saved in the datastore or to start value provided.
+// The method first checks to see if there is information about the last processed block stored in the data store.
+// If there is, the next block to process is set to the block after the last processed block.
+// If not it defaults to the using the start value provided to the watcher (SFCCrossCallFinalisedEventWatcher.Start)
 func (l *SFCCrossCallFinalisedEventWatcher) setNextBlockToProcess() {
 	lastProcessed, err := l.GetSavedProgress()
 	if err != nil {

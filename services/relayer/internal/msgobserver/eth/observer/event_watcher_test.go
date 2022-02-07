@@ -21,12 +21,10 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind/backends"
 	"github.com/ipfs/go-datastore"
-	badger "github.com/ipfs/go-ds-badger"
+	badgerds "github.com/ipfs/go-ds-badger"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"io/ioutil"
 	"math/big"
-	"os"
 	"testing"
 	"time"
 )
@@ -37,22 +35,6 @@ type MockEventHandler struct {
 
 func (m *MockEventHandler) Handle(event interface{}) {
 	m.Called(event)
-}
-
-func newDS(t *testing.T) (*badger.Datastore, func()) {
-	path, err := ioutil.TempDir(os.TempDir(), "testing_badger_")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	d, err := badger.NewDatastore(path, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	return d, func() {
-		d.Close()
-		os.RemoveAll(path)
-	}
 }
 
 func TestSFCCrossCallRealtimeEventWatcher(t *testing.T) {
@@ -132,10 +114,9 @@ func TestSFCCrossCallFinalisedEventWatcher(t *testing.T) {
 		"2 Confirmations": {2, 1, 2},
 		"6 Confirmations": {6, 1, 2},
 	}
-	progOpts := DefaultWatcherProgressDsOpts
 	ds, dsClose := newDS(t)
 	defer dsClose()
-	progOpts.ds = ds
+	progOpts := createProgressOpts(ds)
 
 	for k, v := range cases {
 		logging.Info("testing scenario: %s", k)
@@ -182,10 +163,9 @@ func TestSFCCrossCallFinalisedEventWatcher_MultipleBlocksFinalised(t *testing.T)
 		"Multi-Block-Event-Finalisation-with-1-Confirmation":  {1, 0, 6, 4, 4},
 		"Multi-Block-Event-Finalisation-with-2-Confirmations": {2, 0, 5, 4, 3},
 	}
-	progOpts := DefaultWatcherProgressDsOpts
 	ds, dsClose := newDS(t)
 	defer dsClose()
-	progOpts.ds = ds
+	progOpts := createProgressOpts(ds)
 
 	for k, v := range cases {
 		logging.Info("testing scenario: %s", k)
@@ -222,7 +202,7 @@ func TestSFCCrossCallFinalisedEventWatcher_MultipleBlocksFinalised(t *testing.T)
 	}
 }
 
-func TestSFCCrossCallFinalisedEventWatcher_ProgressPersistence(t *testing.T) {
+func TestSFCCrossCallFinalisedEventWatcher_ProgressPersisted(t *testing.T) {
 	simBackend, auth := simulatedBackend(t)
 	contract := deployContract(t, simBackend, auth)
 	fixConfirms := uint64(2)
@@ -236,11 +216,9 @@ func TestSFCCrossCallFinalisedEventWatcher_ProgressPersistence(t *testing.T) {
 		EventHandler: handler,
 	}
 
-	progOpts := DefaultWatcherProgressDsOpts
 	ds, dsClose := newDS(t)
 	defer dsClose()
-	progOpts.ds = ds
-	progOpts.dsProgKey = datastore.NewKey("test_watcher_progress")
+	progOpts := createProgressOpts(ds)
 
 	watcher, e := NewSFCCrossCallFinalisedEventWatcher(opts, progOpts, DefaultEventHandleRetryOpts, fixConfirms, contract, simBackend,
 		make(chan bool))
@@ -285,11 +263,9 @@ func TestSFCCrossCallFinalisedEventWatcher_Reorg(t *testing.T) {
 		EventHandler: handler,
 	}
 
-	progOpts := DefaultWatcherProgressDsOpts
 	ds, dsClose := newDS(t)
 	defer dsClose()
-	progOpts.ds = ds
-	progOpts.dsProgKey = datastore.NewKey("reorg_test")
+	progOpts := createProgressOpts(ds)
 
 	watcher, e := NewSFCCrossCallFinalisedEventWatcher(opts, progOpts, DefaultEventHandleRetryOpts, 2, contract, simBackend, make(chan bool))
 	assert.Nil(t, e)
@@ -329,4 +305,11 @@ func commit(backend *backends.SimulatedBackend) {
 func commitAndSleep(backend *backends.SimulatedBackend) {
 	commit(backend)
 	time.Sleep(2 * time.Second)
+}
+
+func createProgressOpts(ds *badgerds.Datastore) WatcherProgressDsOpts {
+	progOpts := DefaultWatcherProgressDsOpts
+	progOpts.ds = ds
+	progOpts.dsProgKey = datastore.NewKey("reorg_test")
+	return progOpts
 }
