@@ -100,13 +100,16 @@ func (o *ObserverImplV1) Start() error {
 
 // Stop safely stops the observer.
 func (o *ObserverImplV1) Stop() {
-	o.observer.Stop()
+	if o.observer != nil {
+		o.observer.Stop()
+	}
 }
 
 // StartObserve starts a new observe.
 func (o *ObserverImplV1) StartObserve(chainID *big.Int, chainAP string, contractAddr common.Address) error {
 	// First, close any existing observe.
-	o.observer.Stop()
+	o.Stop()
+
 	val := observation{
 		ChainID:      chainID.String(),
 		ContractAddr: contractAddr.String(),
@@ -127,7 +130,7 @@ func (o *ObserverImplV1) StartObserve(chainID *big.Int, chainAP string, contract
 // StopObserve stops observe.
 func (o *ObserverImplV1) StopObserve() error {
 	// Close any existing observe.
-	o.observer.Stop()
+	o.Stop()
 
 	err := o.ds.Delete(context.Background(), datastore.NewKey(activeKey))
 	if err != nil {

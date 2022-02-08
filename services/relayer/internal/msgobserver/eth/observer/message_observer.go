@@ -48,5 +48,7 @@ func (o *SFCBridgeObserver) Start() error {
 }
 
 func (o *SFCBridgeObserver) Stop() {
-	o.EventWatcher.StopWatcher()
+	if o.EventWatcher != nil {
+		o.EventWatcher.StopWatcher()
+	}
 }
