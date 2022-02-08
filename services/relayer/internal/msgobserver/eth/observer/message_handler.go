@@ -20,22 +20,11 @@ import (
 	"github.com/consensys/gpact/messaging/relayer/internal/logging"
 	v1 "github.com/consensys/gpact/messaging/relayer/internal/messages/v1"
 	"github.com/consensys/gpact/messaging/relayer/internal/mqserver"
-	"time"
 )
 
 // MessageHandler processes relayer messages
 type MessageHandler interface {
 	Handle(m *v1.Message)
-}
-
-type FailureRetryOpts struct {
-	RetryAttempts uint
-	RetryDelay    time.Duration
-}
-
-var DefaultRetryOptions = FailureRetryOpts{
-	RetryAttempts: 5,
-	RetryDelay:    500 * time.Millisecond,
 }
 
 // MessageEnqueueHandler enqueues relayer messages onto a configured message queue server
