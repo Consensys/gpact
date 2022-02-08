@@ -17,7 +17,8 @@ package observer
 
 import (
 	"encoding/base64"
-
+	"encoding/binary"
+	"fmt"
 	"github.com/consensys/gpact/messaging/relayer/internal/crypto"
 )
 
@@ -29,4 +30,20 @@ func randomBytes(n int) []byte {
 
 func toBase64String(data []byte) string {
 	return base64.StdEncoding.EncodeToString(data)
+}
+
+func uintToBytes(n uint64) []byte {
+	b := make([]byte, binary.MaxVarintLen64)
+	binary.PutUvarint(b, n)
+	return b
+}
+
+func bytesToUint(buff []byte) (uint64, error) {
+	val, read := binary.Uvarint(buff)
+	if read == 0 {
+		return val, fmt.Errorf("error deserialising bytes to Uint: Byte buffer too small")
+	} else if read < 0 {
+		return val, fmt.Errorf("error deserialising bytes to Uint: Overflow error")
+	}
+	return val, nil
 }

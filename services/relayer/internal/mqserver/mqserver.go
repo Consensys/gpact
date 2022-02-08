@@ -23,7 +23,7 @@ import (
 
 type MessageQueue interface {
 	// Request sends a message to the message queue.
-	Request(version string, msgType string, msg messages.Message)
+	Request(version string, msgType string, msg messages.Message) error
 
 	// Start starts the message handling routine.
 	Start() error
@@ -145,23 +145,17 @@ func (s *MQServer) Start() error {
 }
 
 // Request sends a message to the message queue.
-func (s *MQServer) Request(version string, msgType string, msg messages.Message) {
-	// Use a routine to push the message.
-	go func() {
-		err := s.chanOut.Publish(
-			"",
-			s.queue.Name,
-			false,
-			false,
-			amqp.Publishing{
-				Headers: amqp.Table{"version": version},
-				Type:    msgType,
-				Body:    msg.ToBytes(),
-			})
-		if err != nil {
-			logging.Info(err.Error())
-		}
-	}()
+func (s *MQServer) Request(version string, msgType string, msg messages.Message) error {
+	return s.chanOut.Publish(
+		"",
+		s.queue.Name,
+		false,
+		false,
+		amqp.Publishing{
+			Headers: amqp.Table{"version": version},
+			Type:    msgType,
+			Body:    msg.ToBytes(),
+		})
 }
 
 // handleIncomingMsgRoutine is a routine for handling incoming messages.

@@ -32,10 +32,11 @@ type SFCBridgeObserver struct {
 
 func NewSFCBridgeObserver(source string, sourceAddr string, contract *functioncall.Sfc, mq mqserver.MessageQueue, end chan bool) (*SFCBridgeObserver, error) {
 	eventTransformer := NewSFCEventTransformer(source, sourceAddr)
-	messageHandler := NewMessageEnqueueHandler(mq)
+	messageHandler := NewMessageEnqueueHandler(mq, DefaultRetryOptions)
 	eventHandler := NewSimpleEventHandler(eventTransformer, messageHandler)
 	removedEvHandler := NewLogEventHandler("removed event")
-	eventWatcher, err := NewSFCCrossCallRealtimeEventWatcher(context.Background(), eventHandler, removedEvHandler, contract, end)
+	eventWatcher, err := NewSFCCrossCallRealtimeEventWatcher(EventWatcherOpts{Context: context.Background(), EventHandler: eventHandler},
+		removedEvHandler, contract, end)
 	if err != nil {
 		return nil, err
 	}
@@ -44,4 +45,8 @@ func NewSFCBridgeObserver(source string, sourceAddr string, contract *functionca
 
 func (o *SFCBridgeObserver) Start() error {
 	return o.EventWatcher.Watch()
+}
+
+func (o *SFCBridgeObserver) Stop() {
+	o.EventWatcher.StopWatcher()
 }

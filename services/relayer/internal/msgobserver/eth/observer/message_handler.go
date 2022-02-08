@@ -16,33 +16,61 @@ package observer
  */
 
 import (
+	"github.com/avast/retry-go"
 	"github.com/consensys/gpact/messaging/relayer/internal/logging"
 	v1 "github.com/consensys/gpact/messaging/relayer/internal/messages/v1"
 	"github.com/consensys/gpact/messaging/relayer/internal/mqserver"
+	"time"
 )
 
 // MessageHandler processes relayer messages
 type MessageHandler interface {
-	Handle(m *v1.Message) error
+	Handle(m *v1.Message)
+}
+
+type FailureRetryOpts struct {
+	RetryAttempts uint
+	RetryDelay    time.Duration
+}
+
+var DefaultRetryOptions = FailureRetryOpts{
+	RetryAttempts: 5,
+	RetryDelay:    500 * time.Millisecond,
 }
 
 // MessageEnqueueHandler enqueues relayer messages onto a configured message queue server
 type MessageEnqueueHandler struct {
 	MQ mqserver.MessageQueue
+	FailureRetryOpts
 }
 
 // Handle sends the provided message to the configured message queue.
+// If sending the message fails, it is retried `MessageEnqueueHandler.retryAttempts` times.
 // The method assumes that the message queue is configured and started.
-func (mq *MessageEnqueueHandler) Handle(m *v1.Message) error {
-	mq.sendMessage(m)
-	return nil
+func (h *MessageEnqueueHandler) Handle(m *v1.Message) {
+	h.sendAsyncWithRetry(m)
 }
 
-func NewMessageEnqueueHandler(qServer mqserver.MessageQueue) *MessageEnqueueHandler {
-	return &MessageEnqueueHandler{qServer}
+// sendAsyncWithRetry starts a go routine that sends the given message to a queue, and retries if it fails.
+func (h *MessageEnqueueHandler) sendAsyncWithRetry(msg *v1.Message) {
+	logging.Info("Sending message to queue. Message ID: %s\n", msg.ID)
+	go func() {
+		err := retry.Do(
+			func() error {
+				return h.MQ.Request(v1.Version, v1.MessageType, msg)
+			},
+			retry.Attempts(h.RetryAttempts),
+			retry.Delay(h.RetryDelay),
+			retry.OnRetry(func(attempt uint, err error) {
+				logging.Info("Retrying sending message. ID: %s, Attempt: %d, Error: %v", msg.ID, attempt+1, err)
+			}))
+		if err != nil {
+			logging.Error("Failed to send message. ID: %s. Error: %v", msg.ID, err)
+			return
+		}
+	}()
 }
 
-func (s *MessageEnqueueHandler) sendMessage(msg *v1.Message) {
-	logging.Info("Send message with ID: %s\n", msg.ID)
-	s.MQ.Request(v1.Version, v1.MessageType, msg)
+func NewMessageEnqueueHandler(qServer mqserver.MessageQueue, retryOpts FailureRetryOpts) *MessageEnqueueHandler {
+	return &MessageEnqueueHandler{qServer, retryOpts}
 }
