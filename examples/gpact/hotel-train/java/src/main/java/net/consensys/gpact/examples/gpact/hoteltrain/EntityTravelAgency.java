@@ -124,14 +124,14 @@ public class EntityTravelAgency extends AbstractBlockchain {
     LOG.info(" Travel Agency: bookHotelAndRTrain: {}", rlpBookHotelAndTrain);
     String rlpHotelBookRoom = sim.getHotelBookRoomRLP();
     LOG.info(" Hotel: bookRoom: {}", rlpHotelBookRoom);
-    String rlpTrainBookRoom = sim.getTrainBookRoomRLP();
+    String rlpTrainBookRoom = sim.getTrainSeatRoomRLP();
     LOG.info(" Train: bookRoom: {}", rlpTrainBookRoom);
 
     ArrayList<CallExecutionTree> rootCalls = new ArrayList<>();
-    CallExecutionTree trainBookRoom =
-        new CallExecutionTree(trainBcId, trainContractAddress, rlpTrainBookRoom);
     CallExecutionTree hotelBookRoom =
         new CallExecutionTree(hotelBcId, hotelContractAddress, rlpHotelBookRoom);
+    CallExecutionTree trainBookRoom =
+            new CallExecutionTree(trainBcId, trainContractAddress, rlpTrainBookRoom);
     rootCalls.add(hotelBookRoom);
     rootCalls.add(trainBookRoom);
     CallExecutionTree rootCall =
@@ -151,7 +151,7 @@ public class EntityTravelAgency extends AbstractBlockchain {
     return uniqueBookingId;
   }
 
-  public void grantAllowance(EntityBase entity, int amount) throws Exception {
+  public void grantAllowance(EntityBase entity, int amount, String spender) throws Exception {
     TransactionReceiptProcessor txrProcessor =
         new PollingTransactionReceiptProcessor(entity.web3j, this.pollingInterval, RETRY);
     FastTxManager atm =
@@ -160,7 +160,7 @@ public class EntityTravelAgency extends AbstractBlockchain {
     LockableERC20PresetFixedSupply erc20 =
         LockableERC20PresetFixedSupply.load(
             entity.getErc20ContractAddress(), entity.web3j, atm, entity.gasProvider);
-    erc20.increaseAllowance(entity.getHotelContractAddress(), BigInteger.valueOf(amount)).send();
+    erc20.increaseAllowance(spender, BigInteger.valueOf(amount)).send();
     LOG.info(
         " Increased allowance of {} contract for account {} by {}",
         entity.entity,

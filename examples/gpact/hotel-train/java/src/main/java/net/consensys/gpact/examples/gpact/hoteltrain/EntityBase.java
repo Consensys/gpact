@@ -33,8 +33,7 @@ public class EntityBase extends AbstractBlockchain {
   // Total number of tokens issued for booking.
   public static final BigInteger TOKEN_SUPPLY = BigInteger.valueOf(1000);
 
-  LockableERC20PresetFixedSupply erc20;
-  Hotel hotelContract;
+  private LockableERC20PresetFixedSupply erc20;
   public String entity;
 
   public EntityBase(
@@ -49,7 +48,7 @@ public class EntityBase extends AbstractBlockchain {
     this.entity = entity;
   }
 
-  public void deployContracts(String cbcAddress) throws Exception {
+  protected String deployERC20Contract(String cbcAddress) throws Exception {
     LOG.info(" Deploy ERC20 contract for {}", this.entity);
     LOG.info(" Setting total supply as {} tokens", TOKEN_SUPPLY);
     String name = "ABC";
@@ -67,15 +66,7 @@ public class EntityBase extends AbstractBlockchain {
                 owner)
             .send();
 
-    LOG.info(" Deploy {} contract", this.entity);
-    this.hotelContract =
-        Hotel.deploy(
-                this.web3j, this.tm, this.gasProvider, this.erc20.getContractAddress(), cbcAddress)
-            .send();
-  }
-
-  public String getHotelContractAddress() {
-    return this.hotelContract.getContractAddress();
+    return this.erc20.getContractAddress();
   }
 
   public String getErc20ContractAddress() {
@@ -89,15 +80,6 @@ public class EntityBase extends AbstractBlockchain {
     this.erc20.transfer(account, BigInteger.valueOf(number)).send();
     BigInteger balance1 = this.erc20.balanceOf(account).send();
     LOG.info(" New balance of account {}: {}", account, balance1);
-  }
-
-  public void addTravelAgency(
-      BlockchainId travelAgencyBcId, String travelAgencyContractAddress, String tokenHoldingAccount)
-      throws Exception {
-    this.hotelContract
-        .addApprovedTravelAgency(
-            travelAgencyBcId.asBigInt(), travelAgencyContractAddress, tokenHoldingAccount)
-        .send();
   }
 
   public void showErc20Balances(String[] accounts) throws Exception {
@@ -114,30 +96,5 @@ public class EntityBase extends AbstractBlockchain {
   public void showErc20Allowance(String owner, String spender) throws Exception {
     BigInteger allowance = this.erc20.allowance(owner, spender).send();
     LOG.info(" {}: Owner {}: Spender: {}: Allowance: {}", this.entity, owner, spender, allowance);
-  }
-
-  public void showBookingInformation(BigInteger bookingId) throws Exception {
-    Tuple3<BigInteger, BigInteger, BigInteger> retVal =
-        this.hotelContract.getBookingInformation(bookingId).send();
-    BigInteger amountPaid = retVal.component1();
-    BigInteger roomId = retVal.component2();
-    BigInteger date = retVal.component3();
-
-    LOG.info(
-        " {} Booking: Date: {}, Room/Seat: {}, Amount: {}", this.entity, date, roomId, amountPaid);
-  }
-
-  public void showBookings(int date) throws Exception {
-    LOG.info(" Hotel Bookings for date: {}", date);
-    List<String> hotelBookings = this.hotelContract.getBookings(BigInteger.valueOf(date)).send();
-    for (String booking : hotelBookings) {
-      LOG.info("  Room booked for {}", booking);
-    }
-
-    LOG.info(" Train Bookings for date: {}", date);
-    List<String> trainBookings = this.hotelContract.getBookings(BigInteger.valueOf(date)).send();
-    for (String booking : trainBookings) {
-      LOG.info("  Seat booked for {}", booking);
-    }
   }
 }
