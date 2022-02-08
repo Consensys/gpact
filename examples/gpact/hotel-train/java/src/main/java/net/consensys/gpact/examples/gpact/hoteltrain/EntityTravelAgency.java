@@ -131,7 +131,7 @@ public class EntityTravelAgency extends AbstractBlockchain {
     CallExecutionTree hotelBookRoom =
         new CallExecutionTree(hotelBcId, hotelContractAddress, rlpHotelBookRoom);
     CallExecutionTree trainBookRoom =
-            new CallExecutionTree(trainBcId, trainContractAddress, rlpTrainBookRoom);
+        new CallExecutionTree(trainBcId, trainContractAddress, rlpTrainBookRoom);
     rootCalls.add(hotelBookRoom);
     rootCalls.add(trainBookRoom);
     CallExecutionTree rootCall =

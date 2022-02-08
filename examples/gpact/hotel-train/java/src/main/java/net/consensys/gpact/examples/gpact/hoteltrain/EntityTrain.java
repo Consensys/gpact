@@ -17,7 +17,6 @@ package net.consensys.gpact.examples.gpact.hoteltrain;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.List;
-
 import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.common.DynamicGasProvider;
 import net.consensys.gpact.soliditywrappers.examples.gpact.hoteltrain.Train;
@@ -37,7 +36,6 @@ public class EntityTrain extends EntityBase {
 
   private Train trainContract;
 
-
   public EntityTrain(
       BlockchainId bcId, String uri, DynamicGasProvider.Strategy gasPriceStrategy, int blockPeriod)
       throws IOException {
@@ -49,9 +47,7 @@ public class EntityTrain extends EntityBase {
 
     LOG.info(" Deploy {} contract", this.entity);
     this.trainContract =
-            Train.deploy(
-                    this.web3j, this.tm, this.gasProvider, erc20Address, cbcAddress)
-                    .send();
+        Train.deploy(this.web3j, this.tm, this.gasProvider, erc20Address, cbcAddress).send();
   }
 
   public String getTrainContractAddress() {
@@ -63,25 +59,23 @@ public class EntityTrain extends EntityBase {
     this.trainContract.addSeats(STANDARD_RATE, NUM_SEATS).send();
   }
 
-
   public void addTravelAgency(
-          BlockchainId travelAgencyBcId, String travelAgencyContractAddress, String tokenHoldingAccount)
-          throws Exception {
+      BlockchainId travelAgencyBcId, String travelAgencyContractAddress, String tokenHoldingAccount)
+      throws Exception {
     this.trainContract
-            .addApprovedTravelAgency(
-                    travelAgencyBcId.asBigInt(), travelAgencyContractAddress, tokenHoldingAccount)
-            .send();
+        .addApprovedTravelAgency(
+            travelAgencyBcId.asBigInt(), travelAgencyContractAddress, tokenHoldingAccount)
+        .send();
   }
 
   public void showBookingInformation(BigInteger bookingId) throws Exception {
     Tuple3<BigInteger, BigInteger, BigInteger> retVal =
-            this.trainContract.getBookingInformation(bookingId).send();
+        this.trainContract.getBookingInformation(bookingId).send();
     BigInteger amountPaid = retVal.component1();
     BigInteger seatId = retVal.component2();
     BigInteger date = retVal.component3();
 
-    LOG.info(
-            " {} Booking: Date: {}, Seat: {}, Amount: {}", this.entity, date, seatId, amountPaid);
+    LOG.info(" {} Booking: Date: {}, Seat: {}, Amount: {}", this.entity, date, seatId, amountPaid);
   }
 
   public void showBookings(int date) throws Exception {

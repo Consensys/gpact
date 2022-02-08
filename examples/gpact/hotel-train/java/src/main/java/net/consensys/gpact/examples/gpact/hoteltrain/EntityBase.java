@@ -16,16 +16,13 @@ package net.consensys.gpact.examples.gpact.hoteltrain;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.List;
 import net.consensys.gpact.common.AbstractBlockchain;
 import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.common.DynamicGasProvider;
-import net.consensys.gpact.soliditywrappers.examples.gpact.hoteltrain.Hotel;
 import net.consensys.gpact.soliditywrappers.examples.gpact.hoteltrain.LockableERC20PresetFixedSupply;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
-import org.web3j.tuples.generated.Tuple3;
 
 public class EntityBase extends AbstractBlockchain {
   private static final Logger LOG = LogManager.getLogger(EntityBase.class);
