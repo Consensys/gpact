@@ -15,6 +15,7 @@
 pragma solidity >=0.8;
 
 import "./Hotel.sol";
+import "./Train.sol";
 import "../../../../../contracts/contracts/src/functioncall/interface/CrosschainFunctionCallInterface.sol";
 import "../../../../../contracts/contracts/src/functioncall/interface/CrosschainFunctionCallReturnInterface.sol";
 
@@ -25,7 +26,7 @@ contract TravelAgency is LockableStorage {
     Hotel public hotelContract;
 
     uint256 public trainBlockchainId;
-    Hotel public trainContract;
+    Train public trainContract;
 
     // Confirmed bookings.
     // Map (bookingId => date)
@@ -43,7 +44,7 @@ contract TravelAgency is LockableStorage {
         hotelBlockchainId = _hotelBlockchainId;
         hotelContract = Hotel(_hotelContract);
         trainBlockchainId = _trainBlockchainId;
-        trainContract = Hotel(_trainContract);
+        trainContract = Train(_trainContract);
     }
 
     function bookHotelAndTrain(uint256 _date, uint256 _bookingId) public {
@@ -67,7 +68,7 @@ contract TravelAgency is LockableStorage {
             trainBlockchainId,
             address(trainContract),
             abi.encodeWithSelector(
-                trainContract.bookRoom.selector,
+                trainContract.bookSeat.selector,
                 _date,
                 _bookingId,
                 100
