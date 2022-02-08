@@ -36,19 +36,24 @@ public abstract class AbstractExecutionEngine implements ExecutionEngine {
   }
 
   public CrosschainCallResult execute(CallExecutionTree callGraph, long timeout) throws Exception {
-    LOG.info("start");
+    LOG.info("Start: Begin");
     BigInteger crossBlockchainTransactionId =
         GpactCrossControlManager.generateRandomCrossBlockchainTransactionId();
     BigInteger timeoutBig = BigInteger.valueOf(timeout);
-
     BlockchainId rootBlockchainId = callRootBlockchainId(callGraph);
     this.executor.init(
         callGraph.encode(), timeoutBig, crossBlockchainTransactionId, rootBlockchainId);
     this.executor.startCall();
+    LOG.info("Start: End");
+
+    LOG.info("Segments and Root: Begin");
     callSegmentsAndRoot(
         callGraph, new ArrayList<>(), rootBlockchainId, callGraph.getNumCalledFunctions());
+    LOG.info("Segments and Root: End");
 
+    LOG.info("Signalling: Begin");
     this.executor.doSignallingCalls();
+    LOG.info("Signalling: End");
 
     return new CrosschainCallResultImpl(
         callGraph, this.executor.getRootEventSuccess(), this.executor.getTransationReceipts());

@@ -23,6 +23,7 @@
         <Root level="${sys:root.log.level}">
             <AppenderRef ref="Console" />
         </Root>
-        <Logger name="net.consensys.gpact.sfccbc" level="DEBUG" />
+        <Logger name="net.consensys.gpact.functioncall" level="DEBUG">
+        </Logger>
     </Loggers>
 </Configuration>
