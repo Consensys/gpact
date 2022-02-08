@@ -48,8 +48,8 @@ type ObserverImplV1 struct {
 	path string
 	mq   *mqserver.MQServer
 
-	ds   datastore.Datastore
-	stop chan bool
+	ds       datastore.Datastore
+	observer *SFCBridgeObserver
 }
 
 // NewObserverImplV1 creates a new observer.
@@ -92,8 +92,7 @@ func (o *ObserverImplV1) Start() error {
 				err = fmt.Errorf("error in setting chain id")
 				return err
 			}
-			o.stop = make(chan bool)
-			go o.routine(chainID, val.AP, common.HexToAddress(val.ContractAddr), o.stop)
+			go o.routine(chainID, val.AP, common.HexToAddress(val.ContractAddr))
 		}
 	}
 	return nil
@@ -101,17 +100,13 @@ func (o *ObserverImplV1) Start() error {
 
 // Stop safely stops the observer.
 func (o *ObserverImplV1) Stop() {
-	if o.ds != nil && o.stop != nil {
-		o.stop <- true
-	}
+	o.observer.Stop()
 }
 
 // StartObserve starts a new observe.
 func (o *ObserverImplV1) StartObserve(chainID *big.Int, chainAP string, contractAddr common.Address) error {
 	// First, close any existing observe.
-	if o.stop != nil {
-		o.stop <- true
-	}
+	o.observer.Stop()
 	val := observation{
 		ChainID:      chainID.String(),
 		ContractAddr: contractAddr.String(),
@@ -125,18 +120,15 @@ func (o *ObserverImplV1) StartObserve(chainID *big.Int, chainAP string, contract
 	if err != nil {
 		return err
 	}
-	o.stop = make(chan bool)
-	go o.routine(chainID, chainAP, contractAddr, o.stop)
+	go o.routine(chainID, chainAP, contractAddr)
 	return nil
 }
 
 // StopObserve stops observe.
 func (o *ObserverImplV1) StopObserve() error {
 	// Close any existing observe.
-	if o.stop != nil {
-		o.stop <- true
-		o.stop = nil
-	}
+	o.observer.Stop()
+
 	err := o.ds.Delete(context.Background(), datastore.NewKey(activeKey))
 	if err != nil {
 		return err
@@ -145,7 +137,7 @@ func (o *ObserverImplV1) StopObserve() error {
 }
 
 // routine is the observe routine.
-func (o *ObserverImplV1) routine(chainID *big.Int, chainAP string, addr common.Address, end chan bool) {
+func (o *ObserverImplV1) routine(chainID *big.Int, chainAP string, addr common.Address) {
 	for {
 		chain, err := ethclient.Dial(chainAP)
 		if err != nil {
@@ -160,11 +152,12 @@ func (o *ObserverImplV1) routine(chainID *big.Int, chainAP string, addr common.A
 			return
 		}
 
-		observer, err := NewSFCBridgeObserver(chainID.String(), addr.String(), sfc, o.mq, end)
+		observer, err := NewSFCBridgeObserver(chainID.String(), addr.String(), sfc, o.mq)
 		if err != nil {
 			logging.Error(err.Error())
 			return
 		}
+		o.observer = observer
 		if observer.Start() == nil {
 			break
 		} else {

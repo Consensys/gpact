@@ -36,7 +36,7 @@ func TestSFCBridgeObserver(t *testing.T) {
 	contract := deployContract(t, simBackend, auth)
 	mockMQ := new(MockMQ)
 
-	observer, err := NewSFCBridgeObserver(fixSourceID, fixSourceAddress, contract, mockMQ, make(chan bool))
+	observer, err := NewSFCBridgeObserver(fixSourceID, fixSourceAddress, contract, mockMQ)
 	assert.Nil(t, err)
 	go observer.Start()
 
