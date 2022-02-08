@@ -155,7 +155,8 @@ func (o *ObserverImplV1) routine(chainID *big.Int, chainAP string, addr common.A
 			return
 		}
 
-		observer, err := NewSFCBridgeObserver(chainID.String(), addr.String(), sfc, o.mq)
+		observer, err := o.createFinalisedEventObserver(chainID.String(), addr.String(), sfc, o.mq, chain)
+
 		if err != nil {
 			logging.Error(err.Error())
 			return
@@ -169,6 +170,13 @@ func (o *ObserverImplV1) routine(chainID *big.Int, chainAP string, addr common.A
 			time.Sleep(3 * time.Second)
 		}
 	}
+}
+
+func (o *ObserverImplV1) createFinalisedEventObserver(source string, sourceAddr string, contract *functioncall.Sfc, mq mqserver.MessageQueue,
+	client *ethclient.Client) (*SFCBridgeObserver, error) {
+	dsProgKey := datastore.NewKey(fmt.Sprintf("/%s/%s/last_finalised_block", source, sourceAddr))
+	watcherProgOpts := WatcherProgressDsOpts{o.ds, dsProgKey, DefaultRetryOptions}
+	return NewSFCBridgeFinalisedObserver(source, sourceAddr, contract, mq, 4, watcherProgOpts, client)
 }
 
 // dsKey gets the datastore key from given chainID and contract address.
