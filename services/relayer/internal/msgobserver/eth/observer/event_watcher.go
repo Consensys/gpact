@@ -99,12 +99,12 @@ func (l *SFCCrossCallRealtimeEventWatcher) StopWatcher() {
 
 // NewSFCCrossCallRealtimeEventWatcher creates an instance of SFCCrossCallRealtimeEventWatcher.
 // Throws an error if the provided even handler or the removed event handler is nil.
-func NewSFCCrossCallRealtimeEventWatcher(watcherOpts EventWatcherOpts, removedEventHandler EventHandler, contract *functioncall.Sfc,
-	end chan bool) (*SFCCrossCallRealtimeEventWatcher, error) {
+func NewSFCCrossCallRealtimeEventWatcher(watcherOpts EventWatcherOpts, removedEventHandler EventHandler, contract *functioncall.Sfc) (*SFCCrossCallRealtimeEventWatcher, error) {
 	if watcherOpts.EventHandler == nil || removedEventHandler == nil {
 		return nil, fmt.Errorf("handler cannot be nil")
 	}
-	return &SFCCrossCallRealtimeEventWatcher{EventWatcherOpts: watcherOpts, RemovedEventHandler: removedEventHandler, SfcContract: contract, end: end}, nil
+	return &SFCCrossCallRealtimeEventWatcher{EventWatcherOpts: watcherOpts, RemovedEventHandler: removedEventHandler, SfcContract: contract,
+		end: make(chan bool)}, nil
 }
 
 type BlockHeadProducer interface {
@@ -290,7 +290,7 @@ func (l *SFCCrossCallFinalisedEventWatcher) setNextBlockToProcess() {
 // Note: 1 block confirmation means the instant the transaction generating the event is mined.
 func NewSFCCrossCallFinalisedEventWatcher(watcherOpts EventWatcherOpts, watchProgressDbOpts WatcherProgressDsOpts,
 	handlerRetryOpts RetryOpts, confirmsForFinality uint64,
-	contract *functioncall.Sfc, client BlockHeadProducer, end chan bool) (*SFCCrossCallFinalisedEventWatcher, error) {
+	contract *functioncall.Sfc, client BlockHeadProducer) (*SFCCrossCallFinalisedEventWatcher, error) {
 	if confirmsForFinality < 1 {
 		return nil, fmt.Errorf("block confirmationsForFinality cannot be less than 1. supplied value: %d", confirmsForFinality)
 	}
@@ -298,5 +298,5 @@ func NewSFCCrossCallFinalisedEventWatcher(watcherOpts EventWatcherOpts, watchPro
 		return nil, fmt.Errorf("handler cannot be nil")
 	}
 	return &SFCCrossCallFinalisedEventWatcher{EventWatcherOpts: watcherOpts, WatcherProgressOpts: watchProgressDbOpts, EventHandleRetryOpts: handlerRetryOpts,
-		SfcContract: contract, confirmationsForFinality: confirmsForFinality, client: client, end: end}, nil
+		SfcContract: contract, confirmationsForFinality: confirmsForFinality, client: client, end: make(chan bool)}, nil
 }

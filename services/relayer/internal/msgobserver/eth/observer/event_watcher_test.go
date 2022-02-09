@@ -48,7 +48,7 @@ func TestSFCCrossCallRealtimeEventWatcher(t *testing.T) {
 		Context:      auth.Context,
 		EventHandler: handler,
 	}
-	watcher, err := NewSFCCrossCallRealtimeEventWatcher(opts, handler, contract, make(chan bool))
+	watcher, err := NewSFCCrossCallRealtimeEventWatcher(opts, handler, contract)
 	assert.Nil(t, err, "failed to create a realtime event watcher")
 	go watcher.Watch()
 	defer watcher.StopWatcher()
@@ -73,7 +73,7 @@ func TestSFCCrossCallRealtimeEventWatcher_RemovedEvent(t *testing.T) {
 		Context:      auth.Context,
 		EventHandler: handler,
 	}
-	watcher, err := NewSFCCrossCallRealtimeEventWatcher(opts, removedHandler, contract, make(chan bool))
+	watcher, err := NewSFCCrossCallRealtimeEventWatcher(opts, removedHandler, contract)
 	assert.Nil(t, err, "failed to create a realtime event watcher")
 	go watcher.Watch()
 	defer watcher.StopWatcher()
@@ -97,13 +97,13 @@ func TestSFCCrossCallRealtimeEventWatcher_RemovedEvent(t *testing.T) {
 func TestSFCCrossCallFinalisedEventWatcher_FailsIfConfirmationTooLow(t *testing.T) {
 	handler := new(MockEventHandler)
 	opts := EventWatcherOpts{EventHandler: handler}
-	_, err := NewSFCCrossCallFinalisedEventWatcher(opts, DefaultWatcherProgressDsOpts, DefaultEventHandleRetryOpts, 0, nil, nil, nil)
+	_, err := NewSFCCrossCallFinalisedEventWatcher(opts, DefaultWatcherProgressDsOpts, DefaultEventHandleRetryOpts, 0, nil, nil)
 	assert.NotNil(t, err)
 }
 
 func TestSFCCrossCallFinalisedEventWatcher_FailsIfEventHandlerNil(t *testing.T) {
 	opts := EventWatcherOpts{EventHandler: nil}
-	_, err := NewSFCCrossCallFinalisedEventWatcher(opts, DefaultWatcherProgressDsOpts, DefaultEventHandleRetryOpts, 2, nil, nil, nil)
+	_, err := NewSFCCrossCallFinalisedEventWatcher(opts, DefaultWatcherProgressDsOpts, DefaultEventHandleRetryOpts, 2, nil, nil)
 	assert.NotNil(t, err)
 }
 
@@ -132,8 +132,7 @@ func TestSFCCrossCallFinalisedEventWatcher(t *testing.T) {
 		}
 
 		progOpts.dsProgKey = datastore.NewKey(k)
-		watcher, e := NewSFCCrossCallFinalisedEventWatcher(opts, progOpts, DefaultEventHandleRetryOpts, v.confirmations, contract, simBackend,
-			make(chan bool))
+		watcher, e := NewSFCCrossCallFinalisedEventWatcher(opts, progOpts, DefaultEventHandleRetryOpts, v.confirmations, contract, simBackend)
 		assert.Nil(t, e)
 		go watcher.Watch()
 
@@ -185,8 +184,7 @@ func TestSFCCrossCallFinalisedEventWatcher_MultipleBlocksFinalised(t *testing.T)
 			EventHandler: handler,
 		}
 		progOpts.dsProgKey = datastore.NewKey(k)
-		watcher, e := NewSFCCrossCallFinalisedEventWatcher(opts, progOpts, DefaultEventHandleRetryOpts, v.confirmations, contract, simBackend,
-			make(chan bool))
+		watcher, e := NewSFCCrossCallFinalisedEventWatcher(opts, progOpts, DefaultEventHandleRetryOpts, v.confirmations, contract, simBackend)
 		assert.Nil(t, e)
 		go watcher.Watch()
 
@@ -220,8 +218,7 @@ func TestSFCCrossCallFinalisedEventWatcher_ProgressPersisted(t *testing.T) {
 	defer dsClose()
 	progOpts := createProgressOpts(ds)
 
-	watcher, e := NewSFCCrossCallFinalisedEventWatcher(opts, progOpts, DefaultEventHandleRetryOpts, fixConfirms, contract, simBackend,
-		make(chan bool))
+	watcher, e := NewSFCCrossCallFinalisedEventWatcher(opts, progOpts, DefaultEventHandleRetryOpts, fixConfirms, contract, simBackend)
 	assert.Nil(t, e)
 
 	go watcher.Watch()
@@ -238,8 +235,7 @@ func TestSFCCrossCallFinalisedEventWatcher_ProgressPersisted(t *testing.T) {
 	assert.Equal(t, fixLastFinalised, progress)
 
 	// Test that the saved progress is used when restarting a new watcher
-	newWatcher, e := NewSFCCrossCallFinalisedEventWatcher(opts, progOpts, DefaultEventHandleRetryOpts, fixConfirms, contract, simBackend,
-		make(chan bool))
+	newWatcher, e := NewSFCCrossCallFinalisedEventWatcher(opts, progOpts, DefaultEventHandleRetryOpts, fixConfirms, contract, simBackend)
 	go newWatcher.Watch()
 	time.Sleep(1 * time.Second)
 	assert.Equal(t, progress+1, newWatcher.GetNextBlockToProcess())
@@ -267,7 +263,7 @@ func TestSFCCrossCallFinalisedEventWatcher_Reorg(t *testing.T) {
 	defer dsClose()
 	progOpts := createProgressOpts(ds)
 
-	watcher, e := NewSFCCrossCallFinalisedEventWatcher(opts, progOpts, DefaultEventHandleRetryOpts, 2, contract, simBackend, make(chan bool))
+	watcher, e := NewSFCCrossCallFinalisedEventWatcher(opts, progOpts, DefaultEventHandleRetryOpts, 2, contract, simBackend)
 	assert.Nil(t, e)
 	go watcher.Watch()
 	defer watcher.StopWatcher()
