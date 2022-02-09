@@ -21,7 +21,7 @@ import "../../../../../contracts/contracts/src/openzeppelin/token/ERC20/IERC20.s
 contract Train is LockableStorage, AtomicHiddenAuthParameters {
     // Seat rate.
     // Map (seat number => seat rate)
-    // mapping (uint256 => uint256) private roomRate;
+    // mapping (uint256 => uint256) private seatRate;
     uint256 private constant SEAT_RATE_MAP = 0;
 
     // Booked by.
@@ -97,6 +97,14 @@ contract Train is LockableStorage, AtomicHiddenAuthParameters {
         uint256 _maxAmountToPay
     ) external {
         require(address(cbc) == msg.sender, "Must be crosschain call");
+        uint256 existingBooking = getMapValue(
+            BOOKING_REF_TO_SEAT_NUMBER,
+            _uniqueId
+        );
+        require(
+            existingBooking == 0,
+            "Train: Existing booking for booking reference"
+        );
 
         // Check that the calling contract was the travel agency linked to this one from
         // the source blockchain.
@@ -114,7 +122,7 @@ contract Train is LockableStorage, AtomicHiddenAuthParameters {
         require(_date != 0, "Date can not be zero");
         for (uint256 i = 0; i < numSeats; i++) {
             uint256 rate = getMapValue(SEAT_RATE_MAP, i);
-            // If amount is OK and the room is available.
+            // If amount is OK and the seat is available.
             if (
                 !isDoubleMapValueLocked(SEAT_BOOKED_BY_2MAP, i, _date) &&
                 rate <= _maxAmountToPay &&
@@ -132,7 +140,7 @@ contract Train is LockableStorage, AtomicHiddenAuthParameters {
                 );
                 setMapValue(BOOKING_REF_TO_SEAT_NUMBER, _uniqueId, i);
                 setMapValue(BOOKING_REF_TO_DATE, _uniqueId, _date);
-                // Pay for room.
+                // Pay for seat.
                 erc20.transferFrom(
                     travelAgencySpender[sourceContract],
                     owner,

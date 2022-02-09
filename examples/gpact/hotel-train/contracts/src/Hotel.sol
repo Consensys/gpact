@@ -97,6 +97,14 @@ contract Hotel is LockableStorage, AtomicHiddenAuthParameters {
         uint256 _maxAmountToPay
     ) external {
         require(address(cbc) == msg.sender, "Must be crosschain call");
+        uint256 existingBooking = getMapValue(
+            BOOKING_REF_TO_ROOM_NUMBER,
+            _uniqueId
+        );
+        require(
+            existingBooking == 0,
+            "Hotel: Existing booking for booking reference"
+        );
 
         // Check that the calling contract was the travel agency linked to this one from
         // the source blockchain.
