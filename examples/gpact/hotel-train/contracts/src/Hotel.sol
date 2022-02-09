@@ -84,13 +84,6 @@ contract Hotel is LockableStorage, AtomicHiddenAuthParameters {
         }
     }
 
-    function changeRoomRate(uint256 _roomNumber, uint256 _roomRate)
-        external
-        onlyOwner
-    {
-        setMapValue(ROOM_RATE_MAP, _roomNumber, _roomRate);
-    }
-
     function bookRoom(
         uint256 _date,
         uint256 _uniqueId,

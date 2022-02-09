@@ -84,13 +84,6 @@ contract Train is LockableStorage, AtomicHiddenAuthParameters {
         }
     }
 
-    function changeSeatRate(uint256 _seatNumber, uint256 _seatRate)
-        external
-        onlyOwner
-    {
-        setMapValue(SEAT_RATE_MAP, _seatNumber, _seatRate);
-    }
-
     function bookSeat(
         uint256 _date,
         uint256 _uniqueId,
