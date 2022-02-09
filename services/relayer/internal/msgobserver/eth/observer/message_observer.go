@@ -25,21 +25,42 @@ import (
 // SFCBridgeObserver listens to incoming events from an SFC contract, transforms them into relayer messages
 // and then enqueues them onto a message queue them for further processing by other Relayer components
 type SFCBridgeObserver struct {
-	EventWatcher  *SFCCrossCallRealtimeEventWatcher
-	EventHandler  *SimpleEventHandler
+	EventWatcher  EventWatcher
+	EventHandler  EventHandler
 	SourceNetwork string
 }
 
-func NewSFCBridgeObserver(source string, sourceAddr string, contract *functioncall.Sfc, mq mqserver.MessageQueue, end chan bool) (*SFCBridgeObserver, error) {
+func NewSFCBridgeRealtimeObserver(source string, sourceAddr string, contract *functioncall.Sfc, mq mqserver.MessageQueue) (*SFCBridgeObserver, error) {
 	eventTransformer := NewSFCEventTransformer(source, sourceAddr)
 	messageHandler := NewMessageEnqueueHandler(mq, DefaultRetryOptions)
 	eventHandler := NewSimpleEventHandler(eventTransformer, messageHandler)
 	removedEvHandler := NewLogEventHandler("removed event")
-	eventWatcher, err := NewSFCCrossCallRealtimeEventWatcher(EventWatcherOpts{Context: context.Background(), EventHandler: eventHandler},
-		removedEvHandler, contract, end)
+
+	// TODO: expose the start option of watcher opts
+	watcherOpts := EventWatcherOpts{Context: context.Background(), EventHandler: eventHandler}
+	eventWatcher, err := NewSFCCrossCallRealtimeEventWatcher(watcherOpts, removedEvHandler, contract)
 	if err != nil {
 		return nil, err
 	}
+
+	return &SFCBridgeObserver{EventWatcher: eventWatcher, EventHandler: eventHandler, SourceNetwork: source}, nil
+}
+
+func NewSFCBridgeFinalisedObserver(source string, sourceAddr string, contract *functioncall.Sfc, mq mqserver.MessageQueue,
+	confirmationsForFinality uint64, watcherProgressOpts WatcherProgressDsOpts, client BlockHeadProducer) (
+	*SFCBridgeObserver,
+	error) {
+	eventTransformer := NewSFCEventTransformer(source, sourceAddr)
+	messageHandler := NewMessageEnqueueHandler(mq, DefaultRetryOptions)
+	eventHandler := NewSimpleEventHandler(eventTransformer, messageHandler)
+
+	// TODO: expose the start option of watcher opts
+	watcherOpts := EventWatcherOpts{Context: context.Background(), EventHandler: eventHandler}
+	eventWatcher, err := NewSFCCrossCallFinalisedEventWatcher(watcherOpts, watcherProgressOpts, DefaultRetryOptions, confirmationsForFinality, contract, client)
+	if err != nil {
+		return nil, err
+	}
+
 	return &SFCBridgeObserver{EventWatcher: eventWatcher, EventHandler: eventHandler, SourceNetwork: source}, nil
 }
 
@@ -48,5 +69,7 @@ func (o *SFCBridgeObserver) Start() error {
 }
 
 func (o *SFCBridgeObserver) Stop() {
-	o.EventWatcher.StopWatcher()
+	if o.EventWatcher != nil {
+		o.EventWatcher.StopWatcher()
+	}
 }

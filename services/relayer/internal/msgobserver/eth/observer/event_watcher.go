@@ -26,9 +26,7 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/event"
 	"github.com/ipfs/go-datastore"
-	badgerds "github.com/ipfs/go-ds-badger"
 	"log"
-	"time"
 )
 
 // EventWatcher listens to blockchain events
@@ -99,41 +97,23 @@ func (l *SFCCrossCallRealtimeEventWatcher) StopWatcher() {
 
 // NewSFCCrossCallRealtimeEventWatcher creates an instance of SFCCrossCallRealtimeEventWatcher.
 // Throws an error if the provided even handler or the removed event handler is nil.
-func NewSFCCrossCallRealtimeEventWatcher(watcherOpts EventWatcherOpts, removedEventHandler EventHandler, contract *functioncall.Sfc,
-	end chan bool) (*SFCCrossCallRealtimeEventWatcher, error) {
+func NewSFCCrossCallRealtimeEventWatcher(watcherOpts EventWatcherOpts, removedEventHandler EventHandler, contract *functioncall.Sfc) (*SFCCrossCallRealtimeEventWatcher, error) {
 	if watcherOpts.EventHandler == nil || removedEventHandler == nil {
 		return nil, fmt.Errorf("handler cannot be nil")
 	}
-	return &SFCCrossCallRealtimeEventWatcher{EventWatcherOpts: watcherOpts, RemovedEventHandler: removedEventHandler, SfcContract: contract, end: end}, nil
+	return &SFCCrossCallRealtimeEventWatcher{EventWatcherOpts: watcherOpts, RemovedEventHandler: removedEventHandler, SfcContract: contract,
+		end: make(chan bool)}, nil
 }
 
 type BlockHeadProducer interface {
 	SubscribeNewHead(ctx context.Context, ch chan<- *types.Header) (ethereum.Subscription, error)
 }
 
-// RetryOpts encapsulates configuration for retry operations
-type RetryOpts struct {
-	retry      uint          // number of attempt to make if saving progress to ds fails
-	retryDelay time.Duration // delay between each retry attempt
-}
-
 // WatcherProgressDsOpts encapsulates configuration details for persisting the progress of a watcher
 type WatcherProgressDsOpts struct {
-	ds        *badgerds.Datastore // datastore for persisting the progress of a watcher
-	dsProgKey datastore.Key       // specific key used in a KV datastore, for storing the latest progress
-	RetryOpts                     // configuration for how retries will be performed if persisting progress fails
-}
-
-var DefaultWatcherProgressDsOpts = WatcherProgressDsOpts{
-	RetryOpts: RetryOpts{
-		retry:      3,
-		retryDelay: 500 * time.Millisecond,
-	},
-}
-
-var DefaultEventHandleRetryOpts = RetryOpts{
-	retry:      4,
-	retryDelay: 500 * time.Millisecond,
+	ds               datastore.Datastore // datastore for persisting the progress of a watcher
+	dsProgKey        datastore.Key       // specific key used in a KV datastore, for storing the latest progress
+	FailureRetryOpts                     // configuration for how retries will be performed if persisting progress fails
 }
 
 // SFCCrossCallFinalisedEventWatcher listens to events from a 'Simple Function Call' bridge and processes them only once they are
@@ -143,7 +123,7 @@ type SFCCrossCallFinalisedEventWatcher struct {
 	EventWatcherOpts
 	WatcherProgressOpts WatcherProgressDsOpts
 	// EventHandleRetryOpts specifies how retries will be attempted if fetching or processing events fails
-	EventHandleRetryOpts     RetryOpts
+	EventHandleRetryOpts     FailureRetryOpts
 	SfcContract              *functioncall.Sfc
 	confirmationsForFinality uint64 //  the number of block confirmations required before an event is considered 'final'.
 	client                   BlockHeadProducer
@@ -238,8 +218,8 @@ func (l *SFCCrossCallFinalisedEventWatcher) handleEventsWithRetry(startBlock uin
 			l.handleEvents(finalisedEvs)
 			return nil
 		},
-		retry.Attempts(l.EventHandleRetryOpts.retry),
-		retry.Delay(l.EventHandleRetryOpts.retryDelay),
+		retry.Attempts(l.EventHandleRetryOpts.RetryAttempts),
+		retry.Delay(l.EventHandleRetryOpts.RetryDelay),
 		retry.OnRetry(func(attempt uint, err error) {
 			logging.Error("Error processing finalised events in blocks %d-%d. Retry attempt: %d, error: %v", startBlock,
 				lastBlock, attempt+1, err)
@@ -253,8 +233,8 @@ func (l *SFCCrossCallFinalisedEventWatcher) saveProgressToDsWithRetry(lastFinali
 		func() error {
 			return l.WatcherProgressOpts.ds.Put(context.Background(), l.WatcherProgressOpts.dsProgKey, uintToBytes(lastFinalisedBlock))
 		},
-		retry.Attempts(l.WatcherProgressOpts.retry),
-		retry.Delay(l.WatcherProgressOpts.retryDelay),
+		retry.Attempts(l.WatcherProgressOpts.RetryAttempts),
+		retry.Delay(l.WatcherProgressOpts.RetryDelay),
 		retry.OnRetry(func(attempt uint, err error) {
 			logging.Error("Error persisting watcher progress to db. Last finalised block: %d, Retry Attempt: %d, Error: %v",
 				lastFinalisedBlock, attempt+1, err)
@@ -289,8 +269,8 @@ func (l *SFCCrossCallFinalisedEventWatcher) setNextBlockToProcess() {
 // NewSFCCrossCallFinalisedEventWatcher creates an `SFCCrossCall` event watcher that processes events only once they receive sufficient confirmations.
 // Note: 1 block confirmation means the instant the transaction generating the event is mined.
 func NewSFCCrossCallFinalisedEventWatcher(watcherOpts EventWatcherOpts, watchProgressDbOpts WatcherProgressDsOpts,
-	handlerRetryOpts RetryOpts, confirmsForFinality uint64,
-	contract *functioncall.Sfc, client BlockHeadProducer, end chan bool) (*SFCCrossCallFinalisedEventWatcher, error) {
+	handlerRetryOpts FailureRetryOpts, confirmsForFinality uint64,
+	contract *functioncall.Sfc, client BlockHeadProducer) (*SFCCrossCallFinalisedEventWatcher, error) {
 	if confirmsForFinality < 1 {
 		return nil, fmt.Errorf("block confirmationsForFinality cannot be less than 1. supplied value: %d", confirmsForFinality)
 	}
@@ -298,5 +278,5 @@ func NewSFCCrossCallFinalisedEventWatcher(watcherOpts EventWatcherOpts, watchPro
 		return nil, fmt.Errorf("handler cannot be nil")
 	}
 	return &SFCCrossCallFinalisedEventWatcher{EventWatcherOpts: watcherOpts, WatcherProgressOpts: watchProgressDbOpts, EventHandleRetryOpts: handlerRetryOpts,
-		SfcContract: contract, confirmationsForFinality: confirmsForFinality, client: client, end: end}, nil
+		SfcContract: contract, confirmationsForFinality: confirmsForFinality, client: client, end: make(chan bool)}, nil
 }
