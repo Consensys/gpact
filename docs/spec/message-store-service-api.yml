@@ -152,7 +152,7 @@ paths:
           description: Validation of attestation failed
       security:
         - api_key: []
-  '/events/{networkId}/{blockHash}/{txHash}/{logIndex}':
+  '/events/{networkId}/{blockNumber}/{txIndex}/{logIndex}':
     get:
       tags:
         - events
@@ -173,30 +173,30 @@ paths:
           description: ID of network in which the event was generated
           required: true
           type: string
-        - name: blockHash
+        - name: blockNumber
           in: path
-          description: ID of network in which the event was generated
+          description: Block number that contains this event
           required: true
           type: string
-        - name: txHash
+        - name: txIndex
           in: path
-          description: Hash of the transaction that generated the event
+          description: Index number within the block for the transaction that generates the event
           required: true
           type: string
         - name: logIndex
           in: path
-          description: Index number for the event
+          description: Index number of the event within the block
           required: true
           type: string
       responses:
         '200':
-          description: successful operation
+          description: Successful retrieval of associated message
           schema:
             $ref: '#/definitions/Message'
         '400':
-          description: Invalid ID supplied
+          description: One or more invalid path parameters provided
         '404':
-          description: message not found
+          description: Message not found
       security:
         - api_key: []
 securityDefinitions:
