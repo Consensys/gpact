@@ -8,10 +8,7 @@ This service is an essential component for protocols such as GPACT that rely on 
 - Aggregates proof information from multiple Relayers, if required
 - Manage the lifecycle of messages if required (i.e. expiry and removal of messages)
 
-### API Specification and Design
-The API for the *Message Store Service* is detailed in [this specification document](spec/message-store-service-api.yml) and is defined using the [Open API Specification format](https://swagger.io/specification/).
-It can be displayed and used through the [Swagger UI tool](https://swagger.io/tools/swagger-ui/).
-
+### Design and Specification
 The *Message Store Service* consumes events that have been processed by Relayers. 
 The service can be configured to store all messages that pass through a Relayer or only a subset that require persistence (e.g. GPACT events).
 A [specialised message dispatcher]("TODO") is responsible for forwarding messages to the store by interacting with its API.
@@ -26,3 +23,12 @@ This requires that the amount of context information that a Relayer requires whe
 <img src="images/message-store-service.png" width="700"/>
 </p>
 <p align="center">Figure 1: Relayer interaction with Message Store Service</p>
+
+The API for the *Message Store Service* is detailed in [this specification document](spec/message-store-service-api.yml) and is defined using the [Open API Specification format](https://swagger.io/specification/).
+It can be displayed and used through the [Swagger UI tool](https://swagger.io/tools/swagger-ui/).
+
+#### TODOs
+- [ ] Security
+- [ ] Deployment considerations
+- [ ] Proof aggregation
+- [ ] Data Store description
