@@ -50,7 +50,9 @@ paths:
         '200':
           description: Successful retrieval of message
           schema:
-            $ref: '#/definitions/Message'
+            type: array
+            items:
+              $ref: '#/definitions/Message'
         '400':
           description: Invalid ID supplied
         '404':
