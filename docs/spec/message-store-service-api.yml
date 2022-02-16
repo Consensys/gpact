@@ -40,13 +40,11 @@ paths:
           description: >-
             The index number of the transaction that generates the
             event, within the block it was mined in.
-          required: true
           type: string
         - name: logIndex
           in: query
           description: >-
             The index number of the event, within the block it was mined in.
-          required: true
           type: string
       responses:
         '200':
