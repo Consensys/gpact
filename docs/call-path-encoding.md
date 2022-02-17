@@ -81,11 +81,11 @@ are called, then the call paths are shown in the table below.
 | Function   | Call Path             | Encoded Call Path |
 | ---------- | --------------------- | --- |
 | A.a1.a1b() | A.a1.a1b()            | {0}       |
-| B.b1.b1a() | A.a1.a1a() -> B.b1.b2a() | {1}   |
-| C.c1.c1a() | A.a1.a1a() -> C.c1.c1a() | {2}   |
-| B.b2.b2b() | A.a1.a1a() -> B.b2.b2b() | {3, 0}   |
-| C.c1.c1a() | A.a1.a1a() -> B.b2.b2b() -> C.c1.c1a()| {3, 1}  |
-| C.c2.c2a() | A.a1.a1a() -> B.b2.b2b() -> C.c2.c2a()| {3, 2}  |
-| A.a2.a2a() | A.a1.a1a() -> B.b2.b2b() -> A.a2.a2a() | {3, 3, 0}  |
-| C.c2.c2a() | A.a1.a1a() -> B.b2.b2b() -> A.a2.a2a() -> C.c2.c2a()| {3, 3, 1}  |
+| B.b1.b1a() | A.a1.a1b() -> B.b1.b2a() | {1}   |
+| C.c1.c1a() | A.a1.a1b() -> C.c1.c1a() | {2}   |
+| B.b2.b2b() | A.a1.a1b() -> B.b2.b2b() | {3, 0}   |
+| C.c1.c1a() | A.a1.a1b() -> B.b2.b2b() -> C.c1.c1a()| {3, 1}  |
+| C.c2.c2a() | A.a1.a1b() -> B.b2.b2b() -> C.c2.c2a()| {3, 2}  |
+| A.a2.a2a() | A.a1.a1b() -> B.b2.b2b() -> A.a2.a2a() | {3, 3, 0}  |
+| C.c2.c2a() | A.a1.a1b() -> B.b2.b2b() -> A.a2.a2a() -> C.c2.c2a()| {3, 3, 1}  |
 
