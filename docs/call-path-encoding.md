@@ -73,7 +73,7 @@ are called, then the call paths are shown in the table below.
 | Function   | Call Path             | Encoded Call Path |
 | ---------- | --------------------- | --- |
 | A.a1.a1a() | A.a1.a1a()            | {0}       |
-| B.b1.b2a() | A.a1.a1a() -> B.b1.b2a() | {1}   |
+| B.b1.b1a() | A.a1.a1a() -> B.b1.b1a() | {1}   |
 
 Assuming that the root function is A.a1.a1b() and that all functions in the call tree 
 are called, then the call paths are shown in the table below.
@@ -81,7 +81,7 @@ are called, then the call paths are shown in the table below.
 | Function   | Call Path             | Encoded Call Path |
 | ---------- | --------------------- | --- |
 | A.a1.a1b() | A.a1.a1b()            | {0}       |
-| B.b1.b1a() | A.a1.a1b() -> B.b1.b2a() | {1}   |
+| B.b2.b2a() | A.a1.a1b() -> B.b2.b2a() | {1}   |
 | C.c1.c1a() | A.a1.a1b() -> C.c1.c1a() | {2}   |
 | B.b2.b2b() | A.a1.a1b() -> B.b2.b2b() | {3, 0}   |
 | C.c1.c1a() | A.a1.a1b() -> B.b2.b2b() -> C.c1.c1a()| {3, 1}  |
