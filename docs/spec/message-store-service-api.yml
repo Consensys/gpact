@@ -38,8 +38,14 @@ paths:
         - name: txIndex
           in: query
           description: >-
-            The index number of the transaction that generates the
+            The index number of the transaction that generated the
             event, within the block it was mined in.
+          type: string
+        - name: txHash
+          in: query
+          description: >-
+            The hash of the transaction that generated the
+            event.
           type: string
         - name: logIndex
           in: query
