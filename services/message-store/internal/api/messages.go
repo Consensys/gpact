@@ -103,7 +103,8 @@ func (mApi *MessageStoreApi) GetMessageProofsHandler(c *gin.Context) {
 	mApi.getMessageDetails(c, id, func(message *v1.Message) interface{} { return message.Proofs })
 }
 
-func (mApi *MessageStoreApi) getMessageDetails(c *gin.Context, id string, attribExtractor func(message *v1.Message) interface{}) {
+func (mApi *MessageStoreApi) getMessageDetails(c *gin.Context, id string,
+	attribExtractor func(message *v1.Message) interface{}) {
 	message, err := mApi.queryMessageById(c, datastore.NewKey(id), mApi.DataStore.Get)
 	if err == datastore.ErrNotFound {
 		messageNotFound(c, id)
@@ -126,7 +127,9 @@ func isValidId(id string) bool {
 	return len(id) > 0
 }
 
-func (mApi *MessageStoreApi) queryMessageById(c *gin.Context, id datastore.Key, dsGetter func(c context.Context, key datastore.Key) ([]byte, error)) (*v1.Message, error) {
+// queryMessageById queries the datastore for a message with the given ID
+func (mApi *MessageStoreApi) queryMessageById(c *gin.Context, id datastore.Key, dsGetter func(c context.Context,
+	key datastore.Key) ([]byte, error)) (*v1.Message, error) {
 	msgBytes, err := dsGetter(c, id)
 	if err != nil {
 		return nil, err
@@ -169,7 +172,8 @@ func (mApi *MessageStoreApi) upsertMessage(c *gin.Context, tx datastore.Txn, new
 
 // updateMessageProofSet adds new proof elements of the message provided as argument,
 // to the proof set of the message in the datastore.
-func (mApi *MessageStoreApi) updateMessageProofSet(c *gin.Context, tx datastore.Txn, msgId datastore.Key, newMessage *v1.Message) error {
+func (mApi *MessageStoreApi) updateMessageProofSet(c *gin.Context, tx datastore.Txn, msgId datastore.Key,
+	newMessage *v1.Message) error {
 	existing, err := mApi.queryMessageById(c, msgId, tx.Get)
 	if err != nil {
 		return err
@@ -188,7 +192,8 @@ func (mApi *MessageStoreApi) updateMessageProofSet(c *gin.Context, tx datastore.
 	return nil
 }
 
-func (mApi *MessageStoreApi) addMessage(c *gin.Context, tx datastore.Txn, msgId datastore.Key, newMessage *v1.Message) error {
+func (mApi *MessageStoreApi) addMessage(c *gin.Context, tx datastore.Txn, msgId datastore.Key,
+	newMessage *v1.Message) error {
 	m, err := json.Marshal(newMessage)
 	if err != nil {
 		return err

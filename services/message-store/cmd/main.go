@@ -27,7 +27,7 @@ func main() {
 		os.RemoveAll(path)
 	}()
 
-	api.ConfigureHandlers(r, m)
+	api.SetupRouter(r, m)
 	err = r.Run()
 	if err != nil {
 		log.Fatal("error configuring routes")

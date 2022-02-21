@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-func ConfigureHandlers(r *gin.Engine, m *MessageStoreApi) {
+func SetupRouter(r *gin.Engine, m *MessageStoreApi) {
 	r.Use(gin.Logger())
 
 	r.Use(gin.CustomRecovery(func(c *gin.Context, recovered interface{}) {
