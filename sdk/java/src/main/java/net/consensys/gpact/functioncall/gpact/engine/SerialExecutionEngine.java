@@ -18,13 +18,13 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import net.consensys.gpact.common.BlockchainId;
-import net.consensys.gpact.functioncall.gpact.CrosschainExecutor;
-import net.consensys.gpact.functioncall.gpact.calltree.CallExecutionTree;
+import net.consensys.gpact.functioncall.CallExecutionTree;
+import net.consensys.gpact.functioncall.gpact.GpactCrosschainExecutor;
 
 public class SerialExecutionEngine extends AbstractExecutionEngine {
   //  static final Logger LOG = LogManager.getLogger(SerialExecutionEngine.class);
 
-  public SerialExecutionEngine(CrosschainExecutor executor) {
+  public SerialExecutionEngine(GpactCrosschainExecutor executor) {
     super(executor);
   }
 

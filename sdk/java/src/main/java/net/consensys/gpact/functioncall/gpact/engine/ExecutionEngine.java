@@ -14,8 +14,9 @@
  */
 package net.consensys.gpact.functioncall.gpact.engine;
 
-import net.consensys.gpact.functioncall.gpact.calltree.CallExecutionTree;
+import net.consensys.gpact.functioncall.CallExecutionTree;
+import net.consensys.gpact.functioncall.CrosschainCallResult;
 
 public interface ExecutionEngine {
-  boolean execute(CallExecutionTree callGraph, long timeout) throws Exception;
+  CrosschainCallResult execute(CallExecutionTree callGraph, long timeout) throws Exception;
 }

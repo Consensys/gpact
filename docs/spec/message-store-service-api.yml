@@ -1,0 +1,293 @@
+swagger: '2.0'
+info:
+  description: >-
+    A service that stores and manages blockchain events forwarded by one or more
+    Relayer services. The blockchain events are stored in the canonical data
+    format employed by Relayer components.
+  version: 0.1.0
+  title: Relayer Message Store Service
+tags:
+  - name: messages
+    description: >-
+      Represents blockchain events in the canonical data format used by
+      Relayers.
+schemes:
+  - https
+paths:
+  /messages:
+    get:
+      tags:
+        - messages
+      summary: Retrieve messages that match the provided filter criteria.
+      description: >-
+        Returns message that match the filter criteria passed as query
+        parameters.
+      produces:
+        - application/json
+      parameters:
+        - name: networkId
+          in: query
+          description: ID of network in which the event was generated
+          required: true
+          type: string
+        - name: blockNumber
+          in: query
+          description: The block number that contains this event
+          required: true
+          type: string
+        - name: txIndex
+          in: query
+          description: >-
+            The index number of the transaction that generated the
+            event, within the block it was mined in.
+          type: string
+        - name: txHash
+          in: query
+          description: >-
+            The hash of the transaction that generated the
+            event.
+          type: string
+        - name: logIndex
+          in: query
+          description: >-
+            The index number of the event, within the block it was mined in.
+          type: string
+      responses:
+        '200':
+          description: Successful retrieval of message
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Message'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Message not found
+      security:
+        - api_key: []
+    put:
+      tags:
+        - messages
+      summary: Adds or updates a Relayer message that represents a blockchain event.
+      description: >-
+        The endpoint is used to submit (and create) a message if it does not
+        already exist in the store. If it does, the existing message is updated
+        to include the additional proof data of the submitting Relayer. Only
+        Relayers can add or update messages.This endpoint is semantically
+        equivalent to the /messages/{id}, where the id of the message is parsed
+        from the message body instead of the path parameter.
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: Message object to add to the store
+          required: true
+          schema:
+            $ref: '#/definitions/Message'
+      responses:
+        '200':
+          description: Exising message updated successfully
+        '201':
+          description: New message created successfully
+        '400':
+          description: Invalid input
+        '401':
+          description: Caller is not authorised to perform this operation
+      security:
+        - api_key: []
+  '/messages/{id}':
+    put:
+      tags:
+        - messages
+      summary: Adds or updates a Relayer message that represents a blockchain event.
+      description: >-
+        The endpoint is used to submit (and create) a message if it does not
+        already exist in the store. If it does, the existing message is updated
+        to include the additional proof data of the submitting Relayer. Only
+        Relayers can add or update messages.
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: Message object to add to the store
+          required: true
+          schema:
+            $ref: '#/definitions/Message'
+        - name: id
+          in: path
+          description: ID of message to return
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Exising message updated successfully
+        '201':
+          description: New message created successfully
+        '400':
+          description: Invalid input
+        '401':
+          description: Caller is not authorised to perform this operation
+      security:
+        - api_key: []
+    get:
+      tags:
+        - messages
+      summary: 'Retrieve the message associated with the given ID, if it exists.'
+      description: >-
+        Returns the message object associated with the given ID, if it exists in
+        the store.
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          description: ID of message to return
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Successful retrieval of message
+          schema:
+            $ref: '#/definitions/Message'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Message not found
+      security:
+        - api_key: []
+  '/messages/{id}/proofs':
+    get:
+      tags:
+        - messages
+      summary: >-
+        Retrieve all proofs that have been recorded for the message with the
+        given ID.
+      description: >-
+        Returns all proofs (e.g. attestations) that have been recorded for the
+        message with the given ID.
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          description: ID of message to return
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Successful retrieval of message proofs
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Proof'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Message not found
+      security:
+        - api_key: []
+    post:
+      tags:
+        - messages
+      summary: Record a new proof for message.
+      description: Records a new proof for the message with a given ID.
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: Message proof object to add to the store
+          required: true
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Proof'
+        - name: id
+          in: path
+          description: ID of message to return
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Proof successfuly added to message
+        '400':
+          description: Invalid ID or proof object supplied
+        '401':
+          description: Caller is not authorised to perform this operation
+        '404':
+          description: Message not found
+        '409':
+          description: Given message proof was already recorded
+        '422':
+          description: Validation of attestation failed
+      security:
+        - api_key: []
+securityDefinitions:
+  api_key:
+    type: apiKey
+    name: api_key
+    in: header
+definitions:
+  Proof:
+    type: object
+    required:
+      - type
+      - created
+      - proof
+    properties:
+      type:
+        type: string
+      created:
+        type: string
+      proof:
+        type: string
+  NetworkAddress:
+    type: object
+    required:
+      - networkId
+      - bridgeAddress
+      - contractAddress
+    properties:
+      networkId:
+        type: string
+      contractAddress:
+        type: string
+      bridgeAddress:
+        type: string
+  Meta:
+    type: object
+    required:
+      - timestamp
+      - version
+    properties:
+      timestamp:
+        type: string
+      version:
+        type: string
+  Message:
+    type: object
+    required:
+      - id
+    properties:
+      id:
+        type: string
+      meta:
+        $ref: '#/definitions/Meta'
+      destination:
+        $ref: '#/definitions/NetworkAddress'
+      source:
+        $ref: '#/definitions/NetworkAddress'
+      proofs:
+        type: array
+        items:
+          $ref: '#/definitions/Proof'
+      payload:
+        type: string

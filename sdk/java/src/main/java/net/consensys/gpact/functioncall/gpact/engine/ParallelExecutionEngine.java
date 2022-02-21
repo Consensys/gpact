@@ -24,15 +24,15 @@ import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import net.consensys.gpact.common.BlockchainId;
-import net.consensys.gpact.functioncall.gpact.CrosschainExecutor;
-import net.consensys.gpact.functioncall.gpact.calltree.CallExecutionTree;
+import net.consensys.gpact.functioncall.CallExecutionTree;
+import net.consensys.gpact.functioncall.gpact.GpactCrosschainExecutor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class ParallelExecutionEngine extends AbstractExecutionEngine {
   static final Logger LOG = LogManager.getLogger(ParallelExecutionEngine.class);
 
-  public ParallelExecutionEngine(CrosschainExecutor executor) {
+  public ParallelExecutionEngine(GpactCrosschainExecutor executor) {
     super(executor);
   }
 

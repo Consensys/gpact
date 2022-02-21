@@ -1,10 +1,11 @@
-package net.consensys.gpact.functioncall.gpact.calltree;
+package net.consensys.gpact.functioncall.common;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import net.consensys.gpact.common.FormatConversion;
 import net.consensys.gpact.common.Tuple;
+import net.consensys.gpact.functioncall.CallExecutionTreeException;
 import net.consensys.gpact.soliditywrappers.functioncall.gpact.CallExecutionTreeTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.web3j.tuples.generated.Tuple3;
@@ -14,7 +15,7 @@ public class SolidityCallExecutionTreeTest extends CallExecutionTreeTestCommon {
   CallExecutionTreeTest callExecutionTreeContract;
 
   Tuple<BigInteger, String, String> extractFunction(byte[] encodedCallTree, int[] callPath)
-      throws CallTreeException {
+      throws CallExecutionTreeException {
     List<BigInteger> callPathB = new ArrayList<>();
     for (int callPathElement : callPath) {
       callPathB.add(BigInteger.valueOf(callPathElement));
@@ -30,7 +31,7 @@ public class SolidityCallExecutionTreeTest extends CallExecutionTreeTestCommon {
           result.component2(),
           FormatConversion.byteArrayToString(result.component3()));
     } catch (Exception ex) {
-      throw new CallTreeException(ex.toString());
+      throw new CallExecutionTreeException(ex.toString());
     }
   }
 

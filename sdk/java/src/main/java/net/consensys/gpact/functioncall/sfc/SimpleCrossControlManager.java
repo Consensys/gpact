@@ -16,22 +16,22 @@ package net.consensys.gpact.functioncall.sfc;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.List;
 import net.consensys.gpact.common.*;
 import net.consensys.gpact.common.crypto.Hash;
+import net.consensys.gpact.functioncall.CallExecutionTree;
+import net.consensys.gpact.functioncall.CrossControlManager;
 import net.consensys.gpact.messaging.SignedEvent;
 import net.consensys.gpact.soliditywrappers.functioncall.sfc.SimpleCrosschainControl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
 import org.web3j.crypto.Credentials;
-import org.web3j.protocol.core.RemoteCall;
 import org.web3j.protocol.core.methods.response.Log;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.exceptions.TransactionException;
 
-public class SimpleCrossControlManager extends AbstractBlockchain {
+public class SimpleCrossControlManager extends AbstractBlockchain implements CrossControlManager {
   private static final Logger LOG = LogManager.getLogger(SimpleCrossControlManager.class);
 
   public static byte[] CROSSCALL_EVENT_SIGNATURE =
@@ -40,8 +40,7 @@ public class SimpleCrossControlManager extends AbstractBlockchain {
           .toArray();
   public static Bytes CROSSCALL_EVENT_SIGNATURE_BYTES = Bytes.wrap(CROSSCALL_EVENT_SIGNATURE);
 
-  protected net.consensys.gpact.soliditywrappers.functioncall.sfc.SimpleCrosschainControl
-      crossBlockchainControlContract;
+  protected SimpleCrosschainControl crossBlockchainControlContract;
 
   public SimpleCrossControlManager(
       Credentials credentials,
@@ -53,10 +52,10 @@ public class SimpleCrossControlManager extends AbstractBlockchain {
     super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
   }
 
-  protected void deployContracts() throws Exception {
+  protected void deployCbcContract() throws Exception {
     final BigInteger HARD_CODED_EVENT_HORIZON = BigInteger.valueOf(3600); // 1 hour == 3600 seconds
     this.crossBlockchainControlContract =
-        net.consensys.gpact.soliditywrappers.functioncall.sfc.SimpleCrosschainControl.deploy(
+        SimpleCrosschainControl.deploy(
                 this.web3j,
                 this.tm,
                 this.gasProvider,
@@ -68,19 +67,12 @@ public class SimpleCrossControlManager extends AbstractBlockchain {
         this.crossBlockchainControlContract.getContractAddress());
   }
 
-  public List<String> getContractAddresses() {
-    List<String> addresses = new ArrayList<>();
-    addresses.add(this.crossBlockchainControlContract.getContractAddress());
-    return addresses;
-  }
-
-  public void loadContracts(List<String> addresses) {
+  public void loadCbcContract(String cbcAddress) {
     this.crossBlockchainControlContract =
-        net.consensys.gpact.soliditywrappers.functioncall.sfc.SimpleCrosschainControl.load(
-            addresses.get(0), this.web3j, this.tm, this.gasProvider);
+        SimpleCrosschainControl.load(cbcAddress, this.web3j, this.tm, this.gasProvider);
   }
 
-  public void addBlockchain(
+  public void addRemoteBlockchain(
       BlockchainId bcId, String cbcContractAddress, String verifierContractAddress)
       throws Exception {
     TransactionReceipt txr =
@@ -97,27 +89,33 @@ public class SimpleCrossControlManager extends AbstractBlockchain {
   }
 
   public Tuple<TransactionReceipt, byte[], SimpleCrosschainControl.CrossCallEventResponse>
-      sourceBcCall(RemoteCall<TransactionReceipt> functionCall) throws Exception {
+      sourceBcCall(CallExecutionTree rootCall) throws Exception {
 
     LOG.debug("Transaction on source blockchain {}", this.blockchainId);
     StatsHolder.log("Source Blockchain call now");
     TransactionReceipt txR;
     try {
-      txR = functionCall.send();
+      txR =
+          tm.executeTransaction(
+              this.gasProvider.getGasPrice(), this.gasProvider.getGasLimit(),
+              rootCall.getContractAddress(), rootCall.getFunctionCallData());
     } catch (TransactionException ex) {
       // Crosschain Control Contract reverted
-      String revertReason =
-          RevertReason.decodeRevertReason(ex.getTransactionReceipt().get().getRevertReason());
+      txR = ex.getTransactionReceipt().get();
+      String revertReason = RevertReason.decodeRevertReason(txR.getRevertReason());
       LOG.error(" Revert Reason1: {}", revertReason);
       return new Tuple<TransactionReceipt, byte[], SimpleCrosschainControl.CrossCallEventResponse>(
-          ex.getTransactionReceipt().get(), null, null);
+          txR, null, null);
     }
 
     StatsHolder.logGas("Source Bc Call", txR.getGasUsed());
-    List<SimpleCrosschainControl.CrossCallEventResponse> callEvents =
-        this.crossBlockchainControlContract.getCrossCallEvents(txR);
-    SimpleCrosschainControl.CrossCallEventResponse crossCallEvent = callEvents.get(0);
-    dumpCrossCallEvent(crossCallEvent);
+    SimpleCrosschainControl.CrossCallEventResponse crossCallEvent = null;
+    if (txR.isStatusOK()) {
+      List<SimpleCrosschainControl.CrossCallEventResponse> callEvents =
+          this.crossBlockchainControlContract.getCrossCallEvents(txR);
+      crossCallEvent = callEvents.get(0);
+      dumpCrossCallEvent(crossCallEvent);
+    }
     return new Tuple<TransactionReceipt, byte[], SimpleCrosschainControl.CrossCallEventResponse>(
         txR, getEventData(txR, CROSSCALL_EVENT_SIGNATURE_BYTES), crossCallEvent);
   }
@@ -136,11 +134,10 @@ public class SimpleCrossControlManager extends AbstractBlockchain {
       StatsHolder.logGas("Destination Bc Call", txR.getGasUsed());
     } catch (TransactionException ex) {
       // Crosschain Control Contract reverted
-      String revertReason =
-          RevertReason.decodeRevertReason(ex.getTransactionReceipt().get().getRevertReason());
+      txR = ex.getTransactionReceipt().get();
+      String revertReason = RevertReason.decodeRevertReason(txR.getRevertReason());
       LOG.error(" Revert Reason2: {}", revertReason);
-      return new Tuple<TransactionReceipt, String, Boolean>(
-          ex.getTransactionReceipt().get(), revertReason, false);
+      return new Tuple<TransactionReceipt, String, Boolean>(txR, revertReason, false);
     }
 
     if (!txR.isStatusOK()) {

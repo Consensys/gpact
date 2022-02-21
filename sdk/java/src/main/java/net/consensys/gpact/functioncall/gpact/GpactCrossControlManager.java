@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import net.consensys.gpact.common.*;
 import net.consensys.gpact.common.crypto.Hash;
+import net.consensys.gpact.functioncall.CrossControlManager;
 import net.consensys.gpact.messaging.SignedEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -38,8 +39,8 @@ import org.web3j.protocol.core.methods.response.Log;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.exceptions.TransactionException;
 
-public class CrossControlManager extends AbstractBlockchain {
-  private static final Logger LOG = LogManager.getLogger(CrossControlManager.class);
+public class GpactCrossControlManager extends AbstractBlockchain implements CrossControlManager {
+  private static final Logger LOG = LogManager.getLogger(GpactCrossControlManager.class);
 
   public static byte[] START_EVENT_SIGNATURE =
       Hash.keccak256(Bytes.wrap("Start(uint256,address,uint256,bytes)".getBytes())).toArray();
@@ -62,7 +63,7 @@ public class CrossControlManager extends AbstractBlockchain {
   private long crossBlockchainTransactionTimeout;
   private boolean rootEventSuccess;
 
-  protected CrossControlManager(
+  protected GpactCrossControlManager(
       Credentials credentials,
       BlockchainId bcId,
       String uri,
@@ -72,7 +73,7 @@ public class CrossControlManager extends AbstractBlockchain {
     super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
   }
 
-  protected void deployContracts() throws Exception {
+  protected void deployContract() throws Exception {
     this.crossBlockchainControlContract =
         net.consensys.gpact.soliditywrappers.functioncall.gpact.CrosschainControl.deploy(
                 this.web3j, this.tm, this.gasProvider, this.blockchainId.asBigInt())
@@ -82,19 +83,13 @@ public class CrossControlManager extends AbstractBlockchain {
         this.crossBlockchainControlContract.getContractAddress());
   }
 
-  public List<String> getContractAddresses() {
-    List<String> addresses = new ArrayList<>();
-    addresses.add(this.crossBlockchainControlContract.getContractAddress());
-    return addresses;
-  }
-
-  public void loadContracts(List<String> addresses) {
+  public void loadContract(String cbcAddress) {
     this.crossBlockchainControlContract =
         net.consensys.gpact.soliditywrappers.functioncall.gpact.CrosschainControl.load(
-            addresses.get(0), this.web3j, this.tm, this.gasProvider);
+            cbcAddress, this.web3j, this.tm, this.gasProvider);
   }
 
-  public void addBlockchain(
+  public void addRemoteBlockchain(
       BlockchainId bcId, String cbcContractAddress, String verifierContractAddress)
       throws Exception {
     TransactionReceipt txr =
@@ -136,7 +131,7 @@ public class CrossControlManager extends AbstractBlockchain {
     // LOG.debug("Start Event: {}", new BigInteger(getEventData(txR,
     // AbstractCbc.START_EVENT_SIGNATURE_BYTES)).toString(16));
     return new Tuple<TransactionReceipt, byte[], Boolean>(
-        txR, getEventData(txR, CrossControlManager.START_EVENT_SIGNATURE_BYTES), false);
+        txR, getEventData(txR, GpactCrossControlManager.START_EVENT_SIGNATURE_BYTES), false);
   }
 
   public Tuple<TransactionReceipt, byte[], Boolean> segment(
@@ -209,7 +204,7 @@ public class CrossControlManager extends AbstractBlockchain {
 
     return new Tuple<TransactionReceipt, byte[], Boolean>(
         txR,
-        getEventData(txR, CrossControlManager.SEGMENT_EVENT_SIGNATURE_BYTES),
+        getEventData(txR, GpactCrossControlManager.SEGMENT_EVENT_SIGNATURE_BYTES),
         segmentEventResponse._lockedContracts.isEmpty());
   }
 

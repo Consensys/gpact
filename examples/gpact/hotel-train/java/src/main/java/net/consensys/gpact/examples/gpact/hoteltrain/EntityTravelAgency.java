@@ -17,13 +17,12 @@ package net.consensys.gpact.examples.gpact.hoteltrain;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.List;
+import net.consensys.gpact.CrosschainProtocols;
 import net.consensys.gpact.common.*;
 import net.consensys.gpact.common.AbstractBlockchain;
-import net.consensys.gpact.functioncall.gpact.CrossControlManagerGroup;
-import net.consensys.gpact.functioncall.gpact.CrosschainExecutor;
-import net.consensys.gpact.functioncall.gpact.calltree.CallExecutionTree;
-import net.consensys.gpact.functioncall.gpact.engine.ExecutionEngine;
+import net.consensys.gpact.functioncall.CallExecutionTree;
+import net.consensys.gpact.functioncall.CrossControlManagerGroup;
+import net.consensys.gpact.functioncall.CrosschainCallResult;
 import net.consensys.gpact.helpers.GpactExampleSystemManager;
 import net.consensys.gpact.messaging.MessagingVerificationInterface;
 import net.consensys.gpact.soliditywrappers.examples.gpact.hoteltrain.LockableERC20PresetFixedSupply;
@@ -89,23 +88,24 @@ public class EntityTravelAgency extends AbstractBlockchain {
   }
 
   public void createCbcManager(
-      BlockchainInfo bcInfoTravel,
-      List<String> infratructureContractAddressOnBcTravel,
+      BlockchainConfig bcInfoTravel,
+      String cbcContractAddressOnBcTravel,
       MessagingVerificationInterface msgVerTravel,
-      BlockchainInfo bcInfoHotel,
-      List<String> infrastructureContractAddressOnBcHotel,
+      BlockchainConfig bcInfoHotel,
+      String cbcContractAddressOnBcHotel,
       MessagingVerificationInterface msgVerHotel,
-      BlockchainInfo bcInfoTrain,
-      List<String> infrastructureContractAddressOnBcTrain,
+      BlockchainConfig bcInfoTrain,
+      String cbcContractAddressOnBcTrain,
       MessagingVerificationInterface msgVerTrain)
       throws Exception {
-    this.crossControlManagerGroup = new CrossControlManagerGroup();
-    this.crossControlManagerGroup.addBlockchainAndLoadContracts(
-        this.credentials, bcInfoTravel, infratructureContractAddressOnBcTravel, msgVerTravel);
-    this.crossControlManagerGroup.addBlockchainAndLoadContracts(
-        this.credentials, bcInfoHotel, infrastructureContractAddressOnBcHotel, msgVerHotel);
-    this.crossControlManagerGroup.addBlockchainAndLoadContracts(
-        this.credentials, bcInfoTrain, infrastructureContractAddressOnBcTrain, msgVerTrain);
+    this.crossControlManagerGroup =
+        CrosschainProtocols.getFunctionCallInstance(CrosschainProtocols.GPACT).get();
+    this.crossControlManagerGroup.addBlockchainAndLoadCbcContract(
+        this.credentials, bcInfoTravel, cbcContractAddressOnBcTravel, msgVerTravel);
+    this.crossControlManagerGroup.addBlockchainAndLoadCbcContract(
+        this.credentials, bcInfoHotel, cbcContractAddressOnBcHotel, msgVerHotel);
+    this.crossControlManagerGroup.addBlockchainAndLoadCbcContract(
+        this.credentials, bcInfoTrain, cbcContractAddressOnBcTrain, msgVerTrain);
   }
 
   public BigInteger book(final int dateInt, GpactExampleSystemManager exampleManager)
@@ -124,34 +124,34 @@ public class EntityTravelAgency extends AbstractBlockchain {
     LOG.info(" Travel Agency: bookHotelAndRTrain: {}", rlpBookHotelAndTrain);
     String rlpHotelBookRoom = sim.getHotelBookRoomRLP();
     LOG.info(" Hotel: bookRoom: {}", rlpHotelBookRoom);
-    String rlpTrainBookRoom = sim.getTrainBookRoomRLP();
+    String rlpTrainBookRoom = sim.getTrainSeatRoomRLP();
     LOG.info(" Train: bookRoom: {}", rlpTrainBookRoom);
 
     ArrayList<CallExecutionTree> rootCalls = new ArrayList<>();
-    CallExecutionTree trainBookRoom =
-        new CallExecutionTree(trainBcId, trainContractAddress, rlpTrainBookRoom);
     CallExecutionTree hotelBookRoom =
         new CallExecutionTree(hotelBcId, hotelContractAddress, rlpHotelBookRoom);
+    CallExecutionTree trainBookRoom =
+        new CallExecutionTree(trainBcId, trainContractAddress, rlpTrainBookRoom);
     rootCalls.add(hotelBookRoom);
     rootCalls.add(trainBookRoom);
     CallExecutionTree rootCall =
         new CallExecutionTree(
             this.blockchainId, this.travelAgencyAddress, rlpBookHotelAndTrain, rootCalls);
 
-    CrosschainExecutor executor = new CrosschainExecutor(this.crossControlManagerGroup);
-    ExecutionEngine executionEngine = exampleManager.getExecutionEngine(executor);
-    boolean success = executionEngine.execute(rootCall, 300);
+    CrosschainCallResult result =
+        this.crossControlManagerGroup.executeCrosschainCall(
+            exampleManager.getExecutionEngine(), rootCall, 300);
 
-    LOG.info("Success: {}", success);
+    LOG.info("Success: {}", result.isSuccessful());
 
-    if (!success) {
+    if (!result.isSuccessful()) {
       throw new Exception("Crosschain Execution failed. See log for details");
     }
 
     return uniqueBookingId;
   }
 
-  public void grantAllowance(EntityBase entity, int amount) throws Exception {
+  public void grantAllowance(EntityBase entity, int amount, String spender) throws Exception {
     TransactionReceiptProcessor txrProcessor =
         new PollingTransactionReceiptProcessor(entity.web3j, this.pollingInterval, RETRY);
     FastTxManager atm =
@@ -160,7 +160,7 @@ public class EntityTravelAgency extends AbstractBlockchain {
     LockableERC20PresetFixedSupply erc20 =
         LockableERC20PresetFixedSupply.load(
             entity.getErc20ContractAddress(), entity.web3j, atm, entity.gasProvider);
-    erc20.increaseAllowance(entity.getHotelContractAddress(), BigInteger.valueOf(amount)).send();
+    erc20.increaseAllowance(spender, BigInteger.valueOf(amount)).send();
     LOG.info(
         " Increased allowance of {} contract for account {} by {}",
         entity.entity,

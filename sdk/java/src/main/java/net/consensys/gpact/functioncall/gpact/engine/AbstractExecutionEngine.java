@@ -18,37 +18,45 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import net.consensys.gpact.common.BlockchainId;
-import net.consensys.gpact.functioncall.gpact.CrossControlManager;
-import net.consensys.gpact.functioncall.gpact.CrosschainExecutor;
-import net.consensys.gpact.functioncall.gpact.calltree.CallExecutionTree;
+import net.consensys.gpact.functioncall.CallExecutionTree;
+import net.consensys.gpact.functioncall.CrosschainCallResult;
+import net.consensys.gpact.functioncall.common.CrosschainCallResultImpl;
+import net.consensys.gpact.functioncall.gpact.GpactCrossControlManager;
+import net.consensys.gpact.functioncall.gpact.GpactCrosschainExecutor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public abstract class AbstractExecutionEngine implements ExecutionEngine {
   static final Logger LOG = LogManager.getLogger(AbstractExecutionEngine.class);
 
-  CrosschainExecutor executor;
+  GpactCrosschainExecutor executor;
 
-  public AbstractExecutionEngine(CrosschainExecutor executor) {
+  public AbstractExecutionEngine(GpactCrosschainExecutor executor) {
     this.executor = executor;
   }
 
-  public boolean execute(CallExecutionTree callGraph, long timeout) throws Exception {
-    LOG.info("start");
+  public CrosschainCallResult execute(CallExecutionTree callGraph, long timeout) throws Exception {
+    LOG.info("Start: Begin");
     BigInteger crossBlockchainTransactionId =
-        CrossControlManager.generateRandomCrossBlockchainTransactionId();
+        GpactCrossControlManager.generateRandomCrossBlockchainTransactionId();
     BigInteger timeoutBig = BigInteger.valueOf(timeout);
-
     BlockchainId rootBlockchainId = callRootBlockchainId(callGraph);
     this.executor.init(
         callGraph.encode(), timeoutBig, crossBlockchainTransactionId, rootBlockchainId);
     this.executor.startCall();
+    LOG.info("Start: End");
+
+    LOG.info("Segments and Root: Begin");
     callSegmentsAndRoot(
         callGraph, new ArrayList<>(), rootBlockchainId, callGraph.getNumCalledFunctions());
+    LOG.info("Segments and Root: End");
 
+    LOG.info("Signalling: Begin");
     this.executor.doSignallingCalls();
+    LOG.info("Signalling: End");
 
-    return this.executor.getRootEventSuccess();
+    return new CrosschainCallResultImpl(
+        callGraph, this.executor.getRootEventSuccess(), this.executor.getTransationReceipts());
   }
 
   protected void callSegmentsAndRoot(

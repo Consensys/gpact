@@ -16,7 +16,7 @@ package net.consensys.gpact.examples.gpact.hoteltrain;
 
 import java.math.BigInteger;
 import net.consensys.gpact.common.*;
-import net.consensys.gpact.functioncall.gpact.CrossControlManagerGroup;
+import net.consensys.gpact.functioncall.CrossControlManagerGroup;
 import net.consensys.gpact.helpers.GpactExampleSystemManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -43,11 +43,11 @@ public class HotelTrain {
     GpactExampleSystemManager exampleManager = new GpactExampleSystemManager(args[0]);
     exampleManager.gpactStandardExampleConfig(3);
 
-    BlockchainInfo root = exampleManager.getRootBcInfo();
-    BlockchainInfo bc2 = exampleManager.getBc2Info();
-    BlockchainInfo bc3 = exampleManager.getBc3Info();
+    BlockchainConfig root = exampleManager.getRootBcInfo();
+    BlockchainConfig bc2 = exampleManager.getBc2Info();
+    BlockchainConfig bc3 = exampleManager.getBc3Info();
     CrossControlManagerGroup crossControlManagerGroup =
-        exampleManager.getGpactCrossControlManagerGroup();
+        exampleManager.getCrossControlManagerGroup();
 
     // Set-up classes to manage blockchains.
     EntityHotel hotel = new EntityHotel(bc2.bcId, bc2.uri, bc2.gasPriceStrategy, bc2.period);
@@ -66,17 +66,17 @@ public class HotelTrain {
         hotel.getBlockchainId(),
         hotel.getHotelContractAddress(),
         train.getBlockchainId(),
-        train.getHotelContractAddress());
+        train.getTrainContractAddress());
 
     travelAgency.createCbcManager(
         root,
-        crossControlManagerGroup.getInfrastructureAddresses(travelBcId),
+        crossControlManagerGroup.getCbcAddress(travelBcId),
         crossControlManagerGroup.getMessageVerification(travelBcId),
         bc2,
-        crossControlManagerGroup.getInfrastructureAddresses(hotelBcId),
+        crossControlManagerGroup.getCbcAddress(hotelBcId),
         crossControlManagerGroup.getMessageVerification(hotelBcId),
         bc3,
-        crossControlManagerGroup.getInfrastructureAddresses(trainBcId),
+        crossControlManagerGroup.getCbcAddress(trainBcId),
         crossControlManagerGroup.getMessageVerification(trainBcId));
 
     // Set-up application contracts.
@@ -91,9 +91,9 @@ public class HotelTrain {
     // Give tokens to the travel agency, and have it authorise the tokens to be spent
     // by the hotel and train contract.
     hotel.buyTokens(travelAgency.getTravelAgencyAccount(), 200);
-    travelAgency.grantAllowance(hotel, 200);
+    travelAgency.grantAllowance(hotel, 200, hotel.getHotelContractAddress());
     train.buyTokens(travelAgency.getTravelAgencyAccount(), 200);
-    travelAgency.grantAllowance(train, 200);
+    travelAgency.grantAllowance(train, 200, train.getTrainContractAddress());
 
     int date = 1;
 
@@ -101,7 +101,7 @@ public class HotelTrain {
         new String[] {
           travelAgency.getTravelAgencyAccount(),
           hotel.getHotelContractAddress(),
-          train.getHotelContractAddress()
+          train.getTrainContractAddress()
         };
 
     hotel.showErc20Balances(accounts);
@@ -109,7 +109,7 @@ public class HotelTrain {
     hotel.showErc20Allowance(
         travelAgency.getTravelAgencyAccount(), hotel.getHotelContractAddress());
     train.showErc20Allowance(
-        travelAgency.getTravelAgencyAccount(), train.getHotelContractAddress());
+        travelAgency.getTravelAgencyAccount(), train.getTrainContractAddress());
 
     for (int numExecutions = 0; numExecutions <= NUM_TIMES_EXECUTE; numExecutions++) {
       LOG.info("Execution: {}  *****************", numExecutions);
@@ -124,7 +124,7 @@ public class HotelTrain {
       hotel.showErc20Allowance(
           travelAgency.getTravelAgencyAccount(), hotel.getHotelContractAddress());
       train.showErc20Allowance(
-          travelAgency.getTravelAgencyAccount(), train.getHotelContractAddress());
+          travelAgency.getTravelAgencyAccount(), train.getTrainContractAddress());
 
       travelAgency.book(date, exampleManager);
       travelAgency.book(date, exampleManager);
@@ -134,7 +134,7 @@ public class HotelTrain {
       hotel.showErc20Allowance(
           travelAgency.getTravelAgencyAccount(), hotel.getHotelContractAddress());
       train.showErc20Allowance(
-          travelAgency.getTravelAgencyAccount(), train.getHotelContractAddress());
+          travelAgency.getTravelAgencyAccount(), train.getTrainContractAddress());
       try {
         travelAgency.book(date, exampleManager);
         throw new Exception("Exception now thrown as expected");
@@ -147,7 +147,7 @@ public class HotelTrain {
       hotel.showErc20Allowance(
           travelAgency.getTravelAgencyAccount(), hotel.getHotelContractAddress());
       train.showErc20Allowance(
-          travelAgency.getTravelAgencyAccount(), train.getHotelContractAddress());
+          travelAgency.getTravelAgencyAccount(), train.getTrainContractAddress());
 
       date++;
     }

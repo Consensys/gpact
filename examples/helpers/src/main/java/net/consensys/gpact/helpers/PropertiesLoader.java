@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Properties;
-import net.consensys.gpact.common.BlockchainInfo;
+import net.consensys.gpact.common.BlockchainConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -58,7 +58,7 @@ public class PropertiesLoader {
   //    return Credentials.create(this.properties.getProperty(keyName));
   //  }
 
-  public BlockchainInfo getBlockchainInfo(String tag) {
+  public BlockchainConfig getBlockchainInfo(String tag) {
     String bcIdStr = getProperty(tag + "_BC_ID");
     LOG.info(" {}_BC_ID: 0x{}", tag, bcIdStr);
     String uriStr = getProperty(tag + "_URI");
@@ -67,7 +67,7 @@ public class PropertiesLoader {
     LOG.info(" {}_GAS: {}", tag, gasPriceStrategyStr);
     String blockPeriodStr = getProperty(tag + "_PERIOD");
     LOG.info(" {}_PERIOD: {}", tag, blockPeriodStr);
-    return new BlockchainInfo(bcIdStr, uriStr, gasPriceStrategyStr, blockPeriodStr);
+    return new BlockchainConfig(bcIdStr, uriStr, gasPriceStrategyStr, blockPeriodStr);
   }
 
   public CrossBlockchainConsensusType getConsensusMethodology() {

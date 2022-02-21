@@ -15,8 +15,8 @@
 package net.consensys.gpact.messaging.txrootrelay;
 
 import java.util.*;
+import net.consensys.gpact.common.BlockchainConfig;
 import net.consensys.gpact.common.BlockchainId;
-import net.consensys.gpact.common.BlockchainInfo;
 import net.consensys.gpact.messaging.MessagingVerificationInterface;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,7 +29,8 @@ public class TxRootTransferGroup {
   Map<BlockchainId, TxRootTransfer> blockchains = new HashMap<>();
 
   public void addBlockchain(
-      TxRootRelayerGroup relayerGroup, Credentials creds, BlockchainInfo bcInfo) throws Exception {
+      TxRootRelayerGroup relayerGroup, Credentials creds, BlockchainConfig bcInfo)
+      throws Exception {
     if (this.blockchains.containsKey(bcInfo.bcId)) {
       return;
       // throw new Exception("Blockchain already in TxRoot Transfer Group: " + bcInfo.bcId);

@@ -36,11 +36,11 @@ func TestSFCBridgeObserver(t *testing.T) {
 	contract := deployContract(t, simBackend, auth)
 	mockMQ := new(MockMQ)
 
-	observer, err := NewSFCBridgeObserver(fixSourceID, fixSourceAddress, contract, mockMQ, make(chan bool))
+	observer, err := NewSFCBridgeRealtimeObserver(fixSourceID, fixSourceAddress, contract, mockMQ)
 	assert.Nil(t, err)
 	go observer.Start()
 
-	mockMQ.On("Request", v1.Version, v1.MessageType, mock.AnythingOfType("*v1.Message")).Once()
+	mockMQ.On("Request", v1.Version, v1.MessageType, mock.AnythingOfType("*v1.Message")).Once().Return(nil)
 
 	_, err = contract.SfcTransactor.CrossBlockchainCall(auth, fixDestID, fixDesAddress, []byte("payload"))
 	if err != nil {

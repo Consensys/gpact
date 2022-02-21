@@ -19,10 +19,9 @@ import java.util.ArrayList;
 import net.consensys.gpact.common.*;
 import net.consensys.gpact.examples.gpact.conditional.sim.SimOtherContract;
 import net.consensys.gpact.examples.gpact.conditional.sim.SimRootContract;
-import net.consensys.gpact.functioncall.gpact.CrossControlManagerGroup;
-import net.consensys.gpact.functioncall.gpact.CrosschainExecutor;
-import net.consensys.gpact.functioncall.gpact.calltree.CallExecutionTree;
-import net.consensys.gpact.functioncall.gpact.engine.ExecutionEngine;
+import net.consensys.gpact.functioncall.CallExecutionTree;
+import net.consensys.gpact.functioncall.CrossControlManagerGroup;
+import net.consensys.gpact.functioncall.CrosschainCallResult;
 import net.consensys.gpact.helpers.CredentialsCreator;
 import net.consensys.gpact.helpers.ExecutionEngineType;
 import net.consensys.gpact.helpers.GpactExampleSystemManager;
@@ -50,10 +49,10 @@ public class Main {
           "This example will not work with a paralell execution engine as it has two segments that interact with the same contract on the same blockchain");
     }
 
-    BlockchainInfo root = exampleManager.getRootBcInfo();
-    BlockchainInfo bc2 = exampleManager.getBc2Info();
+    BlockchainConfig root = exampleManager.getRootBcInfo();
+    BlockchainConfig bc2 = exampleManager.getBc2Info();
     CrossControlManagerGroup crossControlManagerGroup =
-        exampleManager.getGpactCrossControlManagerGroup();
+        exampleManager.getCrossControlManagerGroup();
 
     // Set-up classes to manage blockchains.
     Credentials appCreds = CredentialsCreator.createCredentials();
@@ -138,13 +137,12 @@ public class Main {
     byte[] encoded = rootCall.encode();
     LOG.info(CallExecutionTree.dump(encoded));
 
-    CrosschainExecutor executor = new CrosschainExecutor(crossControlManagerGroup);
-    ExecutionEngine executionEngine = exampleManager.getExecutionEngine(executor);
+    CrosschainCallResult result =
+        crossControlManagerGroup.executeCrosschainCall(
+            exampleManager.getExecutionEngine(), rootCall, 300);
 
-    boolean success = executionEngine.execute(rootCall, 300);
-
-    LOG.info("Success: {}", success);
-    if (success) {
+    LOG.info("Success: {}", result.isSuccessful());
+    if (result.isSuccessful()) {
       LOG.info(
           " Simulated expected values: Root val1: {}, val2: {}, Other val: {}",
           simRootContract.getVal1(),

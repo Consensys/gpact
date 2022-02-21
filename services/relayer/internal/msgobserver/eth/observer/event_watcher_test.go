@@ -20,6 +20,8 @@ import (
 	"github.com/consensys/gpact/messaging/relayer/internal/logging"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind/backends"
+	"github.com/ipfs/go-datastore"
+	badgerds "github.com/ipfs/go-ds-badger"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"math/big"
@@ -31,10 +33,17 @@ type MockEventHandler struct {
 	mock.Mock
 }
 
-func (m *MockEventHandler) Handle(event interface{}) error {
-	args := m.Called(event)
-	return args.Error(0)
+func (m *MockEventHandler) Handle(event interface{}) {
+	m.Called(event)
 }
+
+var fixWatcherProgressDsOpts = WatcherProgressDsOpts{
+	FailureRetryOpts: FailureRetryOpts{
+		RetryAttempts: 3,
+		RetryDelay:    500 * time.Millisecond,
+	},
+}
+var fixEventHandleRetryOpts = DefaultRetryOptions
 
 func TestSFCCrossCallRealtimeEventWatcher(t *testing.T) {
 	simBackend, auth := simulatedBackend(t)
@@ -43,9 +52,14 @@ func TestSFCCrossCallRealtimeEventWatcher(t *testing.T) {
 	handler := new(MockEventHandler)
 	handler.On("Handle", mock.AnythingOfType("*functioncall.SfcCrossCall")).Once().Return(nil)
 
-	watcher, err := NewSFCCrossCallRealtimeEventWatcher(auth.Context, handler, handler, contract, make(chan bool))
+	opts := EventWatcherOpts{
+		Context:      auth.Context,
+		EventHandler: handler,
+	}
+	watcher, err := NewSFCCrossCallRealtimeEventWatcher(opts, handler, contract)
 	assert.Nil(t, err, "failed to create a realtime event watcher")
 	go watcher.Watch()
+	defer watcher.StopWatcher()
 
 	makeCrossContractCallTx(t, contract, auth)
 
@@ -63,9 +77,14 @@ func TestSFCCrossCallRealtimeEventWatcher_RemovedEvent(t *testing.T) {
 	removedHandler := new(MockEventHandler)
 	removedHandler.On("Handle", mock.AnythingOfType("*functioncall.SfcCrossCall")).Once().Return(nil)
 
-	watcher, err := NewSFCCrossCallRealtimeEventWatcher(auth.Context, handler, removedHandler, contract, make(chan bool))
+	opts := EventWatcherOpts{
+		Context:      auth.Context,
+		EventHandler: handler,
+	}
+	watcher, err := NewSFCCrossCallRealtimeEventWatcher(opts, removedHandler, contract)
 	assert.Nil(t, err, "failed to create a realtime event watcher")
 	go watcher.Watch()
+	defer watcher.StopWatcher()
 
 	b1 := simBackend.Blockchain().CurrentBlock().Hash()
 
@@ -85,24 +104,27 @@ func TestSFCCrossCallRealtimeEventWatcher_RemovedEvent(t *testing.T) {
 
 func TestSFCCrossCallFinalisedEventWatcher_FailsIfConfirmationTooLow(t *testing.T) {
 	handler := new(MockEventHandler)
-	_, err := NewSFCCrossCallFinalisedEventWatcher(nil, 0, handler, nil, 0,
-		nil, make(chan bool))
+	opts := EventWatcherOpts{EventHandler: handler}
+	_, err := NewSFCCrossCallFinalisedEventWatcher(opts, fixWatcherProgressDsOpts, fixEventHandleRetryOpts, 0, nil, nil)
 	assert.NotNil(t, err)
 }
 
 func TestSFCCrossCallFinalisedEventWatcher_FailsIfEventHandlerNil(t *testing.T) {
-	_, err := NewSFCCrossCallFinalisedEventWatcher(nil, 2, nil, nil, 0,
-		nil, make(chan bool))
+	opts := EventWatcherOpts{EventHandler: nil}
+	_, err := NewSFCCrossCallFinalisedEventWatcher(opts, fixWatcherProgressDsOpts, fixEventHandleRetryOpts, 2, nil, nil)
 	assert.NotNil(t, err)
 }
 
 // tests the watcher behaviour under different confirmation number settings
 func TestSFCCrossCallFinalisedEventWatcher(t *testing.T) {
-	cases := map[string]struct{ confirmations, start uint64 }{
-		"1 Confirmation":  {1, 2},
-		"2 Confirmations": {2, 1},
-		"6 Confirmations": {6, 1},
+	cases := map[string]struct{ confirmations, start, lastFinalised uint64 }{
+		"1 Confirmation":  {1, 2, 2},
+		"2 Confirmations": {2, 1, 2},
+		"6 Confirmations": {6, 1, 2},
 	}
+	ds, dsClose := newDS(t)
+	defer dsClose()
+	progOpts := createProgressOpts(ds)
 
 	for k, v := range cases {
 		logging.Info("testing scenario: %s", k)
@@ -111,8 +133,14 @@ func TestSFCCrossCallFinalisedEventWatcher(t *testing.T) {
 		simBackend, auth := simulatedBackend(t)
 		contract := deployContract(t, simBackend, auth)
 
-		watcher, e := NewSFCCrossCallFinalisedEventWatcher(auth.Context, v.confirmations, handler, contract, v.start,
-			simBackend, make(chan bool))
+		opts := EventWatcherOpts{
+			Start:        v.start,
+			Context:      auth.Context,
+			EventHandler: handler,
+		}
+
+		progOpts.dsProgKey = datastore.NewKey(k)
+		watcher, e := NewSFCCrossCallFinalisedEventWatcher(opts, progOpts, fixEventHandleRetryOpts, v.confirmations, contract, simBackend)
 		assert.Nil(t, e)
 		go watcher.Watch()
 
@@ -124,18 +152,27 @@ func TestSFCCrossCallFinalisedEventWatcher(t *testing.T) {
 		handler.On("Handle", mock.AnythingOfType("*functioncall.SfcCrossCall")).Once().Return(nil)
 		commitAndSleep(simBackend)
 		handler.AssertExpectations(t)
+		watcher.StopWatcher()
+
+		// Test that the progress of the watcher is persisted correctly
+		progress, err := watcher.GetSavedProgress()
+		assert.Nil(t, err)
+		assert.Equal(t, v.lastFinalised, progress)
 	}
 }
 
 // tests scenarios where events in multiple blocks have been finalised but not yet been processed
 func TestSFCCrossCallFinalisedEventWatcher_MultipleBlocksFinalised(t *testing.T) {
 	cases := map[string]struct {
-		confirmations, start                uint64
+		confirmations, start, lastFinalised uint64
 		ccEventsToCommit, expectedFinalised int
 	}{
-		"Multi-Block-Event-Finalisation-with-1-Confirmation":  {1, 0, 4, 4},
-		"Multi-Block-Event-Finalisation-with-2-Confirmations": {2, 0, 4, 3},
+		"Multi-Block-Event-Finalisation-with-1-Confirmation":  {1, 0, 6, 4, 4},
+		"Multi-Block-Event-Finalisation-with-2-Confirmations": {2, 0, 5, 4, 3},
 	}
+	ds, dsClose := newDS(t)
+	defer dsClose()
+	progOpts := createProgressOpts(ds)
 
 	for k, v := range cases {
 		logging.Info("testing scenario: %s", k)
@@ -149,16 +186,68 @@ func TestSFCCrossCallFinalisedEventWatcher_MultipleBlocksFinalised(t *testing.T)
 			commit(simBackend)
 			makeCrossContractCallTx(t, contract, auth)
 		}
-
-		watcher, e := NewSFCCrossCallFinalisedEventWatcher(auth.Context, v.confirmations, handler, contract, v.start,
-			simBackend, make(chan bool))
+		opts := EventWatcherOpts{
+			Start:        v.start,
+			Context:      auth.Context,
+			EventHandler: handler,
+		}
+		progOpts.dsProgKey = datastore.NewKey(k)
+		watcher, e := NewSFCCrossCallFinalisedEventWatcher(opts, progOpts, fixEventHandleRetryOpts, v.confirmations, contract, simBackend)
 		assert.Nil(t, e)
 		go watcher.Watch()
 
 		handler.On("Handle", mock.AnythingOfType("*functioncall.SfcCrossCall")).Times(v.expectedFinalised).Return(nil)
 		commitAndSleep(simBackend)
 		handler.AssertExpectations(t)
+		watcher.StopWatcher()
+
+		// Test that the progress of the watcher is persisted correctly
+		progress, err := watcher.GetSavedProgress()
+		assert.Nil(t, err)
+		assert.Equal(t, v.lastFinalised, progress)
 	}
+}
+
+func TestSFCCrossCallFinalisedEventWatcher_ProgressPersisted(t *testing.T) {
+	simBackend, auth := simulatedBackend(t)
+	contract := deployContract(t, simBackend, auth)
+	fixConfirms := uint64(2)
+	fixLastFinalised := uint64(2)
+
+	handler := new(MockEventHandler)
+
+	opts := EventWatcherOpts{
+		Start:        0,
+		Context:      auth.Context,
+		EventHandler: handler,
+	}
+
+	ds, dsClose := newDS(t)
+	defer dsClose()
+	progOpts := createProgressOpts(ds)
+
+	watcher, e := NewSFCCrossCallFinalisedEventWatcher(opts, progOpts, fixEventHandleRetryOpts, fixConfirms, contract, simBackend)
+	assert.Nil(t, e)
+
+	go watcher.Watch()
+	makeCrossContractCallTx(t, contract, auth)
+	mineConfirmingBlocks(fixConfirms-1, simBackend)
+	handler.On("Handle", mock.AnythingOfType("*functioncall.SfcCrossCall")).Once().Return(nil)
+	commitAndSleep(simBackend)
+	handler.AssertExpectations(t)
+	watcher.StopWatcher()
+
+	// Test that the progress of the watcher is persisted correctly
+	progress, err := watcher.GetSavedProgress()
+	assert.Nil(t, err)
+	assert.Equal(t, fixLastFinalised, progress)
+
+	// Test that the saved progress is used when restarting a new watcher
+	newWatcher, e := NewSFCCrossCallFinalisedEventWatcher(opts, progOpts, fixEventHandleRetryOpts, fixConfirms, contract, simBackend)
+	go newWatcher.Watch()
+	time.Sleep(1 * time.Second)
+	assert.Equal(t, progress+1, newWatcher.GetNextBlockToProcess())
+	newWatcher.StopWatcher()
 }
 
 /*
@@ -172,10 +261,20 @@ func TestSFCCrossCallFinalisedEventWatcher_Reorg(t *testing.T) {
 	simBackend, auth := simulatedBackend(t)
 	handler := new(MockEventHandler)
 	contract := deployContract(t, simBackend, auth)
+	opts := EventWatcherOpts{
+		Start:        2,
+		Context:      auth.Context,
+		EventHandler: handler,
+	}
 
-	watcher, e := NewSFCCrossCallFinalisedEventWatcher(auth.Context, 2, handler, contract, 1, simBackend, make(chan bool))
+	ds, dsClose := newDS(t)
+	defer dsClose()
+	progOpts := createProgressOpts(ds)
+
+	watcher, e := NewSFCCrossCallFinalisedEventWatcher(opts, progOpts, fixEventHandleRetryOpts, 2, contract, simBackend)
 	assert.Nil(t, e)
 	go watcher.Watch()
+	defer watcher.StopWatcher()
 
 	b1 := simBackend.Blockchain().CurrentBlock().Hash()
 	makeCrossContractCallTx(t, contract, auth)
@@ -210,4 +309,11 @@ func commit(backend *backends.SimulatedBackend) {
 func commitAndSleep(backend *backends.SimulatedBackend) {
 	commit(backend)
 	time.Sleep(2 * time.Second)
+}
+
+func createProgressOpts(ds *badgerds.Datastore) WatcherProgressDsOpts {
+	progOpts := fixWatcherProgressDsOpts
+	progOpts.ds = ds
+	progOpts.dsProgKey = datastore.NewKey("reorg_test")
+	return progOpts
 }

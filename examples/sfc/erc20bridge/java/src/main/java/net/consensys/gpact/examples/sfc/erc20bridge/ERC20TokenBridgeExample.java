@@ -16,7 +16,7 @@ package net.consensys.gpact.examples.sfc.erc20bridge;
 
 import java.math.BigInteger;
 import net.consensys.gpact.common.*;
-import net.consensys.gpact.functioncall.sfc.SimpleCrossControlManagerGroup;
+import net.consensys.gpact.functioncall.CrossControlManagerGroup;
 import net.consensys.gpact.helpers.CredentialsCreator;
 import net.consensys.gpact.helpers.SfcExampleSystemManager;
 import org.apache.logging.log4j.LogManager;
@@ -27,8 +27,8 @@ import org.web3j.crypto.Credentials;
  * Sample code showing how to use the Simple Function Call protocol ERC 20 Mass Conservation and
  * Minter Burner bridges.
  */
-public class TokenBridge {
-  static final Logger LOG = LogManager.getLogger(TokenBridge.class);
+public class ERC20TokenBridgeExample {
+  static final Logger LOG = LogManager.getLogger(ERC20TokenBridgeExample.class);
 
   public static final boolean BLOCKCHAIN_B_MASS_CONSERVATION = false;
 
@@ -51,10 +51,10 @@ public class TokenBridge {
     SfcExampleSystemManager exampleManager = new SfcExampleSystemManager(args[0]);
     exampleManager.sfcStandardExampleConfig(2);
 
-    BlockchainInfo root = exampleManager.getRootBcInfo();
-    BlockchainInfo bc2 = exampleManager.getBc2Info();
-    SimpleCrossControlManagerGroup crossControlManagerGroup =
-        exampleManager.getSfcCrossControlManagerGroup();
+    BlockchainConfig root = exampleManager.getRootBcInfo();
+    BlockchainConfig bc2 = exampleManager.getBc2Info();
+    CrossControlManagerGroup crossControlManagerGroup =
+        exampleManager.getCrossControlManagerGroup();
 
     final int CHAIN_A_TOKEN_SUPPLY = 1000;
     final int CHAIN_B_TOKEN_SUPPLY = 1000;
@@ -138,24 +138,24 @@ public class TokenBridge {
 
     user1.createCbcManager(
         root,
-        crossControlManagerGroup.getInfrastructureAddresses(chainABcId),
+        crossControlManagerGroup.getCbcAddress(chainABcId),
         crossControlManagerGroup.getMessageVerification(chainABcId),
         bc2,
-        crossControlManagerGroup.getInfrastructureAddresses(chainBBcId),
+        crossControlManagerGroup.getCbcAddress(chainBBcId),
         crossControlManagerGroup.getMessageVerification(chainBBcId));
     user2.createCbcManager(
         root,
-        crossControlManagerGroup.getInfrastructureAddresses(chainABcId),
+        crossControlManagerGroup.getCbcAddress(chainABcId),
         crossControlManagerGroup.getMessageVerification(chainABcId),
         bc2,
-        crossControlManagerGroup.getInfrastructureAddresses(chainBBcId),
+        crossControlManagerGroup.getCbcAddress(chainBBcId),
         crossControlManagerGroup.getMessageVerification(chainBBcId));
     user3.createCbcManager(
         root,
-        crossControlManagerGroup.getInfrastructureAddresses(chainABcId),
+        crossControlManagerGroup.getCbcAddress(chainABcId),
         crossControlManagerGroup.getMessageVerification(chainABcId),
         bc2,
-        crossControlManagerGroup.getInfrastructureAddresses(chainBBcId),
+        crossControlManagerGroup.getCbcAddress(chainBBcId),
         crossControlManagerGroup.getMessageVerification(chainBBcId));
 
     // Give some balance to the users
