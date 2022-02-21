@@ -19,7 +19,7 @@ import (
 	"encoding/base64"
 	"encoding/binary"
 	"fmt"
-	"github.com/consensys/gpact/messaging/relayer/internal/crypto"
+	"github.com/consensys/gpact/services/relayer/internal/crypto"
 )
 
 func randomBytes(n int) []byte {

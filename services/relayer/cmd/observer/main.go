@@ -19,13 +19,13 @@ import (
 	"os"
 	"os/signal"
 
-	"github.com/consensys/gpact/messaging/relayer/internal/config"
-	"github.com/consensys/gpact/messaging/relayer/internal/logging"
-	"github.com/consensys/gpact/messaging/relayer/internal/mqserver"
-	"github.com/consensys/gpact/messaging/relayer/internal/msgobserver/eth/api"
-	"github.com/consensys/gpact/messaging/relayer/internal/msgobserver/eth/node"
-	"github.com/consensys/gpact/messaging/relayer/internal/msgobserver/eth/observer"
-	"github.com/consensys/gpact/messaging/relayer/internal/rpc"
+	"github.com/consensys/gpact/services/relayer/internal/config"
+	"github.com/consensys/gpact/services/relayer/internal/logging"
+	"github.com/consensys/gpact/services/relayer/internal/mqserver"
+	"github.com/consensys/gpact/services/relayer/internal/msgobserver/eth/api"
+	"github.com/consensys/gpact/services/relayer/internal/msgobserver/eth/node"
+	"github.com/consensys/gpact/services/relayer/internal/msgobserver/eth/observer"
+	"github.com/consensys/gpact/services/relayer/internal/rpc"
 	_ "github.com/joho/godotenv/autoload"
 )
 

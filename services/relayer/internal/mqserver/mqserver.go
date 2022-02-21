@@ -16,8 +16,8 @@ package mqserver
  */
 
 import (
-	"github.com/consensys/gpact/messaging/relayer/internal/logging"
-	"github.com/consensys/gpact/messaging/relayer/internal/messages"
+	"github.com/consensys/gpact/services/relayer/internal/logging"
+	"github.com/consensys/gpact/services/relayer/internal/messages"
 	"github.com/streadway/amqp"
 )
 

@@ -18,10 +18,10 @@ package node
 import (
 	"sync"
 
-	"github.com/consensys/gpact/messaging/relayer/internal/mqserver"
-	"github.com/consensys/gpact/messaging/relayer/internal/rpc"
+	"github.com/consensys/gpact/services/relayer/internal/mqserver"
+	"github.com/consensys/gpact/services/relayer/internal/rpc"
 
-	"github.com/consensys/gpact/messaging/relayer/internal/msgrelayer/eth/signer"
+	"github.com/consensys/gpact/services/relayer/internal/msgrelayer/eth/signer"
 )
 
 // Node represents the node core.

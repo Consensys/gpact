@@ -22,9 +22,9 @@ import (
 	"os"
 	"strconv"
 
-	dispatcherapi "github.com/consensys/gpact/messaging/relayer/internal/msgdispatcher/eth/api"
-	observerapi "github.com/consensys/gpact/messaging/relayer/internal/msgobserver/eth/api"
-	relayerapi "github.com/consensys/gpact/messaging/relayer/internal/msgrelayer/eth/api"
+	dispatcherapi "github.com/consensys/gpact/services/relayer/internal/msgdispatcher/eth/api"
+	observerapi "github.com/consensys/gpact/services/relayer/internal/msgobserver/eth/api"
+	relayerapi "github.com/consensys/gpact/services/relayer/internal/msgrelayer/eth/api"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/urfave/cli/v2"
 )

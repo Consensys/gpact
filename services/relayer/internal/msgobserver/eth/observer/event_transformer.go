@@ -20,10 +20,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/consensys/gpact/messaging/relayer/pkg/messages/v1"
+	"github.com/consensys/gpact/services/relayer/pkg/messages/v1"
 	"github.com/ethereum/go-ethereum/core/types"
 
-	"github.com/consensys/gpact/messaging/relayer/internal/contracts/functioncall"
+	"github.com/consensys/gpact/services/relayer/internal/contracts/functioncall"
 )
 
 type EventTransformer interface {

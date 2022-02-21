@@ -23,7 +23,7 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/consensys/gpact/messaging/relayer/internal/contracts/functioncall"
+	"github.com/consensys/gpact/services/relayer/internal/contracts/functioncall"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/assert"
 )
