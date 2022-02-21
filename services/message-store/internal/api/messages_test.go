@@ -90,8 +90,39 @@ func TestMessageStoreApi_GetMessageHandler(t *testing.T) {
 	assert.Equal(t, string(msg1Bytes), msgSaved)
 }
 
+func TestMessageStoreApi_GetMessageProofsHandler(t *testing.T) {
+	ds, dsClose := newDS(t)
+	defer dsClose()
+	router := setupTestRouter(ds)
+
+	msg1Bytes, err := json.Marshal(fixMsg1)
+	endpoint := fmt.Sprintf("/messages/%s", fixMsg1.ID)
+
+	// add message
+	respRec := httptest.NewRecorder()
+	req, err := http.NewRequest("PUT", endpoint, bytes.NewBuffer(msg1Bytes))
+	router.ServeHTTP(respRec, req)
+	assert.Nil(t, err)
+	assert.Equal(t, 201, respRec.Code)
+
+	// get message with id
+	fixProofs, err := json.Marshal(fixMsg1.Proofs)
+	assert.Nil(t, err)
+	reqProofs := requestGETMessageProofs(t, router, fixMsg1.ID)
+	assert.Equal(t, string(fixProofs), reqProofs)
+}
+
 func requestGETMessage(t *testing.T, router *gin.Engine, id string) string {
 	endpoint := fmt.Sprintf("/messages/%s", id)
+	return requestGETMessageDetails(t, router, endpoint, id)
+}
+
+func requestGETMessageProofs(t *testing.T, router *gin.Engine, id string) string {
+	endpoint := fmt.Sprintf("/messages/%s/proofs", id)
+	return requestGETMessageDetails(t, router, endpoint, id)
+}
+
+func requestGETMessageDetails(t *testing.T, router *gin.Engine, endpoint string, id string) string {
 	respRec2 := httptest.NewRecorder()
 	reqFail1, err := http.NewRequest("GET", endpoint, nil)
 	router.ServeHTTP(respRec2, reqFail1)
