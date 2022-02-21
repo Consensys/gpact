@@ -17,10 +17,9 @@ package observer
 
 import (
 	"fmt"
+	"github.com/consensys/gpact/messaging/relayer/pkg/messages/v1"
 	"testing"
 	"time"
-
-	v1 "github.com/consensys/gpact/messaging/relayer/internal/messages/v1"
 )
 
 func TestMessageEnqueueHandler(t *testing.T) {

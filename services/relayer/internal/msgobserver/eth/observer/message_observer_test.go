@@ -16,11 +16,11 @@ package observer
  */
 
 import (
+	"github.com/consensys/gpact/messaging/relayer/pkg/messages/v1"
 	"math/big"
 	"testing"
 	"time"
 
-	v1 "github.com/consensys/gpact/messaging/relayer/internal/messages/v1"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
