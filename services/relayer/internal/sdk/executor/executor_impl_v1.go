@@ -130,7 +130,7 @@ func (exec *ExecutorImplV1) start(root *treenode.TreeNode, transID *big.Int) (*f
 	// Try 5 times, 5 seconds apart
 	var tx *types.Transaction
 	for i := 0; i < 5; i++ {
-		tx, err := igpact.Start(exec.transactOpts, transID, big.NewInt(10000), root.Encode())
+		tx, err = igpact.Start(exec.transactOpts, transID, big.NewInt(10000), root.Encode())
 		if err == nil {
 			logging.Info("Start transaction submitted with hash: %v", tx.Hash().String())
 			break
@@ -220,7 +220,7 @@ func (exec *ExecutorImplV1) segment(transID *big.Int, startChainID *big.Int, sta
 	// Try 5 times, 5 seconds apart
 	var tx *types.Transaction
 	for i := 0; i < 5; i++ {
-		tx, err := igpact.Segment(exec.transactOpts, chainIDs, cbcAddrs, eventFuncSigs, eventDatas, eventSigs, callPath)
+		tx, err = igpact.Segment(exec.transactOpts, chainIDs, cbcAddrs, eventFuncSigs, eventDatas, eventSigs, callPath)
 		if err == nil {
 			logging.Info("Segment transaction submitted with hash: %v", tx.Hash().String())
 			break
@@ -306,7 +306,7 @@ func (exec *ExecutorImplV1) root(transID *big.Int, startChainID *big.Int, startE
 	// Try 5 times, 5 seconds apart
 	var tx *types.Transaction
 	for i := 0; i < 5; i++ {
-		tx, err := igpact.Root(exec.transactOpts, chainIDs, cbcAddrs, eventFuncSigs, eventDatas, eventSigs)
+		tx, err = igpact.Root(exec.transactOpts, chainIDs, cbcAddrs, eventFuncSigs, eventDatas, eventSigs)
 		if err == nil {
 			logging.Info("Root transaction submitted with hash: %v", tx.Hash().String())
 			break
