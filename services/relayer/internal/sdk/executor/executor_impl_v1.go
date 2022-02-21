@@ -33,6 +33,9 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
+// timeout for getting a signed event.
+const eventTimeout = 30 * time.Second
+
 // Function sigs.
 var startFuncSig = [32]byte{0x77, 0xda, 0xb6, 0x11, 0xad, 0x9a, 0x24, 0xb7, 0x63, 0xe2, 0x74, 0x2f, 0x57, 0x74, 0x9a, 0x02, 0x27, 0x39, 0x3e, 0x0d, 0xa7, 0x62, 0x12, 0xd7, 0x4f, 0xce, 0xb3, 0x26, 0xb0, 0x66, 0x14, 0x24}
 var segmentFuncSig = [32]byte{0xb0, 0x15, 0x57, 0xf1, 0xf6, 0x34, 0xb7, 0xc5, 0x07, 0x2a, 0xb5, 0xe3, 0x6d, 0x07, 0xa2, 0x35, 0x5e, 0xf8, 0x19, 0xfa, 0xca, 0x5a, 0x3d, 0x32, 0x14, 0x30, 0xd7, 0x19, 0x87, 0x15, 0x5b, 0x8f}
@@ -141,7 +144,7 @@ func (exec *ExecutorImplV1) start(root *treenode.TreeNode, transID *big.Int) (*f
 			return nil, nil, err
 		}
 	}
-	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(30*time.Second))
+	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(eventTimeout))
 	defer cancel()
 	opts := bind.WatchOpts{Start: nil, Context: ctx}
 	chanEvents := make(chan *functioncall.GpactStart)
@@ -231,7 +234,7 @@ func (exec *ExecutorImplV1) segment(transID *big.Int, startChainID *big.Int, sta
 			return nil, nil, err
 		}
 	}
-	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(30*time.Second))
+	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(eventTimeout))
 	defer cancel()
 	opts := bind.WatchOpts{Start: nil, Context: ctx}
 	chanEvents := make(chan *functioncall.GpactSegment)
@@ -317,7 +320,7 @@ func (exec *ExecutorImplV1) root(transID *big.Int, startChainID *big.Int, startE
 			return nil, nil, err
 		}
 	}
-	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(30*time.Second))
+	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(eventTimeout))
 	defer cancel()
 	opts := bind.WatchOpts{Start: nil, Context: ctx}
 	chanEvents := make(chan *functioncall.GpactRoot)
