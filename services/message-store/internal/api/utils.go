@@ -6,11 +6,11 @@ import (
 	"net/http"
 )
 
-func messageNotFound(c *gin.Context, id string) {
+func statusMessageNotFound(c *gin.Context, id string) {
 	setErrorResponse(c, http.StatusNotFound, fmt.Sprintf("message with id '%s' not found", id))
 }
 
-func serverError(c *gin.Context, err interface{}) {
+func statusServerError(c *gin.Context, err interface{}) {
 	setErrorResponse(c, http.StatusInternalServerError, err)
 }
 
@@ -22,14 +22,14 @@ func statusCreated(c *gin.Context, msg string) {
 	setResponse(c, http.StatusCreated, msg)
 }
 
+func statusBadRequest(c *gin.Context, msg string) {
+	c.JSON(http.StatusBadRequest, gin.H{"error": msg})
+}
+
 func setResponse(c *gin.Context, status int, msg string) {
 	c.JSON(status, gin.H{"message": msg})
 }
 
 func setErrorResponse(c *gin.Context, status int, err interface{}) {
 	c.JSON(status, gin.H{"error": err})
-}
-
-func badRequest(c *gin.Context, msg string) {
-	c.JSON(http.StatusBadRequest, gin.H{"error": msg})
 }

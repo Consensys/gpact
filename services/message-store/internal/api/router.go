@@ -10,7 +10,7 @@ func SetupRouter(r *gin.Engine, m *MessageStoreApi) {
 
 	r.Use(gin.CustomRecovery(func(c *gin.Context, recovered interface{}) {
 		if err, ok := recovered.(string); ok {
-			serverError(c, err)
+			statusServerError(c, err)
 		}
 		c.AbortWithStatus(http.StatusInternalServerError)
 	}))

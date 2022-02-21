@@ -33,34 +33,34 @@ func (mApi *MessageStoreApi) UpsertMessageHandler(c *gin.Context) {
 	}
 
 	if !isValidId(message.ID) {
-		badRequest(c, fmt.Sprintf("message id '%s' is not valid", message.ID))
+		statusBadRequest(c, fmt.Sprintf("message id '%s' is not valid", message.ID))
 		return
 	}
 
 	paramId := c.Param("id")
 	if len(paramId) > 0 && paramId != message.ID {
-		badRequest(c, fmt.Sprintf("message id provided in the path parameter, '%s', "+
+		statusBadRequest(c, fmt.Sprintf("message id provided in the path parameter, '%s', "+
 			"does not match id in the message body, '%s'", paramId, message.ID))
 		return
 	}
 
 	tx, err := mApi.DataStore.NewTransaction(c, false)
 	if err != nil {
-		serverError(c, err)
+		statusServerError(c, err)
 		tx.Discard(c)
 		return
 	}
 
 	created, err := mApi.upsertMessage(c, tx, message)
 	if err != nil {
-		serverError(c, err)
+		statusServerError(c, err)
 		tx.Discard(c)
 		return
 	}
 
 	err = tx.Commit(c)
 	if err != nil {
-		serverError(c, err)
+		statusServerError(c, err)
 		return
 	}
 
@@ -81,7 +81,7 @@ func (mApi *MessageStoreApi) UpsertMessageHandler(c *gin.Context) {
 func (mApi *MessageStoreApi) GetMessageHandler(c *gin.Context) {
 	id := c.Param("id")
 	if !isValidId(id) {
-		badRequest(c, fmt.Sprintf("message id '%s' is not valid", id))
+		statusBadRequest(c, fmt.Sprintf("message id '%s' is not valid", id))
 		return
 	}
 	mApi.getMessageDetails(c, id, nil)
@@ -97,7 +97,7 @@ func (mApi *MessageStoreApi) GetMessageHandler(c *gin.Context) {
 func (mApi *MessageStoreApi) GetMessageProofsHandler(c *gin.Context) {
 	id := c.Param("id")
 	if !isValidId(id) {
-		badRequest(c, fmt.Sprintf("message id '%s' is not valid", id))
+		statusBadRequest(c, fmt.Sprintf("message id '%s' is not valid", id))
 		return
 	}
 	mApi.getMessageDetails(c, id, func(message *v1.Message) interface{} { return message.Proofs })
@@ -107,10 +107,10 @@ func (mApi *MessageStoreApi) getMessageDetails(c *gin.Context, id string,
 	attribExtractor func(message *v1.Message) interface{}) {
 	message, err := mApi.queryMessageById(c, datastore.NewKey(id), mApi.DataStore.Get)
 	if err == datastore.ErrNotFound {
-		messageNotFound(c, id)
+		statusMessageNotFound(c, id)
 		return
 	} else if err != nil {
-		serverError(c, err)
+		statusServerError(c, err)
 		return
 	}
 
