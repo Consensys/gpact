@@ -38,7 +38,7 @@ func TestMessageStoreApi_UpsertMessageHandler(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, 200, respRec2.Code)
 
-	savedMsgStr := getMessage(t, router, fixMsg1.ID)
+	savedMsgStr := requestGETMessage(t, router, fixMsg1.ID)
 	var savedMsg v1.Message
 	err = json.Unmarshal([]byte(savedMsgStr), &savedMsg)
 	assert.Nil(t, err)
@@ -70,15 +70,6 @@ func TestMessageStoreApi_UpsertMessageHandler_WithIDParam(t *testing.T) {
 	assert.Equal(t, 400, respRecFail1.Code)
 }
 
-func getMessage(t *testing.T, router *gin.Engine, id string) string {
-	endpoint := fmt.Sprintf("/messages/%s", id)
-	respRec2 := httptest.NewRecorder()
-	reqFail1, err := http.NewRequest("GET", endpoint, nil)
-	router.ServeHTTP(respRec2, reqFail1)
-	assert.Nil(t, err)
-	assert.Equal(t, 200, respRec2.Code)
-	return respRec2.Body.String()
-}
 func TestMessageStoreApi_GetMessageHandler(t *testing.T) {
 	ds, dsClose := newDS(t)
 	defer dsClose()
@@ -95,12 +86,18 @@ func TestMessageStoreApi_GetMessageHandler(t *testing.T) {
 	assert.Equal(t, 201, respRec.Code)
 
 	// get message with id
+	msgSaved := requestGETMessage(t, router, fixMsg1.ID)
+	assert.Equal(t, string(msg1Bytes), msgSaved)
+}
+
+func requestGETMessage(t *testing.T, router *gin.Engine, id string) string {
+	endpoint := fmt.Sprintf("/messages/%s", id)
 	respRec2 := httptest.NewRecorder()
 	reqFail1, err := http.NewRequest("GET", endpoint, nil)
 	router.ServeHTTP(respRec2, reqFail1)
 	assert.Nil(t, err)
 	assert.Equal(t, 200, respRec2.Code)
-	assert.Equal(t, string(msg1Bytes), respRec2.Body.String())
+	return respRec2.Body.String()
 }
 
 func newDS(t *testing.T) (*badger.Datastore, func()) {
