@@ -18,8 +18,8 @@ package observer
 import (
 	"github.com/avast/retry-go"
 	"github.com/consensys/gpact/messaging/relayer/internal/logging"
-	v1 "github.com/consensys/gpact/messaging/relayer/internal/messages/v1"
 	"github.com/consensys/gpact/messaging/relayer/internal/mqserver"
+	"github.com/consensys/gpact/messaging/relayer/pkg/messages/v1"
 )
 
 // MessageHandler processes relayer messages
