@@ -58,7 +58,7 @@ services:
       - bc32node1
 
   observer1:
-    image: consensys/gpact/messaging/relayer
+    image: consensys/gpact/services/relayer
     container_name: observer1
     networks:
       - shared
@@ -72,7 +72,7 @@ services:
     restart: on-failure
 
   observer2:
-    image: consensys/gpact/messaging/relayer
+    image: consensys/gpact/services/relayer
     container_name: observer2
     networks:
       - shared
@@ -86,7 +86,7 @@ services:
     restart: on-failure
   
   relayer:
-    image: consensys/gpact/messaging/relayer
+    image: consensys/gpact/services/relayer
     container_name: relayer
     networks:
       - shared
@@ -100,7 +100,7 @@ services:
     restart: on-failure
 
   dispatcher:
-    image: consensys/gpact/messaging/relayer
+    image: consensys/gpact/services/relayer
     container_name: dispatcher
     networks:
       - shared

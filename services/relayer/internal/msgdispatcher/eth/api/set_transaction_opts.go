@@ -20,9 +20,9 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/consensys/gpact/messaging/relayer/internal/rpc"
+	"github.com/consensys/gpact/services/relayer/internal/rpc"
 
-	"github.com/consensys/gpact/messaging/relayer/internal/msgdispatcher/eth/node"
+	"github.com/consensys/gpact/services/relayer/internal/msgdispatcher/eth/node"
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 

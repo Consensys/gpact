@@ -18,7 +18,7 @@ package v1
 import (
 	"testing"
 
-	"github.com/consensys/gpact/messaging/relayer/internal/messages"
+	"github.com/consensys/gpact/services/relayer/internal/messages"
 	"github.com/stretchr/testify/assert"
 )
 

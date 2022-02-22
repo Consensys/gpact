@@ -20,8 +20,8 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/consensys/gpact/messaging/relayer/internal/contracts/messaging"
-	"github.com/consensys/gpact/messaging/relayer/internal/logging"
+	"github.com/consensys/gpact/services/relayer/internal/contracts/messaging"
+	"github.com/consensys/gpact/services/relayer/internal/logging"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"

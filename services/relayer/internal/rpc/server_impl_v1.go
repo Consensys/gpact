@@ -22,7 +22,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/consensys/gpact/messaging/relayer/internal/logging"
+	"github.com/consensys/gpact/services/relayer/internal/logging"
 )
 
 // ServerImplV1 implements the Server interface.

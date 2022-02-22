@@ -16,7 +16,7 @@ package config
  */
 
 import (
-	"github.com/consensys/gpact/messaging/relayer/internal/logging"
+	"github.com/consensys/gpact/services/relayer/internal/logging"
 	"github.com/spf13/viper"
 )
 
