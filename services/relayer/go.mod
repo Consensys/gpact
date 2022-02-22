@@ -3,18 +3,19 @@ module github.com/consensys/gpact/services/relayer
 go 1.17
 
 require (
+	github.com/ConsenSys/gpact/sdk/go v0.0.0-20220222052327-2550908c71c7
 	github.com/avast/retry-go v3.0.0+incompatible
 	github.com/davidlazar/go-crypto v0.0.0-20200604182044-b73af7476f6c
-	github.com/ethereum/go-ethereum v1.10.13
+	github.com/ethereum/go-ethereum v1.10.16
 	github.com/ipfs/go-datastore v0.5.1
 	github.com/ipfs/go-ds-badger v0.3.0
 	github.com/joho/godotenv v1.4.0
-	github.com/rs/zerolog v1.26.0
+	github.com/rs/zerolog v1.26.1
 	github.com/spf13/viper v1.3.2
 	github.com/streadway/amqp v0.0.0-20190827072141-edfb9018d271
 	github.com/stretchr/testify v1.7.0
 	github.com/urfave/cli/v2 v2.3.0
-	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5
+	golang.org/x/crypto v0.0.0-20211215165025-cf75a172585e
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0
 )
 
@@ -27,7 +28,7 @@ require (
 	github.com/cespare/xxhash/v2 v2.1.1 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.0-20190314233015-f79a8a8ca69d // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/deckarep/golang-set v0.0.0-20180603214616-504e848d77ea // indirect
+	github.com/deckarep/golang-set v1.8.0 // indirect
 	github.com/dgraph-io/badger v1.6.2 // indirect
 	github.com/dgraph-io/ristretto v0.0.2 // indirect
 	github.com/dustin/go-humanize v1.0.0 // indirect
