@@ -1,4 +1,4 @@
-module github.com/consensys/gpact/sdk/go
+module github.com/ConsenSys/gpact/sdk/go
 
 go 1.17
 
