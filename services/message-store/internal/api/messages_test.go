@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	v1 "github.com/consensys/gpact/messaging/message-store/internal/messages/v1"
+	v1 "github.com/consensys/gpact/services/relayer/pkg/messages/v1"
 	"github.com/gin-gonic/gin"
 	badger "github.com/ipfs/go-ds-badger2"
 	"github.com/stretchr/testify/assert"

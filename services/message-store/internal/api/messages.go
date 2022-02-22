@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	v1 "github.com/consensys/gpact/messaging/message-store/internal/messages/v1"
+	v1 "github.com/consensys/gpact/services/relayer/pkg/messages/v1"
 	"github.com/gin-gonic/gin"
 	"github.com/ipfs/go-datastore"
 	"github.com/ipfs/go-ds-badger2"
