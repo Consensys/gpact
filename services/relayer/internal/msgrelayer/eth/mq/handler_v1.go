@@ -1,7 +1,7 @@
 package mq
 
 /*
- * Copyright 2021 ConsenSys Software Inc
+ * Copyright 2022 ConsenSys Software Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -18,10 +18,11 @@ package mq
 import (
 	"encoding/hex"
 	"encoding/json"
-	"github.com/consensys/gpact/services/relayer/pkg/messages/v1"
 	"math/big"
 	"strconv"
 	"time"
+
+	v1 "github.com/consensys/gpact/services/relayer/pkg/messages/v1"
 
 	"github.com/consensys/gpact/services/relayer/internal/logging"
 	"github.com/consensys/gpact/services/relayer/internal/messages"

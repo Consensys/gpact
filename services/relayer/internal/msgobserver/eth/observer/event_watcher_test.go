@@ -1,7 +1,7 @@
 package observer
 
 /*
- * Copyright 2021 ConsenSys Software Inc.
+ * Copyright 2022 ConsenSys Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -16,6 +16,10 @@ package observer
  */
 
 import (
+	"math/big"
+	"testing"
+	"time"
+
 	"github.com/consensys/gpact/services/relayer/internal/contracts/functioncall"
 	"github.com/consensys/gpact/services/relayer/internal/logging"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -24,9 +28,6 @@ import (
 	badgerds "github.com/ipfs/go-ds-badger"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"math/big"
-	"testing"
-	"time"
 )
 
 type MockEventHandler struct {
