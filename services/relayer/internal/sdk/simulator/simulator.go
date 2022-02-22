@@ -18,8 +18,8 @@ package simulator
 import (
 	"math/big"
 
-	"github.com/consensys/gpact/service/relayer/internal/sdk/chainap"
-	"github.com/consensys/gpact/service/relayer/internal/sdk/treenode"
+	"github.com/consensys/gpact/services/relayer/internal/sdk/chainap"
+	"github.com/consensys/gpact/services/relayer/internal/sdk/treenode"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 )
