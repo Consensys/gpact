@@ -19,4 +19,5 @@ func SetupRouter(r *gin.Engine, m *MessageStoreApi) {
 	r.GET("/messages/:id/proofs", m.GetMessageProofsHandler)
 	r.PUT("/messages", m.UpsertMessageHandler)
 	r.PUT("/messages/:id", m.UpsertMessageHandler)
+	r.PUT("/messages/:id/proofs", m.RecordProofsHandler)
 }

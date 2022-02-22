@@ -23,6 +23,7 @@ func TestMessageStoreApi_UpsertMessageHandler(t *testing.T) {
 
 	// adding a new message
 	msg1Bytes, err := json.Marshal(fixMsg1)
+	assert.Nil(t, err)
 	respRec := httptest.NewRecorder()
 	req, err := http.NewRequest("PUT", "/messages", bytes.NewBuffer(msg1Bytes))
 	router.ServeHTTP(respRec, req)
@@ -44,6 +45,8 @@ func TestMessageStoreApi_UpsertMessageHandler(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Len(t, savedMsg.Proofs, len(fixProofSet2)+len(fixProofSet1), "proof set not updated correctly")
 	assert.ElementsMatch(t, savedMsg.Proofs, append(fixProofSet1, fixProofSet2...), "proof set not updated correctly")
+
+	// TODO: test more scenarios
 }
 
 func TestMessageStoreApi_UpsertMessageHandler_WithIDParam(t *testing.T) {
@@ -52,6 +55,7 @@ func TestMessageStoreApi_UpsertMessageHandler_WithIDParam(t *testing.T) {
 	router := setupTestRouter(ds)
 
 	msg1Bytes, err := json.Marshal(fixMsg1)
+	assert.Nil(t, err)
 
 	// add new message with ID in path parameter
 	respRec := httptest.NewRecorder()
@@ -68,6 +72,42 @@ func TestMessageStoreApi_UpsertMessageHandler_WithIDParam(t *testing.T) {
 	router.ServeHTTP(respRecFail1, reqFail1)
 	assert.Nil(t, err)
 	assert.Equal(t, 400, respRecFail1.Code)
+}
+
+func TestMessageStoreApi_RecordProofsHandler(t *testing.T) {
+	ds, dsClose := newDS(t)
+	defer dsClose()
+	router := setupTestRouter(ds)
+
+	msg1Bytes, err := json.Marshal(fixMsg1)
+	assert.Nil(t, err)
+
+	// add new message with ID in path parameter
+	respRec := httptest.NewRecorder()
+	endpoint := fmt.Sprintf("/messages/%s", fixMsg1.ID)
+	req, err := http.NewRequest("PUT", endpoint, bytes.NewBuffer(msg1Bytes))
+	router.ServeHTTP(respRec, req)
+	assert.Nil(t, err)
+	assert.Equal(t, 201, respRec.Code)
+
+	// record new proofs for message
+	proofBytes, err := json.Marshal(fixProofSet2)
+	assert.Nil(t, err)
+	respRec2 := httptest.NewRecorder()
+	endpoint2 := fmt.Sprintf("/messages/%s/proofs", fixMsg1.ID)
+	req2, err := http.NewRequest("PUT", endpoint2, bytes.NewBuffer(proofBytes))
+	router.ServeHTTP(respRec2, req2)
+	assert.Nil(t, err)
+	assert.Equal(t, 201, respRec.Code)
+
+	savedMsgStr := requestGETMessage(t, router, fixMsg1.ID)
+	var savedMsg v1.Message
+	err = json.Unmarshal([]byte(savedMsgStr), &savedMsg)
+	assert.Nil(t, err)
+	assert.Len(t, savedMsg.Proofs, len(fixProofSet2)+len(fixProofSet1), "proof set not updated correctly")
+	assert.ElementsMatch(t, savedMsg.Proofs, append(fixProofSet1, fixProofSet2...), "proof set not updated correctly")
+
+	// TODO: test more scenarios
 }
 
 func TestMessageStoreApi_GetMessageHandler(t *testing.T) {
@@ -88,6 +128,8 @@ func TestMessageStoreApi_GetMessageHandler(t *testing.T) {
 	// get message with id
 	msgSaved := requestGETMessage(t, router, fixMsg1.ID)
 	assert.Equal(t, string(msg1Bytes), msgSaved)
+
+	// TODO: test more scenarios
 }
 
 func TestMessageStoreApi_GetMessageProofsHandler(t *testing.T) {
@@ -110,6 +152,8 @@ func TestMessageStoreApi_GetMessageProofsHandler(t *testing.T) {
 	assert.Nil(t, err)
 	reqProofs := requestGETMessageProofs(t, router, fixMsg1.ID)
 	assert.Equal(t, string(fixProofs), reqProofs)
+
+	// TODO: test more scenarios
 }
 
 func requestGETMessage(t *testing.T, router *gin.Engine, id string) string {

@@ -33,13 +33,13 @@ func (mApi *MessageStoreApi) UpsertMessageHandler(c *gin.Context) {
 	}
 
 	if !isValidId(message.ID) {
-		statusBadRequest(c, fmt.Sprintf("message id '%s' is not valid", message.ID))
+		statusBadRequest(c, fmt.Sprintf("Message id '%s' is not valid", message.ID))
 		return
 	}
 
 	paramId := c.Param("id")
 	if len(paramId) > 0 && paramId != message.ID {
-		statusBadRequest(c, fmt.Sprintf("message id provided in the path parameter, '%s', "+
+		statusBadRequest(c, fmt.Sprintf("Message id provided in the path parameter, '%s', "+
 			"does not match id in the message body, '%s'", paramId, message.ID))
 		return
 	}
@@ -65,9 +65,65 @@ func (mApi *MessageStoreApi) UpsertMessageHandler(c *gin.Context) {
 	}
 
 	if created {
-		statusCreated(c, "message successfully created")
+		statusCreated(c, "Message successfully added to the data store")
 	} else {
-		statusOk(c, "message successfully updated")
+		statusOk(c, "Message successfully updated")
+	}
+}
+
+// RecordProofsHandler The endpoint adds the given proof elements to the set of proofs that has already been recorded
+// for a message. If specific elements within the array of proof submitted have already been stored,
+// they are ignored,  if not, they are added to the datastore.
+// Parameters:
+// - Path: Message ID
+// - Body: Array of Proof elements
+// Responses:
+// - HTTP 201: One or more new proof elements in the request body, were added to the existing proof set for a message.
+// - HTTP 200: All proof elements in the request body were already a part of the recorded proof set for a message,
+//   		   so no updates needed to be performed.
+// - HTTP 400: Invalid parameters or payload submitted by client
+func (mApi *MessageStoreApi) RecordProofsHandler(c *gin.Context) {
+	var newProofs []v1.Proof
+	err := c.BindJSON(&newProofs)
+	if err != nil {
+		return
+	}
+
+	paramId := c.Param("id")
+	if !isValidId(paramId) {
+		statusBadRequest(c, fmt.Sprintf("Message id '%s' is not valid", paramId))
+		return
+	}
+
+	if !mApi.messageExists(c, paramId) {
+		statusMessageNotFound(c, paramId)
+		return
+	}
+
+	tx, err := mApi.DataStore.NewTransaction(c, false)
+	if err != nil {
+		statusServerError(c, err)
+		tx.Discard(c)
+		return
+	}
+
+	updated, err := mApi.updateMessageProofSet(c, tx, datastore.NewKey(paramId), newProofs)
+	if err != nil {
+		statusServerError(c, err)
+		tx.Discard(c)
+		return
+	}
+
+	err = tx.Commit(c)
+	if err != nil {
+		statusServerError(c, err)
+		return
+	}
+
+	if updated {
+		statusCreated(c, "One or more proof elements submitted were successfully added to message's proof set")
+	} else {
+		statusOk(c, "All proof elements submitted are already a part of the message's proof set")
 	}
 }
 
@@ -97,7 +153,7 @@ func (mApi *MessageStoreApi) GetMessageHandler(c *gin.Context) {
 func (mApi *MessageStoreApi) GetMessageProofsHandler(c *gin.Context) {
 	id := c.Param("id")
 	if !isValidId(id) {
-		statusBadRequest(c, fmt.Sprintf("message id '%s' is not valid", id))
+		statusBadRequest(c, fmt.Sprintf("Message id '%s' is not valid", id))
 		return
 	}
 	mApi.getMessageDetails(c, id, func(message *v1.Message) interface{} { return message.Proofs })
@@ -164,7 +220,8 @@ func (mApi *MessageStoreApi) upsertMessage(c *gin.Context, tx datastore.Txn, new
 	}
 	if exists {
 		// TODO: validate that all other fields of the two messages match as a sanity check
-		return false, mApi.updateMessageProofSet(c, tx, id, newMessage)
+		_, err = mApi.updateMessageProofSet(c, tx, id, newMessage.Proofs)
+		return false, err
 	} else {
 		return true, mApi.addMessage(c, tx, id, newMessage)
 	}
@@ -173,23 +230,23 @@ func (mApi *MessageStoreApi) upsertMessage(c *gin.Context, tx datastore.Txn, new
 // updateMessageProofSet adds new proof elements of the message provided as argument,
 // to the proof set of the message in the datastore.
 func (mApi *MessageStoreApi) updateMessageProofSet(c *gin.Context, tx datastore.Txn, msgId datastore.Key,
-	newMessage *v1.Message) error {
+	newProofSet []v1.Proof) (bool, error) {
 	existing, err := mApi.queryMessageById(c, msgId, tx.Get)
 	if err != nil {
-		return err
+		return false, err
 	}
-
-	existing.Proofs = aggregateProofSets(existing.Proofs, newMessage.Proofs)
+	oldProofCount := len(existing.Proofs)
+	existing.Proofs = aggregateProofSets(existing.Proofs, newProofSet)
 	updatedMsg, err := json.Marshal(existing)
 	if err != nil {
-		return err
+		return false, err
 	}
 
 	err = tx.Put(c, msgId, updatedMsg)
 	if err != nil {
-		return err
+		return false, err
 	}
-	return nil
+	return oldProofCount < len(existing.Proofs), nil
 }
 
 func (mApi *MessageStoreApi) addMessage(c *gin.Context, tx datastore.Txn, msgId datastore.Key,
