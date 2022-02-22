@@ -18,8 +18,8 @@ package api
 import (
 	"encoding/json"
 
-	"github.com/consensys/gpact/messaging/relayer/internal/msgobserver/eth/node"
-	"github.com/consensys/gpact/messaging/relayer/internal/rpc"
+	"github.com/consensys/gpact/services/relayer/internal/msgobserver/eth/node"
+	"github.com/consensys/gpact/services/relayer/internal/rpc"
 )
 
 // StopObserveReq is the request to stop observe.

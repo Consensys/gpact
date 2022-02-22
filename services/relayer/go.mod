@@ -1,4 +1,4 @@
-module github.com/consensys/gpact/messaging/relayer
+module github.com/consensys/gpact/services/relayer
 
 go 1.17
 

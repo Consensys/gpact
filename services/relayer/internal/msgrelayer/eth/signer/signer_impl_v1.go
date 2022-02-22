@@ -21,7 +21,7 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/consensys/gpact/messaging/relayer/internal/logging"
+	"github.com/consensys/gpact/services/relayer/internal/logging"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ipfs/go-datastore"
 	badgerds "github.com/ipfs/go-ds-badger"

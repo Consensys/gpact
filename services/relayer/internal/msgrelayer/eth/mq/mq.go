@@ -15,7 +15,7 @@ package mq
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import "github.com/consensys/gpact/messaging/relayer/internal/messages"
+import "github.com/consensys/gpact/services/relayer/internal/messages"
 
 // Handlers store all mq handler.
 var Handlers map[string]map[string]func(msg messages.Message)

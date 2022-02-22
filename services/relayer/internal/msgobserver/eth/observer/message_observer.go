@@ -18,8 +18,8 @@ package observer
 import (
 	"context"
 
-	"github.com/consensys/gpact/messaging/relayer/internal/contracts/functioncall"
-	"github.com/consensys/gpact/messaging/relayer/internal/mqserver"
+	"github.com/consensys/gpact/services/relayer/internal/contracts/functioncall"
+	"github.com/consensys/gpact/services/relayer/internal/mqserver"
 )
 
 // SFCBridgeObserver listens to incoming events from an SFC contract, transforms them into relayer messages
