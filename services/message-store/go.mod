@@ -7,8 +7,10 @@ require (
 	github.com/gin-gonic/gin v1.7.7
 	github.com/ipfs/go-datastore v0.5.1
 	github.com/ipfs/go-ds-badger2 v0.1.3
+	github.com/rs/zerolog v1.26.0
 	github.com/spf13/viper v1.3.2
 	github.com/stretchr/testify v1.7.0
+	gopkg.in/natefinch/lumberjack.v2 v2.0.0
 )
 
 require (

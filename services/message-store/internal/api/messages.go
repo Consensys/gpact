@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/consensys/gpact/messaging/message-store/internal/logging"
 	v1 "github.com/consensys/gpact/services/relayer/pkg/messages/v1"
 	"github.com/gin-gonic/gin"
 	"github.com/ipfs/go-datastore"
@@ -46,6 +47,7 @@ func (mApi *MessageStoreApi) UpsertMessageHandler(c *gin.Context) {
 
 	tx, err := mApi.DataStore.NewTransaction(c, false)
 	if err != nil {
+		logging.Error("Error creating a transaction to update message %s: %v", message.ID, err)
 		statusServerError(c, err)
 		tx.Discard(c)
 		return
@@ -53,6 +55,7 @@ func (mApi *MessageStoreApi) UpsertMessageHandler(c *gin.Context) {
 
 	created, err := mApi.upsertMessage(c, tx, message)
 	if err != nil {
+		logging.Error("Error adding or updating message %s: %v", message.ID, err)
 		statusServerError(c, err)
 		tx.Discard(c)
 		return
@@ -60,6 +63,7 @@ func (mApi *MessageStoreApi) UpsertMessageHandler(c *gin.Context) {
 
 	err = tx.Commit(c)
 	if err != nil {
+		logging.Error("Error committing updates to message %s: %v", message.ID, err)
 		statusServerError(c, err)
 		return
 	}
@@ -102,6 +106,7 @@ func (mApi *MessageStoreApi) RecordProofsHandler(c *gin.Context) {
 
 	tx, err := mApi.DataStore.NewTransaction(c, false)
 	if err != nil {
+		logging.Error("Error creating a transaction to update message %s: %v", paramId, err)
 		statusServerError(c, err)
 		tx.Discard(c)
 		return
@@ -109,6 +114,7 @@ func (mApi *MessageStoreApi) RecordProofsHandler(c *gin.Context) {
 
 	updated, err := mApi.updateMessageProofSet(c, tx, datastore.NewKey(paramId), newProofs)
 	if err != nil {
+		logging.Error("Error updating proof set for message %s: %v", paramId, err)
 		statusServerError(c, err)
 		tx.Discard(c)
 		return
@@ -116,6 +122,7 @@ func (mApi *MessageStoreApi) RecordProofsHandler(c *gin.Context) {
 
 	err = tx.Commit(c)
 	if err != nil {
+		logging.Error("Error committing updates to message %s: %v", paramId, err)
 		statusServerError(c, err)
 		return
 	}
@@ -166,6 +173,7 @@ func (mApi *MessageStoreApi) getMessageDetails(c *gin.Context, id string,
 		statusMessageNotFound(c, id)
 		return
 	} else if err != nil {
+		logging.Error("Error retrieving message %s: %v", id, err)
 		statusServerError(c, err)
 		return
 	}
@@ -184,9 +192,9 @@ func isValidId(id string) bool {
 }
 
 // queryMessageById queries the datastore for a message with the given ID
-func (mApi *MessageStoreApi) queryMessageById(c *gin.Context, id datastore.Key, dsGetter func(c context.Context,
+func (mApi *MessageStoreApi) queryMessageById(c *gin.Context, id datastore.Key, dsQueryFunc func(c context.Context,
 	key datastore.Key) ([]byte, error)) (*v1.Message, error) {
-	msgBytes, err := dsGetter(c, id)
+	msgBytes, err := dsQueryFunc(c, id)
 	if err != nil {
 		return nil, err
 	}
@@ -223,7 +231,8 @@ func (mApi *MessageStoreApi) upsertMessage(c *gin.Context, tx datastore.Txn, new
 		_, err = mApi.updateMessageProofSet(c, tx, id, newMessage.Proofs)
 		return false, err
 	} else {
-		return true, mApi.addMessage(c, tx, id, newMessage)
+		err = mApi.addMessage(c, tx, id, newMessage)
+		return true, err
 	}
 }
 
@@ -231,13 +240,13 @@ func (mApi *MessageStoreApi) upsertMessage(c *gin.Context, tx datastore.Txn, new
 // to the proof set of the message in the datastore.
 func (mApi *MessageStoreApi) updateMessageProofSet(c *gin.Context, tx datastore.Txn, msgId datastore.Key,
 	newProofSet []v1.Proof) (bool, error) {
-	existing, err := mApi.queryMessageById(c, msgId, tx.Get)
+	msg, err := mApi.queryMessageById(c, msgId, tx.Get)
 	if err != nil {
 		return false, err
 	}
-	oldProofCount := len(existing.Proofs)
-	existing.Proofs = aggregateProofSets(existing.Proofs, newProofSet)
-	updatedMsg, err := json.Marshal(existing)
+	oldProofCount := len(msg.Proofs)
+	msg.Proofs = aggregateProofSets(msg.Proofs, newProofSet)
+	updatedMsg, err := json.Marshal(msg)
 	if err != nil {
 		return false, err
 	}
@@ -246,7 +255,8 @@ func (mApi *MessageStoreApi) updateMessageProofSet(c *gin.Context, tx datastore.
 	if err != nil {
 		return false, err
 	}
-	return oldProofCount < len(existing.Proofs), nil
+	newProofsFound := oldProofCount < len(msg.Proofs)
+	return newProofsFound, nil
 }
 
 func (mApi *MessageStoreApi) addMessage(c *gin.Context, tx datastore.Txn, msgId datastore.Key,
@@ -258,15 +268,18 @@ func (mApi *MessageStoreApi) addMessage(c *gin.Context, tx datastore.Txn, msgId 
 	return tx.Put(c, msgId, m)
 }
 
-func aggregateProofSets(existing []v1.Proof, newProofs []v1.Proof) []v1.Proof {
-	var updated = existing
+// aggregateProofSets returns a proof set that combines unique elements from both proof arrays.
+func aggregateProofSets(proofSetA []v1.Proof, proofSetB []v1.Proof) []v1.Proof {
+	var combined = proofSetA
 	// TODO: consider optimising
-	for _, v := range newProofs {
-		if !containsProof(updated, v) {
-			updated = append(updated, v)
+	for _, v := range proofSetB {
+		// avoid potential duplicate proofs in the new set,
+		// by checking the already updated proof set
+		if !containsProof(combined, v) {
+			combined = append(combined, v)
 		}
 	}
-	return updated
+	return combined
 }
 
 func containsProof(proofSet []v1.Proof, proof v1.Proof) bool {
