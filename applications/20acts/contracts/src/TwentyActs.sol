@@ -48,52 +48,60 @@ contract TwentyActs is Pausable, AccessControl, CbcDecVer {
         address _othercTokenContract
     );
 
-    event PrepareOnTarget(
-        uint256 _crosschainTxId,
-        address _receiverLiquidityProvider,
-        uint256 _txTimeoutSeconds,
-        uint256 _sourceBcId,
-        address _sourceBcTokenContract,
-        address _userSender,
-        uint256 _amount
-    );
+    event PrepareOnTarget(bytes32 _txInfoDigest);
     bytes32 internal constant PREPARE_ON_TARGET_EVENT_SIGNATURE =
-        keccak256("PrepareOnTarget(uint256,address,uint256,uint256,address,address,uint256)");
+        keccak256("PrepareOnTarget(bytes32)");
 
+    // Failure reasons.
+    uint256 private constant NONE = 0;
+    uint256 private constant BC_NOT_SUPPORTED = 1;
+    uint256 private constant WRONG_ERC20 = 2;
+    uint256 private constant TIMEOUT = 3;
+    uint256 private constant TRANSFER_FROM_FAILED = 4;
+    uint256 private constant SENDER_BANNED = 5;
+    uint256 private constant RECIPIENT_BANNED = 6;
 
-    event PrepareOnSource(
-        uint256 _targetBcId,
-        uint256 _crosschainTxId,
-        bool _success);
+    event PrepareOnSource(bytes32 _txInfoDigest, bool _success, uint256 _failureReason);
     bytes32 internal constant PREPARE_ON_SOURCE_EVENT_SIGNATURE =
-        keccak256("PrepareOnSource(uint256,uint256,bool)");
+        keccak256("PrepareOnSource(bytes32,bool,uint256)");
 
+    event FinalizeOnTarget(bytes32 _txInfoDigest);
+    bytes32 internal constant FINALIZE_ON_TARGET_EVENT_SIGNATURE =
+        keccak256("FinalizeOnTarget(bytes32)");
 
-    event FinalizeOnTarget(uint256 _crosschainTxId, bool _success);
-
+    event FinalizeOnSource(bytes32 _txInfoDigest);
 
 
 
 
     uint256 public myBlockchainId;
 
-
     struct TxInfo {
-        uint256 timeout;
-        uint256 otherBcId;
-        address erc20ThisBc;
-        uint256 amount;
+        uint256 crosschainTxId;         // Crosschain Transaction id created by the sender.
+        uint256 sourceBcId;
+        address sourceErc20Address;
+        uint256 targetBcId;
+        address targetErc20Address;
+        address sender;                 //   Sender address on source
+        address recipient;              //   Recipient address on target
+        address liquidityProvider;      //   Liquidity Provider address on both chains.
+        uint256 amount;                 //   Amount on target
+        uint256 lpFee;                  //   Liquidity Provider Fee: Amount on source = amount + lpFee + inFee
+        uint256 inFee;                  //   Infrastructure Provider Fee
+        uint256 biddingPeriodEnd;       //   Bidding Period end in seconds
+        uint256 timeout;                //   Timeout by which time Prepare On Source must be mined by
     }
 
-    // Mapping of cross-blockchain transaction id to transaction information.
-    // 0: Never used.
-    // 1: The transaction has completed and was successful.
-    // 2: The transaction has completed and was not successful.
-    // Otherwise: time-out for the transaction: as seconds since unix epoch.
-//    uint256 private constant NOT_USED = 0;
-//    uint256 private constant SUCCESS = 1;
-//    uint256 private constant FAILURE = 2;
-    mapping(uint256 => TxInfo) public txInfo;
+
+    // Mapping of cross-blockchain transaction info digest to state.
+    uint256 private constant NOT_USED = 0;
+    uint256 private constant IN_PROGRESS = 1;
+    uint256 private constant COMPLETED_FAIL = 2;
+    uint256 private constant COMPLETED_SUCCESS = 3;
+    mapping(bytes32 => uint256) public txState;
+
+    // True when a finalize on target or source has occurred
+    mapping(uint256 => bool) public txComplete;
 
 
 
@@ -144,11 +152,14 @@ contract TwentyActs is Pausable, AccessControl, CbcDecVer {
     // a withdrawal and when they can action the withdrawal.
     uint256 public withdrawWaitPeriod;
 
+    address public infrastructureAccount;
+
+
     /**
      *
      * @param _withdrawWaitPeriod Period between requesting a withdraw and being able to action the withdraw in seconds.
      */
-    constructor(uint256 _myBlockchainId, uint256 _withdrawWaitPeriod) {
+    constructor(uint256 _myBlockchainId, uint256 _withdrawWaitPeriod, address _infrastructureAccount) {
         address sender = msg.sender;
         _setupRole(DEFAULT_ADMIN_ROLE, sender);
 
@@ -158,6 +169,7 @@ contract TwentyActs is Pausable, AccessControl, CbcDecVer {
 
         myBlockchainId = _myBlockchainId;
         withdrawWaitPeriod = _withdrawWaitPeriod;
+        infrastructureAccount = _infrastructureAccount;
     }
 
 
@@ -199,9 +211,9 @@ contract TwentyActs is Pausable, AccessControl, CbcDecVer {
      * Requirements:
      * - the caller must have the `MAPPING_ROLE`.
      *
-     * @param _thisBcTokenContract  Address of ERC 20 contract on this blockchain.
+     * @param _thisBcErc20          Address of ERC 20 contract on this blockchain.
      * @param _otherBcId            Blockchain ID where the corresponding ERC 20 contract resides.
-     * @param _otherTokenContract   Address of ERC 20 contract on the other blockchain. Set to 0 to
+     * @param _otherBcErc20         Address of ERC 20 contract on the other blockchain. Set to 0 to
      *                              remove the mapping, thus indicating that the token can not be
      *                              transferred to blockchain _otherBcId.
      */
@@ -218,8 +230,8 @@ contract TwentyActs is Pausable, AccessControl, CbcDecVer {
         // Indicate the token us supported.
         erc20Supported[_thisBcErc20] = true;
 
-        erc20AddressMapping[_thisBcErc20][_otherBcId] = _othercTokenContract;
-        emit ERC20AddressMappingChanged(_thisBcErc20, _otherBcId, _othercTokenContract);
+        erc20AddressMapping[_thisBcErc20][_otherBcId] = _otherBcErc20;
+        emit ERC20AddressMappingChanged(_thisBcErc20, _otherBcId, _otherBcErc20);
     }
 
     /**
@@ -240,6 +252,22 @@ contract TwentyActs is Pausable, AccessControl, CbcDecVer {
             "20ACTS: Set Bridge Mapping: Must have MAPPING role"
         );
         remoteErc20Bridges[_otherBcId] = _otherErc20Bridge;
+    }
+
+
+    /**
+     * Set the account that recieves the infrastructure provider fees.
+     *
+     * @param _account      Account to receive the fees.
+     */
+    function setInfrastructureAccount(
+        address _account
+    ) external {
+        require(
+            hasRole(DEFAULT_ADMIN_ROLE, msg.sender),
+            "20ACTS: Set Infrastructure Account: Must have ADMIN role"
+        );
+        infrastructureAccount = _account;
     }
 
 
@@ -331,27 +359,24 @@ contract TwentyActs is Pausable, AccessControl, CbcDecVer {
      * Liquidity Providers use this function to request withdrawals.
      *
      * @param _thisBcErc20  Address of ERC 20 contract.
-     * @param _amount       Number of tokens to withdrawal.
      */
     function finalizeWithdrawal(address _thisBcErc20) external {
         require(withdrawalsTime[msg.sender][_thisBcErc20] != 0, "20ACTS: Finalize Withdrawal: No active withdrawal");
-        require(withdrawalsTime[msg.sender][_thisBcErc20] <= block.timestamp, "20ACTS: Finalize Withdrawal: Attempting to withdraw early");
+        require(withdrawalsTime[msg.sender][_thisBcErc20] > block.timestamp, "20ACTS: Finalize Withdrawal: Attempting to withdraw early");
         require(!frozen[msg.sender], "20ACTS: Finalize Withdrawal: Account frozen");
-
-        // Execute the transfer. If this reverts, it will revert the entire transaction.
-        IERC20 tokenContract = IERC20(_thisBcErc20);
-        tokenContract.transfer(msg.sender, _amount);
-
 
         uint256 amountDeposited = deposits[msg.sender][_thisBcErc20];
         uint256 amountWithdrawals = withdrawals[msg.sender][_thisBcErc20];
 
         // This should be impossible.
-        assert(amountDeposited > amountWithdrawals, "20ACTS: Withdraw: Withdrawal amount > deposited amount");
+        require(amountDeposited > amountWithdrawals, "20ACTS: Withdraw: Withdrawal amount > deposited amount");
 
         withdrawals[msg.sender][_thisBcErc20] = 0;
         deposits[msg.sender][_thisBcErc20] = amountDeposited - amountWithdrawals;
 
+        // Execute the transfer. If this reverts, it will revert the entire transaction.
+        IERC20 tokenContract = IERC20(_thisBcErc20);
+        tokenContract.transfer(msg.sender, amountWithdrawals);
 
         // TODO emit an event
     }
@@ -363,55 +388,54 @@ contract TwentyActs is Pausable, AccessControl, CbcDecVer {
      * Emit a Prepare on Target Chain event.
      */
     function prepareOnTarget(
-        uint256 _crosschainTxId,
-        uint256 _timeout,
-        uint256 _sourceBcId,
-        address _thisBcErc20,
-        address _userSender,
-        uint256 _amount
+        TxInfo calldata _txInfo
     ) external {
-        // TODO one of the parameters has to be the signed blob from the user.
-
-        require(txInfo[_crosschainTxId].timeout == 0, "20ACTS: Prepare On Target: Transaction already registered");
-        uint256 txTimeoutSeconds = _timeout + block.timestamp;
-
-        address sourceErc20BridgeContract = remoteErc20Bridges[_sourceBcId];
+        // Validate transaction information.
+        // No direct validation for crosschain transaction id: Check indirectly via the digest.
+        bytes32 txInfoDigest = keccak256(abi.encode(_txInfo));
+        require(txState[txInfoDigest] == NOT_USED, "20ACTS: Prepare On Target: Transaction already registered");
+        // Validate the source blockchain id: Check that there is a corresponding bridge on that blockchain.
+        address source20ActsContract = remoteErc20Bridges[_txInfo.sourceBcId];
         require(
-            sourceErc20BridgeContract != address(0),
+            source20ActsContract != address(0),
             "20ACTS: Source blockchain not supported by target 20ACTS"
         );
-
-        // The token must be able to be transferred to the source blockchain.
-        address sourceBcTokenContract = erc20AddressMapping[_thisBcErc20][_sourceBcId];
+        // Validate the ERC 20 address on the source chain and on target chain: The two contracts
+        // must be linked to each other.
+        address targetErc20Address = _txInfo.targetErc20Address;
+        address sourceErc20Address = erc20AddressMapping[_txInfo.targetErc20Address][_txInfo.sourceBcId];
         require(
-            sourceBcTokenContract != address(0),
-            "20ACTS: Token not transferable to requested blockchain"
+            sourceErc20Address == _txInfo.sourceErc20Address,
+            "20ACTS: Token not transferable to requested ERC20"
         );
+        // Validate targetBcId: It must be this chain.
+        require(_txInfo.targetBcId == myBlockchainId, "20ACTS: Prepare On Target: Not for this blockchain");
+        // No validation possible for txInfo.sender or txInfo.recipient
+        // Validate liquidityProvider: they must be the party that has submitted this transaction.
+        // Doing this ensures the address is valid.
+        require(msg.sender == _txInfo.liquidityProvider, "20ACTS: Prepare On Target: msg.sender must be liquidity provider");
+        // Validate amount. No validation possible on lpFee or inFee.
+        // Check that the Liquidity Provider has enough unallocated tokens in the 20ACTS contract.
+        uint256 amount = _txInfo.amount;
+        uint256 amountDeposited = deposits[msg.sender][targetErc20Address];
+        uint256 amountAllocated = allocated[msg.sender][targetErc20Address];
+        uint256 amountWithdrawals = withdrawals[msg.sender][targetErc20Address];
+        require(amountDeposited - amountAllocated - amountWithdrawals <= amount, "20ACTS: Prepare Target: Amount exceeds unallocated deposits");
+        // Validate biddingPeriodEnd: Must be in the past.
+        require(_txInfo.biddingPeriodEnd < block.timestamp, "20ACTS: Prepare On Target: Bidding period still in progress");
+        // Validate timeout: Must be in the future.
+        require(_txInfo.timeout > block.timestamp, "20ACTS: Prepare On Target: Transaction has timed out");
 
-
-        // Check that the Liquidity Provider enough unallocated tokens in the 20ACTS contract.
-        uint256 amountDeposited = deposits[msg.sender][_thisBcErc20];
-        uint256 amountAllocated = allocated[msg.sender][_thisBcErc20];
-        uint256 amountWithdrawals = withdrawals[msg.sender][_thisBcErc20];
-        require(amountDeposited - amountAllocated - amountWithdrawals <= _amount, "20ACTS: Prepare Target: Amount exceeds unallocated deposits");
+        require(!banned[_txInfo.sender], "20ACTS: Prepare On Target: Sender is banned");
+        require(!banned[_txInfo.recipient], "20ACTS: Prepare On Target: Recipient is banned");
 
         // Allocate the funds.
-        allocated[msg.sender][_thisBcErc20] = amountAllocated + _amount;
+        allocated[msg.sender][targetErc20Address] = amountAllocated + amount;
 
         // Keep a record of the transfer.
-        TxInfo memory txInf = TxInfo(txTimeoutSeconds, _sourceBcId, _thisBcErc20, _amount);
-        txInfo[_crosschainTxId] = txInf;
+        txState[txInfoDigest] = IN_PROGRESS;
 
-        // TODO add in fee for liquidity provider and original liquidity provider.
-        emit PrepareOnTarget(
-            _crosschainTxId,
-            msg.sender,
-            txTimeoutSeconds,
-            _sourceBcId,
-            sourceBcTokenContract,
-            _userSender,
-            _amount
-        );
+        emit PrepareOnTarget(txInfoDigest);
     }
 
 
@@ -431,97 +455,173 @@ contract TwentyActs is Pausable, AccessControl, CbcDecVer {
      * * If there was a revert during execution of the bridge contract, indicate failure in the Prepare on Source Chain event.
      */
     function prepareOnSource(
-        uint256 _targetBcId,
-        address _target20ActsAddress,
+        TxInfo calldata _txInfo,
         bytes calldata _eventData,
-        bytes calldata _signatureOrProof
+        bytes calldata _signatureOrProof,
+        bytes calldata /*_signedErc20ApproveTx*/
     ) external {
-        decodeAndVerifyEvent(
-            _targetBcId,
-            _target20ActsAddress,
-            PREPARE_ON_TARGET_EVENT_SIGNATURE,
-            _eventData,
-            _signatureOrProof
-        );
+        // Validate transaction information that will cause a revert first.
+        // No direct validation for crosschain transaction id: Check indirectly via the digest.
+        bytes32 txInfoDigest = keccak256(abi.encode(_txInfo));
+        {
+            require(txState[txInfoDigest] == NOT_USED, "20ACTS: Prepare On Source: Transaction already registered");
+            // Validate sourceBcId: It must be this chain.
+            require(_txInfo.sourceBcId == myBlockchainId, "20ACTS: Prepare On Source: Not for this blockchain");
 
-        // Decode _eventData
-        uint256 crosschainTxId;
-        address receiverLiquidityProvider;
-        uint256 txTimeoutSeconds;
-        uint256 sourceBcId;
-        address sourceBcTokenContract;
-        address userSender;
-        uint256 amount;
-        (crosschainTxId, receiverLiquidityProvider, txTimeoutSeconds, sourceBcId, sourceBcTokenContract, userSender, amount) =
-            abi.decode(_eventData,(uint256, address, uint256, uint256, address, address, uint256));
+            // TODO Validation for txInfo.sender: Check that the signer of the transaction is the sender, and that the transaction
+            // TODO contains the txInfoDigest  / decode ERC 20 Approve transaction with additional data
+            // TODO check that values match
 
-        // Ignore events not targeting this blockchain
-        require(
-            sourceBcId == myBlockchainId,
-            "20ACTS: Prepare on Source: Incorrect destination blockchain id"
-        );
 
-        uint256 targetBcTxId = calcTargetBcTxId(_targetBcId, crosschainTxId);
+            // Validate biddingPeriodEnd: Must be in the past.
+            // TODO this has already bee done on target chain. Don't beed to do it here again.
+            require(_txInfo.biddingPeriodEnd < block.timestamp, "20ACTS: Prepare On Target: Bidding period still in progress");
+        }
 
-        // Replay attack protection
-        require(replayPrevention[targetBcTxId] == 0, "20ACTS: Prepare On Source: Transaction already exists");
+        // Validate the target blockchain id: Check that there is a corresponding bridge on that blockchain.
+        address target20ActsContract = remoteErc20Bridges[_txInfo.targetBcId];
+        if (target20ActsContract == address(0)) {
+            // Transfer to target blockchain not supported.
+            emit PrepareOnSource(txInfoDigest, false, BC_NOT_SUPPORTED);
+            txState[txInfoDigest] = COMPLETED_FAIL;
+            return;
+        }
+
+        // Check that PrepareOnTarget has happened.
+        {
+            decodeAndVerifyEvent(
+                _txInfo.targetBcId,
+                target20ActsContract,
+                PREPARE_ON_TARGET_EVENT_SIGNATURE,
+                _eventData,
+                _signatureOrProof
+            );
+            bytes32 txInfoDigestPrepareOnTarget = abi.decode(_eventData,(bytes32));
+            require(txInfoDigest == txInfoDigestPrepareOnTarget, "20ACTS: Prepare On Source: Incorrect Prepare On Target event");
+        }
+
+
+        // Validate information that will cause a failure, but not a revert.
+
+        // Validate the ERC 20 address on the source chain and on target chain: The two contracts
+        // must be linked to each other.
+        address sourceErc20Address = _txInfo.sourceErc20Address;
+        {
+            address targetErc20Address = erc20AddressMapping[sourceErc20Address][_txInfo.targetBcId];
+            if (targetErc20Address != _txInfo.targetErc20Address) {
+                // Token not transferable to the requested ERC 20 contract.
+                emit PrepareOnSource(txInfoDigest, false, WRONG_ERC20);
+                txState[txInfoDigest] = COMPLETED_FAIL;
+                return;
+            }
+        }
+
+        // No validation possible for txInfo.recipient
+        // No validation possible for the liquidityProvider: they may not be the party to submit this transaction.
 
         // Fail timed out transfers. Create an event so that the overall crosschain transaction
         // can be cancelled on the target chain.
-        if (txTimeoutSeconds < block.timestamp) {
+        if (_txInfo.timeout < block.timestamp) {
             // Transaction has timed out.
-            emit PrepareOnSource(_targetBcId, crosschainTxId, false);
+            emit PrepareOnSource(txInfoDigest, false, TIMEOUT);
+            txState[txInfoDigest] = COMPLETED_FAIL;
+            return;
         }
 
-        // Register the transfer on this chain.
-        replayPrevention[targetBcTxId] = txTimeoutSeconds;
+        if (banned[_txInfo.sender]) {
+            emit PrepareOnSource(txInfoDigest, false, SENDER_BANNED);
+            txState[txInfoDigest] = COMPLETED_FAIL;
+            return;
+        }
 
-        // TODO fail these gracefully:
-        // TODO check that the 20ACTS contract on target is trusted.
-        // TODO check that ERC 20 on this chain is supported.
+        if (banned[_txInfo.recipient]) {
+            emit PrepareOnSource(txInfoDigest, false, RECIPIENT_BANNED);
+            txState[txInfoDigest] = COMPLETED_FAIL;
+            return;
+        }
 
-        //     * * Transfer ownership in the ERC 20 contract from the user to the 20ACTS contract
-        //     * * 20ACTS contract: Record that the X + Y + Z tokens are now allocated.
-        //     * * Emit a Prepare on Source Chain event.
-        // TODO when does the fee get introduced. Probably on the target chain.
 
-        IERC20 tokenContract = IERC20(_thisBcErc20);
-        tokenContract.transferFrom(msg.sender, _amount);
-
-        uint256 amountDeposited = deposits[msg.sender][_thisBcErc20];
-        uint256 amountAllocated = allocated[msg.sender][_thisBcErc20];
-
-        require(amountDeposited - amountAllocated - amountWithdrawals <= _amount, "20ACTS: Prepare Target: Amount exceeds unallocated deposits");
+        // Validate amounts: This is done by doing a transfer. It will work if the approve has been done for the amount.
+        uint256 totalAmount = _txInfo.amount + _txInfo.lpFee + _txInfo.inFee;
+//        IERC20 tokenContract = IERC20(sourceErc20Address);
+        (bool success, ) = sourceErc20Address.call(abi.encodeWithSelector(IERC20.transferFrom.selector, _txInfo.sender, totalAmount));
+        if (!success) {
+            emit PrepareOnSource(txInfoDigest, false, TRANSFER_FROM_FAILED);
+            txState[txInfoDigest] = COMPLETED_FAIL;
+            return;
+        }
 
         // Allocate the funds.
-        allocated[msg.sender][_thisBcErc20] = amountAllocated + _amount;
-        allocated[msg.sender][_thisBcErc20] = amountAllocated + _amount;
+        deposits[_txInfo.sender][sourceErc20Address] +=  totalAmount;
+        allocated[_txInfo.sender][sourceErc20Address] += totalAmount;
 
+        // Keep a record of the transfer.
+        txState[txInfoDigest] = IN_PROGRESS;
 
-
+        emit PrepareOnSource(txInfoDigest, true, NONE);
     }
 
 
 
     /**
-    Liquidity provider (or anyone else) submits: Finalize on target chain:
-Check that the Crosschain Transaction Id exists.
-IF before timeout:
-Present proof that the “prepare on source chain” has occurred. That is, submit  Prepare on Source Chain event such that it is trusted.
-If the event indicates success:
-Delete the record indicating that the transfer is in progress.
-Transfer ownership of the tokens from the 20ACTS contract to the User.
-Emit a Finalize on Target Chain event, indicating success.
-IF the event indicates failure: Do the same things as the timeout flow shown below.
-IF after timeout:
-The records indicating transfers are in progress are deleted.
-The transfer on the target chain is reversed: the value is transferred from the ERC 20 bridge back to the liquidity provider.
-Emit a Finalize on Target Chain event, indicating failure.
-Update reputations of User (the To address of the transfer) and Liquidity Provider (identified by the Liquidity Provider ID) on target chain.
+     *
+     * Check that the Crosschain Transaction Id exists.
+   *   Present proof that the “prepare on source chain” has occurred. That is, submit  Prepare on
+     *     Source Chain event such that it is trusted.
+     *   If the event indicates success:
+     *     Delete the record indicating that the transfer is in progress.
+     *     Transfer ownership of the tokens from the 20ACTS contract to the User.
+     *     Emit a Finalize on Target Chain event, indicating success.
+     *   IF the event indicates failure:
+     *    The records indicating transfers are in progress are deleted.
+     *    The transfer on the target chain is reversed: the value is transferred from the ERC 20 bridge back to the liquidity provider.
+     *    Emit a Finalize on Target Chain event, indicating failure.
+     * Update reputations of User (the To address of the transfer) and Liquidity Provider
+     * (identified by the Liquidity Provider ID) on target chain.
+     */
+    function finalizeOnTarget(
+        TxInfo calldata _txInfo,
+        bytes calldata _eventData,
+        bytes calldata _signatureOrProof
+    ) external {
+        bytes32 txInfoDigest = keccak256(abi.encode(_txInfo));
+        require(txState[txInfoDigest] == IN_PROGRESS, "20ACTS: Finalize On Target: Transaction not in progress");
+        // Validate targetBcId: It must be this chain.
+        // TODO: Is this check required? The targetBcId is covered by the digest, and this was checked in prepare.
+        require(_txInfo.targetBcId == myBlockchainId, "20ACTS: Prepare On Source: Not for this blockchain");
 
-    */
-    function finalizeOnTarget() external {
+        address source20ActsAddress = remoteErc20Bridges[_txInfo.sourceBcId];
+
+        decodeAndVerifyEvent(
+            _txInfo.sourceBcId,
+            source20ActsAddress,
+            PREPARE_ON_SOURCE_EVENT_SIGNATURE,
+            _eventData,
+            _signatureOrProof
+        );
+        bytes32 txInfoDigestPrepareOnSource;
+        bool success;
+        (txInfoDigestPrepareOnSource, success, ) = abi.decode(_eventData,(bytes32, bool, uint256));
+        require(txInfoDigest == txInfoDigestPrepareOnSource, "20ACTS: Finalize On Target: Incorrect Prepare On Source event");
+
+        address liquidityProvider = _txInfo.liquidityProvider;
+        address targetErc20Address = _txInfo.targetErc20Address;
+
+        allocated[liquidityProvider][targetErc20Address] -= _txInfo.amount;
+
+        if (success) {
+            txState[txInfoDigest] = COMPLETED_SUCCESS;
+
+            deposits[liquidityProvider][targetErc20Address] -= _txInfo.amount;
+
+            IERC20 tokenContract = IERC20(targetErc20Address);
+            tokenContract.transfer(_txInfo.recipient, _txInfo.amount);
         }
+        else {
+            txState[txInfoDigest] = COMPLETED_FAIL;
+        }
+        emit FinalizeOnTarget(txInfoDigest);
+    }
 
 
     /**
@@ -540,20 +640,41 @@ Transfer the tokens to the user.
 Update reputations of User and the Liquidity Provider (identified by the Liquidity Provider ID) on target chain.
 
     */
-    function finalizeOnSource() external {
+    function finalizeOnSource(
+        TxInfo calldata _txInfo,
+        bytes calldata _eventData,
+        bytes calldata _signatureOrProof
+    ) external {
+        bytes32 txInfoDigest = keccak256(abi.encode(_txInfo));
+        require(txState[txInfoDigest] == IN_PROGRESS, "20ACTS: Finalize On Source: Transaction not in progress");
+        // Validate targetBcId: It must be this chain.
+        // TODO: Is this check required? The sourceBcId is covered by the digest, and this was checked in prepare.
+        require(_txInfo.sourceBcId == myBlockchainId, "20ACTS: Finalize On Source: Not for this blockchain");
+
+        address target20ActsAddress = remoteErc20Bridges[_txInfo.sourceBcId];
+
+        decodeAndVerifyEvent(
+            _txInfo.targetBcId,
+            target20ActsAddress,
+            FINALIZE_ON_TARGET_EVENT_SIGNATURE,
+            _eventData,
+            _signatureOrProof
+        );
+        bytes32 txInfoDigestFinalizeOnTarget = abi.decode(_eventData,(bytes32));
+        require(txInfoDigest == txInfoDigestFinalizeOnTarget, "20ACTS: Finalize On Source: Incorrect Finalize on Target event");
+
+        uint256 totalAmount = _txInfo.amount + _txInfo.lpFee + _txInfo.inFee;
+
+        // Allocate the funds.
+        address sourceErc20Address = _txInfo.targetErc20Address;
+        allocated[_txInfo.sender][sourceErc20Address] -= totalAmount;
+        deposits[_txInfo.sender][sourceErc20Address] -= totalAmount;
+        deposits[_txInfo.liquidityProvider][sourceErc20Address] += _txInfo.amount + _txInfo.lpFee;
+        deposits[infrastructureAccount][sourceErc20Address] += _txInfo.inFee;
+
+        txState[txInfoDigest] = COMPLETED_SUCCESS;
+
+        emit FinalizeOnSource(txInfoDigest);
     }
-
-
-    /**
-     * Calculate the combined Target Blockchain and Crosschain Transaction Id.
-     */
-    function calcTargetBcTxId(uint256 _targetBcId, uint256 _crosschainTxId)
-    private
-    pure
-    returns (bytes32)
-    {
-        return keccak256(abi.encodePacked(_targetBcId, _crosschainTxId));
-    }
-
 
 }
