@@ -2,34 +2,25 @@ package main
 
 import (
 	"github.com/consensys/gpact/messaging/message-store/internal/api"
+	config "github.com/consensys/gpact/messaging/message-store/internal/config"
 	"github.com/gin-gonic/gin"
 	badger "github.com/ipfs/go-ds-badger2"
-	"io/ioutil"
 	"log"
-	"os"
 )
 
 func main() {
-	r := gin.Default()
-	dsopts := badger.DefaultOptions
-	dsopts.SyncWrites = false
-	dsopts.Truncate = true
+	conf := config.NewConfig()
 
-	// TODO: configurable message ds path and other params
-	path, err := ioutil.TempDir(os.TempDir(), "message_store_ds")
-	if err != nil {
-		log.Fatal("error creating data store")
+	if len(conf.MessageDataStorePath) == 0 {
+		log.Fatal("Message data store path cannot be empty.")
 	}
 
-	m, err := api.NewMessageStoreService(path, &dsopts)
-	defer func() {
-		m.DataStore.Close()
-		os.RemoveAll(path)
-	}()
+	m, err := api.NewMessageStoreService(conf.MessageDataStorePath, &badger.DefaultOptions)
 
+	r := gin.Default()
 	api.SetupRouter(r, m)
 	err = r.Run()
 	if err != nil {
-		log.Fatal("error configuring routes")
+		log.Fatal("error starting message store service")
 	}
 }
