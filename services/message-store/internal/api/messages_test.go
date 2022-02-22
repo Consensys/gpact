@@ -31,15 +31,16 @@ func TestMessageStoreApi_UpsertMessageHandler(t *testing.T) {
 	assert.Equal(t, 201, respRec.Code)
 
 	// updating a message
-	fixMsg1.Proofs = fixProofSet2
-	msg2Bytes, err := json.Marshal(fixMsg1)
+	fixMsg12 := fixMsg1
+	fixMsg12.Proofs = fixProofSet2
+	msg2Bytes, err := json.Marshal(fixMsg12)
 	respRec2 := httptest.NewRecorder()
 	req2, err := http.NewRequest("PUT", "/messages", bytes.NewBuffer(msg2Bytes))
 	router.ServeHTTP(respRec2, req2)
 	assert.Nil(t, err)
 	assert.Equal(t, 200, respRec2.Code)
 
-	savedMsgStr := requestGETMessage(t, router, fixMsg1.ID)
+	savedMsgStr := requestGETMessage(t, router, fixMsg12.ID)
 	var savedMsg v1.Message
 	err = json.Unmarshal([]byte(savedMsgStr), &savedMsg)
 	assert.Nil(t, err)
@@ -98,7 +99,7 @@ func TestMessageStoreApi_RecordProofsHandler(t *testing.T) {
 	req2, err := http.NewRequest("PUT", endpoint2, bytes.NewBuffer(proofBytes))
 	router.ServeHTTP(respRec2, req2)
 	assert.Nil(t, err)
-	assert.Equal(t, 201, respRec.Code)
+	assert.Equal(t, 201, respRec2.Code)
 
 	savedMsgStr := requestGETMessage(t, router, fixMsg1.ID)
 	var savedMsg v1.Message
