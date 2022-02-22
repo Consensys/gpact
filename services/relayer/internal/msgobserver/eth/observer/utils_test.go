@@ -22,8 +22,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/consensys/gpact/messaging/relayer/internal/contracts/functioncall"
-	"github.com/consensys/gpact/messaging/relayer/internal/messages"
+	"github.com/consensys/gpact/services/relayer/internal/contracts/functioncall"
+	"github.com/consensys/gpact/services/relayer/internal/messages"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind/backends"
 	"github.com/ethereum/go-ethereum/common"

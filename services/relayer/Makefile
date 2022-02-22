@@ -7,7 +7,7 @@ build:
 	go build -o ./build/admin cmd/admin/* 
 
 docker:
-	docker build -t consensys/gpact/messaging/relayer .
+	docker build -t consensys/gpact/services/relayer .
 
 clean:
 	rm -rf ./build/*

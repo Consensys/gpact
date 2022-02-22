@@ -23,9 +23,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/consensys/gpact/messaging/relayer/internal/contracts/functioncall"
-	"github.com/consensys/gpact/messaging/relayer/internal/logging"
-	"github.com/consensys/gpact/messaging/relayer/internal/mqserver"
+	"github.com/consensys/gpact/services/relayer/internal/contracts/functioncall"
+	"github.com/consensys/gpact/services/relayer/internal/logging"
+	"github.com/consensys/gpact/services/relayer/internal/mqserver"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ipfs/go-datastore"

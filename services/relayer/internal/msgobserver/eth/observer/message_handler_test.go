@@ -17,7 +17,7 @@ package observer
 
 import (
 	"fmt"
-	"github.com/consensys/gpact/messaging/relayer/pkg/messages/v1"
+	"github.com/consensys/gpact/services/relayer/pkg/messages/v1"
 	"testing"
 	"time"
 )

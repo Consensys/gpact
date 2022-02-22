@@ -22,7 +22,7 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/consensys/gpact/messaging/relayer/internal/logging"
+	"github.com/consensys/gpact/services/relayer/internal/logging"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/crypto/secp256k1"
 	"github.com/ipfs/go-datastore"

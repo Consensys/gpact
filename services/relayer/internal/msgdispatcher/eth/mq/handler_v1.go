@@ -18,13 +18,13 @@ package mq
 import (
 	"encoding/hex"
 	"encoding/json"
-	"github.com/consensys/gpact/messaging/relayer/pkg/messages/v1"
+	"github.com/consensys/gpact/services/relayer/pkg/messages/v1"
 	"math/big"
 	"strconv"
 
-	"github.com/consensys/gpact/messaging/relayer/internal/logging"
-	"github.com/consensys/gpact/messaging/relayer/internal/messages"
-	"github.com/consensys/gpact/messaging/relayer/internal/msgdispatcher/eth/node"
+	"github.com/consensys/gpact/services/relayer/internal/logging"
+	"github.com/consensys/gpact/services/relayer/internal/messages"
+	"github.com/consensys/gpact/services/relayer/internal/msgdispatcher/eth/node"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 )

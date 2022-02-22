@@ -19,7 +19,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/consensys/gpact/messaging/relayer/internal/messages"
+	"github.com/consensys/gpact/services/relayer/internal/messages"
 )
 
 const (

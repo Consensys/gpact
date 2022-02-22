@@ -18,11 +18,11 @@ package node
 import (
 	"sync"
 
-	"github.com/consensys/gpact/messaging/relayer/internal/mqserver"
-	"github.com/consensys/gpact/messaging/relayer/internal/msgdispatcher/eth/dispatcher"
-	"github.com/consensys/gpact/messaging/relayer/internal/msgdispatcher/eth/transactor"
-	"github.com/consensys/gpact/messaging/relayer/internal/msgdispatcher/eth/verifier"
-	"github.com/consensys/gpact/messaging/relayer/internal/rpc"
+	"github.com/consensys/gpact/services/relayer/internal/mqserver"
+	"github.com/consensys/gpact/services/relayer/internal/msgdispatcher/eth/dispatcher"
+	"github.com/consensys/gpact/services/relayer/internal/msgdispatcher/eth/transactor"
+	"github.com/consensys/gpact/services/relayer/internal/msgdispatcher/eth/verifier"
+	"github.com/consensys/gpact/services/relayer/internal/rpc"
 )
 
 // Node represents the node core.
