@@ -19,8 +19,8 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/consensys/gpact/sdk/go/chainap"
-	"github.com/consensys/gpact/sdk/go/treenode"
+	"github.com/ConsenSys/gpact/sdk/go/chainap"
+	"github.com/ConsenSys/gpact/sdk/go/treenode"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 )

@@ -18,7 +18,7 @@ package executor
 import (
 	"math/big"
 
-	"github.com/consensys/gpact/sdk/go/treenode"
+	"github.com/ConsenSys/gpact/sdk/go/treenode"
 	"github.com/ethereum/go-ethereum/common"
 )
 
