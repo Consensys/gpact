@@ -187,7 +187,7 @@ func (mApi *MessageStoreApi) getMessageDetails(c *gin.Context, id string,
 }
 
 func isValidId(id string) bool {
-	// TODO: more validation checks based on message id format
+	// TODO: validate against the id structure laid out in the Relayer design docs
 	return len(id) > 0
 }
 

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/consensys/gpact/messaging/message-store/internal/logging"
 	v1 "github.com/consensys/gpact/services/relayer/pkg/messages/v1"
 	"github.com/gin-gonic/gin"
 	badger "github.com/ipfs/go-ds-badger2"
@@ -16,63 +17,52 @@ import (
 )
 
 func TestMessageStoreApi_UpsertMessageHandler(t *testing.T) {
-	ds, dsClose := newDS(t)
-	defer dsClose()
+	fixMsg1WithMoreProof := fixMsg1
+	fixMsg1WithMoreProof.Proofs = append(fixMsg1.Proofs, fixProofSet2...)
 
-	router := setupTestRouter(ds)
+	testCases := map[string]struct {
+		endpoint         string
+		updatePayloads   []v1.Message
+		updateRespCodes  []int
+		postUpdateStates []v1.Message
+	}{
+		"Add-New-Message": {"/messages", []v1.Message{fixMsg1}, []int{201}, []v1.Message{fixMsg1}},
+		"Add-New-Message-With-ID-Path-Param": {fmt.Sprintf("/messages/%s", fixMsg2.ID), []v1.Message{fixMsg2},
+			[]int{201}, []v1.Message{fixMsg2}},
+		"Update-Message-With-Same-Message": {"/messages", []v1.Message{fixMsg2, fixMsg2}, []int{201, 200},
+			[]v1.Message{fixMsg2, fixMsg2}},
+		"Update-Message-With-Message-Containing-Additional-Proof-Elements": {"/messages", []v1.Message{fixMsg1,
+			fixMsg1WithMoreProof}, []int{201,
+			200}, []v1.Message{fixMsg1, fixMsg1WithMoreProof}},
+		"Mismatch-Between-PathParam-And-Body-IDs": {"/messages/mismatched-id", []v1.Message{fixMsg1}, []int{400},
+			[]v1.Message{}},
+	}
 
-	// adding a new message
-	msg1Bytes, err := json.Marshal(fixMsg1)
-	assert.Nil(t, err)
-	respRec := httptest.NewRecorder()
-	req, err := http.NewRequest("PUT", "/messages", bytes.NewBuffer(msg1Bytes))
-	router.ServeHTTP(respRec, req)
-	assert.Nil(t, err)
-	assert.Equal(t, 201, respRec.Code)
+	for testName, testCase := range testCases {
+		ds, dsClose := newDS(t)
+		router := setupTestRouter(ds)
+		logging.Info("testing scenario :%s", testName)
+		for i, testPayload := range testCase.updatePayloads {
+			// add/update message
+			msg1Bytes, err := json.Marshal(testPayload)
+			assert.Nil(t, err)
+			respRec := httptest.NewRecorder()
+			req, err := http.NewRequest("PUT", testCase.endpoint, bytes.NewBuffer(msg1Bytes))
+			router.ServeHTTP(respRec, req)
+			assert.Nil(t, err)
+			assert.Equal(t, testCase.updateRespCodes[i], respRec.Code)
 
-	// updating a message
-	fixMsg12 := fixMsg1
-	fixMsg12.Proofs = fixProofSet2
-	msg2Bytes, err := json.Marshal(fixMsg12)
-	respRec2 := httptest.NewRecorder()
-	req2, err := http.NewRequest("PUT", "/messages", bytes.NewBuffer(msg2Bytes))
-	router.ServeHTTP(respRec2, req2)
-	assert.Nil(t, err)
-	assert.Equal(t, 200, respRec2.Code)
-
-	savedMsgStr := requestGETMessage(t, router, fixMsg12.ID)
-	var savedMsg v1.Message
-	err = json.Unmarshal([]byte(savedMsgStr), &savedMsg)
-	assert.Nil(t, err)
-	assert.Len(t, savedMsg.Proofs, len(fixProofSet2)+len(fixProofSet1), "proof set not updated correctly")
-	assert.ElementsMatch(t, savedMsg.Proofs, append(fixProofSet1, fixProofSet2...), "proof set not updated correctly")
-
-	// TODO: test more scenarios
-}
-
-func TestMessageStoreApi_UpsertMessageHandler_WithIDParam(t *testing.T) {
-	ds, dsClose := newDS(t)
-	defer dsClose()
-	router := setupTestRouter(ds)
-
-	msg1Bytes, err := json.Marshal(fixMsg1)
-	assert.Nil(t, err)
-
-	// add new message with ID in path parameter
-	respRec := httptest.NewRecorder()
-	endpoint := fmt.Sprintf("/messages/%s", fixMsg1.ID)
-	req, err := http.NewRequest("PUT", endpoint, bytes.NewBuffer(msg1Bytes))
-	router.ServeHTTP(respRec, req)
-	assert.Nil(t, err)
-	assert.Equal(t, 201, respRec.Code)
-
-	// Bad Request Scenario: request ID in path parameter does not match ID in message body
-	respRecFail1 := httptest.NewRecorder()
-	endpointDiffID := fmt.Sprintf("/messages/%s", fixMsg2.ID)
-	reqFail1, err := http.NewRequest("PUT", endpointDiffID, bytes.NewBuffer(msg1Bytes))
-	router.ServeHTTP(respRecFail1, reqFail1)
-	assert.Nil(t, err)
-	assert.Equal(t, 400, respRecFail1.Code)
+			if len(testCase.postUpdateStates) > 0 {
+				// fetch message and check payload matches expected
+				savedMsgStr := requestGETMessage(t, router, testPayload.ID)
+				var savedMsg v1.Message
+				err = json.Unmarshal([]byte(savedMsgStr), &savedMsg)
+				assert.Nil(t, err)
+				assert.Equal(t, testCase.postUpdateStates[i], savedMsg)
+			}
+		}
+		dsClose()
+	}
 }
 
 func TestMessageStoreApi_RecordProofsHandler(t *testing.T) {
