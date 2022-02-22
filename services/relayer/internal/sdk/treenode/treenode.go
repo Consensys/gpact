@@ -1,7 +1,7 @@
 package treenode
 
 /*
- * Copyright 2021 ConsenSys Software Inc
+ * Copyright 2022 ConsenSys Software Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -24,12 +24,10 @@ import (
 )
 
 const (
-	NUM_FUNCS_CALLED_SIZE = 1
-	OFFSET_SIZE           = 4
-	BLOCKCHAIN_ID_SIZE    = 32
-	ADDRESS_SIZE          = 20
-	DATA_LEN_SIZE_SIZE    = 2
-	LEAF_FUNCTION         = 0
+	numFuncsCalledSize    = 1
+	offsetSize            = 4
+	blockchainIDSize      = 32
+	dataLenSizeSize       = 2
 	MAX_CALL_EX_TREE_SIZE = 1000000
 	MAX_CALLED_FUNCTIONS  = 255
 )
@@ -104,10 +102,10 @@ func (n *TreeNode) Encode() []byte {
 	numFunctions := len(n.children)
 	data = append(data, byte(numFunctions))
 	// Encoded data of this node.
-	encoded := make([]byte, BLOCKCHAIN_ID_SIZE)
+	encoded := make([]byte, blockchainIDSize)
 	n.chainID.FillBytes(encoded)
 	encoded = append(encoded, n.contractAddr.Bytes()...)
-	tmp := make([]byte, DATA_LEN_SIZE_SIZE)
+	tmp := make([]byte, dataLenSizeSize)
 	binary.BigEndian.PutUint16(tmp, uint16(len(n.callData)))
 	encoded = append(encoded, tmp...)
 	encoded = append(encoded, n.callData...)
@@ -122,9 +120,9 @@ func (n *TreeNode) Encode() []byte {
 			encodedChildren = append(encodedChildren, child.Encode())
 		}
 		// Add offsets
-		offset := (numFunctions+1)*OFFSET_SIZE + NUM_FUNCS_CALLED_SIZE
+		offset := (numFunctions+1)*offsetSize + numFuncsCalledSize
 		for _, encodedChild := range encodedChildren {
-			tmp = make([]byte, OFFSET_SIZE)
+			tmp = make([]byte, offsetSize)
 			binary.BigEndian.PutUint32(tmp, uint32(offset))
 			data = append(data, tmp...)
 			offset += len(encodedChild)

@@ -1,7 +1,7 @@
 package simulator
 
 /*
- * Copyright 2021 ConsenSys Software Inc
+ * Copyright 2022 ConsenSys Software Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -105,7 +105,10 @@ func (sim *SimulatorImplV1) Simulate(chainID *big.Int, contractType string, cont
 				return nil, err
 			}
 		}
-		head.AddChild(child)
+		err = head.AddChild(child)
+		if err != nil {
+			return nil, err
+		}
 	}
 	return head, nil
 }

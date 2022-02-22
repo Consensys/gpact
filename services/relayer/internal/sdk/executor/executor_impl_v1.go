@@ -1,7 +1,7 @@
 package executor
 
 /*
- * Copyright 2021 ConsenSys Software Inc
+ * Copyright 2022 ConsenSys Software Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -33,8 +33,18 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
-// timeout for getting a signed event.
-const eventTimeout = 30 * time.Second
+// Note:
+// At the moment, the nonce management is done by fetching from blockchain source and
+// the gas price is obtained by asking blockchain source for suggest gas price.
+
+const (
+	// timeout for getting a signed event.
+	eventTimeout = 30 * time.Second
+	// retry attempt
+	retryAttempt = 5
+	// retry delay
+	retryDelay = 5 * time.Second
+)
 
 // Function sigs.
 var startFuncSig = [32]byte{0x77, 0xda, 0xb6, 0x11, 0xad, 0x9a, 0x24, 0xb7, 0x63, 0xe2, 0x74, 0x2f, 0x57, 0x74, 0x9a, 0x02, 0x27, 0x39, 0x3e, 0x0d, 0xa7, 0x62, 0x12, 0xd7, 0x4f, 0xce, 0xb3, 0x26, 0xb0, 0x66, 0x14, 0x24}
@@ -43,12 +53,14 @@ var rootFuncSig = [32]byte{0xe6, 0x76, 0x3d, 0xd9, 0x9b, 0xf8, 0x94, 0xd7, 0x2f,
 
 //ExecutorImplV1 implements Executor.
 type ExecutorImplV1 struct {
-	gpacts       map[string]common.Address
-	cmgr         chainap.ChainAPManager
-	ms           msgstore.MessageStore
+	gpacts map[string]common.Address
+	cmgr   chainap.ChainAPManager
+	ms     msgstore.MessageStore
+	// transactOpts stores the private key for execution. It is updated before every call (to obtain the latest nonce and suggested gas price).
 	transactOpts *bind.TransactOpts
 }
 
+// NewExecutorImplV1 creates a new executor.
 func NewExecutorImplV1(cmgr chainap.ChainAPManager, ms msgstore.MessageStore, transactOpts *bind.TransactOpts) *ExecutorImplV1 {
 	return &ExecutorImplV1{
 		gpacts:       make(map[string]common.Address),
@@ -132,7 +144,7 @@ func (exec *ExecutorImplV1) start(root *treenode.TreeNode, transID *big.Int) (*f
 	}
 	// Try 5 times, 5 seconds apart
 	var tx *types.Transaction
-	for i := 0; i < 5; i++ {
+	for i := 0; i < retryAttempt; i++ {
 		tx, err = igpact.Start(exec.transactOpts, transID, big.NewInt(10000), root.Encode())
 		if err == nil {
 			logging.Info("Start transaction submitted with hash: %v", tx.Hash().String())
@@ -143,6 +155,7 @@ func (exec *ExecutorImplV1) start(root *treenode.TreeNode, transID *big.Int) (*f
 		if err != nil {
 			return nil, nil, err
 		}
+		time.Sleep(retryDelay)
 	}
 	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(eventTimeout))
 	defer cancel()
@@ -222,7 +235,7 @@ func (exec *ExecutorImplV1) segment(transID *big.Int, startChainID *big.Int, sta
 	}
 	// Try 5 times, 5 seconds apart
 	var tx *types.Transaction
-	for i := 0; i < 5; i++ {
+	for i := 0; i < retryAttempt; i++ {
 		tx, err = igpact.Segment(exec.transactOpts, chainIDs, cbcAddrs, eventFuncSigs, eventDatas, eventSigs, callPath)
 		if err == nil {
 			logging.Info("Segment transaction submitted with hash: %v", tx.Hash().String())
@@ -233,6 +246,7 @@ func (exec *ExecutorImplV1) segment(transID *big.Int, startChainID *big.Int, sta
 		if err != nil {
 			return nil, nil, err
 		}
+		time.Sleep(retryDelay)
 	}
 	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(eventTimeout))
 	defer cancel()
@@ -308,7 +322,7 @@ func (exec *ExecutorImplV1) root(transID *big.Int, startChainID *big.Int, startE
 	}
 	// Try 5 times, 5 seconds apart
 	var tx *types.Transaction
-	for i := 0; i < 5; i++ {
+	for i := 0; i < retryAttempt; i++ {
 		tx, err = igpact.Root(exec.transactOpts, chainIDs, cbcAddrs, eventFuncSigs, eventDatas, eventSigs)
 		if err == nil {
 			logging.Info("Root transaction submitted with hash: %v", tx.Hash().String())
@@ -319,6 +333,7 @@ func (exec *ExecutorImplV1) root(transID *big.Int, startChainID *big.Int, startE
 		if err != nil {
 			return nil, nil, err
 		}
+		time.Sleep(retryDelay)
 	}
 	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(eventTimeout))
 	defer cancel()
@@ -381,7 +396,7 @@ func (exec *ExecutorImplV1) signal(transID *big.Int, rootChainID *big.Int, rootE
 			return err
 		}
 		// Try 5 times, 5 seconds apart
-		for i := 0; i < 5; i++ {
+		for i := 0; i < retryAttempt; i++ {
 			var tx *types.Transaction
 			tx, err := igpact.Signalling(exec.transactOpts, chainIDs, cbcAddrs, eventFuncSigs, eventDatas, eventSigs)
 			if err == nil {
@@ -393,6 +408,7 @@ func (exec *ExecutorImplV1) signal(transID *big.Int, rootChainID *big.Int, rootE
 			if err != nil {
 				return err
 			}
+			time.Sleep(retryDelay)
 		}
 	}
 	return nil

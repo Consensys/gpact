@@ -1,7 +1,7 @@
 package observer
 
 /*
- * Copyright 2021 ConsenSys Software Inc.
+ * Copyright 2022 ConsenSys Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -19,9 +19,10 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/ethereum/go-ethereum/core/types"
 	"math/big"
 	"testing"
+
+	"github.com/ethereum/go-ethereum/core/types"
 
 	"github.com/consensys/gpact/services/relayer/internal/contracts/functioncall"
 	"github.com/ethereum/go-ethereum/common"

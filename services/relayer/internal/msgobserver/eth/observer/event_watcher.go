@@ -1,7 +1,7 @@
 package observer
 
 /*
- * Copyright 2021 ConsenSys Software Inc.
+ * Copyright 2022 ConsenSys Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -18,6 +18,8 @@ package observer
 import (
 	"context"
 	"fmt"
+	"log"
+
 	"github.com/avast/retry-go"
 	"github.com/consensys/gpact/services/relayer/internal/contracts/functioncall"
 	"github.com/consensys/gpact/services/relayer/internal/logging"
@@ -26,7 +28,6 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/event"
 	"github.com/ipfs/go-datastore"
-	"log"
 )
 
 // EventWatcher listens to blockchain events
