@@ -76,11 +76,11 @@ func TestERC20SetupSFC(t *testing.T) {
 	defer chainB.Close()
 
 	// Create accounts
-	_, admin := createUser()            // admin to create all contracts
-	_, userA = createUser()             // userA on chainA
-	_, userB = createUser()             // userB on chainB
-	relayerKey, relayer := createUser() // relayer key
-	dispatcherKey, _ := createUser()    // dispatcher key
+	_, admin := createUser()           // admin to create all contracts
+	_, userA = createUser()            // userA on chainA
+	_, userB = createUser()            // userB on chainB
+	relayerKey, relayer = createUser() // relayer key
+	dispatcherKey, _ := createUser()   // dispatcher key
 
 	var tx *types.Transaction
 	// Deploy ERC20 contracts on both chains.
@@ -283,8 +283,8 @@ func TestERC20SetupSFC(t *testing.T) {
 	// Setup relayers
 	t.Log("Setup relayers...")
 
-	assert.Empty(t, setupObserver("127.0.0.1:9525", big.NewInt(31), "ws://bc31node1:8546", sfcAddrA))
-	assert.Empty(t, setupObserver("127.0.0.1:9526", big.NewInt(32), "ws://bc32node1:8546", sfcAddrB))
+	assert.Empty(t, setupObserver("127.0.0.1:9525", big.NewInt(31), "ws://bc31node1:8546", "SFC", sfcAddrA))
+	assert.Empty(t, setupObserver("127.0.0.1:9526", big.NewInt(32), "ws://bc32node1:8546", "SFC", sfcAddrB))
 	assert.Empty(t, setupRelayer("127.0.0.1:9625", big.NewInt(31), bridgeAddrA, signer.SECP256K1_KEY_TYPE, relayerKey))
 	assert.Empty(t, setupRelayer("127.0.0.1:9625", big.NewInt(32), bridgeAddrB, signer.SECP256K1_KEY_TYPE, relayerKey))
 	assert.Empty(t, setupDispatcher("127.0.0.1:9725", big.NewInt(31), "ws://bc31node1:8546", dispatcherKey, bridgeAddrA, verifierAddrA))
@@ -407,10 +407,9 @@ func TestERC20SetupGpact(t *testing.T) {
 	defer chainB.Close()
 
 	// Create accounts
-	_, admin := createUser()           // admin to create all contracts
-	_, userA = createUser()            // userA on chainA
-	_, userB = createUser()            // userB on chainB
-	relayerKey, relayer = createUser() // relayer key
+	_, admin := createUser() // admin to create all contracts
+	_, userA = createUser()  // userA on chainA
+	_, userB = createUser()  // userB on chainB
 
 	// Deploy registrar on both chains
 	t.Log("Deploy registrar on chainA...")
@@ -660,7 +659,14 @@ func TestERC20SetupGpact(t *testing.T) {
 	waitForReceipt(chainB, tx)
 	t.Log("Done")
 
-	t.Log("Setup done.")
+	t.Log("Setup relayers...")
+
+	assert.Empty(t, setupObserver("127.0.0.1:9527", big.NewInt(31), "ws://bc31node1:8546", "GPACT", gpactAddrA))
+	assert.Empty(t, setupObserver("127.0.0.1:9526", big.NewInt(32), "ws://bc32node1:8546", "GPACT", gpactAddrB))
+	assert.Empty(t, setupRelayer("127.0.0.1:9625", big.NewInt(0), common.Address{}, signer.SECP256K1_KEY_TYPE, relayerKey))
+	assert.Empty(t, setupMessageStore("127.0.0.1:9725", "msgstore:8080"))
+
+	t.Log("Setup done")
 }
 
 func TestERC20TransferGpact(t *testing.T) {
@@ -834,8 +840,8 @@ func waitForReceipt(conn *ethclient.Client, tx *types.Transaction) error {
 }
 
 // setupObserver sets up observer.
-func setupObserver(url string, chainID *big.Int, chainAP string, contractAddr common.Address) error {
-	success, err := observerapi.RequestStartObserve(url, chainID, chainAP, "SFC", contractAddr)
+func setupObserver(url string, chainID *big.Int, chainAP string, contractType string, contractAddr common.Address) error {
+	success, err := observerapi.RequestStartObserve(url, chainID, chainAP, contractType, contractAddr)
 	if err != nil {
 		return err
 	}
@@ -867,6 +873,18 @@ func setupDispatcher(url string, chainID *big.Int, chainAP string, key []byte, c
 		return fmt.Errorf("failed.")
 	}
 	success, err = dispatcherapi.RequestSetVerifierAddr(url, chainID, contractAddr, esAddr)
+	if err != nil {
+		return err
+	}
+	if !success {
+		return fmt.Errorf("failed.")
+	}
+	return nil
+}
+
+// setupMessageStore sets up message store.
+func setupMessageStore(url string, msgStoreAddr string) error {
+	success, err := dispatcherapi.RequestSetMsgStoreAddr(url, msgStoreAddr)
 	if err != nil {
 		return err
 	}
