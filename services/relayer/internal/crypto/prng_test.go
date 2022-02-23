@@ -1,7 +1,7 @@
 package crypto
 
 /*
- * Copyright 2021 ConsenSys Software Inc.
+ * Copyright 2022 ConsenSys Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -17,9 +17,10 @@ package crypto
 
 import (
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 // Check that the function executes without causing a panic.
