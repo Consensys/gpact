@@ -29,6 +29,7 @@ import (
 type StartObserveReq struct {
 	ChainID      string `json:"chain_id"`
 	ChainAP      string `json:"chain_ap"`
+	ContractType string `json:"contract_type"`
 	ContractAddr string `json:"contract_addr"`
 }
 
@@ -52,7 +53,7 @@ func HandleStartObserve(data []byte) ([]byte, error) {
 		return nil, fmt.Errorf("fail to decode chain id")
 	}
 
-	err = instance.Observer.StartObserve(chainID, req.ChainAP, common.HexToAddress(req.ContractAddr))
+	err = instance.Observer.StartObserve(chainID, req.ChainAP, req.ContractType, common.HexToAddress(req.ContractAddr))
 	if err != nil {
 		return nil, err
 	}
@@ -67,10 +68,11 @@ func HandleStartObserve(data []byte) ([]byte, error) {
 }
 
 // RequestStartObserve requests start observe.
-func RequestStartObserve(addr string, chainID *big.Int, chainAP string, contractAddr common.Address) (bool, error) {
+func RequestStartObserve(addr string, chainID *big.Int, chainAP string, contractType string, contractAddr common.Address) (bool, error) {
 	req := StartObserveReq{
 		ChainID:      chainID.String(),
 		ChainAP:      chainAP,
+		ContractType: contractType,
 		ContractAddr: contractAddr.String(),
 	}
 	data, err := json.Marshal(req)

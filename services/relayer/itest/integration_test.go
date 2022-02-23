@@ -835,7 +835,7 @@ func waitForReceipt(conn *ethclient.Client, tx *types.Transaction) error {
 
 // setupObserver sets up observer.
 func setupObserver(url string, chainID *big.Int, chainAP string, contractAddr common.Address) error {
-	success, err := observerapi.RequestStartObserve(url, chainID, chainAP, contractAddr)
+	success, err := observerapi.RequestStartObserve(url, chainID, chainAP, "SFC", contractAddr)
 	if err != nil {
 		return err
 	}

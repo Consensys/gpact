@@ -39,6 +39,7 @@ const (
 // observation stores the information of an active observation.
 type observation struct {
 	ChainID      string `json:"chain_id"`
+	ContractType string `json:"contract_type"`
 	ContractAddr string `json:"contract_addr"`
 	AP           string `json:"ap"`
 }
@@ -48,8 +49,9 @@ type ObserverImplV1 struct {
 	path string
 	mq   *mqserver.MQServer
 
-	ds       datastore.Datastore
-	observer *SFCBridgeObserver
+	ds            datastore.Datastore
+	sfcObserver   *SFCBridgeObserver
+	gpactObserver *GPACTBridgeObserver
 }
 
 // NewObserverImplV1 creates a new observer.
@@ -92,7 +94,13 @@ func (o *ObserverImplV1) Start() error {
 				err = fmt.Errorf("error in setting chain id")
 				return err
 			}
-			go o.routine(chainID, val.AP, common.HexToAddress(val.ContractAddr))
+			if val.ContractType == "SFC" || val.ContractType == "sfc" {
+				go o.routineSFC(chainID, val.AP, common.HexToAddress(val.ContractAddr))
+			} else if val.ContractType == "GPACT" || val.ContractType == "gpact" {
+				go o.routineGPACT(chainID, val.AP, common.HexToAddress(val.ContractAddr))
+			} else {
+				return fmt.Errorf("contract type %v is not supported", val.ContractType)
+			}
 		}
 	}
 	return nil
@@ -100,18 +108,22 @@ func (o *ObserverImplV1) Start() error {
 
 // Stop safely stops the observer.
 func (o *ObserverImplV1) Stop() {
-	if o.observer != nil {
-		o.observer.Stop()
+	if o.sfcObserver != nil {
+		o.sfcObserver.Stop()
+	}
+	if o.gpactObserver != nil {
+		o.gpactObserver.Stop()
 	}
 }
 
 // StartObserve starts a new observe.
-func (o *ObserverImplV1) StartObserve(chainID *big.Int, chainAP string, contractAddr common.Address) error {
+func (o *ObserverImplV1) StartObserve(chainID *big.Int, chainAP string, contractType string, contractAddr common.Address) error {
 	// First, close any existing observe.
 	o.Stop()
 
 	val := observation{
 		ChainID:      chainID.String(),
+		ContractType: contractType,
 		ContractAddr: contractAddr.String(),
 		AP:           chainAP,
 	}
@@ -123,7 +135,14 @@ func (o *ObserverImplV1) StartObserve(chainID *big.Int, chainAP string, contract
 	if err != nil {
 		return err
 	}
-	go o.routine(chainID, chainAP, contractAddr)
+	if contractType == "SFC" {
+		go o.routineSFC(chainID, chainAP, contractAddr)
+	} else if contractType == "GPACT" {
+		go o.routineGPACT(chainID, chainAP, contractAddr)
+	} else {
+		return fmt.Errorf("contract type %v is not supported", contractType)
+	}
+
 	return nil
 }
 
@@ -139,8 +158,8 @@ func (o *ObserverImplV1) StopObserve() error {
 	return nil
 }
 
-// routine is the observe routine.
-func (o *ObserverImplV1) routine(chainID *big.Int, chainAP string, addr common.Address) {
+// routineSFC is the observe SFC routine.
+func (o *ObserverImplV1) routineSFC(chainID *big.Int, chainAP string, addr common.Address) {
 	for {
 		chain, err := ethclient.Dial(chainAP)
 		if err != nil {
@@ -161,7 +180,40 @@ func (o *ObserverImplV1) routine(chainID *big.Int, chainAP string, addr common.A
 			logging.Error(err.Error())
 			return
 		}
-		o.observer = observer
+		o.sfcObserver = observer
+		if observer.Start() == nil {
+			break
+		} else {
+			logging.Warn("Error in observing event. Retry in 3 seconds...")
+			chain.Close()
+			time.Sleep(3 * time.Second)
+		}
+	}
+}
+
+// routineGPACT is the observe GPACT routine.
+func (o *ObserverImplV1) routineGPACT(chainID *big.Int, chainAP string, addr common.Address) {
+	for {
+		chain, err := ethclient.Dial(chainAP)
+		if err != nil {
+			logging.Error(err.Error())
+			return
+		}
+		defer chain.Close()
+
+		gpact, err := functioncall.NewGpact(addr, chain)
+		if err != nil {
+			logging.Error(err.Error())
+			return
+		}
+
+		observer, err := NewGPACTBridgeRealtimeObserver(chainID.String(), addr.String(), gpact, o.mq)
+
+		if err != nil {
+			logging.Error(err.Error())
+			return
+		}
+		o.gpactObserver = observer
 		if observer.Start() == nil {
 			break
 		} else {

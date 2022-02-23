@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"time"
 
 	v1 "github.com/consensys/gpact/services/relayer/pkg/messages/v1"
 	"github.com/ethereum/go-ethereum/core/types"
@@ -89,4 +90,59 @@ func (t *SFCEventTransformer) getIDForEvent(event types.Log) string {
 
 func NewSFCEventTransformer(sourceNetwork string, sourceAddr string) *SFCEventTransformer {
 	return &SFCEventTransformer{sourceNetwork, sourceAddr}
+}
+
+type GPACTEventTransformer struct {
+	Source     string
+	SourceAddr string
+}
+
+func (t *GPACTEventTransformer) ToMessage(event interface{}) (*v1.Message, error) {
+	var raw types.Log
+	startEvent, ok := event.(*functioncall.GpactStart)
+	if ok {
+		raw = startEvent.Raw
+	} else {
+		segmentEvent, ok := event.(*functioncall.GpactSegment)
+		if ok {
+			raw = segmentEvent.Raw
+		} else {
+			rootEvent, ok := event.(*functioncall.GpactRoot)
+			if ok {
+				raw = rootEvent.Raw
+			} else {
+				return nil, fmt.Errorf("event not supported")
+			}
+		}
+	}
+
+	source := v1.ApplicationAddress{NetworkID: t.Source, ContractAddress: t.SourceAddr}
+	destination := v1.ApplicationAddress{NetworkID: "0", ContractAddress: ""}
+
+	data, err := json.Marshal(raw)
+	if err != nil {
+		return nil, err
+	}
+
+	message := v1.Message{
+		ID:          t.getIDForEvent(raw),
+		Timestamp:   time.Now().Unix(), //Event does not contain timestamp
+		MsgType:     v1.MessageType,
+		Version:     v1.Version,
+		Destination: destination,
+		Source:      source,
+		Proofs:      []v1.Proof{},
+		Payload:     hex.EncodeToString(data),
+	}
+
+	return &message, nil
+}
+
+// getIDForEvent generates a deterministic ID for an event of the format {network_id}/{contract_address}/{block_number}/{tx_index}/{log_index}
+func (t *GPACTEventTransformer) getIDForEvent(event types.Log) string {
+	return fmt.Sprintf("%s/%s/%d/%d/%d", t.Source, t.SourceAddr, event.BlockNumber, event.TxIndex, event.Index)
+}
+
+func NewGPACTEventTransformer(sourceNetwork string, sourceAddr string) *GPACTEventTransformer {
+	return &GPACTEventTransformer{sourceNetwork, sourceAddr}
 }
