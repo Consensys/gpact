@@ -85,7 +85,7 @@ func (t *SFCEventTransformer) validate(event *functioncall.SfcCrossCall) error {
 
 // getIDForEvent generates a deterministic ID for an event of the format {network_id}/{contract_address}/{block_number}/{tx_index}/{log_index}
 func (t *SFCEventTransformer) getIDForEvent(event types.Log) string {
-	return fmt.Sprintf("%s/%s/%d/%d/%d", t.Source, t.SourceAddr, event.BlockNumber, event.TxIndex, event.Index)
+	return fmt.Sprintf("%s-%s-%d-%d-%d", t.Source, t.SourceAddr, event.BlockNumber, event.TxIndex, event.Index)
 }
 
 func NewSFCEventTransformer(sourceNetwork string, sourceAddr string) *SFCEventTransformer {
@@ -140,7 +140,7 @@ func (t *GPACTEventTransformer) ToMessage(event interface{}) (*v1.Message, error
 
 // getIDForEvent generates a deterministic ID for an event of the format {network_id}/{contract_address}/{block_number}/{tx_index}/{log_index}
 func (t *GPACTEventTransformer) getIDForEvent(event types.Log) string {
-	return fmt.Sprintf("%s/%s/%d/%d/%d", t.Source, t.SourceAddr, event.BlockNumber, event.TxIndex, event.Index)
+	return fmt.Sprintf("%s-%s-%d-%d-%d", t.Source, t.SourceAddr, event.BlockNumber, event.TxIndex, event.Index)
 }
 
 func NewGPACTEventTransformer(sourceNetwork string, sourceAddr string) *GPACTEventTransformer {
