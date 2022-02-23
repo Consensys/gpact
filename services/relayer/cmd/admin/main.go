@@ -241,6 +241,25 @@ func main() {
 							return nil
 						},
 					},
+					{
+						Name:      "set-msgstore",
+						Usage:     "Set message store",
+						ArgsUsage: "[url msgStoreAddr]",
+						Action: func(c *cli.Context) error {
+							url := c.Args().Get(0)
+							msgStoreAddr := c.Args().Get(1)
+							success, err := dispatcherapi.RequestSetMsgStoreAddr(url, msgStoreAddr)
+							if err != nil {
+								return err
+							}
+							if success {
+								fmt.Println("Success.")
+							} else {
+								fmt.Println("Failed.")
+							}
+							return nil
+						},
+					},
 				},
 			},
 		},

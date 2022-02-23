@@ -21,4 +21,5 @@ const (
 	GetAuthAddrReqType        = byte(3)
 	SetVerifierAddrReqType    = byte(4)
 	GetVerifierAddrReqType    = byte(5)
+	SetMsgStoreAddrReqType    = byte(6)
 )

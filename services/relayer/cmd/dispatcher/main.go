@@ -86,7 +86,8 @@ func main() {
 		AddHandler(api.GetChainAPReqType, api.HandleGetChainAP).
 		AddHandler(api.GetAuthAddrReqType, api.HandleGetAuthAddr).
 		AddHandler(api.SetVerifierAddrReqType, api.HandleSetVerifierAddr).
-		AddHandler(api.GetVerifierAddrReqType, api.HandleGetVerifierAddr)
+		AddHandler(api.GetVerifierAddrReqType, api.HandleGetVerifierAddr).
+		AddHandler(api.SetMsgStoreAddrReqType, api.HandleSetMsgStoreAddr)
 	err = rpc.Start()
 	if err != nil {
 		panic(err)

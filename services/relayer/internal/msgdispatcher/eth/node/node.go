@@ -36,6 +36,8 @@ type Node struct {
 	Verifier verifier.Verifier
 
 	Dispatcher dispatcher.Dispatcher
+
+	MessageStoreAddr string
 }
 
 // Single instance of the gateway
