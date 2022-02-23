@@ -172,7 +172,7 @@ func (exec *ExecutorImplV1) start(root *treenode.TreeNode, transID *big.Int) (*f
 		case ev := <-chanEvents:
 			if ev.CrossBlockchainTransactionId.Cmp(transID) == 0 {
 				// Get sig from message store
-				evSig, err := exec.ms.GetSignature(ctx, root.ChainID(), tx.Hash().String())
+				evSig, err := exec.ms.GetSignature(ctx, getEventID(root.ChainID(), ev.Raw))
 				if err != nil {
 					return nil, nil, err
 				}
@@ -263,7 +263,7 @@ func (exec *ExecutorImplV1) segment(transID *big.Int, startChainID *big.Int, sta
 		case ev := <-chanEvents:
 			if ev.CrossBlockchainTransactionId.Cmp(transID) == 0 {
 				// Get sig from message store
-				evSig, err := exec.ms.GetSignature(ctx, node.ChainID(), tx.Hash().String())
+				evSig, err := exec.ms.GetSignature(ctx, getEventID(node.ChainID(), ev.Raw))
 				if err != nil {
 					return nil, nil, err
 				}
@@ -350,7 +350,7 @@ func (exec *ExecutorImplV1) root(transID *big.Int, startChainID *big.Int, startE
 		case ev := <-chanEvents:
 			if ev.CrossBlockchainTransactionId.Cmp(transID) == 0 {
 				// Get sig from message store
-				evSig, err := exec.ms.GetSignature(ctx, startChainID, tx.Hash().String())
+				evSig, err := exec.ms.GetSignature(ctx, getEventID(startChainID, ev.Raw))
 				if err != nil {
 					return nil, nil, err
 				}
@@ -428,4 +428,9 @@ func (exec *ExecutorImplV1) updateTransactOpts(chainAP *ethclient.Client) error 
 	}
 	exec.transactOpts.Nonce = big.NewInt(int64(nonce))
 	return nil
+}
+
+// getEventID gets the ID of an event.
+func getEventID(chainID *big.Int, raw types.Log) string {
+	return fmt.Sprintf("%s/%s/%d/%d/%d", chainID.String(), raw.Address.String(), raw.BlockNumber, raw.TxIndex, raw.Index)
 }
