@@ -184,7 +184,7 @@ contract TwentyActs is Pausable, AccessControl, CbcDecVer {
     function pause() external {
         require(
             hasRole(PAUSER_ROLE, _msgSender()),
-            "20ACTS: Pause: Must have PAUSER role"
+            "20ACTS:Must have PAUSER role"
         );
         _pause();
     }
@@ -198,7 +198,7 @@ contract TwentyActs is Pausable, AccessControl, CbcDecVer {
     function unpause() external {
         require(
             hasRole(PAUSER_ROLE, _msgSender()),
-            "20ACTS: Unpause: Must have PAUSER role"
+            "20ACTS:Must have PAUSER role"
         );
         _unpause();
     }
@@ -224,7 +224,7 @@ contract TwentyActs is Pausable, AccessControl, CbcDecVer {
     ) external {
         require(
             hasRole(MAPPING_ROLE, _msgSender()),
-            "20ACTS: set ERC 20 Mapping: Must have MAPPING role"
+            "20ACTS:Must have MAPPING role"
         );
 
         // Indicate the token us supported.
@@ -249,7 +249,7 @@ contract TwentyActs is Pausable, AccessControl, CbcDecVer {
     ) external {
         require(
             hasRole(MAPPING_ROLE, _msgSender()),
-            "20ACTS: Set Bridge Mapping: Must have MAPPING role"
+            "20ACTS:Must have MAPPING role"
         );
         remoteErc20Bridges[_otherBcId] = _otherErc20Bridge;
     }
@@ -265,7 +265,7 @@ contract TwentyActs is Pausable, AccessControl, CbcDecVer {
     ) external {
         require(
             hasRole(DEFAULT_ADMIN_ROLE, msg.sender),
-            "20ACTS: Set Infrastructure Account: Must have ADMIN role"
+            "20ACTS:Must have ADMIN role"
         );
         infrastructureAccount = _account;
     }
@@ -286,7 +286,7 @@ contract TwentyActs is Pausable, AccessControl, CbcDecVer {
     ) external {
         require(
             hasRole(DEFAULT_ADMIN_ROLE, msg.sender),
-            "20ACTS: Set Banned: Must have ADMIN role"
+            "20ACTS:Must have ADMIN role"
         );
         banned[_user] = _banned;
     }
@@ -307,7 +307,7 @@ contract TwentyActs is Pausable, AccessControl, CbcDecVer {
     ) external {
         require(
             hasRole(DEFAULT_ADMIN_ROLE, msg.sender),
-            "20ACTS: Set Frozen: Must have ADMIN role"
+            "20ACTS:Must have ADMIN role"
         );
         frozen[_user] = _frozen;
     }
@@ -324,8 +324,8 @@ contract TwentyActs is Pausable, AccessControl, CbcDecVer {
      * @param _amount       Number of tokens to transfer.
      */
     function deposit(address _thisBcErc20, uint256 _amount) external {
-        require(erc20Supported[_thisBcErc20], "20ACTS: Deposit: Deposits not allowed for ERC 20 contract");
-        require(!banned[msg.sender], "20ACTS: Deposit: Account is banned from depositing funds");
+        require(erc20Supported[_thisBcErc20], "20ACTS:Deposits not allowed for ERC 20 contract");
+        require(!banned[msg.sender], "20ACTS:Account is banned from depositing funds");
 
         deposits[msg.sender][_thisBcErc20] += _amount;
 
@@ -343,11 +343,11 @@ contract TwentyActs is Pausable, AccessControl, CbcDecVer {
      * @param _amount       Number of tokens to withdrawal.
      */
     function requestWithdrawal(address _thisBcErc20, uint256 _amount) external {
-        require(withdrawalsTime[msg.sender][_thisBcErc20] == 0, "20ACTS: Request Withdrawal: Active withdrawal");
+        require(withdrawalsTime[msg.sender][_thisBcErc20] == 0, "20ACTS:Active withdrawal");
         uint256 amountDeposited = deposits[msg.sender][_thisBcErc20];
         uint256 amountAllocated = allocated[msg.sender][_thisBcErc20];
         uint256 amountWithdrawals = withdrawals[msg.sender][_thisBcErc20];
-        require(amountDeposited - amountAllocated - amountWithdrawals <= _amount, "20ACTS: Request Withdraw: Amount exceeds unallocated deposits");
+        require(amountDeposited - amountAllocated - amountWithdrawals <= _amount, "20ACTS:Amount exceeds unallocated deposits");
         withdrawals[msg.sender][_thisBcErc20] = amountWithdrawals + _amount;
         withdrawalsTime[msg.sender][_thisBcErc20] = withdrawWaitPeriod + block.timestamp;
 
@@ -361,15 +361,15 @@ contract TwentyActs is Pausable, AccessControl, CbcDecVer {
      * @param _thisBcErc20  Address of ERC 20 contract.
      */
     function finalizeWithdrawal(address _thisBcErc20) external {
-        require(withdrawalsTime[msg.sender][_thisBcErc20] != 0, "20ACTS: Finalize Withdrawal: No active withdrawal");
-        require(withdrawalsTime[msg.sender][_thisBcErc20] > block.timestamp, "20ACTS: Finalize Withdrawal: Attempting to withdraw early");
-        require(!frozen[msg.sender], "20ACTS: Finalize Withdrawal: Account frozen");
+        require(withdrawalsTime[msg.sender][_thisBcErc20] != 0, "20ACTS:No active withdrawal");
+        require(withdrawalsTime[msg.sender][_thisBcErc20] > block.timestamp, "20ACTS:Attempting to withdraw early");
+        require(!frozen[msg.sender], "20ACTS:Account frozen");
 
         uint256 amountDeposited = deposits[msg.sender][_thisBcErc20];
         uint256 amountWithdrawals = withdrawals[msg.sender][_thisBcErc20];
 
         // This should be impossible.
-        require(amountDeposited > amountWithdrawals, "20ACTS: Withdraw: Withdrawal amount > deposited amount");
+        require(amountDeposited > amountWithdrawals, "20ACTS:Withdrawal amount > deposited amount");
 
         withdrawals[msg.sender][_thisBcErc20] = 0;
         deposits[msg.sender][_thisBcErc20] = amountDeposited - amountWithdrawals;
@@ -393,12 +393,12 @@ contract TwentyActs is Pausable, AccessControl, CbcDecVer {
         // Validate transaction information.
         // No direct validation for crosschain transaction id: Check indirectly via the digest.
         bytes32 txInfoDigest = keccak256(abi.encode(_txInfo));
-        require(txState[txInfoDigest] == NOT_USED, "20ACTS: Prepare On Target: Transaction already registered");
+        require(txState[txInfoDigest] == NOT_USED, "20ACTS:Transaction already registered");
         // Validate the source blockchain id: Check that there is a corresponding bridge on that blockchain.
         address source20ActsContract = remoteErc20Bridges[_txInfo.sourceBcId];
         require(
             source20ActsContract != address(0),
-            "20ACTS: Source blockchain not supported by target 20ACTS"
+            "20ACTS:Source blockchain not supported by target 20ACTS"
         );
         // Validate the ERC 20 address on the source chain and on target chain: The two contracts
         // must be linked to each other.
@@ -406,28 +406,28 @@ contract TwentyActs is Pausable, AccessControl, CbcDecVer {
         address sourceErc20Address = erc20AddressMapping[_txInfo.targetErc20Address][_txInfo.sourceBcId];
         require(
             sourceErc20Address == _txInfo.sourceErc20Address,
-            "20ACTS: Token not transferable to requested ERC20"
+            "20ACTS:Token not transferable to requested ERC20"
         );
         // Validate targetBcId: It must be this chain.
-        require(_txInfo.targetBcId == myBlockchainId, "20ACTS: Prepare On Target: Not for this blockchain");
+        require(_txInfo.targetBcId == myBlockchainId, "20ACTS:Not for this blockchain");
         // No validation possible for txInfo.sender or txInfo.recipient
         // Validate liquidityProvider: they must be the party that has submitted this transaction.
         // Doing this ensures the address is valid.
-        require(msg.sender == _txInfo.liquidityProvider, "20ACTS: Prepare On Target: msg.sender must be liquidity provider");
+        require(msg.sender == _txInfo.liquidityProvider, "20ACTS:msg.sender must be liquidity provider");
         // Validate amount. No validation possible on lpFee or inFee.
         // Check that the Liquidity Provider has enough unallocated tokens in the 20ACTS contract.
         uint256 amount = _txInfo.amount;
         uint256 amountDeposited = deposits[msg.sender][targetErc20Address];
         uint256 amountAllocated = allocated[msg.sender][targetErc20Address];
         uint256 amountWithdrawals = withdrawals[msg.sender][targetErc20Address];
-        require(amountDeposited - amountAllocated - amountWithdrawals <= amount, "20ACTS: Prepare Target: Amount exceeds unallocated deposits");
+        require(amountDeposited - amountAllocated - amountWithdrawals <= amount, "20ACTS:Amount exceeds unallocated deposits");
         // Validate biddingPeriodEnd: Must be in the past.
-        require(_txInfo.biddingPeriodEnd < block.timestamp, "20ACTS: Prepare On Target: Bidding period still in progress");
+        require(_txInfo.biddingPeriodEnd < block.timestamp, "20ACTS:Bidding period still in progress");
         // Validate timeout: Must be in the future.
-        require(_txInfo.timeout > block.timestamp, "20ACTS: Prepare On Target: Transaction has timed out");
+        require(_txInfo.timeout > block.timestamp, "20ACTS:Transaction has timed out");
 
-        require(!banned[_txInfo.sender], "20ACTS: Prepare On Target: Sender is banned");
-        require(!banned[_txInfo.recipient], "20ACTS: Prepare On Target: Recipient is banned");
+        require(!banned[_txInfo.sender], "20ACTS:Sender is banned");
+        require(!banned[_txInfo.recipient], "20ACTS:Recipient is banned");
 
         // Allocate the funds.
         allocated[msg.sender][targetErc20Address] = amountAllocated + amount;
@@ -464,9 +464,9 @@ contract TwentyActs is Pausable, AccessControl, CbcDecVer {
         // No direct validation for crosschain transaction id: Check indirectly via the digest.
         bytes32 txInfoDigest = keccak256(abi.encode(_txInfo));
         {
-            require(txState[txInfoDigest] == NOT_USED, "20ACTS: Prepare On Source: Transaction already registered");
+            require(txState[txInfoDigest] == NOT_USED, "20ACTS:Transaction already registered");
             // Validate sourceBcId: It must be this chain.
-            require(_txInfo.sourceBcId == myBlockchainId, "20ACTS: Prepare On Source: Not for this blockchain");
+            require(_txInfo.sourceBcId == myBlockchainId, "20ACTS:Not for this blockchain");
 
             // TODO Validation for txInfo.sender: Check that the signer of the transaction is the sender, and that the transaction
             // TODO contains the txInfoDigest  / decode ERC 20 Approve transaction with additional data
@@ -475,7 +475,7 @@ contract TwentyActs is Pausable, AccessControl, CbcDecVer {
 
             // Validate biddingPeriodEnd: Must be in the past.
             // TODO this has already bee done on target chain. Don't beed to do it here again.
-            require(_txInfo.biddingPeriodEnd < block.timestamp, "20ACTS: Prepare On Target: Bidding period still in progress");
+            require(_txInfo.biddingPeriodEnd < block.timestamp, "20ACTS:Bidding period still in progress");
         }
 
         // Validate the target blockchain id: Check that there is a corresponding bridge on that blockchain.
@@ -497,7 +497,7 @@ contract TwentyActs is Pausable, AccessControl, CbcDecVer {
                 _signatureOrProof
             );
             bytes32 txInfoDigestPrepareOnTarget = abi.decode(_eventData,(bytes32));
-            require(txInfoDigest == txInfoDigestPrepareOnTarget, "20ACTS: Prepare On Source: Incorrect Prepare On Target event");
+            require(txInfoDigest == txInfoDigestPrepareOnTarget, "20ACTS:Incorrect Prepare On Target event");
         }
 
 
@@ -585,10 +585,10 @@ contract TwentyActs is Pausable, AccessControl, CbcDecVer {
         bytes calldata _signatureOrProof
     ) external {
         bytes32 txInfoDigest = keccak256(abi.encode(_txInfo));
-        require(txState[txInfoDigest] == IN_PROGRESS, "20ACTS: Finalize On Target: Transaction not in progress");
+        require(txState[txInfoDigest] == IN_PROGRESS, "20ACTS:Transaction not in progress");
         // Validate targetBcId: It must be this chain.
         // TODO: Is this check required? The targetBcId is covered by the digest, and this was checked in prepare.
-        require(_txInfo.targetBcId == myBlockchainId, "20ACTS: Prepare On Source: Not for this blockchain");
+        require(_txInfo.targetBcId == myBlockchainId, "20ACTS:Not for this blockchain");
 
         address source20ActsAddress = remoteErc20Bridges[_txInfo.sourceBcId];
 
@@ -646,10 +646,10 @@ Update reputations of User and the Liquidity Provider (identified by the Liquidi
         bytes calldata _signatureOrProof
     ) external {
         bytes32 txInfoDigest = keccak256(abi.encode(_txInfo));
-        require(txState[txInfoDigest] == IN_PROGRESS, "20ACTS: Finalize On Source: Transaction not in progress");
+        require(txState[txInfoDigest] == IN_PROGRESS, "20ACTS:Transaction not in progress");
         // Validate targetBcId: It must be this chain.
         // TODO: Is this check required? The sourceBcId is covered by the digest, and this was checked in prepare.
-        require(_txInfo.sourceBcId == myBlockchainId, "20ACTS: Finalize On Source: Not for this blockchain");
+        require(_txInfo.sourceBcId == myBlockchainId, "20ACTS:Not for this blockchain");
 
         address target20ActsAddress = remoteErc20Bridges[_txInfo.sourceBcId];
 
@@ -661,7 +661,7 @@ Update reputations of User and the Liquidity Provider (identified by the Liquidi
             _signatureOrProof
         );
         bytes32 txInfoDigestFinalizeOnTarget = abi.decode(_eventData,(bytes32));
-        require(txInfoDigest == txInfoDigestFinalizeOnTarget, "20ACTS: Finalize On Source: Incorrect Finalize on Target event");
+        require(txInfoDigest == txInfoDigestFinalizeOnTarget, "20ACTS:Incorrect Finalize on Target event");
 
         uint256 totalAmount = _txInfo.amount + _txInfo.lpFee + _txInfo.inFee;
 
