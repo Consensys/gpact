@@ -118,7 +118,7 @@ func handleV1(req messages.Message) {
 		}
 		// Put message
 		client := &http.Client{}
-		req, err := http.NewRequest("PUT", fmt.Sprintf("http://%v/messages/%v", instance.MessageStoreAddr, msg.ID), bytes.NewReader(msg.ToBytes()))
+		req, err := http.NewRequest("PUT", fmt.Sprintf("http://%v/messages/", instance.MessageStoreAddr), bytes.NewReader(msg.ToBytes()))
 		if err != nil {
 			logging.Error(err.Error())
 			return
@@ -130,21 +130,6 @@ func handleV1(req messages.Message) {
 		}
 		if !(resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusCreated) {
 			logging.Error("Error creating new message: %v", resp.Status)
-			return
-		}
-		data, err = json.Marshal(msg.Proofs)
-		if err != nil {
-			logging.Error(err.Error())
-			return
-		}
-		req, err = http.NewRequest("PUT", fmt.Sprintf("http://%v/messages/%v/proofs", instance.MessageStoreAddr, msg.ID), bytes.NewReader(data))
-		if err != nil {
-			logging.Error(err.Error())
-			return
-		}
-		resp, err = client.Do(req)
-		if err != nil {
-			logging.Error(err.Error())
 			return
 		}
 		logging.Info("Message %v is pushed to message store.", msg.ID)
