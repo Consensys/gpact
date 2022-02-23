@@ -16,6 +16,9 @@ type MessageStoreApi struct {
 	DataStore *badger.Datastore
 }
 
+var MessageDetailsMismatchError = fmt.Errorf(
+	"the details of the message submitted for update does not match those stored in the data store")
+
 // UpsertMessageHandler is a handler for PUT /messages and PUT /messages:id endpoints.
 // The method adds a new message to a datastore, if it does not already exist.
 // If the message already exists, it updates the proof set of the message in the datastore
@@ -54,7 +57,9 @@ func (mApi *MessageStoreApi) UpsertMessageHandler(c *gin.Context) {
 	}
 
 	created, err := mApi.upsertMessage(c, tx, message)
-	if err != nil {
+	if err == MessageDetailsMismatchError {
+		statusBadRequest(c, err.Error())
+	} else if err != nil {
 		logging.Error("Error adding or updating message %s: %v", message.ID, err)
 		statusServerError(c, err)
 		tx.Discard(c)
@@ -112,7 +117,17 @@ func (mApi *MessageStoreApi) RecordProofsHandler(c *gin.Context) {
 		return
 	}
 
-	updated, err := mApi.updateMessageProofSet(c, tx, datastore.NewKey(paramId), newProofs)
+	existingMsg, err := mApi.queryMessageById(c, datastore.NewKey(paramId), mApi.DataStore.Get)
+	if err == datastore.ErrNotFound {
+		statusMessageNotFound(c, paramId)
+		return
+	} else if err != nil {
+		logging.Error("Error retrieving message %s: %v", paramId, err)
+		statusServerError(c, err)
+		return
+	}
+
+	updated, err := mApi.updateMessageProofSet(c, tx, existingMsg, newProofs)
 	if err != nil {
 		logging.Error("Error updating proof set for message %s: %v", paramId, err)
 		statusServerError(c, err)
@@ -147,7 +162,7 @@ func (mApi *MessageStoreApi) GetMessageHandler(c *gin.Context) {
 		statusBadRequest(c, fmt.Sprintf("message id '%s' is not valid", id))
 		return
 	}
-	mApi.getMessageDetails(c, id, nil)
+	mApi.respondWithMessageDetails(c, id, nil)
 }
 
 // GetMessageProofsHandler retrieves the proof set for a message  with the given ID if it exists in the datastore.
@@ -163,10 +178,10 @@ func (mApi *MessageStoreApi) GetMessageProofsHandler(c *gin.Context) {
 		statusBadRequest(c, fmt.Sprintf("Message id '%s' is not valid", id))
 		return
 	}
-	mApi.getMessageDetails(c, id, func(message *v1.Message) interface{} { return message.Proofs })
+	mApi.respondWithMessageDetails(c, id, func(message *v1.Message) interface{} { return message.Proofs })
 }
 
-func (mApi *MessageStoreApi) getMessageDetails(c *gin.Context, id string,
+func (mApi *MessageStoreApi) respondWithMessageDetails(c *gin.Context, id string,
 	attribExtractor func(message *v1.Message) interface{}) {
 	message, err := mApi.queryMessageById(c, datastore.NewKey(id), mApi.DataStore.Get)
 	if err == datastore.ErrNotFound {
@@ -227,8 +242,15 @@ func (mApi *MessageStoreApi) upsertMessage(c *gin.Context, tx datastore.Txn, new
 		return false, err
 	}
 	if exists {
+		existingMsg, err := mApi.queryMessageById(c, id, tx.Get)
+		if err != nil {
+			return false, err
+		}
+		if !areImmutableDetailsSame(existingMsg, newMessage) {
+			return false, MessageDetailsMismatchError
+		}
 		// TODO: validate that all other fields of the two messages match as a sanity check
-		_, err = mApi.updateMessageProofSet(c, tx, id, newMessage.Proofs)
+		_, err = mApi.updateMessageProofSet(c, tx, existingMsg, newMessage.Proofs)
 		return false, err
 	} else {
 		err = mApi.addMessage(c, tx, id, newMessage)
@@ -238,24 +260,20 @@ func (mApi *MessageStoreApi) upsertMessage(c *gin.Context, tx datastore.Txn, new
 
 // updateMessageProofSet adds new proof elements of the message provided as argument,
 // to the proof set of the message in the datastore.
-func (mApi *MessageStoreApi) updateMessageProofSet(c *gin.Context, tx datastore.Txn, msgId datastore.Key,
+func (mApi *MessageStoreApi) updateMessageProofSet(c *gin.Context, tx datastore.Txn, existingMsg *v1.Message,
 	newProofSet []v1.Proof) (bool, error) {
-	msg, err := mApi.queryMessageById(c, msgId, tx.Get)
-	if err != nil {
-		return false, err
-	}
-	oldProofCount := len(msg.Proofs)
-	msg.Proofs = aggregateProofSets(msg.Proofs, newProofSet)
-	updatedMsg, err := json.Marshal(msg)
+	oldProofCount := len(existingMsg.Proofs)
+	existingMsg.Proofs = aggregateProofSets(existingMsg.Proofs, newProofSet)
+	updatedMsg, err := json.Marshal(existingMsg)
 	if err != nil {
 		return false, err
 	}
 
-	err = tx.Put(c, msgId, updatedMsg)
+	err = tx.Put(c, datastore.NewKey(existingMsg.ID), updatedMsg)
 	if err != nil {
 		return false, err
 	}
-	newProofsFound := oldProofCount < len(msg.Proofs)
+	newProofsFound := oldProofCount < len(existingMsg.Proofs)
 	return newProofsFound, nil
 }
 
@@ -289,6 +307,17 @@ func containsProof(proofSet []v1.Proof, proof v1.Proof) bool {
 		}
 	}
 	return false
+}
+
+// areImmutableDetailsSame checks that all details of two messages match, except for their proof payloads
+func areImmutableDetailsSame(msg1 *v1.Message, msg2 *v1.Message) bool {
+	return msg1.ID == msg2.ID &&
+		msg1.MsgType == msg2.MsgType &&
+		msg1.Timestamp == msg2.Timestamp &&
+		msg1.Version == msg2.Version &&
+		msg1.Source == msg2.Source &&
+		msg1.Destination == msg2.Destination &&
+		msg1.Payload == msg2.Payload
 }
 
 func NewMessageStoreService(dsPath string, options *badger.Options) (*MessageStoreApi, error) {

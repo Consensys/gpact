@@ -20,6 +20,9 @@ func TestMessageStoreApi_UpsertMessageHandler(t *testing.T) {
 	fixMsg1WithMoreProof := fixMsg1
 	fixMsg1WithMoreProof.Proofs = append(fixMsg1.Proofs, fixProofSet2...)
 
+	fixMsg2WithDifferentDetails := fixMsg2
+	fixMsg2WithDifferentDetails.Payload = "different payload"
+
 	testCases := map[string]struct {
 		endpoint         string
 		updatePayloads   []v1.Message
@@ -34,6 +37,8 @@ func TestMessageStoreApi_UpsertMessageHandler(t *testing.T) {
 		"Update-Message-With-Message-Containing-Additional-Proof-Elements": {"/messages", []v1.Message{fixMsg1,
 			fixMsg1WithMoreProof}, []int{201,
 			200}, []v1.Message{fixMsg1, fixMsg1WithMoreProof}},
+		"Update-Message-With-Mismatch-In-Immutable-Details": {"/messages", []v1.Message{fixMsg2,
+			fixMsg2WithDifferentDetails}, []int{201, 400}, []v1.Message{fixMsg2, fixMsg2}},
 		"Mismatch-Between-PathParam-And-Body-IDs": {"/messages/mismatched-id", []v1.Message{fixMsg1}, []int{400},
 			[]v1.Message{}},
 	}
