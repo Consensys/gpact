@@ -117,8 +117,9 @@ contract TwentyActs is Pausable, AccessControl, CbcDecVer {
     // Map (token contract address on this blockchain => bool)
     mapping(address => bool) public erc20Supported;
 
+    // NOTE: This is handled CdcDevVer.sol
     // Addresses of ERC 20 bridges on other blockchains.
-    mapping(uint256 => address) public remoteErc20Bridges;
+//    mapping(uint256 => address) public remoteErc20Bridges;
 
 
 
@@ -234,25 +235,25 @@ contract TwentyActs is Pausable, AccessControl, CbcDecVer {
         emit ERC20AddressMappingChanged(_thisBcErc20, _otherBcId, _otherBcErc20);
     }
 
-    /**
-     * Connect this ERC20 Bridge contract to an ERC20 Bridge contract on another blockchain.
-     *
-     * Requirements:
-     * - the caller must have the `MAPPING_ROLE`.
-     *
-     * @param _otherBcId            Blockchain ID where the corresponding ERC 20 bridge contract resides.
-     * @param _otherErc20Bridge     Address of ERC 20 Bridge contract on other blockchain.
-     */
-    function setBridgeMapping(
-        uint256 _otherBcId,
-        address _otherErc20Bridge
-    ) external {
-        require(
-            hasRole(MAPPING_ROLE, _msgSender()),
-            "20ACTS:Must have MAPPING role"
-        );
-        remoteErc20Bridges[_otherBcId] = _otherErc20Bridge;
-    }
+//    /**
+//     * Connect this ERC20 Bridge contract to an ERC20 Bridge contract on another blockchain.
+//     *
+//     * Requirements:
+//     * - the caller must have the `MAPPING_ROLE`.
+//     *
+//     * @param _otherBcId            Blockchain ID where the corresponding ERC 20 bridge contract resides.
+//     * @param _otherErc20Bridge     Address of ERC 20 Bridge contract on other blockchain.
+//     */
+//    function setBridgeMapping(
+//        uint256 _otherBcId,
+//        address _otherErc20Bridge
+//    ) external {
+//        require(
+//            hasRole(MAPPING_ROLE, _msgSender()),
+//            "20ACTS:Must have MAPPING role"
+//        );
+//        remoteErc20Bridges[_otherBcId] = _otherErc20Bridge;
+//    }
 
 
     /**
@@ -395,7 +396,7 @@ contract TwentyActs is Pausable, AccessControl, CbcDecVer {
         bytes32 txInfoDigest = keccak256(abi.encode(_txInfo));
         require(txState[txInfoDigest] == NOT_USED, "20ACTS:Transaction already registered");
         // Validate the source blockchain id: Check that there is a corresponding bridge on that blockchain.
-        address source20ActsContract = remoteErc20Bridges[_txInfo.sourceBcId];
+        address source20ActsContract = remoteCrosschainControlContracts[_txInfo.sourceBcId];
         require(
             source20ActsContract != address(0),
             "20ACTS:Source blockchain not supported by target 20ACTS"
@@ -479,7 +480,9 @@ contract TwentyActs is Pausable, AccessControl, CbcDecVer {
         }
 
         // Validate the target blockchain id: Check that there is a corresponding bridge on that blockchain.
-        address target20ActsContract = remoteErc20Bridges[_txInfo.targetBcId];
+
+// TODO this is handled by decodeAndVerifyEvent - however it reverts when we need the logic below.
+        address target20ActsContract = remoteCrosschainControlContracts[_txInfo.targetBcId];
         if (target20ActsContract == address(0)) {
             // Transfer to target blockchain not supported.
             emit PrepareOnSource(txInfoDigest, false, BC_NOT_SUPPORTED);
@@ -590,7 +593,7 @@ contract TwentyActs is Pausable, AccessControl, CbcDecVer {
         // TODO: Is this check required? The targetBcId is covered by the digest, and this was checked in prepare.
         require(_txInfo.targetBcId == myBlockchainId, "20ACTS:Not for this blockchain");
 
-        address source20ActsAddress = remoteErc20Bridges[_txInfo.sourceBcId];
+        address source20ActsAddress = remoteCrosschainControlContracts[_txInfo.sourceBcId];
 
         decodeAndVerifyEvent(
             _txInfo.sourceBcId,
@@ -651,7 +654,7 @@ Update reputations of User and the Liquidity Provider (identified by the Liquidi
         // TODO: Is this check required? The sourceBcId is covered by the digest, and this was checked in prepare.
         require(_txInfo.sourceBcId == myBlockchainId, "20ACTS:Not for this blockchain");
 
-        address target20ActsAddress = remoteErc20Bridges[_txInfo.sourceBcId];
+        address target20ActsAddress = remoteCrosschainControlContracts[_txInfo.sourceBcId];
 
         decodeAndVerifyEvent(
             _txInfo.targetBcId,

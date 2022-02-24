@@ -1,5 +1,6 @@
 
 dependencies {
+    testImplementation project (':examples-helpers')
     testImplementation project (":sdk")
     testImplementation project(':common-test')
 }
