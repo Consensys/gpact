@@ -48,8 +48,9 @@ func handleV1(req messages.Message) {
 		logging.Error(err.Error())
 		return
 	}
+	funcSig := data[:32]
 	raw := types.Log{}
-	err = json.Unmarshal(data, &raw)
+	err = json.Unmarshal(data[32:], &raw)
 	if err != nil {
 		logging.Error(err.Error())
 		return
@@ -70,7 +71,7 @@ func handleV1(req messages.Message) {
 	toSign := make([]byte, 32)
 	toSign[31] = byte(srcID)
 	toSign = append(toSign, srcAddr.Bytes()...)
-	toSign = append(toSign, []byte{89, 247, 54, 220, 94, 21, 196, 177, 37, 38, 72, 117, 2, 100, 84, 3, 176, 164, 49, 109, 130, 235, 167, 233, 236, 220, 42, 5, 12, 16, 173, 39}...)
+	toSign = append(toSign, funcSig...)
 	toSign = append(toSign, raw.Data...)
 	logging.Info("Generated data to be signed: %v", hex.EncodeToString(toSign))
 

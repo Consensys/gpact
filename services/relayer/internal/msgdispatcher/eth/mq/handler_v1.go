@@ -67,7 +67,7 @@ func handleV1(req messages.Message) {
 			return
 		}
 		raw := types.Log{}
-		err = json.Unmarshal(data, &raw)
+		err = json.Unmarshal(data[32:], &raw)
 		if err != nil {
 			logging.Error(err.Error())
 			return
@@ -111,7 +111,7 @@ func handleV1(req messages.Message) {
 			return
 		}
 		raw := types.Log{}
-		err = json.Unmarshal(data, &raw)
+		err = json.Unmarshal(data[32:], &raw)
 		if err != nil {
 			logging.Error(err.Error())
 			return
