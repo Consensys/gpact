@@ -57,7 +57,7 @@ func TestSFCTransformer(t *testing.T) {
 	assert.Equal(t, fixValidEvent.Timestamp, big.NewInt(message.Timestamp))
 	assert.Equal(t, hex.EncodeToString(data), message.Payload)
 
-	expectedID := fmt.Sprintf("%s/%s/%d/%d/%d", transformer.Source, transformer.SourceAddr,
+	expectedID := fmt.Sprintf(MessageIDPattern, transformer.Source, transformer.SourceAddr,
 		fixLog.BlockNumber, fixLog.TxIndex, fixLog.Index)
 	assert.Equal(t, expectedID, message.ID)
 }
