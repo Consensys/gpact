@@ -24,7 +24,7 @@ func TestMessageStoreApi_UpsertMessageHandler(t *testing.T) {
 	fixMsg2WithDifferentDetails.Payload = "different payload"
 
 	testCases := map[string]struct {
-		endpoint         string
+		updateEndpoint   string
 		updatePayloads   []v1.Message
 		updateRespCodes  []int
 		postUpdateStates []v1.Message
@@ -46,17 +46,17 @@ func TestMessageStoreApi_UpsertMessageHandler(t *testing.T) {
 	}
 
 	for testName, testCase := range testCases {
-		ds, dsClose := newDS(t)
+		ds, dsClose := createNewDS(t)
 		router := setupTestRouter(ds)
-		logging.Info("testing scenario :%s", testName)
+		logging.Info("testing scenario: %s", testName)
 		for i, testPayload := range testCase.updatePayloads {
-			// add/update message
-			msg1Bytes, err := json.Marshal(testPayload)
+			// add or update message
+			msgBytes, err := json.Marshal(testPayload)
 			assert.Nil(t, err)
 			respRec := httptest.NewRecorder()
-			req, err := http.NewRequest("PUT", testCase.endpoint, bytes.NewBuffer(msg1Bytes))
-			router.ServeHTTP(respRec, req)
+			req, err := http.NewRequest("PUT", testCase.updateEndpoint, bytes.NewBuffer(msgBytes))
 			assert.Nil(t, err)
+			router.ServeHTTP(respRec, req)
 			assert.Equal(t, testCase.updateRespCodes[i], respRec.Code)
 
 			if len(testCase.postUpdateStates) > 0 {
@@ -92,19 +92,19 @@ func TestMessageStoreApi_RecordProofsHandler(t *testing.T) {
 			400, []v1.Proof{}},
 	}
 	for testName, testCase := range testCases {
-		ds, dsClose := newDS(t)
+		ds, dsClose := createNewDS(t)
 		router := setupTestRouter(ds)
-		logging.Info("testing scenario :%s", testName)
+		logging.Info("testing scenario: %s", testName)
 
 		if testCase.preUpdateMsgCreate != nil {
 			// add new message with ID in path parameter
 			msgBytes, err := json.Marshal(testCase.preUpdateMsgCreate)
 			assert.Nil(t, err)
-			respRec := httptest.NewRecorder()
-			req, err := http.NewRequest("PUT", "/messages", bytes.NewBuffer(msgBytes))
-			router.ServeHTTP(respRec, req)
+			respRec1 := httptest.NewRecorder()
+			req1, err := http.NewRequest("PUT", "/messages", bytes.NewBuffer(msgBytes))
 			assert.Nil(t, err)
-			assert.Equal(t, 201, respRec.Code)
+			router.ServeHTTP(respRec1, req1)
+			assert.Equal(t, 201, respRec1.Code)
 		}
 
 		// record new proofs for message
@@ -112,8 +112,8 @@ func TestMessageStoreApi_RecordProofsHandler(t *testing.T) {
 		assert.Nil(t, err)
 		respRec2 := httptest.NewRecorder()
 		req2, err := http.NewRequest("PUT", testCase.proofsEndpoint, bytes.NewBuffer(proofBytes))
-		router.ServeHTTP(respRec2, req2)
 		assert.Nil(t, err)
+		router.ServeHTTP(respRec2, req2)
 		assert.Equal(t, testCase.proofRecordResponse, respRec2.Code)
 
 		if len(testCase.postUpdateProofSet) > 0 {
@@ -139,27 +139,28 @@ func TestMessageStoreApi_GetMessageHandler(t *testing.T) {
 	}
 
 	for testName, testCase := range testCases {
-		ds, dsClose := newDS(t)
+		ds, dsClose := createNewDS(t)
 		router := setupTestRouter(ds)
-		logging.Info("testing scenario :%s", testName)
+		logging.Info("testing scenario: %s", testName)
 
 		endpoint := fmt.Sprintf("/messages/%s", testCase.queryId)
 
 		if testCase.preQueryMsgCreate != nil {
 			// add message
 			msgBytes, err := json.Marshal(testCase.preQueryMsgCreate)
-			respRec := httptest.NewRecorder()
-			req1, err := http.NewRequest("PUT", endpoint, bytes.NewBuffer(msgBytes))
-			router.ServeHTTP(respRec, req1)
 			assert.Nil(t, err)
-			assert.Equal(t, 201, respRec.Code)
+			respRec1 := httptest.NewRecorder()
+			req1, err := http.NewRequest("PUT", endpoint, bytes.NewBuffer(msgBytes))
+			assert.Nil(t, err)
+			router.ServeHTTP(respRec1, req1)
+			assert.Equal(t, 201, respRec1.Code)
 		}
 
 		// get message with id
 		respRec2 := httptest.NewRecorder()
 		req2, err := http.NewRequest("GET", endpoint, nil)
-		router.ServeHTTP(respRec2, req2)
 		assert.Nil(t, err)
+		router.ServeHTTP(respRec2, req2)
 		assert.Equal(t, testCase.queryResponseCode, respRec2.Code)
 
 		var savedMsg v1.Message
@@ -182,24 +183,25 @@ func TestMessageStoreApi_GetMessageProofsHandler(t *testing.T) {
 	}
 
 	for testName, testCase := range testCases {
-		ds, dsClose := newDS(t)
+		ds, dsClose := createNewDS(t)
 		router := setupTestRouter(ds)
 		logging.Info("testing scenario: %s", testName)
 
 		if testCase.preQueryMsgCreate != nil {
 			// add message
-			msg1Bytes, err := json.Marshal(testCase.preQueryMsgCreate)
-			respRec := httptest.NewRecorder()
-			req, err := http.NewRequest("PUT", "/messages", bytes.NewBuffer(msg1Bytes))
-			router.ServeHTTP(respRec, req)
+			msgBytes, err := json.Marshal(testCase.preQueryMsgCreate)
 			assert.Nil(t, err)
+			respRec := httptest.NewRecorder()
+			req, err := http.NewRequest("PUT", "/messages", bytes.NewBuffer(msgBytes))
+			assert.Nil(t, err)
+			router.ServeHTTP(respRec, req)
 			assert.Equal(t, 201, respRec.Code)
 		}
 		// get message proof with id
 		respRec2 := httptest.NewRecorder()
 		req2, err := http.NewRequest("GET", fmt.Sprintf("/messages/%s/proofs", testCase.queryId), nil)
-		router.ServeHTTP(respRec2, req2)
 		assert.Nil(t, err)
+		router.ServeHTTP(respRec2, req2)
 		assert.Equal(t, testCase.queryResponseCode, respRec2.Code)
 		if len(testCase.queryResponse) > 0 {
 			var savedProofs []v1.Proof
@@ -229,7 +231,7 @@ func requestGETMessageDetails(t *testing.T, router *gin.Engine, endpoint string)
 	return resp.Body.String()
 }
 
-func newDS(t *testing.T) (*badger.Datastore, func()) {
+func createNewDS(t *testing.T) (*badger.Datastore, func()) {
 	path, err := ioutil.TempDir(os.TempDir(), "testing_badger_")
 	if err != nil {
 		t.Fatal(err)
