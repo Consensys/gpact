@@ -197,7 +197,7 @@ func setupTestRouter(ds *badger.Datastore) *gin.Engine {
 var fixProofSet1 = []v1.Proof{v1.Proof{Proof: "proof-payload-1", ProofType: "proof-type-1", Created: 11}}
 var fixProofSet2 = []v1.Proof{v1.Proof{Proof: "proof-payload-2", ProofType: "proof-type-2", Created: 12}}
 var fixMsg1 = v1.Message{
-	ID:          "msg-0001",
+	ID:          "chain001-0xed617B1555080073cE6B4DEe31fcd68B7a0c3703-10101984-4-1",
 	Timestamp:   2384923489234,
 	MsgType:     v1.MessageType,
 	Version:     v1.Version,
@@ -207,7 +207,7 @@ var fixMsg1 = v1.Message{
 }
 
 var fixMsg2 = v1.Message{
-	ID:          "msg-0002",
+	ID:          "chain001-0xed617B1555080073cE6B4DEe31fcd68B7a0c3703-10101984-4-2",
 	Timestamp:   2384923489234,
 	MsgType:     v1.MessageType,
 	Version:     v1.Version,

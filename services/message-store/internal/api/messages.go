@@ -10,14 +10,18 @@ import (
 	"github.com/ipfs/go-datastore"
 	"github.com/ipfs/go-ds-badger2"
 	"net/http"
+	"regexp"
 )
 
 type MessageStoreApi struct {
 	DataStore *badger.Datastore
+	idRegex   *regexp.Regexp
 }
 
 var MessageDetailsMismatchError = fmt.Errorf(
 	"the details of the message submitted for update does not match those stored in the data store")
+
+const MessageIdPattern = "\\w+-\\w{40,42}-\\d+-\\d+-\\d+"
 
 // UpsertMessageHandler is a handler for PUT /messages and PUT /messages:id endpoints.
 // The method adds a new message to a datastore, if it does not already exist.
@@ -36,7 +40,7 @@ func (mApi *MessageStoreApi) UpsertMessageHandler(c *gin.Context) {
 		return
 	}
 
-	if !isValidId(message.ID) {
+	if !mApi.isValidId(message.ID) {
 		statusBadRequest(c, fmt.Sprintf("Message id '%s' is not valid", message.ID))
 		return
 	}
@@ -99,7 +103,7 @@ func (mApi *MessageStoreApi) RecordProofsHandler(c *gin.Context) {
 	}
 
 	paramId := c.Param("id")
-	if !isValidId(paramId) {
+	if !mApi.isValidId(paramId) {
 		statusBadRequest(c, fmt.Sprintf("Message id '%s' is not valid", paramId))
 		return
 	}
@@ -158,7 +162,7 @@ func (mApi *MessageStoreApi) RecordProofsHandler(c *gin.Context) {
 // - HTTP 404: Message could not be found
 func (mApi *MessageStoreApi) GetMessageHandler(c *gin.Context) {
 	id := c.Param("id")
-	if !isValidId(id) {
+	if !mApi.isValidId(id) {
 		statusBadRequest(c, fmt.Sprintf("message id '%s' is not valid", id))
 		return
 	}
@@ -174,7 +178,7 @@ func (mApi *MessageStoreApi) GetMessageHandler(c *gin.Context) {
 // - HTTP 404: Message could not be found
 func (mApi *MessageStoreApi) GetMessageProofsHandler(c *gin.Context) {
 	id := c.Param("id")
-	if !isValidId(id) {
+	if !mApi.isValidId(id) {
 		statusBadRequest(c, fmt.Sprintf("Message id '%s' is not valid", id))
 		return
 	}
@@ -201,9 +205,16 @@ func (mApi *MessageStoreApi) respondWithMessageDetails(c *gin.Context, id string
 	c.JSON(http.StatusOK, msgDetails)
 }
 
-func isValidId(id string) bool {
-	// TODO: validate against the id structure laid out in the Relayer design docs
-	return len(id) > 0
+func (mApi *MessageStoreApi) isValidId(id string) bool {
+	if mApi.idRegex == nil {
+		r, err := regexp.Compile(MessageIdPattern)
+		if err != nil {
+			logging.Error("error compiling message Id regex. error: %v", err)
+			return false
+		}
+		mApi.idRegex = r
+	}
+	return mApi.idRegex.MatchString(id)
 }
 
 // queryMessageById queries the datastore for a message with the given ID
