@@ -73,50 +73,69 @@ func TestMessageStoreApi_UpsertMessageHandler(t *testing.T) {
 }
 
 func TestMessageStoreApi_RecordProofsHandler(t *testing.T) {
-	ds, dsClose := newDS(t)
-	defer dsClose()
-	router := setupTestRouter(ds)
+	testCases := map[string]struct {
+		preUpdateMsgCreate  *v1.Message
+		proofsEndpoint      string
+		proofsToRecord      []v1.Proof
+		proofRecordResponse int
+		postUpdateProofSet  []v1.Proof
+	}{
+		"update-message-with-existing-proof-set": {&fixMsg1, fmt.Sprintf("/messages/%s/proofs", fixMsg1.ID),
+			fixMsg1.Proofs, 200, fixMsg1.Proofs},
+		"update-message-with-distinct-proof-elements": {&fixMsg1, fmt.Sprintf("/messages/%s/proofs", fixMsg1.ID),
+			fixMsg2.Proofs, 201, append(fixMsg1.Proofs, fixMsg2.Proofs...)},
+		"update-message-with-some-overlapping-proof-elements": {&fixMsg1, fmt.Sprintf("/messages/%s/proofs",
+			fixMsg1.ID), append(fixMsg1.Proofs, fixMsg2.Proofs...), 201, append(fixMsg1.Proofs, fixMsg2.Proofs...)},
+		"update-for-non-existent-message": {nil, fmt.Sprintf("/messages/%s/proofs", fixMsg1.ID), fixMsg1.Proofs, 404,
+			[]v1.Proof{}},
+		"update-using-invalid-message-id": {nil, "/messages/invalid-message-id/proofs", fixMsg1.Proofs,
+			400, []v1.Proof{}},
+	}
+	for testName, testCase := range testCases {
+		ds, dsClose := newDS(t)
+		router := setupTestRouter(ds)
+		logging.Info("testing scenario :%s", testName)
 
-	msg1Bytes, err := json.Marshal(fixMsg1)
-	assert.Nil(t, err)
+		if testCase.preUpdateMsgCreate != nil {
+			// add new message with ID in path parameter
+			msgBytes, err := json.Marshal(testCase.preUpdateMsgCreate)
+			assert.Nil(t, err)
+			respRec := httptest.NewRecorder()
+			req, err := http.NewRequest("PUT", "/messages", bytes.NewBuffer(msgBytes))
+			router.ServeHTTP(respRec, req)
+			assert.Nil(t, err)
+			assert.Equal(t, 201, respRec.Code)
+		}
 
-	// add new message with ID in path parameter
-	respRec := httptest.NewRecorder()
-	endpoint := fmt.Sprintf("/messages/%s", fixMsg1.ID)
-	req, err := http.NewRequest("PUT", endpoint, bytes.NewBuffer(msg1Bytes))
-	router.ServeHTTP(respRec, req)
-	assert.Nil(t, err)
-	assert.Equal(t, 201, respRec.Code)
+		// record new proofs for message
+		proofBytes, err := json.Marshal(testCase.proofsToRecord)
+		assert.Nil(t, err)
+		respRec2 := httptest.NewRecorder()
+		req2, err := http.NewRequest("PUT", testCase.proofsEndpoint, bytes.NewBuffer(proofBytes))
+		router.ServeHTTP(respRec2, req2)
+		assert.Nil(t, err)
+		assert.Equal(t, testCase.proofRecordResponse, respRec2.Code)
 
-	// record new proofs for message
-	proofBytes, err := json.Marshal(fixProofSet2)
-	assert.Nil(t, err)
-	respRec2 := httptest.NewRecorder()
-	endpoint2 := fmt.Sprintf("/messages/%s/proofs", fixMsg1.ID)
-	req2, err := http.NewRequest("PUT", endpoint2, bytes.NewBuffer(proofBytes))
-	router.ServeHTTP(respRec2, req2)
-	assert.Nil(t, err)
-	assert.Equal(t, 201, respRec2.Code)
-
-	savedMsgStr := requestGETMessage(t, router, fixMsg1.ID)
-	var savedMsg v1.Message
-	err = json.Unmarshal([]byte(savedMsgStr), &savedMsg)
-	assert.Nil(t, err)
-	assert.Len(t, savedMsg.Proofs, len(fixProofSet2)+len(fixProofSet1), "proof set not updated correctly")
-	assert.ElementsMatch(t, savedMsg.Proofs, append(fixProofSet1, fixProofSet2...), "proof set not updated correctly")
-
-	// TODO: test more scenarios
+		if len(testCase.postUpdateProofSet) > 0 {
+			savedMsgStr := requestGETMessage(t, router, testCase.preUpdateMsgCreate.ID)
+			var savedMsg v1.Message
+			err = json.Unmarshal([]byte(savedMsgStr), &savedMsg)
+			assert.Nil(t, err)
+			assert.ElementsMatch(t, savedMsg.Proofs, testCase.postUpdateProofSet, "proof set not updated correctly")
+		}
+		dsClose()
+	}
 }
 
 func TestMessageStoreApi_GetMessageHandler(t *testing.T) {
 	testCases := map[string]struct {
-		createMessage *v1.Message
-		expectMessage v1.Message
-		responseCode  int
+		preQueryMsgCreate *v1.Message
+		queryId           string
+		queryResponseCode int
 	}{
-		"Fetch-Existing-Message":        {createMessage: &fixMsg1, expectMessage: fixMsg1, responseCode: 200},
-		"Fetch-Non-Existing-Message":    {createMessage: nil, expectMessage: fixMsg1, responseCode: 404},
-		"Fetch-Request-With-Invalid-ID": {createMessage: nil, expectMessage: fixMsgInvalidID, responseCode: 400},
+		"Fetch-Existing-Message":        {&fixMsg1, fixMsg1.ID, 200},
+		"Fetch-Non-Existing-Message":    {nil, fixMsg1.ID, 404},
+		"Fetch-Request-With-Invalid-ID": {nil, fixMsgInvalidID.ID, 400},
 	}
 
 	for testName, testCase := range testCases {
@@ -124,11 +143,11 @@ func TestMessageStoreApi_GetMessageHandler(t *testing.T) {
 		router := setupTestRouter(ds)
 		logging.Info("testing scenario :%s", testName)
 
-		msgBytes, err := json.Marshal(testCase.createMessage)
-		endpoint := fmt.Sprintf("/messages/%s", testCase.expectMessage.ID)
+		endpoint := fmt.Sprintf("/messages/%s", testCase.queryId)
 
-		if testCase.createMessage != nil {
+		if testCase.preQueryMsgCreate != nil {
 			// add message
+			msgBytes, err := json.Marshal(testCase.preQueryMsgCreate)
 			respRec := httptest.NewRecorder()
 			req1, err := http.NewRequest("PUT", endpoint, bytes.NewBuffer(msgBytes))
 			router.ServeHTTP(respRec, req1)
@@ -141,7 +160,7 @@ func TestMessageStoreApi_GetMessageHandler(t *testing.T) {
 		req2, err := http.NewRequest("GET", endpoint, nil)
 		router.ServeHTTP(respRec2, req2)
 		assert.Nil(t, err)
-		assert.Equal(t, testCase.responseCode, respRec2.Code)
+		assert.Equal(t, testCase.queryResponseCode, respRec2.Code)
 
 		var savedMsg v1.Message
 		err = json.Unmarshal([]byte(respRec2.Body.String()), &savedMsg)
@@ -151,27 +170,44 @@ func TestMessageStoreApi_GetMessageHandler(t *testing.T) {
 }
 
 func TestMessageStoreApi_GetMessageProofsHandler(t *testing.T) {
-	ds, dsClose := newDS(t)
-	defer dsClose()
-	router := setupTestRouter(ds)
+	testCases := map[string]struct {
+		preQueryMsgCreate *v1.Message
+		queryId           string
+		queryResponse     []v1.Proof
+		queryResponseCode int
+	}{
+		"Fetch-Proof-for-Existing-Message":     {&fixMsg1, fixMsg1.ID, fixMsg1.Proofs, 200},
+		"Fetch-Proof-for-Non-Existing-Message": {nil, fixMsg1.ID, nil, 404},
+		"Fetch-Proof-Using-Invalid-ID":         {nil, fixMsgInvalidID.ID, nil, 400},
+	}
 
-	msg1Bytes, err := json.Marshal(fixMsg1)
-	endpoint := fmt.Sprintf("/messages/%s", fixMsg1.ID)
+	for testName, testCase := range testCases {
+		ds, dsClose := newDS(t)
+		router := setupTestRouter(ds)
+		logging.Info("testing scenario: %s", testName)
 
-	// add message
-	respRec := httptest.NewRecorder()
-	req, err := http.NewRequest("PUT", endpoint, bytes.NewBuffer(msg1Bytes))
-	router.ServeHTTP(respRec, req)
-	assert.Nil(t, err)
-	assert.Equal(t, 201, respRec.Code)
-
-	// get message with id
-	fixProofs, err := json.Marshal(fixMsg1.Proofs)
-	assert.Nil(t, err)
-	reqProofs := requestGETMessageProofs(t, router, fixMsg1.ID)
-	assert.Equal(t, string(fixProofs), reqProofs)
-
-	// TODO: test more scenarios
+		if testCase.preQueryMsgCreate != nil {
+			// add message
+			msg1Bytes, err := json.Marshal(testCase.preQueryMsgCreate)
+			respRec := httptest.NewRecorder()
+			req, err := http.NewRequest("PUT", "/messages", bytes.NewBuffer(msg1Bytes))
+			router.ServeHTTP(respRec, req)
+			assert.Nil(t, err)
+			assert.Equal(t, 201, respRec.Code)
+		}
+		// get message proof with id
+		respRec2 := httptest.NewRecorder()
+		req2, err := http.NewRequest("GET", fmt.Sprintf("/messages/%s/proofs", testCase.queryId), nil)
+		router.ServeHTTP(respRec2, req2)
+		assert.Nil(t, err)
+		assert.Equal(t, testCase.queryResponseCode, respRec2.Code)
+		if len(testCase.queryResponse) > 0 {
+			var savedProofs []v1.Proof
+			err = json.Unmarshal([]byte(respRec2.Body.String()), &savedProofs)
+			assert.Nil(t, err)
+		}
+		dsClose()
+	}
 }
 
 func requestGETMessage(t *testing.T, router *gin.Engine, id string) string {
