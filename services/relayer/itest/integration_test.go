@@ -666,7 +666,7 @@ func TestERC20SetupGpact(t *testing.T) {
 	t.Log("Setup relayers...")
 
 	assert.Empty(t, setupObserver("127.0.0.1:9527", big.NewInt(31), "ws://bc31node1:8546", "GPACT", gpactAddrA))
-	assert.Empty(t, setupObserver("127.0.0.1:9526", big.NewInt(32), "ws://bc32node1:8546", "GPACT", gpactAddrB))
+	assert.Empty(t, setupObserver("127.0.0.1:9528", big.NewInt(32), "ws://bc32node1:8546", "GPACT", gpactAddrB))
 	assert.Empty(t, setupRelayer("127.0.0.1:9625", big.NewInt(0), common.Address{}, signer.SECP256K1_KEY_TYPE, relayerKey))
 	assert.Empty(t, setupMessageStore("127.0.0.1:9725", "msgstore:8080"))
 
