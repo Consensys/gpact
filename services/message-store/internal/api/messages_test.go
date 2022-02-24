@@ -30,16 +30,16 @@ func TestMessageStoreApi_UpsertMessageHandler(t *testing.T) {
 		postUpdateStates []v1.Message
 	}{
 		"Add-New-Message": {"/messages", []v1.Message{fixMsg1}, []int{201}, []v1.Message{fixMsg1}},
-		"Add-New-Message-With-ID-Path-Param": {fmt.Sprintf("/messages/%s", fixMsg2.ID), []v1.Message{fixMsg2},
+		"Add-New-Message-with-ID-Path-Param": {fmt.Sprintf("/messages/%s", fixMsg2.ID), []v1.Message{fixMsg2},
 			[]int{201}, []v1.Message{fixMsg2}},
-		"Add-New-Message-With-Invalid-ID": {"/messages", []v1.Message{fixMsgInvalidID}, []int{400},
+		"Add-New-Message-with-Invalid-ID": {"/messages", []v1.Message{fixMsgInvalidID}, []int{400},
 			[]v1.Message{}},
-		"Update-Message-With-Same-Message": {"/messages", []v1.Message{fixMsg2, fixMsg2}, []int{201, 200},
+		"Update-Message-with-Same-Message": {"/messages", []v1.Message{fixMsg2, fixMsg2}, []int{201, 200},
 			[]v1.Message{fixMsg2, fixMsg2}},
-		"Update-Message-With-Message-Containing-Additional-Proof-Elements": {"/messages", []v1.Message{fixMsg1,
+		"Update-Message-with-Message-Containing-Additional-Proof-Elements": {"/messages", []v1.Message{fixMsg1,
 			fixMsg1WithMoreProof}, []int{201,
 			200}, []v1.Message{fixMsg1, fixMsg1WithMoreProof}},
-		"Update-Message-With-Mismatch-In-Immutable-Details": {"/messages", []v1.Message{fixMsg2,
+		"Update-Message-with-Mismatch-In-Immutable-Details": {"/messages", []v1.Message{fixMsg2,
 			fixMsg2WithDifferentDetails}, []int{201, 400}, []v1.Message{fixMsg2, fixMsg2}},
 		"Mismatch-Between-PathParam-And-Body-IDs": {"/messages/mismatched-id", []v1.Message{fixMsg1}, []int{400},
 			[]v1.Message{}},
@@ -80,15 +80,15 @@ func TestMessageStoreApi_RecordProofsHandler(t *testing.T) {
 		proofRecordResponse int
 		postUpdateProofSet  []v1.Proof
 	}{
-		"update-message-with-existing-proof-set": {&fixMsg1, fmt.Sprintf("/messages/%s/proofs", fixMsg1.ID),
+		"Update-Message-with-Existing-Proof-Set": {&fixMsg1, fmt.Sprintf("/messages/%s/proofs", fixMsg1.ID),
 			fixMsg1.Proofs, 200, fixMsg1.Proofs},
-		"update-message-with-distinct-proof-elements": {&fixMsg1, fmt.Sprintf("/messages/%s/proofs", fixMsg1.ID),
+		"Update-Message-with-Distinct-Proof-Elements": {&fixMsg1, fmt.Sprintf("/messages/%s/proofs", fixMsg1.ID),
 			fixMsg2.Proofs, 201, append(fixMsg1.Proofs, fixMsg2.Proofs...)},
-		"update-message-with-some-overlapping-proof-elements": {&fixMsg1, fmt.Sprintf("/messages/%s/proofs",
+		"Update-Message-with-Some-Overlapping-Proof-Elements": {&fixMsg1, fmt.Sprintf("/messages/%s/proofs",
 			fixMsg1.ID), append(fixMsg1.Proofs, fixMsg2.Proofs...), 201, append(fixMsg1.Proofs, fixMsg2.Proofs...)},
-		"update-for-non-existent-message": {nil, fmt.Sprintf("/messages/%s/proofs", fixMsg1.ID), fixMsg1.Proofs, 404,
+		"Update-for-Non-Existent-Message": {nil, fmt.Sprintf("/messages/%s/proofs", fixMsg1.ID), fixMsg1.Proofs, 404,
 			[]v1.Proof{}},
-		"update-using-invalid-message-id": {nil, "/messages/invalid-message-id/proofs", fixMsg1.Proofs,
+		"Update-using-Invalid-Message-Id": {nil, "/messages/invalid-message-id/proofs", fixMsg1.Proofs,
 			400, []v1.Proof{}},
 	}
 	for testName, testCase := range testCases {
@@ -135,7 +135,7 @@ func TestMessageStoreApi_GetMessageHandler(t *testing.T) {
 	}{
 		"Fetch-Existing-Message":        {&fixMsg1, fixMsg1.ID, 200},
 		"Fetch-Non-Existing-Message":    {nil, fixMsg1.ID, 404},
-		"Fetch-Request-With-Invalid-ID": {nil, fixMsgInvalidID.ID, 400},
+		"Fetch-Request-with-Invalid-ID": {nil, fixMsgInvalidID.ID, 400},
 	}
 
 	for testName, testCase := range testCases {
@@ -178,7 +178,7 @@ func TestMessageStoreApi_GetMessageProofsHandler(t *testing.T) {
 	}{
 		"Fetch-Proof-for-Existing-Message":     {&fixMsg1, fixMsg1.ID, fixMsg1.Proofs, 200},
 		"Fetch-Proof-for-Non-Existing-Message": {nil, fixMsg1.ID, nil, 404},
-		"Fetch-Proof-Using-Invalid-ID":         {nil, fixMsgInvalidID.ID, nil, 400},
+		"Fetch-Proof-using-Invalid-ID":         {nil, fixMsgInvalidID.ID, nil, 400},
 	}
 
 	for testName, testCase := range testCases {
