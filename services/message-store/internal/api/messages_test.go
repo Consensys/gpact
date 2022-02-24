@@ -32,6 +32,8 @@ func TestMessageStoreApi_UpsertMessageHandler(t *testing.T) {
 		"Add-New-Message": {"/messages", []v1.Message{fixMsg1}, []int{201}, []v1.Message{fixMsg1}},
 		"Add-New-Message-With-ID-Path-Param": {fmt.Sprintf("/messages/%s", fixMsg2.ID), []v1.Message{fixMsg2},
 			[]int{201}, []v1.Message{fixMsg2}},
+		"Add-New-Message-With-Invalid-ID": {"/messages", []v1.Message{fixMsgInvalidID}, []int{400},
+			[]v1.Message{}},
 		"Update-Message-With-Same-Message": {"/messages", []v1.Message{fixMsg2, fixMsg2}, []int{201, 200},
 			[]v1.Message{fixMsg2, fixMsg2}},
 		"Update-Message-With-Message-Containing-Additional-Proof-Elements": {"/messages", []v1.Message{fixMsg1,
@@ -107,25 +109,45 @@ func TestMessageStoreApi_RecordProofsHandler(t *testing.T) {
 }
 
 func TestMessageStoreApi_GetMessageHandler(t *testing.T) {
-	ds, dsClose := newDS(t)
-	defer dsClose()
-	router := setupTestRouter(ds)
+	testCases := map[string]struct {
+		createMessage *v1.Message
+		expectMessage v1.Message
+		responseCode  int
+	}{
+		"Fetch-Existing-Message":        {createMessage: &fixMsg1, expectMessage: fixMsg1, responseCode: 200},
+		"Fetch-Non-Existing-Message":    {createMessage: nil, expectMessage: fixMsg1, responseCode: 404},
+		"Fetch-Request-With-Invalid-ID": {createMessage: nil, expectMessage: fixMsgInvalidID, responseCode: 400},
+	}
 
-	msg1Bytes, err := json.Marshal(fixMsg1)
-	endpoint := fmt.Sprintf("/messages/%s", fixMsg1.ID)
+	for testName, testCase := range testCases {
+		ds, dsClose := newDS(t)
+		router := setupTestRouter(ds)
+		logging.Info("testing scenario :%s", testName)
 
-	// add message
-	respRec := httptest.NewRecorder()
-	req, err := http.NewRequest("PUT", endpoint, bytes.NewBuffer(msg1Bytes))
-	router.ServeHTTP(respRec, req)
-	assert.Nil(t, err)
-	assert.Equal(t, 201, respRec.Code)
+		msgBytes, err := json.Marshal(testCase.createMessage)
+		endpoint := fmt.Sprintf("/messages/%s", testCase.expectMessage.ID)
 
-	// get message with id
-	msgSaved := requestGETMessage(t, router, fixMsg1.ID)
-	assert.Equal(t, string(msg1Bytes), msgSaved)
+		if testCase.createMessage != nil {
+			// add message
+			respRec := httptest.NewRecorder()
+			req1, err := http.NewRequest("PUT", endpoint, bytes.NewBuffer(msgBytes))
+			router.ServeHTTP(respRec, req1)
+			assert.Nil(t, err)
+			assert.Equal(t, 201, respRec.Code)
+		}
 
-	// TODO: test more scenarios
+		// get message with id
+		respRec2 := httptest.NewRecorder()
+		req2, err := http.NewRequest("GET", endpoint, nil)
+		router.ServeHTTP(respRec2, req2)
+		assert.Nil(t, err)
+		assert.Equal(t, testCase.responseCode, respRec2.Code)
+
+		var savedMsg v1.Message
+		err = json.Unmarshal([]byte(respRec2.Body.String()), &savedMsg)
+		assert.Nil(t, err)
+		dsClose()
+	}
 }
 
 func TestMessageStoreApi_GetMessageProofsHandler(t *testing.T) {
@@ -154,21 +176,21 @@ func TestMessageStoreApi_GetMessageProofsHandler(t *testing.T) {
 
 func requestGETMessage(t *testing.T, router *gin.Engine, id string) string {
 	endpoint := fmt.Sprintf("/messages/%s", id)
-	return requestGETMessageDetails(t, router, endpoint, id)
+	return requestGETMessageDetails(t, router, endpoint)
 }
 
 func requestGETMessageProofs(t *testing.T, router *gin.Engine, id string) string {
 	endpoint := fmt.Sprintf("/messages/%s/proofs", id)
-	return requestGETMessageDetails(t, router, endpoint, id)
+	return requestGETMessageDetails(t, router, endpoint)
 }
 
-func requestGETMessageDetails(t *testing.T, router *gin.Engine, endpoint string, id string) string {
-	respRec2 := httptest.NewRecorder()
-	reqFail1, err := http.NewRequest("GET", endpoint, nil)
-	router.ServeHTTP(respRec2, reqFail1)
+func requestGETMessageDetails(t *testing.T, router *gin.Engine, endpoint string) string {
+	resp := httptest.NewRecorder()
+	req, err := http.NewRequest("GET", endpoint, nil)
+	router.ServeHTTP(resp, req)
 	assert.Nil(t, err)
-	assert.Equal(t, 200, respRec2.Code)
-	return respRec2.Body.String()
+	assert.Equal(t, 200, resp.Code)
+	return resp.Body.String()
 }
 
 func newDS(t *testing.T) (*badger.Datastore, func()) {
@@ -208,6 +230,16 @@ var fixMsg1 = v1.Message{
 
 var fixMsg2 = v1.Message{
 	ID:          "chain001-0xed617B1555080073cE6B4DEe31fcd68B7a0c3703-10101984-4-2",
+	Timestamp:   2384923489234,
+	MsgType:     v1.MessageType,
+	Version:     v1.Version,
+	Destination: v1.ApplicationAddress{NetworkID: "network-002"},
+	Source:      v1.ApplicationAddress{NetworkID: "network-003"},
+	Proofs:      fixProofSet2,
+}
+
+var fixMsgInvalidID = v1.Message{
+	ID:          "invalid-message-id",
 	Timestamp:   2384923489234,
 	MsgType:     v1.MessageType,
 	Version:     v1.Version,
