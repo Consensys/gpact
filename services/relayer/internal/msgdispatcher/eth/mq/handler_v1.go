@@ -132,6 +132,7 @@ func handleV1(req messages.Message) {
 			logging.Error("Error creating new message: %v", resp.Status)
 			return
 		}
+
 		logging.Info("Message %v is pushed to message store.", msg.ID)
 	}
 }
