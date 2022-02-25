@@ -19,7 +19,13 @@ func main() {
 
 	r := gin.Default()
 	api.SetupRouter(r, m)
-	err = r.Run()
+
+	if len(conf.ServiceAddress) > 0 {
+		err = r.Run(conf.ServiceAddress)
+	} else {
+		err = r.Run()
+	}
+
 	if err != nil {
 		log.Fatal("error starting message store service")
 	}

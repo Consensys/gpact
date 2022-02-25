@@ -92,8 +92,8 @@ properties that the employed ID scheme offers are:
 However, the degree to which the ID scheme can guarantee the above properties is reliant on upstream processes
 mitigating the possibility of reorgs.
 
-The current ID scheme implemented for a message involves the following structure: *
-{network_id}/{contract_address}/{block_number}/{tx_index}/{log_index}*.
+The current ID scheme implemented for a message involves the following structure: 
+`{network_id}-{contract_address}-{block_number}-{tx_index}-{log_index}`.
 
 ### Message Handler
 
