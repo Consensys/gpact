@@ -18,10 +18,13 @@ package itest
 import (
 	"context"
 	"crypto/ecdsa"
+	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"math/big"
-	"sync"
+	"net/http"
 	"testing"
 	"time"
 
@@ -36,6 +39,7 @@ import (
 	observerapi "github.com/consensys/gpact/services/relayer/internal/msgobserver/eth/api"
 	relayerapi "github.com/consensys/gpact/services/relayer/internal/msgrelayer/eth/api"
 	"github.com/consensys/gpact/services/relayer/internal/msgrelayer/eth/signer"
+	v1 "github.com/consensys/gpact/services/relayer/pkg/messages/v1"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
@@ -76,11 +80,11 @@ func TestERC20SetupSFC(t *testing.T) {
 	defer chainB.Close()
 
 	// Create accounts
-	_, admin := createUser()            // admin to create all contracts
-	_, userA = createUser()             // userA on chainA
-	_, userB = createUser()             // userB on chainB
-	relayerKey, relayer := createUser() // relayer key
-	dispatcherKey, _ := createUser()    // dispatcher key
+	_, admin := createUser()           // admin to create all contracts
+	_, userA = createUser()            // userA on chainA
+	_, userB = createUser()            // userB on chainB
+	relayerKey, relayer = createUser() // relayer key
+	dispatcherKey, _ := createUser()   // dispatcher key
 
 	var tx *types.Transaction
 	// Deploy ERC20 contracts on both chains.
@@ -283,8 +287,8 @@ func TestERC20SetupSFC(t *testing.T) {
 	// Setup relayers
 	t.Log("Setup relayers...")
 
-	assert.Empty(t, setupObserver("127.0.0.1:9525", big.NewInt(31), "ws://bc31node1:8546", sfcAddrA))
-	assert.Empty(t, setupObserver("127.0.0.1:9526", big.NewInt(32), "ws://bc32node1:8546", sfcAddrB))
+	assert.Empty(t, setupObserver("127.0.0.1:9525", big.NewInt(31), "ws://bc31node1:8546", "SFC", sfcAddrA))
+	assert.Empty(t, setupObserver("127.0.0.1:9526", big.NewInt(32), "ws://bc32node1:8546", "SFC", sfcAddrB))
 	assert.Empty(t, setupRelayer("127.0.0.1:9625", big.NewInt(31), bridgeAddrA, signer.SECP256K1_KEY_TYPE, relayerKey))
 	assert.Empty(t, setupRelayer("127.0.0.1:9625", big.NewInt(32), bridgeAddrB, signer.SECP256K1_KEY_TYPE, relayerKey))
 	assert.Empty(t, setupDispatcher("127.0.0.1:9725", big.NewInt(31), "ws://bc31node1:8546", dispatcherKey, bridgeAddrA, verifierAddrA))
@@ -407,10 +411,9 @@ func TestERC20SetupGpact(t *testing.T) {
 	defer chainB.Close()
 
 	// Create accounts
-	_, admin := createUser()           // admin to create all contracts
-	_, userA = createUser()            // userA on chainA
-	_, userB = createUser()            // userB on chainB
-	relayerKey, relayer = createUser() // relayer key
+	_, admin := createUser() // admin to create all contracts
+	_, userA = createUser()  // userA on chainA
+	_, userB = createUser()  // userB on chainB
 
 	// Deploy registrar on both chains
 	t.Log("Deploy registrar on chainA...")
@@ -660,7 +663,14 @@ func TestERC20SetupGpact(t *testing.T) {
 	waitForReceipt(chainB, tx)
 	t.Log("Done")
 
-	t.Log("Setup done.")
+	t.Log("Setup relayers...")
+
+	assert.Empty(t, setupObserver("127.0.0.1:9527", big.NewInt(31), "ws://bc31node1:8546", "GPACT", gpactAddrA))
+	assert.Empty(t, setupObserver("127.0.0.1:9528", big.NewInt(32), "ws://bc32node1:8546", "GPACT", gpactAddrB))
+	assert.Empty(t, setupRelayer("127.0.0.1:9625", big.NewInt(0), common.Address{}, signer.SECP256K1_KEY_TYPE, relayerKey))
+	assert.Empty(t, setupMessageStore("127.0.0.1:9725", "msgstore:8080"))
+
+	t.Log("Setup done")
 }
 
 func TestERC20TransferGpact(t *testing.T) {
@@ -686,14 +696,6 @@ func TestERC20TransferGpact(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	igpactA, err := functioncall.NewGpact(gpactA, chainA)
-	if err != nil {
-		panic(err)
-	}
-	igpactB, err := functioncall.NewGpact(gpactB, chainB)
-	if err != nil {
-		panic(err)
-	}
 
 	// Approve first
 	t.Log("Approve transfer")
@@ -709,9 +711,7 @@ func TestERC20TransferGpact(t *testing.T) {
 	cmgr.RegisterChainAP(big.NewInt(31), chainA)
 	cmgr.RegisterChainAP(big.NewInt(32), chainB)
 	sim := simulator.NewSimulatorImplV1(cmgr)
-	ms := &MockMsgStore{Addr: relayer.From, Key: relayerKey, Events: map[string]map[string][]byte{}, Lock: sync.RWMutex{}}
-	ms.Watch(big.NewInt(31), chainA, igpactA)
-	ms.Watch(big.NewInt(32), chainB, igpactB)
+	ms := NewMessageStoreImplV1("localhost:8080")
 	exec := executor.NewExecutorImplV1(cmgr, ms, userA)
 	exec.RegisterGPACT(big.NewInt(31), gpactA)
 	exec.RegisterGPACT(big.NewInt(32), gpactB)
@@ -834,8 +834,8 @@ func waitForReceipt(conn *ethclient.Client, tx *types.Transaction) error {
 }
 
 // setupObserver sets up observer.
-func setupObserver(url string, chainID *big.Int, chainAP string, contractAddr common.Address) error {
-	success, err := observerapi.RequestStartObserve(url, chainID, chainAP, contractAddr)
+func setupObserver(url string, chainID *big.Int, chainAP string, contractType string, contractAddr common.Address) error {
+	success, err := observerapi.RequestStartObserve(url, chainID, chainAP, contractType, contractAddr)
 	if err != nil {
 		return err
 	}
@@ -876,99 +876,56 @@ func setupDispatcher(url string, chainID *big.Int, chainAP string, key []byte, c
 	return nil
 }
 
-// MockMsgStore is a mock msg store.
-type MockMsgStore struct {
-	Addr   common.Address
-	Key    []byte
-	Events map[string]map[string][]byte
-	Lock   sync.RWMutex
+// setupMessageStore sets up message store.
+func setupMessageStore(url string, msgStoreAddr string) error {
+	success, err := dispatcherapi.RequestSetMsgStoreAddr(url, msgStoreAddr)
+	if err != nil {
+		return err
+	}
+	if !success {
+		return fmt.Errorf("failed.")
+	}
+	return nil
 }
 
-func (mgr *MockMsgStore) Watch(chainID *big.Int, chain *ethclient.Client, igpact *functioncall.Gpact) {
-	_, ok := mgr.Events[chainID.String()]
-	if !ok {
-		mgr.Events[chainID.String()] = make(map[string][]byte)
-	}
-	go func() {
-		opts := bind.WatchOpts{Start: nil, Context: context.Background()}
-		chanEvents := make(chan *functioncall.GpactStart)
-		sub, err := igpact.WatchStart(&opts, chanEvents)
-		if err != nil {
-			return
-		}
-		for {
-			select {
-			case <-sub.Err():
-				return
-			case ev := <-chanEvents:
-				mgr.Lock.Lock()
-				mgr.Events[chainID.String()][ev.Raw.TxHash.String()], _ = mgr.sign(chainID, ev.Raw.Address, startFuncSig[:], ev.Raw.Data)
-				mgr.Lock.Unlock()
-			}
-		}
-	}()
-	go func() {
-		opts := bind.WatchOpts{Start: nil, Context: context.Background()}
-		chanEvents := make(chan *functioncall.GpactSegment)
-		sub, err := igpact.WatchSegment(&opts, chanEvents)
-		if err != nil {
-			return
-		}
-		for {
-			select {
-			case <-sub.Err():
-				return
-			case ev := <-chanEvents:
-				mgr.Lock.Lock()
-				mgr.Events[chainID.String()][ev.Raw.TxHash.String()], _ = mgr.sign(chainID, ev.Raw.Address, segmentFuncSig[:], ev.Raw.Data)
-				mgr.Lock.Unlock()
-			}
-		}
-	}()
-	go func() {
-		opts := bind.WatchOpts{Start: nil, Context: context.Background()}
-		chanEvents := make(chan *functioncall.GpactRoot)
-		sub, err := igpact.WatchRoot(&opts, chanEvents)
-		if err != nil {
-			return
-		}
-		for {
-			select {
-			case <-sub.Err():
-				return
-			case ev := <-chanEvents:
-				mgr.Lock.Lock()
-				mgr.Events[chainID.String()][ev.Raw.TxHash.String()], _ = mgr.sign(chainID, ev.Raw.Address, rootFuncSig[:], ev.Raw.Data)
-				mgr.Lock.Unlock()
-			}
-		}
-	}()
+// MessageStoreImplV1 implements MessageStore.
+type MessageStoreImplV1 struct {
+	msgStoreURL string
 }
 
-func (mgr *MockMsgStore) GetSignature(ctx context.Context, chainID *big.Int, transactionHash string) ([]byte, error) {
-	time.Sleep(100 * time.Millisecond)
-	events, ok := mgr.Events[chainID.String()]
-	if !ok {
-		return nil, fmt.Errorf("chain id does not exist")
-	}
-	sig, ok := events[transactionHash]
-	if !ok {
-		return nil, fmt.Errorf("transaction hash does not exist")
-	}
-	return sig, nil
+// NewMessageStoreImplV1 creates a new message store impl v1.
+func NewMessageStoreImplV1(msgStoreURL string) *MessageStoreImplV1 {
+	return &MessageStoreImplV1{msgStoreURL: msgStoreURL}
 }
 
-func (mgr *MockMsgStore) sign(eventChain *big.Int, eventAddr common.Address, eventFuncSig []byte, eventData []byte) ([]byte, error) {
-	toSign := make([]byte, 32)
-	eventChain.FillBytes(toSign)
-	toSign = append(toSign, eventAddr.Bytes()...)
-	toSign = append(toSign, eventFuncSig...)
-	toSign = append(toSign, eventData...)
-	sig, err := crypto.Secp256k1Sign(mgr.Key, toSign)
+// GetSignature gets the signature of an event.
+func (ms *MessageStoreImplV1) GetSignature(ctx context.Context, msgID string) ([]byte, error) {
+	client := &http.Client{}
+	req, err := http.NewRequest("GET", fmt.Sprintf("http://%v/messages/%v/proofs/", ms.msgStoreURL, msgID), nil)
 	if err != nil {
 		return nil, err
 	}
-	sig[len(sig)-1] += 27
-	sig = append([]byte{0, 0, 0, 1}, append(mgr.Addr.Bytes(), sig...)...)
-	return sig, nil
+	// Try every 1 second apart.
+	for {
+		timeout := time.After(1 * time.Second)
+		select {
+		case <-timeout:
+			resp, err := client.Do(req)
+			if err == nil {
+				data, err := io.ReadAll(resp.Body)
+				if err == nil {
+					var proofs []v1.Proof
+					err = json.Unmarshal(data, &proofs)
+					if err == nil && len(proofs) >= 1 {
+						data, err = hex.DecodeString(proofs[0].Proof)
+						if err == nil {
+							return data, nil
+						}
+					}
+				}
+			}
+		case <-ctx.Done():
+			return nil, fmt.Errorf("fail to obtain proof: timeout")
+		}
+	}
 }

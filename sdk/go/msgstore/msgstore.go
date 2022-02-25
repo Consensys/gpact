@@ -17,11 +17,10 @@ package msgstore
 
 import (
 	"context"
-	"math/big"
 )
 
 // MessageStore is used to obtain the signature of an event.
 type MessageStore interface {
 	// GetSignature gets the signature of an event.
-	GetSignature(ctx context.Context, chainID *big.Int, transactionHash string) ([]byte, error)
+	GetSignature(ctx context.Context, msgID string) ([]byte, error)
 }

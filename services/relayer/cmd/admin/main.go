@@ -45,7 +45,7 @@ func main() {
 					{
 						Name:      "start",
 						Usage:     "Start observing contract",
-						ArgsUsage: "[url chainID chainAP contractAddr]",
+						ArgsUsage: "[url chainID chainAP contractType contractAddr]",
 						Action: func(c *cli.Context) error {
 							url := c.Args().Get(0)
 							chainID, err := strconv.ParseUint(c.Args().Get(1), 10, 64)
@@ -53,8 +53,9 @@ func main() {
 								return fmt.Errorf("error parsing chain id: %v", err.Error())
 							}
 							chainAP := c.Args().Get(2)
-							contractAddr := c.Args().Get(3)
-							success, err := observerapi.RequestStartObserve(url, big.NewInt(int64(chainID)), chainAP, common.HexToAddress(contractAddr))
+							contractType := c.Args().Get(3)
+							contractAddr := c.Args().Get(4)
+							success, err := observerapi.RequestStartObserve(url, big.NewInt(int64(chainID)), chainAP, contractType, common.HexToAddress(contractAddr))
 							if err != nil {
 								return err
 							}
@@ -238,6 +239,25 @@ func main() {
 							contractAddr := c.Args().Get(2)
 							addr, err := dispatcherapi.RequestGetVerifierAddr(url, big.NewInt(int64(chainID)), common.HexToAddress(contractAddr))
 							fmt.Println(addr.String())
+							return nil
+						},
+					},
+					{
+						Name:      "set-msgstore",
+						Usage:     "Set message store",
+						ArgsUsage: "[url msgStoreAddr]",
+						Action: func(c *cli.Context) error {
+							url := c.Args().Get(0)
+							msgStoreAddr := c.Args().Get(1)
+							success, err := dispatcherapi.RequestSetMsgStoreAddr(url, msgStoreAddr)
+							if err != nil {
+								return err
+							}
+							if success {
+								fmt.Println("Success.")
+							} else {
+								fmt.Println("Failed.")
+							}
 							return nil
 						},
 					},

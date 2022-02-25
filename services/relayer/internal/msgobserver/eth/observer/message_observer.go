@@ -73,3 +73,34 @@ func (o *SFCBridgeObserver) Stop() {
 		o.EventWatcher.StopWatcher()
 	}
 }
+
+// GPACTBridgeObserver is a simple gpact bridge observer.
+type GPACTBridgeObserver struct {
+	EventWatcher  EventWatcher
+	EventHandler  EventHandler
+	SourceNetwork string
+}
+
+func NewGPACTBridgeRealtimeObserver(source string, sourceAddr string, contract *functioncall.Gpact, mq mqserver.MessageQueue) (*GPACTBridgeObserver, error) {
+	eventTransformer := NewGPACTEventTransformer(source, sourceAddr)
+	messageHandler := NewMessageEnqueueHandler(mq, DefaultRetryOptions)
+	eventHandler := NewSimpleEventHandler(eventTransformer, messageHandler)
+
+	watcherOpts := EventWatcherOpts{Context: context.Background(), EventHandler: eventHandler}
+	eventWatcher, err := NewGPACTCrossCallRealtimeEventWatcher(watcherOpts, contract)
+	if err != nil {
+		return nil, err
+	}
+
+	return &GPACTBridgeObserver{EventWatcher: eventWatcher, EventHandler: eventHandler, SourceNetwork: source}, nil
+}
+
+func (o *GPACTBridgeObserver) Start() error {
+	return o.EventWatcher.Watch()
+}
+
+func (o *GPACTBridgeObserver) Stop() {
+	if o.EventWatcher != nil {
+		o.EventWatcher.StopWatcher()
+	}
+}

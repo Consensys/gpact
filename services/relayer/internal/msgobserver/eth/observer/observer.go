@@ -30,7 +30,7 @@ type Observer interface {
 	Stop()
 
 	// StartObserve starts a new observe.
-	StartObserve(chainID *big.Int, chainAP string, contractAddr common.Address) error
+	StartObserve(chainID *big.Int, chainAP string, contractType string, contractAddr common.Address) error
 
 	// StopObserve stops observe.
 	StopObserve() error

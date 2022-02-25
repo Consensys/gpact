@@ -279,9 +279,13 @@ jobs:
             ls -al
             echo GOROOT: $GOROOT
       - run:
-          name: Build test docker container
+          name: Build relayer docker container
           command: make docker
           working_directory: services/relayer
+      - run:
+          name: Build message store docker container
+          command: make docker
+          working_directory: services/message-store
       - run:
           name: Create and Start blockchains & Relayers
           working_directory: services/relayer
