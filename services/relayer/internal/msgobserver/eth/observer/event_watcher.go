@@ -290,7 +290,7 @@ type GPACTCrossCallRealtimeEventWatcher struct {
 }
 
 func (l *GPACTCrossCallRealtimeEventWatcher) Watch() error {
-	opts := bind.WatchOpts{Start: nil, Context: l.Context}
+	opts := bind.WatchOpts{Start: &l.Start, Context: l.Context}
 	startEvents := make(chan *functioncall.GpactStart)
 	segmentEvents := make(chan *functioncall.GpactSegment)
 	rootEvents := make(chan *functioncall.GpactRoot)
