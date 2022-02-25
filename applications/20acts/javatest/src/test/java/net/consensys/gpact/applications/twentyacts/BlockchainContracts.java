@@ -14,14 +14,14 @@
  */
 package net.consensys.gpact.applications.twentyacts;
 
-import net.consensys.gpact.common.AbstractBlockchain;
-import net.consensys.gpact.common.BlockchainId;
-import net.consensys.gpact.common.DynamicGasProvider;
+import net.consensys.gpact.common.*;
 import net.consensys.gpact.soliditywrappers.applications.twentyacts.ERC20PresetFixedSupply;
 import net.consensys.gpact.soliditywrappers.applications.twentyacts.TwentyActs;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
+import org.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.web3j.protocol.exceptions.TransactionException;
 
 
 import java.io.IOException;
@@ -108,10 +108,46 @@ public class BlockchainContracts extends AbstractBlockchain {
     this.twentyActs.setErc20Mapping(this.erc20.getContractAddress(), otherBc.asBigInt(), otherBcErc20).send();
   }
 
-  public void faucet(String account, BigInteger amount) throws Exception {
+  public void erc20Faucet(String account, BigInteger amount) throws Exception {
     this.erc20.transfer(account, amount).send();
   }
 
+  public void erc20Approve(String spender, BigInteger amount) throws Exception {
+    this.erc20.approve(spender, amount).send();
+  }
+
+  public void lpDeposit(BigInteger amount) throws Exception {
+    TransactionReceipt txR;
+    try {
+      txR = this.twentyActs.deposit(this.erc20.getContractAddress(), amount).send();
+      StatsHolder.logGas("Deposit", txR.getGasUsed());
+    } catch (TransactionException ex) {
+      LOG.error(
+              " Revert Reason: {}",
+              RevertReason.decodeRevertReason(ex.getTransactionReceipt().get().getRevertReason()));
+      throw ex;
+    }
+    if (!txR.isStatusOK()) {
+      throw new Exception("Deposit transaction failed");
+    }
+  }
+
+  public TransactionReceipt prepareOnTarget(TwentyActs.TxInfo txInfo) throws Exception {
+    TransactionReceipt txR;
+    try {
+      txR = this.twentyActs.prepareOnTarget(txInfo).send();
+      StatsHolder.logGas("PrepareOnTarget", txR.getGasUsed());
+    } catch (TransactionException ex) {
+      LOG.error(
+              " Revert Reason: {}",
+              RevertReason.decodeRevertReason(ex.getTransactionReceipt().get().getRevertReason()));
+      throw ex;
+    }
+    if (!txR.isStatusOK()) {
+      throw new Exception("PrepareOnTarget transaction failed");
+    }
+    return txR;
+  }
 
   public String get20ActsContractAddress() {
     return this.twentyActs.getContractAddress();
@@ -119,6 +155,12 @@ public class BlockchainContracts extends AbstractBlockchain {
 
   public String getErc20ContractAddress() {
     return this.erc20.getContractAddress();
+  }
+
+  public void showLiquidityProviderHoldings(String liquidityProvider) throws Exception {
+    LOG.info("Liquidity Provider {}: Deposits:    {} ", liquidityProvider, this.twentyActs.deposits(liquidityProvider, this.erc20.getContractAddress()).send());
+    LOG.info("Liquidity Provider {}: Allocation:  {} ", liquidityProvider, this.twentyActs.allocated(liquidityProvider, this.erc20.getContractAddress()).send());
+    LOG.info("Liquidity Provider {}: Withdrawals: {} ", liquidityProvider, this.twentyActs.withdrawals(liquidityProvider, this.erc20.getContractAddress()).send());
   }
 
 
