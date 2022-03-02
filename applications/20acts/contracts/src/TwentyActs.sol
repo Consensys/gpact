@@ -18,6 +18,7 @@ import "../../../../contracts/contracts/src/functioncall/common/CbcDecVer.sol";
 import "../../../../contracts/contracts/src/openzeppelin/access/AccessControl.sol";
 import "../../../../contracts/contracts/src/openzeppelin/security/Pausable.sol";
 import "../../../../contracts/contracts/src/openzeppelin/token/ERC20/IERC20.sol";
+import "../../../../contracts/contracts/src/common/ResponseProcessUtil.sol";
 
 
 /**
@@ -28,7 +29,7 @@ import "../../../../contracts/contracts/src/openzeppelin/token/ERC20/IERC20.sol"
  * TODO: Make sure I am enforcing this reverse transfer in the protocol.
  *
  */
-contract TwentyActs is Pausable, AccessControl, CbcDecVer {
+contract TwentyActs is Pausable, AccessControl, CbcDecVer, ResponseProcessUtil {
 
     bytes32 public constant MAPPING_ROLE = keccak256("MAPPING_ROLE");
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
@@ -61,9 +62,9 @@ contract TwentyActs is Pausable, AccessControl, CbcDecVer {
     uint256 private constant SENDER_BANNED = 5;
     uint256 private constant RECIPIENT_BANNED = 6;
 
-    event PrepareOnSource(bytes32 _txInfoDigest, bool _success, uint256 _failureReason);
+    event PrepareOnSource(bytes32 _txInfoDigest, bool _success, uint256 _failureReason, string _msg);
     bytes32 internal constant PREPARE_ON_SOURCE_EVENT_SIGNATURE =
-        keccak256("PrepareOnSource(bytes32,bool,uint256)");
+        keccak256("PrepareOnSource(bytes32,bool,uint256,string)");
 
     event FinalizeOnTarget(bytes32 _txInfoDigest);
     bytes32 internal constant FINALIZE_ON_TARGET_EVENT_SIGNATURE =
@@ -151,16 +152,16 @@ contract TwentyActs is Pausable, AccessControl, CbcDecVer {
 
     // How long liquidity providers need to wait between when they request
     // a withdrawal and when they can action the withdrawal.
-    uint256 public withdrawWaitPeriod;
+    uint256 public withdrawalWaitPeriod;
 
     address public infrastructureAccount;
 
 
     /**
      *
-     * @param _withdrawWaitPeriod Period between requesting a withdraw and being able to action the withdraw in seconds.
+     * @param _withdrawalWaitPeriod Period between requesting a withdraw and being able to action the withdraw in seconds.
      */
-    constructor(uint256 _myBlockchainId, uint256 _withdrawWaitPeriod, address _infrastructureAccount) {
+    constructor(uint256 _myBlockchainId, uint256 _withdrawalWaitPeriod, address _infrastructureAccount) {
         address sender = msg.sender;
         _setupRole(DEFAULT_ADMIN_ROLE, sender);
 
@@ -169,10 +170,23 @@ contract TwentyActs is Pausable, AccessControl, CbcDecVer {
 
 
         myBlockchainId = _myBlockchainId;
-        withdrawWaitPeriod = _withdrawWaitPeriod;
+        withdrawalWaitPeriod = _withdrawalWaitPeriod;
         infrastructureAccount = _infrastructureAccount;
     }
 
+
+    /**
+     *
+     * @param _withdrawalWaitPeriod Period between requesting a withdraw and being able to action the withdraw in seconds.
+     */
+    function setWithdrawalWaitPeriod(uint256 _withdrawalWaitPeriod) external {
+        require(
+            hasRole(DEFAULT_ADMIN_ROLE, _msgSender()),
+            "20ACTS:Must have ADMIN role"
+        );
+
+        withdrawalWaitPeriod = _withdrawalWaitPeriod;
+    }
 
 
 
@@ -350,7 +364,7 @@ contract TwentyActs is Pausable, AccessControl, CbcDecVer {
         uint256 amountWithdrawals = withdrawals[msg.sender][_thisBcErc20];
         require(amountDeposited - amountAllocated - amountWithdrawals <= _amount, "20ACTS:Amount exceeds unallocated deposits");
         withdrawals[msg.sender][_thisBcErc20] = amountWithdrawals + _amount;
-        withdrawalsTime[msg.sender][_thisBcErc20] = withdrawWaitPeriod + block.timestamp;
+        withdrawalsTime[msg.sender][_thisBcErc20] = withdrawalWaitPeriod + block.timestamp;
 
         // TODO emit an event
     }
@@ -421,7 +435,7 @@ contract TwentyActs is Pausable, AccessControl, CbcDecVer {
         uint256 amountDeposited = deposits[msg.sender][targetErc20Address];
         uint256 amountAllocated = allocated[msg.sender][targetErc20Address];
         uint256 amountWithdrawals = withdrawals[msg.sender][targetErc20Address];
-        require(amountDeposited - amountAllocated - amountWithdrawals <= amount, "20ACTS:Amount exceeds unallocated deposits");
+        require(amountDeposited - amountAllocated - amountWithdrawals >= amount, "20ACTS:Amount exceeds unallocated deposits");
         // Validate biddingPeriodEnd: Must be in the past.
         require(_txInfo.biddingPeriodEnd < block.timestamp, "20ACTS:Bidding period still in progress");
         // Validate timeout: Must be in the future.
@@ -485,7 +499,7 @@ contract TwentyActs is Pausable, AccessControl, CbcDecVer {
         address target20ActsContract = remoteCrosschainControlContracts[_txInfo.targetBcId];
         if (target20ActsContract == address(0)) {
             // Transfer to target blockchain not supported.
-            emit PrepareOnSource(txInfoDigest, false, BC_NOT_SUPPORTED);
+            emit PrepareOnSource(txInfoDigest, false, BC_NOT_SUPPORTED, "");
             txState[txInfoDigest] = COMPLETED_FAIL;
             return;
         }
@@ -513,7 +527,7 @@ contract TwentyActs is Pausable, AccessControl, CbcDecVer {
             address targetErc20Address = erc20AddressMapping[sourceErc20Address][_txInfo.targetBcId];
             if (targetErc20Address != _txInfo.targetErc20Address) {
                 // Token not transferable to the requested ERC 20 contract.
-                emit PrepareOnSource(txInfoDigest, false, WRONG_ERC20);
+                emit PrepareOnSource(txInfoDigest, false, WRONG_ERC20, "");
                 txState[txInfoDigest] = COMPLETED_FAIL;
                 return;
             }
@@ -526,19 +540,19 @@ contract TwentyActs is Pausable, AccessControl, CbcDecVer {
         // can be cancelled on the target chain.
         if (_txInfo.timeout < block.timestamp) {
             // Transaction has timed out.
-            emit PrepareOnSource(txInfoDigest, false, TIMEOUT);
+            emit PrepareOnSource(txInfoDigest, false, TIMEOUT, "");
             txState[txInfoDigest] = COMPLETED_FAIL;
             return;
         }
 
         if (banned[_txInfo.sender]) {
-            emit PrepareOnSource(txInfoDigest, false, SENDER_BANNED);
+            emit PrepareOnSource(txInfoDigest, false, SENDER_BANNED, "");
             txState[txInfoDigest] = COMPLETED_FAIL;
             return;
         }
 
         if (banned[_txInfo.recipient]) {
-            emit PrepareOnSource(txInfoDigest, false, RECIPIENT_BANNED);
+            emit PrepareOnSource(txInfoDigest, false, RECIPIENT_BANNED, "");
             txState[txInfoDigest] = COMPLETED_FAIL;
             return;
         }
@@ -547,9 +561,11 @@ contract TwentyActs is Pausable, AccessControl, CbcDecVer {
         // Validate amounts: This is done by doing a transfer. It will work if the approve has been done for the amount.
         uint256 totalAmount = _txInfo.amount + _txInfo.lpFee + _txInfo.inFee;
 //        IERC20 tokenContract = IERC20(sourceErc20Address);
-        (bool success, ) = sourceErc20Address.call(abi.encodeWithSelector(IERC20.transferFrom.selector, _txInfo.sender, totalAmount));
+        // Transfer ownership in the ERC 20 contract from the user to the 20ACTS contract
+        (bool success, bytes memory errorMsg) = sourceErc20Address.call(
+            abi.encodeWithSelector(IERC20.transferFrom.selector, _txInfo.sender, address(this), totalAmount));
         if (!success) {
-            emit PrepareOnSource(txInfoDigest, false, TRANSFER_FROM_FAILED);
+            emit PrepareOnSource(txInfoDigest, false, TRANSFER_FROM_FAILED, getRevertMsg(errorMsg));
             txState[txInfoDigest] = COMPLETED_FAIL;
             return;
         }
@@ -561,7 +577,7 @@ contract TwentyActs is Pausable, AccessControl, CbcDecVer {
         // Keep a record of the transfer.
         txState[txInfoDigest] = IN_PROGRESS;
 
-        emit PrepareOnSource(txInfoDigest, true, NONE);
+        emit PrepareOnSource(txInfoDigest, true, NONE, "");
     }
 
 
