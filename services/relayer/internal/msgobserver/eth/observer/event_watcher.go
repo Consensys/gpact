@@ -93,6 +93,7 @@ func (l *FinalisedEventWatcher) Watch() error {
 			return fmt.Errorf("error in log subscription %v", err)
 		case <-l.end:
 			logging.Info("Watcher stopped...")
+			sub.Unsubscribe()
 			return nil
 		case latestHead := <-headers:
 			l.processFinalisedEvents(latestHead)

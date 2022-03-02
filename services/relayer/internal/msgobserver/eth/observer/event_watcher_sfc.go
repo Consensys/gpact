@@ -42,6 +42,7 @@ func (l *SFCCrossCallRealtimeEventWatcher) start(sub event.Subscription, chanEve
 			return fmt.Errorf("error in log subscription %v", err)
 		case <-l.end:
 			logging.Info("Watcher stopped...")
+			sub.Unsubscribe()
 			return nil
 		case ev := <-chanEvents:
 			if ev.Raw.Removed {

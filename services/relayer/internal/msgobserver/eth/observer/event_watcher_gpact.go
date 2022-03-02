@@ -57,6 +57,9 @@ func (l *GPACTCrossCallRealtimeEventWatcher) start(
 			l.EventHandler.Handle(ev)
 		case <-l.end:
 			logging.Info("Watcher stopped...")
+			subStart.Unsubscribe()
+			subRoot.Unsubscribe()
+			subSegment.Unsubscribe()
 			return nil
 		}
 	}
