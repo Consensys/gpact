@@ -8,14 +8,14 @@ import (
 	"github.com/ethereum/go-ethereum/event"
 )
 
-// GPACTCrossCallRealtimeEventWatcher is a simple gpact contract watcher.
-type GPACTCrossCallRealtimeEventWatcher struct {
+// GPACTRealtimeEventWatcher is a simple gpact contract watcher.
+type GPACTRealtimeEventWatcher struct {
 	EventWatcherOpts
 	GpactContract *functioncall.Gpact
 	end           chan bool
 }
 
-func (l *GPACTCrossCallRealtimeEventWatcher) Watch() error {
+func (l *GPACTRealtimeEventWatcher) Watch() error {
 	opts := bind.WatchOpts{Start: &l.Start, Context: l.Context}
 	startEvents := make(chan *functioncall.GpactStart)
 	segmentEvents := make(chan *functioncall.GpactSegment)
@@ -35,7 +35,7 @@ func (l *GPACTCrossCallRealtimeEventWatcher) Watch() error {
 	return l.start(subStart, startEvents, subSegment, segmentEvents, subRoot, rootEvents)
 }
 
-func (l *GPACTCrossCallRealtimeEventWatcher) start(
+func (l *GPACTRealtimeEventWatcher) start(
 	subStart event.Subscription, startEvents <-chan *functioncall.GpactStart,
 	subSegment event.Subscription, segmentEvents <-chan *functioncall.GpactSegment,
 	subRoot event.Subscription, rootEvents <-chan *functioncall.GpactRoot,
@@ -65,15 +65,15 @@ func (l *GPACTCrossCallRealtimeEventWatcher) start(
 	}
 }
 
-func (l *GPACTCrossCallRealtimeEventWatcher) StopWatcher() {
+func (l *GPACTRealtimeEventWatcher) StopWatcher() {
 	l.end <- true
 }
 
 // NewGPACTCrossCallRealtimeEventWatcher creates an instance of SFCCrossCallRealtimeEventWatcher.
 // Throws an error if the provided even handler or the removed event handler is nil.
-func NewGPACTCrossCallRealtimeEventWatcher(watcherOpts EventWatcherOpts, contract *functioncall.Gpact) (*GPACTCrossCallRealtimeEventWatcher, error) {
+func NewGPACTCrossCallRealtimeEventWatcher(watcherOpts EventWatcherOpts, contract *functioncall.Gpact) (*GPACTRealtimeEventWatcher, error) {
 	if watcherOpts.EventHandler == nil {
 		return nil, fmt.Errorf("handler cannot be nil")
 	}
-	return &GPACTCrossCallRealtimeEventWatcher{EventWatcherOpts: watcherOpts, GpactContract: contract, end: make(chan bool)}, nil
+	return &GPACTRealtimeEventWatcher{EventWatcherOpts: watcherOpts, GpactContract: contract, end: make(chan bool)}, nil
 }
