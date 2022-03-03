@@ -24,7 +24,6 @@ import (
 
 	"github.com/consensys/gpact/services/relayer/internal/logging"
 	"github.com/ipfs/go-datastore"
-	badgerds "github.com/ipfs/go-ds-badger"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -271,13 +270,6 @@ func TestSFCCrossCallFinalisedEventWatcher_Reorg(t *testing.T) {
 
 	// handler would panic if it had been called, so this line is a redundant check for clarity
 	handler.AssertNotCalled(t, "Handle", mock.AnythingOfType("*functioncall.SfcCrossCall"))
-}
-
-func createProgressOpts(ds *badgerds.Datastore) WatcherProgressDsOpts {
-	progOpts := fixWatcherProgressDsOpts
-	progOpts.ds = ds
-	progOpts.dsProgKey = datastore.NewKey("reorg_test")
-	return progOpts
 }
 
 func makeCrossContractCallTx(t *testing.T, contract *functioncall.Sfc, auth *bind.TransactOpts) {

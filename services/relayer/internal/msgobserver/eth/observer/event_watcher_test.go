@@ -2,6 +2,8 @@ package observer
 
 import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind/backends"
+	"github.com/ipfs/go-datastore"
+	badgerds "github.com/ipfs/go-ds-badger"
 	"github.com/stretchr/testify/mock"
 	"time"
 )
@@ -35,4 +37,11 @@ func commit(backend *backends.SimulatedBackend) {
 func commitAndSleep(backend *backends.SimulatedBackend) {
 	commit(backend)
 	time.Sleep(2 * time.Second)
+}
+
+func createProgressOpts(ds *badgerds.Datastore) WatcherProgressDsOpts {
+	progOpts := fixWatcherProgressDsOpts
+	progOpts.ds = ds
+	progOpts.dsProgKey = datastore.NewKey("reorg_test")
+	return progOpts
 }
