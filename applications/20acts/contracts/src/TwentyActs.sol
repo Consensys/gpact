@@ -30,16 +30,16 @@ import "../../../../contracts/contracts/src/common/ResponseProcessUtil.sol";
  *
  */
 contract TwentyActs is Pausable, AccessControl, CbcDecVer, ResponseProcessUtil {
-
+    // In addition to DEFAULT_ADMIN_ROLE, the following roles are defined.
     bytes32 public constant MAPPING_ROLE = keccak256("MAPPING_ROLE");
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
 
 
     /**
- * Update the mapping between an ERC 20 contract on this blockchain and an ERC 20
- * contract on another blockchain.
- *
- * @param _thisBcTokenContract  Address of ERC 20 contract on this blockchain.
+     * Update the mapping between an ERC 20 contract on this blockchain and an ERC 20
+     * contract on another blockchain.
+     *
+     * @param _thisBcTokenContract  Address of ERC 20 contract on this blockchain.
      * @param _otherBcId            Blockchain ID where the corresponding ERC 20 contract resides.
      * @param _othercTokenContract  Address of ERC 20 contract on the other blockchain.
      */
@@ -48,6 +48,56 @@ contract TwentyActs is Pausable, AccessControl, CbcDecVer, ResponseProcessUtil {
         uint256 _otherBcId,
         address _othercTokenContract
     );
+
+
+    event SetWithdrawalWaitPeriod(uint256 _waitPeriodInSeconds);
+    event SetInfrastructureAccount(address _account);
+
+    /**
+     * Indicate an account's banned status has changed.
+     *
+     * @param _user    The affected account.
+     * @param _banned  True if the account is now banned from making transfers or acting as a liquidity provider.
+     */
+    event Banned(address _user, bool _banned);
+
+    /**
+     * Indicate an account's frozen status has changed.
+     *
+     * @param _user    The affected account.
+     * @param _frozen  True if the account is now stopped from withdrawing money.
+     */
+    event Frozen(address _user, bool _frozen);
+
+
+    /**
+     * Indicate a liquidity provider has deposited funds.
+     *
+     * @param _lp      The liquidity provider's account.
+     * @param _erc20   The ERC 20 contract address.
+     * @param _amount  The number of tokens.
+     */
+    event Deposited(address _lp, address _erc20, uint256 _amount);
+
+    /**
+     * Indicates a withdrawal request has been received.
+     *
+     * @param _lp      The liquidity provider's account.
+     * @param _erc20   The ERC 20 contract address.
+     * @param _amount  The number of tokens.
+     */
+    event WithdrawalRequested(address _lp, address _erc20, uint256 _amount);
+
+    /**
+     * Indicates a withdrawal has been finalised.
+     *
+     * @param _lp      The liquidity provider's account.
+     * @param _erc20   The ERC 20 contract address.
+     * @param _amount  The number of tokens.
+     */
+    event FinalizeWithdrawal(address _lp, address _erc20, uint256 _amount);
+
+
 
     event PrepareOnTarget(bytes32 _txInfoDigest);
     bytes32 internal constant PREPARE_ON_TARGET_EVENT_SIGNATURE =
@@ -118,9 +168,6 @@ contract TwentyActs is Pausable, AccessControl, CbcDecVer, ResponseProcessUtil {
     // Map (token contract address on this blockchain => bool)
     mapping(address => bool) public erc20Supported;
 
-    // NOTE: This is handled CdcDevVer.sol
-    // Addresses of ERC 20 bridges on other blockchains.
-//    mapping(uint256 => address) public remoteErc20Bridges;
 
 
 
@@ -176,6 +223,8 @@ contract TwentyActs is Pausable, AccessControl, CbcDecVer, ResponseProcessUtil {
 
 
     /**
+     * @dev Set the period of time in seconds that an entity must wait prior to withdrawing funds.
+     * NOTE: Caller must have DEFAULT_ADMIN_ROLE
      *
      * @param _withdrawalWaitPeriod Period between requesting a withdraw and being able to action the withdraw in seconds.
      */
@@ -186,15 +235,14 @@ contract TwentyActs is Pausable, AccessControl, CbcDecVer, ResponseProcessUtil {
         );
 
         withdrawalWaitPeriod = _withdrawalWaitPeriod;
+        emit SetWithdrawalWaitPeriod(_withdrawalWaitPeriod);
     }
 
 
 
     /**
-     * Pauses the bridge.
-     *
-     * Requirements:
-     * - the caller must have the `PAUSER_ROLE`.
+     * @dev Pauses the bridge.
+     * NOTE: caller must have the PAUSER_ROLE.
      */
     function pause() external {
         require(
@@ -205,10 +253,8 @@ contract TwentyActs is Pausable, AccessControl, CbcDecVer, ResponseProcessUtil {
     }
 
     /**
-     * Unpauses the bridge.
-     *
-     * Requirements:
-     * - the caller must have the `PAUSER_ROLE`.
+     * @dev Unpauses the bridge.
+     * NOTE: caller must have the PAUSER_ROLE.
      */
     function unpause() external {
         require(
@@ -222,9 +268,7 @@ contract TwentyActs is Pausable, AccessControl, CbcDecVer, ResponseProcessUtil {
     /**
      * @dev Set or update the mapping between an ERC 20 contract on this blockchain and an ERC 20
      * contract on another blockchain.
-     *
-     * Requirements:
-     * - the caller must have the `MAPPING_ROLE`.
+     * NOTE: caller must have the MAPPING_ROLE.
      *
      * @param _thisBcErc20          Address of ERC 20 contract on this blockchain.
      * @param _otherBcId            Blockchain ID where the corresponding ERC 20 contract resides.
@@ -249,29 +293,10 @@ contract TwentyActs is Pausable, AccessControl, CbcDecVer, ResponseProcessUtil {
         emit ERC20AddressMappingChanged(_thisBcErc20, _otherBcId, _otherBcErc20);
     }
 
-//    /**
-//     * Connect this ERC20 Bridge contract to an ERC20 Bridge contract on another blockchain.
-//     *
-//     * Requirements:
-//     * - the caller must have the `MAPPING_ROLE`.
-//     *
-//     * @param _otherBcId            Blockchain ID where the corresponding ERC 20 bridge contract resides.
-//     * @param _otherErc20Bridge     Address of ERC 20 Bridge contract on other blockchain.
-//     */
-//    function setBridgeMapping(
-//        uint256 _otherBcId,
-//        address _otherErc20Bridge
-//    ) external {
-//        require(
-//            hasRole(MAPPING_ROLE, _msgSender()),
-//            "20ACTS:Must have MAPPING role"
-//        );
-//        remoteErc20Bridges[_otherBcId] = _otherErc20Bridge;
-//    }
-
 
     /**
-     * Set the account that recieves the infrastructure provider fees.
+     * Set the account that receives the infrastructure provider fees.
+     * NOTE: caller must have DEFAULT_ADMIN_ROLE
      *
      * @param _account      Account to receive the fees.
      */
@@ -283,6 +308,8 @@ contract TwentyActs is Pausable, AccessControl, CbcDecVer, ResponseProcessUtil {
             "20ACTS:Must have ADMIN role"
         );
         infrastructureAccount = _account;
+
+        emit SetInfrastructureAccount(_account);
     }
 
 
@@ -304,6 +331,8 @@ contract TwentyActs is Pausable, AccessControl, CbcDecVer, ResponseProcessUtil {
             "20ACTS:Must have ADMIN role"
         );
         banned[_user] = _banned;
+
+        emit Banned(_user, _banned);
     }
 
     /**
@@ -325,6 +354,8 @@ contract TwentyActs is Pausable, AccessControl, CbcDecVer, ResponseProcessUtil {
             "20ACTS:Must have ADMIN role"
         );
         frozen[_user] = _frozen;
+
+        emit Frozen(_user, _frozen);
     }
 
 
@@ -335,65 +366,69 @@ contract TwentyActs is Pausable, AccessControl, CbcDecVer, ResponseProcessUtil {
      *
      * NOTE: msg.sender must have called Approve on the ERC20 contract prior to this call.
      *
-     * @param _thisBcErc20  Address of ERC 20 contract.
+     * @param _erc20        Address of ERC 20 contract.
      * @param _amount       Number of tokens to transfer.
      */
-    function deposit(address _thisBcErc20, uint256 _amount) external {
-        require(erc20Supported[_thisBcErc20], "20ACTS:Deposits not allowed for ERC 20 contract");
+    function deposit(address _erc20, uint256 _amount) external {
+        require(erc20Supported[_erc20], "20ACTS:Deposits not allowed for ERC 20 contract");
         require(!banned[msg.sender], "20ACTS:Account is banned from depositing funds");
 
-        deposits[msg.sender][_thisBcErc20] += _amount;
+        deposits[msg.sender][_erc20] += _amount;
 
-        IERC20 tokenContract = IERC20(_thisBcErc20);
+        IERC20 tokenContract = IERC20(_erc20);
         tokenContract.transferFrom(msg.sender, address(this), _amount);
 
-        // TODO emit a depost event.
+        emit Deposited(msg.sender, _erc20, _amount);
     }
 
 
     /**
-     * Liquidity Providers use this function to request withdrawals.
+     * @dev Liquidity Providers use this function to request withdrawals. Each liquidity provider
+     * can only make one withdrawal at a time.
+     * NOTE: A two step withdrawal process is used to provide time for a liquidity provider's account
+     * that has been taken over by an attacker to be frozen.
      *
-     * @param _thisBcErc20  Address of ERC 20 contract.
+     * @param _erc20        Address of ERC 20 contract.
      * @param _amount       Number of tokens to withdrawal.
      */
-    function requestWithdrawal(address _thisBcErc20, uint256 _amount) external {
-        require(withdrawalsTime[msg.sender][_thisBcErc20] == 0, "20ACTS:Active withdrawal");
-        uint256 amountDeposited = deposits[msg.sender][_thisBcErc20];
-        uint256 amountAllocated = allocated[msg.sender][_thisBcErc20];
-        uint256 amountWithdrawals = withdrawals[msg.sender][_thisBcErc20];
-        require(amountDeposited - amountAllocated - amountWithdrawals <= _amount, "20ACTS:Amount exceeds unallocated deposits");
-        withdrawals[msg.sender][_thisBcErc20] = amountWithdrawals + _amount;
-        withdrawalsTime[msg.sender][_thisBcErc20] = withdrawalWaitPeriod + block.timestamp;
+    function requestWithdrawal(address _erc20, uint256 _amount) external {
+        require(withdrawalsTime[msg.sender][_erc20] == 0, "20ACTS:Active withdrawal");
+        uint256 amountDeposited = deposits[msg.sender][_erc20];
+        uint256 amountAllocated = allocated[msg.sender][_erc20];
+        require(amountDeposited - amountAllocated >= _amount, "20ACTS:Amount exceeds unallocated deposits");
+        withdrawals[msg.sender][_erc20] = _amount;
+        withdrawalsTime[msg.sender][_erc20] = withdrawalWaitPeriod + block.timestamp;
 
-        // TODO emit an event
+        emit WithdrawalRequested(msg.sender, _erc20, _amount);
     }
 
 
     /**
-     * Liquidity Providers use this function to request withdrawals.
+     * @dev Liquidity Providers use this function to finalize a previously requested withdrawal.
+     * NOTE: A two step withdrawal process is used to provide time for a liquidity provider's account
+     * that has been taken over by an attacker to be frozen.
      *
-     * @param _thisBcErc20  Address of ERC 20 contract.
+     * @param _erc20  Address of ERC 20 contract.
      */
-    function finalizeWithdrawal(address _thisBcErc20) external {
-        require(withdrawalsTime[msg.sender][_thisBcErc20] != 0, "20ACTS:No active withdrawal");
-        require(withdrawalsTime[msg.sender][_thisBcErc20] > block.timestamp, "20ACTS:Attempting to withdraw early");
+    function finalizeWithdrawal(address _erc20) external {
+        require(withdrawalsTime[msg.sender][_erc20] != 0, "20ACTS:No active withdrawal");
+        require(withdrawalsTime[msg.sender][_erc20] > block.timestamp, "20ACTS:Attempting to withdraw early");
         require(!frozen[msg.sender], "20ACTS:Account frozen");
 
-        uint256 amountDeposited = deposits[msg.sender][_thisBcErc20];
-        uint256 amountWithdrawals = withdrawals[msg.sender][_thisBcErc20];
+        uint256 amountDeposited = deposits[msg.sender][_erc20];
+        uint256 amountWithdrawals = withdrawals[msg.sender][_erc20];
 
         // This should be impossible.
         require(amountDeposited > amountWithdrawals, "20ACTS:Withdrawal amount > deposited amount");
 
-        withdrawals[msg.sender][_thisBcErc20] = 0;
-        deposits[msg.sender][_thisBcErc20] = amountDeposited - amountWithdrawals;
+        withdrawals[msg.sender][_erc20] = 0;
+        deposits[msg.sender][_erc20] = amountDeposited - amountWithdrawals;
 
         // Execute the transfer. If this reverts, it will revert the entire transaction.
-        IERC20 tokenContract = IERC20(_thisBcErc20);
+        IERC20 tokenContract = IERC20(_erc20);
         tokenContract.transfer(msg.sender, amountWithdrawals);
 
-        // TODO emit an event
+        emit FinalizeWithdrawal(msg.sender, _erc20, amountWithdrawals);
     }
 
     /**
@@ -489,7 +524,7 @@ contract TwentyActs is Pausable, AccessControl, CbcDecVer, ResponseProcessUtil {
 
 
             // Validate biddingPeriodEnd: Must be in the past.
-            // TODO this has already bee done on target chain. Don't beed to do it here again.
+            // TODO this has already bee done on target chain. Don't need to do it here again.
             require(_txInfo.biddingPeriodEnd < block.timestamp, "20ACTS:Bidding period still in progress");
         }
 
