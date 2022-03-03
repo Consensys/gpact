@@ -64,8 +64,8 @@ func NewSFCCrossCallRealtimeEventWatcher(watcherOpts EventWatcherOpts, removedEv
 	if watcherOpts.EventHandler == nil || removedEventHandler == nil {
 		return nil, fmt.Errorf("handler cannot be nil")
 	}
-	return &SFCCrossCallRealtimeEventWatcher{EventWatcherOpts: watcherOpts, RemovedEventHandler: removedEventHandler, SfcContract: contract,
-		end: make(chan bool)}, nil
+	return &SFCCrossCallRealtimeEventWatcher{EventWatcherOpts: watcherOpts, RemovedEventHandler: removedEventHandler,
+		SfcContract: contract, end: make(chan bool)}, nil
 }
 
 // SFCCrossCallFinalisedEventWatcher listens to events from a 'Simple Function Call' bridge and processes them only once they are
@@ -73,11 +73,11 @@ func NewSFCCrossCallRealtimeEventWatcher(watcherOpts EventWatcherOpts, removedEv
 // An event has one block confirmation the instant it is mined into a block.
 type SFCCrossCallFinalisedEventWatcher struct {
 	FinalisedEventWatcher
-	SfcContract *functioncall.Sfc
+	Contract *functioncall.Sfc
 }
 
 func (l *SFCCrossCallFinalisedEventWatcher) fetchAndProcessEvents(filterOpts *bind.FilterOpts) error {
-	finalisedEvs, err := l.SfcContract.FilterCrossCall(filterOpts)
+	finalisedEvs, err := l.Contract.FilterCrossCall(filterOpts)
 	if err != nil {
 		return err
 	}
@@ -104,9 +104,11 @@ func NewSFCCrossCallFinalisedEventWatcher(watcherOpts EventWatcherOpts, watchPro
 	if watcherOpts.EventHandler == nil {
 		return nil, fmt.Errorf("handler cannot be nil")
 	}
-	finalisedEvW := FinalisedEventWatcher{EventWatcherOpts: watcherOpts, WatcherProgressOpts: watchProgressDbOpts, EventHandleRetryOpts: handlerRetryOpts, confirmationsForFinality: confirmsForFinality, client: client, end: make(chan bool)}
+	finalisedEvW := FinalisedEventWatcher{EventWatcherOpts: watcherOpts, WatcherProgressOpts: watchProgressDbOpts,
+		EventHandleRetryOpts: handlerRetryOpts, confirmationsForFinality: confirmsForFinality, client: client,
+		end: make(chan bool)}
 
-	sfcWatcher := SFCCrossCallFinalisedEventWatcher{FinalisedEventWatcher: finalisedEvW, SfcContract: contract}
+	sfcWatcher := SFCCrossCallFinalisedEventWatcher{FinalisedEventWatcher: finalisedEvW, Contract: contract}
 	sfcWatcher.fetchAndProcessEvsFunc = sfcWatcher.fetchAndProcessEvents
 
 	return &sfcWatcher, nil
