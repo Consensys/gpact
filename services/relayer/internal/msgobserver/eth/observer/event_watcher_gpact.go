@@ -77,7 +77,7 @@ func (l *GPACTRealtimeEventWatcher) StopWatcher() {
 	l.end <- true
 }
 
-// NewGPACTRealtimeEventWatcher creates an instance of SFCCrossCallRealtimeEventWatcher.
+// NewGPACTRealtimeEventWatcher creates an instance of GPACTRealtimeEventWatcher
 // Throws an error if the provided even handler or the removed event handler is nil.
 func NewGPACTRealtimeEventWatcher(watcherOpts EventWatcherOpts, removedEventHandler EventHandler,
 	contract *functioncall.Gpact) (*GPACTRealtimeEventWatcher, error) {

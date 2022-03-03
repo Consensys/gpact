@@ -32,6 +32,7 @@ func TestGPACTRealtimeEventWatcher(t *testing.T) {
 	makeGPACTStartCall(t, contract, auth)
 	commitAndSleep(simBackend)
 	handler.AssertExpectations(t)
+	// TODO: test scenarios involving segment and root events
 }
 
 func TestGPACTRealtimeEventWatcher_RemovedEvent(t *testing.T) {
@@ -127,6 +128,7 @@ func TestGPACTFinalisedEventWatcher(t *testing.T) {
 		assert.Nil(t, err)
 		assert.Equal(t, v.lastFinalised, progress)
 	}
+	// TODO: test scenarios involving segment and root events
 }
 
 // tests scenarios where events in multiple blocks have been finalised but not yet been processed
