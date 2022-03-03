@@ -9,7 +9,7 @@ import (
 	"log"
 )
 
-// SFCCrossCallRealtimeEventWatcher subscribes and listens to events from a 'Simple Function Call' bridge contract.
+// SFCCrossCallRealtimeEventWatcher subscribes and listens to events from a `Sfc`(Simple Function Call) bridge contract.
 // The events produced by this watcher are generated the instant they are mined (i.e. 1 confirmation).
 // The progress of this watcher is not persisted, and will always start from either EventWatcherOps.Start block if provided or the latest block if not.
 // The watcher does not check to see if the event is affected by any reorgs.
@@ -21,7 +21,7 @@ type SFCCrossCallRealtimeEventWatcher struct {
 	end                 chan bool
 }
 
-// Watch subscribes and starts listening to 'CrossCall' events from a given 'Simple Function Call' contract.
+// Watch subscribes and starts listening to 'CrossCall' events from a given `Sfc`(Simple Function Call) contract.
 // Events received are passed to an event handler for processing.
 // The method fails if subscribing to the event with the underlying network fails.
 func (l *SFCCrossCallRealtimeEventWatcher) Watch() error {
@@ -68,7 +68,8 @@ func NewSFCCrossCallRealtimeEventWatcher(watcherOpts EventWatcherOpts, removedEv
 		SfcContract: contract, end: make(chan bool)}, nil
 }
 
-// SFCCrossCallFinalisedEventWatcher listens to events from a 'Simple Function Call' bridge and processes them only once they are
+// SFCCrossCallFinalisedEventWatcher listens to events from a `Sfc`(
+// Simple Function Call) bridge contract and processes them only once they are
 // 'finalised'. An event is considered 'finalised' once it receives a configurable number of block confirmations.
 // An event has one block confirmation the instant it is mined into a block.
 type SFCCrossCallFinalisedEventWatcher struct {
@@ -94,7 +95,7 @@ func (l *SFCCrossCallFinalisedEventWatcher) handleEvents(events *functioncall.Sf
 }
 
 // NewSFCCrossCallFinalisedEventWatcher creates an `SFCCrossCall` event watcher that processes events only once they receive sufficient confirmations.
-// Note: 1 block confirmation means the instant the transaction generating the event is mined.
+// The first block confirmation is achieved when the event is mined.
 func NewSFCCrossCallFinalisedEventWatcher(watcherOpts EventWatcherOpts, watchProgressDbOpts WatcherProgressDsOpts,
 	handlerRetryOpts FailureRetryOpts, confirmsForFinality uint64,
 	contract *functioncall.Sfc, client BlockHeadProducer) (*SFCCrossCallFinalisedEventWatcher, error) {
