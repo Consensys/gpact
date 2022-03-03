@@ -143,7 +143,7 @@ func (l *GPACTFinalisedEventWatcher) processEvents(events EventIterator, wg *syn
 	wg.Done()
 }
 
-func NewGpactFinalisedEventWatcher(watcherOpts EventWatcherOpts, watchProgressDbOpts WatcherProgressDsOpts,
+func NewGPACTFinalisedEventWatcher(watcherOpts EventWatcherOpts, watchProgressDbOpts WatcherProgressDsOpts,
 	handlerRetryOpts FailureRetryOpts, confirmsForFinality uint64,
 	contract *functioncall.Gpact, client BlockHeadProducer) (*GPACTFinalisedEventWatcher, error) {
 	if confirmsForFinality < 1 {

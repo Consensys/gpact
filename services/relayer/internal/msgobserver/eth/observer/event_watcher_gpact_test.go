@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-func TestGpactRealtimeEventWatcher(t *testing.T) {
+func TestGPACTRealtimeEventWatcher(t *testing.T) {
 	simBackend, auth := simulatedBackend(t)
 	contract := deployGpactContract(t, simBackend, auth)
 
