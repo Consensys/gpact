@@ -37,7 +37,8 @@ public class TwentyActsExampleSystemManager {
     this.propsFileName = propertiesFileName;
   }
 
-  public void standardExampleConfig(int numberOfBlockchains, Credentials deployer) throws Exception {
+  public void standardExampleConfig(Credentials[] deployers) throws Exception {
+    int numberOfBlockchains = deployers.length;
     // Less that two blockchains doesn't make sense for crosschain.
     // The test infrasturcture only supports three blockchains at present.
     if (!(numberOfBlockchains == 2 || numberOfBlockchains == 3)) {
@@ -51,6 +52,7 @@ public class TwentyActsExampleSystemManager {
     this.bc3 = propsLoader.getBlockchainInfo("BC3");
     CrossBlockchainConsensusType consensusMethodology = propsLoader.getConsensusMethodology();
     StatsHolder.log(consensusMethodology.name());
+
 
     // To keep the example simple, just have one signer for all blockchains.
     AnIdentity globalSigner = new AnIdentity();
@@ -67,15 +69,15 @@ public class TwentyActsExampleSystemManager {
         messagingManagerGroup = new AttestorSignerManagerGroup();
 
         addBcAttestorSign(
-            messagingManagerGroup, this.managerGroup, attestorSignerGroup, deployer, this.root);
+            messagingManagerGroup, this.managerGroup, attestorSignerGroup, deployers[0], this.root);
         addBcAttestorSign(
-            messagingManagerGroup, this.managerGroup, attestorSignerGroup, deployer, this.bc2);
+            messagingManagerGroup, this.managerGroup, attestorSignerGroup, deployers[1], this.bc2);
         if (numberOfBlockchains == 3) {
           addBcAttestorSign(
               messagingManagerGroup,
               this.managerGroup,
               attestorSignerGroup,
-              deployer,
+              deployers[3],
               this.bc3);
         }
         attestorSignerGroup.addSignerOnAllBlockchains(globalSigner);
@@ -90,14 +92,14 @@ public class TwentyActsExampleSystemManager {
             this.managerGroup,
             relayerGroup,
             txRootTransferGroup,
-            deployer,
+            deployers[0],
             this.root);
         addBcTxRootSign(
             messagingManagerGroup,
             this.managerGroup,
             relayerGroup,
             txRootTransferGroup,
-            deployer,
+            deployers[1],
             this.bc2);
         if (numberOfBlockchains == 3) {
           addBcTxRootSign(
@@ -105,7 +107,7 @@ public class TwentyActsExampleSystemManager {
               this.managerGroup,
               relayerGroup,
               txRootTransferGroup,
-              deployer,
+              deployers[2],
               this.bc3);
         }
         relayerGroup.addSignerOnAllBlockchains(globalSigner);
@@ -146,10 +148,10 @@ public class TwentyActsExampleSystemManager {
     for (BlockchainId bcId1 : bcs) {
       CrossControlManager crossManager1 = crossControlManagerGroup.getCbcManager(bcId1);
       String cbcContractAddress = crossManager1.getCbcContractAddress();
-      String verifierContractAddress = messagingManagerGroup.getVerifierAddress(bcId1);
 
       for (BlockchainId bcId2 : bcs) {
         CrossControlManager crossManager2 = crossControlManagerGroup.getCbcManager(bcId2);
+        String verifierContractAddress = messagingManagerGroup.getVerifierAddress(bcId2);
         crossManager2.addRemoteBlockchain(bcId1, cbcContractAddress, verifierContractAddress);
       }
     }

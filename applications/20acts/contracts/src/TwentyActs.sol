@@ -496,6 +496,8 @@ contract TwentyActs is Pausable, AccessControl, CbcDecVer, ResponseProcessUtil {
         // Validate the target blockchain id: Check that there is a corresponding bridge on that blockchain.
 
 // TODO this is handled by decodeAndVerifyEvent - however it reverts when we need the logic below.
+        // TODO need different way of confirming source of event: a param?
+
         address target20ActsContract = remoteCrosschainControlContracts[_txInfo.targetBcId];
         if (target20ActsContract == address(0)) {
             // Transfer to target blockchain not supported.
@@ -581,7 +583,6 @@ contract TwentyActs is Pausable, AccessControl, CbcDecVer, ResponseProcessUtil {
     }
 
 
-
     /**
      *
      * Check that the Crosschain Transaction Id exists.
@@ -609,6 +610,8 @@ contract TwentyActs is Pausable, AccessControl, CbcDecVer, ResponseProcessUtil {
         // TODO: Is this check required? The targetBcId is covered by the digest, and this was checked in prepare.
         require(_txInfo.targetBcId == myBlockchainId, "20ACTS:Not for this blockchain");
 
+        // TODO need different way of confirming source of event: a param?
+        // TODO source contract is part of what is signed. Hence, this shouldn't be needed here.
         address source20ActsAddress = remoteCrosschainControlContracts[_txInfo.sourceBcId];
 
         decodeAndVerifyEvent(
@@ -620,7 +623,7 @@ contract TwentyActs is Pausable, AccessControl, CbcDecVer, ResponseProcessUtil {
         );
         bytes32 txInfoDigestPrepareOnSource;
         bool success;
-        (txInfoDigestPrepareOnSource, success, ) = abi.decode(_eventData,(bytes32, bool, uint256));
+        (txInfoDigestPrepareOnSource, success, , ) = abi.decode(_eventData,(bytes32, bool, uint256, string));
         require(txInfoDigest == txInfoDigestPrepareOnSource, "20ACTS: Finalize On Target: Incorrect Prepare On Source event");
 
         address liquidityProvider = _txInfo.liquidityProvider;
@@ -670,7 +673,8 @@ Update reputations of User and the Liquidity Provider (identified by the Liquidi
         // TODO: Is this check required? The sourceBcId is covered by the digest, and this was checked in prepare.
         require(_txInfo.sourceBcId == myBlockchainId, "20ACTS:Not for this blockchain");
 
-        address target20ActsAddress = remoteCrosschainControlContracts[_txInfo.sourceBcId];
+        // TODO it doesn't make sense to get this and then check it in decode.
+        address target20ActsAddress = remoteCrosschainControlContracts[_txInfo.targetBcId];
 
         decodeAndVerifyEvent(
             _txInfo.targetBcId,
@@ -685,7 +689,7 @@ Update reputations of User and the Liquidity Provider (identified by the Liquidi
         uint256 totalAmount = _txInfo.amount + _txInfo.lpFee + _txInfo.inFee;
 
         // Allocate the funds.
-        address sourceErc20Address = _txInfo.targetErc20Address;
+        address sourceErc20Address = _txInfo.sourceErc20Address;
         allocated[_txInfo.sender][sourceErc20Address] -= totalAmount;
         deposits[_txInfo.sender][sourceErc20Address] -= totalAmount;
         deposits[_txInfo.liquidityProvider][sourceErc20Address] += _txInfo.amount + _txInfo.lpFee;
@@ -695,5 +699,4 @@ Update reputations of User and the Liquidity Provider (identified by the Liquidi
 
         emit FinalizeOnSource(txInfoDigest);
     }
-
 }
