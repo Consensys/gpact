@@ -18,15 +18,11 @@ package observer
 import (
 	"context"
 	"fmt"
-	"log"
-
 	"github.com/avast/retry-go"
-	"github.com/consensys/gpact/services/relayer/internal/contracts/functioncall"
 	"github.com/consensys/gpact/services/relayer/internal/logging"
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/event"
 	"github.com/ipfs/go-datastore"
 )
 
@@ -48,64 +44,6 @@ type EventWatcherOpts struct {
 	Context      context.Context
 }
 
-// SFCCrossCallRealtimeEventWatcher subscribes and listens to events from a 'Simple Function Call' bridge contract.
-// The events produced by this watcher are generated the instant they are mined (i.e. 1 confirmation).
-// The progress of this watcher is not persisted, and will always start from either EventWatcherOps.Start block if provided or the latest block if not.
-// The watcher does not check to see if the event is affected by any reorgs.
-type SFCCrossCallRealtimeEventWatcher struct {
-	EventWatcherOpts
-	// RemovedEventHandler handles events that have been affected by a reorg and are no longer a part of the canonical chain
-	RemovedEventHandler EventHandler
-	SfcContract         *functioncall.Sfc
-	end                 chan bool
-}
-
-// Watch subscribes and starts listening to 'CrossCall' events from a given 'Simple Function Call' contract.
-// Events received are passed to an event handler for processing.
-// The method fails if subscribing to the event with the underlying network fails.
-func (l *SFCCrossCallRealtimeEventWatcher) Watch() error {
-	opts := bind.WatchOpts{Start: &l.Start, Context: l.Context}
-	chanEvents := make(chan *functioncall.SfcCrossCall)
-	sub, err := l.SfcContract.WatchCrossCall(&opts, chanEvents)
-	if err != nil {
-		log.Fatalf("failed to subscribe to crosschaincall event %v", err)
-	}
-	return l.start(sub, chanEvents)
-}
-
-func (l *SFCCrossCallRealtimeEventWatcher) start(sub event.Subscription, chanEvents <-chan *functioncall.SfcCrossCall) error {
-	logging.Info("Start watching %v...", l.SfcContract)
-	for {
-		select {
-		case err := <-sub.Err():
-			return fmt.Errorf("error in log subscription %v", err)
-		case <-l.end:
-			logging.Info("Watcher stopped...")
-			return nil
-		case ev := <-chanEvents:
-			if ev.Raw.Removed {
-				l.RemovedEventHandler.Handle(ev)
-			} else {
-				l.EventHandler.Handle(ev)
-			}
-		}
-	}
-}
-
-func (l *SFCCrossCallRealtimeEventWatcher) StopWatcher() {
-	l.end <- true
-}
-
-// NewSFCCrossCallRealtimeEventWatcher creates an instance of SFCCrossCallRealtimeEventWatcher.
-// Throws an error if the provided even handler or the removed event handler is nil.
-func NewSFCCrossCallRealtimeEventWatcher(watcherOpts EventWatcherOpts, removedEventHandler EventHandler, contract *functioncall.Sfc) (*SFCCrossCallRealtimeEventWatcher, error) {
-	if watcherOpts.EventHandler == nil || removedEventHandler == nil {
-		return nil, fmt.Errorf("handler cannot be nil")
-	}
-	return &SFCCrossCallRealtimeEventWatcher{EventWatcherOpts: watcherOpts, RemovedEventHandler: removedEventHandler, SfcContract: contract,
-		end: make(chan bool)}, nil
-}
-
 type BlockHeadProducer interface {
 	SubscribeNewHead(ctx context.Context, ch chan<- *types.Header) (ethereum.Subscription, error)
 }
@@ -117,28 +55,28 @@ type WatcherProgressDsOpts struct {
 	FailureRetryOpts                     // configuration for how retries will be performed if persisting progress fails
 }
 
-// SFCCrossCallFinalisedEventWatcher listens to events from a 'Simple Function Call' bridge and processes them only once they are
+// FinalisedEventWatcher listens to events from a bridge and processes them only once they are
 // 'finalised'. An event is considered 'finalised' once it receives a configurable number of block confirmations.
 // An event has one block confirmation the instant it is mined into a block.
-type SFCCrossCallFinalisedEventWatcher struct {
+type FinalisedEventWatcher struct {
 	EventWatcherOpts
 	WatcherProgressOpts WatcherProgressDsOpts
 	// EventHandleRetryOpts specifies how retries will be attempted if fetching or processing events fails
 	EventHandleRetryOpts     FailureRetryOpts
-	SfcContract              *functioncall.Sfc
 	confirmationsForFinality uint64 //  the number of block confirmations required before an event is considered 'final'.
 	client                   BlockHeadProducer
 	end                      chan bool
 	nextBlockToProcess       uint64
+	fetchAndProcessEvsFunc   func(opts *bind.FilterOpts) error
 }
 
-func (l *SFCCrossCallFinalisedEventWatcher) StopWatcher() {
+func (l *FinalisedEventWatcher) StopWatcher() {
 	l.end <- true
 }
 
 // Watch subscribes and starts listening to 'CrossCall' events from a given 'Simple Function Call' contract.
 // Once an events receives sufficient block confirmations, it is passed to an event handler for processing.
-func (l *SFCCrossCallFinalisedEventWatcher) Watch() error {
+func (l *FinalisedEventWatcher) Watch() error {
 	headers := make(chan *types.Header)
 	sub, err := l.client.SubscribeNewHead(l.Context, headers)
 	if err != nil {
@@ -146,7 +84,7 @@ func (l *SFCCrossCallFinalisedEventWatcher) Watch() error {
 	}
 
 	// resume processing from last saved progress point if available.
-	//if not, use the SFCCrossCallFinalisedEventWatcher.Start value provided
+	//if not, use the FinalisedEventWatcher.Start value provided
 	l.setNextBlockToProcess()
 
 	for {
@@ -155,6 +93,7 @@ func (l *SFCCrossCallFinalisedEventWatcher) Watch() error {
 			return fmt.Errorf("error in log subscription %v", err)
 		case <-l.end:
 			logging.Info("Watcher stopped...")
+			sub.Unsubscribe()
 			return nil
 		case latestHead := <-headers:
 			l.processFinalisedEvents(latestHead)
@@ -162,14 +101,14 @@ func (l *SFCCrossCallFinalisedEventWatcher) Watch() error {
 	}
 }
 
-func (l *SFCCrossCallFinalisedEventWatcher) GetNextBlockToProcess() uint64 {
+func (l *FinalisedEventWatcher) GetNextBlockToProcess() uint64 {
 	return l.nextBlockToProcess
 }
 
 // GetSavedProgress fetches the last processed block number that has been persisted to the datastore.
 // This value is updated in the datastore each time the watcher processes new blocks ( see `processFinalisedEvents(...)`).
 // returns an error if querying the datastore or deserialising the result fails.
-func (l *SFCCrossCallFinalisedEventWatcher) GetSavedProgress() (uint64, error) {
+func (l *FinalisedEventWatcher) GetSavedProgress() (uint64, error) {
 	p, err := l.WatcherProgressOpts.ds.Get(l.Context, l.WatcherProgressOpts.dsProgKey)
 	if err != nil {
 		return 0, err
@@ -184,7 +123,7 @@ func (l *SFCCrossCallFinalisedEventWatcher) GetSavedProgress() (uint64, error) {
 // processFinalisedEvents fetches all relevant events between the last processed block and the provided latest block that have received a sufficient
 // number of confirmations, and passes them to the event handler for processing. If fetching or processing these events fails, the action is retried.
 // If the function completes successfully, the last processed block is updated in the datastore.
-func (l *SFCCrossCallFinalisedEventWatcher) processFinalisedEvents(latest *types.Header) {
+func (l *FinalisedEventWatcher) processFinalisedEvents(latest *types.Header) {
 	latestBlock := latest.Number.Uint64()
 	confirmations := (latestBlock - l.nextBlockToProcess) + 1
 
@@ -207,17 +146,12 @@ func (l *SFCCrossCallFinalisedEventWatcher) processFinalisedEvents(latest *types
 
 // handleEventsWithRetry fetches relevant events that occurred within the given block range and passes them to an event handler for processing.
 // If fetching the events from the network fails, the action is retried.
-func (l *SFCCrossCallFinalisedEventWatcher) handleEventsWithRetry(startBlock uint64, lastBlock uint64) error {
+func (l *FinalisedEventWatcher) handleEventsWithRetry(startBlock uint64, lastBlock uint64) error {
 	logging.Debug("Processing events from blocks %d to %d", startBlock, lastBlock)
 	return retry.Do(
 		func() error {
 			filterOpts := &bind.FilterOpts{Start: startBlock, End: &lastBlock, Context: l.Context}
-			finalisedEvs, err := l.SfcContract.FilterCrossCall(filterOpts)
-			if err != nil {
-				return err
-			}
-			l.handleEvents(finalisedEvs)
-			return nil
+			return l.fetchAndProcessEvsFunc(filterOpts)
 		},
 		retry.Attempts(l.EventHandleRetryOpts.RetryAttempts),
 		retry.Delay(l.EventHandleRetryOpts.RetryDelay),
@@ -229,7 +163,7 @@ func (l *SFCCrossCallFinalisedEventWatcher) handleEventsWithRetry(startBlock uin
 
 // saveProgressToDsWithRetry updates the progress of the watcher in the datastore and retries if it fails.
 // This information is useful to track the progress of the observer and to resume processing if the observer fails or is restarted.
-func (l *SFCCrossCallFinalisedEventWatcher) saveProgressToDsWithRetry(lastFinalisedBlock uint64) {
+func (l *FinalisedEventWatcher) saveProgressToDsWithRetry(lastFinalisedBlock uint64) {
 	err := retry.Do(
 		func() error {
 			return l.WatcherProgressOpts.ds.Put(context.Background(), l.WatcherProgressOpts.dsProgKey, uintToBytes(lastFinalisedBlock))
@@ -245,19 +179,11 @@ func (l *SFCCrossCallFinalisedEventWatcher) saveProgressToDsWithRetry(lastFinali
 	}
 }
 
-func (l *SFCCrossCallFinalisedEventWatcher) handleEvents(events *functioncall.SfcCrossCallIterator) {
-	for events.Next() {
-		ev := events.Event
-		logging.Debug("Processing event, Block: %d, Tx: %d, Log: %d", ev.Raw.BlockNumber, ev.Raw.TxIndex, ev.Raw.Index)
-		l.EventHandler.Handle(ev)
-	}
-}
-
 // setNextBlockToProcess sets the next block to process to either the progress saved in the datastore or to start value provided.
 // The method first checks to see if there is information about the last processed block stored in the data store.
 // If there is, the next block to process is set to the block after the last processed block.
-// If not it defaults to the using the start value provided to the watcher (SFCCrossCallFinalisedEventWatcher.Start)
-func (l *SFCCrossCallFinalisedEventWatcher) setNextBlockToProcess() {
+// If not it defaults to the using the start value provided to the watcher (FinalisedEventWatcher.Start)
+func (l *FinalisedEventWatcher) setNextBlockToProcess() {
 	lastProcessed, err := l.GetSavedProgress()
 	if err != nil {
 		logging.Info("Failed to fetch last processed block from datastore. Defaulting to provided start point: %d", l.Start)
@@ -265,86 +191,4 @@ func (l *SFCCrossCallFinalisedEventWatcher) setNextBlockToProcess() {
 	} else {
 		l.nextBlockToProcess = lastProcessed + 1
 	}
-}
-
-// NewSFCCrossCallFinalisedEventWatcher creates an `SFCCrossCall` event watcher that processes events only once they receive sufficient confirmations.
-// Note: 1 block confirmation means the instant the transaction generating the event is mined.
-func NewSFCCrossCallFinalisedEventWatcher(watcherOpts EventWatcherOpts, watchProgressDbOpts WatcherProgressDsOpts,
-	handlerRetryOpts FailureRetryOpts, confirmsForFinality uint64,
-	contract *functioncall.Sfc, client BlockHeadProducer) (*SFCCrossCallFinalisedEventWatcher, error) {
-	if confirmsForFinality < 1 {
-		return nil, fmt.Errorf("block confirmationsForFinality cannot be less than 1. supplied value: %d", confirmsForFinality)
-	}
-	if watcherOpts.EventHandler == nil {
-		return nil, fmt.Errorf("handler cannot be nil")
-	}
-	return &SFCCrossCallFinalisedEventWatcher{EventWatcherOpts: watcherOpts, WatcherProgressOpts: watchProgressDbOpts, EventHandleRetryOpts: handlerRetryOpts,
-		SfcContract: contract, confirmationsForFinality: confirmsForFinality, client: client, end: make(chan bool)}, nil
-}
-
-// GPACTCrossCallRealtimeEventWatcher is a simple gpact contract watcher.
-type GPACTCrossCallRealtimeEventWatcher struct {
-	EventWatcherOpts
-	GpactContract *functioncall.Gpact
-	end           chan bool
-}
-
-func (l *GPACTCrossCallRealtimeEventWatcher) Watch() error {
-	opts := bind.WatchOpts{Start: &l.Start, Context: l.Context}
-	startEvents := make(chan *functioncall.GpactStart)
-	segmentEvents := make(chan *functioncall.GpactSegment)
-	rootEvents := make(chan *functioncall.GpactRoot)
-	subStart, err := l.GpactContract.WatchStart(&opts, startEvents)
-	if err != nil {
-		return err
-	}
-	subSegment, err := l.GpactContract.WatchSegment(&opts, segmentEvents)
-	if err != nil {
-		return err
-	}
-	subRoot, err := l.GpactContract.WatchRoot(&opts, rootEvents)
-	if err != nil {
-		return err
-	}
-	return l.start(subStart, startEvents, subSegment, segmentEvents, subRoot, rootEvents)
-}
-
-func (l *GPACTCrossCallRealtimeEventWatcher) start(
-	subStart event.Subscription, startEvents <-chan *functioncall.GpactStart,
-	subSegment event.Subscription, segmentEvents <-chan *functioncall.GpactSegment,
-	subRoot event.Subscription, rootEvents <-chan *functioncall.GpactRoot,
-) error {
-	logging.Info("Start watching GPACT %v...", l.GpactContract)
-	for {
-		select {
-		case err := <-subStart.Err():
-			return fmt.Errorf("error in log subscription %v", err)
-		case err := <-subSegment.Err():
-			return fmt.Errorf("error in log subscription %v", err)
-		case err := <-subRoot.Err():
-			return fmt.Errorf("error in log subscription: %v", err)
-		case ev := <-startEvents:
-			l.EventHandler.Handle(ev)
-		case ev := <-segmentEvents:
-			l.EventHandler.Handle(ev)
-		case ev := <-rootEvents:
-			l.EventHandler.Handle(ev)
-		case <-l.end:
-			logging.Info("Watcher stopped...")
-			return nil
-		}
-	}
-}
-
-func (l *GPACTCrossCallRealtimeEventWatcher) StopWatcher() {
-	l.end <- true
-}
-
-// NewGPACTCrossCallRealtimeEventWatcher creates an instance of SFCCrossCallRealtimeEventWatcher.
-// Throws an error if the provided even handler or the removed event handler is nil.
-func NewGPACTCrossCallRealtimeEventWatcher(watcherOpts EventWatcherOpts, contract *functioncall.Gpact) (*GPACTCrossCallRealtimeEventWatcher, error) {
-	if watcherOpts.EventHandler == nil {
-		return nil, fmt.Errorf("handler cannot be nil")
-	}
-	return &GPACTCrossCallRealtimeEventWatcher{EventWatcherOpts: watcherOpts, GpactContract: contract, end: make(chan bool)}, nil
 }

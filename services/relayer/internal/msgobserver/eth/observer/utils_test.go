@@ -68,8 +68,20 @@ func simulatedBackend(t *testing.T) (*backends.SimulatedBackend, *bind.TransactO
 	return backends.NewSimulatedBackend(genesisAlloc, blockGasLimit), auth
 }
 
-func deployContract(t *testing.T, simBackend *backends.SimulatedBackend, auth *bind.TransactOpts) *functioncall.Sfc {
+func deploySFCContract(t *testing.T, simBackend *backends.SimulatedBackend, auth *bind.TransactOpts) *functioncall.Sfc {
 	_, _, contract, err := functioncall.DeploySfc(auth, simBackend, big.NewInt(10), big.NewInt(10))
+
+	if err != nil {
+		failNow(t, "failed to deploy contract: %v", err)
+	}
+
+	simBackend.Commit()
+	return contract
+}
+
+func deployGPACTContract(t *testing.T, simBackend *backends.SimulatedBackend,
+	auth *bind.TransactOpts) *functioncall.Gpact {
+	_, _, contract, err := functioncall.DeployGpact(auth, simBackend, big.NewInt(10))
 
 	if err != nil {
 		failNow(t, "failed to deploy contract: %v", err)
