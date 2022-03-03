@@ -52,11 +52,11 @@ func (l *GPACTRealtimeEventWatcher) start(
 		case err := <-subRoot.Err():
 			return fmt.Errorf("error in log subscription: %v", err)
 		case ev := <-startEvents:
-			l.EventHandler.Handle(ev)
+			l.handle(ev, ev.Raw.Removed)
 		case ev := <-segmentEvents:
-			l.EventHandler.Handle(ev)
+			l.handle(ev, ev.Raw.Removed)
 		case ev := <-rootEvents:
-			l.EventHandler.Handle(ev)
+			l.handle(ev, ev.Raw.Removed)
 		case <-l.end:
 			logging.Info("Watcher stopped...")
 			subStart.Unsubscribe()
@@ -66,18 +66,27 @@ func (l *GPACTRealtimeEventWatcher) start(
 		}
 	}
 }
-
+func (l *GPACTRealtimeEventWatcher) handle(ev interface{}, removed bool) {
+	if !removed {
+		l.EventHandler.Handle(ev)
+	} else {
+		l.RemovedEventHandler.Handle(ev)
+	}
+}
 func (l *GPACTRealtimeEventWatcher) StopWatcher() {
 	l.end <- true
 }
 
 // NewGPACTRealtimeEventWatcher creates an instance of SFCCrossCallRealtimeEventWatcher.
 // Throws an error if the provided even handler or the removed event handler is nil.
-func NewGPACTRealtimeEventWatcher(watcherOpts EventWatcherOpts, contract *functioncall.Gpact) (*GPACTRealtimeEventWatcher, error) {
+func NewGPACTRealtimeEventWatcher(watcherOpts EventWatcherOpts, removedEventHandler EventHandler,
+	contract *functioncall.Gpact) (*GPACTRealtimeEventWatcher, error) {
 	if watcherOpts.EventHandler == nil {
 		return nil, fmt.Errorf("handler cannot be nil")
 	}
-	return &GPACTRealtimeEventWatcher{EventWatcherOpts: watcherOpts, GpactContract: contract, end: make(chan bool)}, nil
+	return &GPACTRealtimeEventWatcher{EventWatcherOpts: watcherOpts,
+		RemovedEventHandler: removedEventHandler, GpactContract: contract,
+		end: make(chan bool)}, nil
 }
 
 type GPACTFinalisedEventWatcher struct {

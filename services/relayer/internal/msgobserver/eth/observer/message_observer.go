@@ -85,9 +85,10 @@ func NewGPACTBridgeRealtimeObserver(source string, sourceAddr string, contract *
 	eventTransformer := NewGPACTEventTransformer(source, sourceAddr)
 	messageHandler := NewMessageEnqueueHandler(mq, DefaultRetryOptions)
 	eventHandler := NewSimpleEventHandler(eventTransformer, messageHandler)
+	removedEvHandler := NewLogEventHandler("removed event")
 
 	watcherOpts := EventWatcherOpts{Context: context.Background(), EventHandler: eventHandler}
-	eventWatcher, err := NewGPACTRealtimeEventWatcher(watcherOpts, contract)
+	eventWatcher, err := NewGPACTRealtimeEventWatcher(watcherOpts, removedEvHandler, contract)
 	if err != nil {
 		return nil, err
 	}

@@ -11,7 +11,7 @@ import (
 
 func TestGPACTRealtimeEventWatcher(t *testing.T) {
 	simBackend, auth := simulatedBackend(t)
-	contract := deployGpactContract(t, simBackend, auth)
+	contract := deployGPACTContract(t, simBackend, auth)
 
 	handler := new(MockEventHandler)
 	handler.On("Handle", mock.AnythingOfType("*functioncall.GpactStart")).Once().Return(nil)
@@ -20,7 +20,7 @@ func TestGPACTRealtimeEventWatcher(t *testing.T) {
 		Context:      auth.Context,
 		EventHandler: handler,
 	}
-	watcher, err := NewGPACTRealtimeEventWatcher(opts, contract)
+	watcher, err := NewGPACTRealtimeEventWatcher(opts, handler, contract)
 	assert.Nil(t, err, "failed to create a realtime event watcher")
 	go watcher.Watch()
 	defer watcher.StopWatcher()
@@ -28,6 +28,41 @@ func TestGPACTRealtimeEventWatcher(t *testing.T) {
 	makeGpactStartCall(t, contract, auth)
 	commitAndSleep(simBackend)
 	handler.AssertExpectations(t)
+}
+
+func TestGPACTRealtimeEventWatcher_RemovedEvent(t *testing.T) {
+	simBackend, auth := simulatedBackend(t)
+	contract := deployGPACTContract(t, simBackend, auth)
+
+	handler := new(MockEventHandler)
+	handler.On("Handle", mock.AnythingOfType("*functioncall.GpactStart")).Once().Return(nil)
+
+	removedHandler := new(MockEventHandler)
+	removedHandler.On("Handle", mock.AnythingOfType("*functioncall.GpactStart")).Once().Return(nil)
+
+	opts := EventWatcherOpts{
+		Context:      auth.Context,
+		EventHandler: handler,
+	}
+	watcher, err := NewGPACTRealtimeEventWatcher(opts, removedHandler, contract)
+	assert.Nil(t, err, "failed to create a realtime event watcher")
+	go watcher.Watch()
+	defer watcher.StopWatcher()
+
+	b1 := simBackend.Blockchain().CurrentBlock().Hash()
+
+	makeGpactStartCall(t, contract, auth)
+	commit(simBackend)
+
+	// create a fork of the chain that excludes the event. turn this chain into the longer chain.
+	// this will cause the event log to be re-sent with a 'removed' flag set
+	err = simBackend.Fork(auth.Context, b1)
+	assert.Nil(t, err, "could not simulate forking blockchain")
+	mineConfirmingBlocks(1, simBackend)
+	commitAndSleep(simBackend)
+
+	handler.AssertExpectations(t)
+	removedHandler.AssertExpectations(t)
 }
 
 func makeGpactStartCall(t *testing.T, contract *functioncall.Gpact, auth *bind.TransactOpts) {

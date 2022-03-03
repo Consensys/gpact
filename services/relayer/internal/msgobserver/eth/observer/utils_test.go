@@ -79,7 +79,7 @@ func deploySFCContract(t *testing.T, simBackend *backends.SimulatedBackend, auth
 	return contract
 }
 
-func deployGpactContract(t *testing.T, simBackend *backends.SimulatedBackend,
+func deployGPACTContract(t *testing.T, simBackend *backends.SimulatedBackend,
 	auth *bind.TransactOpts) *functioncall.Gpact {
 	_, _, contract, err := functioncall.DeployGpact(auth, simBackend, big.NewInt(10))
 
