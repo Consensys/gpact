@@ -12,7 +12,7 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package net.consensys.gpact.applications.twentyacts;
+package net.consensys.gpact.applications.twentyacts.helpers;
 
 import net.consensys.gpact.common.*;
 import net.consensys.gpact.soliditywrappers.applications.twentyacts.ERC20PresetFixedSupply;
