@@ -16,39 +16,22 @@ package observer
  */
 
 import (
+	"github.com/consensys/gpact/services/relayer/internal/contracts/functioncall"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"math/big"
 	"testing"
 	"time"
 
-	"github.com/consensys/gpact/services/relayer/internal/contracts/functioncall"
 	"github.com/consensys/gpact/services/relayer/internal/logging"
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/ethereum/go-ethereum/accounts/abi/bind/backends"
 	"github.com/ipfs/go-datastore"
 	badgerds "github.com/ipfs/go-ds-badger"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
 
-type MockEventHandler struct {
-	mock.Mock
-}
-
-func (m *MockEventHandler) Handle(event interface{}) {
-	m.Called(event)
-}
-
-var fixWatcherProgressDsOpts = WatcherProgressDsOpts{
-	FailureRetryOpts: FailureRetryOpts{
-		RetryAttempts: 3,
-		RetryDelay:    500 * time.Millisecond,
-	},
-}
-var fixEventHandleRetryOpts = DefaultRetryOptions
-
 func TestSFCCrossCallRealtimeEventWatcher(t *testing.T) {
 	simBackend, auth := simulatedBackend(t)
-	contract := deployContract(t, simBackend, auth)
+	contract := deploySFCContract(t, simBackend, auth)
 
 	handler := new(MockEventHandler)
 	handler.On("Handle", mock.AnythingOfType("*functioncall.SfcCrossCall")).Once().Return(nil)
@@ -70,7 +53,7 @@ func TestSFCCrossCallRealtimeEventWatcher(t *testing.T) {
 
 func TestSFCCrossCallRealtimeEventWatcher_RemovedEvent(t *testing.T) {
 	simBackend, auth := simulatedBackend(t)
-	contract := deployContract(t, simBackend, auth)
+	contract := deploySFCContract(t, simBackend, auth)
 
 	handler := new(MockEventHandler)
 	handler.On("Handle", mock.AnythingOfType("*functioncall.SfcCrossCall")).Once().Return(nil)
@@ -132,7 +115,7 @@ func TestSFCCrossCallFinalisedEventWatcher(t *testing.T) {
 		handler := new(MockEventHandler)
 
 		simBackend, auth := simulatedBackend(t)
-		contract := deployContract(t, simBackend, auth)
+		contract := deploySFCContract(t, simBackend, auth)
 
 		opts := EventWatcherOpts{
 			Start:        v.start,
@@ -180,7 +163,7 @@ func TestSFCCrossCallFinalisedEventWatcher_MultipleBlocksFinalised(t *testing.T)
 
 		simBackend, auth := simulatedBackend(t)
 		handler := new(MockEventHandler)
-		contract := deployContract(t, simBackend, auth)
+		contract := deploySFCContract(t, simBackend, auth)
 
 		// cross-chain calls before watch instance is started
 		for i := 0; i < v.ccEventsToCommit; i++ {
@@ -211,7 +194,7 @@ func TestSFCCrossCallFinalisedEventWatcher_MultipleBlocksFinalised(t *testing.T)
 
 func TestSFCCrossCallFinalisedEventWatcher_ProgressPersisted(t *testing.T) {
 	simBackend, auth := simulatedBackend(t)
-	contract := deployContract(t, simBackend, auth)
+	contract := deploySFCContract(t, simBackend, auth)
 	fixConfirms := uint64(2)
 	fixLastFinalised := uint64(2)
 
@@ -261,7 +244,7 @@ Expectation: the event is not processed at height b3
 func TestSFCCrossCallFinalisedEventWatcher_Reorg(t *testing.T) {
 	simBackend, auth := simulatedBackend(t)
 	handler := new(MockEventHandler)
-	contract := deployContract(t, simBackend, auth)
+	contract := deploySFCContract(t, simBackend, auth)
 	opts := EventWatcherOpts{
 		Start:        2,
 		Context:      auth.Context,
@@ -290,10 +273,11 @@ func TestSFCCrossCallFinalisedEventWatcher_Reorg(t *testing.T) {
 	handler.AssertNotCalled(t, "Handle", mock.AnythingOfType("*functioncall.SfcCrossCall"))
 }
 
-func mineConfirmingBlocks(confirms uint64, simBackend *backends.SimulatedBackend) {
-	for i := uint64(0); i < confirms; i++ {
-		commit(simBackend)
-	}
+func createProgressOpts(ds *badgerds.Datastore) WatcherProgressDsOpts {
+	progOpts := fixWatcherProgressDsOpts
+	progOpts.ds = ds
+	progOpts.dsProgKey = datastore.NewKey("reorg_test")
+	return progOpts
 }
 
 func makeCrossContractCallTx(t *testing.T, contract *functioncall.Sfc, auth *bind.TransactOpts) {
@@ -301,20 +285,4 @@ func makeCrossContractCallTx(t *testing.T, contract *functioncall.Sfc, auth *bin
 	if err != nil {
 		failNow(t, "failed to transact: %v", err)
 	}
-}
-
-func commit(backend *backends.SimulatedBackend) {
-	backend.Commit()
-}
-
-func commitAndSleep(backend *backends.SimulatedBackend) {
-	commit(backend)
-	time.Sleep(2 * time.Second)
-}
-
-func createProgressOpts(ds *badgerds.Datastore) WatcherProgressDsOpts {
-	progOpts := fixWatcherProgressDsOpts
-	progOpts.ds = ds
-	progOpts.dsProgKey = datastore.NewKey("reorg_test")
-	return progOpts
 }

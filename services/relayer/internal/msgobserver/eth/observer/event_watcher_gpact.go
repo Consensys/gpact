@@ -12,8 +12,9 @@ import (
 // GPACTRealtimeEventWatcher is a simple gpact contract watcher.
 type GPACTRealtimeEventWatcher struct {
 	EventWatcherOpts
-	GpactContract *functioncall.Gpact
-	end           chan bool
+	RemovedEventHandler EventHandler
+	GpactContract       *functioncall.Gpact
+	end                 chan bool
 }
 
 func (l *GPACTRealtimeEventWatcher) Watch() error {
@@ -70,9 +71,9 @@ func (l *GPACTRealtimeEventWatcher) StopWatcher() {
 	l.end <- true
 }
 
-// NewGPACTCrossCallRealtimeEventWatcher creates an instance of SFCCrossCallRealtimeEventWatcher.
+// NewGPACTRealtimeEventWatcher creates an instance of SFCCrossCallRealtimeEventWatcher.
 // Throws an error if the provided even handler or the removed event handler is nil.
-func NewGPACTCrossCallRealtimeEventWatcher(watcherOpts EventWatcherOpts, contract *functioncall.Gpact) (*GPACTRealtimeEventWatcher, error) {
+func NewGPACTRealtimeEventWatcher(watcherOpts EventWatcherOpts, contract *functioncall.Gpact) (*GPACTRealtimeEventWatcher, error) {
 	if watcherOpts.EventHandler == nil {
 		return nil, fmt.Errorf("handler cannot be nil")
 	}
