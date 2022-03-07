@@ -299,39 +299,3 @@ export class Executor {
 function getEventID(chainID, event) {
     return "" + chainID + "-" + event.address + "-" + event.blockNumber + "-" + event.transactionIndex + "-" + event.logIndex
 }
-
-// Test
-const web3_1 = new Web3(Web3.givenProvider || "ws://localhost:8311")
-const web3_2 = new Web3(Web3.givenProvider || "ws://localhost:8321")
-web3_1.eth.accounts.wallet.add("e78f29eac62aa74ce4ea6614d2b3bbb4bb940346cacb02fe2b8be65cb9ab1eaf")
-web3_2.eth.accounts.wallet.add("e78f29eac62aa74ce4ea6614d2b3bbb4bb940346cacb02fe2b8be65cb9ab1eaf")
-var testCmgr = new ChainAPManager()
-testCmgr.registerChainAP(31, web3_1)
-testCmgr.registerChainAP(32, web3_2)
-var testMs = new MsgStore("localhost:8080")
-var acct = web3_1.eth.accounts.wallet['0'].address
-console.log("account address is: ", acct)
-var testExecutor = new Executor(testCmgr, acct, testMs)
-testExecutor.registerGPACT(31, "0xE41473a5A81DDA77454c74a550b5fc92A24e88e6")
-testExecutor.registerGPACT(32, "0xE41473a5A81DDA77454c74a550b5fc92A24e88e6")
-
-var testSim = new Simulator(testCmgr)
-testSim.registerABI("bridge", bridgeABI)
-testSim.registerCallLink("bridge", "transferToOtherBlockchain", async function (cmgr, chainID, contractAddr, ...params) {
-    if (params[0].length != 4) {
-        return null
-    }
-    var destBcID = params[0][0]
-    var srcTokenContractAddr = params[0][1]
-    var recipient = params[0][2]
-    var amount = params[0][3]
-    var web3 = cmgr.chainAP(chainID)
-    // Load bridge contract
-    var bridge = new web3.eth.Contract(bridgeABI, contractAddr)
-    var destAddr = await bridge.methods.getRemoteErc20BridgeContract(destBcID).call()
-    var destTokenContractAddr = await bridge.methods.getBcIdTokenMaping(destBcID, srcTokenContractAddr).call()
-    var call = new CrosschainCall(destBcID, "bridge", destAddr, "receiveFromOtherBlockchain", destTokenContractAddr, recipient, amount)
-    return [call]
-})
-var testRoot = await testSim.simulate(31, "bridge", "0x2c32b1aCee21DBEe529b329B2BD078D862079d3b", "transferToOtherBlockchain", 32, "0x12e0624025fF18F6035EC4C5dcCa1F5A66983012", "0x742Ea2a283E6A8f3F96393ade3CD0c0AA6f1E4B7", 10)
-console.log(await testExecutor.crosschainCall(testRoot))
