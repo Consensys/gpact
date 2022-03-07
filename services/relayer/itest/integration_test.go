@@ -699,7 +699,7 @@ func TestERC20TransferGpact(t *testing.T) {
 
 	// Approve first
 	t.Log("Approve transfer")
-	tx, err := ierc20A.Approve(userA, bridgeA, big.NewInt(10))
+	tx, err := ierc20A.Approve(userA, bridgeA, big.NewInt(20))
 	if err != nil {
 		panic(err)
 	}
@@ -712,9 +712,12 @@ func TestERC20TransferGpact(t *testing.T) {
 	cmgr.RegisterChainAP(big.NewInt(32), chainB)
 	sim := simulator.NewSimulatorImplV1(cmgr)
 	ms := NewMessageStoreImplV1("localhost:8080")
-	exec := executor.NewExecutorImplV1(cmgr, ms, userA)
-	exec.RegisterGPACT(big.NewInt(31), gpactA)
-	exec.RegisterGPACT(big.NewInt(32), gpactB)
+	execA := executor.NewExecutorImplV1(cmgr, ms, userA)
+	execA.RegisterGPACT(big.NewInt(31), gpactA)
+	execA.RegisterGPACT(big.NewInt(32), gpactB)
+	execB := executor.NewExecutorImplV1(cmgr, ms, userB)
+	execB.RegisterGPACT(big.NewInt(31), gpactA)
+	execB.RegisterGPACT(big.NewInt(32), gpactB)
 	bridgeABI, _ := application.GpactERC20BridgeMetaData.GetAbi()
 	sim.RegisterABI("bridge", bridgeABI)
 	// Register contract logic
@@ -781,7 +784,7 @@ func TestERC20TransferGpact(t *testing.T) {
 	assert.Equal(t, 0, balB.Cmp(big.NewInt(0)))
 
 	// Transfer
-	_, err = exec.CrosschainCall(root)
+	_, err = execA.CrosschainCall(root)
 	if err != nil {
 		panic(err)
 	}
@@ -792,6 +795,53 @@ func TestERC20TransferGpact(t *testing.T) {
 	balB, _ = ierc20B.BalanceOf(nil, userB.From)
 	assert.Equal(t, 0, balA.Cmp(big.NewInt(90)))
 	assert.Equal(t, 0, balB.Cmp(big.NewInt(10)))
+
+	// Simulate crosschain call.
+	root, err = sim.Simulate(big.NewInt(31), "bridge", bridgeA, "transferToOtherBlockchain", big.NewInt(32), erc20A, userB.From, big.NewInt(10))
+	if err != nil {
+		panic(err)
+	}
+
+	// Transfer
+	_, err = execA.CrosschainCall(root)
+	if err != nil {
+		panic(err)
+	}
+	time.Sleep(1 * time.Second)
+
+	// Balance after transfer.
+	balA, _ = ierc20A.BalanceOf(nil, userA.From)
+	balB, _ = ierc20B.BalanceOf(nil, userB.From)
+	assert.Equal(t, 0, balA.Cmp(big.NewInt(80)))
+	assert.Equal(t, 0, balB.Cmp(big.NewInt(20)))
+
+	// Transfer 5 tokens back
+	// Approve first
+	t.Log("Approve transfer")
+	tx, err = ierc20B.Approve(userB, bridgeB, big.NewInt(5))
+	if err != nil {
+		panic(err)
+	}
+	waitForReceipt(chainB, tx)
+	t.Log("Done")
+
+	root, err = sim.Simulate(big.NewInt(32), "bridge", bridgeB, "transferToOtherBlockchain", big.NewInt(31), erc20B, userA.From, big.NewInt(5))
+	if err != nil {
+		panic(err)
+	}
+
+	// Transfer
+	_, err = execB.CrosschainCall(root)
+	if err != nil {
+		panic(err)
+	}
+	time.Sleep(1 * time.Second)
+
+	// Balance after transfer.
+	balA, _ = ierc20A.BalanceOf(nil, userA.From)
+	balB, _ = ierc20B.BalanceOf(nil, userB.From)
+	assert.Equal(t, 0, balA.Cmp(big.NewInt(85)))
+	assert.Equal(t, 0, balB.Cmp(big.NewInt(15)))
 }
 
 // createUser creates a user with random key.
