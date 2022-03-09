@@ -4,14 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"net/http"
-	"regexp"
-
 	"github.com/consensys/gpact/messaging/message-store/internal/logging"
 	v1 "github.com/consensys/gpact/services/relayer/pkg/messages/v1"
 	"github.com/gin-gonic/gin"
 	"github.com/ipfs/go-datastore"
-	badger "github.com/ipfs/go-ds-badger2"
+	"github.com/ipfs/go-ds-badger2"
+	"net/http"
+	"regexp"
 )
 
 type MessageStoreApi struct {
@@ -204,7 +203,6 @@ func (mApi *MessageStoreApi) respondWithMessageDetails(c *gin.Context, id string
 	}
 
 	c.JSON(http.StatusOK, msgDetails)
-	c.Header("Access-Control-Allow-Origin", "*")
 }
 
 func (mApi *MessageStoreApi) isValidId(id string) bool {
