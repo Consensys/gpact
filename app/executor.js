@@ -86,7 +86,6 @@ export class Executor {
                     try {
                         var sig = await this.ms.getSignature(eventID)
                         if (sig != null) {
-                            console.log("I'm here?????")
                             startEventSig = sig
                             break
                         }
