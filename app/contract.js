@@ -112,7 +112,7 @@ const initialize = () => {
         // Start transfer. First, let's do approve.
         erc20.methods.approve(bridgeAddress, BigInt(val)).send({
           from: accounts[0],
-          gas: 100000,
+          gas: 200000,
           gasPrice: await myWeb3.eth.getGasPrice()
         }, async (err, res) => {
           if (err) {
