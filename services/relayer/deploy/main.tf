@@ -41,6 +41,7 @@ resource "aws_instance" "relayer" {
     export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
     git clone https://github.com/ConsenSys/gpact.git
     cd ./gpact
+    git checkout cros-83-local-demo
     cd ./services/relayer
     make build
     cp ./deploy/promtail-cloud-config.yaml ../../../
@@ -55,6 +56,44 @@ resource "aws_instance" "relayer" {
     LOG_SERVICE_NAME=observer2 LOG_LEVEL=debug LOG_TARGET=STDOUT LOG_DIR=.observer/log2 LOG_FILE=observer2.log LOG_MAX_BACKUPS=3 LOG_MAX_AGE=28 LOG_MAX_SIZE=500 LOG_COMPRESS=true LOG_TIME_FORMAT=RFC3339 OUTBOUND_MQ_ADDR=amqp://guest:guest@localhost:5672/ OUTBOUND_CH_NAME=channel1 API_PORT=9425 OBSERVER_DS_PATH=.relayer-observer2/ nohup ./observer >> /home/ubuntu/all.log 2>&1 &
     LOG_SERVICE_NAME=relayer LOG_LEVEL=debug LOG_TARGET=STDOUT LOG_DIR=.relayer/log LOG_FILE=relayer.log LOG_MAX_BACKUPS=3 LOG_MAX_AGE=28 LOG_MAX_SIZE=500 LOG_COMPRESS=true LOG_TIME_FORMAT=RFC3339 INBOUND_MQ_ADDR=amqp://guest:guest@localhost:5672/ INBOUND_CH_NAME=channel1 OUTBOUND_MQ_ADDR=amqp://guest:guest@localhost:5672/ OUTBOUND_CH_NAME=channel2 API_PORT=9426 SIGNER_DS_PATH=.relayer-signer/ nohup ./relayer >> /home/ubuntu/all.log 2>&1 &
     LOG_SERVICE_NAME=dispatcher LOG_LEVEL=debug LOG_TARGET=STDOUT LOG_DIR=.dispatcher/log LOG_FILE=dispatcher.log LOG_MAX_BACKUPS=3 LOG_MAX_AGE=28 LOG_MAX_SIZE=500 LOG_COMPRESS=true LOG_TIME_FORMAT=RFC3339 INBOUND_MQ_ADDR=amqp://guest:guest@localhost:5672/ INBOUND_CH_NAME=channel2 API_PORT=9427 TRANSACTOR_DS_PATH=.relayer-transactor/ VERIFIER_DS_PATH=.relayer-verifier/ nohup ./dispatcher >> /home/ubuntu/all.log 2>&1 &
+    cd ../../../../
+    sleep 5
+    nohup ./promtail-linux-amd64 -config.file=./promtail-cloud-config.yaml >> /home/ubuntu/promtail.log 2>&1 &
+  EOF
+}
+
+resource "aws_instance" "msgstore" {
+  ami           = "ami-0567f647e75c7bc05"
+  instance_type = "t2.small"
+  tags = {
+    Name = "msgstore"
+  }
+  security_groups = ["security_msgstore"]
+  user_data       = <<-EOF
+    #!/bin/sh
+    cd /home/ubuntu/
+    sudo apt-get update
+    sudo apt install -y unzip git make build-essential ca-certificates curl gnupg lsb-release
+    wget https://github.com/grafana/loki/releases/download/v2.3.0/promtail-linux-amd64.zip
+    wget https://golang.org/dl/go1.17.1.linux-amd64.tar.gz
+    unzip ./promtail-linux-amd64.zip
+    sudo tar -C /usr/local -xzf go1.17.1.linux-amd64.tar.gz
+    mkdir /home/ubuntu/go
+    export HOME=/home/ubuntu
+    export GOPATH=/home/ubuntu/go
+    export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
+    git clone https://github.com/ConsenSys/gpact.git
+    cd ./gpact
+    git checkout cros-83-local-demo
+    cd ./services/message-store
+    make build
+    cp ../relayer/deploy/promtail-cloud-config.yaml ../../../
+    export IP="${aws_instance.relayer-monitor.public_ip}"
+    echo "      host: node2" >> ../../../promtail-cloud-config.yaml
+    echo "clients:" >> ../../../promtail-cloud-config.yaml
+    echo "  - url: http://$IP:3100/loki/api/v1/push" >> ../../../promtail-cloud-config.yaml
+    cd ./build
+    LOG_SERVICE_NAME=msgstore LOG_LEVEL=debug LOG_TARGET=STDOUT LOG_DIR=.msgstore/log LOG_FILE=msgstore.log LOG_MAX_BACKUPS=3 LOG_MAX_AGE=28 LOG_MAX_SIZE=500 LOG_COMPRESS=true LOG_TIME_FORMAT=RFC3339 MESSAGE_DS_PATH=.msgstore-ds/ nohup ./api >> /home/ubuntu/all.log 2>&1 &
     cd ../../../../
     sleep 5
     nohup ./promtail-linux-amd64 -config.file=./promtail-cloud-config.yaml >> /home/ubuntu/promtail.log 2>&1 &
@@ -141,5 +180,28 @@ resource "aws_security_group" "security_relayer" {
 
   tags = {
     Name = "security_relayer"
+  }
+}
+
+resource "aws_security_group" "security_msgstore" {
+  name        = "security_msgstore"
+  description = "security group for msgstore"
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 8080
+    to_port     = 8080
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "security_msgstore"
   }
 }
