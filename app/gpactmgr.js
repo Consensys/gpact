@@ -11,7 +11,7 @@ export class GPACTManager {
         // Create chain manager.
         var cmgr = new ChainAPManagerMetaMask(ethereum)
         // Create message store manager.
-        var ms = new MsgStore("3.25.181.96:8080")
+        var ms = new MsgStore("localhost:8080")
         // Create simulator.
         this.simulator = new Simulator(cmgr)
         // Register contract ABI.
@@ -25,7 +25,7 @@ export class GPACTManager {
             var srcTokenContractAddr = params[0][1]
             var recipient = params[0][2]
             var amount = params[0][3]
-            var web3 = cmgr.chainAP(chainID)
+            var web3 = await cmgr.chainAP(chainID)
             // Load bridge contract
             var bridge = new web3.eth.Contract(bridgeABI, contractAddr)
             var destAddr = await bridge.methods.getRemoteErc20BridgeContract(destBcID).call()
@@ -52,8 +52,8 @@ class ChainAPManagerMetaMask {
         this.ethereum = ethereum
     }
 
-    chainAP(chainID) {
-        this.ethereum.request({ method: 'wallet_switchEthereumChain', params:[{chainId: '0x' + (chainID).toString(16)}]})
+    async chainAP(chainID) {
+        await this.ethereum.request({ method: 'wallet_switchEthereumChain', params:[{chainId: '0x' + (chainID).toString(16)}]})
         return new Web3(this.ethereum)
     }
 }

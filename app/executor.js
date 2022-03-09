@@ -59,7 +59,7 @@ export class Executor {
 
     async start(transID, root) {
         // Get chain ap.
-        var web3 = this.cmgr.chainAP(root.chainID)
+        var web3 = await this.cmgr.chainAP(root.chainID)
         // Get GPACT contract
         var gpactAddr = this.gpacts.get(root.chainID)
         var gpact = new web3.eth.Contract(gpactABI, gpactAddr)
@@ -138,7 +138,7 @@ export class Executor {
         }
         // Either this node is a leaf node or this node is an intermediate node and we have already collected all segment events for its child nodes.
         // Get chain ap.
-        var web3 = this.cmgr.chainAP(node.chainID)
+        var web3 = await this.cmgr.chainAP(node.chainID)
         // Get GPACT contract
         var gpactAddr = this.gpacts.get(node.chainID)
         var gpact = new web3.eth.Contract(gpactABI, gpactAddr)
@@ -210,7 +210,7 @@ export class Executor {
             eventSigs.push(segmentEventSigs[i])
         }
         // Get chain ap.
-        var web3 = this.cmgr.chainAP(startChainID)
+        var web3 = await this.cmgr.chainAP(startChainID)
         // Get GPACT contract
         var gpactAddr = this.gpacts.get(startChainID)
         var gpact = new web3.eth.Contract(gpactABI, gpactAddr)
@@ -267,7 +267,7 @@ export class Executor {
             }
             eventSigs = eventSigs.concat(lockedSegmentsSigs.get(segChainID))
             // Get chain ap.
-            var web3 = this.cmgr.chainAP(segChainID)
+            var web3 = await this.cmgr.chainAP(segChainID)
             // Get GPACT contract
             var gpactAddr = this.gpacts.get(segChainID)
             var gpact = new web3.eth.Contract(gpactABI, gpactAddr)
