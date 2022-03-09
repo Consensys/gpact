@@ -91,14 +91,14 @@ const initialize = () => {
       var bridgeAddress;
       if (chainId == 4) {
         // rinkeby
-        ercAddress = "0xF99e8Deb18A6A8543eBAEEb05364e465c5e5400D";
-        bridgeAddress = "0xb80a34C3337cEa468766d809bBE1612D6De45336"
+        ercAddress = "0x02711f1a33bafa7cfD323Cba56012c1E2721c09F";
+        bridgeAddress = "0x2576CE4BD89Af5D379cA7B5670f25191e3Bb8c6B"
         infos.innerHTML = "Transfer to " + recipient + " on Goerli: "
         otherChainId = 5
       } else if (chainId == 5) {
         // goerli
-        ercAddress = "0x2C101fDbD9fD1f991dF393E6589CA3b8c7C82BFf";
-        bridgeAddress = "0x0c6B04Cc9e567d7edf31A0e70a3F62Ca6253060C"
+        ercAddress = "0x4bf8A1CeCd8F747A41A99B30a514F06B7F1E36bc";
+        bridgeAddress = "0xe2AB1D514363338E322AE14c4571A48a4020c822"
         infos.innerHTML = "Transfer to " + recipient + " on Rinkeby: "
         otherChainId = 4
       } else {
