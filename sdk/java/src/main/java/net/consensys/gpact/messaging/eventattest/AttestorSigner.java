@@ -16,7 +16,6 @@ package net.consensys.gpact.messaging.eventattest;
 
 import static net.consensys.gpact.common.FormatConversion.addressStringToBytes;
 
-import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.*;
 import net.consensys.gpact.common.AnIdentity;

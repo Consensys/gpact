@@ -14,6 +14,9 @@
  */
 package net.consensys.gpact.applications.twentyacts.crosscontrol;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import net.consensys.gpact.CrosschainProtocols;
 import net.consensys.gpact.common.BlockchainConfig;
 import net.consensys.gpact.common.BlockchainId;
@@ -22,10 +25,6 @@ import net.consensys.gpact.messaging.MessagingVerificationInterface;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 /** Manage multiple TwentyActsCrosschainControlManagers, one for each blockchain. */
 public class TwentyActsManagerGroup implements CrossControlManagerGroup {

@@ -1,5 +1,6 @@
 package net.consensys.gpact.applications.twentyacts.helpers;
 
+import java.util.ArrayList;
 import net.consensys.gpact.applications.twentyacts.crosscontrol.TwentyActsManagerGroup;
 import net.consensys.gpact.common.AnIdentity;
 import net.consensys.gpact.common.BlockchainConfig;
@@ -18,9 +19,6 @@ import net.consensys.gpact.messaging.txrootrelay.TxRootTransferManagerGroup;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
-
-import java.util.ArrayList;
-
 
 public class TwentyActsExampleSystemManager {
   static final Logger LOG = LogManager.getLogger(TwentyActsExampleSystemManager.class);
@@ -52,7 +50,6 @@ public class TwentyActsExampleSystemManager {
     this.bc3 = propsLoader.getBlockchainInfo("BC3");
     CrossBlockchainConsensusType consensusMethodology = propsLoader.getConsensusMethodology();
     StatsHolder.log(consensusMethodology.name());
-
 
     // To keep the example simple, just have one signer for all blockchains.
     AnIdentity globalSigner = new AnIdentity();
@@ -140,9 +137,9 @@ public class TwentyActsExampleSystemManager {
   }
 
   private void setupCrosschainTrust(
-          CrossControlManagerGroup crossControlManagerGroup,
-          MessagingManagerGroupInterface messagingManagerGroup)
-          throws Exception {
+      CrossControlManagerGroup crossControlManagerGroup,
+      MessagingManagerGroupInterface messagingManagerGroup)
+      throws Exception {
     ArrayList<BlockchainId> bcs = crossControlManagerGroup.getAllBlockchainIds();
 
     for (BlockchainId bcId1 : bcs) {
@@ -157,7 +154,6 @@ public class TwentyActsExampleSystemManager {
     }
   }
 
-
   private void addBcAttestorSign(
       MessagingManagerGroupInterface messagingManagerGroup,
       CrossControlManagerGroup crossControlManagerGroup,
@@ -168,7 +164,7 @@ public class TwentyActsExampleSystemManager {
     messagingManagerGroup.addBlockchainAndDeployContracts(creds, bc);
     attestorSignerGroup.addBlockchain(bc.bcId);
     crossControlManagerGroup.addBlockchainAndDeployContracts(
-            creds, bc, attestorSignerGroup.getVerifier(bc.bcId));
+        creds, bc, attestorSignerGroup.getVerifier(bc.bcId));
   }
 
   private void addBcTxRootSign(
@@ -186,6 +182,6 @@ public class TwentyActsExampleSystemManager {
         bc,
         ((TxRootTransferManagerGroup) messagingManagerGroup).getTxRootContractAddress(bc.bcId));
     crossControlManagerGroup.addBlockchainAndDeployContracts(
-            creds, bc, txRootTransferGroup.getVerifier(bc.bcId));
+        creds, bc, txRootTransferGroup.getVerifier(bc.bcId));
   }
 }

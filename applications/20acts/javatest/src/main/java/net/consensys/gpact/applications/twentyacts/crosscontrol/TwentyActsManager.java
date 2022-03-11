@@ -14,6 +14,9 @@
  */
 package net.consensys.gpact.applications.twentyacts.crosscontrol;
 
+import java.io.IOException;
+import java.math.BigInteger;
+import java.util.List;
 import net.consensys.gpact.common.*;
 import net.consensys.gpact.common.crypto.Hash;
 import net.consensys.gpact.functioncall.CrossControlManager;
@@ -26,46 +29,36 @@ import org.web3j.protocol.core.methods.response.Log;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.exceptions.TransactionException;
 
-import java.io.IOException;
-import java.math.BigInteger;
-import java.util.List;
-
 public class TwentyActsManager extends AbstractBlockchain implements CrossControlManager {
   private static final Logger LOG = LogManager.getLogger(TwentyActsManager.class);
 
   public static byte[] PREPARE_ON_TARGET_EVENT_SIGNATURE =
-      Hash.keccak256(
-              Bytes.wrap("PrepareOnTarget(bytes32)".getBytes()))
-          .toArray();
-  public static Bytes PREPARE_ON_TARGET_EVENT_SIGNATURE_BYTES = Bytes.wrap(PREPARE_ON_TARGET_EVENT_SIGNATURE);
+      Hash.keccak256(Bytes.wrap("PrepareOnTarget(bytes32)".getBytes())).toArray();
+  public static Bytes PREPARE_ON_TARGET_EVENT_SIGNATURE_BYTES =
+      Bytes.wrap(PREPARE_ON_TARGET_EVENT_SIGNATURE);
 
   public static byte[] PREPARE_ON_SOURCE_EVENT_SIGNATURE =
-          Hash.keccak256(
-                          Bytes.wrap("PrepareOnSource(bytes32,bool,uint256,string)".getBytes()))
-                  .toArray();
-  public static Bytes PREPARE_ON_SOURCE_EVENT_SIGNATURE_BYTES = Bytes.wrap(PREPARE_ON_SOURCE_EVENT_SIGNATURE);
+      Hash.keccak256(Bytes.wrap("PrepareOnSource(bytes32,bool,uint256,string)".getBytes()))
+          .toArray();
+  public static Bytes PREPARE_ON_SOURCE_EVENT_SIGNATURE_BYTES =
+      Bytes.wrap(PREPARE_ON_SOURCE_EVENT_SIGNATURE);
 
   public static byte[] FINALIZE_ON_TARGET_EVENT_SIGNATURE =
-          Hash.keccak256(
-                          Bytes.wrap("FinalizeOnTarget(bytes32)".getBytes()))
-                  .toArray();
-  public static Bytes FINALIZE_ON_TARGET_EVENT_SIGNATURE_BYTES = Bytes.wrap(FINALIZE_ON_TARGET_EVENT_SIGNATURE);
+      Hash.keccak256(Bytes.wrap("FinalizeOnTarget(bytes32)".getBytes())).toArray();
+  public static Bytes FINALIZE_ON_TARGET_EVENT_SIGNATURE_BYTES =
+      Bytes.wrap(FINALIZE_ON_TARGET_EVENT_SIGNATURE);
 
   public static byte[] FINALIZE_ON_SOURCE_EVENT_SIGNATURE =
-          Hash.keccak256(
-                          Bytes.wrap("FinalizeOnSource(bytes32)".getBytes()))
-                  .toArray();
-  public static Bytes FINALIZE_ON_SOURCE_EVENT_SIGNATURE_BYTES = Bytes.wrap(FINALIZE_ON_SOURCE_EVENT_SIGNATURE);
+      Hash.keccak256(Bytes.wrap("FinalizeOnSource(bytes32)".getBytes())).toArray();
+  public static Bytes FINALIZE_ON_SOURCE_EVENT_SIGNATURE_BYTES =
+      Bytes.wrap(FINALIZE_ON_SOURCE_EVENT_SIGNATURE);
 
   public static final int TXSTATE_NOT_USED = 0;
   public static final int TXSTATE_IN_PROGRESS = 1;
   public static final int TXSTATE_COMPLETED_FAIL = 2;
   public static final int TXSTATE_COMPLETED_SUCCESS = 3;
 
-
-
   private TwentyActs twentyActs;
-
 
   public TwentyActsManager(
       Credentials credentials,
@@ -77,57 +70,50 @@ public class TwentyActsManager extends AbstractBlockchain implements CrossContro
     super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
   }
 
-
   public void deploy20ActsContract(BigInteger withdrawWaitPeriod, String infrastructureAccount)
-          throws Exception {
-    this.twentyActs = TwentyActs.deploy(
-                    this.web3j,
-                    this.tm,
-                    this.gasProvider,
-                    this.blockchainId.asBigInt(),
-                    withdrawWaitPeriod,
-                    infrastructureAccount)
+      throws Exception {
+    this.twentyActs =
+        TwentyActs.deploy(
+                this.web3j,
+                this.tm,
+                this.gasProvider,
+                this.blockchainId.asBigInt(),
+                withdrawWaitPeriod,
+                infrastructureAccount)
             .send();
     LOG.info(
-            "20ACTS deployed to {} on blockchain {}",
-            this.twentyActs.getContractAddress(),
-            this.blockchainId);
+        "20ACTS deployed to {} on blockchain {}",
+        this.twentyActs.getContractAddress(),
+        this.blockchainId);
   }
-
-
 
   protected void deployCbcContract() throws Exception {
     // When deploying without parameters, set the wait time to 1000 years
     // and the infrastructure account to the deployer.
-    BigInteger withdrawWaitPeriodInSeconds = BigInteger.valueOf((long)3600 * 24 * 365 * 1000);
+    BigInteger withdrawWaitPeriodInSeconds = BigInteger.valueOf((long) 3600 * 24 * 365 * 1000);
     String infrastructure = this.credentials.getAddress();
     deploy20ActsContract(withdrawWaitPeriodInSeconds, infrastructure);
   }
 
   public void loadCbcContract(String address) {
-    this.twentyActs = TwentyActs.load(
-            address,
-            this.web3j,
-            this.tm,
-            this.gasProvider);
+    this.twentyActs = TwentyActs.load(address, this.web3j, this.tm, this.gasProvider);
   }
 
   public void addRemoteBlockchain(
-          BlockchainId remoteBcId, String remote20ActsAddress, String verifierAddress)
+      BlockchainId remoteBcId, String remote20ActsAddress, String verifierAddress)
       throws Exception {
     TransactionReceipt txr =
-            this.twentyActs.addRemoteCrosschainControl(remoteBcId.asBigInt(), remote20ActsAddress).send();
+        this.twentyActs
+            .addRemoteCrosschainControl(remoteBcId.asBigInt(), remote20ActsAddress)
+            .send();
     assert (txr.isStatusOK());
 
-    txr =
-        this.twentyActs
-            .addVerifier(remoteBcId.asBigInt(), verifierAddress)
-            .send();
+    txr = this.twentyActs.addVerifier(remoteBcId.asBigInt(), verifierAddress).send();
     assert (txr.isStatusOK());
   }
 
-
-  public void addRemoteErc20(String thisBcErc20, BlockchainId otherBc, String otherBcErc20) throws Exception {
+  public void addRemoteErc20(String thisBcErc20, BlockchainId otherBc, String otherBcErc20)
+      throws Exception {
     this.twentyActs.setErc20Mapping(thisBcErc20, otherBc.asBigInt(), otherBcErc20).send();
   }
 
@@ -139,7 +125,6 @@ public class TwentyActsManager extends AbstractBlockchain implements CrossContro
     this.twentyActs.setInfrastructureAccount(infAddress).send();
   }
 
-
   public void lpDeposit(String erc20, BigInteger amount) throws Exception {
     TransactionReceipt txR;
     try {
@@ -147,8 +132,8 @@ public class TwentyActsManager extends AbstractBlockchain implements CrossContro
       StatsHolder.logGas("Deposit", txR.getGasUsed());
     } catch (TransactionException ex) {
       LOG.error(
-              " Revert Reason: {}",
-              RevertReason.decodeRevertReason(ex.getTransactionReceipt().get().getRevertReason()));
+          " Revert Reason: {}",
+          RevertReason.decodeRevertReason(ex.getTransactionReceipt().get().getRevertReason()));
       throw ex;
     }
     if (!txR.isStatusOK()) {
@@ -156,8 +141,8 @@ public class TwentyActsManager extends AbstractBlockchain implements CrossContro
     }
   }
 
-  public Tuple<TransactionReceipt, byte[], TwentyActs.PrepareOnTargetEventResponse>
-    prepareOnTarget(TwentyActs.TxInfo txInfo) throws Exception {
+  public Tuple<TransactionReceipt, byte[], TwentyActs.PrepareOnTargetEventResponse> prepareOnTarget(
+      TwentyActs.TxInfo txInfo) throws Exception {
 
     LOG.debug("Prepare On Target {}", this.blockchainId);
 
@@ -170,7 +155,7 @@ public class TwentyActsManager extends AbstractBlockchain implements CrossContro
       String revertReason = RevertReason.decodeRevertReason(txR.getRevertReason());
       LOG.error(" Revert Reason1: {}", revertReason);
       return new Tuple<TransactionReceipt, byte[], TwentyActs.PrepareOnTargetEventResponse>(
-              txR, null, null);
+          txR, null, null);
     }
     TwentyActs.PrepareOnTargetEventResponse prepareOnTargetEvent = null;
     if (txR.isStatusOK()) {
@@ -183,37 +168,41 @@ public class TwentyActsManager extends AbstractBlockchain implements CrossContro
         txR, getEventData(txR, PREPARE_ON_TARGET_EVENT_SIGNATURE_BYTES), prepareOnTargetEvent);
   }
 
-
-  public Tuple<TransactionReceipt, byte[], TwentyActs.PrepareOnSourceEventResponse>
-    prepareOnSource(TwentyActs.TxInfo txInfo, byte[] prepareOnTargetEvent, byte[] signatureOrProof) throws Exception {
+  public Tuple<TransactionReceipt, byte[], TwentyActs.PrepareOnSourceEventResponse> prepareOnSource(
+      TwentyActs.TxInfo txInfo, byte[] prepareOnTargetEvent, byte[] signatureOrProof)
+      throws Exception {
 
     LOG.debug("Prepare On Source {}", this.blockchainId);
 
     TransactionReceipt txR;
     try {
-      txR = this.twentyActs.prepareOnSource(txInfo, prepareOnTargetEvent, signatureOrProof, new byte[]{}).send();
+      txR =
+          this.twentyActs
+              .prepareOnSource(txInfo, prepareOnTargetEvent, signatureOrProof, new byte[] {})
+              .send();
       StatsHolder.logGas("PrepareOnSource", txR.getGasUsed());
     } catch (TransactionException ex) {
       txR = ex.getTransactionReceipt().get();
       String revertReason = RevertReason.decodeRevertReason(txR.getRevertReason());
       LOG.error(" Revert Reason1: {}", revertReason);
       return new Tuple<TransactionReceipt, byte[], TwentyActs.PrepareOnSourceEventResponse>(
-              txR, null, null);
+          txR, null, null);
     }
     TwentyActs.PrepareOnSourceEventResponse prepareOnSourceEvent = null;
     if (txR.isStatusOK()) {
       List<TwentyActs.PrepareOnSourceEventResponse> prepareOnSourceEvents =
-              this.twentyActs.getPrepareOnSourceEvents(txR);
+          this.twentyActs.getPrepareOnSourceEvents(txR);
       prepareOnSourceEvent = prepareOnSourceEvents.get(0);
       dumpPrepareOnSourceEvent(prepareOnSourceEvent);
     }
     return new Tuple<TransactionReceipt, byte[], TwentyActs.PrepareOnSourceEventResponse>(
-            txR, getEventData(txR, PREPARE_ON_SOURCE_EVENT_SIGNATURE_BYTES), prepareOnSourceEvent);
+        txR, getEventData(txR, PREPARE_ON_SOURCE_EVENT_SIGNATURE_BYTES), prepareOnSourceEvent);
   }
 
-
   public Tuple<TransactionReceipt, byte[], TwentyActs.FinalizeOnTargetEventResponse>
-    finalizeOnTarget(TwentyActs.TxInfo txInfo, byte[] prepareOnSourceEvent, byte[] signatureOrProof) throws Exception {
+      finalizeOnTarget(
+          TwentyActs.TxInfo txInfo, byte[] prepareOnSourceEvent, byte[] signatureOrProof)
+          throws Exception {
 
     LOG.debug("Finalize on Target {}", this.blockchainId);
 
@@ -226,55 +215,58 @@ public class TwentyActsManager extends AbstractBlockchain implements CrossContro
       String revertReason = RevertReason.decodeRevertReason(txR.getRevertReason());
       LOG.error(" Revert Reason1: {}", revertReason);
       return new Tuple<TransactionReceipt, byte[], TwentyActs.FinalizeOnTargetEventResponse>(
-              txR, null, null);
+          txR, null, null);
     }
 
     TwentyActs.FinalizeOnTargetEventResponse finalizeOnTargetEvent = null;
     if (txR.isStatusOK()) {
       List<TwentyActs.FinalizeOnTargetEventResponse> finalizeOnTargetEvents =
-              this.twentyActs.getFinalizeOnTargetEvents(txR);
+          this.twentyActs.getFinalizeOnTargetEvents(txR);
       finalizeOnTargetEvent = finalizeOnTargetEvents.get(0);
       dumpFinalizeOnTargetEvent(finalizeOnTargetEvent);
     }
     return new Tuple<TransactionReceipt, byte[], TwentyActs.FinalizeOnTargetEventResponse>(
-            txR, getEventData(txR, FINALIZE_ON_TARGET_EVENT_SIGNATURE_BYTES), finalizeOnTargetEvent);
+        txR, getEventData(txR, FINALIZE_ON_TARGET_EVENT_SIGNATURE_BYTES), finalizeOnTargetEvent);
   }
 
   public Tuple<TransactionReceipt, byte[], TwentyActs.FinalizeOnSourceEventResponse>
-  finalizeOnSource(TwentyActs.TxInfo txInfo, byte[] finalizeOnTargetEvent, byte[] signatureOrProof) throws Exception {
+      finalizeOnSource(
+          TwentyActs.TxInfo txInfo, byte[] finalizeOnTargetEvent, byte[] signatureOrProof)
+          throws Exception {
 
     LOG.debug("Finalize on Source {}", this.blockchainId);
 
     TransactionReceipt txR;
     try {
-      txR = this.twentyActs.finalizeOnSource(txInfo, finalizeOnTargetEvent, signatureOrProof).send();
+      txR =
+          this.twentyActs.finalizeOnSource(txInfo, finalizeOnTargetEvent, signatureOrProof).send();
       StatsHolder.logGas("FinalizeOnSource", txR.getGasUsed());
     } catch (TransactionException ex) {
       txR = ex.getTransactionReceipt().get();
       String revertReason = RevertReason.decodeRevertReason(txR.getRevertReason());
       LOG.error(" Revert Reason1: {}", revertReason);
       return new Tuple<TransactionReceipt, byte[], TwentyActs.FinalizeOnSourceEventResponse>(
-              txR, null, null);
+          txR, null, null);
     }
 
     TwentyActs.FinalizeOnSourceEventResponse finalizeOnSourceEvent = null;
     if (txR.isStatusOK()) {
       List<TwentyActs.FinalizeOnSourceEventResponse> finalizeOnSourceEvents =
-              this.twentyActs.getFinalizeOnSourceEvents(txR);
+          this.twentyActs.getFinalizeOnSourceEvents(txR);
       finalizeOnSourceEvent = finalizeOnSourceEvents.get(0);
       dumpFinalizeOnSourceEvent(finalizeOnSourceEvent);
     }
     return new Tuple<TransactionReceipt, byte[], TwentyActs.FinalizeOnSourceEventResponse>(
-            txR, getEventData(txR, FINALIZE_ON_SOURCE_EVENT_SIGNATURE_BYTES), finalizeOnSourceEvent);
+        txR, getEventData(txR, FINALIZE_ON_SOURCE_EVENT_SIGNATURE_BYTES), finalizeOnSourceEvent);
   }
 
-
-  public TwentyActsManager forUser(Credentials user) throws IOException{
-    TwentyActsManager bc = new TwentyActsManager(user, this.blockchainId, this.uri, this.gasPriceStrategy, this.pollingInterval);
+  public TwentyActsManager forUser(Credentials user) throws IOException {
+    TwentyActsManager bc =
+        new TwentyActsManager(
+            user, this.blockchainId, this.uri, this.gasPriceStrategy, this.pollingInterval);
     bc.loadCbcContract(this.twentyActs.getContractAddress());
     return bc;
   }
-
 
   public String getCbcContractAddress() {
     return this.twentyActs.getContractAddress();
@@ -284,7 +276,8 @@ public class TwentyActsManager extends AbstractBlockchain implements CrossContro
     return this.twentyActs.txState(txInfoHash).send();
   }
 
-  public Tuple<BigInteger, BigInteger, BigInteger> getHoldings(String account, String erc20) throws Exception {
+  public Tuple<BigInteger, BigInteger, BigInteger> getHoldings(String account, String erc20)
+      throws Exception {
     BigInteger deposits = this.twentyActs.deposits(account, erc20).send();
     BigInteger allocation = this.twentyActs.allocated(account, erc20).send();
     BigInteger withdrawals = this.twentyActs.withdrawals(account, erc20).send();
@@ -292,11 +285,20 @@ public class TwentyActsManager extends AbstractBlockchain implements CrossContro
     return new Tuple<BigInteger, BigInteger, BigInteger>(deposits, allocation, withdrawals);
   }
 
-
-  public void showLiquidityProviderHoldings(String liquidityProvider, String erc20) throws Exception {
-    LOG.info("Liquidity Provider {}: Deposits:    {} ", liquidityProvider, this.twentyActs.deposits(liquidityProvider, erc20).send());
-    LOG.info("Liquidity Provider {}: Allocation:  {} ", liquidityProvider, this.twentyActs.allocated(liquidityProvider, erc20).send());
-    LOG.info("Liquidity Provider {}: Withdrawals: {} ", liquidityProvider, this.twentyActs.withdrawals(liquidityProvider, erc20).send());
+  public void showLiquidityProviderHoldings(String liquidityProvider, String erc20)
+      throws Exception {
+    LOG.info(
+        "Liquidity Provider {}: Deposits:    {} ",
+        liquidityProvider,
+        this.twentyActs.deposits(liquidityProvider, erc20).send());
+    LOG.info(
+        "Liquidity Provider {}: Allocation:  {} ",
+        liquidityProvider,
+        this.twentyActs.allocated(liquidityProvider, erc20).send());
+    LOG.info(
+        "Liquidity Provider {}: Withdrawals: {} ",
+        liquidityProvider,
+        this.twentyActs.withdrawals(liquidityProvider, erc20).send());
   }
 
   // TODO this is common code between gpact and this.
@@ -347,5 +349,4 @@ public class TwentyActsManager extends AbstractBlockchain implements CrossContro
     LOG.debug(" Finalize On Source Event:");
     LOG.debug("   Tx Info Digest: 0x{}", new BigInteger(1, event._txInfoDigest).toString(16));
   }
-
 }

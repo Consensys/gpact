@@ -20,6 +20,7 @@ import org.apache.tuweni.units.bigints.UInt256;
 
 public class FormatConversion {
   public static final int BYTES_IN_ADDRESS = 20;
+  public static final int BYTES_IN_WORD = 32;
 
   public static byte[] addressStringToBytes(String address) {
     Bytes eventDataBytes = Bytes.fromHexString(address);
@@ -36,6 +37,20 @@ public class FormatConversion {
       addressBytes = b;
     }
     return addressBytes;
+  }
+
+  public static byte[] addressStringToPaddedBytes(String address) {
+    Bytes eventDataBytes = Bytes.fromHexString(address);
+    byte[] addressBytes = eventDataBytes.toArray();
+
+    if (addressBytes.length > BYTES_IN_ADDRESS) {
+      throw new RuntimeException(
+          "Unexpected address length: " + addressBytes.length + " for address: " + address);
+    }
+
+    byte[] b = new byte[BYTES_IN_WORD];
+    System.arraycopy(addressBytes, 0, b, BYTES_IN_WORD - addressBytes.length, addressBytes.length);
+    return b;
   }
 
   public static byte[] hexStringToByteArray(String hexString) {

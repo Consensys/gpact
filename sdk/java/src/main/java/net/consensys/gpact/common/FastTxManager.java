@@ -7,16 +7,20 @@ import java.util.Set;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
+import org.web3j.crypto.Hash;
 import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.methods.response.EthSendTransaction;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.exceptions.TransactionException;
 import org.web3j.tx.RawTransactionManager;
+import org.web3j.tx.exceptions.TxHashMismatchException;
 import org.web3j.tx.response.TransactionReceiptProcessor;
 
 public class FastTxManager extends RawTransactionManager {
   private static final Logger LOG = LogManager.getLogger(FastTxManager.class);
   private final String address;
   private final long chainId;
+  private final Web3j myWeb3j;
 
   private static Set<String> exists = new HashSet<>();
 
@@ -30,6 +34,7 @@ public class FastTxManager extends RawTransactionManager {
     super(web3j, credentials, chainId, transactionReceiptProcessor);
     this.address = credentials.getAddress();
     this.chainId = chainId;
+    this.myWeb3j = web3j;
     LOG.info("Create transaction manager for Bc: {}, Address: {}", this.chainId, this.address);
 
     String key = this.address + this.chainId;
@@ -53,6 +58,10 @@ public class FastTxManager extends RawTransactionManager {
     return this.nonce;
   }
 
+  public BigInteger getNonceWithIncrement() throws IOException {
+    return getNonce();
+  }
+
   public BigInteger getCurrentNonce() {
     return this.nonce;
   }
@@ -72,5 +81,21 @@ public class FastTxManager extends RawTransactionManager {
       final BigInteger gasPrice, final BigInteger gasLimit, String address, final String data)
       throws IOException, TransactionException {
     return executeTransaction(gasPrice, gasLimit, address, data, BigInteger.ZERO);
+  }
+
+  public TransactionReceipt sendRawTransaction(final String signedTransaction)
+      throws IOException, TransactionException {
+    EthSendTransaction ethSendTransaction =
+        this.myWeb3j.ethSendRawTransaction(signedTransaction).send();
+
+    if (ethSendTransaction != null && !ethSendTransaction.hasError()) {
+      String txHashLocal = Hash.sha3(signedTransaction);
+      String txHashRemote = ethSendTransaction.getTransactionHash();
+      if (!txHashVerifier.verify(txHashLocal, txHashRemote)) {
+        throw new TxHashMismatchException(txHashLocal, txHashRemote);
+      }
+    }
+
+    return processResponse(ethSendTransaction);
   }
 }
