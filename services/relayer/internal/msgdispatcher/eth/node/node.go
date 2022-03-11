@@ -1,7 +1,7 @@
 package node
 
 /*
- * Copyright 2021 ConsenSys Software Inc
+ * Copyright 2022 ConsenSys Software Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -18,11 +18,11 @@ package node
 import (
 	"sync"
 
-	"github.com/consensys/gpact/messaging/relayer/internal/mqserver"
-	"github.com/consensys/gpact/messaging/relayer/internal/msgdispatcher/eth/dispatcher"
-	"github.com/consensys/gpact/messaging/relayer/internal/msgdispatcher/eth/transactor"
-	"github.com/consensys/gpact/messaging/relayer/internal/msgdispatcher/eth/verifier"
-	"github.com/consensys/gpact/messaging/relayer/internal/rpc"
+	"github.com/consensys/gpact/services/relayer/internal/mqserver"
+	"github.com/consensys/gpact/services/relayer/internal/msgdispatcher/eth/dispatcher"
+	"github.com/consensys/gpact/services/relayer/internal/msgdispatcher/eth/transactor"
+	"github.com/consensys/gpact/services/relayer/internal/msgdispatcher/eth/verifier"
+	"github.com/consensys/gpact/services/relayer/internal/rpc"
 )
 
 // Node represents the node core.
@@ -36,6 +36,8 @@ type Node struct {
 	Verifier verifier.Verifier
 
 	Dispatcher dispatcher.Dispatcher
+
+	MessageStoreAddr string
 }
 
 // Single instance of the gateway

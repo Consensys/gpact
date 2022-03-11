@@ -1,7 +1,7 @@
 package observer
 
 /*
- * Copyright 2021 ConsenSys Software Inc.
+ * Copyright 2022 ConsenSys Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -18,8 +18,8 @@ package observer
 import (
 	"context"
 
-	"github.com/consensys/gpact/messaging/relayer/internal/contracts/functioncall"
-	"github.com/consensys/gpact/messaging/relayer/internal/mqserver"
+	"github.com/consensys/gpact/services/relayer/internal/contracts/functioncall"
+	"github.com/consensys/gpact/services/relayer/internal/mqserver"
 )
 
 // SFCBridgeObserver listens to incoming events from an SFC contract, transforms them into relayer messages
@@ -69,6 +69,38 @@ func (o *SFCBridgeObserver) Start() error {
 }
 
 func (o *SFCBridgeObserver) Stop() {
+	if o.EventWatcher != nil {
+		o.EventWatcher.StopWatcher()
+	}
+}
+
+// GPACTBridgeObserver is a simple gpact bridge observer.
+type GPACTBridgeObserver struct {
+	EventWatcher  EventWatcher
+	EventHandler  EventHandler
+	SourceNetwork string
+}
+
+func NewGPACTBridgeRealtimeObserver(source string, sourceAddr string, contract *functioncall.Gpact, mq mqserver.MessageQueue) (*GPACTBridgeObserver, error) {
+	eventTransformer := NewGPACTEventTransformer(source, sourceAddr)
+	messageHandler := NewMessageEnqueueHandler(mq, DefaultRetryOptions)
+	eventHandler := NewSimpleEventHandler(eventTransformer, messageHandler)
+	removedEvHandler := NewLogEventHandler("removed event")
+
+	watcherOpts := EventWatcherOpts{Context: context.Background(), EventHandler: eventHandler}
+	eventWatcher, err := NewGPACTRealtimeEventWatcher(watcherOpts, removedEvHandler, contract)
+	if err != nil {
+		return nil, err
+	}
+
+	return &GPACTBridgeObserver{EventWatcher: eventWatcher, EventHandler: eventHandler, SourceNetwork: source}, nil
+}
+
+func (o *GPACTBridgeObserver) Start() error {
+	return o.EventWatcher.Watch()
+}
+
+func (o *GPACTBridgeObserver) Stop() {
 	if o.EventWatcher != nil {
 		o.EventWatcher.StopWatcher()
 	}

@@ -58,7 +58,7 @@ services:
       - bc32node1
 
   observer1:
-    image: consensys/gpact/messaging/relayer
+    image: consensys/gpact/services/relayer
     container_name: observer1
     networks:
       - shared
@@ -72,7 +72,7 @@ services:
     restart: on-failure
 
   observer2:
-    image: consensys/gpact/messaging/relayer
+    image: consensys/gpact/services/relayer
     container_name: observer2
     networks:
       - shared
@@ -84,9 +84,37 @@ services:
     depends_on:
       - rabbitmq
     restart: on-failure
+
+  observer3:
+    image: consensys/gpact/services/relayer
+    container_name: observer3
+    networks:
+      - shared
+    ports:
+      - 9527:9425
+    env_file:
+      - ./env/.env.observer.example
+    command: /app/build/observer
+    depends_on:
+      - rabbitmq
+    restart: on-failure
+
+  observer4:
+    image: consensys/gpact/services/relayer
+    container_name: observer4
+    networks:
+      - shared
+    ports:
+      - 9528:9425
+    env_file:
+      - ./env/.env.observer.example
+    command: /app/build/observer
+    depends_on:
+      - rabbitmq
+    restart: on-failure
   
   relayer:
-    image: consensys/gpact/messaging/relayer
+    image: consensys/gpact/services/relayer
     container_name: relayer
     networks:
       - shared
@@ -100,7 +128,7 @@ services:
     restart: on-failure
 
   dispatcher:
-    image: consensys/gpact/messaging/relayer
+    image: consensys/gpact/services/relayer
     container_name: dispatcher
     networks:
       - shared
@@ -112,6 +140,17 @@ services:
     depends_on:
       - rabbitmq
     restart: on-failure
+
+  msgstore:
+    image: consensys/gpact/services/message-store
+    container_name: msgstore
+    networks:
+      - shared
+    ports:
+      - 8080:8080
+    env_file:
+      - ./env/.env.msgstore.example
+    command: /app/build/api
 
 networks:
   shared:

@@ -1,7 +1,7 @@
 package api
 
 /*
- * Copyright 2021 ConsenSys Software Inc
+ * Copyright 2022 ConsenSys Software Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -20,8 +20,8 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/consensys/gpact/messaging/relayer/internal/msgobserver/eth/node"
-	"github.com/consensys/gpact/messaging/relayer/internal/rpc"
+	"github.com/consensys/gpact/services/relayer/internal/msgobserver/eth/node"
+	"github.com/consensys/gpact/services/relayer/internal/rpc"
 	"github.com/ethereum/go-ethereum/common"
 )
 
@@ -29,6 +29,7 @@ import (
 type StartObserveReq struct {
 	ChainID      string `json:"chain_id"`
 	ChainAP      string `json:"chain_ap"`
+	ContractType string `json:"contract_type"`
 	ContractAddr string `json:"contract_addr"`
 }
 
@@ -52,7 +53,7 @@ func HandleStartObserve(data []byte) ([]byte, error) {
 		return nil, fmt.Errorf("fail to decode chain id")
 	}
 
-	err = instance.Observer.StartObserve(chainID, req.ChainAP, common.HexToAddress(req.ContractAddr))
+	err = instance.Observer.StartObserve(chainID, req.ChainAP, req.ContractType, common.HexToAddress(req.ContractAddr))
 	if err != nil {
 		return nil, err
 	}
@@ -67,10 +68,11 @@ func HandleStartObserve(data []byte) ([]byte, error) {
 }
 
 // RequestStartObserve requests start observe.
-func RequestStartObserve(addr string, chainID *big.Int, chainAP string, contractAddr common.Address) (bool, error) {
+func RequestStartObserve(addr string, chainID *big.Int, chainAP string, contractType string, contractAddr common.Address) (bool, error) {
 	req := StartObserveReq{
 		ChainID:      chainID.String(),
 		ChainAP:      chainAP,
+		ContractType: contractType,
 		ContractAddr: contractAddr.String(),
 	}
 	data, err := json.Marshal(req)

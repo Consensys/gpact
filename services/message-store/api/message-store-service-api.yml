@@ -15,56 +15,6 @@ schemes:
   - https
 paths:
   /messages:
-    get:
-      tags:
-        - messages
-      summary: Retrieve messages that match the provided filter criteria.
-      description: >-
-        Returns message that match the filter criteria passed as query
-        parameters.
-      produces:
-        - application/json
-      parameters:
-        - name: networkId
-          in: query
-          description: ID of network in which the event was generated
-          required: true
-          type: string
-        - name: blockNumber
-          in: query
-          description: The block number that contains this event
-          required: true
-          type: string
-        - name: txIndex
-          in: query
-          description: >-
-            The index number of the transaction that generated the
-            event, within the block it was mined in.
-          type: string
-        - name: txHash
-          in: query
-          description: >-
-            The hash of the transaction that generated the
-            event.
-          type: string
-        - name: logIndex
-          in: query
-          description: >-
-            The index number of the event, within the block it was mined in.
-          type: string
-      responses:
-        '200':
-          description: Successful retrieval of message
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/Message'
-        '400':
-          description: Invalid ID supplied
-        '404':
-          description: Message not found
-      security:
-        - api_key: []
     put:
       tags:
         - messages
@@ -192,11 +142,11 @@ paths:
           description: Message not found
       security:
         - api_key: []
-    post:
+    put:
       tags:
         - messages
-      summary: Record a new proof for message.
-      description: Records a new proof for the message with a given ID.
+      summary: Records new proof elements for a given message.
+      description: The endpoint adds the given proof elements to the set of proofs that has already been recorded for a message. If specific elements within the array of proof submitted have already been stored, they are ignored, if not, they are added to the datastore.
       consumes:
         - application/json
       produces:
@@ -216,18 +166,17 @@ paths:
           required: true
           type: string
       responses:
+        '201':
+          description: Update completed successfully. This response specifically indicates that the submitted request contained one or more proof elements that were not already saved and that theses have now been added to the message's proof set.
         '200':
-          description: Proof successfuly added to message
+          description: Update completed successfully. This response specifically indicates that all proof elements in the request were already
+            persisted, and that no additional updates needed to be performed.
         '400':
           description: Invalid ID or proof object supplied
         '401':
           description: Caller is not authorised to perform this operation
         '404':
-          description: Message not found
-        '409':
-          description: Given message proof was already recorded
-        '422':
-          description: Validation of attestation failed
+          description: Message with specified ID was not found
       security:
         - api_key: []
 securityDefinitions:

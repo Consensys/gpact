@@ -1,7 +1,7 @@
 package mq
 
 /*
- * Copyright 2021 ConsenSys Software Inc
+ * Copyright 2022 ConsenSys Software Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -22,11 +22,12 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/consensys/gpact/messaging/relayer/internal/logging"
-	"github.com/consensys/gpact/messaging/relayer/internal/messages"
-	v1 "github.com/consensys/gpact/messaging/relayer/internal/messages/v1"
-	"github.com/consensys/gpact/messaging/relayer/internal/msgrelayer/eth/node"
-	"github.com/consensys/gpact/messaging/relayer/internal/msgrelayer/eth/signer"
+	v1 "github.com/consensys/gpact/services/relayer/pkg/messages/v1"
+
+	"github.com/consensys/gpact/services/relayer/internal/logging"
+	"github.com/consensys/gpact/services/relayer/internal/messages"
+	"github.com/consensys/gpact/services/relayer/internal/msgrelayer/eth/node"
+	"github.com/consensys/gpact/services/relayer/internal/msgrelayer/eth/signer"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 )
@@ -47,8 +48,9 @@ func handleV1(req messages.Message) {
 		logging.Error(err.Error())
 		return
 	}
+	funcSig := data[:32]
 	raw := types.Log{}
-	err = json.Unmarshal(data, &raw)
+	err = json.Unmarshal(data[32:], &raw)
 	if err != nil {
 		logging.Error(err.Error())
 		return
@@ -69,7 +71,7 @@ func handleV1(req messages.Message) {
 	toSign := make([]byte, 32)
 	toSign[31] = byte(srcID)
 	toSign = append(toSign, srcAddr.Bytes()...)
-	toSign = append(toSign, []byte{89, 247, 54, 220, 94, 21, 196, 177, 37, 38, 72, 117, 2, 100, 84, 3, 176, 164, 49, 109, 130, 235, 167, 233, 236, 220, 42, 5, 12, 16, 173, 39}...)
+	toSign = append(toSign, funcSig...)
 	toSign = append(toSign, raw.Data...)
 	logging.Info("Generated data to be signed: %v", hex.EncodeToString(toSign))
 

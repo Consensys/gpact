@@ -1,7 +1,7 @@
 package observer
 
 /*
- * Copyright 2021 ConsenSys Software Inc.
+ * Copyright 2022 ConsenSys Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -16,14 +16,15 @@ package observer
  */
 
 import (
-	badger "github.com/ipfs/go-ds-badger"
 	"io/ioutil"
 	"math/big"
 	"os"
 	"testing"
 
-	"github.com/consensys/gpact/messaging/relayer/internal/contracts/functioncall"
-	"github.com/consensys/gpact/messaging/relayer/internal/messages"
+	badger "github.com/ipfs/go-ds-badger"
+
+	"github.com/consensys/gpact/services/relayer/internal/contracts/functioncall"
+	"github.com/consensys/gpact/services/relayer/internal/messages"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind/backends"
 	"github.com/ethereum/go-ethereum/common"
@@ -67,8 +68,20 @@ func simulatedBackend(t *testing.T) (*backends.SimulatedBackend, *bind.TransactO
 	return backends.NewSimulatedBackend(genesisAlloc, blockGasLimit), auth
 }
 
-func deployContract(t *testing.T, simBackend *backends.SimulatedBackend, auth *bind.TransactOpts) *functioncall.Sfc {
+func deploySFCContract(t *testing.T, simBackend *backends.SimulatedBackend, auth *bind.TransactOpts) *functioncall.Sfc {
 	_, _, contract, err := functioncall.DeploySfc(auth, simBackend, big.NewInt(10), big.NewInt(10))
+
+	if err != nil {
+		failNow(t, "failed to deploy contract: %v", err)
+	}
+
+	simBackend.Commit()
+	return contract
+}
+
+func deployGPACTContract(t *testing.T, simBackend *backends.SimulatedBackend,
+	auth *bind.TransactOpts) *functioncall.Gpact {
+	_, _, contract, err := functioncall.DeployGpact(auth, simBackend, big.NewInt(10))
 
 	if err != nil {
 		failNow(t, "failed to deploy contract: %v", err)

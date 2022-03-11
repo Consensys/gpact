@@ -30,5 +30,3 @@ It is defined using the [Open API Specification format](https://swagger.io/speci
 #### TODOs
 - [ ] Security
 - [ ] Deployment considerations
-- [ ] Proof aggregation
-- [ ] Data Store description

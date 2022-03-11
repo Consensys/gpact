@@ -1,7 +1,7 @@
 package observer
 
 /*
- * Copyright 2021 ConsenSys Software Inc.
+ * Copyright 2022 ConsenSys Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -20,7 +20,8 @@ import (
 	"testing"
 	"time"
 
-	v1 "github.com/consensys/gpact/messaging/relayer/internal/messages/v1"
+	v1 "github.com/consensys/gpact/services/relayer/pkg/messages/v1"
+
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -33,7 +34,7 @@ func TestSFCBridgeObserver(t *testing.T) {
 	fixSourceAddress := "0x8e215d06ea7ec1fdb4fc5fd21768f4b34ee92ef4"
 
 	simBackend, auth := simulatedBackend(t)
-	contract := deployContract(t, simBackend, auth)
+	contract := deploySFCContract(t, simBackend, auth)
 	mockMQ := new(MockMQ)
 
 	observer, err := NewSFCBridgeRealtimeObserver(fixSourceID, fixSourceAddress, contract, mockMQ)

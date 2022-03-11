@@ -1,7 +1,7 @@
 package mq
 
 /*
- * Copyright 2021 ConsenSys Software Inc
+ * Copyright 2022 ConsenSys Software Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -16,15 +16,19 @@ package mq
  */
 
 import (
+	"bytes"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"math/big"
+	"net/http"
 	"strconv"
 
-	"github.com/consensys/gpact/messaging/relayer/internal/logging"
-	"github.com/consensys/gpact/messaging/relayer/internal/messages"
-	v1 "github.com/consensys/gpact/messaging/relayer/internal/messages/v1"
-	"github.com/consensys/gpact/messaging/relayer/internal/msgdispatcher/eth/node"
+	v1 "github.com/consensys/gpact/services/relayer/pkg/messages/v1"
+
+	"github.com/consensys/gpact/services/relayer/internal/logging"
+	"github.com/consensys/gpact/services/relayer/internal/messages"
+	"github.com/consensys/gpact/services/relayer/internal/msgdispatcher/eth/node"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 )
@@ -52,50 +56,85 @@ func handleV1(req messages.Message) {
 	}
 	srcAddr := common.HexToAddress(msg.Source.ContractAddress)
 	destAddr := common.HexToAddress(msg.Destination.ContractAddress)
-	logging.Info("Received message for bridging from contract %v on chain %v to contract %v on chain %v", srcAddr.String(), srcID, destAddr.String(), destID)
+	empty := common.Address{}
+	if destAddr != empty {
+		logging.Info("Received message for bridging from contract %v on chain %v to contract %v on chain %v", srcAddr.String(), srcID, destAddr.String(), destID)
 
-	// Get proof
-	data, err := hex.DecodeString(msg.Payload)
-	if err != nil {
-		logging.Error(err.Error())
-		return
-	}
-	raw := types.Log{}
-	err = json.Unmarshal(data, &raw)
-	if err != nil {
-		logging.Error(err.Error())
-		return
-	}
-	if len(msg.Proofs) == 0 {
-		logging.Error("Empty proofs received.")
-		return
-	}
-	signature, err := hex.DecodeString(msg.Proofs[0].Proof)
-	if err != nil {
-		logging.Error(err.Error())
-		return
-	}
+		// Get proof
+		data, err := hex.DecodeString(msg.Payload)
+		if err != nil {
+			logging.Error(err.Error())
+			return
+		}
+		raw := types.Log{}
+		err = json.Unmarshal(data[32:], &raw)
+		if err != nil {
+			logging.Error(err.Error())
+			return
+		}
+		if len(msg.Proofs) == 0 {
+			logging.Error("Empty proofs received.")
+			return
+		}
+		signature, err := hex.DecodeString(msg.Proofs[0].Proof)
+		if err != nil {
+			logging.Error(err.Error())
+			return
+		}
 
-	link, err := instance.Transactor.GetChainAP(big.NewInt(int64(destID)))
-	if err != nil {
-		logging.Error(err.Error())
-		return
-	}
-	auth, err := instance.Transactor.GetAuth(big.NewInt(int64(destID)))
-	if err != nil {
-		logging.Error(err.Error())
-		return
-	}
-	esAddr, err := instance.Verifier.GetVerifierAddr(big.NewInt(int64(destID)), destAddr)
-	if err != nil {
-		logging.Error(err.Error())
-		return
-	}
-	logging.Info("Obtain event store address: %v", esAddr.String())
+		link, err := instance.Transactor.GetChainAP(big.NewInt(int64(destID)))
+		if err != nil {
+			logging.Error(err.Error())
+			return
+		}
+		auth, err := instance.Transactor.GetAuth(big.NewInt(int64(destID)))
+		if err != nil {
+			logging.Error(err.Error())
+			return
+		}
+		esAddr, err := instance.Verifier.GetVerifierAddr(big.NewInt(int64(destID)), destAddr)
+		if err != nil {
+			logging.Error(err.Error())
+			return
+		}
+		logging.Info("Obtain event store address: %v", esAddr.String())
 
-	logging.Info("Adding message %v to queue for process...", msg.ID)
-	instance.Dispatcher.AddToQueue(link, auth, msg.ID, big.NewInt(int64(destID)), esAddr, big.NewInt(int64(srcID)), srcAddr, raw.Data, signature)
-	logging.Info("Message %v is added to queue.", msg.ID)
+		logging.Info("Adding message %v to queue for process...", msg.ID)
+		instance.Dispatcher.AddToQueue(link, auth, msg.ID, big.NewInt(int64(destID)), esAddr, big.NewInt(int64(srcID)), srcAddr, raw.Data, signature)
+		logging.Info("Message %v is added to queue.", msg.ID)
+	} else {
+		logging.Info("Received message for bridging from contract %v on chain %v to message store on %v", srcAddr.String(), srcID, instance.MessageStoreAddr)
+
+		data, err := hex.DecodeString(msg.Payload)
+		if err != nil {
+			logging.Error(err.Error())
+			return
+		}
+		raw := types.Log{}
+		err = json.Unmarshal(data[32:], &raw)
+		if err != nil {
+			logging.Error(err.Error())
+			return
+		}
+		// Put message
+		client := &http.Client{}
+		req, err := http.NewRequest("PUT", fmt.Sprintf("http://%v/messages/", instance.MessageStoreAddr), bytes.NewReader(msg.ToBytes()))
+		if err != nil {
+			logging.Error(err.Error())
+			return
+		}
+		resp, err := client.Do(req)
+		if err != nil {
+			logging.Error(err.Error())
+			return
+		}
+		if !(resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusCreated) {
+			logging.Error("Error creating new message: %v", resp.Status)
+			return
+		}
+
+		logging.Info("Message %v is pushed to message store.", msg.ID)
+	}
 }
 
 // initV1 inits the handler.

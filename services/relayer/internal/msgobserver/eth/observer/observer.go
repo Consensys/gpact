@@ -1,7 +1,7 @@
 package observer
 
 /*
- * Copyright 2021 ConsenSys Software Inc
+ * Copyright 2022 ConsenSys Software Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -30,7 +30,7 @@ type Observer interface {
 	Stop()
 
 	// StartObserve starts a new observe.
-	StartObserve(chainID *big.Int, chainAP string, contractAddr common.Address) error
+	StartObserve(chainID *big.Int, chainAP string, contractType string, contractAddr common.Address) error
 
 	// StopObserve stops observe.
 	StopObserve() error

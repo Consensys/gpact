@@ -1,7 +1,7 @@
 package observer
 
 /*
- * Copyright 2021 ConsenSys Software Inc.
+ * Copyright 2022 ConsenSys Software Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -19,11 +19,12 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/ethereum/go-ethereum/core/types"
 	"math/big"
 	"testing"
 
-	"github.com/consensys/gpact/messaging/relayer/internal/contracts/functioncall"
+	"github.com/ethereum/go-ethereum/core/types"
+
+	"github.com/consensys/gpact/services/relayer/internal/contracts/functioncall"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/assert"
 )
@@ -54,9 +55,9 @@ func TestSFCTransformer(t *testing.T) {
 	assert.Equal(t, fixValidEvent.DestBcId.String(), message.Destination.NetworkID)
 	assert.Equal(t, fixValidEvent.DestContract.String(), message.Destination.ContractAddress)
 	assert.Equal(t, fixValidEvent.Timestamp, big.NewInt(message.Timestamp))
-	assert.Equal(t, hex.EncodeToString(data), message.Payload)
+	assert.Equal(t, hex.EncodeToString(append(sfcFuncSig[:], data...)), message.Payload)
 
-	expectedID := fmt.Sprintf("%s/%s/%d/%d/%d", transformer.Source, transformer.SourceAddr,
+	expectedID := fmt.Sprintf(MessageIDPattern, transformer.Source, transformer.SourceAddr,
 		fixLog.BlockNumber, fixLog.TxIndex, fixLog.Index)
 	assert.Equal(t, expectedID, message.ID)
 }

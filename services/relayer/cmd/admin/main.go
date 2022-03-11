@@ -1,7 +1,7 @@
 package main
 
 /*
- * Copyright 2021 ConsenSys Software Inc
+ * Copyright 2022 ConsenSys Software Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -22,9 +22,9 @@ import (
 	"os"
 	"strconv"
 
-	dispatcherapi "github.com/consensys/gpact/messaging/relayer/internal/msgdispatcher/eth/api"
-	observerapi "github.com/consensys/gpact/messaging/relayer/internal/msgobserver/eth/api"
-	relayerapi "github.com/consensys/gpact/messaging/relayer/internal/msgrelayer/eth/api"
+	dispatcherapi "github.com/consensys/gpact/services/relayer/internal/msgdispatcher/eth/api"
+	observerapi "github.com/consensys/gpact/services/relayer/internal/msgobserver/eth/api"
+	relayerapi "github.com/consensys/gpact/services/relayer/internal/msgrelayer/eth/api"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/urfave/cli/v2"
 )
@@ -45,7 +45,7 @@ func main() {
 					{
 						Name:      "start",
 						Usage:     "Start observing contract",
-						ArgsUsage: "[url chainID chainAP contractAddr]",
+						ArgsUsage: "[url chainID chainAP contractType contractAddr]",
 						Action: func(c *cli.Context) error {
 							url := c.Args().Get(0)
 							chainID, err := strconv.ParseUint(c.Args().Get(1), 10, 64)
@@ -53,8 +53,9 @@ func main() {
 								return fmt.Errorf("error parsing chain id: %v", err.Error())
 							}
 							chainAP := c.Args().Get(2)
-							contractAddr := c.Args().Get(3)
-							success, err := observerapi.RequestStartObserve(url, big.NewInt(int64(chainID)), chainAP, common.HexToAddress(contractAddr))
+							contractType := c.Args().Get(3)
+							contractAddr := c.Args().Get(4)
+							success, err := observerapi.RequestStartObserve(url, big.NewInt(int64(chainID)), chainAP, contractType, common.HexToAddress(contractAddr))
 							if err != nil {
 								return err
 							}
@@ -238,6 +239,25 @@ func main() {
 							contractAddr := c.Args().Get(2)
 							addr, err := dispatcherapi.RequestGetVerifierAddr(url, big.NewInt(int64(chainID)), common.HexToAddress(contractAddr))
 							fmt.Println(addr.String())
+							return nil
+						},
+					},
+					{
+						Name:      "set-msgstore",
+						Usage:     "Set message store",
+						ArgsUsage: "[url msgStoreAddr]",
+						Action: func(c *cli.Context) error {
+							url := c.Args().Get(0)
+							msgStoreAddr := c.Args().Get(1)
+							success, err := dispatcherapi.RequestSetMsgStoreAddr(url, msgStoreAddr)
+							if err != nil {
+								return err
+							}
+							if success {
+								fmt.Println("Success.")
+							} else {
+								fmt.Println("Failed.")
+							}
 							return nil
 						},
 					},
