@@ -7,7 +7,7 @@ export class ChainAPManager {
         this.chainAPs.set(chainID, web3)
     }
 
-    chainAP(chainID) {
+    async chainAP(chainID) {
         return this.chainAPs.get(chainID)
     }
 }

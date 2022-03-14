@@ -6,7 +6,7 @@ export class MsgStore {
     }
 
     async getSignature(msgID) {
-        var req = fetch("http://" + this.msgStoreURL + "/messages/" + msgID + "/proofs/")
+        var req = fetch("http://" + this.msgStoreURL + "/messages/" + msgID + "/proofs")
         var resp = await (await req).json()
         if (resp == null) {
             return null
