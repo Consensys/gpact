@@ -11,7 +11,7 @@ export class GPACTManager {
         // Create chain manager.
         var cmgr = new ChainAPManagerMetaMask(ethereum)
         // Create message store manager.
-        var ms = new MsgStore("localhost:8080")
+        var ms = new MsgStore("3.26.9.238:8080")
         // Create simulator.
         this.simulator = new Simulator(cmgr)
         // Register contract ABI.
