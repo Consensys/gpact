@@ -258,6 +258,8 @@ contract TwentyActs is Pausable, AccessControl, CbcDecVer, ResponseProcessUtil {
      * @dev Set or update the mapping between an ERC 20 contract on this blockchain and an ERC 20
      * contract on another blockchain.
      * NOTE: caller must have the MAPPING_ROLE.
+     * NOTE: once transferring of an ERC 20 token is enabled, liquidity providers will be able to deposit
+     * that token going forwards. This is even if all of the mappings for the token are removed.
      *
      * @param _thisBcErc20          Address of ERC 20 contract on this blockchain.
      * @param _otherBcId            Blockchain ID where the corresponding ERC 20 contract resides.
@@ -275,7 +277,7 @@ contract TwentyActs is Pausable, AccessControl, CbcDecVer, ResponseProcessUtil {
             "20ACTS:Must have MAPPING role"
         );
 
-        // Indicate the token us supported.
+        // Indicate that deposits for this token are allowed on this blockchain.
         erc20Supported[_thisBcErc20] = true;
 
         erc20AddressMapping[_thisBcErc20][_otherBcId] = _otherBcErc20;
