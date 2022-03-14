@@ -18,6 +18,8 @@ include 'examples-sfc-erc20bridge'
 include 'examples-sfc-erc721bridge'
 include 'examples-sfc-write'
 
+include 'app-20acts'
+
 include 'perf-singlebc-hoteltrain'
 include 'perf-singlebc-read'
 include 'perf-singlebc-trade'
@@ -44,6 +46,8 @@ project(":examples-gpact-write").projectDir = file("examples/gpact/write/java")
 project(":examples-sfc-erc20bridge").projectDir = file("examples/sfc/erc20bridge/java")
 project(":examples-sfc-erc721bridge").projectDir = file("examples/sfc/erc721bridge/java")
 project(":examples-sfc-write").projectDir = file("examples/sfc/write/java")
+
+project(":app-20acts").projectDir = file("applications/20acts/javatest")
 
 project(":perf-singlebc-hoteltrain").projectDir = file("performance/singlebc/hotel-train/java")
 project(":perf-singlebc-read").projectDir = file("performance/singlebc/read/java")

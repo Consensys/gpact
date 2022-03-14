@@ -32,7 +32,7 @@ abstract contract CbcDecVer is Ownable {
     mapping(uint256 => CrosschainVerifier) private verifiers;
 
     // Address of Crosschain Control Contract on another blockchain.
-    mapping(uint256 => address) private remoteCrosschainControlContracts;
+    mapping(uint256 => address) internal remoteCrosschainControlContracts;
 
     function addVerifier(uint256 _blockchainId, address _verifier)
         external

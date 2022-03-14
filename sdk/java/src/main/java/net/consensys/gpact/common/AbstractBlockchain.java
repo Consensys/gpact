@@ -37,6 +37,7 @@ public abstract class AbstractBlockchain {
   // Polling interval should be equal to the block time.
   protected int pollingInterval;
   public DynamicGasProvider gasProvider;
+  protected DynamicGasProvider.Strategy gasPriceStrategy;
 
   public Web3j web3j;
   protected FastTxManager tm;
@@ -61,6 +62,7 @@ public abstract class AbstractBlockchain {
     this.tm =
         TxManagerCache.getOrCreate(
             this.web3j, this.credentials, this.blockchainId.asLong(), txrProcessor);
+    this.gasPriceStrategy = gasPriceStrategy;
     this.gasProvider = new DynamicGasProvider(this.web3j, uri, gasPriceStrategy);
   }
 
