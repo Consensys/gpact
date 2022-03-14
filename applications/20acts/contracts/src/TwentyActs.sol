@@ -158,10 +158,14 @@ contract TwentyActs is Pausable, AccessControl, CbcDecVer, ResponseProcessUtil {
     //  Map (destination blockchain Id => address on remote contract)
     mapping(address => mapping(uint256 => address)) public erc20AddressMapping;
 
-    // Mapping of ERC 20 contracts which deposits are allowed for.
+    // Mapping of ERC 20 contracts which deposits are allowed for. The value also indicates
+    // the number of chains each ERC 20 contract can be transferred to. Zero indicates no
+    // chains, and hence deposits should not be allowed. Greater than one indicates that
+    // deposits should be allowed.
     //
-    // Map (token contract address on this blockchain => bool)
-    mapping(address => bool) public erc20Supported;
+    // Map (token contract address on this blockchain => number of mappings of the ERC20
+    // contract on this blockchain to other blockchains)
+    mapping(address => uint256) public erc20Supported;
 
     // List of addresses that are banned from using the service either as a
     // liquidity provider or as a user. The user may be able to withdraw funds
@@ -258,8 +262,6 @@ contract TwentyActs is Pausable, AccessControl, CbcDecVer, ResponseProcessUtil {
      * @dev Set or update the mapping between an ERC 20 contract on this blockchain and an ERC 20
      * contract on another blockchain.
      * NOTE: caller must have the MAPPING_ROLE.
-     * NOTE: once transferring of an ERC 20 token is enabled, liquidity providers will be able to deposit
-     * that token going forwards. This is even if all of the mappings for the token are removed.
      *
      * @param _thisBcErc20          Address of ERC 20 contract on this blockchain.
      * @param _otherBcId            Blockchain ID where the corresponding ERC 20 contract resides.
@@ -277,8 +279,14 @@ contract TwentyActs is Pausable, AccessControl, CbcDecVer, ResponseProcessUtil {
             "20ACTS:Must have MAPPING role"
         );
 
-        // Indicate that deposits for this token are allowed on this blockchain.
-        erc20Supported[_thisBcErc20] = true;
+        // Indicate the number of mappings for the token. The ERC 20 is deemed to be supported if the number of mappings is not zero.
+        address empty = address(0);
+        address currentMapping = erc20AddressMapping[_thisBcErc20][_otherBcId];
+        if (currentMapping == empty && _otherBcErc20 != empty) {
+            erc20Supported[_thisBcErc20]++;
+        } else if (currentMapping != empty && _otherBcErc20 == empty) {
+            erc20Supported[_thisBcErc20]--;
+        }
 
         erc20AddressMapping[_thisBcErc20][_otherBcId] = _otherBcErc20;
         emit ERC20AddressMappingChanged(
@@ -354,7 +362,7 @@ contract TwentyActs is Pausable, AccessControl, CbcDecVer, ResponseProcessUtil {
      */
     function deposit(address _erc20, uint256 _amount) external {
         require(
-            erc20Supported[_erc20],
+            erc20Supported[_erc20] != 0,
             "20ACTS:Deposits not allowed for ERC 20 contract"
         );
         require(
