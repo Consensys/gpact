@@ -6,7 +6,7 @@ require (
 	github.com/consensys/gpact/services/relayer v0.0.0-20220222052327-2550908c71c7
 	github.com/gin-gonic/gin v1.7.7
 	github.com/ipfs/go-datastore v0.5.1
-	github.com/ipfs/go-ds-badger2 v0.1.3
+	github.com/ipfs/go-ds-badger v0.3.0
 	github.com/rs/zerolog v1.26.0
 	github.com/spf13/viper v1.3.2
 	github.com/stretchr/testify v1.7.0
@@ -14,12 +14,11 @@ require (
 )
 
 require (
-	github.com/DataDog/zstd v1.4.1 // indirect
+	github.com/AndreasBriese/bbloom v0.0.0-20190825152654-46b345b51c96 // indirect
 	github.com/cespare/xxhash v1.1.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/dgraph-io/badger/v2 v2.2007.3 // indirect
+	github.com/dgraph-io/badger v1.6.2 // indirect
 	github.com/dgraph-io/ristretto v0.0.3-0.20200630154024-f66de99634de // indirect
-	github.com/dgryski/go-farm v0.0.0-20190423205320-6a90982ecee2 // indirect
 	github.com/dustin/go-humanize v1.0.0 // indirect
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
@@ -27,7 +26,6 @@ require (
 	github.com/go-playground/universal-translator v0.17.0 // indirect
 	github.com/go-playground/validator/v10 v10.4.1 // indirect
 	github.com/golang/protobuf v1.4.3 // indirect
-	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/uuid v1.1.5 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/ipfs/go-log/v2 v2.5.0 // indirect

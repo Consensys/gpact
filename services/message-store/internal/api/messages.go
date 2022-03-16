@@ -4,13 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"regexp"
+
 	"github.com/consensys/gpact/messaging/message-store/internal/logging"
 	v1 "github.com/consensys/gpact/services/relayer/pkg/messages/v1"
 	"github.com/gin-gonic/gin"
 	"github.com/ipfs/go-datastore"
-	"github.com/ipfs/go-ds-badger2"
-	"net/http"
-	"regexp"
+	badger "github.com/ipfs/go-ds-badger"
 )
 
 type MessageStoreApi struct {
@@ -187,6 +188,7 @@ func (mApi *MessageStoreApi) GetMessageProofsHandler(c *gin.Context) {
 
 func (mApi *MessageStoreApi) respondWithMessageDetails(c *gin.Context, id string,
 	attribExtractor func(message *v1.Message) interface{}) {
+	c.Header("Access-Control-Allow-Origin", "*")
 	message, err := mApi.queryMessageById(c, datastore.NewKey(id), mApi.DataStore.Get)
 	if err == datastore.ErrNotFound {
 		statusMessageNotFound(c, id)

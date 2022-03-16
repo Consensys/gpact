@@ -1,11 +1,12 @@
 package main
 
 import (
+	"log"
+
 	"github.com/consensys/gpact/messaging/message-store/internal/api"
 	config "github.com/consensys/gpact/messaging/message-store/internal/config"
 	"github.com/gin-gonic/gin"
-	badger "github.com/ipfs/go-ds-badger2"
-	"log"
+	badger "github.com/ipfs/go-ds-badger"
 )
 
 func main() {

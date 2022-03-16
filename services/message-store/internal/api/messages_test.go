@@ -4,16 +4,17 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/consensys/gpact/messaging/message-store/internal/logging"
-	v1 "github.com/consensys/gpact/services/relayer/pkg/messages/v1"
-	"github.com/gin-gonic/gin"
-	badger "github.com/ipfs/go-ds-badger2"
-	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"testing"
+
+	"github.com/consensys/gpact/messaging/message-store/internal/logging"
+	v1 "github.com/consensys/gpact/services/relayer/pkg/messages/v1"
+	"github.com/gin-gonic/gin"
+	badger "github.com/ipfs/go-ds-badger"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestMessageStoreApi_UpsertMessageHandler(t *testing.T) {
@@ -254,8 +255,8 @@ func setupTestRouter(ds *badger.Datastore) *gin.Engine {
 	return router
 }
 
-var fixProofSet1 = []v1.Proof{v1.Proof{Proof: "proof-payload-1", ProofType: "proof-type-1", Created: 11}}
-var fixProofSet2 = []v1.Proof{v1.Proof{Proof: "proof-payload-2", ProofType: "proof-type-2", Created: 12}}
+var fixProofSet1 = []v1.Proof{{Proof: "proof-payload-1", ProofType: "proof-type-1", Created: 11}}
+var fixProofSet2 = []v1.Proof{{Proof: "proof-payload-2", ProofType: "proof-type-2", Created: 12}}
 var fixMsg1 = v1.Message{
 	ID:          "chain001-0xed617B1555080073cE6B4DEe31fcd68B7a0c3703-10101984-4-1",
 	Timestamp:   2384923489234,
