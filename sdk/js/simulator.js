@@ -36,27 +36,27 @@ export class Simulator {
         if (!this.links.get(contractType).has(method)) {
             return null
         }
-        var link = this.links.get(contractType).get(method)
+        let link = this.links.get(contractType).get(method)
         if (!this.abis.has(contractType)) {
             return null
         }
-        var contractABI = this.abis.get(contractType)
-        var methodABI = searchMethod(contractABI, method)
-        var callData = Web3ABI.encodeFunctionCall(methodABI, params)
-        var head = new TreeNode(chainID, contractAddr, callData)
-        var crosschainCalls = await link(this.cmgr, chainID, contractAddr, params)
-        for (var crosschainCall of crosschainCalls) {
+        let contractABI = this.abis.get(contractType)
+        let methodABI = searchMethod(contractABI, method)
+        let callData = Web3ABI.encodeFunctionCall(methodABI, params)
+        let head = new TreeNode(chainID, contractAddr, callData)
+        let crosschainCalls = await link(this.cmgr, chainID, contractAddr, params)
+        for (let crosschainCall of crosschainCalls) {
             // TODO: Need to check error.
-            var subChainID = crosschainCall.chainID
-            var subContractType = crosschainCall.contractType
-            var subContractAddr = crosschainCall.contractAddr
-            var subMethod = crosschainCall.method
-            var subParams = crosschainCall.params
-            var child = await this.simulate(subChainID, subContractType, subContractAddr, subMethod, subParams)
+            let subChainID = crosschainCall.chainID
+            let subContractType = crosschainCall.contractType
+            let subContractAddr = crosschainCall.contractAddr
+            let subMethod = crosschainCall.method
+            let subParams = crosschainCall.params
+            let child = await this.simulate(subChainID, subContractType, subContractAddr, subMethod, subParams)
             if (child == null) {
-                var subABI = this.abis.get(subContractType)
-                var subMethodABI = searchMethod(subABI, subMethod)
-                var subCallData = Web3ABI.encodeFunctionCall(subMethodABI, subParams)
+                let subABI = this.abis.get(subContractType)
+                let subMethodABI = searchMethod(subABI, subMethod)
+                let subCallData = Web3ABI.encodeFunctionCall(subMethodABI, subParams)
                 child = new TreeNode(subChainID, subContractAddr, subCallData)
             }
             head.addChild(child)
@@ -66,7 +66,7 @@ export class Simulator {
 }
 
 function searchMethod(abi, name) {
-    for (var method of abi) {
+    for (let method of abi) {
         if  (method.name == name) {
             return method
         }

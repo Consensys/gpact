@@ -26,11 +26,11 @@ export class TreeNode {
     }
 
     encode() {
-        var data = []
+        let data = []
         // Add number of functions
         data = data.concat(longToByteArray(1, this.children.length))
         // Encoded data of this node
-        var encoded = []
+        let encoded = []
         encoded = encoded.concat(longToByteArray(blockchainIDSize, this.chainID))        
         encoded = encoded.concat(hexToBytes(addrSize, this.contractAddr))
         encoded = encoded.concat(longToByteArray(dataLenSizeSize, this.callData.length/2-1))
@@ -40,13 +40,13 @@ export class TreeNode {
             data = data.concat(encoded)
         } else {
             // This is a non-leaf node.
-            var encodedChildren = []
+            let encodedChildren = []
             encodedChildren.push(encoded)
-            for (var child of this.children) {
+            for (let child of this.children) {
                 encodedChildren.push(child.encode())
             }
             // Add offsets
-            var offset = (this.children.length+1)*offsetSize + numFuncsCalledSize
+            let offset = (this.children.length+1)*offsetSize + numFuncsCalledSize
             for (let encodedChild of encodedChildren) {
                 data = data.concat(longToByteArray(offsetSize, offset))
                 offset = offset + encodedChild.length

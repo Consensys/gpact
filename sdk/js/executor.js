@@ -1,10 +1,3 @@
-
-import { default as Web3 } from "web3";
-import { ChainAPManager } from "./chainmgr.js"
-import { TreeNode } from "./treenode.js"
-import { MsgStore } from "./msgstore.js"
-import { CrosschainCall, Simulator } from "./simulator.js"
-
 const startFuncSig = "0x77dab611ad9a24b763e2742f57749a0227393e0da76212d74fceb326b0661424"
 const segmentFuncSig = "0xb01557f1f634b7c5072ab5e36d07a2355ef819faca5a3d321430d71987155b8f"
 const rootFuncSig = "0xe6763dd99bf894d72f3499dd572aa42876eae7ae028c32fff21654e1bbc4c807"
@@ -24,28 +17,28 @@ export class Executor {
 
     async crosschainCall(root) {
         // Generate a random transaction id
-        var temp = '0b'
+        let temp = '0b'
         for (let i = 0; i < 256; i++) {
             temp += Math.round(Math.random())
         }
-        var transID = BigInt(temp)
+        let transID = BigInt(temp)
 
         // Start event
         console.log("start...")
-        var [startEvent, startEventSig, err] = await this.start(transID, root)
+        let [startEvent, startEventSig, err] = await this.start(transID, root)
         if (err != null) {
             return err
         }
         // Get Segment events for every child.
         console.log("segment...")
-        var segmentChainIDs = []
-        var segmentEvents = []
-        var segmentEventSigs = []
-        var lockedSegments = new Map()
-        var lockedSegmentsSigs = new Map()
+        let segmentChainIDs = []
+        let segmentEvents = []
+        let segmentEventSigs = []
+        let lockedSegments = new Map()
+        let lockedSegmentsSigs = new Map()
         for (let i = 0; i < root.children.length; i++) {
             console.log("segment ", i, "...")
-            var [segEvent, segEventSig, err2] = await this.segment(root.chainID, startEvent, startEventSig, root.children[i], [i + 1], lockedSegments, lockedSegmentsSigs)
+            let [segEvent, segEventSig, err2] = await this.segment(root.chainID, startEvent, startEventSig, root.children[i], [i + 1], lockedSegments, lockedSegmentsSigs)
             if (err2 != null) {
                 return err2
             }
@@ -55,7 +48,7 @@ export class Executor {
         }
         console.log("root...")
         // Root.
-        var [rootEvent, rootEventSig, err3] = await this.root(root.chainID, startEvent, startEventSig, segmentChainIDs, segmentEvents, segmentEventSigs)
+        let [rootEvent, rootEventSig, err3] = await this.root(root.chainID, startEvent, startEventSig, segmentChainIDs, segmentEvents, segmentEventSigs)
         if (err3 != null) {
             return err3
         }
@@ -66,19 +59,19 @@ export class Executor {
 
     async start(transID, root) {
         // Get chain ap.
-        var web3 = await this.cmgr.chainAP(root.chainID)
+        let web3 = await this.cmgr.chainAP(root.chainID)
         // Get GPACT contract
-        var gpactAddr = this.gpacts.get(root.chainID)
-        var gpact = new web3.eth.Contract(gpactABI, gpactAddr)
+        let gpactAddr = this.gpacts.get(root.chainID)
+        let gpact = new web3.eth.Contract(gpactABI, gpactAddr)
         // gpact.events.
-        var startEvent
-        var startEventSig
-        var err
+        let startEvent
+        let startEventSig
+        let err
         // Try 5 times, 5 seconds apart.
         for (let i = 0; i < 5; i++) {
             try {
-                var gasPrice = await web3.eth.getGasPrice()
-                var res = await gpact.methods.start(transID, BigInt(10000), root.encode()).send({
+                let gasPrice = await web3.eth.getGasPrice()
+                let res = await gpact.methods.start(transID, BigInt(10000), root.encode()).send({
                     from: this.account,
                     gas: 600000,
                     gasPrice: gasPrice,
@@ -88,9 +81,9 @@ export class Executor {
                 startEvent = res.events.Start
                 // Try to get event sig
                 // Try 60 times, 2 seconds apart.
-                var eventID = getEventID(root.chainID, startEvent)
+                let eventID = getEventID(root.chainID, startEvent)
                 for (let j = 0; j < 60; j++) {
-                    var sig = await this.ms.getSignature(eventID)
+                    let sig = await this.ms.getSignature(eventID)
                     if (sig != null) {
                         startEventSig = sig
                         break
@@ -111,25 +104,25 @@ export class Executor {
 
     async segment(startChainID, startEvent, startEventSig, node, callPath, lockedSegments, lockedSegmentsSigs) {
         // Segment events.
-        var segmentEvent
-        var segmentEventSig
-        var err
-        var chainIDs = [startChainID]
-        var cbcAddrs = [startEvent.address]
-        var eventFuncSigs = [startFuncSig]
-        var eventDatas = [startEvent.raw.data]
-        var eventSigs = [startEventSig]
+        let segmentEvent
+        let segmentEventSig
+        let err
+        let chainIDs = [startChainID]
+        let cbcAddrs = [startEvent.address]
+        let eventFuncSigs = [startFuncSig]
+        let eventDatas = [startEvent.raw.data]
+        let eventSigs = [startEventSig]
         if (node.children.length > 0) {
             // This is an intermediate node.
             // Append a 0 in the end of the call path.
             callPath.push(0)
             // Copy the call path
-            var childCallPath = callPath.slice()
+            let childCallPath = callPath.slice()
             // Need to collect segments event for all the child nodes.
             for (let i = 0; i < node.children.length; i++) {
                 // Child call path last element starts with 1.
                 childCallPath[childCallPath.length - 1] = i + 1
-                var [childSegEvent, childSegSig, err2] = await this.segment(startChainID, startEvent, startEventSig, child, childCallPath, lockedSegments, lockedSegmentsSigs)
+                let [childSegEvent, childSegSig, err2] = await this.segment(startChainID, startEvent, startEventSig, child, childCallPath, lockedSegments, lockedSegmentsSigs)
                 if (err2 != null) {
                     return [null, null, err2]
                 }
@@ -142,16 +135,16 @@ export class Executor {
         }
         // Either this node is a leaf node or this node is an intermediate node and we have already collected all segment events for its child nodes.
         // Get chain ap.
-        var web3 = await this.cmgr.chainAP(node.chainID)
+        let web3 = await this.cmgr.chainAP(node.chainID)
         // Get GPACT contract
-        var gpactAddr = this.gpacts.get(node.chainID)
-        var gpact = new web3.eth.Contract(gpactABI, gpactAddr)
+        let gpactAddr = this.gpacts.get(node.chainID)
+        let gpact = new web3.eth.Contract(gpactABI, gpactAddr)
         // //
         // Try 5 times, 5 seconds apart.
         for (let i = 0; i < 5; i++) {
             try {
-                var gasPrice = await web3.eth.getGasPrice()
-                var res = await gpact.methods.segment(chainIDs, cbcAddrs, eventFuncSigs, eventDatas, eventSigs, callPath).send({
+                let gasPrice = await web3.eth.getGasPrice()
+                let res = await gpact.methods.segment(chainIDs, cbcAddrs, eventFuncSigs, eventDatas, eventSigs, callPath).send({
                     from: this.account,
                     gas: 600000,
                     gasPrice: gasPrice,
@@ -196,14 +189,14 @@ export class Executor {
 
     async root(startChainID, startEvent, startEventSig, segmentChainIDs, segmentEvents, segmentEventSigs) {
         // Root events.
-        var rootEvent
-        var rootEventSig
-        var err
-        var chainIDs = [startChainID]
-        var cbcAddrs = [startEvent.address]
-        var eventFuncSigs = [startFuncSig]
-        var eventDatas = [startEvent.raw.data]
-        var eventSigs = [startEventSig]
+        let rootEvent
+        let rootEventSig
+        let err
+        let chainIDs = [startChainID]
+        let cbcAddrs = [startEvent.address]
+        let eventFuncSigs = [startFuncSig]
+        let eventDatas = [startEvent.raw.data]
+        let eventSigs = [startEventSig]
         for (let i = 0; i < segmentChainIDs.length; i++) {
             chainIDs.push(segmentChainIDs[i])
             cbcAddrs.push(segmentEvents[i].address)
@@ -212,15 +205,15 @@ export class Executor {
             eventSigs.push(segmentEventSigs[i])
         }
         // Get chain ap.
-        var web3 = await this.cmgr.chainAP(startChainID)
+        let web3 = await this.cmgr.chainAP(startChainID)
         // Get GPACT contract
-        var gpactAddr = this.gpacts.get(startChainID)
-        var gpact = new web3.eth.Contract(gpactABI, gpactAddr)
+        let gpactAddr = this.gpacts.get(startChainID)
+        let gpact = new web3.eth.Contract(gpactABI, gpactAddr)
         // Try 5 times, 5 seconds apart.
         for (let i = 0; i < 5; i++) {
             try {
-                var gasPrice = await web3.eth.getGasPrice()
-                var res = await gpact.methods.root(chainIDs, cbcAddrs, eventFuncSigs, eventDatas, eventSigs).send({
+                let gasPrice = await web3.eth.getGasPrice()
+                let res = await gpact.methods.root(chainIDs, cbcAddrs, eventFuncSigs, eventDatas, eventSigs).send({
                     from: this.account,
                     gas: 1000000,
                     gasPrice: gasPrice,
@@ -230,9 +223,9 @@ export class Executor {
                 rootEvent = res.events.Root
                 // Try to get event sig
                 // Try 60 times, 2 seconds apart.
-                var eventID = getEventID(startChainID, rootEvent)
+                let eventID = getEventID(startChainID, rootEvent)
                 for (let j = 0; j < 60; j++) {
-                    var sig = await this.ms.getSignature(eventID)
+                    let sig = await this.ms.getSignature(eventID)
                     if (sig != null) {
                         rootEventSig = sig
                         break
@@ -252,14 +245,14 @@ export class Executor {
     }
 
     async signal(rootChainID, rootEvent, rootEventSig, lockedSegments, lockedSegmentsSigs) {
-        var err
-        for (var [segChainID, segments] of lockedSegments.entries()) {
-            var chainIDs = [rootChainID]
-            var cbcAddrs = [rootEvent.address]
-            var eventFuncSigs = [rootFuncSig]
-            var eventDatas = [rootEvent.raw.data]
-            var eventSigs = [rootEventSig]
-            for (var segment of segments) {
+        let err
+        for (let [segChainID, segments] of lockedSegments.entries()) {
+            let chainIDs = [rootChainID]
+            let cbcAddrs = [rootEvent.address]
+            let eventFuncSigs = [rootFuncSig]
+            let eventDatas = [rootEvent.raw.data]
+            let eventSigs = [rootEventSig]
+            for (let segment of segments) {
                 chainIDs.push(segChainID)
                 cbcAddrs.push(segment.address)
                 eventFuncSigs.push(segmentFuncSig)
@@ -267,15 +260,15 @@ export class Executor {
             }
             eventSigs = eventSigs.concat(lockedSegmentsSigs.get(segChainID))
             // Get chain ap.
-            var web3 = await this.cmgr.chainAP(segChainID)
+            let web3 = await this.cmgr.chainAP(segChainID)
             // Get GPACT contract
-            var gpactAddr = this.gpacts.get(segChainID)
-            var gpact = new web3.eth.Contract(gpactABI, gpactAddr)
+            let gpactAddr = this.gpacts.get(segChainID)
+            let gpact = new web3.eth.Contract(gpactABI, gpactAddr)
             // Try 5 times, 5 seconds apart.
             for (let i = 0; i < 5; i++) {
                 try {
-                    var gasPrice = await web3.eth.getGasPrice()
-                    var res = await gpact.methods.signalling(chainIDs, cbcAddrs, eventFuncSigs, eventDatas, eventSigs).send({
+                    let gasPrice = await web3.eth.getGasPrice()
+                    let res = await gpact.methods.signalling(chainIDs, cbcAddrs, eventFuncSigs, eventDatas, eventSigs).send({
                         from: this.account,
                         gas: 600000,
                         gasPrice: gasPrice,
