@@ -121,6 +121,7 @@ export class Executor {
             // Need to collect segments event for all the child nodes.
             for (let i = 0; i < node.children.length; i++) {
                 // Child call path last element starts with 1.
+                let child = node.children[i]
                 childCallPath[childCallPath.length - 1] = i + 1
                 let [childSegEvent, childSegSig, err2] = await this.segment(startChainID, startEvent, startEventSig, child, childCallPath, lockedSegments, lockedSegmentsSigs)
                 if (err2 != null) {
