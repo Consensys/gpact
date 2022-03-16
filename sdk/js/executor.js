@@ -4,10 +4,11 @@ const rootFuncSig = "0xe6763dd99bf894d72f3499dd572aa42876eae7ae028c32fff21654e1b
 const gpactABI = [{"inputs":[{"internalType":"uint256","name":"_myBlockchainId","type":"uint256"}],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"_expectedBlockchainId","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"_actualBlockchainId","type":"uint256"},{"indexed":false,"internalType":"address","name":"_expectedContract","type":"address"},{"indexed":false,"internalType":"address","name":"_actualContract","type":"address"},{"indexed":false,"internalType":"bytes","name":"_expectedFunctionCall","type":"bytes"},{"indexed":false,"internalType":"bytes","name":"_actualFunctionCall","type":"bytes"}],"name":"BadCall","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"string","name":"_revertReason","type":"string"}],"name":"CallFailure","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"_blockchainId","type":"uint256"},{"indexed":false,"internalType":"address","name":"_contract","type":"address"},{"indexed":false,"internalType":"bytes","name":"_functionCall","type":"bytes"},{"indexed":false,"internalType":"bytes","name":"_result","type":"bytes"}],"name":"CallResult","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"_val1","type":"uint256"},{"indexed":false,"internalType":"bytes32","name":"_val2","type":"bytes32"},{"indexed":false,"internalType":"address","name":"_val3","type":"address"},{"indexed":false,"internalType":"bytes","name":"_val4","type":"bytes"}],"name":"Dump","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"_expectedNumberOfCalls","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"_actualNumberOfCalls","type":"uint256"}],"name":"NotEnoughCalls","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"_crossBlockchainTransactionId","type":"uint256"},{"indexed":false,"internalType":"bool","name":"_success","type":"bool"}],"name":"Root","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"_crossBlockchainTransactionId","type":"uint256"},{"indexed":false,"internalType":"bytes32","name":"_hashOfCallGraph","type":"bytes32"},{"indexed":false,"internalType":"uint256[]","name":"_callPath","type":"uint256[]"},{"indexed":false,"internalType":"address[]","name":"_lockedContracts","type":"address[]"},{"indexed":false,"internalType":"bool","name":"_success","type":"bool"},{"indexed":false,"internalType":"bytes","name":"_returnValue","type":"bytes"}],"name":"Segment","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"_rootBcId","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"_crossBlockchainTransactionId","type":"uint256"}],"name":"Signalling","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint256","name":"_crossBlockchainTransactionId","type":"uint256"},{"indexed":false,"internalType":"address","name":"_caller","type":"address"},{"indexed":false,"internalType":"uint256","name":"_timeout","type":"uint256"},{"indexed":false,"internalType":"bytes","name":"_callGraph","type":"bytes"}],"name":"Start","type":"event"},{"inputs":[],"name":"activeCallCrosschainRootTxId","outputs":[{"internalType":"bytes32","name":"","type":"bytes32"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"_blockchainId","type":"uint256"},{"internalType":"address","name":"_cbc","type":"address"}],"name":"addRemoteCrosschainControl","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"_contractToLock","type":"address"}],"name":"addToListOfLockedContracts","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"_blockchainId","type":"uint256"},{"internalType":"address","name":"_verifier","type":"address"}],"name":"addVerifier","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"_blockchainId","type":"uint256"},{"internalType":"address","name":"_contract","type":"address"},{"internalType":"bytes","name":"_functionCallData","type":"bytes"}],"name":"crossBlockchainCall","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"_blockchainId","type":"uint256"},{"internalType":"address","name":"_contract","type":"address"},{"internalType":"bytes","name":"_functionCallData","type":"bytes"}],"name":"crossBlockchainCallReturnsUint256","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"getActiveCallCrosschainRootTxId","outputs":[{"internalType":"bytes32","name":"","type":"bytes32"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"isSingleBlockchainCall","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"myBlockchainId","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256[]","name":"_blockchainIds","type":"uint256[]"},{"internalType":"address[]","name":"_cbcAddresses","type":"address[]"},{"internalType":"bytes32[]","name":"_eventFunctionSignatures","type":"bytes32[]"},{"internalType":"bytes[]","name":"_eventData","type":"bytes[]"},{"internalType":"bytes[]","name":"_signatures","type":"bytes[]"}],"name":"root","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"rootTransactionInformation","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256[]","name":"_blockchainIds","type":"uint256[]"},{"internalType":"address[]","name":"_cbcAddresses","type":"address[]"},{"internalType":"bytes32[]","name":"_eventFunctionSignatures","type":"bytes32[]"},{"internalType":"bytes[]","name":"_eventData","type":"bytes[]"},{"internalType":"bytes[]","name":"_signatures","type":"bytes[]"},{"internalType":"uint256[]","name":"_callPath","type":"uint256[]"}],"name":"segment","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"bytes32","name":"","type":"bytes32"}],"name":"segmentTransactionExecuted","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256[]","name":"_blockchainIds","type":"uint256[]"},{"internalType":"address[]","name":"_cbcAddresses","type":"address[]"},{"internalType":"bytes32[]","name":"_eventFunctionSignatures","type":"bytes32[]"},{"internalType":"bytes[]","name":"_eventData","type":"bytes[]"},{"internalType":"bytes[]","name":"_signatures","type":"bytes[]"}],"name":"signalling","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"_crossBlockchainTransactionId","type":"uint256"},{"internalType":"uint256","name":"_timeout","type":"uint256"},{"internalType":"bytes","name":"_callGraph","type":"bytes"}],"name":"start","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"}]
 
 export class Executor {
-    constructor (cmgr, account, ms) {
+    constructor (cmgr, account, ms, eventFinalizedDelay) {
         this.cmgr = cmgr
         this.account = account
         this.ms = ms
+        this.delay = eventFinalizedDelay
         this.gpacts = new Map()
     }
 
@@ -79,25 +80,33 @@ export class Executor {
                 console.log("start succeed")
                 console.log(res)
                 startEvent = res.events.Start
-                // Try to get event sig
-                // Try 60 times, 2 seconds apart.
-                let eventID = getEventID(root.chainID, startEvent)
-                for (let j = 0; j < 60; j++) {
-                    let sig = await this.ms.getSignature(eventID)
-                    if (sig != null) {
-                        startEventSig = sig
-                        break
-                    }
-                    console.log("fail to get event sig, try again...")
-                    await new Promise(r => setTimeout(r, 2000))
-                }
                 err = null
                 break
             } catch (error) {
-                console.log("got error", error, "try again...")
                 err = "fail to do start transaction"
+                console.log("got error", error, "try again...")
             }
             await new Promise(r => setTimeout(r, 5000))
+        }
+        if (err == null) {
+            // Try to get event sig
+            // Try 60 times, 2 seconds apart, with initial delay
+            await new Promise(r => setTimeout(r, this.delay))
+            let eventID = getEventID(root.chainID, startEvent)
+            for (let i = 0; i < 60; i++) {
+                try {
+                    let sig = await this.ms.getSignature(eventID)
+                    if (sig != null) {
+                        startEventSig = sig
+                        err = null
+                        break
+                    }
+                } catch (error) {
+                    err = "fail to get event sig"
+                    console.log("fail to get event sig", error, "try again...")
+                }
+                await new Promise(r => setTimeout(r, 2000))
+            }
         }
         return [startEvent, startEventSig, err]
     }
@@ -140,8 +149,8 @@ export class Executor {
         // Get GPACT contract
         let gpactAddr = this.gpacts.get(node.chainID)
         let gpact = new web3.eth.Contract(gpactABI, gpactAddr)
-        // //
         // Try 5 times, 5 seconds apart.
+        err = "fail to do segment transaction"
         for (let i = 0; i < 5; i++) {
             try {
                 let gasPrice = await web3.eth.getGasPrice()
@@ -153,37 +162,44 @@ export class Executor {
                 console.log("segment succeed")
                 console.log(res)
                 segmentEvent = res.events.Segment   
-                // Try to get event sig
-                // Try 60 times, 2 seconds apart.
-                var eventID = getEventID(node.chainID, segmentEvent)
-                for (let j = 0; j < 60; j++) {
-                    var sig = await this.ms.getSignature(eventID)
-                    if (sig != null) {
-                        segmentEventSig = sig
-                        break
-                    }
-                    console.log("fail to get event sig, try again...")
-                    await new Promise(r => setTimeout(r, 2000))
-                }
-                // Got the segment event sig.
-                // Locked contracts
-                if (segmentEvent.returnValues._lockedContracts.length > 0) {
-                    if (!lockedSegments.has(node.chainID)) {
-                        lockedSegments.set(node.chainID, [])
-                    }
-                    lockedSegments.get(node.chainID).push(segmentEvent)
-                    if (!lockedSegmentsSigs.has(node.chainID)) {
-                        lockedSegmentsSigs.set(node.chainID, [])
-                    }
-                    lockedSegmentsSigs.get(node.chainID).push(segmentEventSig)
-                }
                 err = null
                 break
             } catch (error) {
                 console.log("got error", error, "try again...")
-                err = "fail to do segment transaction"
             }
             await new Promise(r => setTimeout(r, 5000))
+        }
+        if (err == null) {
+            // Try to get event sig
+            // Try 60 times, 2 seconds apart.
+            await new Promise(r => setTimeout(r, this.delay))
+            let eventID = getEventID(node.chainID, segmentEvent)
+            for (let i = 0; i < 60; i++) {
+                try {
+                    let sig = await this.ms.getSignature(eventID)
+                    if (sig != null) {
+                        segmentEventSig = sig
+                        err = null
+                        // Got the segment event sig.
+                        // Get Locked contracts.
+                        if (segmentEvent.returnValues._lockedContracts.length > 0) {
+                            if (!lockedSegments.has(node.chainID)) {
+                                lockedSegments.set(node.chainID, [])
+                            }
+                            lockedSegments.get(node.chainID).push(segmentEvent)
+                            if (!lockedSegmentsSigs.has(node.chainID)) {
+                                lockedSegmentsSigs.set(node.chainID, [])
+                            }
+                            lockedSegmentsSigs.get(node.chainID).push(segmentEventSig)
+                        }
+                        break
+                    }
+                } catch (error) {
+                    err = "fail to get event sig"
+                    console.log("fail to get event sig", error, "try again...")   
+                }
+                await new Promise(r => setTimeout(r, 2000))
+            }
         }
         return [segmentEvent, segmentEventSig, err]
     }
@@ -222,25 +238,33 @@ export class Executor {
                 console.log("root succeed")
                 console.log(res)
                 rootEvent = res.events.Root
-                // Try to get event sig
-                // Try 60 times, 2 seconds apart.
-                let eventID = getEventID(startChainID, rootEvent)
-                for (let j = 0; j < 60; j++) {
-                    let sig = await this.ms.getSignature(eventID)
-                    if (sig != null) {
-                        rootEventSig = sig
-                        break
-                    }
-                    console.log("fail to get event sig, try again...")
-                    await new Promise(r => setTimeout(r, 2000))
-                }
                 err = null
                 break
             } catch (error) {
-                console.log("got error", error, "try again...")
                 err = "fail to do root transaction"
+                console.log("got error", error, "try again...")
             }
             await new Promise(r => setTimeout(r, 5000))
+        }
+        if (err == null) {
+            // Try to get event sig
+            // Try 60 times, 2 seconds apart.
+            await new Promise(r => setTimeout(r, this.delay))
+            let eventID = getEventID(startChainID, rootEvent)
+            for (let i = 0; i < 60; i++) {
+                try {
+                    let sig = await this.ms.getSignature(eventID)
+                    if (sig != null) {
+                        rootEventSig = sig
+                        err = null
+                        break
+                    }
+                } catch (error) {
+                    err = "fail to get event sig"
+                    console.log("fail to get event sig", error, "try again...")  
+                }
+                await new Promise(r => setTimeout(r, 2000))
+            }
         }
         return [rootEvent, rootEventSig, err]
     }
