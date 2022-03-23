@@ -71,7 +71,7 @@ Walking through the diagram:
  a crosschain function call.</li>
 <li>The Crosschain Control contract emits an event indicating the destination
  blockchain, contract address, function call and parameters to be called.
- All relayers associated with the blockchain observer the event being emitted.
+ All relayers associated with the blockchain observe the event being emitted.
  Once the block containing the transaction that emitted the event is final
  relayers process the event.</li>
 <li>The relayer signs the event and submits a transaction to the Signed Event Store contract
@@ -146,7 +146,7 @@ Walking through the diagram:
  results from funcion calls, or whether provisional updates should be committed
  or discarded.
 
- All relayers associated with the blockchain observer the event being emitted.
+ All relayers associated with the blockchain observe the event being emitted.
  Once the block containing the transaction that emitted the event is final
  relayers process the event. Similarly, the application observes the event.</li>
 <li>The relayer signs the block header of the block containing the transaction
@@ -209,7 +209,7 @@ Walking through the diagram:
  results from funcion calls, or whether provisional updates should be committed
  or discarded.
 
- All relayers associated with the blockchain observer the event being emitted.
+ All relayers associated with the blockchain observe the event being emitted.
  Once the block containing the transaction that emitted the event is final
  relayers process the event. Similarly, the application observes the event.</li>
 <li>The application requests the signed event from attestors.
