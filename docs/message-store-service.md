@@ -29,4 +29,5 @@ It is defined using the [Open API Specification format](https://swagger.io/speci
 
 #### TODOs
 - [ ] Security
+- [ ] API versioning
 - [ ] Deployment considerations
