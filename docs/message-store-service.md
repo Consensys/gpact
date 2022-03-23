@@ -11,7 +11,7 @@ This service is an essential component for protocols such as GPACT that rely on 
 ### Design and Specification
 The *Message Store Service* consumes events that have been processed by Relayers. 
 The service can be configured to store all messages that pass through a Relayer or only a subset that require persistence (e.g. GPACT events).
-A [specialised message dispatcher]("TODO") is responsible for forwarding messages to the store by interacting with its API.
+A specialised message dispatcher is responsible for forwarding messages to the store by interacting with its API.
 Relayers can either create a message if it is not already in the Message Store, or update it with their own attestation (or other proof), if the message already exists.
 
 The service is responsible for ensuring that all create and update operations on messages can only be performed by authorised Relayers.
@@ -29,4 +29,6 @@ It is defined using the [Open API Specification format](https://swagger.io/speci
 
 #### TODOs
 - [ ] Security
+- [ ] Message expiration and removal
+- [ ] API versioning
 - [ ] Deployment considerations
