@@ -324,5 +324,6 @@ public class HappyPathTest extends Abstract20ActsTest {
     BigInteger pubKey = Sign.signedMessageHashToKey(messageHash, signatureData);
     LOG.info("Recovered pub key: {}", pubKey.toString(16));
     LOG.info("Pub Key: {}", credentials.getEcKeyPair().getPublicKey().toString(16));
+    LOG.info("test");
   }
 }
