@@ -27,8 +27,11 @@ resource "aws_instance" "dapp" {
     export HOME=/home/ubuntu
     git clone https://github.com/ConsenSys/gpact.git
     cd ./gpact
-    git checkout cros-83-demo
-    cd ./app
+    git checkout cros-83-demo-2
+    cd ./app2/buyer
+    npm install
+    nohup npm run serve &
+    cd ./app2/seller
     npm install
     nohup npm run serve &
   EOF
