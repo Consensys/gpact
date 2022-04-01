@@ -1,0 +1,60 @@
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Demo (Customer portal)</title>
+  <link rel="icon" type="image/png" href="metamask-fox.svg">
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.14.1/css/mdb.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="metamask.css" type="text/css">
+</head>
+
+<body>
+  <main class="container-fluid">
+    <header>
+      <h1 class="text-center">NFT Trade (Customer Portal)</h1>
+    </header>
+    <section>
+      <div class="row d-flex justify-content-center">
+        <div class="col-xl-4 col-lg-6 col-md-12 col-sm-12 col-12">
+          <div class="card">
+            <img class="card-img-top" src="https://docs.metamask.io/metamask-fox.svg"
+              alt="Card image cap"
+              style="width:50px;height:50px;">
+            <div class="card-body">
+              <button class="btn btn-primary btn-lg btn-block mb-3" id="connectButton" disabled></button>
+              <button class="btn btn-primary btn-lg btn-block mb-3" id="checkAccountButton">Check account</button>
+              <p class="info-text alert alert-secondary">Logs: <span id="infos1"></span></p>
+              <h2 class="card-title">Purchase NFT</h2>
+              <h4 class="card-title">----NFT to buy----</h4>
+              <p class="info-text"> NFT chain: <span id="otherBcIdText"></span></p>
+              <input type="number" id="otherBcId"></input>
+              <p class="info-text"> NFT contract address: <span id="nftContractAddressText"></span></p>
+              <input type="string" id="nftContractAddress"></input>
+              <p class="info-text"> NFT Id: <span id="nftIdText"></span></p>
+              <input type="string" id="nftId"></input>
+              <h4 class="card-title">----Token to pay----</h4>
+              <p class="info-text"> Token address: <span id="tokenContractAddressText"></span></p>
+              <input type="string" id="tokenContractAddress"></input>
+              <p class="info-text"> Amount (x 1e18): <span id="amountText"></span></p>
+              <input type="number" id="amount"></input>
+              <p class="info-text"> Token recipient: <span id="tokenRecipientAddressText"></span></p>
+              <input type="string" id="tokenRecipientAddress"></input>
+              <button class="btn btn-primary btn-lg btn-block mb-3" id="approveButton" disabled>Approve</button>
+              <p class="info-text alert alert-secondary">Logs: <span id="infos2"></span></p>
+              <button class="btn btn-primary btn-lg btn-block mb-3" id="purchaseButton" disabled>Buy</button>
+              <p class="info-text alert alert-secondary">Logs: <span id="infos3"></span></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <script src="node_modules/@metamask/onboarding/dist/metamask-onboarding.bundle.js" defer></script>
+  <script src="node_modules/web3/dist/web3.min.js" defer></script>
+  <script type="module" src="app.js" defer></script>
+</body>
+
+</html>

@@ -49,7 +49,7 @@ resource "aws_security_group" "security_dapp" {
   }
 
   ingress {
-    from_port   = 9011
+    from_port   = 9010
     to_port     = 9011
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
