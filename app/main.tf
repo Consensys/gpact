@@ -31,7 +31,7 @@ resource "aws_instance" "dapp" {
     cd ./app2/buyer
     npm install
     nohup npm run serve &
-    cd ./app2/seller
+    cd ../seller
     npm install
     nohup npm run serve &
   EOF
