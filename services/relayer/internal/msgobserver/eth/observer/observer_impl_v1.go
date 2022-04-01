@@ -174,7 +174,7 @@ func (o *ObserverImplV1) routineSFC(chainID *big.Int, chainAP string, addr commo
 			return
 		}
 
-		observer, err := o.createFinalisedEventObserver(chainID.String(), addr.String(), sfc, o.mq, chain)
+		observer, err := NewSFCBridgeRealtimeObserver(chainID.String(), addr.String(), sfc, o.mq)
 
 		if err != nil {
 			logging.Error(err.Error())
