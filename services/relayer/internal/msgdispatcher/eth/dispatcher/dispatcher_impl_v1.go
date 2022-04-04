@@ -158,5 +158,5 @@ func dispatch(chain *ethclient.Client, auth *bind.TransactOpts, esAddr common.Ad
 			return
 		}
 	}
-	logging.Error("Error submitting transaction, stop retry: %v", err.Error())
+	logging.Error("Error submitting transaction, stop retry")
 }
