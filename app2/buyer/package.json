@@ -14,7 +14,7 @@
     "url": ""
   },
   "files": [
-    "/app.js",
+    "/contract.js",
     "/index.html"
   ],
   "author": "MetaMask",
@@ -25,7 +25,8 @@
   "homepage": "",
   "dependencies": {
     "@metamask/onboarding": "^1.0.1",
-    "web3": "^1.6.1"
+    "web3": "^1.7.0",
+    "node-fetch": "^3.2.2"
   },
   "devDependencies": {
     "@metamask/eslint-config": "^2.0.0",
