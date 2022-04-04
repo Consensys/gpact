@@ -1083,9 +1083,9 @@ const initialize = () => {
       onboardButton.disabled = false;
     } else {
       //If it is installed we change our button text
-      onboardButton.innerText = 'Connected';
+      onboardButton.innerText = 'Connect';
       onboardButton.onclick = onClickConnect;
-      onboardButton.disabled = true;
+      onboardButton.disabled = false;
       checkAccountButton.disabled = false;
       myWeb3 = new Web3(window.ethereum);
     }
