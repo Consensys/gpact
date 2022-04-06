@@ -17,6 +17,9 @@ pragma solidity >=0.8;
 import "../../messaging/interface/CrosschainVerifier.sol";
 import "../../openzeppelin/access/Ownable.sol";
 
+
+
+// TODO: The plan is to migrate usages of this contract to CbcDecVer2.sol.
 abstract contract CbcDecVer is Ownable {
     // 	0x77dab611
     bytes32 internal constant START_EVENT_SIGNATURE =
