@@ -20,7 +20,7 @@ import net.consensys.gpact.common.BlockchainId;
 import org.web3j.crypto.Credentials;
 
 /** Manage multiple blockchains, each holding a set of registrar and verification contracts */
-public interface MessagingManagerGroupInterface {
+public interface MessagingManagerGroup {
 
   /**
    * Add a blockchain to the group managed by this class and deploy contracts to the blockchain.

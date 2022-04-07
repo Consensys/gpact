@@ -16,16 +16,28 @@ package net.consensys.gpact.messaging.eventattest;
 
 import static net.consensys.gpact.common.FormatConversion.addressStringToBytes;
 
+import java.io.*;
+import java.net.URI;
+import java.net.URL;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import net.consensys.gpact.common.AnIdentity;
 import net.consensys.gpact.common.BlockchainId;
+import net.consensys.gpact.common.FormatConversion;
 import net.consensys.gpact.messaging.MessagingVerificationInterface;
 import net.consensys.gpact.messaging.SignedEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.tuweni.bytes.Bytes;
 import org.web3j.crypto.Sign;
+import org.web3j.protocol.core.methods.response.Log;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
+
 
 /**
  * Manages the interaction between the application library and attestors for a certain blockchain.
@@ -42,8 +54,11 @@ public class AttestorSigner implements MessagingVerificationInterface {
 
   BlockchainId bcId;
 
-  public AttestorSigner(BlockchainId blockchainId) {
+  String msgStoreURL;
+
+  public AttestorSigner(BlockchainId blockchainId, String msgStoreURL) {
     this.bcId = blockchainId;
+    this.msgStoreURL = msgStoreURL;
   }
 
   // TODO this method won't be needed / should be removed once the Attestor service has been
@@ -57,11 +72,19 @@ public class AttestorSigner implements MessagingVerificationInterface {
   @Override
   public SignedEvent getSignedEvent(
       List<BlockchainId> targetBlockchainIds,
-      TransactionReceipt startTxReceipt,
+      TransactionReceipt txReceipt,
       byte[] eventData,
       String contractAddress,
       byte[] eventFunctionSignature)
       throws Exception {
+
+    String eventId = getEventID(this.bcId, txReceipt, contractAddress, eventFunctionSignature);
+    LOG.info("EventId: {}", eventId);
+    String encodedSignaturesStr = fetchSignedEvent(eventId);
+    LOG.info("EncodedSig: {}", encodedSignaturesStr);
+
+
+
 
     byte[] encodedEventInformation =
         abiEncodePackedEvent(this.bcId, contractAddress, eventFunctionSignature, eventData);
@@ -131,4 +154,141 @@ public class AttestorSigner implements MessagingVerificationInterface {
     }
     return bb.array();
   }
+
+
+  private String fetchSignedEvent(String eventId) throws IOException  {
+    String urlStr = "http://" + this.msgStoreURL + "/messages/" + eventId + "/proofs";
+    InputStream input = new URL(urlStr).openStream();
+    // Input Stream Object To Start Streaming.
+    try {                                 // try catch for checked exception
+      BufferedReader re = new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8));
+      // Buffer Reading In UTF-8
+      String Text = read(re);         // Handy Method To Read Data From BufferReader
+//      JSONObject json = new JSONObject(Text);    //Creating A JSON
+//
+//      "0x" + resp[0].proof
+
+      return null;
+    } catch (Exception e) {
+      return null;
+    } finally {
+      input.close();
+    }
+  }
+
+
+  public String read(Reader re) throws IOException {     // class Declaration
+    StringBuilder str = new StringBuilder();     // To Store Url Data In String.
+    int temp;
+    do {
+
+      temp = re.read();       //reading Charcter By Chracter.
+      str.append((char) temp);
+
+    } while (temp != -1);
+    //  re.read() return -1 when there is end of buffer , data or end of file.
+
+    return str.toString();
+
+  }
+
+
+  private String getEventID(BlockchainId bcId, TransactionReceipt txr, String contractAddress, byte[] eventFunctionSignature) {
+    String chainId = bcId.toPlainString();
+
+    List<Log> logs = txr.getLogs();
+    for (Log log: logs) {
+      if (log.getAddress().equalsIgnoreCase(contractAddress) &&
+        log.getTopics().get(0).equalsIgnoreCase(FormatConversion.byteArrayToString(eventFunctionSignature))) {
+
+        String eventAddr = log.getAddress();
+        String blockNumber = log.getBlockNumberRaw();
+        String txIndex = log.getTransactionIndexRaw();
+        String logIndex = log.getLogIndexRaw();
+        return "chain" + chainId + "-" + eventAddr + "-" + blockNumber + "-" + txIndex + "-" + logIndex;
+      }
+    }
+    throw new RuntimeException("Event not found");
+  }
+//
+//
+//  // setupObserver sets up observer.
+//  func setupObserver(url string, chainID *big.Int, chainAP string, contractType string, contractAddr common.Address) error {
+//    success, err := observerapi.RequestStartObserve(url, chainID, chainAP, contractType, contractAddr)
+//    if err != nil {
+//      return err
+//    }
+//    if !success {
+//      return fmt.Errorf("failed.")
+//    }
+//    return nil
+//  }
+//
+//  // setupRelayer sets up relayer.
+//  func setupRelayer(url string, chainID *big.Int, contractAddr common.Address, keyType byte, key []byte) error {
+//    success, err := relayerapi.RequestSetKey(url, chainID, contractAddr, keyType, key)
+//    if err != nil {
+//      return err
+//    }
+//    if !success {
+//      return fmt.Errorf("failed.")
+//    }
+//    return nil
+//  }
+//
+//  // setupDispatcher sets up dispatcher.
+//  func setupDispatcher(url string, chainID *big.Int, chainAP string, key []byte, contractAddr common.Address, esAddr common.Address) error {
+//    success, err := dispatcherapi.RequestSetTransactionOpts(url, chainID, chainAP, key)
+//    if err != nil {
+//      return err
+//    }
+//    if !success {
+//      return fmt.Errorf("failed.")
+//    }
+//    success, err = dispatcherapi.RequestSetVerifierAddr(url, chainID, contractAddr, esAddr)
+//    if err != nil {
+//      return err
+//    }
+//    if !success {
+//      return fmt.Errorf("failed.")
+//    }
+//    return nil
+//  }
+
+  // setupMessageStore sets up message store.
+  private void setupMessageStore(String msgDispatcherUrl, String msgStoreAddr) throws Exception {
+
+    final byte SetMsgStoreAddrReqType = 6;
+    Bytes type = Bytes.of(SetMsgStoreAddrReqType);
+    Bytes body = Bytes.wrap(msgStoreAddr.getBytes(StandardCharsets.UTF_8));
+    Bytes all = Bytes.concatenate(type, body);
+    byte[] requestBody = all.toArray();
+
+    HttpClient client = HttpClient.newHttpClient();
+    HttpRequest request = HttpRequest.newBuilder()
+            .uri(URI.create(msgDispatcherUrl))
+            .POST(HttpRequest.BodyPublishers.ofByteArray(requestBody))
+            .build();
+
+    HttpResponse<String> response = client.send(request,
+            HttpResponse.BodyHandlers.ofString());
+
+    System.out.println(response.body());
+  }
+
+
+  public static void main(String args[]) throws Exception {
+    AttestorSigner a = new AttestorSigner(null, null);
+    a.setupMessageStore("127.0.0.1:9725","msgstore:8080");
+  }
 }
+
+
+
+
+//	assert.Empty(t, setupObserver("127.0.0.1:9527", big.NewInt(31), "ws://bc31node1:8546", "GPACT", gpactAddrA))
+//            assert.Empty(t, setupObserver("127.0.0.1:9528", big.NewInt(32), "ws://bc32node1:8546", "GPACT", gpactAddrB))
+//            assert.Empty(t, setupRelayer("127.0.0.1:9625", big.NewInt(0), common.Address{}, signer.SECP256K1_KEY_TYPE, relayerKey))
+//            assert.Empty(t, setupMessageStore("127.0.0.1:9725", "msgstore:8080"))
+
+

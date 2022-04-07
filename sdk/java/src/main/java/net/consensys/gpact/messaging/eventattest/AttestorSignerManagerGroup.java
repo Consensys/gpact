@@ -18,13 +18,13 @@ import java.math.BigInteger;
 import java.util.*;
 import net.consensys.gpact.common.BlockchainConfig;
 import net.consensys.gpact.common.BlockchainId;
-import net.consensys.gpact.messaging.MessagingManagerGroupInterface;
+import net.consensys.gpact.messaging.MessagingManagerGroup;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
 
 /** Manage multiple blockchains, each holding a set of registrar and verification contracts */
-public class AttestorSignerManagerGroup implements MessagingManagerGroupInterface {
+public class AttestorSignerManagerGroup implements MessagingManagerGroup {
   static final Logger LOG = LogManager.getLogger(AttestorSignerManagerGroup.class);
 
   Map<BlockchainId, AttestorSignerManager> blockchains = new HashMap<>();

@@ -14,10 +14,10 @@ rpc-http-api = ["ETH", "NET", "WEB3"]
 
 
 # ws
-#rpc-ws-enabled=true
-#rpc-ws-host="0.0.0.0"
-#rpc-ws-port=8546
-#rpc-ws-api = ["ETH", "NET", "WEB3", "EEA", "PERM", "IBFT"]
+rpc-ws-enabled=true
+rpc-ws-host="0.0.0.0"
+rpc-ws-port=8546
+rpc-ws-api = ["ETH", "NET", "WEB3", "EEA", "PERM", "IBFT"]
 
 # graphql
 #graphql-http-enabled=true

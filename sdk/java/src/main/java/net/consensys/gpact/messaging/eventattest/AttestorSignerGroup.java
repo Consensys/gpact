@@ -33,7 +33,8 @@ public class AttestorSignerGroup {
       // throw new Exception("Blockchain already in Attestor Signer Group: " + blockchainId);
     }
 
-    this.blockchains.put(blockchainId, new AttestorSigner(blockchainId));
+    // TODO msgstore this needs to be configurable!
+    this.blockchains.put(blockchainId, new AttestorSigner(blockchainId, "127.0.0.1:8080"));
   }
 
   // TODO when an attestor signer service is implemented, this will change to
@@ -49,7 +50,7 @@ public class AttestorSignerGroup {
   public void addSigner(AnIdentity signer, BlockchainId bcId1) throws Exception {
     // Add the signer (their private key) to app for the blockchain
     AttestorSigner holder = this.blockchains.get(bcId1);
-    holder.signers.add(signer);
+    holder.addSigner(signer);
   }
 
   public MessagingVerificationInterface getVerifier(BlockchainId bcId) throws Exception {

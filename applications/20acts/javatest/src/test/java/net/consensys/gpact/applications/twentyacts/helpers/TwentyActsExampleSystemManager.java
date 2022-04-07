@@ -10,7 +10,7 @@ import net.consensys.gpact.functioncall.CrossControlManager;
 import net.consensys.gpact.functioncall.CrossControlManagerGroup;
 import net.consensys.gpact.helpers.CrossBlockchainConsensusType;
 import net.consensys.gpact.helpers.PropertiesLoader;
-import net.consensys.gpact.messaging.MessagingManagerGroupInterface;
+import net.consensys.gpact.messaging.MessagingManagerGroup;
 import net.consensys.gpact.messaging.eventattest.AttestorSignerGroup;
 import net.consensys.gpact.messaging.eventattest.AttestorSignerManagerGroup;
 import net.consensys.gpact.messaging.txrootrelay.TxRootRelayerGroup;
@@ -54,7 +54,7 @@ public class TwentyActsExampleSystemManager {
     // To keep the example simple, just have one signer for all blockchains.
     AnIdentity globalSigner = new AnIdentity();
 
-    MessagingManagerGroupInterface messagingManagerGroup = null;
+    MessagingManagerGroup messagingManagerGroup = null;
 
     this.managerGroup = new TwentyActsManagerGroup();
 
@@ -138,7 +138,7 @@ public class TwentyActsExampleSystemManager {
 
   private void setupCrosschainTrust(
       CrossControlManagerGroup crossControlManagerGroup,
-      MessagingManagerGroupInterface messagingManagerGroup)
+      MessagingManagerGroup messagingManagerGroup)
       throws Exception {
     ArrayList<BlockchainId> bcs = crossControlManagerGroup.getAllBlockchainIds();
 
@@ -155,7 +155,7 @@ public class TwentyActsExampleSystemManager {
   }
 
   private void addBcAttestorSign(
-      MessagingManagerGroupInterface messagingManagerGroup,
+      MessagingManagerGroup messagingManagerGroup,
       CrossControlManagerGroup crossControlManagerGroup,
       AttestorSignerGroup attestorSignerGroup,
       Credentials creds,
@@ -168,7 +168,7 @@ public class TwentyActsExampleSystemManager {
   }
 
   private void addBcTxRootSign(
-      MessagingManagerGroupInterface messagingManagerGroup,
+      MessagingManagerGroup messagingManagerGroup,
       CrossControlManagerGroup crossControlManagerGroup,
       TxRootRelayerGroup relayerGroup,
       TxRootTransferGroup txRootTransferGroup,

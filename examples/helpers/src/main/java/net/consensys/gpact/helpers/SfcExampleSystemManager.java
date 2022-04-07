@@ -8,7 +8,7 @@ import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.common.StatsHolder;
 import net.consensys.gpact.functioncall.CrossControlManager;
 import net.consensys.gpact.functioncall.CrossControlManagerGroup;
-import net.consensys.gpact.messaging.MessagingManagerGroupInterface;
+import net.consensys.gpact.messaging.MessagingManagerGroup;
 import net.consensys.gpact.messaging.eventattest.AttestorSignerGroup;
 import net.consensys.gpact.messaging.eventattest.AttestorSignerManagerGroup;
 import net.consensys.gpact.messaging.txrootrelay.TxRootRelayerGroup;
@@ -52,7 +52,7 @@ public class SfcExampleSystemManager {
     // To keep the example simple, just have one signer for all blockchains.
     AnIdentity globalSigner = new AnIdentity();
 
-    MessagingManagerGroupInterface messagingManagerGroup = null;
+    MessagingManagerGroup messagingManagerGroup = null;
     this.crossControlManagerGroup =
         CrosschainProtocols.getFunctionCallInstance(CrosschainProtocols.SFC).get();
 
@@ -140,7 +140,7 @@ public class SfcExampleSystemManager {
 
   private void setupCrosschainTrust(
       CrossControlManagerGroup crossControlManagerGroup,
-      MessagingManagerGroupInterface messagingManagerGroup)
+      MessagingManagerGroup messagingManagerGroup)
       throws Exception {
     ArrayList<BlockchainId> bcs = crossControlManagerGroup.getAllBlockchainIds();
 
@@ -157,7 +157,7 @@ public class SfcExampleSystemManager {
   }
 
   private void addBcAttestorSign(
-      MessagingManagerGroupInterface messagingManagerGroup,
+      MessagingManagerGroup messagingManagerGroup,
       CrossControlManagerGroup crossControlManagerGroup,
       AttestorSignerGroup attestorSignerGroup,
       Credentials creds,
@@ -170,7 +170,7 @@ public class SfcExampleSystemManager {
   }
 
   private void addBcTxRootSign(
-      MessagingManagerGroupInterface messagingManagerGroup,
+      MessagingManagerGroup messagingManagerGroup,
       CrossControlManagerGroup crossControlManagerGroup,
       TxRootRelayerGroup relayerGroup,
       TxRootTransferGroup txRootTransferGroup,
