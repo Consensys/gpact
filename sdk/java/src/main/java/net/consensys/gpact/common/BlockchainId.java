@@ -45,6 +45,10 @@ public class BlockchainId {
     return this.bcId.toString(16);
   }
 
+  public String toPlainBase10String() {
+    return this.bcId.toString(10);
+  }
+
   @Override
   public String toString() {
     return "0x" + this.bcId.toString(16);

@@ -127,20 +127,6 @@ services:
       - rabbitmq
     restart: on-failure
 
-  observer4:
-    image: consensys/gpact/services/relayer
-    container_name: observer4
-    networks:
-      - gpact-test
-    ports:
-      - 9528:9425
-    env_file:
-      - ./env/.env.observer.example
-    command: /app/build/observer
-    depends_on:
-      - rabbitmq
-    restart: on-failure
-
   relayer:
     image: consensys/gpact/services/relayer
     container_name: relayer
