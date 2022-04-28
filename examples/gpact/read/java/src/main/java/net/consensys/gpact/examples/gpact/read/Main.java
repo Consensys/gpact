@@ -55,9 +55,11 @@ public class Main {
     // Set-up classes to manage blockchains.
     Credentials appCreds = CredentialsCreator.createCredentials();
     Bc1ContractA bc1ContractABlockchain =
-        new Bc1ContractA(appCreds, root.bcId, root.uri, root.gasPriceStrategy, root.period);
+        new Bc1ContractA(
+            appCreds, root.bcId, root.blockchainNodeRpcUri, root.gasPriceStrategy, root.period);
     Bc2ContractB bc2ContractBBlockchain =
-        new Bc2ContractB(appCreds, bc2.bcId, bc2.uri, bc2.gasPriceStrategy, bc2.period);
+        new Bc2ContractB(
+            appCreds, bc2.bcId, bc2.blockchainNodeRpcUri, bc2.gasPriceStrategy, bc2.period);
 
     BigInteger val = BigInteger.valueOf(7);
 

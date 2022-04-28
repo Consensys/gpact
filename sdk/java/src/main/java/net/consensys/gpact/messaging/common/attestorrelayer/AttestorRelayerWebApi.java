@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 ConsenSys Software Inc
+ * Copyright 2022 ConsenSys Software Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -12,32 +12,25 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package net.consensys.gpact.messaging.common;
+package net.consensys.gpact.messaging.common.attestorrelayer;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import net.consensys.gpact.common.BlockchainId;
-import net.consensys.gpact.common.CrosschainProtocolStackException;
-import net.consensys.gpact.functioncall.CrosschainFunctionCallException;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.tuweni.bytes.Bytes;
-
-import java.io.IOException;
+import java.io.*;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
-import java.security.InvalidParameterException;
+import net.consensys.gpact.common.BlockchainId;
+import net.consensys.gpact.common.CrosschainProtocolStackException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.tuweni.bytes.Bytes;
 
-
-/**
- * Configures Attestor / Relayer components.
- *
- */
-public class AttestorRelayerConfigurer {
-  static final Logger LOG = LogManager.getLogger(AttestorRelayerConfigurer.class);
+/** Configures Attestor / Relayer components. */
+public class AttestorRelayerWebApi {
+  static final Logger LOG = LogManager.getLogger(AttestorRelayerWebApi.class);
 
   // Observer API
   public static final byte START_OBSERVE_REQ_TYPE = 1;
@@ -57,19 +50,36 @@ public class AttestorRelayerConfigurer {
 
   public static final byte SECP256K1_KEY_TYPE = 1;
 
-  private AttestorRelayerConfigurer() {
-  }
+  private AttestorRelayerWebApi() {}
 
+  public static void setupObserver(
+      String observerUrl,
+      BlockchainId bcId,
+      String bcWsUrl,
+      String contractType,
+      String crosschainControlAddr)
+      throws CrosschainProtocolStackException {
+    LOG.info(
+        "SetupObserver: ChainId: {}, ChainAP: {}, ContractType: {}, ContractAddr: {}, ObserverURL: {}",
+        bcId.toDecimalString(),
+        bcWsUrl,
+        contractType,
+        crosschainControlAddr,
+        observerUrl);
 
-  public static void setupObserver(String observerUrl, BlockchainId bcId, String bcWsUrl, String contractType, String crosschainControlAddr) throws Exception {
     ObjectMapper mapper = new ObjectMapper();
     ObjectNode user = mapper.createObjectNode();
-    user.put("chain_id", bcId.toPlainBase10String());
+    user.put("chain_id", bcId.toDecimalString());
     user.put("chain_ap", bcWsUrl);
     user.put("contract_type", contractType);
     user.put("contract_addr", crosschainControlAddr);
-//    String jsonStr1 = mapper.writer().writeValueAsString(user);
-    byte[] json = mapper.writer().writeValueAsBytes(user);
+    //    String jsonStr1 = mapper.writer().writeValueAsString(user);
+    byte[] json;
+    try {
+      json = mapper.writer().writeValueAsBytes(user);
+    } catch (JsonProcessingException ex) {
+      throw new CrosschainProtocolStackException("Observer", ex);
+    }
 
     Bytes type = Bytes.of(START_OBSERVE_REQ_TYPE);
     Bytes body = Bytes.wrap(json);
@@ -79,17 +89,30 @@ public class AttestorRelayerConfigurer {
     config("Observer", observerUrl, requestBody);
   }
 
-  public static void setupRelayer(String relayerUrl, BlockchainId bcId, String gpactContractAddr, byte[] pKey) throws Exception {
+  public static void setupRelayer(
+      String relayerUrl, BlockchainId bcId, String crosschainControlAddr, byte[] pKey)
+      throws CrosschainProtocolStackException {
     byte keyType = SECP256K1_KEY_TYPE;
+
+    LOG.info(
+        "SetupRelayer: ChainId: {}, ContractAddr: {}, RelayerURL: {}",
+        bcId.toDecimalString(),
+        crosschainControlAddr,
+        relayerUrl);
 
     ObjectMapper mapper = new ObjectMapper();
     ObjectNode user = mapper.createObjectNode();
-    user.put("chain_id", bcId.toPlainBase10String());
-    user.put("contract_addr", gpactContractAddr);
+    user.put("chain_id", bcId.toDecimalString());
+    user.put("contract_addr", crosschainControlAddr);
     user.put("key_type", keyType);
     user.put("key", pKey);
-//    String jsonStr1 = mapper.writer().writeValueAsString(user);
-    byte[] json = mapper.writer().writeValueAsBytes(user);
+    //    String jsonStr1 = mapper.writer().writeValueAsString(user);
+    byte[] json;
+    try {
+      json = mapper.writer().writeValueAsBytes(user);
+    } catch (JsonProcessingException ex) {
+      throw new CrosschainProtocolStackException("Relayer", ex);
+    }
 
     Bytes type = Bytes.of(SET_KET_REQ_TYPE);
     Bytes body = Bytes.wrap(json);
@@ -99,23 +122,31 @@ public class AttestorRelayerConfigurer {
     config("Relayer", relayerUrl, requestBody);
   }
 
-  public static void setupDispatcher(String msgDispatcherUrl, String msgStoreAddr) throws Exception {
+  public static void setupDispatcher(String msgDispatcherUrl, String msgStoreAddr)
+      throws CrosschainProtocolStackException {
+    LOG.info("SetupDispatcher: MsgStore: {}, DispatcherURL: {}", msgStoreAddr, msgDispatcherUrl);
+
     ObjectMapper mapper = new ObjectMapper();
     ObjectNode user = mapper.createObjectNode();
     user.put("msg_store_url", msgStoreAddr);
-//    String jsonStr1 = mapper.writer().writeValueAsString(user);
-    byte[] json = mapper.writer().writeValueAsBytes(user);
+    //    String jsonStr1 = mapper.writer().writeValueAsString(user);
+    byte[] json;
+    try {
+      json = mapper.writer().writeValueAsBytes(user);
+    } catch (JsonProcessingException ex) {
+      throw new CrosschainProtocolStackException("Dispatcher", ex);
+    }
 
     Bytes type = Bytes.of(SET_MSG_STORE_ADDR_REQ_TYPE);
     Bytes body = Bytes.wrap(json);
     Bytes all = Bytes.concatenate(type, body);
     byte[] requestBody = all.toArray();
 
-    config("MessageStore", msgDispatcherUrl, requestBody);
+    config("Dispatcher", msgDispatcherUrl, requestBody);
   }
 
-
-  private static void config(String component, String uri, byte[] requestBody) throws CrosschainProtocolStackException {
+  private static void config(String component, String uri, byte[] requestBody)
+      throws CrosschainProtocolStackException {
     HttpResponse<String> response;
     try {
       response = httpPost(uri, requestBody);
@@ -124,29 +155,63 @@ public class AttestorRelayerConfigurer {
     }
 
     if (response.statusCode() != 200) {
-      throw new CrosschainProtocolStackException("Observer config returned HTTP status: " + response.statusCode());
+      throw new CrosschainProtocolStackException(
+          component + " config returned HTTP status: " + response.statusCode());
     }
     if (response.body().compareToIgnoreCase("{\"success\":true}") != 0) {
-      throw new CrosschainProtocolStackException("Observer config did not return success. Status: " + response.body());
+      throw new CrosschainProtocolStackException(
+          component + " config did not return success. Status: " + response.body());
     }
   }
 
-  private static HttpResponse<String> httpPost(String uri, byte[] requestBody) throws InterruptedException, IOException {
+  private static class Proof {
+    public String[] proofs;
+  }
+
+  public static String fetchSignedEvent(String msgStoreURL, String eventId)
+      throws CrosschainProtocolStackException {
+    String uriStr = msgStoreURL + "/messages/" + eventId + "/proofs";
+    LOG.info("MsgStore URI: {}", uriStr);
+
+    HttpResponse<String> response;
+    try {
+      response = httpGet(uriStr);
+    } catch (InterruptedException | IOException ex1) {
+      throw new CrosschainProtocolStackException("Error while fetching signed event ", ex1);
+    }
+
+    if (response.statusCode() != 200) {
+      throw new CrosschainProtocolStackException(
+          "Fetch signed event returned HTTP status: "
+              + response.statusCode()
+              + ", "
+              + response.body());
+    }
+    String body = response.body();
+    System.out.println("BODY: " + body);
+    ObjectMapper mapper = new ObjectMapper();
+    try {
+      Proof obj = mapper.readValue("{'name' : 'mkyong'}", Proof.class);
+      return obj.proofs[0];
+    } catch (Exception e) {
+      throw new CrosschainProtocolStackException("Fetch signed event JSON decoding: ", e);
+    }
+  }
+
+  private static HttpResponse<String> httpPost(String uri, byte[] requestBody)
+      throws InterruptedException, IOException {
     HttpClient client = HttpClient.newHttpClient();
-    HttpRequest request = HttpRequest.newBuilder()
+    HttpRequest request =
+        HttpRequest.newBuilder()
             .uri(URI.create(uri))
             .POST(HttpRequest.BodyPublishers.ofByteArray(requestBody))
             .build();
     return client.send(request, HttpResponse.BodyHandlers.ofString());
   }
+
+  private static HttpResponse<String> httpGet(String uri) throws InterruptedException, IOException {
+    HttpClient client = HttpClient.newHttpClient();
+    HttpRequest request = HttpRequest.newBuilder().uri(URI.create(uri)).GET().build();
+    return client.send(request, HttpResponse.BodyHandlers.ofString());
+  }
 }
-
-
-
-
-//	assert.Empty(t, setupObserver("127.0.0.1:9527", big.NewInt(31), "ws://bc31node1:8546", "GPACT", gpactAddrA))
-//            assert.Empty(t, setupObserver("127.0.0.1:9528", big.NewInt(32), "ws://bc32node1:8546", "GPACT", gpactAddrB))
-//            assert.Empty(t, setupRelayer("127.0.0.1:9625", big.NewInt(0), common.Address{}, signer.SECP256K1_KEY_TYPE, relayerKey))
-//            assert.Empty(t, setupMessageStore("127.0.0.1:9725", "msgstore:8080"))
-
-

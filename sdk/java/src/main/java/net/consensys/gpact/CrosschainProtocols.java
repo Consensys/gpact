@@ -32,7 +32,6 @@ public class CrosschainProtocols {
   public static final String ATTESTOR = "ATTESTOR";
   public static final String TXROOT = "TXROOT";
 
-
   // Execution engine tpe
   public static final String SERIAL = "SERIAL";
   public static final String PARALLEL = "PARALLEL";
@@ -75,30 +74,28 @@ public class CrosschainProtocols {
   }
 
   /**
-   * Register a crosschain messaging protocol implementation. This method can be used to update
-   * the implementation of a protocol by passing in a name that is associated with an existing
+   * Register a crosschain messaging protocol implementation. This method can be used to update the
+   * implementation of a protocol by passing in a name that is associated with an existing
    * implementation.
    *
    * @param name Name to associate with an implementation.
    * @param implClass Protocol implementation class that implements MessagingManagerGroup.
    */
   public static void registerMessagingImpl(
-          final String name, final Class<? extends MessagingManagerGroup> implClass) {
+      final String name, final Class<? extends MessagingManagerGroup> implClass) {
     if (implClass == null) {
       throw new IllegalArgumentException("Attempted to register a null implementation");
     }
     if (name == null) {
       throw new IllegalArgumentException(
-              "Attempted to register an implementation with a null name");
+          "Attempted to register an implementation with a null name");
     }
     if (name.length() == 0) {
       throw new IllegalArgumentException(
-              "Attempted to register an implementation with a zero length name");
+          "Attempted to register an implementation with a zero length name");
     }
     messagingImpls.put(name, implClass);
   }
-
-
 
   /**
    * Create an instance of a crosschain function call implementation.
@@ -117,7 +114,6 @@ public class CrosschainProtocols {
     return Optional.of(clazz.getDeclaredConstructor().newInstance());
   }
 
-
   /**
    * Create an instance of a crosschain function call implementation.
    *
@@ -126,13 +122,11 @@ public class CrosschainProtocols {
    * @throws Exception Typically thrown if the implementation has not been registered yet.
    */
   public static Optional<MessagingManagerGroup> getMessagingInstance(
-          final String implementationName) throws Exception {
-    final Class<? extends MessagingManagerGroup> clazz =
-            messagingImpls.get(implementationName);
+      final String implementationName) throws Exception {
+    final Class<? extends MessagingManagerGroup> clazz = messagingImpls.get(implementationName);
     if (clazz == null) {
       return Optional.empty();
     }
     return Optional.of(clazz.getDeclaredConstructor().newInstance());
   }
-
 }

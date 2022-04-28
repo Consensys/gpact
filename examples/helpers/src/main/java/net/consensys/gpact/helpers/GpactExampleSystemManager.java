@@ -1,6 +1,7 @@
 package net.consensys.gpact.helpers;
 
 import java.util.ArrayList;
+import java.util.List;
 import net.consensys.gpact.CrosschainProtocols;
 import net.consensys.gpact.common.AnIdentity;
 import net.consensys.gpact.common.BlockchainConfig;
@@ -9,8 +10,8 @@ import net.consensys.gpact.common.StatsHolder;
 import net.consensys.gpact.functioncall.CrossControlManager;
 import net.consensys.gpact.functioncall.CrossControlManagerGroup;
 import net.consensys.gpact.messaging.MessagingManagerGroup;
+import net.consensys.gpact.messaging.common.attestorrelayer.AttestorRelayer;
 import net.consensys.gpact.messaging.eventattest.AttestorSignerGroup;
-import net.consensys.gpact.messaging.eventattest.AttestorSignerManagerGroup;
 import net.consensys.gpact.messaging.txrootrelay.TxRootRelayerGroup;
 import net.consensys.gpact.messaging.txrootrelay.TxRootTransferGroup;
 import net.consensys.gpact.messaging.txrootrelay.TxRootTransferManagerGroup;
@@ -52,9 +53,10 @@ public class GpactExampleSystemManager {
     StatsHolder.log(consensusMethodology.name());
     this.executionEngineType = propsLoader.getExecutionEnngine();
     StatsHolder.log(executionEngineType.name());
+    String relayerUri = propsLoader.getRelayerUri();
 
     // To keep the example simple, just have one signer for all blockchains.
-    AnIdentity globalSigner = new AnIdentity();
+    AnIdentity globalSigner = AnIdentity.createNewRandomIdentity();
 
     this.crossControlManagerGroup =
         CrosschainProtocols.getFunctionCallInstance(CrosschainProtocols.GPACT).get();
@@ -64,26 +66,48 @@ public class GpactExampleSystemManager {
     switch (consensusMethodology) {
       case EVENT_SIGNING:
         AttestorSignerGroup attestorSignerGroup = new AttestorSignerGroup();
-        this.messagingManagerGroup = CrosschainProtocols.getMessagingInstance(CrosschainProtocols.ATTESTOR).get();
+        this.messagingManagerGroup =
+            CrosschainProtocols.getMessagingInstance(CrosschainProtocols.ATTESTOR).get();
+
+        List<AttestorRelayer.Source> sources = new ArrayList<>();
 
         addBcAttestorSign(
-            messagingManagerGroup, crossControlManagerGroup, attestorSignerGroup, creds, this.root);
+            messagingManagerGroup,
+            crossControlManagerGroup,
+            attestorSignerGroup,
+            creds,
+            this.root,
+            sources);
+
         addBcAttestorSign(
-            messagingManagerGroup, crossControlManagerGroup, attestorSignerGroup, creds, this.bc2);
+            messagingManagerGroup,
+            crossControlManagerGroup,
+            attestorSignerGroup,
+            creds,
+            this.bc2,
+            sources);
         if (numberOfBlockchains == 3) {
           addBcAttestorSign(
               messagingManagerGroup,
               crossControlManagerGroup,
               attestorSignerGroup,
               creds,
-              this.bc3);
+              this.bc3,
+              sources);
         }
-        attestorSignerGroup.addSignerOnAllBlockchains(globalSigner);
+        attestorSignerGroup.configureRelayer(
+            globalSigner,
+            relayerUri,
+            sources,
+            this.root.dispatcherUri,
+            this.root.msgStoreUrlFromDispatcher,
+            this.root.msgStoreUrlFromUser);
         break;
       case TRANSACTION_RECEIPT_SIGNING:
         TxRootRelayerGroup relayerGroup = new TxRootRelayerGroup();
         TxRootTransferGroup txRootTransferGroup = new TxRootTransferGroup();
-        this.messagingManagerGroup = CrosschainProtocols.getMessagingInstance(CrosschainProtocols.TXROOT).get();
+        this.messagingManagerGroup =
+            CrosschainProtocols.getMessagingInstance(CrosschainProtocols.TXROOT).get();
 
         addBcTxRootSign(
             messagingManagerGroup,
@@ -174,12 +198,21 @@ public class GpactExampleSystemManager {
       CrossControlManagerGroup crossControlManagerGroup,
       AttestorSignerGroup attestorSignerGroup,
       Credentials creds,
-      BlockchainConfig bc)
+      BlockchainConfig bc,
+      List<AttestorRelayer.Source> sources)
       throws Exception {
     messagingManagerGroup.addBlockchainAndDeployContracts(creds, bc);
-    attestorSignerGroup.addBlockchain(bc.bcId);
+    attestorSignerGroup.addBlockchain(bc.bcId, bc.msgStoreUrlFromUser);
     crossControlManagerGroup.addBlockchainAndDeployContracts(
         creds, bc, attestorSignerGroup.getVerifier(bc.bcId));
+    String crosschainControlAddr = crossControlManagerGroup.getCbcAddress(bc.bcId);
+    sources.add(
+        new AttestorRelayer.Source(
+            bc.bcId,
+            crosschainControlAddr,
+            CrosschainProtocols.GPACT,
+            bc.observerUri,
+            bc.blockchainNodeWsUri));
   }
 
   private void addBcTxRootSign(

@@ -17,7 +17,9 @@ package net.consensys.gpact.messaging.eventattest;
 import java.util.*;
 import net.consensys.gpact.common.AnIdentity;
 import net.consensys.gpact.common.BlockchainId;
+import net.consensys.gpact.common.CrosschainProtocolStackException;
 import net.consensys.gpact.messaging.MessagingVerificationInterface;
+import net.consensys.gpact.messaging.common.attestorrelayer.AttestorRelayer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -27,30 +29,28 @@ public class AttestorSignerGroup {
 
   private Map<BlockchainId, AttestorSigner> blockchains = new HashMap<>();
 
-  public void addBlockchain(BlockchainId blockchainId) throws Exception {
+  public void addBlockchain(BlockchainId blockchainId, String msgStoreUrlFromUser)
+      throws Exception {
     if (this.blockchains.containsKey(blockchainId)) {
       return;
-      // throw new Exception("Blockchain already in Attestor Signer Group: " + blockchainId);
     }
 
-    // TODO msgstore this needs to be configurable!
-    this.blockchains.put(blockchainId, new AttestorSigner(blockchainId, "127.0.0.1:8080"));
+    this.blockchains.put(blockchainId, new AttestorSigner(blockchainId, msgStoreUrlFromUser));
   }
 
-  // TODO when an attestor signer service is implemented, this will change to
-  // setting up URLs where attestors can be contacted
-  public void addSignerOnAllBlockchains(AnIdentity signer) throws Exception {
-    for (BlockchainId bcId1 : this.blockchains.keySet()) {
-      addSigner(signer, bcId1);
+  public void configureRelayer(
+      AnIdentity signingCredentials,
+      String relayerUri,
+      List<AttestorRelayer.Source> sources,
+      String dispatcherUri,
+      String msgStoreUriFromDispatcher,
+      String msgStoreUriFromUser)
+      throws CrosschainProtocolStackException {
+    AttestorRelayer relayer = new AttestorRelayer(relayerUri, signingCredentials.getPrivateKey());
+    for (AttestorRelayer.Source source : sources) {
+      relayer.addNewSource(source);
     }
-  }
-
-  // TODO when an attestor signer service is implemented, this will change to
-  // setting up URLs where attestors can be contacted
-  public void addSigner(AnIdentity signer, BlockchainId bcId1) throws Exception {
-    // Add the signer (their private key) to app for the blockchain
-    AttestorSigner holder = this.blockchains.get(bcId1);
-    holder.addSigner(signer);
+    relayer.addMessageStore(dispatcherUri, msgStoreUriFromDispatcher, msgStoreUriFromUser);
   }
 
   public MessagingVerificationInterface getVerifier(BlockchainId bcId) throws Exception {

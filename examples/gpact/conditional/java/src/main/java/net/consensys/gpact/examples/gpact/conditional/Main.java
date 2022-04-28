@@ -57,9 +57,10 @@ public class Main {
     // Set-up classes to manage blockchains.
     Credentials appCreds = CredentialsCreator.createCredentials();
     RootBc rootBlockchain =
-        new RootBc(appCreds, root.bcId, root.uri, root.gasPriceStrategy, root.period);
+        new RootBc(
+            appCreds, root.bcId, root.blockchainNodeRpcUri, root.gasPriceStrategy, root.period);
     OtherBc otherBlockchain =
-        new OtherBc(appCreds, bc2.bcId, bc2.uri, bc2.gasPriceStrategy, bc2.period);
+        new OtherBc(appCreds, bc2.bcId, bc2.blockchainNodeRpcUri, bc2.gasPriceStrategy, bc2.period);
 
     // Deploy application contracts.
     BlockchainId otherBcId = otherBlockchain.getBlockchainId();

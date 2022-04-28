@@ -41,7 +41,11 @@ public class AttestorSignerManagerGroup implements MessagingManagerGroup {
 
     AttestorSignerManager manager =
         new AttestorSignerManager(
-            creds, blockchainId, bcInfo.uri, bcInfo.gasPriceStrategy, bcInfo.period);
+            creds,
+            blockchainId,
+            bcInfo.blockchainNodeRpcUri,
+            bcInfo.gasPriceStrategy,
+            bcInfo.period);
     manager.deployContracts();
 
     this.blockchains.put(blockchainId, manager);
@@ -57,7 +61,11 @@ public class AttestorSignerManagerGroup implements MessagingManagerGroup {
 
     AttestorSignerManager manager =
         new AttestorSignerManager(
-            creds, blockchainId, bcInfo.uri, bcInfo.gasPriceStrategy, bcInfo.period);
+            creds,
+            blockchainId,
+            bcInfo.blockchainNodeRpcUri,
+            bcInfo.gasPriceStrategy,
+            bcInfo.period);
     manager.loadContracts(addresses);
 
     this.blockchains.put(blockchainId, manager);

@@ -50,10 +50,13 @@ public class HotelTrain {
         exampleManager.getCrossControlManagerGroup();
 
     // Set-up classes to manage blockchains.
-    EntityHotel hotel = new EntityHotel(bc2.bcId, bc2.uri, bc2.gasPriceStrategy, bc2.period);
-    EntityTrain train = new EntityTrain(bc3.bcId, bc3.uri, bc3.gasPriceStrategy, bc3.period);
+    EntityHotel hotel =
+        new EntityHotel(bc2.bcId, bc2.blockchainNodeRpcUri, bc2.gasPriceStrategy, bc2.period);
+    EntityTrain train =
+        new EntityTrain(bc3.bcId, bc3.blockchainNodeRpcUri, bc3.gasPriceStrategy, bc3.period);
     EntityTravelAgency travelAgency =
-        new EntityTravelAgency(root.bcId, root.uri, root.gasPriceStrategy, root.period);
+        new EntityTravelAgency(
+            root.bcId, root.blockchainNodeRpcUri, root.gasPriceStrategy, root.period);
 
     // Deploy application contracts.
     BlockchainId hotelBcId = hotel.getBlockchainId();

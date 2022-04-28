@@ -1,6 +1,7 @@
 package net.consensys.gpact.helpers;
 
 import java.util.ArrayList;
+import java.util.List;
 import net.consensys.gpact.CrosschainProtocols;
 import net.consensys.gpact.common.AnIdentity;
 import net.consensys.gpact.common.BlockchainConfig;
@@ -9,6 +10,7 @@ import net.consensys.gpact.common.StatsHolder;
 import net.consensys.gpact.functioncall.CrossControlManager;
 import net.consensys.gpact.functioncall.CrossControlManagerGroup;
 import net.consensys.gpact.messaging.MessagingManagerGroup;
+import net.consensys.gpact.messaging.common.attestorrelayer.AttestorRelayer;
 import net.consensys.gpact.messaging.eventattest.AttestorSignerGroup;
 import net.consensys.gpact.messaging.eventattest.AttestorSignerManagerGroup;
 import net.consensys.gpact.messaging.txrootrelay.TxRootRelayerGroup;
@@ -48,9 +50,10 @@ public class SfcExampleSystemManager {
     this.bc3 = propsLoader.getBlockchainInfo("BC3");
     CrossBlockchainConsensusType consensusMethodology = propsLoader.getConsensusMethodology();
     StatsHolder.log(consensusMethodology.name());
+    String relayerUri = propsLoader.getRelayerUri();
 
     // To keep the example simple, just have one signer for all blockchains.
-    AnIdentity globalSigner = new AnIdentity();
+    AnIdentity globalSigner = AnIdentity.createNewRandomIdentity();
 
     MessagingManagerGroup messagingManagerGroup = null;
     this.crossControlManagerGroup =
@@ -63,19 +66,38 @@ public class SfcExampleSystemManager {
         AttestorSignerGroup attestorSignerGroup = new AttestorSignerGroup();
         messagingManagerGroup = new AttestorSignerManagerGroup();
 
+        List<AttestorRelayer.Source> sources = new ArrayList<>();
+
         addBcAttestorSign(
-            messagingManagerGroup, crossControlManagerGroup, attestorSignerGroup, creds, this.root);
+            messagingManagerGroup,
+            crossControlManagerGroup,
+            attestorSignerGroup,
+            creds,
+            this.root,
+            sources);
         addBcAttestorSign(
-            messagingManagerGroup, crossControlManagerGroup, attestorSignerGroup, creds, this.bc2);
+            messagingManagerGroup,
+            crossControlManagerGroup,
+            attestorSignerGroup,
+            creds,
+            this.bc2,
+            sources);
         if (numberOfBlockchains == 3) {
           addBcAttestorSign(
               messagingManagerGroup,
               crossControlManagerGroup,
               attestorSignerGroup,
               creds,
-              this.bc3);
+              this.bc3,
+              sources);
         }
-        attestorSignerGroup.addSignerOnAllBlockchains(globalSigner);
+        attestorSignerGroup.configureRelayer(
+            globalSigner,
+            relayerUri,
+            sources,
+            this.root.dispatcherUri,
+            this.root.msgStoreUrlFromDispatcher,
+            this.root.msgStoreUrlFromUser);
         break;
       case TRANSACTION_RECEIPT_SIGNING:
         TxRootRelayerGroup relayerGroup = new TxRootRelayerGroup();
@@ -161,12 +183,21 @@ public class SfcExampleSystemManager {
       CrossControlManagerGroup crossControlManagerGroup,
       AttestorSignerGroup attestorSignerGroup,
       Credentials creds,
-      BlockchainConfig bc)
+      BlockchainConfig bc,
+      List<AttestorRelayer.Source> sources)
       throws Exception {
     messagingManagerGroup.addBlockchainAndDeployContracts(creds, bc);
-    attestorSignerGroup.addBlockchain(bc.bcId);
+    attestorSignerGroup.addBlockchain(bc.bcId, bc.msgStoreUrlFromUser);
     crossControlManagerGroup.addBlockchainAndDeployContracts(
         creds, bc, attestorSignerGroup.getVerifier(bc.bcId));
+    String crosschainControlAddr = crossControlManagerGroup.getCbcAddress(bc.bcId);
+    sources.add(
+        new AttestorRelayer.Source(
+            bc.bcId,
+            crosschainControlAddr,
+            CrosschainProtocols.SFC,
+            bc.observerUri,
+            bc.blockchainNodeWsUri));
   }
 
   private void addBcTxRootSign(

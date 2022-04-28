@@ -54,9 +54,11 @@ public class GpactCrosschainWrite {
 
     Credentials creds = CredentialsCreator.createCredentials();
     Bc1ContractA bc1ContractABlockchain =
-        new Bc1ContractA(creds, root.bcId, root.uri, root.gasPriceStrategy, root.period);
+        new Bc1ContractA(
+            creds, root.bcId, root.blockchainNodeRpcUri, root.gasPriceStrategy, root.period);
     Bc2ContractB bc2ContractBBlockchain =
-        new Bc2ContractB(creds, bc2.bcId, bc2.uri, bc2.gasPriceStrategy, bc2.period);
+        new Bc2ContractB(
+            creds, bc2.bcId, bc2.blockchainNodeRpcUri, bc2.gasPriceStrategy, bc2.period);
 
     // Set-up client side and deploy contracts on the blockchains.
     BlockchainId bc2BcId = bc2ContractBBlockchain.getBlockchainId();

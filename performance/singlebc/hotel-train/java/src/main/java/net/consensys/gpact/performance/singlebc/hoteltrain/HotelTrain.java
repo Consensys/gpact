@@ -44,15 +44,18 @@ public class HotelTrain {
     PropertiesLoader propsLoader = new PropertiesLoader(args[0]);
     BlockchainConfig root = propsLoader.getBlockchainInfo("ROOT");
 
-    EntityHotel hotel = new EntityHotel(root.bcId, root.uri, root.gasPriceStrategy, root.period);
+    EntityHotel hotel =
+        new EntityHotel(root.bcId, root.blockchainNodeRpcUri, root.gasPriceStrategy, root.period);
     hotel.deployContracts();
     hotel.addRooms();
-    EntityTrain train = new EntityTrain(root.bcId, root.uri, root.gasPriceStrategy, root.period);
+    EntityTrain train =
+        new EntityTrain(root.bcId, root.blockchainNodeRpcUri, root.gasPriceStrategy, root.period);
     train.deployContracts();
     train.addSeats();
 
     EntityTravelAgency travelAgency =
-        new EntityTravelAgency(root.bcId, root.uri, root.gasPriceStrategy, root.period);
+        new EntityTravelAgency(
+            root.bcId, root.blockchainNodeRpcUri, root.gasPriceStrategy, root.period);
     travelAgency.deploy(
         hotel.getBlockchainId(),
         hotel.getHotelContractAddress(),

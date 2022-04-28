@@ -110,7 +110,7 @@ public class TxRootAddTest extends AbstractWeb3Test {
     setupWeb3();
     deployRegistrarContract();
     BigInteger blockchainId = BigInteger.TEN;
-    AnIdentity newSigner = new AnIdentity();
+    AnIdentity newSigner = AnIdentity.createNewRandomIdentity();
     addBlockchain(blockchainId, newSigner.getAddress());
 
     deployTxReceiptRootStorageContract();
@@ -203,7 +203,7 @@ public class TxRootAddTest extends AbstractWeb3Test {
     // blockchain
     // has blockchain id 10.
     BigInteger sourceBlockchainId = BigInteger.TEN;
-    AnIdentity newSigner = new AnIdentity();
+    AnIdentity newSigner = AnIdentity.createNewRandomIdentity();
     addBlockchain(sourceBlockchainId, newSigner.getAddress());
 
     deployTxReceiptRootStorageContract();

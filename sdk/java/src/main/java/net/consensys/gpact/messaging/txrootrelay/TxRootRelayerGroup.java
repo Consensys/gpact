@@ -42,7 +42,12 @@ public class TxRootRelayerGroup {
     }
 
     TxRootRelayer manager =
-        new TxRootRelayer(creds, blockchainId, bcInfo.uri, bcInfo.gasPriceStrategy, bcInfo.period);
+        new TxRootRelayer(
+            creds,
+            blockchainId,
+            bcInfo.blockchainNodeRpcUri,
+            bcInfo.gasPriceStrategy,
+            bcInfo.period);
     manager.loadContract(txRootContract);
 
     this.blockchains.put(blockchainId, manager);

@@ -52,7 +52,7 @@ public class TwentyActsExampleSystemManager {
     StatsHolder.log(consensusMethodology.name());
 
     // To keep the example simple, just have one signer for all blockchains.
-    AnIdentity globalSigner = new AnIdentity();
+    AnIdentity globalSigner = AnIdentity.createNewRandomIdentity();
 
     MessagingManagerGroup messagingManagerGroup = null;
 
@@ -77,7 +77,7 @@ public class TwentyActsExampleSystemManager {
               deployers[3],
               this.bc3);
         }
-        attestorSignerGroup.addSignerOnAllBlockchains(globalSigner);
+        // attestorSignerGroup.addSignerOnAllBlockchains(globalSigner);
         break;
       case TRANSACTION_RECEIPT_SIGNING:
         TxRootRelayerGroup relayerGroup = new TxRootRelayerGroup();
@@ -161,10 +161,11 @@ public class TwentyActsExampleSystemManager {
       Credentials creds,
       BlockchainConfig bc)
       throws Exception {
-    messagingManagerGroup.addBlockchainAndDeployContracts(creds, bc);
-    attestorSignerGroup.addBlockchain(bc.bcId);
-    crossControlManagerGroup.addBlockchainAndDeployContracts(
-        creds, bc, attestorSignerGroup.getVerifier(bc.bcId));
+    throw new RuntimeException("Not implemented yet");
+    //    messagingManagerGroup.addBlockchainAndDeployContracts(creds, bc);
+    //    attestorSignerGroup.addBlockchain(bc.bcId);
+    //    crossControlManagerGroup.addBlockchainAndDeployContracts(
+    //        creds, bc, attestorSignerGroup.getVerifier(bc.bcId));
   }
 
   private void addBcTxRootSign(

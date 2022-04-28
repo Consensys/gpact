@@ -118,7 +118,7 @@ public class EventRelayTest extends AbstractWeb3Test {
     setupWeb3();
     deployContracts(sourceBcId, sourceBcCbcAddress, destBcId);
 
-    AnIdentity newSigner = new AnIdentity();
+    AnIdentity newSigner = AnIdentity.createNewRandomIdentity();
     addBlockchain(sourceBcId, newSigner.getAddress());
     eventSigner.addSigner(newSigner);
 

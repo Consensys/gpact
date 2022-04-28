@@ -1,12 +1,8 @@
 package net.consensys.gpact.examples.gpact.conditional;
 
-import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.helpers.AbstractExampleTest;
-import net.consensys.gpact.messaging.common.AttestorRelayerConfigurer;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-
-import java.math.BigInteger;
 
 public class ConditionalTest extends AbstractExampleTest {
 

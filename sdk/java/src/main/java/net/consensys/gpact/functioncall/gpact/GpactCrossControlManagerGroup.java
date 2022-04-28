@@ -52,7 +52,11 @@ public class GpactCrossControlManagerGroup implements CrossControlManagerGroup {
     BcHolder holder = new BcHolder();
     holder.cbc =
         new GpactCrossControlManager(
-            creds, bcInfo.bcId, bcInfo.uri, bcInfo.gasPriceStrategy, bcInfo.period);
+            creds,
+            bcInfo.bcId,
+            bcInfo.blockchainNodeRpcUri,
+            bcInfo.gasPriceStrategy,
+            bcInfo.period);
     holder.cbc.deployContract();
     holder.cbcContractAddress = holder.cbc.getCbcContractAddress();
     holder.ver = messageVerification;
@@ -75,7 +79,11 @@ public class GpactCrossControlManagerGroup implements CrossControlManagerGroup {
     BcHolder holder = new BcHolder();
     holder.cbc =
         new GpactCrossControlManager(
-            creds, bcInfo.bcId, bcInfo.uri, bcInfo.gasPriceStrategy, bcInfo.period);
+            creds,
+            bcInfo.bcId,
+            bcInfo.blockchainNodeRpcUri,
+            bcInfo.gasPriceStrategy,
+            bcInfo.period);
 
     holder.cbc.loadContract(cbcAddress);
     holder.cbcContractAddress = cbcAddress;

@@ -71,4 +71,12 @@ public class FormatConversion {
   public static String byteArrayToString(byte[] bytes) {
     return Bytes.wrap(bytes).toHexString();
   }
+
+  public static String hexStringToDecString(String hexStr) {
+    if (hexStr.startsWith("0x")) {
+      hexStr = hexStr.substring(2);
+    }
+    BigInteger value = new BigInteger(hexStr, 16);
+    return value.toString();
+  }
 }

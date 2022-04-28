@@ -41,7 +41,11 @@ public class TxRootTransferManagerGroup implements MessagingManagerGroup {
 
     TxRootTransferManager manager =
         new TxRootTransferManager(
-            creds, blockchainId, bcInfo.uri, bcInfo.gasPriceStrategy, bcInfo.period);
+            creds,
+            blockchainId,
+            bcInfo.blockchainNodeRpcUri,
+            bcInfo.gasPriceStrategy,
+            bcInfo.period);
     manager.deployContracts();
 
     this.blockchains.put(blockchainId, manager);
@@ -58,7 +62,11 @@ public class TxRootTransferManagerGroup implements MessagingManagerGroup {
 
     TxRootTransferManager manager =
         new TxRootTransferManager(
-            creds, blockchainId, bcInfo.uri, bcInfo.gasPriceStrategy, bcInfo.period);
+            creds,
+            blockchainId,
+            bcInfo.blockchainNodeRpcUri,
+            bcInfo.gasPriceStrategy,
+            bcInfo.period);
     manager.loadContracts(addresses);
 
     this.blockchains.put(blockchainId, manager);
