@@ -28,7 +28,6 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
-	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 // Init initialises the logger with a Viper object.
@@ -38,7 +37,7 @@ func Init(conf *viper.Viper) zerolog.Logger {
 	writer := getLogTarget(conf)
 	service := getLogServiceName(conf)
 	logger := zerolog.New(writer).With().Timestamp().Str("service", service).Logger()
-	log.Logger = logger.With().Caller().Logger()
+	log.Logger = logger.With().CallerWithSkipFrameCount(3).Logger()
 	return logger
 }
 

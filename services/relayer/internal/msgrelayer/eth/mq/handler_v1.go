@@ -75,7 +75,8 @@ func handleV1(req messages.Message) {
 	toSign = append(toSign, raw.Data...)
 	logging.Info("Generated data to be signed: %v", hex.EncodeToString(toSign))
 
-	_, addr, err := instance.Signer.GetAddr(big.NewInt(int64(destID)), destAddr)
+	//_, addr, err := instance.Signer.GetAddr(big.NewInt(int64(destID)), destAddr)
+	_, addr, err := instance.Signer.GetAddr(big.NewInt(int64(srcID)), srcAddr)
 	if err != nil {
 		logging.Error("Signer not found for: Chain: %v, Address: %v, Error: %v", destID, destAddr, err.Error())
 		return
