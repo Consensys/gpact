@@ -101,7 +101,19 @@ public class AttestorRelayer {
       byte[] eventFunctionSignature)
       throws CrosschainProtocolStackException {
     String eventId = calculateEventID(bcId, txr, contractAddress, eventFunctionSignature);
-    return AttestorRelayerWebApi.fetchSignedEvent("http://" + this.msgStoreAddr, eventId);
+
+    // TODO FIx this!
+    try {
+      return AttestorRelayerWebApi.fetchSignedEvent("http://" + this.msgStoreAddr, eventId);
+    } catch (Exception ex) {
+      try {
+        Thread.sleep(1000);
+        return AttestorRelayerWebApi.fetchSignedEvent("http://" + this.msgStoreAddr, eventId);
+      }
+      catch (Exception ex1) {
+        throw new RuntimeException(ex1);
+      }
+    }
   }
 
   public static String calculateEventID(
@@ -118,7 +130,7 @@ public class AttestorRelayer {
               .get(0)
               .equalsIgnoreCase(FormatConversion.byteArrayToString(eventFunctionSignature))) {
 
-        String eventAddr = log.getAddress();
+        String eventAddr = "0x" + log.getAddress().toUpperCase().substring(2);
         String blockNumberHex = log.getBlockNumberRaw();
         String blockNumber = FormatConversion.hexStringToDecString(blockNumberHex);
         String txIndexHex = log.getTransactionIndexRaw();

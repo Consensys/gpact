@@ -28,6 +28,7 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
+	lumberjack "gopkg.in/natefinch/lumberjack.v2"
 )
 
 // Init initialises the logger with a Viper object.

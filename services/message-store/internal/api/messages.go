@@ -10,7 +10,7 @@ import (
 	"github.com/consensys/gpact/messaging/message-store/internal/logging"
 	v1 "github.com/consensys/gpact/services/relayer/pkg/messages/v1"
 	"github.com/gin-gonic/gin"
-	"github.com/ipfs/go-datastore"
+	datastore "github.com/ipfs/go-datastore"
 	badger "github.com/ipfs/go-ds-badger"
 )
 
@@ -41,13 +41,18 @@ func (mApi *MessageStoreApi) UpsertMessageHandler(c *gin.Context) {
 		return
 	}
 
+	logging.Info("UpsertMessageHandler: Processing message id: '%s'", message.ID)
+
 	if !mApi.isValidId(message.ID) {
 		statusBadRequest(c, fmt.Sprintf("Message id '%s' is not valid", message.ID))
+		logging.Warn("Message id '%s' is not valid", message.ID)
 		return
 	}
 
 	paramId := c.Param("id")
 	if len(paramId) > 0 && paramId != message.ID {
+		logging.Warn("Message id provided in the path parameter, '%s', "+
+			"does not match id in the message body, '%s'", paramId, message.ID)
 		statusBadRequest(c, fmt.Sprintf("Message id provided in the path parameter, '%s', "+
 			"does not match id in the message body, '%s'", paramId, message.ID))
 		return
@@ -63,7 +68,9 @@ func (mApi *MessageStoreApi) UpsertMessageHandler(c *gin.Context) {
 
 	created, err := mApi.upsertMessage(c, tx, message)
 	if err == MessageDetailsMismatchError {
+		logging.Error("Upsert Message: MessageDetailsMismatchError: %s: %v", message.ID, err)
 		statusBadRequest(c, err.Error())
+		return
 	} else if err != nil {
 		logging.Error("Error adding or updating message %s: %v", message.ID, err)
 		statusServerError(c, err)
@@ -106,11 +113,13 @@ func (mApi *MessageStoreApi) RecordProofsHandler(c *gin.Context) {
 	paramId := c.Param("id")
 	if !mApi.isValidId(paramId) {
 		statusBadRequest(c, fmt.Sprintf("Message id '%s' is not valid", paramId))
+		logging.Warn("RecordProofsHandler: Id invalid: %v", paramId)
 		return
 	}
 
 	if !mApi.messageExists(c, paramId) {
 		statusMessageNotFound(c, paramId)
+		logging.Warn("RecordProofsHandler: Message not found: %v", paramId)
 		return
 	}
 
@@ -125,6 +134,7 @@ func (mApi *MessageStoreApi) RecordProofsHandler(c *gin.Context) {
 	existingMsg, err := mApi.queryMessageById(c, datastore.NewKey(paramId), mApi.DataStore.Get)
 	if err == datastore.ErrNotFound {
 		statusMessageNotFound(c, paramId)
+		logging.Warn("RecordProofsHandler: Message not found2: %v", paramId)
 		return
 	} else if err != nil {
 		logging.Error("Error retrieving message %s: %v", paramId, err)
@@ -149,8 +159,10 @@ func (mApi *MessageStoreApi) RecordProofsHandler(c *gin.Context) {
 
 	if updated {
 		statusCreated(c, "One or more proof elements submitted were successfully added to message's proof set")
+		logging.Info("RecordProofsHandler: Created: %v", paramId)
 	} else {
 		statusOk(c, "All proof elements submitted are already a part of the message's proof set")
+		logging.Info("RecordProofsHandler: Already added: %v", paramId)
 	}
 }
 
