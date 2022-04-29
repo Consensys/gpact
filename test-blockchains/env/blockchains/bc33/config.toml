@@ -2,7 +2,7 @@
 logging="INFO"
 #logging="DEBUG"
 data-path="/opt/besu/data"
-# host-whitelist=["*"]
+host-whitelist=["*"]
 
 # rpc
 rpc-http-enabled=true

@@ -125,7 +125,8 @@ public class AttestorRelayer {
         String txIndex = FormatConversion.hexStringToDecString(txIndexHex);
         String logIndexHex = log.getLogIndexRaw();
         String logIndex = FormatConversion.hexStringToDecString(logIndexHex);
-        return "chain"
+//        return "chain"
+        return ""
             + chainId
             + "-"
             + eventAddr

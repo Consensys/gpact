@@ -28,7 +28,7 @@ import (
 	"github.com/consensys/gpact/services/relayer/internal/mqserver"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/ipfs/go-datastore"
+	datastore "github.com/ipfs/go-datastore"
 	badgerds "github.com/ipfs/go-ds-badger"
 )
 
@@ -196,21 +196,20 @@ func (o *ObserverImplV1) routineGPACT(chainID *big.Int, chainAP string, addr com
 	for {
 		chain, err := ethclient.Dial(chainAP)
 		if err != nil {
-			logging.Error(err.Error())
+			logging.Error("Error connecting to Chain AP: %v", err.Error())
 			return
 		}
 		defer chain.Close()
 
 		gpact, err := functioncall.NewGpact(addr, chain)
 		if err != nil {
-			logging.Error(err.Error())
+			logging.Error("Error creating GPACT handler: %v", err.Error())
 			return
 		}
 
 		observer, err := NewGPACTBridgeRealtimeObserver(chainID.String(), addr.String(), gpact, o.mq)
-
 		if err != nil {
-			logging.Error(err.Error())
+			logging.Error("Error creating observer for Chain: %v, Contract: %v, Error: %v", chainID.String(), addr.String(), err.Error())
 			return
 		}
 		o.gpactObserver = observer
