@@ -31,7 +31,7 @@ func TestSFCBridgeObserver(t *testing.T) {
 	fixDesAddress := common.HexToAddress("0x8e215d06ea7ec1fdb4fc5fd21768f4b34ee92ef4")
 	fixDestID := big.NewInt(2)
 	fixSourceID := "1"
-	fixSourceAddress := "0x8e215d06ea7ec1fdb4fc5fd21768f4b34ee92ef4"
+	fixSourceAddress := common.HexToAddress("0x8e215d06ea7ec1fdb4fc5fd21768f4b34ee92ef4")
 
 	simBackend, auth := simulatedBackend(t)
 	contract := deploySFCContract(t, simBackend, auth)
