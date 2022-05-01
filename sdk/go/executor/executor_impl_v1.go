@@ -432,5 +432,5 @@ func (exec *ExecutorImplV1) updateTransactOpts(chainAP *ethclient.Client) error 
 
 // getEventID gets the ID of an event.
 func getEventID(chainID *big.Int, raw types.Log) string {
-	return fmt.Sprintf("%s-%s-%d-%d-%d", chainID.String(), raw.Address.String(), raw.BlockNumber, raw.TxIndex, raw.Index)
+	return fmt.Sprintf("%s-%#x-%d-%d-%d", chainID.String(), raw.Address, raw.BlockNumber, raw.TxIndex, raw.Index)
 }
