@@ -77,14 +77,14 @@ func handleV1(req messages.Message) {
 
 	//Old: _, addr, err := instance.Signer.GetAddr(big.NewInt(int64(destID)), destAddr)
 	//	_, addr, err := instance.Signer.GetAddr(big.NewInt(int64(srcID)), srcAddr)
-	_, addr, err := instance.Signer.GetAddr(big.NewInt(0), common.BigToAddr(big.NewInt(0)))
+	_, addr, err := instance.Signer.GetAddr(big.NewInt(0), common.BigToAddress(big.NewInt(0)))
 	if err != nil {
 		logging.Error("Signer not found for: Chain: %v, Address: %v, Error: %v", destID, destAddr, err.Error())
 		return
 	}
 	//	sigType, signature, err := instance.Signer.Sign(big.NewInt(int64(destID)), destAddr, toSign)
 	//	sigType, signature, err := instance.Signer.Sign(big.NewInt(int64(srcID)), srcAddr, toSign)
-	sigType, signature, err := instance.Signer.Sign(big.NewInt(0), common.BigToAddr(big.NewInt(0)), toSign)
+	sigType, signature, err := instance.Signer.Sign(big.NewInt(0), common.BigToAddress(big.NewInt(0)), toSign)
 	if err != nil {
 		logging.Error("Signer error signing: %v", err.Error())
 		return
