@@ -102,18 +102,7 @@ public class AttestorRelayer {
       throws CrosschainProtocolStackException {
     String eventId = calculateEventID(bcId, txr, contractAddress, eventFunctionSignature);
 
-    // TODO FIx this!
-    try {
-      return AttestorRelayerWebApi.fetchSignedEvent("http://" + this.msgStoreAddr, eventId);
-    } catch (Exception ex) {
-      try {
-        Thread.sleep(1000);
-        return AttestorRelayerWebApi.fetchSignedEvent("http://" + this.msgStoreAddr, eventId);
-      }
-      catch (Exception ex1) {
-        throw new RuntimeException(ex1);
-      }
-    }
+    return AttestorRelayerWebApi.fetchSignedEvent("http://" + this.msgStoreAddr, eventId);
   }
 
   public static String calculateEventID(
@@ -130,24 +119,14 @@ public class AttestorRelayer {
               .get(0)
               .equalsIgnoreCase(FormatConversion.byteArrayToString(eventFunctionSignature))) {
 
-        String eventAddr = "0x" + log.getAddress().toUpperCase().substring(2);
+        String eventAddr = "0x" + log.getAddress().toLowerCase().substring(2);
         String blockNumberHex = log.getBlockNumberRaw();
         String blockNumber = FormatConversion.hexStringToDecString(blockNumberHex);
         String txIndexHex = log.getTransactionIndexRaw();
         String txIndex = FormatConversion.hexStringToDecString(txIndexHex);
         String logIndexHex = log.getLogIndexRaw();
         String logIndex = FormatConversion.hexStringToDecString(logIndexHex);
-//        return "chain"
-        return ""
-            + chainId
-            + "-"
-            + eventAddr
-            + "-"
-            + blockNumber
-            + "-"
-            + txIndex
-            + "-"
-            + logIndex;
+        return "" + chainId + "-" + eventAddr + "-" + blockNumber + "-" + txIndex + "-" + logIndex;
       }
     }
     throw new RuntimeException("Event not found");

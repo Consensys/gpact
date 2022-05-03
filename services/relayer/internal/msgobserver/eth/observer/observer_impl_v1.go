@@ -174,7 +174,7 @@ func (o *ObserverImplV1) routineSFC(chainID *big.Int, chainAP string, addr commo
 			return
 		}
 
-		observer, err := o.createFinalisedEventObserver(chainID.String(), addr.String(), sfc, o.mq, chain)
+		observer, err := o.createFinalisedEventObserver(chainID.String(), addr, sfc, o.mq, chain)
 
 		if err != nil {
 			logging.Error(err.Error())
@@ -207,7 +207,7 @@ func (o *ObserverImplV1) routineGPACT(chainID *big.Int, chainAP string, addr com
 			return
 		}
 
-		observer, err := NewGPACTBridgeRealtimeObserver(chainID.String(), addr.String(), gpact, o.mq)
+		observer, err := NewGPACTBridgeRealtimeObserver(chainID.String(), addr, gpact, o.mq)
 		if err != nil {
 			logging.Error("Error creating observer for Chain: %v, Contract: %v, Error: %v", chainID.String(), addr.String(), err.Error())
 			return
@@ -223,7 +223,8 @@ func (o *ObserverImplV1) routineGPACT(chainID *big.Int, chainAP string, addr com
 	}
 }
 
-func (o *ObserverImplV1) createFinalisedEventObserver(source string, sourceAddr string, contract *functioncall.Sfc, mq mqserver.MessageQueue,
+func (o *ObserverImplV1) createFinalisedEventObserver(source string, sourceAddr common.Address, contract *functioncall.Sfc,
+	mq mqserver.MessageQueue,
 	client *ethclient.Client) (*SFCBridgeObserver, error) {
 	dsProgKey := datastore.NewKey(fmt.Sprintf("/%s/%s/last_finalised_block", source, sourceAddr))
 	watcherProgOpts := WatcherProgressDsOpts{o.ds, dsProgKey, DefaultRetryOptions}

@@ -43,7 +43,8 @@ var fixValidEvent = functioncall.SfcCrossCall{
 	Raw:              fixLog,
 }
 
-var transformer = NewSFCEventTransformer("network-001", "0x8e215d06ea7ec1fdb4fc5fd21768f4b34ee92ef4")
+var transformer = NewSFCEventTransformer("network-001",
+	common.HexToAddress("0x8e215d06ea7ec1fdb4fc5fd21768f4b34ee92ef4"))
 
 func TestSFCTransformer(t *testing.T) {
 	message, err := transformer.ToMessage(&fixValidEvent)

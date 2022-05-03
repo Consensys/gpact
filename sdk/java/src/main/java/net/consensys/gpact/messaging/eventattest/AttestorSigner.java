@@ -14,9 +14,6 @@
  */
 package net.consensys.gpact.messaging.eventattest;
 
-import static net.consensys.gpact.common.FormatConversion.addressStringToBytes;
-
-import java.nio.ByteBuffer;
 import java.util.*;
 import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.common.FormatConversion;
@@ -56,7 +53,6 @@ public class AttestorSigner implements MessagingVerificationInterface {
     String encodedSignaturesStr =
         this.attestorRelayer.fetchedSignedEvent(
             this.bcId, txReceipt, contractAddress, eventFunctionSignature);
-    LOG.info("EncodedSig: {}", encodedSignaturesStr);
 
     byte[] encodedSignatures = FormatConversion.hexStringToByteArray(encodedSignaturesStr);
 
@@ -84,49 +80,51 @@ public class AttestorSigner implements MessagingVerificationInterface {
         this.bcId, contractAddress, eventFunctionSignature, eventData, encodedSignatures);
   }
 
-  private static byte[] abiEncodePackedEvent(
-      BlockchainId blockchainId, String contractAddress, byte[] eventSignature, byte[] eventData) {
-    byte[] blockchainIdBytes = blockchainId.asBytes();
-
-    byte[] address = addressStringToBytes(contractAddress);
-
-    byte[] abiEncodePacked =
-        new byte
-            [blockchainIdBytes.length + address.length + eventSignature.length + eventData.length];
-    System.arraycopy(blockchainIdBytes, 0, abiEncodePacked, 0, blockchainIdBytes.length);
-    System.arraycopy(address, 0, abiEncodePacked, blockchainIdBytes.length, address.length);
-    System.arraycopy(
-        eventSignature,
-        0,
-        abiEncodePacked,
-        blockchainIdBytes.length + address.length,
-        eventSignature.length);
-    System.arraycopy(
-        eventData,
-        0,
-        abiEncodePacked,
-        blockchainIdBytes.length + address.length + eventSignature.length,
-        eventData.length);
-
-    return abiEncodePacked;
-  }
-
-  private byte[] abiEncodePackedSignatures(
-      List<String> theSigners, List<byte[]> sigR, List<byte[]> sigS, List<Byte> sigV) {
-    final int LEN_OF_LEN = 4;
-    final int LEN_OF_SIG = 20 + 32 + 32 + 1;
-
-    int len = theSigners.size();
-
-    ByteBuffer bb = ByteBuffer.allocate(LEN_OF_LEN + LEN_OF_SIG * len);
-    bb.putInt(len);
-
-    for (int i = 0; i < len; i++) {
-      bb.put(addressStringToBytes(theSigners.get(i)));
-      bb.put(sigR.get(i));
-      bb.put(sigS.get(i));
-      bb.put(sigV.get(i));
-    }
-    return bb.array();
-  }
+  //  private static byte[] abiEncodePackedEvent(
+  //      BlockchainId blockchainId, String contractAddress, byte[] eventSignature, byte[]
+  // eventData) {
+  //    byte[] blockchainIdBytes = blockchainId.asBytes();
+  //
+  //    byte[] address = addressStringToBytes(contractAddress);
+  //
+  //    byte[] abiEncodePacked =
+  //        new byte
+  //            [blockchainIdBytes.length + address.length + eventSignature.length +
+  // eventData.length];
+  //    System.arraycopy(blockchainIdBytes, 0, abiEncodePacked, 0, blockchainIdBytes.length);
+  //    System.arraycopy(address, 0, abiEncodePacked, blockchainIdBytes.length, address.length);
+  //    System.arraycopy(
+  //        eventSignature,
+  //        0,
+  //        abiEncodePacked,
+  //        blockchainIdBytes.length + address.length,
+  //        eventSignature.length);
+  //    System.arraycopy(
+  //        eventData,
+  //        0,
+  //        abiEncodePacked,
+  //        blockchainIdBytes.length + address.length + eventSignature.length,
+  //        eventData.length);
+  //
+  //    return abiEncodePacked;
+  //  }
+  //
+  //  private byte[] abiEncodePackedSignatures(
+  //      List<String> theSigners, List<byte[]> sigR, List<byte[]> sigS, List<Byte> sigV) {
+  //    final int LEN_OF_LEN = 4;
+  //    final int LEN_OF_SIG = 20 + 32 + 32 + 1;
+  //
+  //    int len = theSigners.size();
+  //
+  //    ByteBuffer bb = ByteBuffer.allocate(LEN_OF_LEN + LEN_OF_SIG * len);
+  //    bb.putInt(len);
+  //
+  //    for (int i = 0; i < len; i++) {
+  //      bb.put(addressStringToBytes(theSigners.get(i)));
+  //      bb.put(sigR.get(i));
+  //      bb.put(sigS.get(i));
+  //      bb.put(sigV.get(i));
+  //    }
+  //    return bb.array();
+  //  }
 }

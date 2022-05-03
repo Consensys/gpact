@@ -165,37 +165,65 @@ public class AttestorRelayerWebApi {
   }
 
   private static class Proof {
-    public String[] proofs;
+    public String proof_type;
+    public long created;
+    public String proof;
   }
 
   public static String fetchSignedEvent(String msgStoreURL, String eventId)
       throws CrosschainProtocolStackException {
     String uriStr = msgStoreURL + "/messages/" + eventId + "/proofs";
-    LOG.info("MsgStore URI: {}", uriStr);
 
-    HttpResponse<String> response;
-    try {
-      response = httpGet(uriStr);
-    } catch (InterruptedException | IOException ex1) {
-      throw new CrosschainProtocolStackException("Error while fetching signed event ", ex1);
+    long backOffTime = 1000;
+    final double backOffScale = 1.5;
+    int backOffCountDown = 5;
+
+    String body = null;
+    boolean done = false;
+    while (!done) {
+      try {
+        HttpResponse<String> response = httpGet(uriStr);
+        if (response.statusCode() != 200) {
+          throw new CrosschainProtocolStackException(
+              "Fetch signed event returned HTTP status: "
+                  + response.statusCode()
+                  + ", "
+                  + response.body());
+        }
+        body = response.body();
+
+        done = true;
+      } catch (InterruptedException | IOException ex1) {
+        if (backOffCountDown == 0) {
+          LOG.warn("Error while fetching signed event: {}, Error: {}", uriStr, ex1.toString());
+          throw new CrosschainProtocolStackException("Error while fetching signed event ", ex1);
+        }
+        backOffTime = (long) (backOffScale * backOffTime);
+        backOffCountDown--;
+      }
     }
 
-    if (response.statusCode() != 200) {
-      throw new CrosschainProtocolStackException(
-          "Fetch signed event returned HTTP status: "
-              + response.statusCode()
-              + ", "
-              + response.body());
-    }
-    String body = response.body();
-    System.out.println("BODY: " + body);
-    ObjectMapper mapper = new ObjectMapper();
+    // LOG.info(" Fetched Signed Event: {}" + body);
+    Proof[] proofs;
     try {
-      Proof obj = mapper.readValue("{'name' : 'mkyong'}", Proof.class);
-      return obj.proofs[0];
+      ObjectMapper mapper = new ObjectMapper();
+      proofs = mapper.readValue(body, Proof[].class);
     } catch (Exception e) {
       throw new CrosschainProtocolStackException("Fetch signed event JSON decoding: ", e);
     }
+
+    if (proofs.length == 0) {
+      LOG.error("Fetch signed event contains no proofs");
+      throw new CrosschainProtocolStackException("Fetch signed event contains no proofs");
+    }
+    if (proofs.length != 1) {
+      LOG.error(
+          "Fetch signed event contains more than one proofs. SDK can currenly only handle one proof");
+      throw new CrosschainProtocolStackException(
+          "Fetch signed event contains more than one proofs. SDK can currenly only handle one proof");
+    }
+
+    return proofs[0].proof;
   }
 
   private static HttpResponse<String> httpPost(String uri, byte[] requestBody)

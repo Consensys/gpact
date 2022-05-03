@@ -17,6 +17,7 @@ package observer
 
 import (
 	"context"
+	"github.com/ethereum/go-ethereum/common"
 
 	"github.com/consensys/gpact/services/relayer/internal/contracts/functioncall"
 	"github.com/consensys/gpact/services/relayer/internal/mqserver"
@@ -30,7 +31,8 @@ type SFCBridgeObserver struct {
 	SourceNetwork string
 }
 
-func NewSFCBridgeRealtimeObserver(source string, sourceAddr string, contract *functioncall.Sfc, mq mqserver.MessageQueue) (*SFCBridgeObserver, error) {
+func NewSFCBridgeRealtimeObserver(source string, sourceAddr common.Address, contract *functioncall.Sfc,
+	mq mqserver.MessageQueue) (*SFCBridgeObserver, error) {
 	eventTransformer := NewSFCEventTransformer(source, sourceAddr)
 	messageHandler := NewMessageEnqueueHandler(mq, DefaultRetryOptions)
 	eventHandler := NewSimpleEventHandler(eventTransformer, messageHandler)
@@ -46,7 +48,7 @@ func NewSFCBridgeRealtimeObserver(source string, sourceAddr string, contract *fu
 	return &SFCBridgeObserver{EventWatcher: eventWatcher, EventHandler: eventHandler, SourceNetwork: source}, nil
 }
 
-func NewSFCBridgeFinalisedObserver(source string, sourceAddr string, contract *functioncall.Sfc, mq mqserver.MessageQueue,
+func NewSFCBridgeFinalisedObserver(source string, sourceAddr common.Address, contract *functioncall.Sfc, mq mqserver.MessageQueue,
 	confirmationsForFinality uint64, watcherProgressOpts WatcherProgressDsOpts, client BlockHeadProducer) (
 	*SFCBridgeObserver,
 	error) {
@@ -81,7 +83,8 @@ type GPACTBridgeObserver struct {
 	SourceNetwork string
 }
 
-func NewGPACTBridgeRealtimeObserver(source string, sourceAddr string, contract *functioncall.Gpact, mq mqserver.MessageQueue) (*GPACTBridgeObserver, error) {
+func NewGPACTBridgeRealtimeObserver(source string, sourceAddr common.Address, contract *functioncall.Gpact,
+	mq mqserver.MessageQueue) (*GPACTBridgeObserver, error) {
 	eventTransformer := NewGPACTEventTransformer(source, sourceAddr)
 	messageHandler := NewMessageEnqueueHandler(mq, DefaultRetryOptions)
 	eventHandler := NewSimpleEventHandler(eventTransformer, messageHandler)

@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/ethereum/go-ethereum/common"
 	"time"
 
 	v1 "github.com/consensys/gpact/services/relayer/pkg/messages/v1"
@@ -34,7 +35,7 @@ var startFuncSig = [32]byte{0x77, 0xda, 0xb6, 0x11, 0xad, 0x9a, 0x24, 0xb7, 0x63
 var segmentFuncSig = [32]byte{0xb0, 0x15, 0x57, 0xf1, 0xf6, 0x34, 0xb7, 0xc5, 0x07, 0x2a, 0xb5, 0xe3, 0x6d, 0x07, 0xa2, 0x35, 0x5e, 0xf8, 0x19, 0xfa, 0xca, 0x5a, 0x3d, 0x32, 0x14, 0x30, 0xd7, 0x19, 0x87, 0x15, 0x5b, 0x8f}
 var rootFuncSig = [32]byte{0xe6, 0x76, 0x3d, 0xd9, 0x9b, 0xf8, 0x94, 0xd7, 0x2f, 0x34, 0x99, 0xdd, 0x57, 0x2a, 0xa4, 0x28, 0x76, 0xea, 0xe7, 0xae, 0x02, 0x8c, 0x32, 0xff, 0xf2, 0x16, 0x54, 0xe1, 0xbb, 0xc4, 0xc8, 0x07}
 
-const MessageIDPattern = "%s-%s-%d-%d-%d"
+const MessageIDPattern = "%s-%#x-%d-%d-%d"
 
 type EventTransformer interface {
 	// ToMessage converts a given event to a relayer message
@@ -44,7 +45,7 @@ type EventTransformer interface {
 // SFCEventTransformer converts events from a simple-function-call bridge contract to relayer messages
 type SFCEventTransformer struct {
 	Source     string
-	SourceAddr string
+	SourceAddr common.Address
 }
 
 // ToMessage converts a 'CrossCall' event emited from a simple-function-call bridge contract to relayer message
@@ -57,7 +58,7 @@ func (t *SFCEventTransformer) ToMessage(event interface{}) (*v1.Message, error) 
 		return nil, err
 	}
 
-	source := v1.ApplicationAddress{NetworkID: t.Source, ContractAddress: t.SourceAddr}
+	source := v1.ApplicationAddress{NetworkID: t.Source, ContractAddress: fmt.Sprintf("%#x", t.SourceAddr)}
 	destination := v1.ApplicationAddress{NetworkID: sfcEvent.DestBcId.String(), ContractAddress: sfcEvent.DestContract.String()}
 
 	data, err := json.Marshal(sfcEvent.Raw)
@@ -97,13 +98,13 @@ func (t *SFCEventTransformer) getIDForEvent(event types.Log) string {
 	return fmt.Sprintf(MessageIDPattern, t.Source, t.SourceAddr, event.BlockNumber, event.TxIndex, event.Index)
 }
 
-func NewSFCEventTransformer(sourceNetwork string, sourceAddr string) *SFCEventTransformer {
+func NewSFCEventTransformer(sourceNetwork string, sourceAddr common.Address) *SFCEventTransformer {
 	return &SFCEventTransformer{sourceNetwork, sourceAddr}
 }
 
 type GPACTEventTransformer struct {
 	Source     string
-	SourceAddr string
+	SourceAddr common.Address
 }
 
 func (t *GPACTEventTransformer) ToMessage(event interface{}) (*v1.Message, error) {
@@ -129,7 +130,7 @@ func (t *GPACTEventTransformer) ToMessage(event interface{}) (*v1.Message, error
 		}
 	}
 
-	source := v1.ApplicationAddress{NetworkID: t.Source, ContractAddress: t.SourceAddr}
+	source := v1.ApplicationAddress{NetworkID: t.Source, ContractAddress: fmt.Sprintf("%#x", t.SourceAddr)}
 	destination := v1.ApplicationAddress{NetworkID: "0", ContractAddress: ""}
 
 	data, err := json.Marshal(raw)
@@ -157,6 +158,6 @@ func (t *GPACTEventTransformer) getIDForEvent(event types.Log) string {
 	return fmt.Sprintf(MessageIDPattern, t.Source, t.SourceAddr, event.BlockNumber, event.TxIndex, event.Index)
 }
 
-func NewGPACTEventTransformer(sourceNetwork string, sourceAddr string) *GPACTEventTransformer {
+func NewGPACTEventTransformer(sourceNetwork string, sourceAddr common.Address) *GPACTEventTransformer {
 	return &GPACTEventTransformer{sourceNetwork, sourceAddr}
 }

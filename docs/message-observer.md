@@ -93,7 +93,8 @@ However, the degree to which the ID scheme can guarantee the above properties is
 mitigating the possibility of reorgs.
 
 The current ID scheme implemented for a message involves the following structure: 
-`{network_id}-{contract_address}-{block_number}-{tx_index}-{log_index}`.
+`{network_id}-{contract_address}-{block_number}-{tx_index}-{log_index}`. 
+The contract address is a lowercase hex string and not in [EIP-55](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-55.md) format.
 
 ### Message Handler
 
