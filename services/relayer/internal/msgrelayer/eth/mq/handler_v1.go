@@ -61,12 +61,12 @@ func handleV1(req messages.Message) {
 		return
 	}
 	srcAddr := common.HexToAddress(msg.Source.ContractAddress)
-	destID, err := strconv.Atoi(msg.Destination.NetworkID)
-	if err != nil {
-		logging.Error(err.Error())
-		return
-	}
-	destAddr := common.HexToAddress(msg.Destination.ContractAddress)
+	//destID, err := strconv.Atoi(msg.Destination.NetworkID)
+	//if err != nil {
+	//	logging.Error(err.Error())
+	//	return
+	//}
+	//destAddr := common.HexToAddress(msg.Destination.ContractAddress)
 
 	toSign := make([]byte, 32)
 	toSign[31] = byte(srcID)
@@ -79,7 +79,8 @@ func handleV1(req messages.Message) {
 	//	_, addr, err := instance.Signer.GetAddr(big.NewInt(int64(srcID)), srcAddr)
 	_, addr, err := instance.Signer.GetAddr(big.NewInt(0), common.BigToAddress(big.NewInt(0)))
 	if err != nil {
-		logging.Error("Signer not found for: Chain: %v, Address: %v, Error: %v", destID, destAddr, err.Error())
+		logging.Error("Signer not found for: Chain: %v, Address: %v, Error: %v", 0, 0, err.Error())
+		//		logging.Error("Signer not found for: Chain: %v, Address: %v, Error: %v", destID, destAddr, err.Error())
 		return
 	}
 	//	sigType, signature, err := instance.Signer.Sign(big.NewInt(int64(destID)), destAddr, toSign)

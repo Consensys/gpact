@@ -195,7 +195,7 @@ public class AttestorRelayerWebApi {
         body = response.body();
 
         done = true;
-      } catch (InterruptedException | IOException ex1) {
+      } catch (InterruptedException | IOException | CrosschainProtocolStackException ex1) {
         if (backOffCountDown == 0) {
           LOG.warn("Error while fetching signed event: {}, Error: {}", uriStr, ex1.toString());
           throw new CrosschainProtocolStackException("Error while fetching signed event ", ex1);

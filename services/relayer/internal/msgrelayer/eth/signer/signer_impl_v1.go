@@ -23,7 +23,7 @@ import (
 
 	"github.com/consensys/gpact/services/relayer/internal/logging"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ipfs/go-datastore"
+	datastore "github.com/ipfs/go-datastore"
 	badgerds "github.com/ipfs/go-ds-badger"
 )
 
@@ -72,6 +72,7 @@ func (s *SignerImplV1) SetKey(chainID *big.Int, contractAddr common.Address, key
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), dsTimeout)
 	defer cancel()
+	logging.Info("Signing key set for: Chain: %v, Contract: %v", chainID, contractAddr)
 	return s.ds.Put(ctx, dsKey(chainID, contractAddr), append([]byte{keyType}, key...))
 }
 

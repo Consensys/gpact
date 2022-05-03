@@ -33,6 +33,7 @@ import net.consensys.gpact.messaging.SignedEvent;
 import net.consensys.gpact.soliditywrappers.applications.twentyacts.TwentyActs;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
@@ -42,6 +43,7 @@ public class HappyPathTest extends Abstract20ActsTest {
   // Running multiple times will reveal any gas difference due to rerunning.
   static int NUM_TIMES_EXECUTE = 2;
 
+  @Disabled
   @Test
   public void happyPathDirectSignMultiBlockchain() throws Exception {
     StatsHolder.log("20ACTS: Happy Path");
