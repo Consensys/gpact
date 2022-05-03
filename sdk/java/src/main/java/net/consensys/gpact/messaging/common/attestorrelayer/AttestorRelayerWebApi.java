@@ -102,8 +102,10 @@ public class AttestorRelayerWebApi {
 
     ObjectMapper mapper = new ObjectMapper();
     ObjectNode user = mapper.createObjectNode();
-    user.put("chain_id", bcId.toDecimalString());
-    user.put("contract_addr", crosschainControlAddr);
+//    user.put("chain_id", bcId.toDecimalString());
+//    user.put("contract_addr", crosschainControlAddr);
+    user.put("chain_id", "0");
+    user.put("contract_addr", "0x0");
     user.put("key_type", keyType);
     user.put("key", pKey);
     //    String jsonStr1 = mapper.writer().writeValueAsString(user);
