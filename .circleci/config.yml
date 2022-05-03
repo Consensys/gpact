@@ -122,12 +122,10 @@ jobs:
       - run:
           name: Create Relayer containers
           working_directory: services/relayer
-          background: true
           command: make docker
       - run:
           name: Create Message Store container
           working_directory: services/message-store
-          background: true
           command: make docker
       - run:
           name: Create and Start blockchains
