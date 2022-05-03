@@ -200,6 +200,11 @@ public class AttestorRelayerWebApi {
           LOG.warn("Error while fetching signed event: {}, Error: {}", uriStr, ex1.toString());
           throw new CrosschainProtocolStackException("Error while fetching signed event ", ex1);
         }
+        try {
+          Thread.sleep(backOffTime);
+        } catch (Exception ex2) {
+          // Do nothing
+        }
         backOffTime = (long) (backOffScale * backOffTime);
         backOffCountDown--;
       }
