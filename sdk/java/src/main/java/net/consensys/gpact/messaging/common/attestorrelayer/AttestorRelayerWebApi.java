@@ -200,6 +200,7 @@ public class AttestorRelayerWebApi {
           LOG.warn("Error while fetching signed event: {}, Error: {}", uriStr, ex1.toString());
           throw new CrosschainProtocolStackException("Error while fetching signed event ", ex1);
         }
+        LOG.info(" Fetch signed event failed. Waiting another {} ms", backOffTime);
         try {
           Thread.sleep(backOffTime);
         } catch (Exception ex2) {
@@ -220,14 +221,15 @@ public class AttestorRelayerWebApi {
     }
 
     if (proofs.length == 0) {
-      LOG.error("Fetch signed event contains no proofs");
-      throw new CrosschainProtocolStackException("Fetch signed event contains no proofs");
+      final String msg = "Fetch signed event contains no proofs";
+      LOG.error(msg);
+      throw new CrosschainProtocolStackException(msg);
     }
     if (proofs.length != 1) {
-      LOG.error(
-          "Fetch signed event contains more than one proofs. SDK can currenly only handle one proof");
-      throw new CrosschainProtocolStackException(
-          "Fetch signed event contains more than one proofs. SDK can currenly only handle one proof");
+      final String msg =
+          "Fetch signed event contains more than one proofs. SDK can currently only handle one proof";
+      LOG.error(msg);
+      throw new CrosschainProtocolStackException(msg);
     }
 
     return proofs[0].proof;
