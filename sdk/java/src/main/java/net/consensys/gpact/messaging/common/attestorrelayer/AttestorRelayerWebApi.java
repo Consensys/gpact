@@ -178,7 +178,7 @@ public class AttestorRelayerWebApi {
 
     long backOffTime = 1000;
     final double backOffScale = 1.5;
-    int backOffCountDown = 5;
+    int backOffCountDown = 10;
 
     String body = null;
     boolean done = false;
