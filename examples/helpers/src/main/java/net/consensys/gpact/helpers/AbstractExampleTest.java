@@ -138,4 +138,22 @@ public abstract class AbstractExampleTest {
 
     return file.getAbsolutePath();
   }
+
+  private void setProperties(Properties props, final String name, final String bcId, final String rpcUri,
+                             final String wsUri, final String gasStrategy, final String pollPeriodMs,
+                             final String observerUri, final String dispatcherUri, final String msgStoreFromDispatcher,
+                             final String msgStoreFromUser) {
+    props.setProperty(name + "_BC_ID", bcId);
+    props.setProperty(name + "_BC_RPC_URI", rpcUri);
+    props.setProperty(name + "_BC_WS_URI", wsUri);
+    props.setProperty(name + "_GAS", gasStrategy);
+    props.setProperty(name + "_PERIOD", pollPeriodMs);
+    props.setProperty(name + "_OBSERVER_URI", observerUri);
+    props.setProperty(name + "_DISPATCHER_URI", dispatcherUri);
+    props.setProperty(name + "_MSG_STORE_FROM_DISPATCHER_URI", msgStoreFromDispatcher);
+    props.setProperty(name + "_MSG_STORE_FROM_USER_URI", msgStoreFromUser);
+
+  }
+
+
 }
