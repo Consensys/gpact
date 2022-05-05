@@ -154,6 +154,24 @@ jobs:
             docker container logs test-blockchains_bc32node1_1
           when: always
       - run:
+          name: Logs from observer1
+          working_directory: test-blockchains
+          command: |
+            docker container logs test-blockchains_observer1_1
+          when: always
+      - run:
+          name: Logs from relayer
+          working_directory: test-blockchains
+          command: |
+            docker container logs test-blockchains_relayer_1
+          when: always
+      - run:
+          name: Logs from msgstore
+          working_directory: test-blockchains
+          command: |
+            docker container logs test-blockchains_msgstore_1
+          when: always
+      - run:
           name: Remove blockchains
           working_directory: test-blockchains
           command: docker-compose down
