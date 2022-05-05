@@ -137,7 +137,7 @@ public abstract class AbstractExampleTest {
           "ws://bc33node1:8546",
           GAS_STRATEGY_FREE,
           POLL_PERIOD_MS,
-              "http://127.0.0.1:9527",
+          "http://127.0.0.1:9527",
           DISPATCHER_URI,
           MSG_STORE_FROM_DISPATCHER,
           MSG_STORE_FROM_USER);
