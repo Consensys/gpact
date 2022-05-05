@@ -119,7 +119,7 @@ public class AttestorRelayer {
               .get(0)
               .equalsIgnoreCase(FormatConversion.byteArrayToString(eventFunctionSignature))) {
 
-        String eventAddr = "0x" + log.getAddress().toLowerCase().substring(2);
+        String eventAddr = log.getAddress().toLowerCase();
         String blockNumberHex = log.getBlockNumberRaw();
         String blockNumber = FormatConversion.hexStringToDecString(blockNumberHex);
         String txIndexHex = log.getTransactionIndexRaw();
