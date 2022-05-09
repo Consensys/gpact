@@ -22,6 +22,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.time.Duration;
 import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.common.CrosschainProtocolStackException;
 import org.apache.logging.log4j.LogManager;
@@ -241,8 +242,10 @@ public class AttestorRelayerWebApi {
     HttpRequest request =
         HttpRequest.newBuilder()
             .uri(URI.create(uri))
+            .timeout(Duration.ofSeconds(20)) // Hard code the timeout as 20 seconds
             .POST(HttpRequest.BodyPublishers.ofByteArray(requestBody))
             .build();
+
     return client.send(request, HttpResponse.BodyHandlers.ofString());
   }
 
