@@ -49,7 +49,7 @@ public class ERC20TokenBridgeExample {
     }
 
     SfcExampleSystemManager exampleManager = new SfcExampleSystemManager(args[0]);
-    exampleManager.sfcStandardExampleConfig(2);
+    exampleManager.standardExampleConfig(2);
 
     BlockchainConfig root = exampleManager.getRootBcInfo();
     BlockchainConfig bc2 = exampleManager.getBc2Info();

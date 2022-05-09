@@ -45,7 +45,7 @@ public class Main {
     }
 
     GpactExampleSystemManager exampleManager = new GpactExampleSystemManager(args[0]);
-    exampleManager.gpactStandardExampleConfig(2);
+    exampleManager.standardExampleConfig(2);
 
     BlockchainConfig root = exampleManager.getRootBcInfo();
     BlockchainConfig bc2 = exampleManager.getBc2Info();

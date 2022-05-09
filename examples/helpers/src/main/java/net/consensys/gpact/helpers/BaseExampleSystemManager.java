@@ -1,3 +1,17 @@
+/*
+ * Copyright 2022 ConsenSys Software Inc
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 package net.consensys.gpact.helpers;
 
 import java.util.ArrayList;
@@ -19,25 +33,24 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
 
-public class GpactExampleSystemManager {
-  static final Logger LOG = LogManager.getLogger(GpactExampleSystemManager.class);
+public abstract class BaseExampleSystemManager {
+  static final Logger LOG = LogManager.getLogger(BaseExampleSystemManager.class);
 
   private final String propsFileName;
 
-  private BlockchainConfig root;
-  private BlockchainConfig bc2;
-  private BlockchainConfig bc3;
+  protected BlockchainConfig root;
+  protected BlockchainConfig bc2;
+  protected BlockchainConfig bc3;
 
-  private ExecutionEngineType executionEngineType;
   private CrossControlManagerGroup crossControlManagerGroup;
-  private MessagingManagerGroup messagingManagerGroup;
+  protected MessagingManagerGroup messagingManagerGroup;
 
-  public GpactExampleSystemManager(String propertiesFileName) {
+  public BaseExampleSystemManager(String propertiesFileName) {
     this.propsFileName = propertiesFileName;
   }
 
-  public void gpactStandardExampleConfig(int numberOfBlockchains) throws Exception {
-    // Less that two blockchains doesn't make sense for crosschain.
+  public void standardExampleConfig(int numberOfBlockchains) throws Exception {
+    // Less than two blockchains doesn't make sense for crosschain.
     // The test infrasturcture only supports three blockchains at present.
     if (!(numberOfBlockchains == 2 || numberOfBlockchains == 3)) {
       throw new IllegalArgumentException(
@@ -49,17 +62,17 @@ public class GpactExampleSystemManager {
     this.root = propsLoader.getBlockchainInfo("ROOT");
     this.bc2 = propsLoader.getBlockchainInfo("BC2");
     this.bc3 = propsLoader.getBlockchainInfo("BC3");
+
     CrossBlockchainConsensusType consensusMethodology = propsLoader.getConsensusMethodology();
     StatsHolder.log(consensusMethodology.name());
-    this.executionEngineType = propsLoader.getExecutionEnngine();
-    StatsHolder.log(executionEngineType.name());
     String relayerUri = propsLoader.getRelayerUri();
+
+    loadFunctionPayerProperties(propsLoader);
 
     // To keep the example simple, just have one signer for all blockchains.
     AnIdentity globalSigner = AnIdentity.createNewRandomIdentity();
 
-    this.crossControlManagerGroup =
-        CrosschainProtocols.getFunctionCallInstance(CrosschainProtocols.GPACT).get();
+    this.crossControlManagerGroup = getFunctionCallInstance();
 
     // Set-up GPACT contracts: Deploy Crosschain Control and Registrar contracts on
     // each blockchain.
@@ -144,36 +157,11 @@ public class GpactExampleSystemManager {
     setupCrosschainTrust(crossControlManagerGroup, messagingManagerGroup);
   }
 
-  public String getExecutionEngine() {
-    switch (this.executionEngineType) {
-      case SERIAL:
-        return CrosschainProtocols.SERIAL;
-      case PARALLEL:
-        return CrosschainProtocols.PARALLEL;
-      default:
-        throw new RuntimeException("Not implemented yet");
-    }
-  }
+  protected abstract void loadFunctionPayerProperties(PropertiesLoader propsLoader);
 
-  public ExecutionEngineType getExecutionEngineType() {
-    return executionEngineType;
-  }
+  protected abstract CrossControlManagerGroup getFunctionCallInstance() throws Exception;
 
-  public BlockchainConfig getRootBcInfo() {
-    return this.root;
-  }
-
-  public BlockchainConfig getBc2Info() {
-    return this.bc2;
-  }
-
-  public BlockchainConfig getBc3Info() {
-    return this.bc3;
-  }
-
-  public CrossControlManagerGroup getCrossControlManagerGroup() {
-    return this.crossControlManagerGroup;
-  }
+  protected abstract String getFunctionCallImplName() throws Exception;
 
   private void setupCrosschainTrust(
       CrossControlManagerGroup crossControlManagerGroup,
@@ -210,7 +198,7 @@ public class GpactExampleSystemManager {
         new AttestorRelayer.Source(
             bc.bcId,
             crosschainControlAddr,
-            CrosschainProtocols.GPACT,
+            getFunctionCallImplName(),
             bc.observerUri,
             bc.blockchainNodeWsUri));
   }
@@ -231,5 +219,21 @@ public class GpactExampleSystemManager {
         ((TxRootTransferManagerGroup) messagingManagerGroup).getTxRootContractAddress(bc.bcId));
     crossControlManagerGroup.addBlockchainAndDeployContracts(
         creds, bc, txRootTransferGroup.getVerifier(bc.bcId));
+  }
+
+  public BlockchainConfig getRootBcInfo() {
+    return this.root;
+  }
+
+  public BlockchainConfig getBc2Info() {
+    return this.bc2;
+  }
+
+  public BlockchainConfig getBc3Info() {
+    return this.bc3;
+  }
+
+  public CrossControlManagerGroup getCrossControlManagerGroup() {
+    return this.crossControlManagerGroup;
   }
 }

@@ -43,7 +43,7 @@ public class Main {
 
     GpactExampleSystemManager exampleManager = new GpactExampleSystemManager(args[0]);
     // TODO can be configured for 5, however, need to set-up test system for 5 blockchains.
-    exampleManager.gpactStandardExampleConfig(3);
+    exampleManager.standardExampleConfig(3);
 
     BlockchainConfig root = exampleManager.getRootBcInfo();
     BlockchainConfig bc2 = exampleManager.getBc2Info();

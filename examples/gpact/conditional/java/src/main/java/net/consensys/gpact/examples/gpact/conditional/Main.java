@@ -42,7 +42,7 @@ public class Main {
     }
 
     GpactExampleSystemManager exampleManager = new GpactExampleSystemManager(args[0]);
-    exampleManager.gpactStandardExampleConfig(2);
+    exampleManager.standardExampleConfig(2);
 
     if (exampleManager.getExecutionEngineType() == ExecutionEngineType.PARALLEL) {
       throw new Exception(
