@@ -91,26 +91,37 @@ func (s *ServerImplV1) AddHandler(method byte, handler func(data []byte) ([]byte
 func (s *ServerImplV1) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	content, err := ioutil.ReadAll(r.Body)
 	if closeErr := r.Body.Close(); closeErr != nil {
-		logging.Error("HTTP can't close request body")
+		errStr := "HTTP can't close request body"
+		logging.Error(errStr)
+		http.Error(w, errStr, 501)
+		return
 	}
 	if err != nil {
-		logging.Error("Error reading request %v", err.Error())
+		errStr := fmt.Sprintf("Error reading request %v", err.Error())
+		logging.Error(errStr)
+		http.Error(w, errStr, 501)
 		return
 	}
 	if len(content) <= 1 {
-		logging.Error("Received content with empty request %v", content)
+		errStr := fmt.Sprintf("Received content with empty request %v", content)
+		logging.Error(errStr)
+		http.Error(w, errStr, 400)
 		return
 	}
 	msgType := content[0]
 	msgData := content[1:]
 	handler, ok := s.handlers[msgType]
 	if !ok {
-		logging.Error("Unsupported message type: %v", msgType)
+		errStr := fmt.Sprintf("Unsupported message type: %v", msgType)
+		logging.Error(errStr)
+		http.Error(w, errStr, 400)
 		return
 	}
 	respData, err := handler(msgData)
 	if err != nil {
-		logging.Error("Error handling request: %v", err.Error())
+		errStr := fmt.Sprintf("Error handling request. Message: : %v, Error: %v", msgType, err.Error())
+		logging.Error(errStr)
+		http.Error(w, errStr, 500)
 		return
 	}
 	w.WriteHeader(200)
