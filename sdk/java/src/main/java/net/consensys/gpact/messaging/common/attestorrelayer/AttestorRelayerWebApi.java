@@ -90,6 +90,15 @@ public class AttestorRelayerWebApi {
     config("Observer", observerUrl, requestBody);
   }
 
+  public static void stopObserver(String observerUrl) throws CrosschainProtocolStackException {
+    LOG.info("StopObserver: ObserverURL: {}", observerUrl);
+
+    Bytes type = Bytes.of(STOP_OBSERVE_REQ_TYPE);
+    byte[] requestBody = type.toArray();
+
+    config("Observer", observerUrl, requestBody);
+  }
+
   public static void setupRelayer(
       String relayerUrl, BlockchainId bcId, String crosschainControlAddr, byte[] pKey)
       throws CrosschainProtocolStackException {
@@ -154,7 +163,8 @@ public class AttestorRelayerWebApi {
     try {
       response = httpPost(uri, requestBody);
     } catch (InterruptedException | IOException ex1) {
-      throw new CrosschainProtocolStackException("Error while configuring " + component, ex1);
+      throw new CrosschainProtocolStackException(
+          "Error while configuring " + component + ", at: " + uri, ex1);
     }
 
     if (response.statusCode() != 200) {

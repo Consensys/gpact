@@ -77,6 +77,8 @@ public class AttestorRelayer {
   public void addNewSource(Source source) throws CrosschainProtocolStackException {
     this.sources.put(source.getSourceId(), source);
 
+    // AttestorRelayerWebApi.stopObserver(source.observerUri);
+
     AttestorRelayerWebApi.setupObserver(
         source.observerUri,
         source.bcId,
