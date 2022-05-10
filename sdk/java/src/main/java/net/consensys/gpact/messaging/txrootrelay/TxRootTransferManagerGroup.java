@@ -18,13 +18,13 @@ import java.math.BigInteger;
 import java.util.*;
 import net.consensys.gpact.common.BlockchainConfig;
 import net.consensys.gpact.common.BlockchainId;
-import net.consensys.gpact.messaging.MessagingManagerGroupInterface;
+import net.consensys.gpact.messaging.MessagingManagerGroup;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
 
 /** Manage multiple blockchains, each holding a set of registrar and verification contracts */
-public class TxRootTransferManagerGroup implements MessagingManagerGroupInterface {
+public class TxRootTransferManagerGroup implements MessagingManagerGroup {
   static final Logger LOG = LogManager.getLogger(TxRootTransferManagerGroup.class);
 
   Map<BlockchainId, TxRootTransferManager> blockchains = new HashMap<>();
@@ -41,7 +41,11 @@ public class TxRootTransferManagerGroup implements MessagingManagerGroupInterfac
 
     TxRootTransferManager manager =
         new TxRootTransferManager(
-            creds, blockchainId, bcInfo.uri, bcInfo.gasPriceStrategy, bcInfo.period);
+            creds,
+            blockchainId,
+            bcInfo.blockchainNodeRpcUri,
+            bcInfo.gasPriceStrategy,
+            bcInfo.period);
     manager.deployContracts();
 
     this.blockchains.put(blockchainId, manager);
@@ -58,7 +62,11 @@ public class TxRootTransferManagerGroup implements MessagingManagerGroupInterfac
 
     TxRootTransferManager manager =
         new TxRootTransferManager(
-            creds, blockchainId, bcInfo.uri, bcInfo.gasPriceStrategy, bcInfo.period);
+            creds,
+            blockchainId,
+            bcInfo.blockchainNodeRpcUri,
+            bcInfo.gasPriceStrategy,
+            bcInfo.period);
     manager.loadContracts(addresses);
 
     this.blockchains.put(blockchainId, manager);

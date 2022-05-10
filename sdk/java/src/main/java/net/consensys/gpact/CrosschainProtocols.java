@@ -20,11 +20,17 @@ import java.util.Optional;
 import net.consensys.gpact.functioncall.CrossControlManagerGroup;
 import net.consensys.gpact.functioncall.gpact.GpactCrossControlManagerGroup;
 import net.consensys.gpact.functioncall.sfc.SimpleCrossControlManagerGroup;
+import net.consensys.gpact.messaging.MessagingManagerGroup;
+import net.consensys.gpact.messaging.eventattest.AttestorSignerManagerGroup;
+import net.consensys.gpact.messaging.txrootrelay.TxRootTransferManagerGroup;
 
 /** Entry point class for the Crosschian Protocol Stack SDK. */
 public class CrosschainProtocols {
   public static final String GPACT = "GPACT";
   public static final String SFC = "SFC";
+
+  public static final String ATTESTOR = "ATTESTOR";
+  public static final String TXROOT = "TXROOT";
 
   // Execution engine tpe
   public static final String SERIAL = "SERIAL";
@@ -32,10 +38,15 @@ public class CrosschainProtocols {
 
   private static final Map<String, Class<? extends CrossControlManagerGroup>> functionCallImpls;
 
+  private static final Map<String, Class<? extends MessagingManagerGroup>> messagingImpls;
+
   static {
     functionCallImpls = new HashMap<>();
     registerFunctionCallImpl(GPACT, GpactCrossControlManagerGroup.class);
     registerFunctionCallImpl(SFC, SimpleCrossControlManagerGroup.class);
+    messagingImpls = new HashMap<>();
+    registerMessagingImpl(ATTESTOR, AttestorSignerManagerGroup.class);
+    registerMessagingImpl(TXROOT, TxRootTransferManagerGroup.class);
   }
 
   /**
@@ -63,6 +74,30 @@ public class CrosschainProtocols {
   }
 
   /**
+   * Register a crosschain messaging protocol implementation. This method can be used to update the
+   * implementation of a protocol by passing in a name that is associated with an existing
+   * implementation.
+   *
+   * @param name Name to associate with an implementation.
+   * @param implClass Protocol implementation class that implements MessagingManagerGroup.
+   */
+  public static void registerMessagingImpl(
+      final String name, final Class<? extends MessagingManagerGroup> implClass) {
+    if (implClass == null) {
+      throw new IllegalArgumentException("Attempted to register a null implementation");
+    }
+    if (name == null) {
+      throw new IllegalArgumentException(
+          "Attempted to register an implementation with a null name");
+    }
+    if (name.length() == 0) {
+      throw new IllegalArgumentException(
+          "Attempted to register an implementation with a zero length name");
+    }
+    messagingImpls.put(name, implClass);
+  }
+
+  /**
    * Create an instance of a crosschain function call implementation.
    *
    * @param implementationName Name of the implementation that must have been previously registered.
@@ -73,6 +108,22 @@ public class CrosschainProtocols {
       final String implementationName) throws Exception {
     final Class<? extends CrossControlManagerGroup> clazz =
         functionCallImpls.get(implementationName);
+    if (clazz == null) {
+      return Optional.empty();
+    }
+    return Optional.of(clazz.getDeclaredConstructor().newInstance());
+  }
+
+  /**
+   * Create an instance of a crosschain function call implementation.
+   *
+   * @param implementationName Name of the implementation that must have been previously registered.
+   * @return Implementation of CrosschainFunctionCall
+   * @throws Exception Typically thrown if the implementation has not been registered yet.
+   */
+  public static Optional<MessagingManagerGroup> getMessagingInstance(
+      final String implementationName) throws Exception {
+    final Class<? extends MessagingManagerGroup> clazz = messagingImpls.get(implementationName);
     if (clazz == null) {
       return Optional.empty();
     }

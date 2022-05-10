@@ -14,38 +14,44 @@
  */
 package net.consensys.gpact.common;
 
-import java.math.BigInteger;
 import net.consensys.gpact.common.crypto.KeyPairGen;
 import org.web3j.crypto.ECKeyPair;
 import org.web3j.crypto.Keys;
 import org.web3j.crypto.Sign;
 import org.web3j.utils.Numeric;
 
+/** Holds a private key. Used either to configure relayers or for testing. */
 public class AnIdentity {
   private ECKeyPair keyPair;
   private String address;
 
-  public AnIdentity() {
+  public static AnIdentity createNewRandomIdentity() {
     KeyPairGen keyGen = new KeyPairGen();
     String privateKey = keyGen.generateKeyPairGetPrivateKey();
+    return new AnIdentity(privateKey);
+  }
+
+  public AnIdentity(String privateKey) {
     this.keyPair = ECKeyPair.create(Numeric.toBigInt(privateKey));
     this.address = Keys.getAddress(keyPair.getPublicKey().toString(16));
   }
 
+  /**
+   * Used to create test signatures.
+   *
+   * @param plainText To be signed data.
+   * @return Signature
+   */
   public Sign.SignatureData sign(byte[] plainText) {
     return Sign.signMessage(plainText, this.keyPair);
-  }
-
-  public ECKeyPair getKeyPair() {
-    return keyPair;
   }
 
   public String getAddress() {
     return address;
   }
 
-  public BigInteger getAddressAsBigInt() {
-    return new BigInteger(this.address, 16);
-    //    return new BigInteger(this.address.substring(2), 16);
+  public byte[] getPrivateKey() {
+    // TODO this limits private key length to 256 bits.
+    return FormatConversion.bigIntegerToUint256ByteArray(this.keyPair.getPrivateKey());
   }
 }

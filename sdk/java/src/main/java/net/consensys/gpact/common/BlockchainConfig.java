@@ -19,23 +19,48 @@ public class BlockchainConfig {
   // Blockchain identifier.
   public BlockchainId bcId;
   // URI of the blockchain node to be used for connecting to the blockchain.
-  public String uri;
+  public String blockchainNodeRpcUri;
+  // Web socket URI of blockchain node to be used for connecting to the blockchain.
+  public String blockchainNodeWsUri;
+
   // Strategy to be used for setting gas prices.
   public DynamicGasProvider.Strategy gasPriceStrategy;
   // How often to poll the blockchain for a response. Typically set to the block period.
   public int period;
 
+  public String msgStoreUrlFromDispatcher;
+  public String msgStoreUrlFromUser;
+
+  public String dispatcherUri;
+
+  public String observerUri;
+
   /**
    * @param bcId Blockchain identifier.
-   * @param uri URI of the blockchain node to be used for connecting to the blockchain.
+   * @param blockchainNodeRpcUri URI of the blockchain node to be used for connecting to the
+   *     blockchain.
    * @param gasPriceStrategy Strategy to be used for setting gas prices.
    * @param period How often to poll the blockchain for a response. Typically set to the block
    *     period.
    */
-  public BlockchainConfig(String bcId, String uri, String gasPriceStrategy, String period) {
+  public BlockchainConfig(
+      String bcId,
+      String blockchainNodeRpcUri,
+      String blockchainNodeWsUri,
+      String gasPriceStrategy,
+      String period,
+      String observerUri,
+      String dispatcherUri,
+      String msgStoreUrlFromDispatcher,
+      String msgStoreUrlFromUser) {
     this.bcId = new BlockchainId(bcId);
-    this.uri = uri;
+    this.blockchainNodeRpcUri = blockchainNodeRpcUri;
+    this.blockchainNodeWsUri = blockchainNodeWsUri;
     this.gasPriceStrategy = DynamicGasProvider.Strategy.valueOf(gasPriceStrategy);
     this.period = Integer.parseInt(period);
+    this.msgStoreUrlFromDispatcher = msgStoreUrlFromDispatcher;
+    this.msgStoreUrlFromUser = msgStoreUrlFromUser;
+    this.dispatcherUri = dispatcherUri;
+    this.observerUri = observerUri;
   }
 }

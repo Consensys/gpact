@@ -17,7 +17,6 @@ include 'examples-gpact-write'
 include 'examples-sfc-erc20bridge'
 include 'examples-sfc-erc721bridge'
 include 'examples-sfc-write'
-
 include 'app-20acts'
 
 include 'perf-singlebc-hoteltrain'

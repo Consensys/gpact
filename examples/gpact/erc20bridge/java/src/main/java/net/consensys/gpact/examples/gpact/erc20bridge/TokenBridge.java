@@ -38,7 +38,7 @@ public class TokenBridge {
     }
 
     GpactExampleSystemManager exampleManager = new GpactExampleSystemManager(args[0]);
-    exampleManager.gpactStandardExampleConfig(2);
+    exampleManager.standardExampleConfig(2);
 
     BlockchainConfig root = exampleManager.getRootBcInfo();
     BlockchainConfig bc2 = exampleManager.getBc2Info();
@@ -56,7 +56,7 @@ public class TokenBridge {
             BigInteger.valueOf(CHAIN_A_TOKEN_SUPPLY),
             erc20OwnerCreds,
             root.bcId,
-            root.uri,
+            root.blockchainNodeRpcUri,
             root.gasPriceStrategy,
             root.period);
     SourceAndDestinationBlockchain chainB =
@@ -65,7 +65,7 @@ public class TokenBridge {
             BigInteger.valueOf(CHAIN_B_TOKEN_SUPPLY),
             erc20OwnerCreds,
             bc2.bcId,
-            bc2.uri,
+            bc2.blockchainNodeRpcUri,
             bc2.gasPriceStrategy,
             bc2.period);
 

@@ -31,7 +31,7 @@ public class RegistrarVerifySignatureTest extends AbstractRegistrarTest {
     setupWeb3();
     deployRegistrarContract();
     BigInteger blockchainId = BigInteger.TEN;
-    AnIdentity newSigner = new AnIdentity();
+    AnIdentity newSigner = AnIdentity.createNewRandomIdentity();
     addBlockchain(blockchainId, newSigner.getAddress());
 
     Sign.SignatureData signatureData = newSigner.sign(this.plainText);
@@ -53,8 +53,8 @@ public class RegistrarVerifySignatureTest extends AbstractRegistrarTest {
     setupWeb3();
     deployRegistrarContract();
     BigInteger blockchainId = BigInteger.TEN;
-    AnIdentity newSigner1 = new AnIdentity();
-    AnIdentity newSigner2 = new AnIdentity();
+    AnIdentity newSigner1 = AnIdentity.createNewRandomIdentity();
+    AnIdentity newSigner2 = AnIdentity.createNewRandomIdentity();
     List<String> signers = new ArrayList<>();
     signers.add(newSigner1.getAddress());
     signers.add(newSigner2.getAddress());
@@ -86,7 +86,7 @@ public class RegistrarVerifySignatureTest extends AbstractRegistrarTest {
     setupWeb3();
     deployRegistrarContract();
     BigInteger blockchainId = BigInteger.TEN;
-    AnIdentity newSigner = new AnIdentity();
+    AnIdentity newSigner = AnIdentity.createNewRandomIdentity();
     addBlockchain(blockchainId, newSigner.getAddress());
 
     Sign.SignatureData signatureData = newSigner.sign(this.plainText);
@@ -124,9 +124,9 @@ public class RegistrarVerifySignatureTest extends AbstractRegistrarTest {
     setupWeb3();
     deployRegistrarContract();
     BigInteger blockchainId = BigInteger.TEN;
-    AnIdentity newSigner1 = new AnIdentity();
+    AnIdentity newSigner1 = AnIdentity.createNewRandomIdentity();
     addBlockchain(blockchainId, newSigner1.getAddress());
-    AnIdentity newSigner2 = new AnIdentity();
+    AnIdentity newSigner2 = AnIdentity.createNewRandomIdentity();
 
     Sign.SignatureData signatureData2 = newSigner2.sign(this.plainText);
     List<String> signers = new ArrayList<>();
@@ -161,8 +161,8 @@ public class RegistrarVerifySignatureTest extends AbstractRegistrarTest {
     setupWeb3();
     deployRegistrarContract();
     BigInteger blockchainId = BigInteger.TEN;
-    AnIdentity newSigner1 = new AnIdentity();
-    AnIdentity newSigner2 = new AnIdentity();
+    AnIdentity newSigner1 = AnIdentity.createNewRandomIdentity();
+    AnIdentity newSigner2 = AnIdentity.createNewRandomIdentity();
     List<String> signers = new ArrayList<>();
     signers.add(newSigner1.getAddress());
     signers.add(newSigner2.getAddress());
@@ -205,8 +205,8 @@ public class RegistrarVerifySignatureTest extends AbstractRegistrarTest {
     setupWeb3();
     deployRegistrarContract();
     BigInteger blockchainId = BigInteger.TEN;
-    AnIdentity newSigner1 = new AnIdentity();
-    AnIdentity newSigner2 = new AnIdentity();
+    AnIdentity newSigner1 = AnIdentity.createNewRandomIdentity();
+    AnIdentity newSigner2 = AnIdentity.createNewRandomIdentity();
     List<String> signers = new ArrayList<>();
     signers.add(newSigner1.getAddress());
     signers.add(newSigner2.getAddress());
@@ -246,8 +246,8 @@ public class RegistrarVerifySignatureTest extends AbstractRegistrarTest {
     setupWeb3();
     deployRegistrarContract();
     BigInteger blockchainId = BigInteger.TEN;
-    AnIdentity newSigner1 = new AnIdentity();
-    AnIdentity newSigner2 = new AnIdentity();
+    AnIdentity newSigner1 = AnIdentity.createNewRandomIdentity();
+    AnIdentity newSigner2 = AnIdentity.createNewRandomIdentity();
     List<String> signers = new ArrayList<>();
     signers.add(newSigner1.getAddress());
     signers.add(newSigner2.getAddress());
@@ -287,8 +287,8 @@ public class RegistrarVerifySignatureTest extends AbstractRegistrarTest {
     setupWeb3();
     deployRegistrarContract();
     BigInteger blockchainId = BigInteger.TEN;
-    AnIdentity newSigner1 = new AnIdentity();
-    AnIdentity newSigner2 = new AnIdentity();
+    AnIdentity newSigner1 = AnIdentity.createNewRandomIdentity();
+    AnIdentity newSigner2 = AnIdentity.createNewRandomIdentity();
     List<String> signers = new ArrayList<>();
     signers.add(newSigner1.getAddress());
     signers.add(newSigner2.getAddress());

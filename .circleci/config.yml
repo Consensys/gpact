@@ -101,87 +101,6 @@ jobs:
 #          destination: distributions
 #          when: always
 
-  # This job does not work as the remote docker runs out of memory when trying to run
-  # the Besu container.
-  unitTestsDocker:
-    docker:
-      - image: cimg/openjdk:11.0.11
-    working_directory: ~/gpact
-    steps:
-      - prepare
-      - run:
-          name: Build web3j
-          command: |
-            # Build our Web3j
-            cd ../web3j-abi
-            ./gradlew --parallel --stacktrace --info --build-cache installDist
-      - setup_remote_docker:
-          version: 20.10.6
-          docker_layer_caching: true
-      - run:
-          name: Create blockchains
-          working_directory: ~/gpact/test-blockchains
-          command: docker-compose up --no-start --force-recreate
-      - run:
-          name: Copy config and keys. Create log directory.
-          working_directory: ~/gpact/test-blockchains
-          command: |
-            docker cp ./bc31/. test-blockchains_bc31node1_1:/config
-            docker cp ./keys/. test-blockchains_bc31node1_1:/opt/besu/keys
-            docker cp ./bc32/. test-blockchains_bc32node1_1:/config
-            docker cp ./keys/. test-blockchains_bc32node1_1:/opt/besu/keys
-      - run:
-          name: Start blockchains
-          background: true
-          working_directory: ~/gpact/test-blockchains
-          command: docker-compose up --no-recreate bc31node1
-      - run:
-          command: docker container exec test-blockchains_bc31node1_1 ls -al /tmp/besu
-          when: always
-      - run:
-          command: docker container exec test-blockchains_bc31node1_1 chmod 777 /tmp/besu
-          when: always
-      - run:
-          command: docker container exec test-blockchains_bc31node1_1 ls -al /tmp/besu
-          when: always
-      - run: docker container exec test-blockchains_bc31node1_1 ls -al /config
-      - run: sleep 10
-      #- run:
-      #    name: Build and test
-      #    command: ./gradlew test
-      - run:
-          name: Stop blockchains
-          working_directory: ~/gpact/test-blockchains
-          command: docker-compose stop
-          when: always
-      - run:
-          name: Logs from bc31
-          working_directory: ~/gpact/test-blockchains
-          command: |
-            docker container logs test-blockchains_bc31node1_1
-          when: always
-      - run:
-          name: Logs from bc32
-          working_directory: ~/gpact/test-blockchains
-          command: |
-            docker container logs test-blockchains_bc32node1_1
-          when: always
-      - run:
-          name: Remove blockchains
-          working_directory: ~/gpact/test-blockchains
-          command: docker-compose down
-          when: always
-      - run:
-          name: Save test results
-          command: |
-            mkdir -p ~/test-results/junit/
-            find . -type f -regex ".*/build/test-results/.*xml" -exec cp {} ~/test-results/junit/ \;
-          when: always
-      - store_test_results:
-          path: ~/test-results
-      - store_artifacts:
-          path: ~/test-results/junit
-
   unitTestsMachine:
     machine:
       image: ubuntu-2004:202107-02
@@ -200,6 +119,14 @@ jobs:
       - run:
           name: Check code formatting
           command: ./gradlew solCheckFormat spotlessCheck
+      - run:
+          name: Create Relayer containers
+          working_directory: services/relayer
+          command: make docker
+      - run:
+          name: Create Message Store container
+          working_directory: services/message-store
+          command: make docker
       - run:
           name: Create and Start blockchains
           working_directory: test-blockchains
@@ -225,6 +152,48 @@ jobs:
           working_directory: test-blockchains
           command: |
             docker container logs test-blockchains_bc32node1_1
+          when: always
+      - run:
+          name: Logs from bc33
+          working_directory: test-blockchains
+          command: |
+            docker container logs test-blockchains_bc33node1_1
+          when: always
+      - run:
+          name: Logs from observer1
+          working_directory: test-blockchains
+          command: |
+            docker container logs observer1
+          when: always
+      - run:
+          name: Logs from observer2
+          working_directory: test-blockchains
+          command: |
+            docker container logs observer2
+          when: always
+      - run:
+          name: Logs from observer3
+          working_directory: test-blockchains
+          command: |
+            docker container logs observer3
+          when: always
+      - run:
+          name: Logs from relayer
+          working_directory: test-blockchains
+          command: |
+            docker container logs relayer
+          when: always
+      - run:
+          name: Logs from dispatcher
+          working_directory: test-blockchains
+          command: |
+            docker container logs dispatcher
+          when: always
+      - run:
+          name: Logs from msgstore
+          working_directory: test-blockchains
+          command: |
+            docker container logs msgstore
           when: always
       - run:
           name: Remove blockchains

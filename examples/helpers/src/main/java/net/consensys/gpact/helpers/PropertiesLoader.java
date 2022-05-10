@@ -40,7 +40,7 @@ public class PropertiesLoader {
     LOG.info("Loaded properties from file {}", propertiesFile.toString());
   }
 
-  public String getProperty(String prop) {
+  private String getProperty(String prop) {
     String p = this.properties.getProperty(prop);
     if (p == null) {
       LOG.error("Property {} was not defined", prop);
@@ -49,25 +49,35 @@ public class PropertiesLoader {
     return this.properties.getProperty(prop);
   }
 
-  // Static credentials don't work for testing as multiple tests are run in parallel.
-  // The nonce values end up being wrong and the test fail.
-  //  public Credentials getCredentials() {
-  //    return Credentials.create(getProperty("PRIVATE_KEY"));
-  //  }
-  //  public Credentials getCredentials(String keyName) {
-  //    return Credentials.create(this.properties.getProperty(keyName));
-  //  }
-
   public BlockchainConfig getBlockchainInfo(String tag) {
     String bcIdStr = getProperty(tag + "_BC_ID");
     LOG.info(" {}_BC_ID: 0x{}", tag, bcIdStr);
-    String uriStr = getProperty(tag + "_URI");
-    LOG.info(" {}_URI: {}", tag, uriStr);
+    String rpcUriStr = getProperty(tag + "_BC_RPC_URI");
+    LOG.info(" {}_BC_RPC_URI: {}", tag, rpcUriStr);
+    String wsUriStr = getProperty(tag + "_BC_WS_URI");
+    LOG.info(" {}_BC_WS_URI: {}", tag, wsUriStr);
     String gasPriceStrategyStr = getProperty(tag + "_GAS");
     LOG.info(" {}_GAS: {}", tag, gasPriceStrategyStr);
     String blockPeriodStr = getProperty(tag + "_PERIOD");
     LOG.info(" {}_PERIOD: {}", tag, blockPeriodStr);
-    return new BlockchainConfig(bcIdStr, uriStr, gasPriceStrategyStr, blockPeriodStr);
+    String observerUriStr = getProperty(tag + "_OBSERVER_URI");
+    LOG.info(" {}_OBSERVER_URI: {}", tag, observerUriStr);
+    String dispatcherUriStr = getProperty(tag + "_DISPATCHER_URI");
+    LOG.info(" {}_DISPATCHER_URI: {}", tag, dispatcherUriStr);
+    String msgStoreUriFromDispatcherStr = getProperty(tag + "_MSG_STORE_FROM_DISPATCHER_URI");
+    LOG.info(" {}_MSG_STORE_FROM_DISPATCHER_URI: {}", tag, msgStoreUriFromDispatcherStr);
+    String msgStoreUriFromUserStr = getProperty(tag + "_MSG_STORE_FROM_USER_URI");
+    LOG.info(" {}_MSG_STORE_FROM_USER_URI: {}", tag, msgStoreUriFromUserStr);
+    return new BlockchainConfig(
+        bcIdStr,
+        rpcUriStr,
+        wsUriStr,
+        gasPriceStrategyStr,
+        blockPeriodStr,
+        observerUriStr,
+        dispatcherUriStr,
+        msgStoreUriFromDispatcherStr,
+        msgStoreUriFromUserStr);
   }
 
   public CrossBlockchainConsensusType getConsensusMethodology() {
@@ -80,5 +90,11 @@ public class PropertiesLoader {
     String engineType = getProperty("EXECUTION_ENGINE");
     LOG.info(" EXECUTION_ENGINE: {}", engineType);
     return ExecutionEngineType.valueOf(engineType);
+  }
+
+  public String getRelayerUri() {
+    String relayerUri = getProperty("RELAYER_URI");
+    LOG.info(" RELAYER_URI: {}", relayerUri);
+    return relayerUri;
   }
 }

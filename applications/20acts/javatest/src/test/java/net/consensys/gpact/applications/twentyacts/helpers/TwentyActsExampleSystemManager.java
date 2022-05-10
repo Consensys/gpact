@@ -1,3 +1,17 @@
+/*
+ * Copyright 2022 ConsenSys Software Inc
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
 package net.consensys.gpact.applications.twentyacts.helpers;
 
 import java.util.ArrayList;
@@ -10,7 +24,7 @@ import net.consensys.gpact.functioncall.CrossControlManager;
 import net.consensys.gpact.functioncall.CrossControlManagerGroup;
 import net.consensys.gpact.helpers.CrossBlockchainConsensusType;
 import net.consensys.gpact.helpers.PropertiesLoader;
-import net.consensys.gpact.messaging.MessagingManagerGroupInterface;
+import net.consensys.gpact.messaging.MessagingManagerGroup;
 import net.consensys.gpact.messaging.eventattest.AttestorSignerGroup;
 import net.consensys.gpact.messaging.eventattest.AttestorSignerManagerGroup;
 import net.consensys.gpact.messaging.txrootrelay.TxRootRelayerGroup;
@@ -52,9 +66,9 @@ public class TwentyActsExampleSystemManager {
     StatsHolder.log(consensusMethodology.name());
 
     // To keep the example simple, just have one signer for all blockchains.
-    AnIdentity globalSigner = new AnIdentity();
+    AnIdentity globalSigner = AnIdentity.createNewRandomIdentity();
 
-    MessagingManagerGroupInterface messagingManagerGroup = null;
+    MessagingManagerGroup messagingManagerGroup = null;
 
     this.managerGroup = new TwentyActsManagerGroup();
 
@@ -77,7 +91,7 @@ public class TwentyActsExampleSystemManager {
               deployers[3],
               this.bc3);
         }
-        attestorSignerGroup.addSignerOnAllBlockchains(globalSigner);
+        // attestorSignerGroup.addSignerOnAllBlockchains(globalSigner);
         break;
       case TRANSACTION_RECEIPT_SIGNING:
         TxRootRelayerGroup relayerGroup = new TxRootRelayerGroup();
@@ -138,7 +152,7 @@ public class TwentyActsExampleSystemManager {
 
   private void setupCrosschainTrust(
       CrossControlManagerGroup crossControlManagerGroup,
-      MessagingManagerGroupInterface messagingManagerGroup)
+      MessagingManagerGroup messagingManagerGroup)
       throws Exception {
     ArrayList<BlockchainId> bcs = crossControlManagerGroup.getAllBlockchainIds();
 
@@ -155,20 +169,21 @@ public class TwentyActsExampleSystemManager {
   }
 
   private void addBcAttestorSign(
-      MessagingManagerGroupInterface messagingManagerGroup,
+      MessagingManagerGroup messagingManagerGroup,
       CrossControlManagerGroup crossControlManagerGroup,
       AttestorSignerGroup attestorSignerGroup,
       Credentials creds,
       BlockchainConfig bc)
       throws Exception {
-    messagingManagerGroup.addBlockchainAndDeployContracts(creds, bc);
-    attestorSignerGroup.addBlockchain(bc.bcId);
-    crossControlManagerGroup.addBlockchainAndDeployContracts(
-        creds, bc, attestorSignerGroup.getVerifier(bc.bcId));
+    throw new RuntimeException("Not implemented yet");
+    //    messagingManagerGroup.addBlockchainAndDeployContracts(creds, bc);
+    //    attestorSignerGroup.addBlockchain(bc.bcId);
+    //    crossControlManagerGroup.addBlockchainAndDeployContracts(
+    //        creds, bc, attestorSignerGroup.getVerifier(bc.bcId));
   }
 
   private void addBcTxRootSign(
-      MessagingManagerGroupInterface messagingManagerGroup,
+      MessagingManagerGroup messagingManagerGroup,
       CrossControlManagerGroup crossControlManagerGroup,
       TxRootRelayerGroup relayerGroup,
       TxRootTransferGroup txRootTransferGroup,

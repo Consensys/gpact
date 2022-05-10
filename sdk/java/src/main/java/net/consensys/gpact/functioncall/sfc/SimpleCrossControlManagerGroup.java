@@ -33,7 +33,11 @@ public class SimpleCrossControlManagerGroup implements CrossControlManagerGroup 
     BcHolder holder = new BcHolder();
     holder.cbc =
         new SimpleCrossControlManager(
-            creds, bcInfo.bcId, bcInfo.uri, bcInfo.gasPriceStrategy, bcInfo.period);
+            creds,
+            bcInfo.bcId,
+            bcInfo.blockchainNodeRpcUri,
+            bcInfo.gasPriceStrategy,
+            bcInfo.period);
     holder.cbc.deployCbcContract();
     holder.cbcContractAddress = holder.cbc.getCbcContractAddress();
     holder.ver = messageVerification;
@@ -56,7 +60,11 @@ public class SimpleCrossControlManagerGroup implements CrossControlManagerGroup 
     BcHolder holder = new BcHolder();
     holder.cbc =
         new SimpleCrossControlManager(
-            creds, bcInfo.bcId, bcInfo.uri, bcInfo.gasPriceStrategy, bcInfo.period);
+            creds,
+            bcInfo.bcId,
+            bcInfo.blockchainNodeRpcUri,
+            bcInfo.gasPriceStrategy,
+            bcInfo.period);
 
     holder.cbc.loadCbcContract(cbcAddress);
     holder.cbcContractAddress = cbcAddress;

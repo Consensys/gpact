@@ -130,13 +130,16 @@ public class Erc20User {
 
     final int RETRY = 20;
     Web3j web3j =
-        Web3j.build(new HttpService(bcInfo.uri), bcInfo.period, new ScheduledThreadPoolExecutor(5));
+        Web3j.build(
+            new HttpService(bcInfo.blockchainNodeRpcUri),
+            bcInfo.period,
+            new ScheduledThreadPoolExecutor(5));
     TransactionReceiptProcessor txrProcessor =
         new PollingTransactionReceiptProcessor(web3j, bcInfo.period, RETRY);
     FastTxManager tm =
         TxManagerCache.getOrCreate(web3j, this.creds, sourceBlockchainId.asLong(), txrProcessor);
     DynamicGasProvider gasProvider =
-        new DynamicGasProvider(web3j, bcInfo.uri, bcInfo.gasPriceStrategy);
+        new DynamicGasProvider(web3j, bcInfo.blockchainNodeRpcUri, bcInfo.gasPriceStrategy);
 
     // Step 1: Approve of the bridge contract using some of the user's tokens.
     LOG.info("Approve");

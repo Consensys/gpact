@@ -45,6 +45,10 @@ public class BlockchainId {
     return this.bcId.toString(16);
   }
 
+  public String toDecimalString() {
+    return this.bcId.toString();
+  }
+
   @Override
   public String toString() {
     return "0x" + this.bcId.toString(16);

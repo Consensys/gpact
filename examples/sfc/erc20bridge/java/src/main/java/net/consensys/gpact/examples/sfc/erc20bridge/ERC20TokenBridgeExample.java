@@ -49,7 +49,7 @@ public class ERC20TokenBridgeExample {
     }
 
     SfcExampleSystemManager exampleManager = new SfcExampleSystemManager(args[0]);
-    exampleManager.sfcStandardExampleConfig(2);
+    exampleManager.standardExampleConfig(2);
 
     BlockchainConfig root = exampleManager.getRootBcInfo();
     BlockchainConfig bc2 = exampleManager.getBc2Info();
@@ -67,7 +67,7 @@ public class ERC20TokenBridgeExample {
             BigInteger.valueOf(CHAIN_A_TOKEN_SUPPLY),
             erc20OwnerCreds,
             root.bcId,
-            root.uri,
+            root.blockchainNodeRpcUri,
             root.gasPriceStrategy,
             root.period);
     AbstractERC20Bridge chainB;
@@ -78,7 +78,7 @@ public class ERC20TokenBridgeExample {
               BigInteger.valueOf(CHAIN_B_TOKEN_SUPPLY),
               erc20OwnerCreds,
               bc2.bcId,
-              bc2.uri,
+              bc2.blockchainNodeRpcUri,
               bc2.gasPriceStrategy,
               bc2.period);
     } else {
@@ -88,7 +88,7 @@ public class ERC20TokenBridgeExample {
               BigInteger.valueOf(CHAIN_B_TOKEN_SUPPLY),
               erc20OwnerCreds,
               bc2.bcId,
-              bc2.uri,
+              bc2.blockchainNodeRpcUri,
               bc2.gasPriceStrategy,
               bc2.period);
     }

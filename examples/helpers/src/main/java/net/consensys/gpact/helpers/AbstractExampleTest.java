@@ -6,6 +6,15 @@ import java.io.IOException;
 import java.util.Properties;
 
 public abstract class AbstractExampleTest {
+  public static final String ROOT_BC_ID = "1F";
+  public static final String ROOT_BC_RPC_URI = "http://127.0.0.1:8310/";
+  public static final String ROOT_BC_WS_URI = "ws://bc31node1:8546";
+  public static final String GAS_STRATEGY_FREE = "FREE";
+  public static final String POLL_PERIOD_MS = "1000";
+  public static final String OBSERVER_URI_BC1 = "http://127.0.0.1:9525";
+  public static final String DISPATCHER_URI = "http://127.0.0.1:9725";
+  public static final String MSG_STORE_FROM_DISPATCHER = "msgstore:8080";
+  public static final String MSG_STORE_FROM_USER = "127.0.0.1:8080";
 
   protected String createPropertiesFile(
       boolean useDirectSigning, boolean serialExecution, boolean oneBlockchain) throws IOException {
@@ -14,8 +23,8 @@ public abstract class AbstractExampleTest {
 
     Properties props = new Properties();
 
-    props.setProperty(
-        "PRIVATE_KEY", "40000123456789012345678903961456349a242b3a4b8a211d85ea4d89b1");
+    props.setProperty("RELAYER_URI", "http://127.0.0.1:9625");
+
     if (useDirectSigning) {
       props.setProperty("CONSENSUS_METHODOLOGY", "EVENT_SIGNING");
     } else {
@@ -29,65 +38,135 @@ public abstract class AbstractExampleTest {
     }
 
     if (oneBlockchain) {
-      props.setProperty("OTHER_BC_ID", "1F");
-      props.setProperty("OTHER_URI", "http://127.0.0.1:8310/");
-      props.setProperty("OTHER_GAS", "FREE");
-      props.setProperty("OTHER_PERIOD", "1000");
+      setProperties(
+          props,
+          "ROOT",
+          ROOT_BC_ID,
+          ROOT_BC_RPC_URI,
+          ROOT_BC_WS_URI,
+          GAS_STRATEGY_FREE,
+          POLL_PERIOD_MS,
+          OBSERVER_URI_BC1,
+          DISPATCHER_URI,
+          MSG_STORE_FROM_DISPATCHER,
+          MSG_STORE_FROM_USER);
 
-      props.setProperty("ROOT_BC_ID", "1F");
-      props.setProperty("ROOT_URI", "http://127.0.0.1:8310/");
-      props.setProperty("ROOT_GAS", "FREE");
-      props.setProperty("ROOT_PERIOD", "1000");
+      setProperties(
+          props,
+          "BC2",
+          ROOT_BC_ID,
+          ROOT_BC_RPC_URI,
+          ROOT_BC_WS_URI,
+          GAS_STRATEGY_FREE,
+          POLL_PERIOD_MS,
+          OBSERVER_URI_BC1,
+          DISPATCHER_URI,
+          MSG_STORE_FROM_DISPATCHER,
+          MSG_STORE_FROM_USER);
 
-      props.setProperty("BC2_BC_ID", "1F");
-      props.setProperty("BC2_URI", "http://127.0.0.1:8310/");
-      props.setProperty("BC2_GAS", "FREE");
-      props.setProperty("BC2_PERIOD", "1000");
+      setProperties(
+          props,
+          "BC3",
+          ROOT_BC_ID,
+          ROOT_BC_RPC_URI,
+          ROOT_BC_WS_URI,
+          GAS_STRATEGY_FREE,
+          POLL_PERIOD_MS,
+          OBSERVER_URI_BC1,
+          DISPATCHER_URI,
+          MSG_STORE_FROM_DISPATCHER,
+          MSG_STORE_FROM_USER);
 
-      props.setProperty("BC3_BC_ID", "1F");
-      props.setProperty("BC3_URI", "http://127.0.0.1:8310/");
-      props.setProperty("BC3_GAS", "FREE");
-      props.setProperty("BC3_PERIOD", "1000");
+      setProperties(
+          props,
+          "BC4",
+          ROOT_BC_ID,
+          ROOT_BC_RPC_URI,
+          ROOT_BC_WS_URI,
+          GAS_STRATEGY_FREE,
+          POLL_PERIOD_MS,
+          OBSERVER_URI_BC1,
+          DISPATCHER_URI,
+          MSG_STORE_FROM_DISPATCHER,
+          MSG_STORE_FROM_USER);
 
-      props.setProperty("BC4_BC_ID", "1F");
-      props.setProperty("BC4_URI", "http://127.0.0.1:8310/");
-      props.setProperty("BC4_GAS", "FREE");
-      props.setProperty("BC4_PERIOD", "1000");
-
-      props.setProperty("BC5_BC_ID", "1F");
-      props.setProperty("BC5_URI", "http://127.0.0.1:8310/");
-      props.setProperty("BC5_GAS", "FREE");
-      props.setProperty("BC5_PERIOD", "1000");
+      setProperties(
+          props,
+          "BC5",
+          ROOT_BC_ID,
+          ROOT_BC_RPC_URI,
+          ROOT_BC_WS_URI,
+          GAS_STRATEGY_FREE,
+          POLL_PERIOD_MS,
+          OBSERVER_URI_BC1,
+          DISPATCHER_URI,
+          MSG_STORE_FROM_DISPATCHER,
+          MSG_STORE_FROM_USER);
     } else {
-      props.setProperty("OTHER_BC_ID", "20");
-      props.setProperty("OTHER_URI", "http://127.0.0.1:8320/");
-      props.setProperty("OTHER_GAS", "FREE");
-      props.setProperty("OTHER_PERIOD", "1000");
+      setProperties(
+          props,
+          "ROOT",
+          ROOT_BC_ID,
+          ROOT_BC_RPC_URI,
+          ROOT_BC_WS_URI,
+          GAS_STRATEGY_FREE,
+          POLL_PERIOD_MS,
+          OBSERVER_URI_BC1,
+          DISPATCHER_URI,
+          MSG_STORE_FROM_DISPATCHER,
+          MSG_STORE_FROM_USER);
 
-      props.setProperty("ROOT_BC_ID", "1F");
-      props.setProperty("ROOT_URI", "http://127.0.0.1:8310/");
-      props.setProperty("ROOT_GAS", "FREE");
-      props.setProperty("ROOT_PERIOD", "1000");
+      setProperties(
+          props,
+          "BC2",
+          "20",
+          "http://127.0.0.1:8320/",
+          "ws://bc32node1:8546",
+          GAS_STRATEGY_FREE,
+          POLL_PERIOD_MS,
+          "http://127.0.0.1:9526",
+          DISPATCHER_URI,
+          MSG_STORE_FROM_DISPATCHER,
+          MSG_STORE_FROM_USER);
 
-      props.setProperty("BC2_BC_ID", "20");
-      props.setProperty("BC2_URI", "http://127.0.0.1:8320/");
-      props.setProperty("BC2_GAS", "FREE");
-      props.setProperty("BC2_PERIOD", "1000");
+      setProperties(
+          props,
+          "BC3",
+          "21",
+          "http://127.0.0.1:8330/",
+          "ws://bc33node1:8546",
+          GAS_STRATEGY_FREE,
+          POLL_PERIOD_MS,
+          "http://127.0.0.1:9527",
+          DISPATCHER_URI,
+          MSG_STORE_FROM_DISPATCHER,
+          MSG_STORE_FROM_USER);
 
-      props.setProperty("BC3_BC_ID", "21");
-      props.setProperty("BC3_URI", "http://127.0.0.1:8330/");
-      props.setProperty("BC3_GAS", "FREE");
-      props.setProperty("BC3_PERIOD", "1000");
+      setProperties(
+          props,
+          "BC4",
+          "22",
+          "http://127.0.0.1:8340/",
+          "ws://bc34node1:8546",
+          GAS_STRATEGY_FREE,
+          POLL_PERIOD_MS,
+          "http://127.0.0.1:9528",
+          DISPATCHER_URI,
+          MSG_STORE_FROM_DISPATCHER,
+          MSG_STORE_FROM_USER);
 
-      props.setProperty("BC4_BC_ID", "22");
-      props.setProperty("BC4_URI", "http://127.0.0.1:8340/");
-      props.setProperty("BC4_GAS", "FREE");
-      props.setProperty("BC4_PERIOD", "1000");
-
-      props.setProperty("BC5_BC_ID", "23");
-      props.setProperty("BC5_URI", "http://127.0.0.1:8350/");
-      props.setProperty("BC5_GAS", "FREE");
-      props.setProperty("BC5_PERIOD", "1000");
+      setProperties(
+          props,
+          "BC5",
+          "23",
+          "http://127.0.0.1:8350/",
+          "ws://bc35node1:8546",
+          GAS_STRATEGY_FREE,
+          POLL_PERIOD_MS,
+          "http://127.0.0.1:9529",
+          DISPATCHER_URI,
+          MSG_STORE_FROM_DISPATCHER,
+          MSG_STORE_FROM_USER);
     }
 
     FileOutputStream fos = new FileOutputStream(file);
@@ -96,5 +175,28 @@ public abstract class AbstractExampleTest {
     fos.close();
 
     return file.getAbsolutePath();
+  }
+
+  private void setProperties(
+      Properties props,
+      final String name,
+      final String bcId,
+      final String rpcUri,
+      final String wsUri,
+      final String gasStrategy,
+      final String pollPeriodMs,
+      final String observerUri,
+      final String dispatcherUri,
+      final String msgStoreFromDispatcher,
+      final String msgStoreFromUser) {
+    props.setProperty(name + "_BC_ID", bcId);
+    props.setProperty(name + "_BC_RPC_URI", rpcUri);
+    props.setProperty(name + "_BC_WS_URI", wsUri);
+    props.setProperty(name + "_GAS", gasStrategy);
+    props.setProperty(name + "_PERIOD", pollPeriodMs);
+    props.setProperty(name + "_OBSERVER_URI", observerUri);
+    props.setProperty(name + "_DISPATCHER_URI", dispatcherUri);
+    props.setProperty(name + "_MSG_STORE_FROM_DISPATCHER_URI", msgStoreFromDispatcher);
+    props.setProperty(name + "_MSG_STORE_FROM_USER_URI", msgStoreFromUser);
   }
 }

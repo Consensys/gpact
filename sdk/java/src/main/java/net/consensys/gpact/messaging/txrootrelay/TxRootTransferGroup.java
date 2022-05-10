@@ -39,7 +39,12 @@ public class TxRootTransferGroup {
     this.blockchains.put(
         bcInfo.bcId,
         new TxRootTransfer(
-            relayerGroup, creds, bcInfo.bcId, bcInfo.uri, bcInfo.gasPriceStrategy, bcInfo.period));
+            relayerGroup,
+            creds,
+            bcInfo.bcId,
+            bcInfo.blockchainNodeRpcUri,
+            bcInfo.gasPriceStrategy,
+            bcInfo.period));
   }
 
   public MessagingVerificationInterface getVerifier(BlockchainId bcId) throws Exception {

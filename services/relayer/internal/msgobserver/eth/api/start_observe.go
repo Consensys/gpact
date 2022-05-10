@@ -23,6 +23,7 @@ import (
 	"github.com/consensys/gpact/services/relayer/internal/msgobserver/eth/node"
 	"github.com/consensys/gpact/services/relayer/internal/rpc"
 	"github.com/ethereum/go-ethereum/common"
+	logging "github.com/rs/zerolog/log"
 )
 
 // StartObserveReq is the request to start observe.
@@ -52,6 +53,8 @@ func HandleStartObserve(data []byte) ([]byte, error) {
 	if !ok {
 		return nil, fmt.Errorf("fail to decode chain id")
 	}
+
+	logging.Info().Msgf("Start Observe: Chain: %v, Contract: %v, ChainAP: %v", chainID, req.ContractAddr, req.ChainAP)
 
 	err = instance.Observer.StartObserve(chainID, req.ChainAP, req.ContractType, common.HexToAddress(req.ContractAddr))
 	if err != nil {

@@ -43,7 +43,7 @@ public class Main {
 
     GpactExampleSystemManager exampleManager = new GpactExampleSystemManager(args[0]);
     // TODO can be configured for 5, however, need to set-up test system for 5 blockchains.
-    exampleManager.gpactStandardExampleConfig(3);
+    exampleManager.standardExampleConfig(3);
 
     BlockchainConfig root = exampleManager.getRootBcInfo();
     BlockchainConfig bc2 = exampleManager.getBc2Info();
@@ -58,15 +58,18 @@ public class Main {
     // Set-up classes to manage blockchains.
     Credentials creds = CredentialsCreator.createCredentials();
     Bc1TradeWallet bc1TradeWalletBlockchain =
-        new Bc1TradeWallet(creds, root.bcId, root.uri, root.gasPriceStrategy, root.period);
+        new Bc1TradeWallet(
+            creds, root.bcId, root.blockchainNodeRpcUri, root.gasPriceStrategy, root.period);
     Bc2BusLogic bc2BusLogicBlockchain =
-        new Bc2BusLogic(creds, bc2.bcId, bc2.uri, bc2.gasPriceStrategy, bc2.period);
+        new Bc2BusLogic(
+            creds, bc2.bcId, bc2.blockchainNodeRpcUri, bc2.gasPriceStrategy, bc2.period);
     Bc3Balances bc3BalancesBlockchain =
-        new Bc3Balances(creds, bc3.bcId, bc3.uri, bc3.gasPriceStrategy, bc3.period);
+        new Bc3Balances(
+            creds, bc3.bcId, bc3.blockchainNodeRpcUri, bc3.gasPriceStrategy, bc3.period);
     Bc4Oracle bc4OracleBlockchain =
-        new Bc4Oracle(creds, bc4.bcId, bc4.uri, bc4.gasPriceStrategy, bc4.period);
+        new Bc4Oracle(creds, bc4.bcId, bc4.blockchainNodeRpcUri, bc4.gasPriceStrategy, bc4.period);
     Bc5Stock bc5StockBlockchain =
-        new Bc5Stock(creds, bc5.bcId, bc5.uri, bc5.gasPriceStrategy, bc5.period);
+        new Bc5Stock(creds, bc5.bcId, bc5.blockchainNodeRpcUri, bc5.gasPriceStrategy, bc5.period);
 
     // Set-up client side and deploy contracts on the blockchains.
     BlockchainId bc3BcId = bc3BalancesBlockchain.getBlockchainId();
