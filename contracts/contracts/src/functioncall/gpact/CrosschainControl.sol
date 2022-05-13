@@ -444,7 +444,9 @@ contract CrosschainControl is
             _contract,
             _functionCallData
         );
-
+        if (failed) {
+            revert("Cross Blockchain Call failed");
+        }
         if (!failed) {
             if (!(compare(returnValue, bytes("")))) {
                 emit CallFailure(
