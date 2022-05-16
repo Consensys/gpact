@@ -56,8 +56,6 @@ func main() {
 	instance.MQ = messageQ
 	defer messageQ.Stop()
 
-	logging.Info("Configuration: %v", conf)
-
 	// Configure relay routes data store
 	routes, err := router.NewRelayRoutes(conf.RelayerRoutesDSPath)
 	if err != nil {

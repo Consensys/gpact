@@ -56,8 +56,7 @@ type Config struct {
 	ObserverDSPath string `mapstructure:"OBSERVER_DS_PATH"` // Observer DS Path: /var/.relayer/ds3
 
 	// Relayer routes datastore location
-	RelayerRoutesDSPath string `mapstructure:"RELAYER_ROUTES_DS_PATH"` // Relayer Routes DS Path: /var/.relayer/ds4
-
+	RelayerRoutesDSPath string `mapstructure:"RELAYER_ROUTES_DS_PATH"`
 }
 
 // NewConfig reads environmental variables and creates a new configuration.
@@ -88,6 +87,6 @@ func NewConfig() Config {
 		TransactorDSPath:    conf.GetString("TRANSACTOR_DS_PATH"),
 		VerifierDSPath:      conf.GetString("VERIFIER_DS_PATH"),
 		ObserverDSPath:      conf.GetString("OBSERVER_DS_PATH"),
-		RelayerRoutesDSPath: "./relayer-routes/",
+		RelayerRoutesDSPath: conf.GetString("RELAYER_ROUTES_DS_PATH"),
 	}
 }

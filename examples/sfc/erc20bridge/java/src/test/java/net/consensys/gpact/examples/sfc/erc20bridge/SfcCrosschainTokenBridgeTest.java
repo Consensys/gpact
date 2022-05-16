@@ -1,7 +1,6 @@
 package net.consensys.gpact.examples.sfc.erc20bridge;
 
 import net.consensys.gpact.helpers.AbstractExampleTest;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 public class SfcCrosschainTokenBridgeTest extends AbstractExampleTest {

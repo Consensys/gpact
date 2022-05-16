@@ -99,9 +99,10 @@ public class AttestorRelayerWebApi {
 
     config("Observer", observerUrl, requestBody);
   }
+
   public static void addMessageStoreRoute(
-          String relayerUrl, String sourceNetwork, String sourceContract)
-          throws CrosschainProtocolStackException {
+      String relayerUrl, String sourceNetwork, String sourceContract)
+      throws CrosschainProtocolStackException {
 
     ObjectMapper mapper = new ObjectMapper();
     ObjectNode user = mapper.createObjectNode();
