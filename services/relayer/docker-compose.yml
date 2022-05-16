@@ -26,6 +26,7 @@ services:
     networks:
       - shared
     ports:
+      - 8310:8545/tcp
       - 8311:8546
 
   bc32node1:
@@ -38,6 +39,7 @@ services:
     networks:
       - shared
     ports:
+      - 8320:8545/tcp
       - 8321:8546
 
   rabbitmq:

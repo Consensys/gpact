@@ -5,14 +5,12 @@ import org.junit.jupiter.api.Test;
 
 public class SfcCrosschainTokenBridgeTest extends AbstractExampleTest {
 
-  // TODO Remove disable
   @Test
   public void directSignMultipleBlockchainMinting() throws Exception {
     String tempPropsFile = createPropertiesFile(true, false, false);
     ERC20TokenBridgeExample.main(new String[] {tempPropsFile}, false);
   }
 
-  // TODO Remove disable
   @Test
   public void directSignMultipleBlockchainMassC() throws Exception {
     String tempPropsFile = createPropertiesFile(true, false, false);
