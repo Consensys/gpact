@@ -49,8 +49,12 @@ public class AttestorSignerGroup {
     AttestorRelayer relayer = new AttestorRelayer(relayerUri, signingCredentials.getPrivateKey());
     for (AttestorRelayer.Source source : sources) {
       relayer.addNewSource(source);
+      LOG.info(String.format("Adding Message Store Route: %s %s", source.getBlockchainId().toDecimalString(), source.getCrosschainControlAddr()));
+      relayer.addMessageStoreRoute(relayerUri, source.getBlockchainId().toDecimalString(), source.getCrosschainControlAddr());
     }
     relayer.addMessageStore(dispatcherUri, msgStoreUriFromDispatcher, msgStoreUriFromUser);
+
+
   }
 
   public MessagingVerificationInterface getVerifier(BlockchainId bcId) throws Exception {

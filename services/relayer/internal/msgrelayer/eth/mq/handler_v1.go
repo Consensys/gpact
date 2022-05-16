@@ -61,6 +61,15 @@ func handleV1(req messages.Message) {
 		return
 	}
 	srcAddr := common.HexToAddress(msg.Source.ContractAddress)
+
+	// If this message should be routed to the message store, remove the destination attribute
+	if instance.RelayRoutes.ShouldRouteToStore(&msg.Source) {
+		logging.Info("Routing Message %v to Message Store", msg.ID)
+		msg.Destination = v1.ApplicationAddress{}
+	} else {
+		logging.Info("NOT routing Message %v to Message Store", msg.ID)
+	}
+
 	//destID, err := strconv.Atoi(msg.Destination.NetworkID)
 	//if err != nil {
 	//	logging.Error(err.Error())
@@ -103,6 +112,7 @@ func handleV1(req messages.Message) {
 		Proof:     hex.EncodeToString(signature),
 	})
 
+	logging.Info("Message Destination: %v", msg.Destination.ContractAddress)
 	// Pass message to MQ.
 	go instance.MQ.Request(msg.Version, msg.MsgType, msg)
 }

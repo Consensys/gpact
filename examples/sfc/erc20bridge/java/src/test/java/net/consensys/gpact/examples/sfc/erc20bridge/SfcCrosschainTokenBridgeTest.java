@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 public class SfcCrosschainTokenBridgeTest extends AbstractExampleTest {
 
   // TODO Remove disable
-  @Disabled
   @Test
   public void directSignMultipleBlockchainMinting() throws Exception {
     String tempPropsFile = createPropertiesFile(true, false, false);
@@ -15,7 +14,6 @@ public class SfcCrosschainTokenBridgeTest extends AbstractExampleTest {
   }
 
   // TODO Remove disable
-  @Disabled
   @Test
   public void directSignMultipleBlockchainMassC() throws Exception {
     String tempPropsFile = createPropertiesFile(true, false, false);

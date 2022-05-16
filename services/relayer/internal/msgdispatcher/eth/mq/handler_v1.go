@@ -44,11 +44,6 @@ func handleV1(req messages.Message) {
 	}
 	logging.Info("Process message with ID: %v", msg.ID)
 
-	destID, err := strconv.Atoi(msg.Destination.NetworkID)
-	if err != nil {
-		logging.Error(err.Error())
-		return
-	}
 	srcID, err := strconv.Atoi(msg.Source.NetworkID)
 	if err != nil {
 		logging.Error(err.Error())
@@ -58,6 +53,11 @@ func handleV1(req messages.Message) {
 	destAddr := common.HexToAddress(msg.Destination.ContractAddress)
 	empty := common.Address{}
 	if destAddr != empty {
+		destID, err := strconv.Atoi(msg.Destination.NetworkID)
+		if err != nil {
+			logging.Error(err.Error())
+			return
+		}
 		logging.Info("Received message for bridging from contract %v on chain %v to contract %v on chain %v", srcAddr.String(), srcID, destAddr.String(), destID)
 
 		// Get proof

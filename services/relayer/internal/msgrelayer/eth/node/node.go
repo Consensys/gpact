@@ -16,6 +16,7 @@ package node
  */
 
 import (
+	"github.com/consensys/gpact/services/relayer/internal/msgrelayer/eth/router"
 	"sync"
 
 	"github.com/consensys/gpact/services/relayer/internal/mqserver"
@@ -31,6 +32,8 @@ type Node struct {
 	RPC rpc.Server
 
 	Signer signer.Signer
+
+	RelayRoutes router.RelayRoutes
 }
 
 // Single instance of the gateway
