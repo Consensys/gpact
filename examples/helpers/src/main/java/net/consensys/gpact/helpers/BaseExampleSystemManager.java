@@ -26,16 +26,13 @@ import net.consensys.gpact.functioncall.CrossControlManagerGroup;
 import net.consensys.gpact.messaging.MessagingManagerGroup;
 import net.consensys.gpact.messaging.common.attestorrelayer.AttestorRelayer;
 import net.consensys.gpact.messaging.eventattest.AttestorSignerGroup;
+import net.consensys.gpact.messaging.eventrelay.EventRelayGroup;
 import net.consensys.gpact.messaging.txrootrelay.TxRootRelayerGroup;
 import net.consensys.gpact.messaging.txrootrelay.TxRootTransferGroup;
 import net.consensys.gpact.messaging.txrootrelay.TxRootTransferManagerGroup;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
 
 public abstract class BaseExampleSystemManager {
-  static final Logger LOG = LogManager.getLogger(BaseExampleSystemManager.class);
-
   private final String propsFileName;
 
   protected BlockchainConfig root;
@@ -116,6 +113,33 @@ public abstract class BaseExampleSystemManager {
             this.root.msgStoreUrlFromDispatcher,
             this.root.msgStoreUrlFromUser);
         break;
+      case EVENT_RELAY:
+        EventRelayGroup eventRelayGroup = new EventRelayGroup();
+        this.messagingManagerGroup =
+                CrosschainProtocols.getMessagingInstance(CrosschainProtocols.EVENTRELAY).get();
+
+        addBcEventRelay(
+                messagingManagerGroup,
+                crossControlManagerGroup,
+                eventRelayGroup,
+                creds,
+                this.root);
+
+        addBcEventRelay(
+                messagingManagerGroup,
+                crossControlManagerGroup,
+                eventRelayGroup,
+                creds,
+                this.bc2);
+        if (numberOfBlockchains == 3) {
+          addBcEventRelay(
+                  messagingManagerGroup,
+                  crossControlManagerGroup,
+                  eventRelayGroup,
+                  creds,
+                  this.bc3);
+        }
+        break;
       case TRANSACTION_RECEIPT_SIGNING:
         TxRootRelayerGroup relayerGroup = new TxRootRelayerGroup();
         TxRootTransferGroup txRootTransferGroup = new TxRootTransferGroup();
@@ -189,11 +213,11 @@ public abstract class BaseExampleSystemManager {
       BlockchainConfig bc,
       List<AttestorRelayer.Source> sources)
       throws Exception {
+    crossControlManagerGroup.addBlockchainAndDeployContracts(creds, bc);
+    String crosschainControlAddr = crossControlManagerGroup.getCbcAddress(bc.bcId);
     messagingManagerGroup.addBlockchainAndDeployContracts(creds, bc);
     attestorSignerGroup.addBlockchain(bc.bcId, bc.msgStoreUrlFromUser);
-    crossControlManagerGroup.addBlockchainAndDeployContracts(
-        creds, bc, attestorSignerGroup.getVerifier(bc.bcId));
-    String crosschainControlAddr = crossControlManagerGroup.getCbcAddress(bc.bcId);
+    crossControlManagerGroup.setMessageVerifier(bc.bcId, attestorSignerGroup.getVerifier(bc.bcId));
     sources.add(
         new AttestorRelayer.Source(
             bc.bcId,
@@ -202,6 +226,20 @@ public abstract class BaseExampleSystemManager {
             bc.observerUri,
             bc.blockchainNodeWsUri));
   }
+
+  private void addBcEventRelay(
+          MessagingManagerGroup messagingManagerGroup,
+          CrossControlManagerGroup crossControlManagerGroup,
+          EventRelayGroup eventRelayGroup,
+          Credentials creds,
+          BlockchainConfig bc)
+          throws Exception {
+    crossControlManagerGroup.addBlockchainAndDeployContracts(creds, bc);
+    String crosschainControlAddr = crossControlManagerGroup.getCbcAddress(bc.bcId);
+    messagingManagerGroup.addBlockchainAndDeployContracts(creds, bc, crosschainControlAddr);
+    crossControlManagerGroup.setMessageVerifier(bc.bcId, eventRelayGroup.getVerifier(bc.bcId));
+  }
+
 
   private void addBcTxRootSign(
       MessagingManagerGroup messagingManagerGroup,
@@ -218,7 +256,8 @@ public abstract class BaseExampleSystemManager {
         bc,
         ((TxRootTransferManagerGroup) messagingManagerGroup).getTxRootContractAddress(bc.bcId));
     crossControlManagerGroup.addBlockchainAndDeployContracts(
-        creds, bc, txRootTransferGroup.getVerifier(bc.bcId));
+        creds, bc);
+    crossControlManagerGroup.setMessageVerifier(bc.bcId, txRootTransferGroup.getVerifier(bc.bcId));
   }
 
   public BlockchainConfig getRootBcInfo() {

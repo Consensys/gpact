@@ -40,8 +40,7 @@ public class GpactCrossControlManagerGroup implements CrossControlManagerGroup {
   @Override
   public void addBlockchainAndDeployContracts(
       Credentials creds,
-      BlockchainConfig bcInfo,
-      MessagingVerificationInterface messageVerification)
+      BlockchainConfig bcInfo)
       throws Exception {
     BlockchainId blockchainId = bcInfo.bcId;
     if (this.blockchains.containsKey(blockchainId)) {
@@ -59,7 +58,6 @@ public class GpactCrossControlManagerGroup implements CrossControlManagerGroup {
             bcInfo.period);
     holder.cbc.deployContract();
     holder.cbcContractAddress = holder.cbc.getCbcContractAddress();
-    holder.ver = messageVerification;
 
     this.blockchains.put(blockchainId, holder);
   }
@@ -68,8 +66,7 @@ public class GpactCrossControlManagerGroup implements CrossControlManagerGroup {
   public void addBlockchainAndLoadCbcContract(
       Credentials creds,
       BlockchainConfig bcInfo,
-      String cbcAddress,
-      MessagingVerificationInterface messageVerification)
+      String cbcAddress)
       throws Exception {
     BlockchainId blockchainId = bcInfo.bcId;
     if (this.blockchains.containsKey(blockchainId)) {
@@ -87,9 +84,14 @@ public class GpactCrossControlManagerGroup implements CrossControlManagerGroup {
 
     holder.cbc.loadContract(cbcAddress);
     holder.cbcContractAddress = cbcAddress;
-    holder.ver = messageVerification;
 
     this.blockchains.put(blockchainId, holder);
+  }
+
+  @Override
+  public void setMessageVerifier(final BlockchainId bcId, final MessagingVerificationInterface messageVerification) {
+    BcHolder holder = this.blockchains.get(bcId);
+    holder.ver = messageVerification;
   }
 
   @Override

@@ -21,6 +21,7 @@ import net.consensys.gpact.CrosschainProtocols;
 import net.consensys.gpact.common.BlockchainConfig;
 import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.functioncall.*;
+import net.consensys.gpact.functioncall.gpact.GpactCrossControlManagerGroup;
 import net.consensys.gpact.messaging.MessagingVerificationInterface;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -35,8 +36,7 @@ public class TwentyActsManagerGroup implements CrossControlManagerGroup {
   @Override
   public void addBlockchainAndDeployContracts(
       Credentials creds,
-      BlockchainConfig bcInfo,
-      MessagingVerificationInterface messageVerification)
+      BlockchainConfig bcInfo)
       throws Exception {
     BlockchainId blockchainId = bcInfo.bcId;
     if (this.blockchains.containsKey(blockchainId)) {
@@ -54,7 +54,6 @@ public class TwentyActsManagerGroup implements CrossControlManagerGroup {
             bcInfo.period);
     holder.cbc.deployCbcContract();
     holder.cbcContractAddress = holder.cbc.getCbcContractAddress();
-    holder.ver = messageVerification;
 
     this.blockchains.put(blockchainId, holder);
   }
@@ -63,8 +62,7 @@ public class TwentyActsManagerGroup implements CrossControlManagerGroup {
   public void addBlockchainAndLoadCbcContract(
       Credentials creds,
       BlockchainConfig bcInfo,
-      String cbcAddress,
-      MessagingVerificationInterface messageVerification)
+      String cbcAddress)
       throws Exception {
     BlockchainId blockchainId = bcInfo.bcId;
     if (this.blockchains.containsKey(blockchainId)) {
@@ -82,10 +80,16 @@ public class TwentyActsManagerGroup implements CrossControlManagerGroup {
 
     holder.cbc.loadCbcContract(cbcAddress);
     holder.cbcContractAddress = cbcAddress;
-    holder.ver = messageVerification;
 
     this.blockchains.put(blockchainId, holder);
   }
+
+  @Override
+  public void setMessageVerifier(final BlockchainId bcId, final MessagingVerificationInterface messageVerification) {
+    BcHolder holder = this.blockchains.get(bcId);
+    holder.ver = messageVerification;
+  }
+
 
   @Override
   public CrosschainCallResult executeCrosschainCall(
