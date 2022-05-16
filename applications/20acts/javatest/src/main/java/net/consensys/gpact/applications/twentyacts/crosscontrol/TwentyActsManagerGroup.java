@@ -21,7 +21,6 @@ import net.consensys.gpact.CrosschainProtocols;
 import net.consensys.gpact.common.BlockchainConfig;
 import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.functioncall.*;
-import net.consensys.gpact.functioncall.gpact.GpactCrossControlManagerGroup;
 import net.consensys.gpact.messaging.MessagingVerificationInterface;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -34,9 +33,7 @@ public class TwentyActsManagerGroup implements CrossControlManagerGroup {
   private Map<BlockchainId, BcHolder> blockchains = new HashMap<>();
 
   @Override
-  public void addBlockchainAndDeployContracts(
-      Credentials creds,
-      BlockchainConfig bcInfo)
+  public void addBlockchainAndDeployContracts(Credentials creds, BlockchainConfig bcInfo)
       throws Exception {
     BlockchainId blockchainId = bcInfo.bcId;
     if (this.blockchains.containsKey(blockchainId)) {
@@ -60,10 +57,7 @@ public class TwentyActsManagerGroup implements CrossControlManagerGroup {
 
   @Override
   public void addBlockchainAndLoadCbcContract(
-      Credentials creds,
-      BlockchainConfig bcInfo,
-      String cbcAddress)
-      throws Exception {
+      Credentials creds, BlockchainConfig bcInfo, String cbcAddress) throws Exception {
     BlockchainId blockchainId = bcInfo.bcId;
     if (this.blockchains.containsKey(blockchainId)) {
       return;
@@ -85,11 +79,11 @@ public class TwentyActsManagerGroup implements CrossControlManagerGroup {
   }
 
   @Override
-  public void setMessageVerifier(final BlockchainId bcId, final MessagingVerificationInterface messageVerification) {
+  public void setMessageVerifier(
+      final BlockchainId bcId, final MessagingVerificationInterface messageVerification) {
     BcHolder holder = this.blockchains.get(bcId);
     holder.ver = messageVerification;
   }
-
 
   @Override
   public CrosschainCallResult executeCrosschainCall(

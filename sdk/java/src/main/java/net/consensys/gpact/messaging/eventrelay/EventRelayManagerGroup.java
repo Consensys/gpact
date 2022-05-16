@@ -14,17 +14,16 @@
  */
 package net.consensys.gpact.messaging.eventrelay;
 
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import net.consensys.gpact.common.BlockchainConfig;
 import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.messaging.MessagingManagerGroup;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
-
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 /** Manage multiple blockchains, each holding a set of registrar and verification contracts */
 public class EventRelayManagerGroup implements MessagingManagerGroup {
@@ -34,13 +33,13 @@ public class EventRelayManagerGroup implements MessagingManagerGroup {
 
   @Override
   public void addBlockchainAndDeployContracts(Credentials creds, BlockchainConfig bcInfo)
-          throws Exception {
+      throws Exception {
     throw new RuntimeException("Not implemented");
   }
 
-
   @Override
-  public void addBlockchainAndDeployContracts(Credentials creds, BlockchainConfig bcInfo, String additionalContractAddress)
+  public void addBlockchainAndDeployContracts(
+      Credentials creds, BlockchainConfig bcInfo, String additionalContractAddress)
       throws Exception {
     BlockchainId blockchainId = bcInfo.bcId;
     if (this.blockchains.containsKey(blockchainId)) {

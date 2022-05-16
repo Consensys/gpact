@@ -14,18 +14,16 @@
  */
 package net.consensys.gpact.messaging.eventrelay;
 
-import net.consensys.gpact.common.BlockchainId;
-import net.consensys.gpact.messaging.MessagingVerificationInterface;
-
 import java.util.HashMap;
 import java.util.Map;
+import net.consensys.gpact.common.BlockchainId;
+import net.consensys.gpact.messaging.MessagingVerificationInterface;
 
 /** Manages a set of EventRelay objects for a set of blockchains. */
 public class EventRelayGroup {
   private Map<BlockchainId, EventRelay> blockchains = new HashMap<>();
 
-  public void addBlockchain(BlockchainId blockchainId)
-      throws Exception {
+  public void addBlockchain(BlockchainId blockchainId) throws Exception {
     if (this.blockchains.containsKey(blockchainId)) {
       return;
     }

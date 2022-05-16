@@ -38,9 +38,7 @@ public class GpactCrossControlManagerGroup implements CrossControlManagerGroup {
   private final Map<BlockchainId, BcHolder> blockchains = new HashMap<>();
 
   @Override
-  public void addBlockchainAndDeployContracts(
-      Credentials creds,
-      BlockchainConfig bcInfo)
+  public void addBlockchainAndDeployContracts(Credentials creds, BlockchainConfig bcInfo)
       throws Exception {
     BlockchainId blockchainId = bcInfo.bcId;
     if (this.blockchains.containsKey(blockchainId)) {
@@ -64,10 +62,7 @@ public class GpactCrossControlManagerGroup implements CrossControlManagerGroup {
 
   @Override
   public void addBlockchainAndLoadCbcContract(
-      Credentials creds,
-      BlockchainConfig bcInfo,
-      String cbcAddress)
-      throws Exception {
+      Credentials creds, BlockchainConfig bcInfo, String cbcAddress) throws Exception {
     BlockchainId blockchainId = bcInfo.bcId;
     if (this.blockchains.containsKey(blockchainId)) {
       return;
@@ -89,7 +84,8 @@ public class GpactCrossControlManagerGroup implements CrossControlManagerGroup {
   }
 
   @Override
-  public void setMessageVerifier(final BlockchainId bcId, final MessagingVerificationInterface messageVerification) {
+  public void setMessageVerifier(
+      final BlockchainId bcId, final MessagingVerificationInterface messageVerification) {
     BcHolder holder = this.blockchains.get(bcId);
     holder.ver = messageVerification;
   }

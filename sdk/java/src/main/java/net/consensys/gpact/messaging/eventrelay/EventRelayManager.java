@@ -14,6 +14,8 @@
  */
 package net.consensys.gpact.messaging.eventrelay;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.common.DynamicGasProvider;
 import net.consensys.gpact.messaging.common.RegistrarManager;
@@ -21,9 +23,6 @@ import net.consensys.gpact.soliditywrappers.messaging.eventrelay.EventRelayVerif
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
-
-import java.io.IOException;
-import java.util.ArrayList;
 
 /** Manages the registrar and crosschain verifier contracts on a blockchain. */
 public class EventRelayManager extends RegistrarManager {
@@ -51,8 +50,12 @@ public class EventRelayManager extends RegistrarManager {
   public void deployContracts() throws Exception {
     super.deployContracts();
     this.verifier =
-            EventRelayVerifier.deploy(
-                this.web3j, this.tm, this.gasProvider, this.registrarContract.getContractAddress(), this.functionCallContract)
+        EventRelayVerifier.deploy(
+                this.web3j,
+                this.tm,
+                this.gasProvider,
+                this.registrarContract.getContractAddress(),
+                this.functionCallContract)
             .send();
     LOG.debug(" Verifier Contract: {}", this.verifier.getContractAddress());
   }
@@ -68,7 +71,7 @@ public class EventRelayManager extends RegistrarManager {
   public void loadContracts(ArrayList<String> addresses) {
     super.loadContracts(addresses);
     this.verifier =
-            EventRelayVerifier.load(addresses.get(1), this.web3j, this.tm, this.gasProvider);
+        EventRelayVerifier.load(addresses.get(1), this.web3j, this.tm, this.gasProvider);
   }
 
   @Override

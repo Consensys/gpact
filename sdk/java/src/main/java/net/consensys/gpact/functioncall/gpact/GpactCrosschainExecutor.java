@@ -97,7 +97,8 @@ public class GpactCrosschainExecutor {
             rootCbcContract.getCbcContractAddress(),
             GpactCrossControlManager.START_EVENT_SIGNATURE);
     if (this.signedStartEvent == null) {
-      throw new RuntimeException("Messaging layer not configured to return proofs to function call layer");
+      throw new RuntimeException(
+          "Messaging layer not configured to return proofs to function call layer");
     }
   }
 
@@ -139,7 +140,8 @@ public class GpactCrosschainExecutor {
             GpactCrossControlManager.SEGMENT_EVENT_SIGNATURE);
     this.transactionReceipts.put(mapKey, txr);
     if (signedSegEvent == null) {
-      throw new RuntimeException("Messaging layer not configured to return proofs to function call layer");
+      throw new RuntimeException(
+          "Messaging layer not configured to return proofs to function call layer");
     }
 
     // Store the segment event for the call that has just occurred to the map so it can be accessed
@@ -178,7 +180,8 @@ public class GpactCrosschainExecutor {
             rootCbcContract.getCbcContractAddress(),
             GpactCrossControlManager.ROOT_EVENT_SIGNATURE);
     if (this.signedRootEvent == null) {
-      throw new RuntimeException("Messaging layer not configured to return proofs to function call layer");
+      throw new RuntimeException(
+          "Messaging layer not configured to return proofs to function call layer");
     }
     this.transactionReceipts.put(ROOT_CALL_MAP_KEY, txr);
     this.success = rootCbcContract.getRootEventSuccess();

@@ -90,10 +90,10 @@ public class Erc721User {
     this.crossControlManagerGroup =
         CrosschainProtocols.getFunctionCallInstance(CrosschainProtocols.SFC).get();
     this.crossControlManagerGroup.addBlockchainAndLoadCbcContract(
-            this.creds, bcInfoA, cbcContractAddressOnBcA);
+        this.creds, bcInfoA, cbcContractAddressOnBcA);
     this.crossControlManagerGroup.setMessageVerifier(bcInfoA.bcId, msgVerA);
     this.crossControlManagerGroup.addBlockchainAndLoadCbcContract(
-            this.creds, bcInfoB, cbcContractAddressOnBcB);
+        this.creds, bcInfoB, cbcContractAddressOnBcB);
     this.crossControlManagerGroup.setMessageVerifier(bcInfoB.bcId, msgVerB);
 
     this.bcInfoA = bcInfoA;

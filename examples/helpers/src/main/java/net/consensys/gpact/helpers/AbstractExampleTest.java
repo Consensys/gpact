@@ -23,14 +23,14 @@ public abstract class AbstractExampleTest {
   }
 
   protected String createPropertiesFile(
-          boolean useDirectSigning, boolean serialExecution, boolean oneBlockchain) throws IOException {
-    MessagingType msgType = useDirectSigning ? MessagingType.EVENT_SIGNING : MessagingType.TRANSACTION_RECEIPT_SIGNING;
+      boolean useDirectSigning, boolean serialExecution, boolean oneBlockchain) throws IOException {
+    MessagingType msgType =
+        useDirectSigning ? MessagingType.EVENT_SIGNING : MessagingType.TRANSACTION_RECEIPT_SIGNING;
     return createPropertiesFile(msgType, serialExecution, oneBlockchain);
   }
 
-
   protected String createPropertiesFile(
-            MessagingType msgType, boolean serialExecution, boolean oneBlockchain) throws IOException {
+      MessagingType msgType, boolean serialExecution, boolean oneBlockchain) throws IOException {
     File file = File.createTempFile("temp", null);
     //    file.deleteOnExit();
 

@@ -19,5 +19,4 @@ public class SfcErc721BridgeExampleTest extends AbstractExampleTest {
     String tempPropsFile = createPropertiesFile(MessagingType.EVENT_RELAY, false, false);
     Erc721TokenBridgeExample.main(new String[] {tempPropsFile});
   }
-
 }

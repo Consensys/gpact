@@ -14,20 +14,15 @@
  */
 package net.consensys.gpact.messaging.eventrelay;
 
+import java.util.List;
 import net.consensys.gpact.common.BlockchainId;
-import net.consensys.gpact.common.FormatConversion;
 import net.consensys.gpact.messaging.MessagingVerificationInterface;
 import net.consensys.gpact.messaging.SignedEvent;
-import net.consensys.gpact.messaging.common.attestorrelayer.AttestorRelayer;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
-import java.util.List;
-
 /**
- * Provides dummy information back to the function call layer. For event relay, the relayers
- * sign the event and then forward it to the target chain.
+ * Provides dummy information back to the function call layer. For event relay, the relayers sign
+ * the event and then forward it to the target chain.
  */
 public class EventRelay implements MessagingVerificationInterface {
 
@@ -47,5 +42,4 @@ public class EventRelay implements MessagingVerificationInterface {
       throws Exception {
     return null;
   }
-
 }

@@ -31,21 +31,21 @@ public interface MessagingManagerGroup {
    */
   void addBlockchainAndDeployContracts(Credentials creds, BlockchainConfig bcInfo) throws Exception;
 
-  default void addBlockchainAndDeployContracts(Credentials creds, BlockchainConfig bcInfo, String additionalContractAddress)
-          throws Exception {
+  default void addBlockchainAndDeployContracts(
+      Credentials creds, BlockchainConfig bcInfo, String additionalContractAddress)
+      throws Exception {
     throw new RuntimeException("Not implemented");
   }
 
-
-    /**
-     * Add a blockchain to be managed by this class. Load contracts that have previously been
-     * deployed.
-     *
-     * @param creds Credentials to use for transactions on the blockchain.
-     * @param bcInfo Blockchain configuration information.
-     * @param addresses Addresses of contracts.
-     * @throws Exception If there is an issue; typically due to issues deploying the contracts.
-     */
+  /**
+   * Add a blockchain to be managed by this class. Load contracts that have previously been
+   * deployed.
+   *
+   * @param creds Credentials to use for transactions on the blockchain.
+   * @param bcInfo Blockchain configuration information.
+   * @param addresses Addresses of contracts.
+   * @throws Exception If there is an issue; typically due to issues deploying the contracts.
+   */
   void addBlockchainAndLoadContracts(
       Credentials creds, BlockchainConfig bcInfo, ArrayList<String> addresses) throws Exception;
 

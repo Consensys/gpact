@@ -78,8 +78,7 @@ class SimpleCrosschainExecutor {
     if (signedCrossCallEvent == null) {
       // The messaging protocol will complete the transaction for the user.
       // There is no more to do.
-      return new CrosschainCallResultImpl(
-              rootCall, true, transactionReceipts, null);
+      return new CrosschainCallResultImpl(rootCall, true, transactionReceipts, null);
     }
 
     BlockchainId destBcId = new BlockchainId(crossCallEvent._destBcId);

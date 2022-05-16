@@ -116,28 +116,16 @@ public abstract class BaseExampleSystemManager {
       case EVENT_RELAY:
         EventRelayGroup eventRelayGroup = new EventRelayGroup();
         this.messagingManagerGroup =
-                CrosschainProtocols.getMessagingInstance(CrosschainProtocols.EVENTRELAY).get();
+            CrosschainProtocols.getMessagingInstance(CrosschainProtocols.EVENTRELAY).get();
 
         addBcEventRelay(
-                messagingManagerGroup,
-                crossControlManagerGroup,
-                eventRelayGroup,
-                creds,
-                this.root);
+            messagingManagerGroup, crossControlManagerGroup, eventRelayGroup, creds, this.root);
 
         addBcEventRelay(
-                messagingManagerGroup,
-                crossControlManagerGroup,
-                eventRelayGroup,
-                creds,
-                this.bc2);
+            messagingManagerGroup, crossControlManagerGroup, eventRelayGroup, creds, this.bc2);
         if (numberOfBlockchains == 3) {
           addBcEventRelay(
-                  messagingManagerGroup,
-                  crossControlManagerGroup,
-                  eventRelayGroup,
-                  creds,
-                  this.bc3);
+              messagingManagerGroup, crossControlManagerGroup, eventRelayGroup, creds, this.bc3);
         }
         break;
       case TRANSACTION_RECEIPT_SIGNING:
@@ -228,18 +216,18 @@ public abstract class BaseExampleSystemManager {
   }
 
   private void addBcEventRelay(
-          MessagingManagerGroup messagingManagerGroup,
-          CrossControlManagerGroup crossControlManagerGroup,
-          EventRelayGroup eventRelayGroup,
-          Credentials creds,
-          BlockchainConfig bc)
-          throws Exception {
+      MessagingManagerGroup messagingManagerGroup,
+      CrossControlManagerGroup crossControlManagerGroup,
+      EventRelayGroup eventRelayGroup,
+      Credentials creds,
+      BlockchainConfig bc)
+      throws Exception {
     crossControlManagerGroup.addBlockchainAndDeployContracts(creds, bc);
     String crosschainControlAddr = crossControlManagerGroup.getCbcAddress(bc.bcId);
     messagingManagerGroup.addBlockchainAndDeployContracts(creds, bc, crosschainControlAddr);
+    eventRelayGroup.addBlockchain(bc.bcId);
     crossControlManagerGroup.setMessageVerifier(bc.bcId, eventRelayGroup.getVerifier(bc.bcId));
   }
-
 
   private void addBcTxRootSign(
       MessagingManagerGroup messagingManagerGroup,
@@ -255,8 +243,7 @@ public abstract class BaseExampleSystemManager {
         creds,
         bc,
         ((TxRootTransferManagerGroup) messagingManagerGroup).getTxRootContractAddress(bc.bcId));
-    crossControlManagerGroup.addBlockchainAndDeployContracts(
-        creds, bc);
+    crossControlManagerGroup.addBlockchainAndDeployContracts(creds, bc);
     crossControlManagerGroup.setMessageVerifier(bc.bcId, txRootTransferGroup.getVerifier(bc.bcId));
   }
 
