@@ -15,8 +15,6 @@
 package net.consensys.gpact.application.lockablestorage;
 
 import net.consensys.gpact.common.test.AbstractWeb3Test;
-import net.consensys.gpact.soliditywrappers.application.lockablestorage.MockCbcForLockableStorageTest;
-import net.consensys.gpact.soliditywrappers.application.lockablestorage.TestLockableStorageWrapperAllValues;
 
 /**
  * Check operation, assuming the calls are single blockchain (that is not part of a

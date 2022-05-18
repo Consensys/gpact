@@ -23,7 +23,6 @@ import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.common.DynamicGasProvider;
 import net.consensys.gpact.common.RevertReason;
 import net.consensys.gpact.messaging.MessagingManagerInterface;
-import net.consensys.gpact.soliditywrappers.messaging.common.MessagingRegistrar;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;

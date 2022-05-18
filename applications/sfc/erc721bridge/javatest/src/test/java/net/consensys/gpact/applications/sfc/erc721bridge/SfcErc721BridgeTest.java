@@ -21,7 +21,6 @@ import java.util.List;
 import net.consensys.gpact.common.RevertReason;
 import net.consensys.gpact.common.test.AbstractWeb3Test;
 import net.consensys.gpact.common.test.DummyAddressGenerator;
-import net.consensys.gpact.soliditywrappers.applications.sfc.erc721bridge.SfcErc721Bridge;
 import org.apache.logging.log4j.util.Strings;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

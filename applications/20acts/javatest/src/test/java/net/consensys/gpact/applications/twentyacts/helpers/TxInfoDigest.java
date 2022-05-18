@@ -1,9 +1,9 @@
 package net.consensys.gpact.applications.twentyacts.helpers;
 
 import java.nio.ByteBuffer;
+import net.consensys.gpact.applications.twentyacts.TwentyActs;
 import net.consensys.gpact.common.FormatConversion;
 import net.consensys.gpact.common.crypto.Hash;
-import net.consensys.gpact.soliditywrappers.applications.twentyacts.TwentyActs;
 import org.apache.tuweni.bytes.Bytes;
 
 /**

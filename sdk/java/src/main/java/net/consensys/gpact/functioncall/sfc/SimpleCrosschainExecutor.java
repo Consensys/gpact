@@ -29,7 +29,6 @@ import net.consensys.gpact.functioncall.CrosschainCallResult;
 import net.consensys.gpact.functioncall.common.CrosschainCallResultImpl;
 import net.consensys.gpact.messaging.MessagingVerificationInterface;
 import net.consensys.gpact.messaging.SignedEvent;
-import net.consensys.gpact.soliditywrappers.functioncall.sfc.SimpleCrosschainControl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
