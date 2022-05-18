@@ -39,8 +39,8 @@ public class AttestorSignerGroup {
   }
 
   /**
-   * Adds a route in the Relayer, that sends all events from the provided sources to the message
-   * store
+   * Instructs the Relayer to forward events from the given sources to the message store, instead of
+   * submitting them to the destination chain.
    *
    * @param relayerUri The address of the relayer
    * @param sources The list of souces (network id and contract address), to route messages from

@@ -33,7 +33,7 @@ type Node struct {
 
 	Signer signer.Signer
 
-	RelayRoutes router.RelayRoutes
+	RelayRoutes router.RelayRouter
 }
 
 // Single instance of the gateway

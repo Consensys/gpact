@@ -63,6 +63,10 @@ func handleV1(req messages.Message) {
 	srcAddr := common.HexToAddress(msg.Source.ContractAddress)
 
 	// If this message should be routed to the message store, remove the destination attribute
+	// FIXME:
+	// the current implementation of the dispatcher determines what should go to the message store based on
+	// whether the destination field is empty. This is brittle approach. The code below will be updated,
+	// once the dispatcher is better refactored
 	if instance.RelayRoutes.ShouldRouteToStore(&msg.Source) {
 		logging.Info("Routing Message %v to Message Store", msg.ID)
 		msg.Destination = v1.ApplicationAddress{}

@@ -57,7 +57,7 @@ func main() {
 	defer messageQ.Stop()
 
 	// Configure relay routes data store
-	routes, err := router.NewRelayRoutes(conf.RelayerRoutesDSPath)
+	routes, err := router.NewRelayRouter(conf.RelayerRoutesDSPath)
 	if err != nil {
 		panic(err)
 	}

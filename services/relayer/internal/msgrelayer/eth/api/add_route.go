@@ -19,7 +19,7 @@ func HandleAddRouteToStore(data []byte) ([]byte, error) {
 	}
 
 	instance := node.GetSingleInstance()
-	err = instance.RelayRoutes.AddRouteToStore(req)
+	err = instance.RelayRoutes.RegisterRouteToStore(req)
 	if err != nil {
 		return getResponse(false, err.Error())
 	}
