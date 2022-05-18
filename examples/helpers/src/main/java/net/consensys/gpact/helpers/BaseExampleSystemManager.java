@@ -115,6 +115,10 @@ public abstract class BaseExampleSystemManager {
             this.root.dispatcherUri,
             this.root.msgStoreUrlFromDispatcher,
             this.root.msgStoreUrlFromUser);
+
+        // ensure attestors send events from the given sources to the message store
+        attestorSignerGroup.registerRouteToMessageStore(relayerUri, sources);
+
         break;
       case TRANSACTION_RECEIPT_SIGNING:
         TxRootRelayerGroup relayerGroup = new TxRootRelayerGroup();

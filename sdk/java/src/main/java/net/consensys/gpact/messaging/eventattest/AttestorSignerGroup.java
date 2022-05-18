@@ -38,6 +38,29 @@ public class AttestorSignerGroup {
     this.blockchains.put(blockchainId, new AttestorSigner(blockchainId, msgStoreUrlFromUser));
   }
 
+  /**
+   * Adds a route in the Relayer, that sends all events from the provided sources to the message
+   * store
+   *
+   * @param relayerUri The address of the relayer
+   * @param sources The list of souces (network id and contract address), to route messages from
+   * @throws CrosschainProtocolStackException if registering the route with the Relayer fails
+   */
+  public void registerRouteToMessageStore(String relayerUri, List<AttestorRelayer.Source> sources)
+      throws CrosschainProtocolStackException {
+    AttestorRelayer relayer = new AttestorRelayer(relayerUri, null);
+    for (AttestorRelayer.Source source : sources) {
+      LOG.info(
+          String.format(
+              "Adding Message Store Route: %s %s",
+              source.getBlockchainId().toDecimalString(), source.getCrosschainControlAddr()));
+      relayer.addMessageStoreRoute(
+          relayerUri,
+          source.getBlockchainId().toDecimalString(),
+          source.getCrosschainControlAddr());
+    }
+  }
+
   public void configureRelayer(
       AnIdentity signingCredentials,
       String relayerUri,
