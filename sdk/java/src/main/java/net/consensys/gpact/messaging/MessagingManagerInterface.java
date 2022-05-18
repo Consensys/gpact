@@ -50,4 +50,6 @@ public interface MessagingManagerInterface {
   void removeSigner(BlockchainId bcId, String signer) throws Exception;
 
   void removeSigner(BlockchainId bcId, String signer, BigInteger newThreshold) throws Exception;
+
+  String getWsUri() throws Exception;
 }

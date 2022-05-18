@@ -33,11 +33,12 @@ public class AttestorSignerManager extends RegistrarManager {
   public AttestorSignerManager(
       Credentials credentials,
       BlockchainId bcId,
-      String uri,
+      String rpcUri,
+      String wsUri,
       DynamicGasProvider.Strategy gasPriceStrategy,
       int blockPeriod)
       throws IOException {
-    super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
+    super(credentials, bcId, rpcUri, wsUri, gasPriceStrategy, blockPeriod);
   }
 
   @Override

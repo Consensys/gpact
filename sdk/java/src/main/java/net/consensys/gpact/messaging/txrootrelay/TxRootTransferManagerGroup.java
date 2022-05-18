@@ -14,20 +14,17 @@
  */
 package net.consensys.gpact.messaging.txrootrelay;
 
-import java.math.BigInteger;
 import java.util.*;
 import net.consensys.gpact.common.BlockchainConfig;
 import net.consensys.gpact.common.BlockchainId;
-import net.consensys.gpact.messaging.MessagingManagerGroup;
+import net.consensys.gpact.messaging.BaseMessagingManagerGroup;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
 
 /** Manage multiple blockchains, each holding a set of registrar and verification contracts */
-public class TxRootTransferManagerGroup implements MessagingManagerGroup {
+public class TxRootTransferManagerGroup extends BaseMessagingManagerGroup {
   static final Logger LOG = LogManager.getLogger(TxRootTransferManagerGroup.class);
-
-  Map<BlockchainId, TxRootTransferManager> blockchains = new HashMap<>();
 
   @Override
   public void addBlockchainAndDeployContracts(Credentials creds, BlockchainConfig bcInfo)
@@ -44,6 +41,7 @@ public class TxRootTransferManagerGroup implements MessagingManagerGroup {
             creds,
             blockchainId,
             bcInfo.blockchainNodeRpcUri,
+            bcInfo.blockchainNodeWsUri,
             bcInfo.gasPriceStrategy,
             bcInfo.period);
     manager.deployContracts();
@@ -65,6 +63,7 @@ public class TxRootTransferManagerGroup implements MessagingManagerGroup {
             creds,
             blockchainId,
             bcInfo.blockchainNodeRpcUri,
+            bcInfo.blockchainNodeWsUri,
             bcInfo.gasPriceStrategy,
             bcInfo.period);
     manager.loadContracts(addresses);
@@ -72,50 +71,10 @@ public class TxRootTransferManagerGroup implements MessagingManagerGroup {
     this.blockchains.put(blockchainId, manager);
   }
 
-  @Override
-  public void registerSignerOnAllBlockchains(String signersAddress) throws Exception {
-    for (BlockchainId bcId1 : this.blockchains.keySet()) {
-      registerSigner(signersAddress, bcId1);
-    }
-  }
-
-  @Override
-  public void registerSigner(String signersAddress, BlockchainId bcId1) throws Exception {
-    // Add the signer (their address / public key) to each blockchain
-    for (BlockchainId bcId2 : this.blockchains.keySet()) {
-      TxRootTransferManager manager = this.blockchains.get(bcId2);
-      manager.registerSigner(bcId1, signersAddress);
-    }
-  }
-
-  @Override
-  public void registerFirstSignerOnAllBlockchains(String signersAddress) throws Exception {
-    for (BlockchainId bcId1 : this.blockchains.keySet()) {
-      registerFirstSigner(signersAddress, bcId1);
-    }
-  }
-
-  @Override
-  public void registerFirstSigner(String signersAddress, BlockchainId bcId1) throws Exception {
-    // Add the signer (their address / public key) to each blockchain
-    for (BlockchainId bcId2 : this.blockchains.keySet()) {
-      TxRootTransferManager manager = this.blockchains.get(bcId2);
-      manager.registerSigner(bcId1, signersAddress, BigInteger.ONE);
-    }
-  }
-
-  @Override
-  public String getVerifierAddress(final BlockchainId bcId) throws Exception {
-    if (!this.blockchains.containsKey(bcId)) {
-      throw new Exception("Blockchain not found: " + bcId);
-    }
-    return this.blockchains.get(bcId).getVerifierAddress();
-  }
-
   public String getTxRootContractAddress(BlockchainId bcId) throws Exception {
     if (!this.blockchains.containsKey(bcId)) {
       throw new Exception("Unknown blockchain: " + bcId);
     }
-    return this.blockchains.get(bcId).getTxRootContractAddress();
+    return ((TxRootTransferManager) this.blockchains.get(bcId)).getTxRootContractAddress();
   }
 }

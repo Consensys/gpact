@@ -15,6 +15,7 @@
 package net.consensys.gpact.messaging;
 
 import java.util.ArrayList;
+import java.util.Set;
 import net.consensys.gpact.common.BlockchainConfig;
 import net.consensys.gpact.common.BlockchainId;
 import org.web3j.crypto.Credentials;
@@ -30,6 +31,12 @@ public interface MessagingManagerGroup {
    * @throws Exception If there is an issue; typically due to issues deploying the contracts.
    */
   void addBlockchainAndDeployContracts(Credentials creds, BlockchainConfig bcInfo) throws Exception;
+
+  default void addBlockchainAndDeployContracts(
+      Credentials creds, BlockchainConfig bcInfo, String additionalContractAddress)
+      throws Exception {
+    throw new RuntimeException("Not implemented");
+  }
 
   /**
    * Add a blockchain to be managed by this class. Load contracts that have previously been
@@ -51,5 +58,9 @@ public interface MessagingManagerGroup {
 
   void registerFirstSigner(String signersAddress, BlockchainId bcId1) throws Exception;
 
+  String getWsUri(final BlockchainId bcId) throws Exception;
+
   String getVerifierAddress(final BlockchainId bcId) throws Exception;
+
+  Set<BlockchainId> getSupportedBlockchains();
 }
