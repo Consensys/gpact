@@ -177,8 +177,15 @@ public class ERC20TokenBridgeExample {
       StatsHolder.log("Execution: " + numExecutions + " **************************");
 
       user1.transfer(true, 20);
+      chainA.showErc20Balances(users);
+      chainB.showErc20Balances(users);
+
       user2.transfer(true, user2.getAddress(), 30);
+      chainA.showErc20Balances(users);
+      chainB.showErc20Balances(users);
       user3.transfer(true, user2.getAddress(), 10);
+      chainA.showErc20Balances(users);
+      chainB.showErc20Balances(users);
 
       user2.transfer(false, 39);
       user1.transfer(false, 18);

@@ -134,7 +134,7 @@ public class AttestorRelayerWebApi {
     config("Relayer", relayerUrl, requestBody);
   }
 
-  public static void setupDispatcher(String msgDispatcherUrl, String msgStoreAddr)
+  public static void setupDispatcherForMsgStore(String msgDispatcherUrl, String msgStoreAddr)
       throws CrosschainProtocolStackException {
     LOG.info("SetupDispatcher: MsgStore: {}, DispatcherURL: {}", msgStoreAddr, msgDispatcherUrl);
 
@@ -156,6 +156,53 @@ public class AttestorRelayerWebApi {
 
     config("Dispatcher", msgDispatcherUrl, requestBody);
   }
+
+  public static void setupDispatcherForRelayingEvents(
+          String msgDispatcherUrl, BlockchainId sourceChainBcId, BlockchainId targetChainBcId, String targetChainWsUrl, byte[] txPKey,
+          String targetChainVerifierAddr)
+          throws CrosschainProtocolStackException {
+    LOG.info("SetupDispatcher: DispatcherURL: {}, Source Chain Id: {}, Target Chain Id: {}, Target Chain Ws: {}, Target Verifier: {}",
+            msgDispatcherUrl, sourceChainBcId.toDecimalString(), targetChainBcId.toDecimalString(), targetChainWsUrl, targetChainVerifierAddr);
+
+    ObjectMapper mapper1 = new ObjectMapper();
+    ObjectNode setEthTxKey = mapper1.createObjectNode();
+    setEthTxKey.put("chain_id", targetChainBcId.toDecimalString());
+    setEthTxKey.put("chain_ap", targetChainWsUrl);
+    setEthTxKey.put("key", txPKey);
+    byte[] json;
+    try {
+      json = mapper1.writer().writeValueAsBytes(setEthTxKey);
+    } catch (JsonProcessingException ex) {
+      throw new CrosschainProtocolStackException("Dispatcher", ex);
+    }
+
+    Bytes type = Bytes.of(SET_TRANSACTION_OPT_REQ_TYPE);
+    Bytes body = Bytes.wrap(json);
+    Bytes all = Bytes.concatenate(type, body);
+    byte[] requestBody = all.toArray();
+
+    config("Dispatcher", msgDispatcherUrl, requestBody);
+
+
+    ObjectMapper mapper2 = new ObjectMapper();
+    ObjectNode setVerifier = mapper2.createObjectNode();
+    setVerifier.put("source_chain_id", sourceChainBcId.toDecimalString());
+    setVerifier.put("target_chain_id", targetChainBcId.toDecimalString());
+    setVerifier.put("verifier_addr", targetChainVerifierAddr);
+    try {
+      json = mapper1.writer().writeValueAsBytes(setVerifier);
+    } catch (JsonProcessingException ex) {
+      throw new CrosschainProtocolStackException("Dispatcher", ex);
+    }
+
+    type = Bytes.of(SET_VERIFIER_ADDR_REQ_TYPE);
+    body = Bytes.wrap(json);
+    all = Bytes.concatenate(type, body);
+    requestBody = all.toArray();
+
+    config("Dispatcher", msgDispatcherUrl, requestBody);
+  }
+
 
   private static void config(String component, String uri, byte[] requestBody)
       throws CrosschainProtocolStackException {

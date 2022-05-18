@@ -263,7 +263,7 @@ public class TwentyActsManager extends AbstractBlockchain implements CrossContro
   public TwentyActsManager forUser(Credentials user) throws IOException {
     TwentyActsManager bc =
         new TwentyActsManager(
-            user, this.blockchainId, this.uri, this.gasPriceStrategy, this.pollingInterval);
+            user, this.blockchainId, this.rpcUri, this.gasPriceStrategy, this.pollingInterval);
     bc.loadCbcContract(this.twentyActs.getContractAddress());
     return bc;
   }

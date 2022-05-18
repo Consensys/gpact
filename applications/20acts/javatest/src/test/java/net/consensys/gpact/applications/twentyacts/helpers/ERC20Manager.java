@@ -81,7 +81,7 @@ public class ERC20Manager extends AbstractBlockchain {
   public ERC20Manager forUser(Credentials user) throws IOException {
     ERC20Manager bc =
         new ERC20Manager(
-            user, this.blockchainId, this.uri, this.gasPriceStrategy, this.pollingInterval);
+            user, this.blockchainId, this.rpcUri, this.gasPriceStrategy, this.pollingInterval);
     bc.loadErc20Contract(this.erc20.getContractAddress());
     return bc;
   }

@@ -35,11 +35,12 @@ public class EventRelayManager extends RegistrarManager {
   public EventRelayManager(
       Credentials credentials,
       BlockchainId bcId,
-      String uri,
+      String rpcUri,
+      String wsUri,
       DynamicGasProvider.Strategy gasPriceStrategy,
       int blockPeriod)
       throws IOException {
-    super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
+    super(credentials, bcId, rpcUri, wsUri, gasPriceStrategy, blockPeriod);
   }
 
   public void setFunctionCallContract(final String functionCallContract) {

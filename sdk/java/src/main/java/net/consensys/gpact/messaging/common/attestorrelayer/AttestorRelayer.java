@@ -53,7 +53,35 @@ public class AttestorRelayer {
     }
   }
 
+  public static class Dest {
+    BlockchainId sourceBcId;
+    BlockchainId targetBcId;
+    String targetBcWsUri;
+    byte[] txPKey;
+    String targetChainVerifierAddr;
+
+    public Dest(
+            BlockchainId sourceBcId,
+            BlockchainId targetBcId,
+            String targetBcWsUri,
+            byte[] txPKey,
+            String targetChainVerifierAddr) {
+      this.sourceBcId = sourceBcId;
+      this.targetBcId = targetBcId;
+      this.targetBcWsUri = targetBcWsUri;
+      this.txPKey = txPKey;
+      this.targetChainVerifierAddr = targetChainVerifierAddr;
+    }
+
+    public String getDestId() {
+      return this.sourceBcId.toString() + this.targetBcId.toString();
+    }
+  }
+
   Map<String, Source> sources = new HashMap<>();
+
+
+
 
   public AttestorRelayer(String relayerUri, byte[] signingKey) {
     this.relayerUri = relayerUri;
@@ -92,8 +120,22 @@ public class AttestorRelayer {
   public void addMessageStore(
       String msgDispatcherUrl, String msgStoreAddrFromDispatcher, String msgStoreAddrFromUser)
       throws CrosschainProtocolStackException {
-    AttestorRelayerWebApi.setupDispatcher(msgDispatcherUrl, msgStoreAddrFromDispatcher);
+    AttestorRelayerWebApi.setupDispatcherForMsgStore(msgDispatcherUrl, msgStoreAddrFromDispatcher);
     this.msgStoreAddr = msgStoreAddrFromUser;
+  }
+
+
+  public void setDispatcher(String msgDispatcherUrl, BlockchainId sourceChainBcId, BlockchainId targetChainBcId, String targetChainWsUrl, byte[] txPKey,
+                            String targetChainVerifierAddr)
+          throws CrosschainProtocolStackException {
+    Dest dest = new Dest(sourceChainBcId, targetChainBcId, targetChainWsUrl, txPKey, targetChainVerifierAddr);
+    setDispatcher(msgDispatcherUrl, dest);
+  }
+
+  public void setDispatcher(String msgDispatcherUrl, Dest dest)
+          throws CrosschainProtocolStackException {
+    AttestorRelayerWebApi.setupDispatcherForRelayingEvents(msgDispatcherUrl,
+            dest.sourceBcId, dest.targetBcId, dest.targetBcWsUri, dest.txPKey, dest.targetChainVerifierAddr);
   }
 
   public String fetchedSignedEvent(

@@ -33,7 +33,8 @@ public abstract class AbstractBlockchain {
   protected Credentials credentials;
 
   protected BlockchainId blockchainId;
-  protected String uri;
+  protected String rpcUri;
+  protected String wsUri;
   // Polling interval should be equal to the block time.
   protected int pollingInterval;
   public DynamicGasProvider gasProvider;
@@ -43,19 +44,32 @@ public abstract class AbstractBlockchain {
   protected FastTxManager tm;
 
   protected AbstractBlockchain(
+          Credentials credentials,
+          BlockchainId bcId,
+          String rpcUri,
+          DynamicGasProvider.Strategy gasPriceStrategy,
+          int blockPeriod)
+          throws IOException {
+    this(credentials, bcId, rpcUri, null, gasPriceStrategy, blockPeriod);
+  }
+
+
+  protected AbstractBlockchain(
       Credentials credentials,
       BlockchainId bcId,
-      String uri,
+      String rpcUri,
+      String wsUri,
       DynamicGasProvider.Strategy gasPriceStrategy,
       int blockPeriod)
       throws IOException {
     this.blockchainId = bcId;
-    this.uri = uri;
+    this.rpcUri = rpcUri;
+    this.wsUri = wsUri;
     this.pollingInterval = blockPeriod;
     this.credentials = credentials;
     this.web3j =
         Web3j.build(
-            new HttpService(this.uri), this.pollingInterval, new ScheduledThreadPoolExecutor(5));
+            new HttpService(this.rpcUri), this.pollingInterval, new ScheduledThreadPoolExecutor(5));
 
     TransactionReceiptProcessor txrProcessor =
         new PollingTransactionReceiptProcessor(this.web3j, this.pollingInterval, RETRY);
@@ -63,7 +77,7 @@ public abstract class AbstractBlockchain {
         TxManagerCache.getOrCreate(
             this.web3j, this.credentials, this.blockchainId.asLong(), txrProcessor);
     this.gasPriceStrategy = gasPriceStrategy;
-    this.gasProvider = new DynamicGasProvider(this.web3j, uri, gasPriceStrategy);
+    this.gasProvider = new DynamicGasProvider(this.web3j, rpcUri, gasPriceStrategy);
   }
 
   public void shutdown() {
@@ -74,7 +88,12 @@ public abstract class AbstractBlockchain {
     return this.blockchainId;
   }
 
-  public String getUri() {
-    return this.uri;
+  public String getRpcUri() {
+    return this.rpcUri;
   }
+
+  public String getWsUri() {
+    return this.wsUri;
+  }
+
 }

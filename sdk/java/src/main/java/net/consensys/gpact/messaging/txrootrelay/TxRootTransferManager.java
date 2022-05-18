@@ -35,11 +35,12 @@ public class TxRootTransferManager extends RegistrarManager {
   public TxRootTransferManager(
       Credentials credentials,
       BlockchainId bcId,
-      String uri,
+      String rpcUri,
+      String wsUri,
       DynamicGasProvider.Strategy gasPriceStrategy,
       int blockPeriod)
       throws IOException {
-    super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
+    super(credentials, bcId, rpcUri, wsUri, gasPriceStrategy, blockPeriod);
   }
 
   @Override
