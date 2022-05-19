@@ -5,8 +5,8 @@ set -e
 HERE=examples/sfc/erc20bridge/java
 BUILDDIR=$HERE/build
 CONTRACTSDIR=applications/sfc/erc20bridge/contracts/src
-OUTPUTDIR=$HERE/src/main/java
-PACKAGE=net.consensys.gpact.soliditywrappers.examples.sfc.erc20bridge
+OUTPUTDIR=$BUILDDIR/generated/sources/main/java
+PACKAGE=net.consensys.gpact.examples.sfc.erc20bridge
 #WEB3J=web3j
 WEB3J=../web3j-abi/codegen/build/install/codegen/bin/codegen
 

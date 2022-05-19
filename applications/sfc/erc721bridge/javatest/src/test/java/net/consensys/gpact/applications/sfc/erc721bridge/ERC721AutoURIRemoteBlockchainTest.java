@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.math.BigInteger;
 import net.consensys.gpact.common.test.AbstractWeb3Test;
 import net.consensys.gpact.common.test.DummyAddressGenerator;
-import net.consensys.gpact.soliditywrappers.applications.sfc.erc721bridge.ERC721AutoURIRemoteBlockchain;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

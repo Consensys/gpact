@@ -6,7 +6,7 @@ import java.util.List;
 import net.consensys.gpact.common.FormatConversion;
 import net.consensys.gpact.common.Tuple;
 import net.consensys.gpact.functioncall.CallExecutionTreeException;
-import net.consensys.gpact.soliditywrappers.functioncall.gpact.CallExecutionTreeTest;
+import net.consensys.gpact.functioncall.gpact.CallExecutionTreeTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.web3j.tuples.generated.Tuple3;
 

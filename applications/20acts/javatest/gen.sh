@@ -5,9 +5,9 @@ rm -rf build
 HERE=applications/20acts/javatest
 BUILDDIR=$HERE/build
 CONTRACTSDIR=$HERE/../contracts/src
-OUTPUTDIR=$HERE/src/main/java
-TESTOUTPUTDIR=$HERE/src/test/java
-BASEPACKAGE=net.consensys.gpact.soliditywrappers.applications.twentyacts
+OUTPUTDIR=$BUILDDIR/generated/sources/main/java
+TESTOUTPUTDIR=$BUILDDIR/generated/sources/test/java
+BASEPACKAGE=net.consensys.gpact.applications.twentyacts
 #WEB3J=web3j
 WEB3J=../web3j-abi/codegen/build/install/codegen/bin/codegen
 

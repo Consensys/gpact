@@ -15,10 +15,9 @@
 package net.consensys.gpact.applications.gpact.erc20bridge;
 
 import java.math.BigInteger;
+import net.consensys.gpact.applications.gpact.erc20bridge.presets.LockableERC20PresetFixedSupply;
 import net.consensys.gpact.common.TxManagerCache;
 import net.consensys.gpact.common.test.AbstractWeb3Test;
-import net.consensys.gpact.soliditywrappers.applications.gpact.erc20bridge.MockCbcForERC20Test;
-import net.consensys.gpact.soliditywrappers.applications.gpact.erc20bridge.presets.LockableERC20PresetFixedSupply;
 import org.web3j.crypto.Credentials;
 import org.web3j.tx.TransactionManager;
 import org.web3j.tx.response.PollingTransactionReceiptProcessor;

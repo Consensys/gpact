@@ -16,13 +16,16 @@ allprojects {
         mavenCentral()
     }
 
+    sourceSets.main.java.srcDirs += 'build/generated/sources/main/java'
+    sourceSets.test.java.srcDirs += 'build/generated/sources/test/java'
+
     spotless {
         java {
             target fileTree('.') {
-                exclude '**/soliditywrappers/**'
                 exclude '**/*.sol'
                 exclude '**/.gradle/**'
                 exclude '**/resources'
+                exclude '**/build/**'
                 exclude '**/build/**'
                 include '**/*.java'
             }

@@ -25,8 +25,6 @@ import net.consensys.gpact.functioncall.CrossControlManagerGroup;
 import net.consensys.gpact.functioncall.CrosschainCallResult;
 import net.consensys.gpact.helpers.GpactExampleSystemManager;
 import net.consensys.gpact.messaging.MessagingVerificationInterface;
-import net.consensys.gpact.soliditywrappers.examples.gpact.hoteltrain.LockableERC20PresetFixedSupply;
-import net.consensys.gpact.soliditywrappers.examples.gpact.hoteltrain.TravelAgency;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;

@@ -21,7 +21,6 @@ import java.util.List;
 import net.consensys.gpact.common.test.AbstractWeb3Test;
 import net.consensys.gpact.common.test.DummyAddressGenerator;
 import net.consensys.gpact.common.test.DummyBlockchainIdGenerator;
-import net.consensys.gpact.soliditywrappers.applications.sfc.erc20bridge.SfcErc20Bridge;
 import org.junit.jupiter.api.Test;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 

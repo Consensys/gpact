@@ -1,9 +1,6 @@
 package net.consensys.gpact.examples.gpact.hoteltrain;
 
 import java.math.BigInteger;
-import net.consensys.gpact.soliditywrappers.examples.gpact.hoteltrain.Hotel;
-import net.consensys.gpact.soliditywrappers.examples.gpact.hoteltrain.Train;
-import net.consensys.gpact.soliditywrappers.examples.gpact.hoteltrain.TravelAgency;
 import org.web3j.tx.TransactionManager;
 
 // No simulation needs to be done as the parameters from the travel agency's

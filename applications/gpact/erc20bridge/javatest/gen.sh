@@ -5,8 +5,8 @@ rm -rf build
 HERE=applications/gpact/erc20bridge/javatest
 BUILDDIR=$HERE/build
 CONTRACTSDIR=$HERE/../contracts/src
-OUTPUTDIR=$HERE/src/test/java
-BASEPACKAGE=net.consensys.gpact.soliditywrappers.applications.gpact.erc20bridge
+OUTPUTDIR=$BUILDDIR/generated/sources/test/java
+BASEPACKAGE=net.consensys.gpact.applications.gpact.erc20bridge
 #WEB3J=web3j
 WEB3J=../web3j-abi/codegen/build/install/codegen/bin/codegen
 
