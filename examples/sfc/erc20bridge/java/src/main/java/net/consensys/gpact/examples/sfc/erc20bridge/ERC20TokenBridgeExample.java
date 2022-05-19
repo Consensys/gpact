@@ -63,34 +63,16 @@ public class ERC20TokenBridgeExample {
     Credentials erc20OwnerCreds = CredentialsCreator.createCredentials();
     MassConservationERC20Bridge chainA =
         new MassConservationERC20Bridge(
-            "ChainA",
-            BigInteger.valueOf(CHAIN_A_TOKEN_SUPPLY),
-            erc20OwnerCreds,
-            root.bcId,
-            root.blockchainNodeRpcUri,
-            root.gasPriceStrategy,
-            root.period);
+            "ChainA", BigInteger.valueOf(CHAIN_A_TOKEN_SUPPLY), erc20OwnerCreds, root);
     AbstractERC20Bridge chainB;
     if (blockchainBIsMassConservation) {
       chainB =
           new MassConservationERC20Bridge(
-              "ChainB",
-              BigInteger.valueOf(CHAIN_B_TOKEN_SUPPLY),
-              erc20OwnerCreds,
-              bc2.bcId,
-              bc2.blockchainNodeRpcUri,
-              bc2.gasPriceStrategy,
-              bc2.period);
+              "ChainB", BigInteger.valueOf(CHAIN_B_TOKEN_SUPPLY), erc20OwnerCreds, bc2);
     } else {
       chainB =
           new MinterBurnerERC20Bridge(
-              "ChainB",
-              BigInteger.valueOf(CHAIN_B_TOKEN_SUPPLY),
-              erc20OwnerCreds,
-              bc2.bcId,
-              bc2.blockchainNodeRpcUri,
-              bc2.gasPriceStrategy,
-              bc2.period);
+              "ChainB", BigInteger.valueOf(CHAIN_B_TOKEN_SUPPLY), erc20OwnerCreds, bc2);
     }
 
     // Deploy application contracts.

@@ -45,13 +45,7 @@ public class TwentyActsManagerGroup implements CrossControlManagerGroup {
     LOG.debug("Deploying Cross-Blockchain Control contract for blockchain id {}", blockchainId);
 
     BcHolder holder = new BcHolder();
-    holder.cbc =
-        new TwentyActsManager(
-            creds,
-            bcInfo.bcId,
-            bcInfo.blockchainNodeRpcUri,
-            bcInfo.gasPriceStrategy,
-            bcInfo.period);
+    holder.cbc = new TwentyActsManager(creds, bcInfo);
     holder.cbc.deployCbcContract();
     holder.cbcContractAddress = holder.cbc.getCbcContractAddress();
     holder.ver = messageVerification;
@@ -72,13 +66,7 @@ public class TwentyActsManagerGroup implements CrossControlManagerGroup {
     }
 
     BcHolder holder = new BcHolder();
-    holder.cbc =
-        new TwentyActsManager(
-            creds,
-            bcInfo.bcId,
-            bcInfo.blockchainNodeRpcUri,
-            bcInfo.gasPriceStrategy,
-            bcInfo.period);
+    holder.cbc = new TwentyActsManager(creds, bcInfo);
 
     holder.cbc.loadCbcContract(cbcAddress);
     holder.cbcContractAddress = cbcAddress;

@@ -27,23 +27,16 @@ public class TxRootTransferManagerGroup extends BaseMessagingManagerGroup {
   static final Logger LOG = LogManager.getLogger(TxRootTransferManagerGroup.class);
 
   @Override
-  public void addBlockchainAndDeployContracts(Credentials creds, BlockchainConfig bcInfo)
-      throws Exception {
-    BlockchainId blockchainId = bcInfo.bcId;
+  public void addBlockchainAndDeployContracts(
+      final Credentials creds, final BlockchainConfig bcConfig) throws Exception {
+    BlockchainId blockchainId = bcConfig.bcId;
     if (this.blockchains.containsKey(blockchainId)) {
       return;
       // throw new Exception("Blockchain already added: " + blockchainId);
     }
     LOG.debug("Deploying Cross-Blockchain Control contracts for blockchain id {}", blockchainId);
 
-    TxRootTransferManager manager =
-        new TxRootTransferManager(
-            creds,
-            blockchainId,
-            bcInfo.blockchainNodeRpcUri,
-            bcInfo.blockchainNodeWsUri,
-            bcInfo.gasPriceStrategy,
-            bcInfo.period);
+    TxRootTransferManager manager = new TxRootTransferManager(creds, bcConfig);
     manager.deployContracts();
 
     this.blockchains.put(blockchainId, manager);
@@ -51,21 +44,14 @@ public class TxRootTransferManagerGroup extends BaseMessagingManagerGroup {
 
   @Override
   public void addBlockchainAndLoadContracts(
-      Credentials creds, BlockchainConfig bcInfo, ArrayList<String> addresses) throws Exception {
-    BlockchainId blockchainId = bcInfo.bcId;
+      Credentials creds, BlockchainConfig bcConfig, ArrayList<String> addresses) throws Exception {
+    BlockchainId blockchainId = bcConfig.bcId;
     if (this.blockchains.containsKey(blockchainId)) {
       return;
       // throw new Exception("Blockchain already added: " + blockchainId);
     }
 
-    TxRootTransferManager manager =
-        new TxRootTransferManager(
-            creds,
-            blockchainId,
-            bcInfo.blockchainNodeRpcUri,
-            bcInfo.blockchainNodeWsUri,
-            bcInfo.gasPriceStrategy,
-            bcInfo.period);
+    TxRootTransferManager manager = new TxRootTransferManager(creds, bcConfig);
     manager.loadContracts(addresses);
 
     this.blockchains.put(blockchainId, manager);

@@ -17,8 +17,7 @@ package net.consensys.gpact.examples.gpact.trade;
 import java.io.IOException;
 import java.math.BigInteger;
 import net.consensys.gpact.common.AbstractBlockchain;
-import net.consensys.gpact.common.BlockchainId;
-import net.consensys.gpact.common.DynamicGasProvider;
+import net.consensys.gpact.common.BlockchainConfig;
 import net.consensys.gpact.soliditywrappers.examples.gpact.trade.Stock;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,14 +28,9 @@ public class Bc5Stock extends AbstractBlockchain {
 
   Stock stockContract;
 
-  public Bc5Stock(
-      Credentials credentials,
-      BlockchainId bcId,
-      String uri,
-      DynamicGasProvider.Strategy gasPriceStrategy,
-      int blockPeriod)
+  public Bc5Stock(final Credentials credentials, final BlockchainConfig bcConfig)
       throws IOException {
-    super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
+    super(credentials, bcConfig);
   }
 
   public void deployContracts(String cbcContractAddress) throws Exception {

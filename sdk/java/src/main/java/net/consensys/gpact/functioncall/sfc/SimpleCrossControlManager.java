@@ -42,14 +42,9 @@ public class SimpleCrossControlManager extends AbstractBlockchain implements Cro
 
   protected SimpleCrosschainControl crossBlockchainControlContract;
 
-  public SimpleCrossControlManager(
-      Credentials credentials,
-      BlockchainId bcId,
-      String uri,
-      DynamicGasProvider.Strategy gasPriceStrategy,
-      int blockPeriod)
+  public SimpleCrossControlManager(final Credentials credentials, final BlockchainConfig bcConfig)
       throws IOException {
-    super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
+    super(credentials, bcConfig);
   }
 
   protected void deployCbcContract() throws Exception {

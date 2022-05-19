@@ -34,14 +34,9 @@ public class TxRootRelayer extends AbstractBlockchain {
 
   List<AnIdentity> signers = new ArrayList<>();
 
-  public TxRootRelayer(
-      Credentials credentials,
-      BlockchainId bcId,
-      String uri,
-      DynamicGasProvider.Strategy gasPriceStrategy,
-      int blockPeriod)
+  public TxRootRelayer(final Credentials credentials, final BlockchainConfig bcConfig)
       throws IOException {
-    super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
+    super(credentials, bcConfig);
   }
 
   public void loadContract(String address) {

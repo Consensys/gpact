@@ -41,13 +41,7 @@ public class TxRootRelayerGroup {
       // throw new Exception("Blockchain already added: " + blockchainId);
     }
 
-    TxRootRelayer manager =
-        new TxRootRelayer(
-            creds,
-            blockchainId,
-            bcInfo.blockchainNodeRpcUri,
-            bcInfo.gasPriceStrategy,
-            bcInfo.period);
+    TxRootRelayer manager = new TxRootRelayer(creds, bcInfo);
     manager.loadContract(txRootContract);
 
     this.blockchains.put(blockchainId, manager);

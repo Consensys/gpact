@@ -31,6 +31,7 @@ public abstract class AbstractBlockchain {
   protected static final int RETRY = 100;
 
   protected Credentials credentials;
+  protected BlockchainConfig blockchainConfig;
 
   protected BlockchainId blockchainId;
   protected String rpcUri;
@@ -43,39 +44,24 @@ public abstract class AbstractBlockchain {
   public Web3j web3j;
   protected FastTxManager tm;
 
-  protected AbstractBlockchain(
-      Credentials credentials,
-      BlockchainId bcId,
-      String rpcUri,
-      DynamicGasProvider.Strategy gasPriceStrategy,
-      int blockPeriod)
+  protected AbstractBlockchain(final Credentials credentials, final BlockchainConfig bcConfig)
       throws IOException {
-    this(credentials, bcId, rpcUri, null, gasPriceStrategy, blockPeriod);
-  }
-
-  protected AbstractBlockchain(
-      Credentials credentials,
-      BlockchainId bcId,
-      String rpcUri,
-      String wsUri,
-      DynamicGasProvider.Strategy gasPriceStrategy,
-      int blockPeriod)
-      throws IOException {
-    this.blockchainId = bcId;
-    this.rpcUri = rpcUri;
-    this.wsUri = wsUri;
-    this.pollingInterval = blockPeriod;
     this.credentials = credentials;
+    this.blockchainConfig = bcConfig;
+    this.blockchainId = bcConfig.bcId;
+    this.rpcUri = bcConfig.blockchainNodeRpcUri;
+    this.wsUri = bcConfig.blockchainNodeWsUri;
+    this.pollingInterval = bcConfig.period;
+    this.gasPriceStrategy = bcConfig.gasPriceStrategy;
+
     this.web3j =
         Web3j.build(
             new HttpService(this.rpcUri), this.pollingInterval, new ScheduledThreadPoolExecutor(5));
-
     TransactionReceiptProcessor txrProcessor =
         new PollingTransactionReceiptProcessor(this.web3j, this.pollingInterval, RETRY);
     this.tm =
         TxManagerCache.getOrCreate(
             this.web3j, this.credentials, this.blockchainId.asLong(), txrProcessor);
-    this.gasPriceStrategy = gasPriceStrategy;
     this.gasProvider = new DynamicGasProvider(this.web3j, rpcUri, gasPriceStrategy);
   }
 

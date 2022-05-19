@@ -36,15 +36,7 @@ public class TxRootTransferGroup {
       // throw new Exception("Blockchain already in TxRoot Transfer Group: " + bcInfo.bcId);
     }
 
-    this.blockchains.put(
-        bcInfo.bcId,
-        new TxRootTransfer(
-            relayerGroup,
-            creds,
-            bcInfo.bcId,
-            bcInfo.blockchainNodeRpcUri,
-            bcInfo.gasPriceStrategy,
-            bcInfo.period));
+    this.blockchains.put(bcInfo.bcId, new TxRootTransfer(relayerGroup, creds, bcInfo));
   }
 
   public MessagingVerificationInterface getVerifier(BlockchainId bcId) throws Exception {

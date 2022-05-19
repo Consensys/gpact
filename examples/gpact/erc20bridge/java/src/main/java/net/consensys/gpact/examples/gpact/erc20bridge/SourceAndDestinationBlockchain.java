@@ -16,10 +16,7 @@ package net.consensys.gpact.examples.gpact.erc20bridge;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import net.consensys.gpact.common.AbstractBlockchain;
-import net.consensys.gpact.common.BlockchainId;
-import net.consensys.gpact.common.DynamicGasProvider;
-import net.consensys.gpact.common.RevertReason;
+import net.consensys.gpact.common.*;
 import net.consensys.gpact.soliditywrappers.examples.gpact.erc20bridge.GpactERC20Bridge;
 import net.consensys.gpact.soliditywrappers.examples.gpact.erc20bridge.LockableERC20PresetFixedSupply;
 import org.apache.logging.log4j.LogManager;
@@ -38,14 +35,11 @@ public class SourceAndDestinationBlockchain extends AbstractBlockchain {
 
   public SourceAndDestinationBlockchain(
       final String entity,
-      BigInteger tokenSupply,
-      Credentials credentials,
-      BlockchainId bcId,
-      String uri,
-      DynamicGasProvider.Strategy gasPriceStrategy,
-      int blockPeriod)
+      final BigInteger tokenSupply,
+      final Credentials credentials,
+      final BlockchainConfig bcConfig)
       throws IOException {
-    super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
+    super(credentials, bcConfig);
     this.entity = entity;
     this.tokenSupply = tokenSupply;
   }

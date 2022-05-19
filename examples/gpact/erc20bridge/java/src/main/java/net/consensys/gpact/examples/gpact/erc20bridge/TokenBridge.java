@@ -52,22 +52,10 @@ public class TokenBridge {
     Credentials erc20OwnerCreds = CredentialsCreator.createCredentials();
     SourceAndDestinationBlockchain chainA =
         new SourceAndDestinationBlockchain(
-            "ChainA",
-            BigInteger.valueOf(CHAIN_A_TOKEN_SUPPLY),
-            erc20OwnerCreds,
-            root.bcId,
-            root.blockchainNodeRpcUri,
-            root.gasPriceStrategy,
-            root.period);
+            "ChainA", BigInteger.valueOf(CHAIN_A_TOKEN_SUPPLY), erc20OwnerCreds, root);
     SourceAndDestinationBlockchain chainB =
         new SourceAndDestinationBlockchain(
-            "ChainB",
-            BigInteger.valueOf(CHAIN_B_TOKEN_SUPPLY),
-            erc20OwnerCreds,
-            bc2.bcId,
-            bc2.blockchainNodeRpcUri,
-            bc2.gasPriceStrategy,
-            bc2.period);
+            "ChainB", BigInteger.valueOf(CHAIN_B_TOKEN_SUPPLY), erc20OwnerCreds, bc2);
 
     // Deploy application contracts.
     BlockchainId chainABcId = chainA.getBlockchainId();

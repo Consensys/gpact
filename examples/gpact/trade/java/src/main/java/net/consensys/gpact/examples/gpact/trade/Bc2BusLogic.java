@@ -18,8 +18,8 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.List;
 import net.consensys.gpact.common.AbstractBlockchain;
+import net.consensys.gpact.common.BlockchainConfig;
 import net.consensys.gpact.common.BlockchainId;
-import net.consensys.gpact.common.DynamicGasProvider;
 import net.consensys.gpact.soliditywrappers.examples.gpact.trade.BusLogic;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -31,14 +31,9 @@ public class Bc2BusLogic extends AbstractBlockchain {
 
   BusLogic busLogicContract;
 
-  public Bc2BusLogic(
-      Credentials credentials,
-      BlockchainId bcId,
-      String uri,
-      DynamicGasProvider.Strategy gasPriceStrategy,
-      int blockPeriod)
+  public Bc2BusLogic(final Credentials credentials, final BlockchainConfig bcConfig)
       throws IOException {
-    super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
+    super(credentials, bcConfig);
   }
 
   public void deployContracts(
