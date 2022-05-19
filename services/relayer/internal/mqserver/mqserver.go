@@ -53,6 +53,8 @@ type MQServer struct {
 
 	// shutdown is used to safely shutdown the routine.
 	shutdown chan bool
+	// chanInClose receives connection errors and channel close events
+	chanInClose chan *amqp.Error
 }
 
 // NewMQServer creates a new message queue server.
@@ -107,6 +109,9 @@ func NewMQServer(
 		if err != nil {
 			return nil, err
 		}
+
+		s.chanInClose = make(chan *amqp.Error)
+		s.chanIn.NotifyClose(s.chanInClose)
 	}
 	if outboundMQAddr != "" && outboundChName != "" {
 		if outboundMQAddr == inboundMQAddr {
@@ -189,6 +194,9 @@ func (s *MQServer) handleIncomingMsgRoutine() {
 			// Start a routine to handle message.
 			// logging.Debug("Handled messasge %v with version %v and type %v", req, version, msgType)
 			go handler(msg)
+		case e := <-s.chanInClose:
+			logging.Info("Channel closed: %v", e)
+			return
 		case <-s.shutdown:
 			// Shutdown the routine
 			logging.Info("Routine shutdown...")
