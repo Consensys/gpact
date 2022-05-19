@@ -24,7 +24,6 @@ import net.consensys.gpact.common.test.AbstractWeb3Test;
 import net.consensys.gpact.messaging.txrootrelay.besuethereum.core.Hash;
 import net.consensys.gpact.messaging.txrootrelay.besuethereum.core.LogTopic;
 import net.consensys.gpact.messaging.txrootrelay.besuethereum.rlp.RLP;
-import net.consensys.gpact.soliditywrappers.messaging.txrootrelay.TestReceipts;
 import org.apache.tuweni.bytes.Bytes;
 import org.junit.jupiter.api.Test;
 import org.web3j.protocol.core.methods.response.Log;

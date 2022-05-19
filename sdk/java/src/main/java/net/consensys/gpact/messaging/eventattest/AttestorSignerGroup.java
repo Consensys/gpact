@@ -38,6 +38,29 @@ public class AttestorSignerGroup {
     this.blockchains.put(blockchainId, new AttestorSigner(blockchainId, msgStoreUrlFromUser));
   }
 
+  /**
+   * Instructs the Relayer to forward events from the given sources to the message store, instead of
+   * submitting them to the destination chain.
+   *
+   * @param relayerUri The address of the relayer
+   * @param sources The list of souces (network id and contract address), to route messages from
+   * @throws CrosschainProtocolStackException if registering the route with the Relayer fails
+   */
+  public void registerRouteToMessageStore(String relayerUri, List<AttestorRelayer.Source> sources)
+      throws CrosschainProtocolStackException {
+    AttestorRelayer relayer = new AttestorRelayer(relayerUri, null);
+    for (AttestorRelayer.Source source : sources) {
+      LOG.info(
+          String.format(
+              "Adding Message Store Route: %s %s",
+              source.getBlockchainId().toDecimalString(), source.getCrosschainControlAddr()));
+      relayer.addMessageStoreRoute(
+          relayerUri,
+          source.getBlockchainId().toDecimalString(),
+          source.getCrosschainControlAddr());
+    }
+  }
+
   public void configureRelayer(
       AnIdentity signingCredentials,
       String relayerUri,
@@ -49,6 +72,14 @@ public class AttestorSignerGroup {
     AttestorRelayer relayer = new AttestorRelayer(relayerUri, signingCredentials.getPrivateKey());
     for (AttestorRelayer.Source source : sources) {
       relayer.addNewSource(source);
+      LOG.info(
+          String.format(
+              "Adding Message Store Route: %s %s",
+              source.getBlockchainId().toDecimalString(), source.getCrosschainControlAddr()));
+      relayer.addMessageStoreRoute(
+          relayerUri,
+          source.getBlockchainId().toDecimalString(),
+          source.getCrosschainControlAddr());
     }
     relayer.addMessageStore(dispatcherUri, msgStoreUriFromDispatcher, msgStoreUriFromUser);
   }

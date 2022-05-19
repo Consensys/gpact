@@ -50,6 +50,11 @@ public abstract class BaseExampleSystemManager {
   }
 
   public void standardExampleConfig(int numberOfBlockchains) throws Exception {
+    standardExampleConfig(numberOfBlockchains, true);
+  }
+
+  public void standardExampleConfig(int numberOfBlockchains, boolean fetchFromStore)
+      throws Exception {
     // Less than two blockchains doesn't make sense for crosschain.
     // The test infrasturcture only supports three blockchains at present.
     if (!(numberOfBlockchains == 2 || numberOfBlockchains == 3)) {
@@ -115,6 +120,12 @@ public abstract class BaseExampleSystemManager {
             this.root.dispatcherUri,
             this.root.msgStoreUrlFromDispatcher,
             this.root.msgStoreUrlFromUser);
+
+        if (fetchFromStore) {
+          // ensure attestors send events from the given sources to the message store
+          attestorSignerGroup.registerRouteToMessageStore(relayerUri, sources);
+        }
+
         break;
       case TRANSACTION_RECEIPT_SIGNING:
         TxRootRelayerGroup relayerGroup = new TxRootRelayerGroup();

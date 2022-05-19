@@ -19,7 +19,6 @@ import java.math.BigInteger;
 import java.util.List;
 import net.consensys.gpact.common.AbstractBlockchain;
 import net.consensys.gpact.common.BlockchainConfig;
-import net.consensys.gpact.soliditywrappers.examples.gpact.read.ContractA;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;

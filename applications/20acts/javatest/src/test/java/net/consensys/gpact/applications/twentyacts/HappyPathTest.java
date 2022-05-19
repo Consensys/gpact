@@ -30,7 +30,6 @@ import net.consensys.gpact.common.StatsHolder;
 import net.consensys.gpact.common.Tuple;
 import net.consensys.gpact.messaging.MessagingVerificationInterface;
 import net.consensys.gpact.messaging.SignedEvent;
-import net.consensys.gpact.soliditywrappers.applications.twentyacts.TwentyActs;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Disabled;

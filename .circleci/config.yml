@@ -131,7 +131,7 @@ jobs:
           name: Create and Start blockchains
           working_directory: test-blockchains
           background: true
-          command: docker-compose up
+          command: docker-compose build && docker-compose up
       - run: sleep 30
       - run:
           name: Build and test

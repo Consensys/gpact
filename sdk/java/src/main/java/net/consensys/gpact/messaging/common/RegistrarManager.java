@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 import net.consensys.gpact.common.*;
 import net.consensys.gpact.messaging.MessagingManagerInterface;
-import net.consensys.gpact.soliditywrappers.messaging.common.MessagingRegistrar;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;

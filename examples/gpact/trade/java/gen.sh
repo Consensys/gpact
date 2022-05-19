@@ -5,8 +5,8 @@ set -e
 HERE=examples/gpact/trade/java
 BUILDDIR=$HERE/build
 CONTRACTSDIR=$HERE/../contracts/src
-OUTPUTDIR=$HERE/src/main/java
-PACKAGE=net.consensys.gpact.soliditywrappers.examples.gpact.trade
+OUTPUTDIR=$BUILDDIR/generated/sources/main/java
+PACKAGE=net.consensys.gpact.examples.gpact.trade
 #WEB3J=web3j
 WEB3J=../web3j-abi/codegen/build/install/codegen/bin/codegen
 

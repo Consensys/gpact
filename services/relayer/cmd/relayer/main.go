@@ -16,6 +16,7 @@ package main
  */
 
 import (
+	"github.com/consensys/gpact/services/relayer/internal/msgrelayer/eth/router"
 	"os"
 	"os/signal"
 
@@ -38,7 +39,7 @@ func main() {
 
 	// Start the MQ server
 	var err error
-	mq, err := mqserver.NewMQServer(
+	messageQ, err := mqserver.NewMQServer(
 		conf.InboundMQAddr,
 		conf.InboundChName,
 		conf.OutboundMQAddr,
@@ -48,12 +49,20 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	err = mq.Start()
+	err = messageQ.Start()
 	if err != nil {
 		panic(err)
 	}
-	instance.MQ = mq
-	defer mq.Stop()
+	instance.MQ = messageQ
+	defer messageQ.Stop()
+
+	// Configure relay routes data store
+	routes, err := router.NewRelayRouter(conf.RelayerRoutesDSPath)
+	if err != nil {
+		panic(err)
+	}
+	instance.RelayRoutes = routes
+
 	// Start the Signer
 	signer := signer.NewSignerImplV1(conf.SignerDSPath)
 	err = signer.Start()
@@ -63,15 +72,16 @@ func main() {
 	instance.Signer = signer
 	defer signer.Stop()
 	// Start the RPC Server
-	rpc := rpc.NewServerImplV1(conf.APIPort).
+	server := rpc.NewServerImplV1(conf.APIPort).
+		AddHandler(api.RegisterRouteToStore, api.HandleAddRouteToStore).
 		AddHandler(api.SetKeyReqType, api.HandleSetKey).
 		AddHandler(api.GetAddrReqType, api.HandleGetAddr)
-	err = rpc.Start()
+	err = server.Start()
 	if err != nil {
 		panic(err)
 	}
-	instance.RPC = rpc
-	defer rpc.Stop()
+	instance.RPC = server
+	defer server.Stop()
 	logging.Info("Relayer started.")
 
 	c := make(chan os.Signal)
