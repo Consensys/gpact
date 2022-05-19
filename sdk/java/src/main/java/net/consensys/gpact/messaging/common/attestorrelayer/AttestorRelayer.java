@@ -51,6 +51,14 @@ public class AttestorRelayer {
     public String getSourceId() {
       return this.bcId.toString() + this.crosschainControlAddr;
     }
+
+    public BlockchainId getBlockchainId() {
+      return bcId;
+    }
+
+    public String getCrosschainControlAddr() {
+      return crosschainControlAddr;
+    }
   }
 
   Map<String, Source> sources = new HashMap<>();
@@ -94,6 +102,11 @@ public class AttestorRelayer {
       throws CrosschainProtocolStackException {
     AttestorRelayerWebApi.setupDispatcher(msgDispatcherUrl, msgStoreAddrFromDispatcher);
     this.msgStoreAddr = msgStoreAddrFromUser;
+  }
+
+  public void addMessageStoreRoute(String relayerUri, String sourceNetwork, String sourceAddress)
+      throws CrosschainProtocolStackException {
+    AttestorRelayerWebApi.addMessageStoreRoute(relayerUri, sourceNetwork, sourceAddress);
   }
 
   public String fetchedSignedEvent(

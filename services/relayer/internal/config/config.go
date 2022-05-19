@@ -54,6 +54,9 @@ type Config struct {
 
 	// Observer datastore locaion
 	ObserverDSPath string `mapstructure:"OBSERVER_DS_PATH"` // Observer DS Path: /var/.relayer/ds3
+
+	// Relayer routes datastore location
+	RelayerRoutesDSPath string `mapstructure:"RELAYER_ROUTES_DS_PATH"`
 }
 
 // NewConfig reads environmental variables and creates a new configuration.
@@ -79,10 +82,11 @@ func NewConfig() Config {
 		OutboundMQAddr: conf.GetString("OUTBOUND_MQ_ADDR"),
 		OutboundChName: conf.GetString("OUTBOUND_CH_NAME"),
 
-		APIPort:          conf.GetInt("API_PORT"),
-		SignerDSPath:     conf.GetString("SIGNER_DS_PATH"),
-		TransactorDSPath: conf.GetString("TRANSACTOR_DS_PATH"),
-		VerifierDSPath:   conf.GetString("VERIFIER_DS_PATH"),
-		ObserverDSPath:   conf.GetString("OBSERVER_DS_PATH"),
+		APIPort:             conf.GetInt("API_PORT"),
+		SignerDSPath:        conf.GetString("SIGNER_DS_PATH"),
+		TransactorDSPath:    conf.GetString("TRANSACTOR_DS_PATH"),
+		VerifierDSPath:      conf.GetString("VERIFIER_DS_PATH"),
+		ObserverDSPath:      conf.GetString("OBSERVER_DS_PATH"),
+		RelayerRoutesDSPath: conf.GetString("RELAYER_ROUTES_DS_PATH"),
 	}
 }

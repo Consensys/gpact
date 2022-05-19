@@ -110,9 +110,11 @@ func (o *ObserverImplV1) Start() error {
 func (o *ObserverImplV1) Stop() {
 	if o.sfcObserver != nil {
 		o.sfcObserver.Stop()
+		o.sfcObserver = nil
 	}
 	if o.gpactObserver != nil {
 		o.gpactObserver.Stop()
+		o.gpactObserver = nil
 	}
 }
 
