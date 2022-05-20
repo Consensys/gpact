@@ -57,51 +57,6 @@ commands:
 
 
 jobs:
-  build:
-    docker:
-      - image: cimg/openjdk:11.0.11
-    working_directory: ~/gpact
-    steps:
-      - prepare
-      - run:
-          name: Assemble
-          command: |
-            pushd .
-            # Build our Web3j
-            cd ../web3j-abi
-            ./gradlew --parallel --stacktrace --info --build-cache installDist
-            popd
-            # Build the gpact
-            ./gradlew --parallel --stacktrace --info --build-cache clean compileJava compileTestJava assemble
-      - save_cache:
-          name: Caching Web3j gradle dependencies
-          key: deps-web3j-{{ checksum "../web3j-abi/build.gradle" }}
-          paths:
-            - ../web3j/.gradle
-      - save_cache:
-          name: Caching GPACT gradle dependencies
-          key: deps-gpact-{{ checksum "build.gradle" }}
-          paths:
-            - .gradle
-      - save_cache:
-          name: Caching gradle build cache
-          key: build-cache-{{ checksum "../besu/headcommit" }}-{{ checksum "../web3j-abi/headcommit" }}-{{ .Revision }}
-          paths:
-            - ~/.gradle
-
-#      - persist_to_workspace:
-#          root: ~/
-#          paths:
-#            - ./gpact
-#            - ./web3j-abi
-            #           - ./besu/build/install
-#      - store_artifacts:
-#          name: Distribution artifacts
-#          path:  build/distributions
-#          destination: distributions
-#          when: always
-
-
   javasdk-build:
     machine:
       image: ubuntu-2004:202107-02
@@ -132,7 +87,7 @@ jobs:
             - .gradle
       - save_cache:
           name: Caching gradle build cache
-          key: build-cache-{{ checksum "../besu/headcommit" }}-{{ checksum "../web3j-abi/headcommit" }}-{{ .Revision }}
+          key: build-cache-{{ checksum "../web3j-abi/headcommit" }}-{{ .Revision }}
           paths:
             - ~/.gradle
 
