@@ -57,22 +57,24 @@ commands:
 
 
 jobs:
-  build:
-    docker:
-      - image: cimg/openjdk:11.0.11
-    working_directory: ~/gpact
+  javasdk-build:
+    machine:
+      image: ubuntu-2004:202107-02
+    resource_class: medium
     steps:
+      # The home directory is: /home/circleci/project
+      # gpact is cloned to: /home/circleci/project/.
+      # web3j is cloned to: /home/circleci/web3j-abi
       - prepare
       - run:
-          name: Assemble
+          name: Build web3j
           command: |
-            pushd .
             # Build our Web3j
             cd ../web3j-abi
             ./gradlew --parallel --stacktrace --info --build-cache installDist
-            popd
-            # Build the gpact
-            ./gradlew --parallel --stacktrace --info --build-cache clean compileJava compileTestJava assemble
+      - run:
+          name: Check code formatting, compile the code, everything but execute any tests
+          command: ./gradlew build -x test
       - save_cache:
           name: Caching Web3j gradle dependencies
           key: deps-web3j-{{ checksum "../web3j-abi/build.gradle" }}
@@ -85,21 +87,9 @@ jobs:
             - .gradle
       - save_cache:
           name: Caching gradle build cache
-          key: build-cache-{{ checksum "../besu/headcommit" }}-{{ checksum "../web3j-abi/headcommit" }}-{{ .Revision }}
+          key: build-cache-{{ checksum "../web3j-abi/headcommit" }}-{{ .Revision }}
           paths:
             - ~/.gradle
-
-#      - persist_to_workspace:
-#          root: ~/
-#          paths:
-#            - ./gpact
-#            - ./web3j-abi
-            #           - ./besu/build/install
-#      - store_artifacts:
-#          name: Distribution artifacts
-#          path:  build/distributions
-#          destination: distributions
-#          when: always
 
   unitTestsMachine:
     machine:
@@ -117,8 +107,8 @@ jobs:
             cd ../web3j-abi
             ./gradlew --parallel --stacktrace --info --build-cache installDist
       - run:
-          name: Check code formatting
-          command: ./gradlew solCheckFormat spotlessCheck
+          name: Check code formatting, compile the code, everything but execute any tests
+          command: ./gradlew build -x test
       - run:
           name: Create Relayer containers
           working_directory: services/relayer
