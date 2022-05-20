@@ -107,6 +107,9 @@ jobs:
             cd ../web3j-abi
             ./gradlew --parallel --stacktrace --info --build-cache installDist
       - run:
+          name: Check code formatting, compile the code, everything but execute any tests
+          command: ./gradlew build -x test
+      - run:
           name: Create Relayer containers
           working_directory: services/relayer
           command: make docker
@@ -270,13 +273,11 @@ workflows:
   default:
     jobs:
       - relayer-build
-      - javasdk-build
       - relayer-test:
           requires:
             - relayer-build
       - unitTestsMachine:
           requires:
             - relayer-build
-            - javasdk-build
 
 
