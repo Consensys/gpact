@@ -15,7 +15,6 @@
 package net.consensys.gpact.examples.sfc.erc20bridge;
 
 import java.io.IOException;
-import java.math.BigInteger;
 import net.consensys.gpact.common.AbstractBlockchain;
 import net.consensys.gpact.common.BlockchainConfig;
 import net.consensys.gpact.common.BlockchainId;
@@ -30,21 +29,15 @@ import org.web3j.crypto.Credentials;
 public abstract class AbstractERC20Bridge extends AbstractBlockchain {
   private static final Logger LOG = LogManager.getLogger(AbstractERC20Bridge.class);
 
-  // Total number of tokens issued for booking.
-  public final BigInteger tokenSupply;
   public final String entity;
 
   protected String erc20BridgeAddress;
 
   public AbstractERC20Bridge(
-      final String entity,
-      final BigInteger tokenSupply,
-      final Credentials credentials,
-      final BlockchainConfig bcConfig)
+      final String entity, final Credentials credentials, final BlockchainConfig bcConfig)
       throws IOException {
     super(credentials, bcConfig);
     this.entity = entity;
-    this.tokenSupply = tokenSupply;
   }
 
   public abstract void deployContracts(String cbcAddress) throws Exception;

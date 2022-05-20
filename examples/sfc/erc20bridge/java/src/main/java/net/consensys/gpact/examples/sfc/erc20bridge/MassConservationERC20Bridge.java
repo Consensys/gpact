@@ -29,6 +29,9 @@ import org.web3j.crypto.Credentials;
 public class MassConservationERC20Bridge extends AbstractERC20Bridge {
   private static final Logger LOG = LogManager.getLogger(MassConservationERC20Bridge.class);
 
+  // Total number of tokens issued for booking.
+  public final BigInteger tokenSupply;
+
   ERC20PresetFixedSupply erc20;
   SfcErc20Bridge erc20Bridge;
 
@@ -38,7 +41,8 @@ public class MassConservationERC20Bridge extends AbstractERC20Bridge {
       final Credentials credentials,
       final BlockchainConfig bcConfig)
       throws IOException {
-    super(entity, tokenSupply, credentials, bcConfig);
+    super(entity, credentials, bcConfig);
+    this.tokenSupply = tokenSupply;
   }
 
   public void deployContracts(String cbcAddress) throws Exception {

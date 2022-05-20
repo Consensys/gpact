@@ -23,8 +23,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
 
-public class TokenBridge {
-  static final Logger LOG = LogManager.getLogger(TokenBridge.class);
+public class ERC20TokenBridgeExample {
+  static final Logger LOG = LogManager.getLogger(ERC20TokenBridgeExample.class);
 
   public static final int NUM_TIMES_EXECUTE = 2;
 
