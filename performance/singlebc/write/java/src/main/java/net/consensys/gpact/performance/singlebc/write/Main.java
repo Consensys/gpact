@@ -43,12 +43,8 @@ public class Main {
     Credentials creds = CredentialsCreator.createCredentials();
     BlockchainConfig root = propsLoader.getBlockchainInfo("ROOT");
 
-    Bc1ContractA bc1ContractABlockchain =
-        new Bc1ContractA(
-            creds, root.bcId, root.blockchainNodeRpcUri, root.gasPriceStrategy, root.period);
-    Bc2ContractB bc2ContractBBlockchain =
-        new Bc2ContractB(
-            creds, root.bcId, root.blockchainNodeRpcUri, root.gasPriceStrategy, root.period);
+    Bc1ContractA bc1ContractABlockchain = new Bc1ContractA(creds, root);
+    Bc2ContractB bc2ContractBBlockchain = new Bc2ContractB(creds, root);
 
     BigInteger val = BigInteger.valueOf(7);
 

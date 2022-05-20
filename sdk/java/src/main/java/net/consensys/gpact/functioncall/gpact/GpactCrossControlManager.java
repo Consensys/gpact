@@ -62,14 +62,9 @@ public class GpactCrossControlManager extends AbstractBlockchain implements Cros
   private long crossBlockchainTransactionTimeout;
   private boolean rootEventSuccess;
 
-  protected GpactCrossControlManager(
-      Credentials credentials,
-      BlockchainId bcId,
-      String uri,
-      DynamicGasProvider.Strategy gasPriceStrategy,
-      int blockPeriod)
+  protected GpactCrossControlManager(final Credentials credentials, final BlockchainConfig bcConfig)
       throws IOException {
-    super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
+    super(credentials, bcConfig);
   }
 
   protected void deployContract() throws Exception {

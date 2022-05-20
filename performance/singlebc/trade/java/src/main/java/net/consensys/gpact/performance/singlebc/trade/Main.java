@@ -43,9 +43,7 @@ public class Main {
     Credentials creds = CredentialsCreator.createCredentials();
     BlockchainConfig root = propsLoader.getBlockchainInfo("ROOT");
 
-    Bc1TradeWallet bc1TradeWalletBlockchain =
-        new Bc1TradeWallet(
-            creds, root.bcId, root.blockchainNodeRpcUri, root.gasPriceStrategy, root.period);
+    Bc1TradeWallet bc1TradeWalletBlockchain = new Bc1TradeWallet(creds, root);
     bc1TradeWalletBlockchain.deployContracts();
 
     // Do some single blockchain calls to set things up, to show that values have changed.

@@ -35,14 +35,9 @@ public class EntityBase extends AbstractBlockchain {
   public String entity;
 
   public EntityBase(
-      final String entity,
-      Credentials credentials,
-      BlockchainId bcId,
-      String uri,
-      DynamicGasProvider.Strategy gasPriceStrategy,
-      int blockPeriod)
+      final String entity, final Credentials credentials, final BlockchainConfig bcConfig)
       throws IOException {
-    super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
+    super(credentials, bcConfig);
     this.entity = entity;
   }
 

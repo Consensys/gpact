@@ -26,6 +26,6 @@ public class AttestorRelayerConfigurerTest {
 
   @Test
   public void testSetupDispatcher() throws Exception {
-    AttestorRelayerWebApi.setupDispatcher("http://127.0.0.1:9725", "msgstore:8080");
+    AttestorRelayerWebApi.setupDispatcherForMsgStore("http://127.0.0.1:9725", "msgstore:8080");
   }
 }

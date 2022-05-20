@@ -22,12 +22,12 @@ public class Erc20BridgeTest extends AbstractExampleTest {
   @Test
   public void directSignSerialMultiBlockchain() throws Exception {
     String tempPropsFile = createPropertiesFile(true, true, false);
-    TokenBridge.main(new String[] {tempPropsFile});
+    ERC20TokenBridgeExample.main(new String[] {tempPropsFile});
   }
 
   @Test
   public void transferSignSerialMultiBlockchain() throws Exception {
     String tempPropsFile = createPropertiesFile(false, true, false);
-    TokenBridge.main(new String[] {tempPropsFile});
+    ERC20TokenBridgeExample.main(new String[] {tempPropsFile});
   }
 }

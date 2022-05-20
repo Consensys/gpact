@@ -113,13 +113,7 @@ public abstract class Abstract20ActsTest extends AbstractExampleTest {
     this.withdrawalWaitTime = BigInteger.valueOf(DEFAULT_WITHDRAWAL_WAIT_TIME);
 
     // Set-up Chain A
-    this.depChainAErc20 =
-        new ERC20Manager(
-            deployerCredsA,
-            chainA.bcId,
-            chainA.blockchainNodeRpcUri,
-            chainA.gasPriceStrategy,
-            chainA.period);
+    this.depChainAErc20 = new ERC20Manager(deployerCredsA, chainA);
     this.depChainA20Acts = (TwentyActsManager) managerGroup.getCbcManager(chainA.bcId);
     this.depChainA20Acts.setWithdrawalTime(withdrawalWaitTime);
     this.depChainA20Acts.setInfBenficiary(infCreds.getAddress());
@@ -130,13 +124,7 @@ public abstract class Abstract20ActsTest extends AbstractExampleTest {
         chainAName, chainASymbol, chainAInitialSupply, chainAErc20Owner.getAddress());
 
     // Set-up Chain B
-    this.depChainBErc20 =
-        new ERC20Manager(
-            deployerCredsB,
-            chainB.bcId,
-            chainB.blockchainNodeRpcUri,
-            chainB.gasPriceStrategy,
-            chainB.period);
+    this.depChainBErc20 = new ERC20Manager(deployerCredsB, chainB);
     this.depChainB20Acts = (TwentyActsManager) managerGroup.getCbcManager(chainB.bcId);
     this.depChainB20Acts.setWithdrawalTime(withdrawalWaitTime);
     this.depChainB20Acts.setInfBenficiary(infCreds.getAddress());

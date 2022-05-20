@@ -31,9 +31,11 @@ public abstract class AbstractBlockchain {
   protected static final int RETRY = 100;
 
   protected Credentials credentials;
+  protected BlockchainConfig blockchainConfig;
 
   protected BlockchainId blockchainId;
-  protected String uri;
+  protected String rpcUri;
+  protected String wsUri;
   // Polling interval should be equal to the block time.
   protected int pollingInterval;
   public DynamicGasProvider gasProvider;
@@ -42,28 +44,25 @@ public abstract class AbstractBlockchain {
   public Web3j web3j;
   protected FastTxManager tm;
 
-  protected AbstractBlockchain(
-      Credentials credentials,
-      BlockchainId bcId,
-      String uri,
-      DynamicGasProvider.Strategy gasPriceStrategy,
-      int blockPeriod)
+  protected AbstractBlockchain(final Credentials credentials, final BlockchainConfig bcConfig)
       throws IOException {
-    this.blockchainId = bcId;
-    this.uri = uri;
-    this.pollingInterval = blockPeriod;
     this.credentials = credentials;
+    this.blockchainConfig = bcConfig;
+    this.blockchainId = bcConfig.bcId;
+    this.rpcUri = bcConfig.blockchainNodeRpcUri;
+    this.wsUri = bcConfig.blockchainNodeWsUri;
+    this.pollingInterval = bcConfig.period;
+    this.gasPriceStrategy = bcConfig.gasPriceStrategy;
+
     this.web3j =
         Web3j.build(
-            new HttpService(this.uri), this.pollingInterval, new ScheduledThreadPoolExecutor(5));
-
+            new HttpService(this.rpcUri), this.pollingInterval, new ScheduledThreadPoolExecutor(5));
     TransactionReceiptProcessor txrProcessor =
         new PollingTransactionReceiptProcessor(this.web3j, this.pollingInterval, RETRY);
     this.tm =
         TxManagerCache.getOrCreate(
             this.web3j, this.credentials, this.blockchainId.asLong(), txrProcessor);
-    this.gasPriceStrategy = gasPriceStrategy;
-    this.gasProvider = new DynamicGasProvider(this.web3j, uri, gasPriceStrategy);
+    this.gasProvider = new DynamicGasProvider(this.web3j, rpcUri, gasPriceStrategy);
   }
 
   public void shutdown() {
@@ -74,7 +73,11 @@ public abstract class AbstractBlockchain {
     return this.blockchainId;
   }
 
-  public String getUri() {
-    return this.uri;
+  public String getRpcUri() {
+    return this.rpcUri;
+  }
+
+  public String getWsUri() {
+    return this.wsUri;
   }
 }

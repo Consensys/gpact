@@ -46,22 +46,8 @@ public class Erc721TokenBridgeExample {
 
     // Set-up classes to manage blockchains.
     Credentials erc20OwnerCreds = CredentialsCreator.createCredentials();
-    AbstractERC721Bridge chainA =
-        new HomeBcERC721Bridge(
-            "ChainA",
-            erc20OwnerCreds,
-            root.bcId,
-            root.blockchainNodeRpcUri,
-            root.gasPriceStrategy,
-            root.period);
-    AbstractERC721Bridge chainB =
-        new RemoteBcERC721Bridge(
-            "ChainB",
-            erc20OwnerCreds,
-            bc2.bcId,
-            bc2.blockchainNodeRpcUri,
-            bc2.gasPriceStrategy,
-            bc2.period);
+    AbstractERC721Bridge chainA = new HomeBcERC721Bridge("ChainA", erc20OwnerCreds, root);
+    AbstractERC721Bridge chainB = new RemoteBcERC721Bridge("ChainB", erc20OwnerCreds, bc2);
 
     // Deploy application contracts.
     BlockchainId chainABcId = chainA.getBlockchainId();

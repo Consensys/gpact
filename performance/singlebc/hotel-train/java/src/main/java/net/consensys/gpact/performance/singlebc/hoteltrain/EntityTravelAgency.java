@@ -33,10 +33,8 @@ public class EntityTravelAgency extends AbstractBlockchain {
   TravelAgency travelAgency;
   private static final String PKEY = "50000000000000000000000000000000000000000000000000000000003";
 
-  public EntityTravelAgency(
-      BlockchainId bcId, String uri, DynamicGasProvider.Strategy gasPriceStrategy, int blockPeriod)
-      throws IOException {
-    super(Credentials.create(PKEY), bcId, uri, gasPriceStrategy, blockPeriod);
+  public EntityTravelAgency(final BlockchainConfig bcConfig) throws IOException {
+    super(Credentials.create(PKEY), bcConfig);
   }
 
   public void deploy(

@@ -60,14 +60,8 @@ public class TwentyActsManager extends AbstractBlockchain implements CrossContro
 
   private TwentyActs twentyActs;
 
-  public TwentyActsManager(
-      Credentials credentials,
-      BlockchainId bcId,
-      String uri,
-      DynamicGasProvider.Strategy gasPriceStrategy,
-      int blockPeriod)
-      throws IOException {
-    super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
+  public TwentyActsManager(Credentials credentials, BlockchainConfig bcConfig) throws IOException {
+    super(credentials, bcConfig);
   }
 
   public void deploy20ActsContract(BigInteger withdrawWaitPeriod, String infrastructureAccount)
@@ -261,9 +255,7 @@ public class TwentyActsManager extends AbstractBlockchain implements CrossContro
   }
 
   public TwentyActsManager forUser(Credentials user) throws IOException {
-    TwentyActsManager bc =
-        new TwentyActsManager(
-            user, this.blockchainId, this.uri, this.gasPriceStrategy, this.pollingInterval);
+    TwentyActsManager bc = new TwentyActsManager(user, this.blockchainConfig);
     bc.loadCbcContract(this.twentyActs.getContractAddress());
     return bc;
   }

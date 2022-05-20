@@ -17,8 +17,8 @@ package net.consensys.gpact.examples.gpact.hoteltrain;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.List;
+import net.consensys.gpact.common.BlockchainConfig;
 import net.consensys.gpact.common.BlockchainId;
-import net.consensys.gpact.common.DynamicGasProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
@@ -35,10 +35,8 @@ public class EntityTrain extends EntityBase {
 
   private Train trainContract;
 
-  public EntityTrain(
-      BlockchainId bcId, String uri, DynamicGasProvider.Strategy gasPriceStrategy, int blockPeriod)
-      throws IOException {
-    super(NAME, Credentials.create(PKEY), bcId, uri, gasPriceStrategy, blockPeriod);
+  public EntityTrain(final BlockchainConfig bcConfig) throws IOException {
+    super(NAME, Credentials.create(PKEY), bcConfig);
   }
 
   public void deployContracts(String cbcAddress) throws Exception {

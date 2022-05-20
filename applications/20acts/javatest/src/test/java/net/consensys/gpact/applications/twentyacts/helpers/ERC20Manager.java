@@ -35,14 +35,9 @@ public class ERC20Manager extends AbstractBlockchain {
 
   private ERC20PresetFixedSupply erc20;
 
-  public ERC20Manager(
-      Credentials credentials,
-      BlockchainId bcId,
-      String uri,
-      DynamicGasProvider.Strategy gasPriceStrategy,
-      int blockPeriod)
+  public ERC20Manager(final Credentials credentials, final BlockchainConfig bcConfig)
       throws IOException {
-    super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
+    super(credentials, bcConfig);
   }
 
   public void deployErc20Contract(
@@ -79,9 +74,7 @@ public class ERC20Manager extends AbstractBlockchain {
   }
 
   public ERC20Manager forUser(Credentials user) throws IOException {
-    ERC20Manager bc =
-        new ERC20Manager(
-            user, this.blockchainId, this.uri, this.gasPriceStrategy, this.pollingInterval);
+    ERC20Manager bc = new ERC20Manager(user, this.blockchainConfig);
     bc.loadErc20Contract(this.erc20.getContractAddress());
     return bc;
   }

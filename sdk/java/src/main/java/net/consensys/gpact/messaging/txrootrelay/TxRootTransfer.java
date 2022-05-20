@@ -18,8 +18,8 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.*;
 import net.consensys.gpact.common.AbstractBlockchain;
+import net.consensys.gpact.common.BlockchainConfig;
 import net.consensys.gpact.common.BlockchainId;
-import net.consensys.gpact.common.DynamicGasProvider;
 import net.consensys.gpact.messaging.MessagingVerificationInterface;
 import net.consensys.gpact.messaging.SignedEvent;
 import net.consensys.gpact.messaging.txrootrelay.besuethereum.core.Hash;
@@ -51,14 +51,11 @@ public class TxRootTransfer extends AbstractBlockchain implements MessagingVerif
   TxRootRelayerGroup relayerGroup;
 
   public TxRootTransfer(
-      TxRootRelayerGroup relayerGroup,
-      Credentials credentials,
-      BlockchainId bcId,
-      String uri,
-      DynamicGasProvider.Strategy gasPriceStrategy,
-      int blockPeriod)
+      final TxRootRelayerGroup relayerGroup,
+      final Credentials credentials,
+      final BlockchainConfig bcConfig)
       throws IOException {
-    super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
+    super(credentials, bcConfig);
     this.relayerGroup = relayerGroup;
   }
 

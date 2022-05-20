@@ -39,24 +39,18 @@ public class GpactCrossControlManagerGroup implements CrossControlManagerGroup {
 
   @Override
   public void addBlockchainAndDeployContracts(
-      Credentials creds,
-      BlockchainConfig bcInfo,
-      MessagingVerificationInterface messageVerification)
+      final Credentials creds,
+      final BlockchainConfig bcConfig,
+      final MessagingVerificationInterface messageVerification)
       throws Exception {
-    BlockchainId blockchainId = bcInfo.bcId;
+    BlockchainId blockchainId = bcConfig.bcId;
     if (this.blockchains.containsKey(blockchainId)) {
       return;
     }
     LOG.debug("Deploying Cross-Blockchain Control contract for blockchain id {}", blockchainId);
 
     BcHolder holder = new BcHolder();
-    holder.cbc =
-        new GpactCrossControlManager(
-            creds,
-            bcInfo.bcId,
-            bcInfo.blockchainNodeRpcUri,
-            bcInfo.gasPriceStrategy,
-            bcInfo.period);
+    holder.cbc = new GpactCrossControlManager(creds, bcConfig);
     holder.cbc.deployContract();
     holder.cbcContractAddress = holder.cbc.getCbcContractAddress();
     holder.ver = messageVerification;
@@ -66,24 +60,18 @@ public class GpactCrossControlManagerGroup implements CrossControlManagerGroup {
 
   @Override
   public void addBlockchainAndLoadCbcContract(
-      Credentials creds,
-      BlockchainConfig bcInfo,
-      String cbcAddress,
-      MessagingVerificationInterface messageVerification)
+      final Credentials creds,
+      final BlockchainConfig bcConfig,
+      final String cbcAddress,
+      final MessagingVerificationInterface messageVerification)
       throws Exception {
-    BlockchainId blockchainId = bcInfo.bcId;
+    BlockchainId blockchainId = bcConfig.bcId;
     if (this.blockchains.containsKey(blockchainId)) {
       return;
     }
 
     BcHolder holder = new BcHolder();
-    holder.cbc =
-        new GpactCrossControlManager(
-            creds,
-            bcInfo.bcId,
-            bcInfo.blockchainNodeRpcUri,
-            bcInfo.gasPriceStrategy,
-            bcInfo.period);
+    holder.cbc = new GpactCrossControlManager(creds, bcConfig);
 
     holder.cbc.loadContract(cbcAddress);
     holder.cbcContractAddress = cbcAddress;

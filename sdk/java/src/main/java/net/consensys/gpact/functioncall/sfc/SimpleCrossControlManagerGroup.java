@@ -20,24 +20,18 @@ public class SimpleCrossControlManagerGroup implements CrossControlManagerGroup 
 
   @Override
   public void addBlockchainAndDeployContracts(
-      Credentials creds,
-      BlockchainConfig bcInfo,
-      MessagingVerificationInterface messageVerification)
+      final Credentials creds,
+      final BlockchainConfig bcConfig,
+      final MessagingVerificationInterface messageVerification)
       throws Exception {
-    BlockchainId blockchainId = bcInfo.bcId;
+    BlockchainId blockchainId = bcConfig.bcId;
     if (this.blockchains.containsKey(blockchainId)) {
       return;
     }
     LOG.debug("Deploying Cross-Blockchain Control contract for blockchain id {}", blockchainId);
 
     BcHolder holder = new BcHolder();
-    holder.cbc =
-        new SimpleCrossControlManager(
-            creds,
-            bcInfo.bcId,
-            bcInfo.blockchainNodeRpcUri,
-            bcInfo.gasPriceStrategy,
-            bcInfo.period);
+    holder.cbc = new SimpleCrossControlManager(creds, bcConfig);
     holder.cbc.deployCbcContract();
     holder.cbcContractAddress = holder.cbc.getCbcContractAddress();
     holder.ver = messageVerification;
@@ -48,23 +42,17 @@ public class SimpleCrossControlManagerGroup implements CrossControlManagerGroup 
   @Override
   public void addBlockchainAndLoadCbcContract(
       Credentials creds,
-      BlockchainConfig bcInfo,
+      BlockchainConfig bcConfig,
       String cbcAddress,
       MessagingVerificationInterface messageVerification)
       throws Exception {
-    BlockchainId blockchainId = bcInfo.bcId;
+    BlockchainId blockchainId = bcConfig.bcId;
     if (this.blockchains.containsKey(blockchainId)) {
       return;
     }
 
     BcHolder holder = new BcHolder();
-    holder.cbc =
-        new SimpleCrossControlManager(
-            creds,
-            bcInfo.bcId,
-            bcInfo.blockchainNodeRpcUri,
-            bcInfo.gasPriceStrategy,
-            bcInfo.period);
+    holder.cbc = new SimpleCrossControlManager(creds, bcConfig);
 
     holder.cbc.loadCbcContract(cbcAddress);
     holder.cbcContractAddress = cbcAddress;

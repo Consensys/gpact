@@ -16,8 +16,7 @@ package net.consensys.gpact.messaging.txrootrelay;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import net.consensys.gpact.common.BlockchainId;
-import net.consensys.gpact.common.DynamicGasProvider;
+import net.consensys.gpact.common.BlockchainConfig;
 import net.consensys.gpact.messaging.common.RegistrarManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -30,14 +29,9 @@ public class TxRootTransferManager extends RegistrarManager {
   private TxRootRelayVerifier verifier;
   private TxReceiptsRootStorage txReceiptsRootStorage;
 
-  public TxRootTransferManager(
-      Credentials credentials,
-      BlockchainId bcId,
-      String uri,
-      DynamicGasProvider.Strategy gasPriceStrategy,
-      int blockPeriod)
+  public TxRootTransferManager(final Credentials credentials, final BlockchainConfig bcConfig)
       throws IOException {
-    super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
+    super(credentials, bcConfig);
   }
 
   @Override
