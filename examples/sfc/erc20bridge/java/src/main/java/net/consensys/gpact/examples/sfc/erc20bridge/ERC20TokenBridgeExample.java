@@ -71,9 +71,7 @@ public class ERC20TokenBridgeExample {
           new MassConservationERC20Bridge(
               "ChainB", BigInteger.valueOf(CHAIN_B_TOKEN_SUPPLY), erc20OwnerCreds, bc2);
     } else {
-      chainB =
-          new MinterBurnerERC20Bridge(
-              "ChainB", BigInteger.valueOf(CHAIN_B_TOKEN_SUPPLY), erc20OwnerCreds, bc2);
+      chainB = new MinterBurnerERC20Bridge("ChainB", erc20OwnerCreds, bc2);
     }
 
     // Deploy application contracts.

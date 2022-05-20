@@ -38,12 +38,9 @@ public class MinterBurnerERC20Bridge extends AbstractERC20Bridge {
   SfcErc20Bridge erc20Bridge;
 
   public MinterBurnerERC20Bridge(
-      final String entity,
-      final BigInteger tokenSupply,
-      final Credentials credentials,
-      final BlockchainConfig bcConfig)
+      final String entity, final Credentials credentials, final BlockchainConfig bcConfig)
       throws IOException {
-    super(entity, tokenSupply, credentials, bcConfig);
+    super(entity, credentials, bcConfig);
   }
 
   public void deployContracts(String cbcAddress) throws Exception {
