@@ -16,11 +16,8 @@ package net.consensys.gpact.examples.sfc.erc721bridge;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import net.consensys.gpact.common.BlockchainId;
-import net.consensys.gpact.common.DynamicGasProvider;
+import net.consensys.gpact.common.BlockchainConfig;
 import net.consensys.gpact.common.crypto.Hash;
-import net.consensys.gpact.soliditywrappers.examples.sfc.erc721bridge.ERC721AutoURIRemoteBlockchain;
-import net.consensys.gpact.soliditywrappers.examples.sfc.erc721bridge.SfcErc721Bridge;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
@@ -39,14 +36,9 @@ public class RemoteBcERC721Bridge extends AbstractERC721Bridge {
   ERC721AutoURIRemoteBlockchain erc721;
 
   public RemoteBcERC721Bridge(
-      final String entity,
-      Credentials credentials,
-      BlockchainId bcId,
-      String uri,
-      DynamicGasProvider.Strategy gasPriceStrategy,
-      int blockPeriod)
+      final String entity, final Credentials credentials, final BlockchainConfig bcConfig)
       throws IOException {
-    super(entity, credentials, bcId, uri, gasPriceStrategy, blockPeriod);
+    super(entity, credentials, bcConfig);
   }
 
   public void deployContracts(String cbcAddress) throws Exception {

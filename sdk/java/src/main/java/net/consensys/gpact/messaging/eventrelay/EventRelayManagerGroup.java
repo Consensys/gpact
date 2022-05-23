@@ -14,16 +14,13 @@
  */
 package net.consensys.gpact.messaging.eventrelay;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import net.consensys.gpact.common.BlockchainConfig;
 import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.messaging.BaseMessagingManagerGroup;
-import net.consensys.gpact.messaging.MessagingManagerGroup;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
@@ -42,9 +39,9 @@ public class EventRelayManagerGroup extends BaseMessagingManagerGroup {
 
   @Override
   public void addBlockchainAndDeployContracts(
-      Credentials creds, BlockchainConfig bcInfo, String additionalContractAddress)
+      final Credentials creds, final BlockchainConfig bcConfig, final String additionalContractAddress)
       throws Exception {
-    BlockchainId blockchainId = bcInfo.bcId;
+    BlockchainId blockchainId = bcConfig.bcId;
     if (this.blockchains.containsKey(blockchainId)) {
       return;
       // throw new Exception("Blockchain already added: " + blockchainId);
@@ -54,11 +51,7 @@ public class EventRelayManagerGroup extends BaseMessagingManagerGroup {
     EventRelayManager manager =
         new EventRelayManager(
             creds,
-            blockchainId,
-            bcInfo.blockchainNodeRpcUri,
-            bcInfo.blockchainNodeWsUri,
-            bcInfo.gasPriceStrategy,
-            bcInfo.period);
+            bcConfig);
     manager.setFunctionCallContract(additionalContractAddress);
     manager.deployContracts();
 
@@ -67,8 +60,8 @@ public class EventRelayManagerGroup extends BaseMessagingManagerGroup {
 
   @Override
   public void addBlockchainAndLoadContracts(
-      Credentials creds, BlockchainConfig bcInfo, ArrayList<String> addresses) throws Exception {
-    BlockchainId blockchainId = bcInfo.bcId;
+      final Credentials creds, final BlockchainConfig bcConfig, final ArrayList<String> addresses) throws Exception {
+    BlockchainId blockchainId = bcConfig.bcId;
     if (this.blockchains.containsKey(blockchainId)) {
       throw new Exception("Blockchain already added: " + blockchainId);
     }
@@ -76,11 +69,7 @@ public class EventRelayManagerGroup extends BaseMessagingManagerGroup {
     EventRelayManager manager =
         new EventRelayManager(
             creds,
-            blockchainId,
-            bcInfo.blockchainNodeRpcUri,
-            bcInfo.blockchainNodeWsUri,
-            bcInfo.gasPriceStrategy,
-            bcInfo.period);
+            bcConfig);
     manager.loadContracts(addresses);
 
     this.blockchains.put(blockchainId, manager);

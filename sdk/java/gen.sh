@@ -5,11 +5,10 @@ set -e
 HERE=sdk/java
 BUILDDIR=$HERE/build
 CONTRACTSDIR=contracts/contracts/src
-OUTPUTDIR=$HERE/src/main/java
-BASEPACKAGE=net.consensys.gpact.soliditywrappers
+OUTPUTDIR=$BUILDDIR/generated/sources/main/java
+BASEPACKAGE=net.consensys.gpact
 #WEB3J=web3j
 WEB3J=../web3j-abi/codegen/build/install/codegen/bin/codegen
-
 
 solc $CONTRACTSDIR/common/BlsSignatureTest.sol --bin --abi --optimize -o $BUILDDIR --overwrite
 solc $CONTRACTSDIR/common/EcdsaSignatureTest.sol --bin --abi --optimize -o $BUILDDIR --overwrite

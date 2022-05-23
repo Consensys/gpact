@@ -15,15 +15,13 @@
 package net.consensys.gpact.messaging;
 
 import net.consensys.gpact.common.BlockchainId;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-abstract public class BaseMessagingManagerGroup implements MessagingManagerGroup {
+public abstract class BaseMessagingManagerGroup implements MessagingManagerGroup {
 
   protected Map<BlockchainId, MessagingManagerInterface> blockchains = new HashMap<>();
 

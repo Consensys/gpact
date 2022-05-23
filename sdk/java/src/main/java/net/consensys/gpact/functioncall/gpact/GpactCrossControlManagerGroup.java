@@ -38,22 +38,18 @@ public class GpactCrossControlManagerGroup implements CrossControlManagerGroup {
   private final Map<BlockchainId, BcHolder> blockchains = new HashMap<>();
 
   @Override
-  public void addBlockchainAndDeployContracts(Credentials creds, BlockchainConfig bcInfo)
+  public void addBlockchainAndDeployContracts(
+      final Credentials creds,
+      final BlockchainConfig bcConfig)
       throws Exception {
-    BlockchainId blockchainId = bcInfo.bcId;
+    BlockchainId blockchainId = bcConfig.bcId;
     if (this.blockchains.containsKey(blockchainId)) {
       return;
     }
     LOG.debug("Deploying Cross-Blockchain Control contract for blockchain id {}", blockchainId);
 
     BcHolder holder = new BcHolder();
-    holder.cbc =
-        new GpactCrossControlManager(
-            creds,
-            bcInfo.bcId,
-            bcInfo.blockchainNodeRpcUri,
-            bcInfo.gasPriceStrategy,
-            bcInfo.period);
+    holder.cbc = new GpactCrossControlManager(creds, bcConfig);
     holder.cbc.deployContract();
     holder.cbcContractAddress = holder.cbc.getCbcContractAddress();
 
@@ -62,20 +58,17 @@ public class GpactCrossControlManagerGroup implements CrossControlManagerGroup {
 
   @Override
   public void addBlockchainAndLoadCbcContract(
-      Credentials creds, BlockchainConfig bcInfo, String cbcAddress) throws Exception {
-    BlockchainId blockchainId = bcInfo.bcId;
+      final Credentials creds,
+      final BlockchainConfig bcConfig,
+      final String cbcAddress)
+      throws Exception {
+    BlockchainId blockchainId = bcConfig.bcId;
     if (this.blockchains.containsKey(blockchainId)) {
       return;
     }
 
     BcHolder holder = new BcHolder();
-    holder.cbc =
-        new GpactCrossControlManager(
-            creds,
-            bcInfo.bcId,
-            bcInfo.blockchainNodeRpcUri,
-            bcInfo.gasPriceStrategy,
-            bcInfo.period);
+    holder.cbc = new GpactCrossControlManager(creds, bcConfig);
 
     holder.cbc.loadContract(cbcAddress);
     holder.cbcContractAddress = cbcAddress;

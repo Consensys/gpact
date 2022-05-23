@@ -17,8 +17,6 @@ package net.consensys.gpact.performance.singlebc.hoteltrain;
 import java.io.IOException;
 import java.math.BigInteger;
 import net.consensys.gpact.common.*;
-import net.consensys.gpact.soliditywrappers.performance.singlebc.hoteltrain.ERC20PresetFixedSupply;
-import net.consensys.gpact.soliditywrappers.performance.singlebc.hoteltrain.TravelAgency;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
@@ -35,10 +33,8 @@ public class EntityTravelAgency extends AbstractBlockchain {
   TravelAgency travelAgency;
   private static final String PKEY = "50000000000000000000000000000000000000000000000000000000003";
 
-  public EntityTravelAgency(
-      BlockchainId bcId, String uri, DynamicGasProvider.Strategy gasPriceStrategy, int blockPeriod)
-      throws IOException {
-    super(Credentials.create(PKEY), bcId, uri, gasPriceStrategy, blockPeriod);
+  public EntityTravelAgency(final BlockchainConfig bcConfig) throws IOException {
+    super(Credentials.create(PKEY), bcConfig);
   }
 
   public void deploy(

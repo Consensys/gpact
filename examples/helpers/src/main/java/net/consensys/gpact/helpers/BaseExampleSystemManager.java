@@ -28,7 +28,6 @@ import net.consensys.gpact.functioncall.CrossControlManagerGroup;
 import net.consensys.gpact.messaging.MessagingManagerGroup;
 import net.consensys.gpact.messaging.common.attestorrelayer.AttestorRelayer;
 import net.consensys.gpact.messaging.eventattest.AttestorSignerGroup;
-import net.consensys.gpact.messaging.eventrelay.EventRelay;
 import net.consensys.gpact.messaging.eventrelay.EventRelayGroup;
 import net.consensys.gpact.messaging.txrootrelay.TxRootRelayerGroup;
 import net.consensys.gpact.messaging.txrootrelay.TxRootTransferGroup;
@@ -67,7 +66,7 @@ public abstract class BaseExampleSystemManager {
     StatsHolder.log(consensusMethodology.name());
     String relayerUri = propsLoader.getRelayerUri();
 
-    loadFunctionPayerProperties(propsLoader);
+    loadFunctionLayerProperties(propsLoader);
 
     // To keep the example simple, just have one signer for all blockchains.
     AnIdentity globalSigner = AnIdentity.createNewRandomIdentity();
@@ -108,6 +107,7 @@ public abstract class BaseExampleSystemManager {
               this.bc3,
               sources);
         }
+
         attestorSignerGroup.configureRelayer(
             globalSigner,
             relayerUri,
@@ -115,6 +115,8 @@ public abstract class BaseExampleSystemManager {
             this.root.dispatcherUri,
             this.root.msgStoreUrlFromDispatcher,
             this.root.msgStoreUrlFromUser);
+        // ensure attestors send events from the given sources to the message store
+        attestorSignerGroup.registerRouteToMessageStore(relayerUri, sources);
         break;
       case EVENT_RELAY:
         EventRelayGroup eventRelayGroup = new EventRelayGroup();
@@ -181,7 +183,7 @@ public abstract class BaseExampleSystemManager {
     setupCrosschainTrust(crossControlManagerGroup, messagingManagerGroup);
   }
 
-  protected abstract void loadFunctionPayerProperties(PropertiesLoader propsLoader);
+  protected abstract void loadFunctionLayerProperties(PropertiesLoader propsLoader);
 
   protected abstract CrossControlManagerGroup getFunctionCallInstance() throws Exception;
 

@@ -5,8 +5,8 @@ set -e
 HERE=performance/singlebc/read/java
 BUILDDIR=$HERE/build
 CONTRACTSDIR=$HERE/../contracts/src
-OUTPUTDIR=$HERE/src/main/java
-PACKAGE=net.consensys.gpact.soliditywrappers.performance.singlebc.read
+OUTPUTDIR=$BUILDDIR/generated/sources/main/java
+PACKAGE=net.consensys.gpact.performance.singlebc.read
 #WEB3J=web3j
 WEB3J=../web3j-abi/codegen/build/install/codegen/bin/codegen
 

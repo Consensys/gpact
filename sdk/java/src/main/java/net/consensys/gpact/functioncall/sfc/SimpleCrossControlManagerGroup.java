@@ -19,22 +19,18 @@ public class SimpleCrossControlManagerGroup implements CrossControlManagerGroup 
   private Map<BlockchainId, BcHolder> blockchains = new HashMap<>();
 
   @Override
-  public void addBlockchainAndDeployContracts(Credentials creds, BlockchainConfig bcInfo)
+  public void addBlockchainAndDeployContracts(
+      final Credentials creds,
+      final BlockchainConfig bcConfig)
       throws Exception {
-    BlockchainId blockchainId = bcInfo.bcId;
+    BlockchainId blockchainId = bcConfig.bcId;
     if (this.blockchains.containsKey(blockchainId)) {
       return;
     }
     LOG.debug("Deploying Cross-Blockchain Control contract for blockchain id {}", blockchainId);
 
     BcHolder holder = new BcHolder();
-    holder.cbc =
-        new SimpleCrossControlManager(
-            creds,
-            bcInfo.bcId,
-            bcInfo.blockchainNodeRpcUri,
-            bcInfo.gasPriceStrategy,
-            bcInfo.period);
+    holder.cbc = new SimpleCrossControlManager(creds, bcConfig);
     holder.cbc.deployCbcContract();
     holder.cbcContractAddress = holder.cbc.getCbcContractAddress();
 
@@ -43,20 +39,17 @@ public class SimpleCrossControlManagerGroup implements CrossControlManagerGroup 
 
   @Override
   public void addBlockchainAndLoadCbcContract(
-      Credentials creds, BlockchainConfig bcInfo, String cbcAddress) throws Exception {
-    BlockchainId blockchainId = bcInfo.bcId;
+      Credentials creds,
+      BlockchainConfig bcConfig,
+      String cbcAddress)
+      throws Exception {
+    BlockchainId blockchainId = bcConfig.bcId;
     if (this.blockchains.containsKey(blockchainId)) {
       return;
     }
 
     BcHolder holder = new BcHolder();
-    holder.cbc =
-        new SimpleCrossControlManager(
-            creds,
-            bcInfo.bcId,
-            bcInfo.blockchainNodeRpcUri,
-            bcInfo.gasPriceStrategy,
-            bcInfo.period);
+    holder.cbc = new SimpleCrossControlManager(creds, bcConfig);
 
     holder.cbc.loadCbcContract(cbcAddress);
     holder.cbcContractAddress = cbcAddress;

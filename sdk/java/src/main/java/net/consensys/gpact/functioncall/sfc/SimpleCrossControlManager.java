@@ -22,7 +22,6 @@ import net.consensys.gpact.common.crypto.Hash;
 import net.consensys.gpact.functioncall.CallExecutionTree;
 import net.consensys.gpact.functioncall.CrossControlManager;
 import net.consensys.gpact.messaging.SignedEvent;
-import net.consensys.gpact.soliditywrappers.functioncall.sfc.SimpleCrosschainControl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
@@ -42,14 +41,9 @@ public class SimpleCrossControlManager extends AbstractBlockchain implements Cro
 
   protected SimpleCrosschainControl crossBlockchainControlContract;
 
-  public SimpleCrossControlManager(
-      Credentials credentials,
-      BlockchainId bcId,
-      String uri,
-      DynamicGasProvider.Strategy gasPriceStrategy,
-      int blockPeriod)
+  public SimpleCrossControlManager(final Credentials credentials, final BlockchainConfig bcConfig)
       throws IOException {
-    super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
+    super(credentials, bcConfig);
   }
 
   protected void deployCbcContract() throws Exception {

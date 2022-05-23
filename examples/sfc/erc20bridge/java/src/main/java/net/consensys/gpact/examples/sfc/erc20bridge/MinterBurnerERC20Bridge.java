@@ -16,11 +16,9 @@ package net.consensys.gpact.examples.sfc.erc20bridge;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import net.consensys.gpact.common.BlockchainConfig;
 import net.consensys.gpact.common.BlockchainId;
-import net.consensys.gpact.common.DynamicGasProvider;
 import net.consensys.gpact.common.crypto.Hash;
-import net.consensys.gpact.soliditywrappers.examples.sfc.erc20bridge.ERC20PresetMinterPauser;
-import net.consensys.gpact.soliditywrappers.examples.sfc.erc20bridge.SfcErc20Bridge;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
@@ -40,15 +38,9 @@ public class MinterBurnerERC20Bridge extends AbstractERC20Bridge {
   SfcErc20Bridge erc20Bridge;
 
   public MinterBurnerERC20Bridge(
-      final String entity,
-      BigInteger tokenSupply,
-      Credentials credentials,
-      BlockchainId bcId,
-      String uri,
-      DynamicGasProvider.Strategy gasPriceStrategy,
-      int blockPeriod)
+      final String entity, final Credentials credentials, final BlockchainConfig bcConfig)
       throws IOException {
-    super(entity, tokenSupply, credentials, bcId, uri, gasPriceStrategy, blockPeriod);
+    super(entity, credentials, bcConfig);
   }
 
   public void deployContracts(String cbcAddress) throws Exception {

@@ -5,8 +5,8 @@ set -e
 HERE=examples/sfc/write/java
 BUILDDIR=$HERE/build
 CONTRACTSDIR=$HERE/../contracts/src
-OUTPUTDIR=$HERE/src/main/java
-PACKAGE=net.consensys.gpact.soliditywrappers.examples.sfc.write
+OUTPUTDIR=$BUILDDIR/generated/sources/main/java
+PACKAGE=net.consensys.gpact.examples.sfc.write
 #WEB3J=web3j
 WEB3J=../web3j-abi/codegen/build/install/codegen/bin/codegen
 

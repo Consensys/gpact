@@ -16,10 +16,8 @@ package net.consensys.gpact.examples.sfc.erc20bridge;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import net.consensys.gpact.common.BlockchainConfig;
 import net.consensys.gpact.common.BlockchainId;
-import net.consensys.gpact.common.DynamicGasProvider;
-import net.consensys.gpact.soliditywrappers.examples.sfc.erc20bridge.ERC20PresetFixedSupply;
-import net.consensys.gpact.soliditywrappers.examples.sfc.erc20bridge.SfcErc20Bridge;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
@@ -31,19 +29,20 @@ import org.web3j.crypto.Credentials;
 public class MassConservationERC20Bridge extends AbstractERC20Bridge {
   private static final Logger LOG = LogManager.getLogger(MassConservationERC20Bridge.class);
 
+  // Total number of tokens issued for booking.
+  public final BigInteger tokenSupply;
+
   ERC20PresetFixedSupply erc20;
   SfcErc20Bridge erc20Bridge;
 
   public MassConservationERC20Bridge(
       final String entity,
-      BigInteger tokenSupply,
-      Credentials credentials,
-      BlockchainId bcId,
-      String uri,
-      DynamicGasProvider.Strategy gasPriceStrategy,
-      int blockPeriod)
+      final BigInteger tokenSupply,
+      final Credentials credentials,
+      final BlockchainConfig bcConfig)
       throws IOException {
-    super(entity, tokenSupply, credentials, bcId, uri, gasPriceStrategy, blockPeriod);
+    super(entity, credentials, bcConfig);
+    this.tokenSupply = tokenSupply;
   }
 
   public void deployContracts(String cbcAddress) throws Exception {

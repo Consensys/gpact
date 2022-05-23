@@ -51,8 +51,16 @@ public class AttestorRelayer {
     public String getSourceId() {
       return this.bcId.toString() + this.crosschainControlAddr;
     }
-  }
 
+    public BlockchainId getBlockchainId() {
+      return bcId;
+    }
+
+    public String getCrosschainControlAddr() {
+      return crosschainControlAddr;
+    }
+  }
+  
   public static class Dest {
     BlockchainId sourceBcId;
     BlockchainId targetBcId;
@@ -124,18 +132,34 @@ public class AttestorRelayer {
     this.msgStoreAddr = msgStoreAddrFromUser;
   }
 
-
-  public void setDispatcher(String msgDispatcherUrl, BlockchainId sourceChainBcId, BlockchainId targetChainBcId, String targetChainWsUrl, byte[] txPKey,
-                            String targetChainVerifierAddr)
-          throws CrosschainProtocolStackException {
-    Dest dest = new Dest(sourceChainBcId, targetChainBcId, targetChainWsUrl, txPKey, targetChainVerifierAddr);
+  public void setDispatcher(
+      String msgDispatcherUrl,
+      BlockchainId sourceChainBcId,
+      BlockchainId targetChainBcId,
+      String targetChainWsUrl,
+      byte[] txPKey,
+      String targetChainVerifierAddr)
+      throws CrosschainProtocolStackException {
+    Dest dest =
+        new Dest(
+            sourceChainBcId, targetChainBcId, targetChainWsUrl, txPKey, targetChainVerifierAddr);
     setDispatcher(msgDispatcherUrl, dest);
   }
 
   public void setDispatcher(String msgDispatcherUrl, Dest dest)
-          throws CrosschainProtocolStackException {
-    AttestorRelayerWebApi.setupDispatcherForRelayingEvents(msgDispatcherUrl,
-            dest.sourceBcId, dest.targetBcId, dest.targetBcWsUri, dest.txPKey, dest.targetChainVerifierAddr);
+      throws CrosschainProtocolStackException {
+    AttestorRelayerWebApi.setupDispatcherForRelayingEvents(
+        msgDispatcherUrl,
+        dest.sourceBcId,
+        dest.targetBcId,
+        dest.targetBcWsUri,
+        dest.txPKey,
+        dest.targetChainVerifierAddr);
+  }
+
+  public void addMessageStoreRoute(String relayerUri, String sourceNetwork, String sourceAddress)
+      throws CrosschainProtocolStackException {
+    AttestorRelayerWebApi.addMessageStoreRoute(relayerUri, sourceNetwork, sourceAddress);
   }
 
   public String fetchedSignedEvent(

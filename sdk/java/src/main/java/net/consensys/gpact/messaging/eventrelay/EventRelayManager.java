@@ -16,10 +16,12 @@ package net.consensys.gpact.messaging.eventrelay;
 
 import java.io.IOException;
 import java.util.ArrayList;
+
+import net.consensys.gpact.common.BlockchainConfig;
 import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.common.DynamicGasProvider;
 import net.consensys.gpact.messaging.common.RegistrarManager;
-import net.consensys.gpact.soliditywrappers.messaging.eventrelay.EventRelayVerifier;
+import net.consensys.gpact.messaging.eventrelay.EventRelayVerifier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
@@ -33,14 +35,10 @@ public class EventRelayManager extends RegistrarManager {
   private String functionCallContract;
 
   public EventRelayManager(
-      Credentials credentials,
-      BlockchainId bcId,
-      String rpcUri,
-      String wsUri,
-      DynamicGasProvider.Strategy gasPriceStrategy,
-      int blockPeriod)
+      final Credentials credentials,
+      final BlockchainConfig bcConfig)
       throws IOException {
-    super(credentials, bcId, rpcUri, wsUri, gasPriceStrategy, blockPeriod);
+    super(credentials, bcConfig);
   }
 
   public void setFunctionCallContract(final String functionCallContract) {

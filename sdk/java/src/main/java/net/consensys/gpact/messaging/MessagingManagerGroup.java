@@ -16,7 +16,6 @@ package net.consensys.gpact.messaging;
 
 import java.util.ArrayList;
 import java.util.Set;
-
 import net.consensys.gpact.common.BlockchainConfig;
 import net.consensys.gpact.common.BlockchainId;
 import org.web3j.crypto.Credentials;
@@ -34,8 +33,8 @@ public interface MessagingManagerGroup {
   void addBlockchainAndDeployContracts(Credentials creds, BlockchainConfig bcInfo) throws Exception;
 
   default void addBlockchainAndDeployContracts(
-          Credentials creds, BlockchainConfig bcInfo, String additionalContractAddress)
-          throws Exception {
+      Credentials creds, BlockchainConfig bcInfo, String additionalContractAddress)
+      throws Exception {
     throw new RuntimeException("Not implemented");
   }
 

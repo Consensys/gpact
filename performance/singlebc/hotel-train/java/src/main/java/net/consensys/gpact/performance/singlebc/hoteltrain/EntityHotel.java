@@ -16,8 +16,7 @@ package net.consensys.gpact.performance.singlebc.hoteltrain;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import net.consensys.gpact.common.BlockchainId;
-import net.consensys.gpact.common.DynamicGasProvider;
+import net.consensys.gpact.common.BlockchainConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
@@ -32,10 +31,8 @@ public class EntityHotel extends EntityBase {
 
   private static final String PKEY = "50000000000000000000000000000000000000000000000000000000001";
 
-  public EntityHotel(
-      BlockchainId bcId, String uri, DynamicGasProvider.Strategy gasPriceStrategy, int blockPeriod)
-      throws IOException {
-    super(NAME, Credentials.create(PKEY), bcId, uri, gasPriceStrategy, blockPeriod);
+  public EntityHotel(final BlockchainConfig bcConfig) throws IOException {
+    super(NAME, Credentials.create(PKEY), bcConfig);
   }
 
   public void addRooms() throws Exception {

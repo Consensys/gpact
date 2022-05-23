@@ -48,6 +48,7 @@ public class AttestorRelayerWebApi {
   // Relayer API
   public static final byte SET_KET_REQ_TYPE = 1;
   public static final byte GET_ADDR_REQ_TYPE = 2;
+  public static final byte ADD_ROUTE_REQ_TYPE = 3;
 
   public static final byte SECP256K1_KEY_TYPE = 1;
 
@@ -97,6 +98,30 @@ public class AttestorRelayerWebApi {
     byte[] requestBody = type.toArray();
 
     config("Observer", observerUrl, requestBody);
+  }
+
+  public static void addMessageStoreRoute(
+      String relayerUrl, String sourceNetwork, String sourceContract)
+      throws CrosschainProtocolStackException {
+
+    ObjectMapper mapper = new ObjectMapper();
+    ObjectNode user = mapper.createObjectNode();
+    user.put("network_id", sourceNetwork.toString());
+    user.put("contract_address", sourceContract);
+
+    byte[] json;
+    try {
+      json = mapper.writer().writeValueAsBytes(user);
+    } catch (JsonProcessingException ex) {
+      throw new CrosschainProtocolStackException("Relayer", ex);
+    }
+
+    Bytes type = Bytes.of(ADD_ROUTE_REQ_TYPE);
+    Bytes body = Bytes.wrap(json);
+    Bytes all = Bytes.concatenate(type, body);
+    byte[] requestBody = all.toArray();
+
+    config("Relayer", relayerUrl, requestBody);
   }
 
   public static void setupRelayer(
@@ -158,11 +183,20 @@ public class AttestorRelayerWebApi {
   }
 
   public static void setupDispatcherForRelayingEvents(
-          String msgDispatcherUrl, BlockchainId sourceChainBcId, BlockchainId targetChainBcId, String targetChainWsUrl, byte[] txPKey,
-          String targetChainVerifierAddr)
-          throws CrosschainProtocolStackException {
-    LOG.info("SetupDispatcher: DispatcherURL: {}, Source Chain Id: {}, Target Chain Id: {}, Target Chain Ws: {}, Target Verifier: {}",
-            msgDispatcherUrl, sourceChainBcId.toDecimalString(), targetChainBcId.toDecimalString(), targetChainWsUrl, targetChainVerifierAddr);
+      String msgDispatcherUrl,
+      BlockchainId sourceChainBcId,
+      BlockchainId targetChainBcId,
+      String targetChainWsUrl,
+      byte[] txPKey,
+      String targetChainVerifierAddr)
+      throws CrosschainProtocolStackException {
+    LOG.info(
+        "SetupDispatcher: DispatcherURL: {}, Source Chain Id: {}, Target Chain Id: {}, Target Chain Ws: {}, Target Verifier: {}",
+        msgDispatcherUrl,
+        sourceChainBcId.toDecimalString(),
+        targetChainBcId.toDecimalString(),
+        targetChainWsUrl,
+        targetChainVerifierAddr);
 
     ObjectMapper mapper1 = new ObjectMapper();
     ObjectNode setEthTxKey = mapper1.createObjectNode();
@@ -183,7 +217,6 @@ public class AttestorRelayerWebApi {
 
     config("Dispatcher", msgDispatcherUrl, requestBody);
 
-
     ObjectMapper mapper2 = new ObjectMapper();
     ObjectNode setVerifier = mapper2.createObjectNode();
     setVerifier.put("source_chain_id", sourceChainBcId.toDecimalString());
@@ -203,7 +236,6 @@ public class AttestorRelayerWebApi {
     config("Dispatcher", msgDispatcherUrl, requestBody);
   }
 
-
   private static void config(String component, String uri, byte[] requestBody)
       throws CrosschainProtocolStackException {
     HttpResponse<String> response;
@@ -218,7 +250,7 @@ public class AttestorRelayerWebApi {
       throw new CrosschainProtocolStackException(
           component + " config returned HTTP status: " + response.statusCode());
     }
-    if (response.body().compareToIgnoreCase("{\"success\":true}") != 0) {
+    if (!response.body().contains("\"success\":true")) {
       throw new CrosschainProtocolStackException(
           component + " config did not return success. Status: " + response.body());
     }

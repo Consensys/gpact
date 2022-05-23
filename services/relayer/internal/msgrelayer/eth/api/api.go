@@ -16,6 +16,7 @@ package api
  */
 
 const (
-	SetKeyReqType  = byte(1)
-	GetAddrReqType = byte(2)
+	SetKeyReqType        = byte(1)
+	GetAddrReqType       = byte(2)
+	RegisterRouteToStore = byte(3)
 )

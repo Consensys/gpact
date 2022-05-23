@@ -16,10 +16,8 @@ package net.consensys.gpact.messaging.eventattest;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import net.consensys.gpact.common.BlockchainId;
-import net.consensys.gpact.common.DynamicGasProvider;
+import net.consensys.gpact.common.BlockchainConfig;
 import net.consensys.gpact.messaging.common.RegistrarManager;
-import net.consensys.gpact.soliditywrappers.messaging.eventattest.EventAttestationVerifier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
@@ -30,15 +28,9 @@ public class AttestorSignerManager extends RegistrarManager {
 
   private EventAttestationVerifier verifier;
 
-  public AttestorSignerManager(
-      Credentials credentials,
-      BlockchainId bcId,
-      String rpcUri,
-      String wsUri,
-      DynamicGasProvider.Strategy gasPriceStrategy,
-      int blockPeriod)
+  public AttestorSignerManager(final Credentials credentials, final BlockchainConfig bcConfig)
       throws IOException {
-    super(credentials, bcId, rpcUri, wsUri, gasPriceStrategy, blockPeriod);
+    super(credentials, bcConfig);
   }
 
   @Override

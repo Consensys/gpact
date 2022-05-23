@@ -18,8 +18,6 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.List;
 import net.consensys.gpact.common.*;
-import net.consensys.gpact.soliditywrappers.performance.singlebc.hoteltrain.ERC20PresetFixedSupply;
-import net.consensys.gpact.soliditywrappers.performance.singlebc.hoteltrain.Hotel;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
@@ -37,14 +35,9 @@ public class EntityBase extends AbstractBlockchain {
   public String entity;
 
   public EntityBase(
-      final String entity,
-      Credentials credentials,
-      BlockchainId bcId,
-      String uri,
-      DynamicGasProvider.Strategy gasPriceStrategy,
-      int blockPeriod)
+      final String entity, final Credentials credentials, final BlockchainConfig bcConfig)
       throws IOException {
-    super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
+    super(credentials, bcConfig);
     this.entity = entity;
   }
 

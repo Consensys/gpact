@@ -18,8 +18,6 @@ import java.math.BigInteger;
 import java.util.List;
 import net.consensys.gpact.common.RevertReason;
 import net.consensys.gpact.common.test.AbstractWeb3Test;
-import net.consensys.gpact.soliditywrappers.functioncall.HiddenParamDestTest;
-import net.consensys.gpact.soliditywrappers.functioncall.HiddenParamSourceTest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeEach;

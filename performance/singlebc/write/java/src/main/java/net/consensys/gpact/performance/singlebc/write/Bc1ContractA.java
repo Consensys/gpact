@@ -16,11 +16,9 @@ package net.consensys.gpact.performance.singlebc.write;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import net.consensys.gpact.common.*;
 import net.consensys.gpact.common.AbstractBlockchain;
-import net.consensys.gpact.common.BlockchainId;
-import net.consensys.gpact.common.DynamicGasProvider;
 import net.consensys.gpact.common.StatsHolder;
-import net.consensys.gpact.soliditywrappers.performance.singlebc.write.ContractA;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
@@ -31,14 +29,9 @@ public class Bc1ContractA extends AbstractBlockchain {
 
   ContractA contractA;
 
-  public Bc1ContractA(
-      Credentials credentials,
-      BlockchainId bcId,
-      String uri,
-      DynamicGasProvider.Strategy gasPriceStrategy,
-      int blockPeriod)
+  public Bc1ContractA(final Credentials credentials, final BlockchainConfig bcConfig)
       throws IOException {
-    super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
+    super(credentials, bcConfig);
   }
 
   public void deployContracts(String busLogicContractAddress) throws Exception {

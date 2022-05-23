@@ -6,6 +6,7 @@ include 'contracttest'
 include 'app-gpact-erc20bridge'
 include 'app-sfc-erc20bridge'
 include 'app-sfc-erc721bridge'
+
 include 'examples-helpers'
 include 'examples-gpact-conditional'
 include 'examples-gpact-erc20bridge'
@@ -35,6 +36,7 @@ project(":app-sfc-erc20bridge").projectDir = file("applications/sfc/erc20bridge/
 project(":app-sfc-erc721bridge").projectDir = file("applications/sfc/erc721bridge/javatest")
 
 project(":examples-helpers").projectDir = file("examples/helpers")
+
 project(":examples-gpact-conditional").projectDir = file("examples/gpact/conditional/java")
 project(":examples-gpact-erc20bridge").projectDir = file("examples/gpact/erc20bridge/java")
 project(":examples-gpact-hoteltrain").projectDir = file("examples/gpact/hotel-train/java")
@@ -54,4 +56,3 @@ project(":perf-singlebc-trade").projectDir = file("performance/singlebc/trade/ja
 project(":perf-singlebc-write").projectDir = file("performance/singlebc/write/java")
 
 project(":utils-pkey").projectDir = file("utils/pkey")
-

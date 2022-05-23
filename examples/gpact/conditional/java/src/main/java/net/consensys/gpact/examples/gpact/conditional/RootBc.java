@@ -17,9 +17,8 @@ package net.consensys.gpact.examples.gpact.conditional;
 import java.io.IOException;
 import java.math.BigInteger;
 import net.consensys.gpact.common.AbstractBlockchain;
+import net.consensys.gpact.common.BlockchainConfig;
 import net.consensys.gpact.common.BlockchainId;
-import net.consensys.gpact.common.DynamicGasProvider;
-import net.consensys.gpact.soliditywrappers.examples.gpact.conditional.RootBlockchainContract;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
@@ -29,14 +28,8 @@ public class RootBc extends AbstractBlockchain {
 
   RootBlockchainContract rootBlockchainContract;
 
-  public RootBc(
-      Credentials credentials,
-      BlockchainId bcId,
-      String uri,
-      DynamicGasProvider.Strategy gasPriceStrategy,
-      int blockPeriod)
-      throws IOException {
-    super(credentials, bcId, uri, gasPriceStrategy, blockPeriod);
+  public RootBc(final Credentials credentials, final BlockchainConfig bcConfig) throws IOException {
+    super(credentials, bcConfig);
   }
 
   public void deployContracts(
