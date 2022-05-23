@@ -17,23 +17,70 @@ package observer
 
 import (
 	"context"
+	"errors"
+	"fmt"
+	"github.com/consensys/gpact/services/relayer/internal/logging"
 	"github.com/ethereum/go-ethereum/common"
+	"math/big"
 
 	"github.com/consensys/gpact/services/relayer/internal/contracts/functioncall"
 	"github.com/consensys/gpact/services/relayer/internal/mqserver"
 )
 
-// SFCBridgeObserver listens to incoming events from an SFC contract, transforms them into relayer messages
-// and then enqueues them onto a message queue them for further processing by other Relayer components
-type SFCBridgeObserver struct {
-	EventWatcher  EventWatcher
-	EventHandler  EventHandler
-	SourceNetwork string
+// Observer is an interface for the observer.
+type Observer interface {
+	// Start starts the observer's routine.
+	Start() error
+
+	// Stop safely stops the observer.
+	Stop()
+
+	// IsRunning returns true if the observer is running
+	IsRunning() bool
+
+	// StartObserve starts a new observe.
+	StartObserve(chainID *big.Int, chainAP string, contractType string, contractAddr common.Address) error
+
+	// StopObserve stops observe.
+	StopObserve() error
 }
 
-func NewSFCBridgeRealtimeObserver(source string, sourceAddr common.Address, contract *functioncall.Sfc,
-	mq mqserver.MessageQueue) (*SFCBridgeObserver, error) {
-	eventTransformer := NewSFCEventTransformer(source, sourceAddr)
+// SingleObserver listens to incoming events from a given bridge contract, transforms them into relayer messages
+// and then enqueues them onto a message queue them for further processing by other Relayer components
+type SingleObserver struct {
+	SourceId      string
+	SourceNetwork *big.Int
+	EventWatcher  EventWatcher
+	EventHandler  EventHandler
+	Running       bool
+}
+
+func (o *SingleObserver) Start() error {
+	if o.Running {
+		return errors.New("observer already running")
+	}
+
+	err := o.EventWatcher.Watch()
+	if err == nil {
+		o.Running = true
+	}
+	return err
+}
+
+func (o *SingleObserver) Stop() {
+	if !o.Running {
+		logging.Debug("observer isn't running. stop request ignored")
+		return
+	}
+	if o.EventWatcher != nil {
+		o.EventWatcher.StopWatcher()
+		o.Running = false
+	}
+}
+
+func NewSFCRealtimeObserver(chainId *big.Int, sourceAddr common.Address, contract *functioncall.Sfc,
+	mq mqserver.MessageQueue) (*SingleObserver, error) {
+	eventTransformer := NewSFCEventTransformer(chainId, sourceAddr)
 	messageHandler := NewMessageEnqueueHandler(mq, DefaultRetryOptions)
 	eventHandler := NewSimpleEventHandler(eventTransformer, messageHandler)
 	removedEvHandler := NewLogEventHandler("removed event")
@@ -45,14 +92,18 @@ func NewSFCBridgeRealtimeObserver(source string, sourceAddr common.Address, cont
 		return nil, err
 	}
 
-	return &SFCBridgeObserver{EventWatcher: eventWatcher, EventHandler: eventHandler, SourceNetwork: source}, nil
+	sourceId := fmt.Sprintf("%s:%s:%s", chainId, sourceAddr.String(), "sfc")
+	return &SingleObserver{SourceId: sourceId, EventWatcher: eventWatcher, EventHandler: eventHandler,
+			SourceNetwork: chainId},
+		nil
 }
 
-func NewSFCBridgeFinalisedObserver(source string, sourceAddr common.Address, contract *functioncall.Sfc, mq mqserver.MessageQueue,
+func NewSFCFinalisedObserver(chainId *big.Int, sourceAddr common.Address, contract *functioncall.Sfc,
+	mq mqserver.MessageQueue,
 	confirmationsForFinality uint64, watcherProgressOpts WatcherProgressDsOpts, client BlockHeadProducer) (
-	*SFCBridgeObserver,
+	*SingleObserver,
 	error) {
-	eventTransformer := NewSFCEventTransformer(source, sourceAddr)
+	eventTransformer := NewSFCEventTransformer(chainId, sourceAddr)
 	messageHandler := NewMessageEnqueueHandler(mq, DefaultRetryOptions)
 	eventHandler := NewSimpleEventHandler(eventTransformer, messageHandler)
 
@@ -63,29 +114,12 @@ func NewSFCBridgeFinalisedObserver(source string, sourceAddr common.Address, con
 		return nil, err
 	}
 
-	return &SFCBridgeObserver{EventWatcher: eventWatcher, EventHandler: eventHandler, SourceNetwork: source}, nil
+	return &SingleObserver{EventWatcher: eventWatcher, EventHandler: eventHandler, SourceNetwork: chainId}, nil
 }
 
-func (o *SFCBridgeObserver) Start() error {
-	return o.EventWatcher.Watch()
-}
-
-func (o *SFCBridgeObserver) Stop() {
-	if o.EventWatcher != nil {
-		o.EventWatcher.StopWatcher()
-	}
-}
-
-// GPACTBridgeObserver is a simple gpact bridge observer.
-type GPACTBridgeObserver struct {
-	EventWatcher  EventWatcher
-	EventHandler  EventHandler
-	SourceNetwork string
-}
-
-func NewGPACTBridgeRealtimeObserver(source string, sourceAddr common.Address, contract *functioncall.Gpact,
-	mq mqserver.MessageQueue) (*GPACTBridgeObserver, error) {
-	eventTransformer := NewGPACTEventTransformer(source, sourceAddr)
+func NewGPACTRealtimeObserver(chainId *big.Int, sourceAddr common.Address, contract *functioncall.Gpact,
+	mq mqserver.MessageQueue) (*SingleObserver, error) {
+	eventTransformer := NewGPACTEventTransformer(chainId, sourceAddr)
 	messageHandler := NewMessageEnqueueHandler(mq, DefaultRetryOptions)
 	eventHandler := NewSimpleEventHandler(eventTransformer, messageHandler)
 	removedEvHandler := NewLogEventHandler("removed event")
@@ -96,15 +130,5 @@ func NewGPACTBridgeRealtimeObserver(source string, sourceAddr common.Address, co
 		return nil, err
 	}
 
-	return &GPACTBridgeObserver{EventWatcher: eventWatcher, EventHandler: eventHandler, SourceNetwork: source}, nil
-}
-
-func (o *GPACTBridgeObserver) Start() error {
-	return o.EventWatcher.Watch()
-}
-
-func (o *GPACTBridgeObserver) Stop() {
-	if o.EventWatcher != nil {
-		o.EventWatcher.StopWatcher()
-	}
+	return &SingleObserver{EventWatcher: eventWatcher, EventHandler: eventHandler, SourceNetwork: chainId}, nil
 }

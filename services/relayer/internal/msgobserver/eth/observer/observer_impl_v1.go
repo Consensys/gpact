@@ -44,23 +44,24 @@ type observation struct {
 	AP           string `json:"ap"`
 }
 
-// ObserverImplV1 implements observer.
-type ObserverImplV1 struct {
+// MultiObserver implements observer.
+type MultiObserver struct {
 	path string
 	mq   *mqserver.MQServer
 
 	ds            datastore.Datastore
-	sfcObserver   *SFCBridgeObserver
-	gpactObserver *GPACTBridgeObserver
+	sfcObserver   *SingleObserver
+	gpactObserver *SingleObserver
+	running       bool
 }
 
-// NewObserverImplV1 creates a new observer.
-func NewObserverImplV1(path string, mq *mqserver.MQServer) Observer {
-	return &ObserverImplV1{path: path, mq: mq}
+// NewMultiObserver creates a new observer.
+func NewMultiObserver(path string, mq *mqserver.MQServer) Observer {
+	return &MultiObserver{path: path, mq: mq}
 }
 
 // Start starts the observer's routine.
-func (o *ObserverImplV1) Start() error {
+func (o *MultiObserver) Start() error {
 	var err error
 	if o.ds == nil {
 		dsopts := badgerds.DefaultOptions
@@ -107,7 +108,7 @@ func (o *ObserverImplV1) Start() error {
 }
 
 // Stop safely stops the observer.
-func (o *ObserverImplV1) Stop() {
+func (o *MultiObserver) Stop() {
 	if o.sfcObserver != nil {
 		o.sfcObserver.Stop()
 		o.sfcObserver = nil
@@ -118,8 +119,12 @@ func (o *ObserverImplV1) Stop() {
 	}
 }
 
+func (o *MultiObserver) IsRunning() bool {
+	return o.running
+}
+
 // StartObserve starts a new observe.
-func (o *ObserverImplV1) StartObserve(chainID *big.Int, chainAP string, contractType string, contractAddr common.Address) error {
+func (o *MultiObserver) StartObserve(chainID *big.Int, chainAP string, contractType string, contractAddr common.Address) error {
 	// First, close any existing observe.
 	o.Stop()
 
@@ -149,7 +154,7 @@ func (o *ObserverImplV1) StartObserve(chainID *big.Int, chainAP string, contract
 }
 
 // StopObserve stops observe.
-func (o *ObserverImplV1) StopObserve() error {
+func (o *MultiObserver) StopObserve() error {
 	// Close any existing observe.
 	o.Stop()
 
@@ -161,7 +166,7 @@ func (o *ObserverImplV1) StopObserve() error {
 }
 
 // routineSFC is the observe SFC routine.
-func (o *ObserverImplV1) routineSFC(chainID *big.Int, chainAP string, addr common.Address) {
+func (o *MultiObserver) routineSFC(chainID *big.Int, chainAP string, contractAddr common.Address) {
 	for {
 		chain, err := ethclient.Dial(chainAP)
 		if err != nil {
@@ -170,13 +175,13 @@ func (o *ObserverImplV1) routineSFC(chainID *big.Int, chainAP string, addr commo
 		}
 		defer chain.Close()
 
-		sfc, err := functioncall.NewSfc(addr, chain)
+		sfc, err := functioncall.NewSfc(contractAddr, chain)
 		if err != nil {
 			logging.Error(err.Error())
 			return
 		}
 
-		observer, err := o.createFinalisedEventObserver(chainID.String(), addr, sfc, o.mq, chain)
+		observer, err := o.createFinalisedEventObserver(chainID, contractAddr, sfc, o.mq, chain)
 
 		if err != nil {
 			logging.Error(err.Error())
@@ -194,7 +199,7 @@ func (o *ObserverImplV1) routineSFC(chainID *big.Int, chainAP string, addr commo
 }
 
 // routineGPACT is the observe GPACT routine.
-func (o *ObserverImplV1) routineGPACT(chainID *big.Int, chainAP string, addr common.Address) {
+func (o *MultiObserver) routineGPACT(chainID *big.Int, chainAP string, addr common.Address) {
 	for {
 		chain, err := ethclient.Dial(chainAP)
 		if err != nil {
@@ -209,7 +214,7 @@ func (o *ObserverImplV1) routineGPACT(chainID *big.Int, chainAP string, addr com
 			return
 		}
 
-		observer, err := NewGPACTBridgeRealtimeObserver(chainID.String(), addr, gpact, o.mq)
+		observer, err := NewGPACTRealtimeObserver(chainID, addr, gpact, o.mq)
 		if err != nil {
 			logging.Error("Error creating observer for Chain: %v, Contract: %v, Error: %v", chainID.String(), addr.String(), err.Error())
 			return
@@ -225,12 +230,11 @@ func (o *ObserverImplV1) routineGPACT(chainID *big.Int, chainAP string, addr com
 	}
 }
 
-func (o *ObserverImplV1) createFinalisedEventObserver(source string, sourceAddr common.Address, contract *functioncall.Sfc,
-	mq mqserver.MessageQueue,
-	client *ethclient.Client) (*SFCBridgeObserver, error) {
-	dsProgKey := datastore.NewKey(fmt.Sprintf("/%s/%s/last_finalised_block", source, sourceAddr))
+func (o *MultiObserver) createFinalisedEventObserver(chainId *big.Int, contractAddr common.Address,
+	contract *functioncall.Sfc, mq mqserver.MessageQueue, client *ethclient.Client) (*SingleObserver, error) {
+	dsProgKey := datastore.NewKey(fmt.Sprintf("/%s/%s/last_finalised_block", chainId, contractAddr))
 	watcherProgOpts := WatcherProgressDsOpts{o.ds, dsProgKey, DefaultRetryOptions}
-	return NewSFCBridgeFinalisedObserver(source, sourceAddr, contract, mq, 4, watcherProgOpts, client)
+	return NewSFCFinalisedObserver(chainId, contractAddr, contract, mq, 4, watcherProgOpts, client)
 }
 
 // dsKey gets the datastore key from given chainID and contract address.
