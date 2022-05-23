@@ -74,7 +74,7 @@ jobs:
             ./gradlew --parallel --stacktrace --info --build-cache installDist
       - run:
           name: Check code formatting, compile the code, everything but execute any tests
-          command: ./gradlew build -x test
+          command: ./gradlew build -x test -x intTest -x perfTest
       - save_cache:
           name: Caching Web3j gradle dependencies
           key: deps-web3j-{{ checksum "../web3j-abi/build.gradle" }}
