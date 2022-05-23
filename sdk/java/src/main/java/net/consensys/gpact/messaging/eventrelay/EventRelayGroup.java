@@ -17,8 +17,6 @@ package net.consensys.gpact.messaging.eventrelay;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-
 import net.consensys.gpact.common.AnIdentity;
 import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.common.CrosschainProtocolStackException;
@@ -38,12 +36,12 @@ public class EventRelayGroup {
   }
 
   public void configureRelayer(
-          AnIdentity signingCredentials,
-          String relayerUri,
-          List<AttestorRelayer.Source> sources,
-          String dispatcherUri,
-          List<AttestorRelayer.Dest> targets)
-          throws CrosschainProtocolStackException {
+      AnIdentity signingCredentials,
+      String relayerUri,
+      List<AttestorRelayer.Source> sources,
+      String dispatcherUri,
+      List<AttestorRelayer.Dest> targets)
+      throws CrosschainProtocolStackException {
     AttestorRelayer relayer = new AttestorRelayer(relayerUri, signingCredentials.getPrivateKey());
     for (AttestorRelayer.Source source : sources) {
       relayer.addNewSource(source);
@@ -54,12 +52,10 @@ public class EventRelayGroup {
     }
   }
 
-
   public MessagingVerificationInterface getVerifier(BlockchainId bcId) throws Exception {
     if (!this.blockchains.containsKey(bcId)) {
       throw new Exception("Unknown blockchain: " + bcId);
     }
     return this.blockchains.get(bcId);
   }
-
 }

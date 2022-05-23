@@ -14,12 +14,11 @@
  */
 package net.consensys.gpact.messaging;
 
-import net.consensys.gpact.common.BlockchainId;
-
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import net.consensys.gpact.common.BlockchainId;
 
 public abstract class BaseMessagingManagerGroup implements MessagingManagerGroup {
 

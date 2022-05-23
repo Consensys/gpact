@@ -60,7 +60,7 @@ public class AttestorRelayer {
       return crosschainControlAddr;
     }
   }
-  
+
   public static class Dest {
     BlockchainId sourceBcId;
     BlockchainId targetBcId;
@@ -69,11 +69,11 @@ public class AttestorRelayer {
     String targetChainVerifierAddr;
 
     public Dest(
-            BlockchainId sourceBcId,
-            BlockchainId targetBcId,
-            String targetBcWsUri,
-            byte[] txPKey,
-            String targetChainVerifierAddr) {
+        BlockchainId sourceBcId,
+        BlockchainId targetBcId,
+        String targetBcWsUri,
+        byte[] txPKey,
+        String targetChainVerifierAddr) {
       this.sourceBcId = sourceBcId;
       this.targetBcId = targetBcId;
       this.targetBcWsUri = targetBcWsUri;
@@ -87,9 +87,6 @@ public class AttestorRelayer {
   }
 
   Map<String, Source> sources = new HashMap<>();
-
-
-
 
   public AttestorRelayer(String relayerUri, byte[] signingKey) {
     this.relayerUri = relayerUri;

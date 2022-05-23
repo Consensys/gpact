@@ -17,7 +17,6 @@ package net.consensys.gpact.messaging.eventrelay;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-
 import net.consensys.gpact.common.BlockchainConfig;
 import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.messaging.BaseMessagingManagerGroup;
@@ -39,7 +38,9 @@ public class EventRelayManagerGroup extends BaseMessagingManagerGroup {
 
   @Override
   public void addBlockchainAndDeployContracts(
-      final Credentials creds, final BlockchainConfig bcConfig, final String additionalContractAddress)
+      final Credentials creds,
+      final BlockchainConfig bcConfig,
+      final String additionalContractAddress)
       throws Exception {
     BlockchainId blockchainId = bcConfig.bcId;
     if (this.blockchains.containsKey(blockchainId)) {
@@ -48,10 +49,7 @@ public class EventRelayManagerGroup extends BaseMessagingManagerGroup {
     }
     LOG.debug("Deploying Cross-Blockchain Control contracts for blockchain id {}", blockchainId);
 
-    EventRelayManager manager =
-        new EventRelayManager(
-            creds,
-            bcConfig);
+    EventRelayManager manager = new EventRelayManager(creds, bcConfig);
     manager.setFunctionCallContract(additionalContractAddress);
     manager.deployContracts();
 
@@ -60,16 +58,14 @@ public class EventRelayManagerGroup extends BaseMessagingManagerGroup {
 
   @Override
   public void addBlockchainAndLoadContracts(
-      final Credentials creds, final BlockchainConfig bcConfig, final ArrayList<String> addresses) throws Exception {
+      final Credentials creds, final BlockchainConfig bcConfig, final ArrayList<String> addresses)
+      throws Exception {
     BlockchainId blockchainId = bcConfig.bcId;
     if (this.blockchains.containsKey(blockchainId)) {
       throw new Exception("Blockchain already added: " + blockchainId);
     }
 
-    EventRelayManager manager =
-        new EventRelayManager(
-            creds,
-            bcConfig);
+    EventRelayManager manager = new EventRelayManager(creds, bcConfig);
     manager.loadContracts(addresses);
 
     this.blockchains.put(blockchainId, manager);

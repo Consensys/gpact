@@ -26,7 +26,7 @@ public interface MessagingManagerGroup {
   /**
    * Add a blockchain to the group managed by this class and deploy contracts to the blockchain.
    *
-   * @param creds  Credentials to use for transactions on the blockchain.
+   * @param creds Credentials to use for transactions on the blockchain.
    * @param bcInfo Blockchain configuration information.
    * @throws Exception If there is an issue; typically due to issues deploying the contracts.
    */
@@ -42,13 +42,13 @@ public interface MessagingManagerGroup {
    * Add a blockchain to be managed by this class. Load contracts that have previously been
    * deployed.
    *
-   * @param creds     Credentials to use for transactions on the blockchain.
-   * @param bcInfo    Blockchain configuration information.
+   * @param creds Credentials to use for transactions on the blockchain.
+   * @param bcInfo Blockchain configuration information.
    * @param addresses Addresses of contracts.
    * @throws Exception If there is an issue; typically due to issues deploying the contracts.
    */
   void addBlockchainAndLoadContracts(
-          Credentials creds, BlockchainConfig bcInfo, ArrayList<String> addresses) throws Exception;
+      Credentials creds, BlockchainConfig bcInfo, ArrayList<String> addresses) throws Exception;
 
   void registerSignerOnAllBlockchains(String signersAddress) throws Exception;
 

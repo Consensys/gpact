@@ -20,9 +20,7 @@ public class SimpleCrossControlManagerGroup implements CrossControlManagerGroup 
 
   @Override
   public void addBlockchainAndDeployContracts(
-      final Credentials creds,
-      final BlockchainConfig bcConfig)
-      throws Exception {
+      final Credentials creds, final BlockchainConfig bcConfig) throws Exception {
     BlockchainId blockchainId = bcConfig.bcId;
     if (this.blockchains.containsKey(blockchainId)) {
       return;
@@ -39,10 +37,7 @@ public class SimpleCrossControlManagerGroup implements CrossControlManagerGroup 
 
   @Override
   public void addBlockchainAndLoadCbcContract(
-      Credentials creds,
-      BlockchainConfig bcConfig,
-      String cbcAddress)
-      throws Exception {
+      Credentials creds, BlockchainConfig bcConfig, String cbcAddress) throws Exception {
     BlockchainId blockchainId = bcConfig.bcId;
     if (this.blockchains.containsKey(blockchainId)) {
       return;

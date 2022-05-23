@@ -39,9 +39,7 @@ public class GpactCrossControlManagerGroup implements CrossControlManagerGroup {
 
   @Override
   public void addBlockchainAndDeployContracts(
-      final Credentials creds,
-      final BlockchainConfig bcConfig)
-      throws Exception {
+      final Credentials creds, final BlockchainConfig bcConfig) throws Exception {
     BlockchainId blockchainId = bcConfig.bcId;
     if (this.blockchains.containsKey(blockchainId)) {
       return;
@@ -58,9 +56,7 @@ public class GpactCrossControlManagerGroup implements CrossControlManagerGroup {
 
   @Override
   public void addBlockchainAndLoadCbcContract(
-      final Credentials creds,
-      final BlockchainConfig bcConfig,
-      final String cbcAddress)
+      final Credentials creds, final BlockchainConfig bcConfig, final String cbcAddress)
       throws Exception {
     BlockchainId blockchainId = bcConfig.bcId;
     if (this.blockchains.containsKey(blockchainId)) {
