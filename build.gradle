@@ -38,6 +38,7 @@ allprojects {
     }
 }
 
+
 ext {
     log4JVersion = '2.17.1'
     okHttpVersion = '4.9.1'
@@ -52,6 +53,60 @@ subprojects {
     test {
         useJUnitPlatform()
     }
+
+    if (file('src/intTest').directory) {
+        sourceSets {
+            intTest {
+                compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath + sourceSets.test.compileClasspath
+                runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath + sourceSets.test.runtimeClasspath
+                sourceSets.intTest.java.srcDirs += 'build/generated/sources/test/java'
+            }
+        }
+
+        configurations {
+            intTestImplementation.extendsFrom implementation
+            intTestRuntimeOnly.extendsFrom runtimeOnly
+        }
+
+        tasks.register('intTest', Test) {
+            description = 'Runs integration tests.'
+            group = 'verification'
+
+            testClassesDirs = sourceSets.intTest.output.classesDirs
+            classpath = sourceSets.intTest.runtimeClasspath
+            shouldRunAfter test
+            useJUnitPlatform()
+        }
+        check.dependsOn intTest
+    }
+
+    if (file('src/perfTest').directory) {
+        sourceSets {
+            perfTest {
+                compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath + sourceSets.test.compileClasspath
+                runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath + sourceSets.test.runtimeClasspath
+            }
+        }
+
+        configurations {
+            perfTestImplementation.extendsFrom implementation
+            perfTestRuntimeOnly.extendsFrom runtimeOnly
+        }
+
+        tasks.register('perfTest', Test) {
+            description = 'Runs performance tests.'
+            group = 'verification'
+
+            testClassesDirs = sourceSets.perfTest.output.classesDirs
+            classpath = sourceSets.perfTest.runtimeClasspath
+            shouldRunAfter test
+            useJUnitPlatform()
+        }
+        check.dependsOn perfTest
+    }
+
+
+
     dependencies {
         implementation group: 'org.apache.logging.log4j', name: 'log4j-slf4j-impl', version: log4JVersion
         implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: log4JVersion
@@ -70,6 +125,7 @@ subprojects {
         testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: junitVersion
     }
 }
+
 
 task solFormat {
     dependsOn npm_run_solFormat

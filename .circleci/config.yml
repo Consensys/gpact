@@ -74,7 +74,7 @@ jobs:
             ./gradlew --parallel --stacktrace --info --build-cache installDist
       - run:
           name: Check code formatting, compile the code, everything but execute any tests
-          command: ./gradlew build -x test
+          command: ./gradlew build -x test -x intTest -x perfTest
       - save_cache:
           name: Caching Web3j gradle dependencies
           key: deps-web3j-{{ checksum "../web3j-abi/build.gradle" }}
@@ -106,9 +106,6 @@ jobs:
             # Build our Web3j
             cd ../web3j-abi
             ./gradlew --parallel --stacktrace --info --build-cache installDist
-      - run:
-          name: Check code formatting, compile the code, everything but execute any tests
-          command: ./gradlew build -x test
       - run:
           name: Create Relayer containers
           working_directory: services/relayer
@@ -201,7 +198,219 @@ jobs:
       - store_artifacts:
           path: ~/test-results/junit
 
+  intTestsMachine:
+    machine:
+      image: ubuntu-2004:202107-02
+    resource_class: large
+    steps:
+      # The home directory is: /home/circleci/project
+      # gpact is cloned to: /home/circleci/project/.
+      # web3j is cloned to: /home/circleci/web3j-abi
+      - prepare
+      - run:
+          name: Build web3j
+          command: |
+            # Build our Web3j
+            cd ../web3j-abi
+            ./gradlew --parallel --stacktrace --info --build-cache installDist
+      - run:
+          name: Create Relayer containers
+          working_directory: services/relayer
+          command: make docker
+      - run:
+          name: Create Message Store container
+          working_directory: services/message-store
+          command: make docker
+      - run:
+          name: Create and Start blockchains
+          working_directory: test-blockchains
+          background: true
+          command: docker-compose build && docker-compose up
+      - run: sleep 30
+      - run:
+          name: Build and test
+          command: ./gradlew intTest
+      - run:
+          name: Stop blockchains
+          working_directory: test-blockchains
+          command: docker-compose stop
+          when: always
+      - run:
+          name: Logs from bc31
+          working_directory: test-blockchains
+          command: |
+            docker container logs test-blockchains_bc31node1_1
+          when: always
+      - run:
+          name: Logs from bc32
+          working_directory: test-blockchains
+          command: |
+            docker container logs test-blockchains_bc32node1_1
+          when: always
+      - run:
+          name: Logs from bc33
+          working_directory: test-blockchains
+          command: |
+            docker container logs test-blockchains_bc33node1_1
+          when: always
+      - run:
+          name: Logs from observer1
+          working_directory: test-blockchains
+          command: |
+            docker container logs observer1
+          when: always
+      - run:
+          name: Logs from observer2
+          working_directory: test-blockchains
+          command: |
+            docker container logs observer2
+          when: always
+      - run:
+          name: Logs from observer3
+          working_directory: test-blockchains
+          command: |
+            docker container logs observer3
+          when: always
+      - run:
+          name: Logs from relayer
+          working_directory: test-blockchains
+          command: |
+            docker container logs relayer
+          when: always
+      - run:
+          name: Logs from dispatcher
+          working_directory: test-blockchains
+          command: |
+            docker container logs dispatcher
+          when: always
+      - run:
+          name: Logs from msgstore
+          working_directory: test-blockchains
+          command: |
+            docker container logs msgstore
+          when: always
+      - run:
+          name: Remove blockchains
+          working_directory: test-blockchains
+          command: docker-compose down
+          when: always
+      - run:
+          name: Save test results
+          command: |
+            mkdir -p ~/test-results/junit/
+            find . -type f -regex ".*/build/test-results/.*xml" -exec cp {} ~/test-results/junit/ \;
+          when: always
+      - store_test_results:
+          path: ~/test-results
+      - store_artifacts:
+          path: ~/test-results/junit
 
+  perfTestsMachine:
+    machine:
+      image: ubuntu-2004:202107-02
+    resource_class: large
+    steps:
+      # The home directory is: /home/circleci/project
+      # gpact is cloned to: /home/circleci/project/.
+      # web3j is cloned to: /home/circleci/web3j-abi
+      - prepare
+      - run:
+          name: Build web3j
+          command: |
+            # Build our Web3j
+            cd ../web3j-abi
+            ./gradlew --parallel --stacktrace --info --build-cache installDist
+      - run:
+          name: Create Relayer containers
+          working_directory: services/relayer
+          command: make docker
+      - run:
+          name: Create Message Store container
+          working_directory: services/message-store
+          command: make docker
+      - run:
+          name: Create and Start blockchains
+          working_directory: test-blockchains
+          background: true
+          command: docker-compose build && docker-compose up
+      - run: sleep 30
+      - run:
+          name: Build and test
+          command: ./gradlew perfTest
+      - run:
+          name: Stop blockchains
+          working_directory: test-blockchains
+          command: docker-compose stop
+          when: always
+      - run:
+          name: Logs from bc31
+          working_directory: test-blockchains
+          command: |
+            docker container logs test-blockchains_bc31node1_1
+          when: always
+      - run:
+          name: Logs from bc32
+          working_directory: test-blockchains
+          command: |
+            docker container logs test-blockchains_bc32node1_1
+          when: always
+      - run:
+          name: Logs from bc33
+          working_directory: test-blockchains
+          command: |
+            docker container logs test-blockchains_bc33node1_1
+          when: always
+      - run:
+          name: Logs from observer1
+          working_directory: test-blockchains
+          command: |
+            docker container logs observer1
+          when: always
+      - run:
+          name: Logs from observer2
+          working_directory: test-blockchains
+          command: |
+            docker container logs observer2
+          when: always
+      - run:
+          name: Logs from observer3
+          working_directory: test-blockchains
+          command: |
+            docker container logs observer3
+          when: always
+      - run:
+          name: Logs from relayer
+          working_directory: test-blockchains
+          command: |
+            docker container logs relayer
+          when: always
+      - run:
+          name: Logs from dispatcher
+          working_directory: test-blockchains
+          command: |
+            docker container logs dispatcher
+          when: always
+      - run:
+          name: Logs from msgstore
+          working_directory: test-blockchains
+          command: |
+            docker container logs msgstore
+          when: always
+      - run:
+          name: Remove blockchains
+          working_directory: test-blockchains
+          command: docker-compose down
+          when: always
+      - run:
+          name: Save test results
+          command: |
+            mkdir -p ~/test-results/junit/
+            find . -type f -regex ".*/build/test-results/.*xml" -exec cp {} ~/test-results/junit/ \;
+          when: always
+      - store_test_results:
+          path: ~/test-results
+      - store_artifacts:
+          path: ~/test-results/junit
 
   relayer-build:
     docker:
@@ -273,11 +482,21 @@ workflows:
   default:
     jobs:
       - relayer-build
+      - javasdk-build
       - relayer-test:
           requires:
             - relayer-build
       - unitTestsMachine:
           requires:
             - relayer-build
+            - javasdk-build
+      - intTestsMachine:
+          requires:
+            - relayer-build
+            - javasdk-build
+      - perfTestsMachine:
+          requires:
+            - relayer-build
+            - javasdk-build
 
 
