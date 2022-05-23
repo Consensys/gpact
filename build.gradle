@@ -57,8 +57,9 @@ subprojects {
     if (file('src/intTest').directory) {
         sourceSets {
             intTest {
-                compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath + sourceSets.test.compileClasspath + 'build/generated/sources/main/java'
-                runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath + sourceSets.test.runtimeClasspath + 'build/generated/sources/test/java'
+                compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath + sourceSets.test.compileClasspath
+                runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath + sourceSets.test.runtimeClasspath
+                sourceSets.intTest.java.srcDirs += 'build/generated/sources/test/java'
             }
         }
 
@@ -82,8 +83,8 @@ subprojects {
     if (file('src/perfTest').directory) {
         sourceSets {
             perfTest {
-                compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath + sourceSets.test.compileClasspath + 'build/generated/sources/main/java'
-                runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath + sourceSets.test.runtimeClasspathm + 'build/generated/sources/test/java'
+                compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath + sourceSets.test.compileClasspath
+                runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath + sourceSets.test.runtimeClasspath
             }
         }
 
