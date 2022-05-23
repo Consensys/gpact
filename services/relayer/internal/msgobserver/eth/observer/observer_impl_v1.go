@@ -44,30 +44,32 @@ type observation struct {
 	AP           string `json:"ap"`
 }
 
-// MultiObserver implements observer.
-type MultiObserver struct {
-	path string
-	mq   *mqserver.MQServer
+// MultiSourceObserver is an observer that can observer multiple different event sources.
+// It creates and manages distinct SingleSourceObserver instances for each event source.
+// The contract persists the list of event sources it tracks. In the event of a failure related restart,
+// the observer resumes observing the designated sources.
+type MultiSourceObserver struct {
+	dsPath string
+	mq     *mqserver.MQServer
 
 	ds            datastore.Datastore
-	sfcObserver   *SingleObserver
-	gpactObserver *SingleObserver
-	running       bool
+	sfcObserver   *SingleSourceObserver
+	gpactObserver *SingleSourceObserver
 }
 
-// NewMultiObserver creates a new observer.
-func NewMultiObserver(path string, mq *mqserver.MQServer) Observer {
-	return &MultiObserver{path: path, mq: mq}
+// NewMultiSourceObserver creates a new MultiSourceObserver instance
+func NewMultiSourceObserver(dsPath string, mq *mqserver.MQServer) *MultiSourceObserver {
+	return &MultiSourceObserver{dsPath: dsPath, mq: mq}
 }
 
 // Start starts the observer's routine.
-func (o *MultiObserver) Start() error {
+func (o *MultiSourceObserver) Start() error {
 	var err error
 	if o.ds == nil {
 		dsopts := badgerds.DefaultOptions
 		dsopts.SyncWrites = false
 		dsopts.Truncate = true
-		o.ds, err = badgerds.NewDatastore(o.path, &dsopts)
+		o.ds, err = badgerds.NewDatastore(o.dsPath, &dsopts)
 		if err != nil {
 			return err
 		}
@@ -108,7 +110,7 @@ func (o *MultiObserver) Start() error {
 }
 
 // Stop safely stops the observer.
-func (o *MultiObserver) Stop() {
+func (o *MultiSourceObserver) Stop() {
 	if o.sfcObserver != nil {
 		o.sfcObserver.Stop()
 		o.sfcObserver = nil
@@ -119,12 +121,8 @@ func (o *MultiObserver) Stop() {
 	}
 }
 
-func (o *MultiObserver) IsRunning() bool {
-	return o.running
-}
-
 // StartObserve starts a new observe.
-func (o *MultiObserver) StartObserve(chainID *big.Int, chainAP string, contractType string, contractAddr common.Address) error {
+func (o *MultiSourceObserver) StartObserve(chainID *big.Int, chainAP string, contractType string, contractAddr common.Address) error {
 	// First, close any existing observe.
 	o.Stop()
 
@@ -154,7 +152,7 @@ func (o *MultiObserver) StartObserve(chainID *big.Int, chainAP string, contractT
 }
 
 // StopObserve stops observe.
-func (o *MultiObserver) StopObserve() error {
+func (o *MultiSourceObserver) StopObserve() error {
 	// Close any existing observe.
 	o.Stop()
 
@@ -165,8 +163,8 @@ func (o *MultiObserver) StopObserve() error {
 	return nil
 }
 
-// routineSFC is the observe SFC routine.
-func (o *MultiObserver) routineSFC(chainID *big.Int, chainAP string, contractAddr common.Address) {
+// routineSFC starts an observation for an SFC source event
+func (o *MultiSourceObserver) routineSFC(chainID *big.Int, chainAP string, contractAddr common.Address) {
 	for {
 		chain, err := ethclient.Dial(chainAP)
 		if err != nil {
@@ -198,8 +196,8 @@ func (o *MultiObserver) routineSFC(chainID *big.Int, chainAP string, contractAdd
 	}
 }
 
-// routineGPACT is the observe GPACT routine.
-func (o *MultiObserver) routineGPACT(chainID *big.Int, chainAP string, addr common.Address) {
+// routineGPACT starts an observation for a new GPACT source event
+func (o *MultiSourceObserver) routineGPACT(chainID *big.Int, chainAP string, addr common.Address) {
 	for {
 		chain, err := ethclient.Dial(chainAP)
 		if err != nil {
@@ -230,8 +228,8 @@ func (o *MultiObserver) routineGPACT(chainID *big.Int, chainAP string, addr comm
 	}
 }
 
-func (o *MultiObserver) createFinalisedEventObserver(chainId *big.Int, contractAddr common.Address,
-	contract *functioncall.Sfc, mq mqserver.MessageQueue, client *ethclient.Client) (*SingleObserver, error) {
+func (o *MultiSourceObserver) createFinalisedEventObserver(chainId *big.Int, contractAddr common.Address,
+	contract *functioncall.Sfc, mq mqserver.MessageQueue, client *ethclient.Client) (*SingleSourceObserver, error) {
 	dsProgKey := datastore.NewKey(fmt.Sprintf("/%s/%s/last_finalised_block", chainId, contractAddr))
 	watcherProgOpts := WatcherProgressDsOpts{o.ds, dsProgKey, DefaultRetryOptions}
 	return NewSFCFinalisedObserver(chainId, contractAddr, contract, mq, 4, watcherProgOpts, client)

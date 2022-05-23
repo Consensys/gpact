@@ -17,9 +17,7 @@ package observer
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	"github.com/consensys/gpact/services/relayer/internal/logging"
 	"github.com/ethereum/go-ethereum/common"
 	"math/big"
 
@@ -35,9 +33,6 @@ type Observer interface {
 	// Stop safely stops the observer.
 	Stop()
 
-	// IsRunning returns true if the observer is running
-	IsRunning() bool
-
 	// StartObserve starts a new observe.
 	StartObserve(chainID *big.Int, chainAP string, contractType string, contractAddr common.Address) error
 
@@ -45,41 +40,27 @@ type Observer interface {
 	StopObserve() error
 }
 
-// SingleObserver listens to incoming events from a given bridge contract, transforms them into relayer messages
+// SingleSourceObserver listens to incoming events from a given bridge contract, transforms them into relayer messages
 // and then enqueues them onto a message queue them for further processing by other Relayer components
-type SingleObserver struct {
+type SingleSourceObserver struct {
 	SourceId      string
 	SourceNetwork *big.Int
 	EventWatcher  EventWatcher
 	EventHandler  EventHandler
-	Running       bool
 }
 
-func (o *SingleObserver) Start() error {
-	if o.Running {
-		return errors.New("observer already running")
-	}
-
-	err := o.EventWatcher.Watch()
-	if err == nil {
-		o.Running = true
-	}
-	return err
+func (o *SingleSourceObserver) Start() error {
+	return o.EventWatcher.Watch()
 }
 
-func (o *SingleObserver) Stop() {
-	if !o.Running {
-		logging.Debug("observer isn't running. stop request ignored")
-		return
-	}
+func (o *SingleSourceObserver) Stop() {
 	if o.EventWatcher != nil {
 		o.EventWatcher.StopWatcher()
-		o.Running = false
 	}
 }
 
 func NewSFCRealtimeObserver(chainId *big.Int, sourceAddr common.Address, contract *functioncall.Sfc,
-	mq mqserver.MessageQueue) (*SingleObserver, error) {
+	mq mqserver.MessageQueue) (*SingleSourceObserver, error) {
 	eventTransformer := NewSFCEventTransformer(chainId, sourceAddr)
 	messageHandler := NewMessageEnqueueHandler(mq, DefaultRetryOptions)
 	eventHandler := NewSimpleEventHandler(eventTransformer, messageHandler)
@@ -93,7 +74,7 @@ func NewSFCRealtimeObserver(chainId *big.Int, sourceAddr common.Address, contrac
 	}
 
 	sourceId := fmt.Sprintf("%s:%s:%s", chainId, sourceAddr.String(), "sfc")
-	return &SingleObserver{SourceId: sourceId, EventWatcher: eventWatcher, EventHandler: eventHandler,
+	return &SingleSourceObserver{SourceId: sourceId, EventWatcher: eventWatcher, EventHandler: eventHandler,
 			SourceNetwork: chainId},
 		nil
 }
@@ -101,7 +82,7 @@ func NewSFCRealtimeObserver(chainId *big.Int, sourceAddr common.Address, contrac
 func NewSFCFinalisedObserver(chainId *big.Int, sourceAddr common.Address, contract *functioncall.Sfc,
 	mq mqserver.MessageQueue,
 	confirmationsForFinality uint64, watcherProgressOpts WatcherProgressDsOpts, client BlockHeadProducer) (
-	*SingleObserver,
+	*SingleSourceObserver,
 	error) {
 	eventTransformer := NewSFCEventTransformer(chainId, sourceAddr)
 	messageHandler := NewMessageEnqueueHandler(mq, DefaultRetryOptions)
@@ -114,11 +95,11 @@ func NewSFCFinalisedObserver(chainId *big.Int, sourceAddr common.Address, contra
 		return nil, err
 	}
 
-	return &SingleObserver{EventWatcher: eventWatcher, EventHandler: eventHandler, SourceNetwork: chainId}, nil
+	return &SingleSourceObserver{EventWatcher: eventWatcher, EventHandler: eventHandler, SourceNetwork: chainId}, nil
 }
 
 func NewGPACTRealtimeObserver(chainId *big.Int, sourceAddr common.Address, contract *functioncall.Gpact,
-	mq mqserver.MessageQueue) (*SingleObserver, error) {
+	mq mqserver.MessageQueue) (*SingleSourceObserver, error) {
 	eventTransformer := NewGPACTEventTransformer(chainId, sourceAddr)
 	messageHandler := NewMessageEnqueueHandler(mq, DefaultRetryOptions)
 	eventHandler := NewSimpleEventHandler(eventTransformer, messageHandler)
@@ -130,5 +111,5 @@ func NewGPACTRealtimeObserver(chainId *big.Int, sourceAddr common.Address, contr
 		return nil, err
 	}
 
-	return &SingleObserver{EventWatcher: eventWatcher, EventHandler: eventHandler, SourceNetwork: chainId}, nil
+	return &SingleSourceObserver{EventWatcher: eventWatcher, EventHandler: eventHandler, SourceNetwork: chainId}, nil
 }
