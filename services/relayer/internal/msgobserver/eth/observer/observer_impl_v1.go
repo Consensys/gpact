@@ -20,7 +20,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/big"
-	"strings"
 	"time"
 
 	"github.com/consensys/gpact/services/relayer/internal/contracts/functioncall"
@@ -52,9 +51,11 @@ type MultiSourceObserver struct {
 	dsPath string
 	mq     *mqserver.MQServer
 
-	ds            datastore.Datastore
+	ds datastore.Datastore
+	//TODO: update to support multiple observers
 	sfcObserver   *SingleSourceObserver
 	gpactObserver *SingleSourceObserver
+	running       bool
 }
 
 // NewMultiSourceObserver creates a new MultiSourceObserver instance
@@ -64,6 +65,10 @@ func NewMultiSourceObserver(dsPath string, mq *mqserver.MQServer) *MultiSourceOb
 
 // Start starts the observer's routine.
 func (o *MultiSourceObserver) Start() error {
+	if o.IsRunning() {
+		logging.Info("Multi-observer already running. Start request ignored")
+		return nil
+	}
 	var err error
 	if o.ds == nil {
 		dsopts := badgerds.DefaultOptions
@@ -106,11 +111,16 @@ func (o *MultiSourceObserver) Start() error {
 			}
 		}
 	}
+	o.running = true
 	return nil
 }
 
 // Stop safely stops the observer.
 func (o *MultiSourceObserver) Stop() {
+	if !o.IsRunning() {
+		logging.Info("Multi-observer is not running. Stop request ignored")
+		return
+	}
 	if o.sfcObserver != nil {
 		o.sfcObserver.Stop()
 		o.sfcObserver = nil
@@ -119,6 +129,11 @@ func (o *MultiSourceObserver) Stop() {
 		o.gpactObserver.Stop()
 		o.gpactObserver = nil
 	}
+	o.running = false
+}
+
+func (o *MultiSourceObserver) IsRunning() bool {
+	return o.running
 }
 
 // StartObserve starts a new observe.
@@ -148,6 +163,7 @@ func (o *MultiSourceObserver) StartObserve(chainID *big.Int, chainAP string, con
 		return fmt.Errorf("contract type %v is not supported", contractType)
 	}
 
+	o.running = true
 	return nil
 }
 
@@ -233,17 +249,4 @@ func (o *MultiSourceObserver) createFinalisedEventObserver(chainId *big.Int, con
 	dsProgKey := datastore.NewKey(fmt.Sprintf("/%s/%s/last_finalised_block", chainId, contractAddr))
 	watcherProgOpts := WatcherProgressDsOpts{o.ds, dsProgKey, DefaultRetryOptions}
 	return NewSFCFinalisedObserver(chainId, contractAddr, contract, mq, 4, watcherProgOpts, client)
-}
-
-// dsKey gets the datastore key from given chainID and contract address.
-func dsKey(chainID *big.Int, contractAddr common.Address) datastore.Key {
-	return datastore.NewKey(fmt.Sprintf("%v-%v", chainID.String(), contractAddr.String()))
-}
-
-// splitKey splits key to chainID and contract address.
-func splitKey(key string) (*big.Int, common.Address) {
-	res := strings.Split(key, "-")
-	chainID, _ := big.NewInt(0).SetString(res[0], 10)
-	addr := common.HexToAddress(res[1])
-	return chainID, addr
 }

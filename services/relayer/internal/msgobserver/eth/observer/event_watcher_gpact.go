@@ -136,18 +136,21 @@ func (l *GPACTFinalisedEventWatcher) fetchAndProcessEvents(filterOpts *bind.Filt
 	if err != nil {
 		return err
 	}
+	wg.Add(1)
 	go l.processEvents(&GpactStartEventIterator{finalisedStartEvs}, &wg)
 
 	finalisedSegmentEvs, err := l.Contract.FilterSegment(filterOpts)
 	if err != nil {
 		return err
 	}
+	wg.Add(1)
 	go l.processEvents(&GpactSegmentEventIterator{finalisedSegmentEvs}, &wg)
 
 	finalisedRootEvs, err := l.Contract.FilterRoot(filterOpts)
 	if err != nil {
 		return err
 	}
+	wg.Add(1)
 	go l.processEvents(&GpactRootEventIterator{finalisedRootEvs}, &wg)
 
 	wg.Wait()
@@ -155,7 +158,6 @@ func (l *GPACTFinalisedEventWatcher) fetchAndProcessEvents(filterOpts *bind.Filt
 }
 
 func (l *GPACTFinalisedEventWatcher) processEvents(events EventIterator, wg *sync.WaitGroup) {
-	wg.Add(1)
 	for events.Next() {
 		ev := events.GetEvent()
 		l.EventHandler.Handle(ev)

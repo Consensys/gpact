@@ -18,6 +18,7 @@ package observer
 import (
 	"context"
 	"fmt"
+	"github.com/consensys/gpact/services/relayer/internal/logging"
 	"github.com/ethereum/go-ethereum/common"
 	"math/big"
 
@@ -38,6 +39,9 @@ type Observer interface {
 
 	// StopObserve stops observe.
 	StopObserve() error
+
+	// IsRunning returns true if the observer is running
+	IsRunning() bool
 }
 
 // SingleSourceObserver listens to incoming events from a given bridge contract, transforms them into relayer messages
@@ -47,13 +51,28 @@ type SingleSourceObserver struct {
 	SourceNetwork *big.Int
 	EventWatcher  EventWatcher
 	EventHandler  EventHandler
+	running       bool
+}
+
+func (o *SingleSourceObserver) IsRunning() bool {
+	return o.running
 }
 
 func (o *SingleSourceObserver) Start() error {
+	if o.IsRunning() {
+		logging.Info("Observer already running. Start request ignored")
+		return nil
+	}
+	o.running = true
 	return o.EventWatcher.Watch()
 }
 
 func (o *SingleSourceObserver) Stop() {
+	if !o.IsRunning() {
+		logging.Info("Observer not running. Stop request ignored")
+		return
+	}
+	o.running = false
 	if o.EventWatcher != nil {
 		o.EventWatcher.StopWatcher()
 	}
