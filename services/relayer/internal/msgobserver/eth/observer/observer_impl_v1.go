@@ -19,6 +19,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/avast/retry-go"
 	"math/big"
 	"strings"
 	"time"
@@ -183,66 +184,78 @@ func (o *MultiSourceObserver) StopObserve() error {
 
 // routineSFC starts an Observation for an SFC source event
 func (o *MultiSourceObserver) routineSFC(chainID *big.Int, chainAP string, contractAddr common.Address) {
-	for {
-		chain, err := ethclient.Dial(chainAP)
-		if err != nil {
-			logging.Error(err.Error())
-			return
-		}
-		defer chain.Close()
+	err := withRetryWrapper(
+		func() error {
+			chain, err := ethclient.Dial(chainAP)
+			if err != nil {
+				return err
+			}
+			defer chain.Close()
 
-		sfc, err := functioncall.NewSfc(contractAddr, chain)
-		if err != nil {
-			logging.Error(err.Error())
-			return
-		}
+			sfc, err := functioncall.NewSfc(contractAddr, chain)
+			if err != nil {
+				return err
+			}
 
-		observer, err := o.createFinalisedEventObserver(chainID, contractAddr, sfc, o.mq, chain)
+			observer, err := o.createFinalisedEventObserver(chainID, contractAddr, sfc, o.mq, chain)
+			if err != nil {
+				logging.Error(err.Error())
+				return err
+			}
+			o.sfcObserver = observer
+			err = observer.Start()
+			if err != nil {
+				return err
+			}
+			return nil
+		}, "SFC observer routine")
 
-		if err != nil {
-			logging.Error(err.Error())
-			return
-		}
-		o.sfcObserver = observer
-		if observer.Start() == nil {
-			break
-		} else {
-			logging.Warn("Error in observing event. Retry in 3 seconds...")
-			chain.Close()
-			time.Sleep(3 * time.Second)
-		}
+	if err != nil {
+		logging.Error("Error starting SFC routine. All retry attempts failed.")
+		return
 	}
+}
+
+func withRetryWrapper(fn func() error, desc string) error {
+	// TODO: make the retry parameters configurable
+	return retry.Do(fn,
+		retry.Attempts(5),
+		retry.Delay(3*time.Second),
+		retry.OnRetry(func(attempt uint, err error) {
+			logging.Error("Error starting %s routine. Retry attempt: %d, error: %v", desc, attempt+1, err)
+		}))
 }
 
 // routineGPACT starts an Observation for a new GPACT source event
 func (o *MultiSourceObserver) routineGPACT(chainID *big.Int, chainAP string, addr common.Address) {
-	for {
-		chain, err := ethclient.Dial(chainAP)
-		if err != nil {
-			logging.Error("Error connecting to Chain AP: %v", err.Error())
-			return
-		}
-		defer chain.Close()
+	err := withRetryWrapper(
+		func() error {
+			chain, err := ethclient.Dial(chainAP)
+			if err != nil {
+				return err
+			}
+			defer chain.Close()
 
-		gpact, err := functioncall.NewGpact(addr, chain)
-		if err != nil {
-			logging.Error("Error creating GPACT handler: %v", err.Error())
-			return
-		}
+			gpact, err := functioncall.NewGpact(addr, chain)
+			if err != nil {
+				return err
+			}
 
-		observer, err := NewGPACTRealtimeObserver(chainID, addr, gpact, o.mq)
-		if err != nil {
-			logging.Error("Error creating observer for Chain: %v, Contract: %v, Error: %v", chainID.String(), addr.String(), err.Error())
-			return
-		}
-		o.gpactObserver = observer
-		if observer.Start() == nil {
-			break
-		} else {
-			logging.Warn("Error in observing event. Retry in 3 seconds...")
-			chain.Close()
-			time.Sleep(3 * time.Second)
-		}
+			observer, err := NewGPACTRealtimeObserver(chainID, addr, gpact, o.mq)
+			if err != nil {
+				return err
+			}
+			o.gpactObserver = observer
+			err = observer.Start()
+			if err != nil {
+				return err
+			}
+			return nil
+		}, "GPACT observer routine")
+
+	if err != nil {
+		logging.Error("Error starting SFC routine. All retry attempts failed.")
+		return
 	}
 }
 

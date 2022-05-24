@@ -60,7 +60,7 @@ func (o *SingleSourceObserver) IsRunning() bool {
 	return o.running
 }
 
-// Start starts the observer's monitoring of the assigned source.
+// Start starts the observer monitoring of the assigned source.
 func (o *SingleSourceObserver) Start() error {
 	if o.IsRunning() {
 		logging.Info("Observer already running. Start request ignored")
