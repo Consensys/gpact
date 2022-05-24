@@ -53,11 +53,21 @@ public abstract class AbstractERC20Bridge extends AbstractBlockchain {
   }
 
   public void checkBalance(Erc20User user, int expectedBalance) throws Exception {
+    final int numRetires = 10;
+
     BigInteger expectedBal = BigInteger.valueOf(expectedBalance);
-    BigInteger actualBal = getBalance(user.getAddress());
-    if (expectedBal.compareTo(actualBal) != 0) {
-      throw new Exception(this.entity + ", " + user.getName() + ": actual balance " + actualBal + " does not match expected balance " + expectedBal);
+    BigInteger actualBal = null;
+
+    // Retry some number of retries. The issue could be that the transaction
+    // that will update the balance hasn't been mined yet.
+    for (int i = 0; i < numRetires; i++) {
+      actualBal = getBalance(user.getAddress());
+      if (expectedBal.compareTo(actualBal) == 0) {
+        return;
+      }
+      pauseWhileTransactionMined();
     }
+    throw new Exception(this.entity + ", " + user.getName() + ": actual balance " + actualBal + " does not match expected balance " + expectedBal);
   }
 
 

@@ -18,10 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import net.consensys.gpact.CrosschainProtocols;
-import net.consensys.gpact.common.AnIdentity;
-import net.consensys.gpact.common.BlockchainConfig;
-import net.consensys.gpact.common.BlockchainId;
-import net.consensys.gpact.common.StatsHolder;
+import net.consensys.gpact.common.*;
 import net.consensys.gpact.functioncall.CrossControlManager;
 import net.consensys.gpact.functioncall.CrossControlManagerGroup;
 import net.consensys.gpact.messaging.MessagingManagerGroup;
@@ -280,7 +277,8 @@ public abstract class BaseExampleSystemManager {
   }
 
   private List<AttestorRelayer.Dest> setupDispatcherTargets() throws Exception {
-    byte[] txPKey = new byte[32]; // For the moment, just use a key of all 0s.
+    String txPKeyStr = "59a182023c8bdb02c838288635ac54809528381a3197758fd17a31b166fab85e";
+    byte[] txPKey = FormatConversion.hexStringToByteArray(txPKeyStr);
     List<AttestorRelayer.Dest> targets = new ArrayList<>();
     Set<BlockchainId> blockchainIds = this.messagingManagerGroup.getSupportedBlockchains();
     for (BlockchainId sourceBcId : blockchainIds) {
