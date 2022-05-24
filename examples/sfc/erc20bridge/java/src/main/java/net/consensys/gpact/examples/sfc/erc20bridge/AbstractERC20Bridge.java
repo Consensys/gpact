@@ -15,6 +15,8 @@
 package net.consensys.gpact.examples.sfc.erc20bridge;
 
 import java.io.IOException;
+import java.math.BigInteger;
+
 import net.consensys.gpact.common.AbstractBlockchain;
 import net.consensys.gpact.common.BlockchainConfig;
 import net.consensys.gpact.common.BlockchainId;
@@ -40,6 +42,26 @@ public abstract class AbstractERC20Bridge extends AbstractBlockchain {
     this.entity = entity;
   }
 
+
+  public void showErc20Balances(Erc20User[] users) throws Exception {
+    LOG.info("{} ERC20 Balances", this.entity);
+    LOG.info(" Total Supply: {}", totalSupply());
+    LOG.info(" ERC20 Bridge Account {}: balance: {}", this.erc20BridgeAddress, getBalance(this.erc20BridgeAddress));
+    for (Erc20User user : users) {
+      LOG.info(" Account {}:{} balance: {}", user.getName(), user.getAddress(), getBalance(user.getAddress()));
+    }
+  }
+
+  public void checkBalance(Erc20User user, int expectedBalance) throws Exception {
+    BigInteger expectedBal = BigInteger.valueOf(expectedBalance);
+    BigInteger actualBal = getBalance(user.getAddress());
+    if (expectedBal.compareTo(actualBal) != 0) {
+      throw new Exception(this.entity + ", " + user.getName() + ": actual balance " + actualBal + " does not match expected balance " + expectedBal);
+    }
+  }
+
+
+
   public abstract void deployContracts(String cbcAddress) throws Exception;
 
   public abstract void addRemoteERC20(BlockchainId remoteBcId, String remoteERC20ContractAddress)
@@ -56,7 +78,9 @@ public abstract class AbstractERC20Bridge extends AbstractBlockchain {
 
   public abstract void giveTokens(final Erc20User user, final int number) throws Exception;
 
-  public abstract void showErc20Balances(Erc20User[] users) throws Exception;
+  protected abstract BigInteger totalSupply() throws Exception;
+
+  protected abstract BigInteger getBalance(String account) throws Exception;
 
   public abstract void showErc20Allowance(String owner, String spender) throws Exception;
 }
