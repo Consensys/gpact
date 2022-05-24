@@ -42,8 +42,6 @@ public class ERC20TokenBridgeExample {
   static final int TRANSFER2 = 23;
   static final int TRANSFER3 = 17;
 
-
-
   public static void main(String[] args) throws Exception {
     main(args, BLOCKCHAIN_B_MASS_CONSERVATION);
   }

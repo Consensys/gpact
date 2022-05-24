@@ -112,7 +112,6 @@ public class MinterBurnerERC20Bridge extends AbstractERC20Bridge {
     return this.erc20.balanceOf(account).send();
   }
 
-
   public void showErc20Allowance(String owner, String spender) throws Exception {
     BigInteger allowance = this.erc20.allowance(owner, spender).send();
     LOG.info(" {}: Owner {}: Spender: {}: Allowance: {}", this.entity, owner, spender, allowance);

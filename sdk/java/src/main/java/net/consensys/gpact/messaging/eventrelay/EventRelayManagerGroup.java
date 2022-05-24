@@ -15,8 +15,6 @@
 package net.consensys.gpact.messaging.eventrelay;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import net.consensys.gpact.common.BlockchainConfig;
 import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.messaging.BaseMessagingManagerGroup;

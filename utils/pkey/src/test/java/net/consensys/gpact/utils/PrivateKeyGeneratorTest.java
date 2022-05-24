@@ -4,8 +4,8 @@ import org.junit.jupiter.api.Test;
 
 public class PrivateKeyGeneratorTest {
 
-    @Test
-    public void genKey() throws Exception {
-        PrivateKeyGenerator.main(null);
-    }
+  @Test
+  public void genKey() throws Exception {
+    PrivateKeyGenerator.main(null);
+  }
 }

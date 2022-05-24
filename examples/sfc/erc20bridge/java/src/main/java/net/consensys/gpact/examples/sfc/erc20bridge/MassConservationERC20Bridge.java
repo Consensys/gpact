@@ -112,11 +112,11 @@ public class MassConservationERC20Bridge extends AbstractERC20Bridge {
   }
 
   protected BigInteger totalSupply() throws Exception {
-      return this.erc20.totalSupply().send();
+    return this.erc20.totalSupply().send();
   }
 
   protected BigInteger getBalance(String account) throws Exception {
-      return this.erc20.balanceOf(account).send();
+    return this.erc20.balanceOf(account).send();
   }
 
   public void showErc20Allowance(String owner, String spender) throws Exception {

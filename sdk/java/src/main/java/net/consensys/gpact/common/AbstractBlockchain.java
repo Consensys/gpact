@@ -56,7 +56,9 @@ public abstract class AbstractBlockchain {
 
     this.web3j =
         Web3j.build(
-            new HttpService(this.rpcUri), this.pollingIntervalMs, new ScheduledThreadPoolExecutor(5));
+            new HttpService(this.rpcUri),
+            this.pollingIntervalMs,
+            new ScheduledThreadPoolExecutor(5));
     TransactionReceiptProcessor txrProcessor =
         new PollingTransactionReceiptProcessor(this.web3j, this.pollingIntervalMs, RETRY);
     this.tm =
