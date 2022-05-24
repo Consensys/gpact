@@ -58,52 +58,54 @@ func handleV1(req messages.Message) {
 			logging.Error("Target chain decode issue: %v", err.Error())
 			return
 		}
-		logging.Info("Received message for bridging from contract %v on chain %v to contract %v on chain %v", srcAddr.String(), srcID, destAddr.String(), destID)
+		logging.Info("Preparing to relay message for bridging from contract %v on chain %v to contract %v on chain %v", srcAddr.String(), srcID, destAddr.String(), destID)
 
 		// Get proof
 		data, err := hex.DecodeString(msg.Payload)
 		if err != nil {
-			logging.Error(err.Error())
+			logging.Error("Error decoding payload: %v", err.Error())
 			return
 		}
 		raw := types.Log{}
 		err = json.Unmarshal(data[32:], &raw)
 		if err != nil {
-			logging.Error(err.Error())
+			logging.Error("Error decoding data for payload %v: %v", msg.Payload, err.Error())
 			return
 		}
 		if len(msg.Proofs) == 0 {
 			logging.Error("Empty proofs received.")
 			return
 		}
+
 		signature, err := hex.DecodeString(msg.Proofs[0].Proof)
 		if err != nil {
-			logging.Error(err.Error())
+			logging.Error("Error decoding proofs[0]: %v, %v", msg.Proofs[0].Proof, err.Error())
 			return
 		}
 
 		link, err := instance.Transactor.GetChainAP(big.NewInt(int64(destID)))
 		if err != nil {
-			logging.Error(err.Error())
+			logging.Error("No chain AP for target chain: %v, %v", destID, err.Error())
 			return
 		}
 		auth, err := instance.Transactor.GetAuth(big.NewInt(int64(destID)))
 		if err != nil {
-			logging.Error(err.Error())
+			logging.Error("No auth target chain: %v, %v", destID, err.Error())
 			return
 		}
 		verfierAddr, err := instance.Verifier.GetVerifierAddr(big.NewInt(int64(srcID)), big.NewInt(int64(destID)))
 		if err != nil {
-			logging.Error(err.Error())
+			logging.Error("Issue loading verifier address for source %v, target %v: %v", srcID, destID, err.Error())
 			return
 		}
-		logging.Info("Obtain event store address: %v", verfierAddr.String())
+		logging.Info("loc12")
+		logging.Info("Obtained event store address: %v", verfierAddr.String())
 
 		logging.Info("Adding message %v to queue for process...", msg.ID)
 		instance.Dispatcher.AddToQueue(link, auth, msg.ID, big.NewInt(int64(destID)), verfierAddr, big.NewInt(int64(srcID)), srcAddr, raw.Data, signature)
 		logging.Info("Message %v is added to queue.", msg.ID)
 	} else {
-		logging.Info("Received message for bridging from contract %v on chain %v to message store on %v", srcAddr.String(), srcID, instance.MessageStoreAddr)
+		logging.Info("Preparing to store message for bridging from contract %v on chain %v to message store on %v", srcAddr.String(), srcID, instance.MessageStoreAddr)
 
 		data, err := hex.DecodeString(msg.Payload)
 		if err != nil {

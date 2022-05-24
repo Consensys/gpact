@@ -127,7 +127,7 @@ func dispatch(chain *ethclient.Client, auth *bind.TransactOpts, esAddr common.Ad
 	}
 
 	// Dispatching
-	logging.Info("Start dispatching...")
+	logging.Info("Submitting message to target chain as a transaction")
 	// TODO: Need to estimate the gas involved in the call.
 	auth.GasLimit = uint64(3000000)
 	auth.GasPrice, err = chain.SuggestGasPrice(context.Background())
