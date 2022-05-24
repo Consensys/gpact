@@ -43,7 +43,7 @@ var fixValidEvent = functioncall.SfcCrossCall{
 	Raw:              fixLog,
 }
 
-var transformer = NewSFCEventTransformer("network-001",
+var transformer = NewSFCEventTransformer(big.NewInt(1),
 	common.HexToAddress("0x8e215d06ea7ec1fdb4fc5fd21768f4b34ee92ef4"))
 
 func TestSFCTransformer(t *testing.T) {
@@ -58,7 +58,7 @@ func TestSFCTransformer(t *testing.T) {
 	assert.Equal(t, fixValidEvent.Timestamp, big.NewInt(message.Timestamp))
 	assert.Equal(t, hex.EncodeToString(append(sfcFuncSig[:], data...)), message.Payload)
 
-	expectedID := fmt.Sprintf(MessageIDPattern, transformer.Source, transformer.SourceAddr,
+	expectedID := fmt.Sprintf(MessageIDPattern, transformer.ChainId, transformer.ContractAddress,
 		fixLog.BlockNumber, fixLog.TxIndex, fixLog.Index)
 	assert.Equal(t, expectedID, message.ID)
 }

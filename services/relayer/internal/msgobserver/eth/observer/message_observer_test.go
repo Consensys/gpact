@@ -30,14 +30,14 @@ import (
 func TestSFCBridgeObserver(t *testing.T) {
 	fixDesAddress := common.HexToAddress("0x8e215d06ea7ec1fdb4fc5fd21768f4b34ee92ef4")
 	fixDestID := big.NewInt(2)
-	fixSourceID := "1"
+	fixSourceID := big.NewInt(1)
 	fixSourceAddress := common.HexToAddress("0x8e215d06ea7ec1fdb4fc5fd21768f4b34ee92ef4")
 
 	simBackend, auth := simulatedBackend(t)
 	contract := deploySFCContract(t, simBackend, auth)
 	mockMQ := new(MockMQ)
 
-	observer, err := NewSFCBridgeRealtimeObserver(fixSourceID, fixSourceAddress, contract, mockMQ)
+	observer, err := NewSFCRealtimeObserver(fixSourceID, fixSourceAddress, contract, mockMQ)
 	assert.Nil(t, err)
 	go observer.Start()
 
@@ -57,5 +57,5 @@ func TestSFCBridgeObserver(t *testing.T) {
 
 	assert.Equal(t, fixDesAddress.String(), sentMsg.Destination.ContractAddress)
 	assert.Equal(t, fixDestID.String(), sentMsg.Destination.NetworkID)
-	assert.Equal(t, fixSourceID, sentMsg.Source.NetworkID)
+	assert.Equal(t, fixSourceID.String(), sentMsg.Source.NetworkID)
 }

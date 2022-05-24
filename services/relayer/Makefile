@@ -1,4 +1,4 @@
-.PHONY: build
+.PHONY: build itest
 
 build:
 	go build -o ./build/relayer cmd/relayer/* 
@@ -14,4 +14,6 @@ clean:
 
 utest:
 	go test -v --count=1 ./internal/...
+
+itest:
 	go test -v --count=1 ./itest/

@@ -462,7 +462,7 @@ jobs:
       - run: sleep 30
       - run:
           name: Build test code and execute unit tests
-          command: make utest
+          command: make utest itest
           working_directory: services/relayer
       - run:
           name: Stop blockchains & Relayers
