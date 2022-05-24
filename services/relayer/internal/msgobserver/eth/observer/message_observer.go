@@ -44,8 +44,9 @@ type Observer interface {
 	IsRunning() bool
 }
 
-// SingleSourceObserver listens to incoming events from a given bridge contract, transforms them into relayer messages
-// and then enqueues them onto a message queue them for further processing by other Relayer components
+// SingleSourceObserver is an Observer that listens to events from a given source contract,
+// transforms them into Relayer messages and then enqueues them onto a message queue for further
+// processing by the Relayer core component.
 type SingleSourceObserver struct {
 	SourceId      string
 	SourceNetwork *big.Int
@@ -54,10 +55,12 @@ type SingleSourceObserver struct {
 	running       bool
 }
 
+// IsRunning returns true if the observer is running
 func (o *SingleSourceObserver) IsRunning() bool {
 	return o.running
 }
 
+// Start starts the observer's monitoring of the assigned source.
 func (o *SingleSourceObserver) Start() error {
 	if o.IsRunning() {
 		logging.Info("Observer already running. Start request ignored")
@@ -67,6 +70,7 @@ func (o *SingleSourceObserver) Start() error {
 	return o.EventWatcher.Watch()
 }
 
+// Stop stops the observer monitoring the assigned source.
 func (o *SingleSourceObserver) Stop() {
 	if !o.IsRunning() {
 		logging.Info("Observer not running. Stop request ignored")
@@ -78,6 +82,8 @@ func (o *SingleSourceObserver) Stop() {
 	}
 }
 
+// NewSFCRealtimeObserver creates an instance of SingleSourceObserver that monitors a simple-function-call
+// bridge contract events. The observer processes events as they are emitted (realtime), without awaiting finalisation.
 func NewSFCRealtimeObserver(chainId *big.Int, sourceAddr common.Address, contract *functioncall.Sfc,
 	mq mqserver.MessageQueue) (*SingleSourceObserver, error) {
 	eventTransformer := NewSFCEventTransformer(chainId, sourceAddr)
@@ -98,6 +104,8 @@ func NewSFCRealtimeObserver(chainId *big.Int, sourceAddr common.Address, contrac
 		nil
 }
 
+// NewSFCFinalisedObserver creates an instance of SingleSourceObserver that monitors a simple-function-call
+// bridge contract events. The observer processes events only once they receive a configured number of confirmations.
 func NewSFCFinalisedObserver(chainId *big.Int, sourceAddr common.Address, contract *functioncall.Sfc,
 	mq mqserver.MessageQueue,
 	confirmationsForFinality uint64, watcherProgressOpts WatcherProgressDsOpts, client BlockHeadProducer) (
@@ -117,6 +125,8 @@ func NewSFCFinalisedObserver(chainId *big.Int, sourceAddr common.Address, contra
 	return &SingleSourceObserver{EventWatcher: eventWatcher, EventHandler: eventHandler, SourceNetwork: chainId}, nil
 }
 
+// NewGPACTRealtimeObserver creates an instance of SingleSourceObserver that monitors a GPACT bridge contract.
+// The observer processes events as they are emitted (realtime), without awaiting finalisation.
 func NewGPACTRealtimeObserver(chainId *big.Int, sourceAddr common.Address, contract *functioncall.Gpact,
 	mq mqserver.MessageQueue) (*SingleSourceObserver, error) {
 	eventTransformer := NewGPACTEventTransformer(chainId, sourceAddr)

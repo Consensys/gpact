@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/big"
+	"strings"
 	"time"
 
 	"github.com/consensys/gpact/services/relayer/internal/contracts/functioncall"
@@ -35,8 +36,8 @@ const (
 	activeKey = "active"
 )
 
-// observation stores the information of an active observation.
-type observation struct {
+// Observation stores the information of an active Observation.
+type Observation struct {
 	ChainID      string `json:"chain_id"`
 	ContractType string `json:"contract_type"`
 	ContractAddr string `json:"contract_addr"`
@@ -45,8 +46,8 @@ type observation struct {
 
 // MultiSourceObserver is an observer that can observer multiple different event sources.
 // It creates and manages distinct SingleSourceObserver instances for each event source.
-// The contract persists the list of event sources it tracks. In the event of a failure related restart,
-// the observer resumes observing the designated sources.
+// The contract persists the list of event sources it tracks. In the event of a restart,
+// the observer resumes Observation of the persisted sources.
 type MultiSourceObserver struct {
 	dsPath string
 	mq     *mqserver.MQServer
@@ -92,26 +93,17 @@ func (o *MultiSourceObserver) Start() error {
 			if err != nil {
 				return err
 			}
-			val := observation{}
-			err = json.Unmarshal(data, &val)
+			obs := Observation{}
+			err = json.Unmarshal(data, &obs)
 			if err != nil {
 				return err
 			}
-			chainID, ok := big.NewInt(0).SetString(val.ChainID, 10)
-			if !ok {
-				err = fmt.Errorf("error in setting chain id")
+			err = o.startObservation(obs)
+			if err != nil {
 				return err
-			}
-			if val.ContractType == "SFC" || val.ContractType == "sfc" {
-				go o.routineSFC(chainID, val.AP, common.HexToAddress(val.ContractAddr))
-			} else if val.ContractType == "GPACT" || val.ContractType == "gpact" {
-				go o.routineGPACT(chainID, val.AP, common.HexToAddress(val.ContractAddr))
-			} else {
-				return fmt.Errorf("contract type %v is not supported", val.ContractType)
 			}
 		}
 	}
-	o.running = true
 	return nil
 }
 
@@ -141,13 +133,13 @@ func (o *MultiSourceObserver) StartObserve(chainID *big.Int, chainAP string, con
 	// First, close any existing observe.
 	o.Stop()
 
-	val := observation{
+	obs := Observation{
 		ChainID:      chainID.String(),
 		ContractType: contractType,
 		ContractAddr: contractAddr.String(),
 		AP:           chainAP,
 	}
-	data, err := json.Marshal(val)
+	data, err := json.Marshal(obs)
 	if err != nil {
 		return err
 	}
@@ -155,15 +147,25 @@ func (o *MultiSourceObserver) StartObserve(chainID *big.Int, chainAP string, con
 	if err != nil {
 		return err
 	}
-	if contractType == "SFC" {
-		go o.routineSFC(chainID, chainAP, contractAddr)
-	} else if contractType == "GPACT" {
-		go o.routineGPACT(chainID, chainAP, contractAddr)
-	} else {
-		return fmt.Errorf("contract type %v is not supported", contractType)
-	}
 
-	o.running = true
+	return o.startObservation(obs)
+}
+
+func (o *MultiSourceObserver) startObservation(obs Observation) error {
+	chainID, ok := big.NewInt(0).SetString(obs.ChainID, 10)
+	if !ok {
+		return fmt.Errorf("error in setting chain id")
+	}
+	if strings.EqualFold(obs.ContractType, "SFC") {
+		go o.routineSFC(chainID, obs.AP, common.HexToAddress(obs.ContractAddr))
+	} else if strings.EqualFold(obs.ContractType, "GPACT") {
+		go o.routineGPACT(chainID, obs.AP, common.HexToAddress(obs.ContractAddr))
+	} else {
+		return fmt.Errorf("contract type %v is not supported", obs.ContractType)
+	}
+	if !o.IsRunning() {
+		o.running = true
+	}
 	return nil
 }
 
@@ -179,7 +181,7 @@ func (o *MultiSourceObserver) StopObserve() error {
 	return nil
 }
 
-// routineSFC starts an observation for an SFC source event
+// routineSFC starts an Observation for an SFC source event
 func (o *MultiSourceObserver) routineSFC(chainID *big.Int, chainAP string, contractAddr common.Address) {
 	for {
 		chain, err := ethclient.Dial(chainAP)
@@ -212,7 +214,7 @@ func (o *MultiSourceObserver) routineSFC(chainID *big.Int, chainAP string, contr
 	}
 }
 
-// routineGPACT starts an observation for a new GPACT source event
+// routineGPACT starts an Observation for a new GPACT source event
 func (o *MultiSourceObserver) routineGPACT(chainID *big.Int, chainAP string, addr common.Address) {
 	for {
 		chain, err := ethclient.Dial(chainAP)
