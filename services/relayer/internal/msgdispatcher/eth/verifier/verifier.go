@@ -29,9 +29,9 @@ type Verifier interface {
 	// Stop stops the verifier.
 	Stop()
 
-	// SetVerifierAddr sets a verifier address with associated chain id and contract address.
-	SetVerifierAddr(chainID *big.Int, contractAddr common.Address, esAddr common.Address) error
+	// SetVerifierAddr sets a verifier contract address on the target chain based on source and target chain.
+	SetVerifierAddr(sourceChainID *big.Int, targetChainID *big.Int, verifierContractAddr common.Address) error
 
-	// GetVerifierAddr gets a verifier address for given associated chain id and contract address.
-	GetVerifierAddr(chainID *big.Int, contractAddr common.Address) (common.Address, error)
+	// GetVerifierAddr gets a verifier contract address for given source and target chain combination.
+	GetVerifierAddr(sourceChainID *big.Int, targetChainID *big.Int) (common.Address, error)
 }

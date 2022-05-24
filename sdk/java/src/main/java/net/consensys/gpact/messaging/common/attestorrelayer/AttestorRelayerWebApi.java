@@ -221,7 +221,7 @@ public class AttestorRelayerWebApi {
     ObjectNode setVerifier = mapper2.createObjectNode();
     setVerifier.put("source_chain_id", sourceChainBcId.toDecimalString());
     setVerifier.put("target_chain_id", targetChainBcId.toDecimalString());
-    setVerifier.put("verifier_addr", targetChainVerifierAddr);
+    setVerifier.put("verifier_contract_addr", targetChainVerifierAddr);
     try {
       json = mapper1.writer().writeValueAsBytes(setVerifier);
     } catch (JsonProcessingException ex) {

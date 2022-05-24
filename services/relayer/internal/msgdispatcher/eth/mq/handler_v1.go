@@ -46,7 +46,7 @@ func handleV1(req messages.Message) {
 
 	srcID, err := strconv.Atoi(msg.Source.NetworkID)
 	if err != nil {
-		logging.Error(err.Error())
+		logging.Error("Source chain decode issue: %v", err.Error())
 		return
 	}
 	srcAddr := common.HexToAddress(msg.Source.ContractAddress)
@@ -55,7 +55,7 @@ func handleV1(req messages.Message) {
 	if destAddr != empty {
 		destID, err := strconv.Atoi(msg.Destination.NetworkID)
 		if err != nil {
-			logging.Error(err.Error())
+			logging.Error("Target chain decode issue: %v", err.Error())
 			return
 		}
 		logging.Info("Received message for bridging from contract %v on chain %v to contract %v on chain %v", srcAddr.String(), srcID, destAddr.String(), destID)
@@ -92,15 +92,15 @@ func handleV1(req messages.Message) {
 			logging.Error(err.Error())
 			return
 		}
-		esAddr, err := instance.Verifier.GetVerifierAddr(big.NewInt(int64(destID)), destAddr)
+		verfierAddr, err := instance.Verifier.GetVerifierAddr(big.NewInt(int64(srcID)), big.NewInt(int64(destID)))
 		if err != nil {
 			logging.Error(err.Error())
 			return
 		}
-		logging.Info("Obtain event store address: %v", esAddr.String())
+		logging.Info("Obtain event store address: %v", verfierAddr.String())
 
 		logging.Info("Adding message %v to queue for process...", msg.ID)
-		instance.Dispatcher.AddToQueue(link, auth, msg.ID, big.NewInt(int64(destID)), esAddr, big.NewInt(int64(srcID)), srcAddr, raw.Data, signature)
+		instance.Dispatcher.AddToQueue(link, auth, msg.ID, big.NewInt(int64(destID)), verfierAddr, big.NewInt(int64(srcID)), srcAddr, raw.Data, signature)
 		logging.Info("Message %v is added to queue.", msg.ID)
 	} else {
 		logging.Info("Received message for bridging from contract %v on chain %v to message store on %v", srcAddr.String(), srcID, instance.MessageStoreAddr)

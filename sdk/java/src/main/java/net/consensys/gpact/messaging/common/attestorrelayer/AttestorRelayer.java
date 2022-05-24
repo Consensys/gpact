@@ -129,20 +129,6 @@ public class AttestorRelayer {
     this.msgStoreAddr = msgStoreAddrFromUser;
   }
 
-  public void setDispatcher(
-      String msgDispatcherUrl,
-      BlockchainId sourceChainBcId,
-      BlockchainId targetChainBcId,
-      String targetChainWsUrl,
-      byte[] txPKey,
-      String targetChainVerifierAddr)
-      throws CrosschainProtocolStackException {
-    Dest dest =
-        new Dest(
-            sourceChainBcId, targetChainBcId, targetChainWsUrl, txPKey, targetChainVerifierAddr);
-    setDispatcher(msgDispatcherUrl, dest);
-  }
-
   public void setDispatcher(String msgDispatcherUrl, Dest dest)
       throws CrosschainProtocolStackException {
     AttestorRelayerWebApi.setupDispatcherForRelayingEvents(

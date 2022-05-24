@@ -28,8 +28,6 @@ import org.web3j.crypto.Credentials;
 public class EventRelayManagerGroup extends BaseMessagingManagerGroup {
   static final Logger LOG = LogManager.getLogger(EventRelayManagerGroup.class);
 
-  Map<BlockchainId, EventRelayManager> blockchains = new HashMap<>();
-
   @Override
   public void addBlockchainAndDeployContracts(Credentials creds, BlockchainConfig bcInfo)
       throws Exception {
