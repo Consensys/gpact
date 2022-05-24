@@ -21,6 +21,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
+	"math/big"
 	"time"
 
 	v1 "github.com/consensys/gpact/services/relayer/pkg/messages/v1"
@@ -44,8 +45,8 @@ type EventTransformer interface {
 
 // SFCEventTransformer converts events from a simple-function-call bridge contract to relayer messages
 type SFCEventTransformer struct {
-	Source     string
-	SourceAddr common.Address
+	ChainId         *big.Int
+	ContractAddress common.Address
 }
 
 // ToMessage converts a 'CrossCall' event emited from a simple-function-call bridge contract to relayer message
@@ -58,7 +59,7 @@ func (t *SFCEventTransformer) ToMessage(event interface{}) (*v1.Message, error) 
 		return nil, err
 	}
 
-	source := v1.ApplicationAddress{NetworkID: t.Source, ContractAddress: fmt.Sprintf("%#x", t.SourceAddr)}
+	source := v1.ApplicationAddress{NetworkID: t.ChainId.String(), ContractAddress: fmt.Sprintf("%#x", t.ContractAddress)}
 	destination := v1.ApplicationAddress{NetworkID: sfcEvent.DestBcId.String(), ContractAddress: sfcEvent.DestContract.String()}
 
 	data, err := json.Marshal(sfcEvent.Raw)
@@ -68,7 +69,7 @@ func (t *SFCEventTransformer) ToMessage(event interface{}) (*v1.Message, error) 
 	data = append(sfcFuncSig[:], data...)
 
 	message := v1.Message{
-		ID:          t.getIDForEvent(sfcEvent.Raw),
+		ID:          getIDForEvent(t.ChainId, t.ContractAddress, sfcEvent.Raw.BlockNumber, sfcEvent.Raw.TxIndex, sfcEvent.Raw.Index),
 		Timestamp:   sfcEvent.Timestamp.Int64(),
 		MsgType:     v1.MessageType,
 		Version:     v1.Version,
@@ -93,18 +94,13 @@ func (t *SFCEventTransformer) validate(event *functioncall.SfcCrossCall) error {
 	return nil
 }
 
-// getIDForEvent generates a deterministic ID for an event of the format {network_id}/{contract_address}/{block_number}/{tx_index}/{log_index}
-func (t *SFCEventTransformer) getIDForEvent(event types.Log) string {
-	return fmt.Sprintf(MessageIDPattern, t.Source, t.SourceAddr, event.BlockNumber, event.TxIndex, event.Index)
-}
-
-func NewSFCEventTransformer(sourceNetwork string, sourceAddr common.Address) *SFCEventTransformer {
-	return &SFCEventTransformer{sourceNetwork, sourceAddr}
+func NewSFCEventTransformer(chainId *big.Int, sourceAddr common.Address) *SFCEventTransformer {
+	return &SFCEventTransformer{chainId, sourceAddr}
 }
 
 type GPACTEventTransformer struct {
-	Source     string
-	SourceAddr common.Address
+	ChainId         *big.Int
+	ContractAddress common.Address
 }
 
 func (t *GPACTEventTransformer) ToMessage(event interface{}) (*v1.Message, error) {
@@ -130,7 +126,7 @@ func (t *GPACTEventTransformer) ToMessage(event interface{}) (*v1.Message, error
 		}
 	}
 
-	source := v1.ApplicationAddress{NetworkID: t.Source, ContractAddress: fmt.Sprintf("%#x", t.SourceAddr)}
+	source := v1.ApplicationAddress{NetworkID: t.ChainId.String(), ContractAddress: fmt.Sprintf("%#x", t.ContractAddress)}
 	destination := v1.ApplicationAddress{NetworkID: "0", ContractAddress: ""}
 
 	data, err := json.Marshal(raw)
@@ -140,7 +136,7 @@ func (t *GPACTEventTransformer) ToMessage(event interface{}) (*v1.Message, error
 	data = append(funcSig, data...)
 
 	message := v1.Message{
-		ID:          t.getIDForEvent(raw),
+		ID:          getIDForEvent(t.ChainId, t.ContractAddress, raw.BlockNumber, raw.TxIndex, raw.Index),
 		Timestamp:   time.Now().Unix(), //Event does not contain timestamp
 		MsgType:     v1.MessageType,
 		Version:     v1.Version,
@@ -154,10 +150,10 @@ func (t *GPACTEventTransformer) ToMessage(event interface{}) (*v1.Message, error
 }
 
 // getIDForEvent generates a deterministic ID for an event of the format {network_id}/{contract_address}/{block_number}/{tx_index}/{log_index}
-func (t *GPACTEventTransformer) getIDForEvent(event types.Log) string {
-	return fmt.Sprintf(MessageIDPattern, t.Source, t.SourceAddr, event.BlockNumber, event.TxIndex, event.Index)
+func getIDForEvent(chainId *big.Int, contractAddr common.Address, blockNum uint64, txIndex uint, evIndex uint) string {
+	return fmt.Sprintf(MessageIDPattern, chainId, contractAddr, blockNum, txIndex, evIndex)
 }
 
-func NewGPACTEventTransformer(sourceNetwork string, sourceAddr common.Address) *GPACTEventTransformer {
-	return &GPACTEventTransformer{sourceNetwork, sourceAddr}
+func NewGPACTEventTransformer(chainId *big.Int, contractAddress common.Address) *GPACTEventTransformer {
+	return &GPACTEventTransformer{chainId, contractAddress}
 }

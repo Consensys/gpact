@@ -16,7 +16,6 @@ package observer
  */
 
 import (
-	"encoding/base64"
 	"encoding/binary"
 	"fmt"
 
@@ -27,10 +26,6 @@ func randomBytes(n int) []byte {
 	res := make([]byte, n)
 	crypto.GetPrivatePRNG().ReadBytes(res)
 	return res
-}
-
-func toBase64String(data []byte) string {
-	return base64.StdEncoding.EncodeToString(data)
 }
 
 func uintToBytes(n uint64) []byte {

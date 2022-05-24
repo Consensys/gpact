@@ -54,7 +54,7 @@ func main() {
 	instance.MQ = mq
 	defer mq.Stop()
 	// Start the observer
-	observer := observer.NewObserverImplV1(conf.ObserverDSPath, mq)
+	observer := observer.NewMultiSourceObserver(conf.ObserverDSPath, mq)
 	err = observer.Start()
 	if err != nil {
 		panic(err)
