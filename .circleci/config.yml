@@ -428,7 +428,7 @@ jobs:
             go version
       - run:
           name: Build production code and test code
-          command: make test -run=nope ./...
+          command: make buildall
           working_directory: ~/project/services/relayer
 
   relayer-test:
