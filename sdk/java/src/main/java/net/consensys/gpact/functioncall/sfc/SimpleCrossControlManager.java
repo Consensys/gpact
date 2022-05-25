@@ -109,6 +109,16 @@ public class SimpleCrossControlManager extends AbstractBlockchain implements Cro
           this.crossBlockchainControlContract.getCrossCallEvents(txR);
       crossCallEvent = callEvents.get(0);
       dumpCrossCallEvent(crossCallEvent);
+    } else {
+      LOG.error(" Source Bc Call error: status: {}", txR.getStatus());
+      String revertReasonRaw = txR.getRevertReason();
+      if (revertReasonRaw != null) {
+        String revertReason = RevertReason.decodeRevertReason(revertReasonRaw);
+        LOG.error(" Revert Reason2: {}", revertReason);
+      }
+
+      return new Tuple<TransactionReceipt, byte[], SimpleCrosschainControl.CrossCallEventResponse>(
+          txR, null, null);
     }
     return new Tuple<TransactionReceipt, byte[], SimpleCrosschainControl.CrossCallEventResponse>(
         txR, getEventData(txR, CROSSCALL_EVENT_SIGNATURE_BYTES), crossCallEvent);

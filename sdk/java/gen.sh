@@ -23,9 +23,10 @@ solc $CONTRACTSDIR/messaging/common/MessagingRegistrar.sol --allow-paths . --bin
 
 solc $CONTRACTSDIR/messaging/eventattest/EventAttestationVerifier.sol --allow-paths . --bin --abi --optimize -o $BUILDDIR --overwrite
 
-
 solc $CONTRACTSDIR/messaging/txrootrelay/TxRootRelayVerifier.sol --allow-paths . --bin --abi --hashes --optimize -o $BUILDDIR --overwrite
 solc $CONTRACTSDIR/messaging/txrootrelay/TxReceiptsRootStorage.sol --allow-paths . --bin --abi --hashes --optimize -o $BUILDDIR --overwrite
+
+solc $CONTRACTSDIR/messaging/eventrelay/EventRelayVerifier.sol --allow-paths . --bin --abi --hashes --optimize -o $BUILDDIR --overwrite
 
 
 $WEB3J solidity generate -a=$BUILDDIR/BlsSignatureTest.abi -b=$BUILDDIR/BlsSignatureTest.bin -o=$OUTPUTDIR -p=$BASEPACKAGE.common
@@ -42,3 +43,5 @@ $WEB3J solidity generate -a=$BUILDDIR/EventAttestationVerifier.abi -b=$BUILDDIR/
 
 $WEB3J solidity generate -a=$BUILDDIR/TxRootRelayVerifier.abi -b=$BUILDDIR/TxRootRelayVerifier.bin -o=$OUTPUTDIR -p=$BASEPACKAGE.messaging.txrootrelay
 $WEB3J solidity generate -a=$BUILDDIR/TxReceiptsRootStorage.abi -b=$BUILDDIR/TxReceiptsRootStorage.bin -o=$OUTPUTDIR -p=$BASEPACKAGE.messaging.txrootrelay
+
+$WEB3J solidity generate -a=$BUILDDIR/EventRelayVerifier.abi -b=$BUILDDIR/EventRelayVerifier.bin -o=$OUTPUTDIR -p=$BASEPACKAGE.messaging.eventrelay

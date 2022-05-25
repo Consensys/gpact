@@ -16,4 +16,16 @@ public class SfcCrosschainTokenBridgeTest extends AbstractExampleTest {
     String tempPropsFile = createPropertiesFile(true, false, false);
     ERC20TokenBridgeExample.main(new String[] {tempPropsFile}, true);
   }
+
+  @Test
+  public void eventRelayMultipleBlockchainMinting() throws Exception {
+    String tempPropsFile = createPropertiesFile(MessagingType.EVENT_RELAY, false, false);
+    ERC20TokenBridgeExample.main(new String[] {tempPropsFile}, false);
+  }
+
+  @Test
+  public void eventRelayMultipleBlockchainMassC() throws Exception {
+    String tempPropsFile = createPropertiesFile(MessagingType.EVENT_RELAY, false, false);
+    ERC20TokenBridgeExample.main(new String[] {tempPropsFile}, true);
+  }
 }

@@ -37,7 +37,7 @@ public abstract class AbstractBlockchain {
   protected String rpcUri;
   protected String wsUri;
   // Polling interval should be equal to the block time.
-  protected int pollingInterval;
+  protected int pollingIntervalMs;
   public DynamicGasProvider gasProvider;
   protected DynamicGasProvider.Strategy gasPriceStrategy;
 
@@ -51,14 +51,16 @@ public abstract class AbstractBlockchain {
     this.blockchainId = bcConfig.bcId;
     this.rpcUri = bcConfig.blockchainNodeRpcUri;
     this.wsUri = bcConfig.blockchainNodeWsUri;
-    this.pollingInterval = bcConfig.period;
+    this.pollingIntervalMs = bcConfig.period;
     this.gasPriceStrategy = bcConfig.gasPriceStrategy;
 
     this.web3j =
         Web3j.build(
-            new HttpService(this.rpcUri), this.pollingInterval, new ScheduledThreadPoolExecutor(5));
+            new HttpService(this.rpcUri),
+            this.pollingIntervalMs,
+            new ScheduledThreadPoolExecutor(5));
     TransactionReceiptProcessor txrProcessor =
-        new PollingTransactionReceiptProcessor(this.web3j, this.pollingInterval, RETRY);
+        new PollingTransactionReceiptProcessor(this.web3j, this.pollingIntervalMs, RETRY);
     this.tm =
         TxManagerCache.getOrCreate(
             this.web3j, this.credentials, this.blockchainId.asLong(), txrProcessor);
@@ -79,5 +81,13 @@ public abstract class AbstractBlockchain {
 
   public String getWsUri() {
     return this.wsUri;
+  }
+
+  public void pauseWhileTransactionMined() {
+    try {
+      Thread.sleep((long) this.pollingIntervalMs);
+    } catch (InterruptedException e) {
+      // Do nothing
+    }
   }
 }

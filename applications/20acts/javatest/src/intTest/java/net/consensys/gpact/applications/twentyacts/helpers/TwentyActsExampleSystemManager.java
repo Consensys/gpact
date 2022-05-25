@@ -196,7 +196,7 @@ public class TwentyActsExampleSystemManager {
         creds,
         bc,
         ((TxRootTransferManagerGroup) messagingManagerGroup).getTxRootContractAddress(bc.bcId));
-    crossControlManagerGroup.addBlockchainAndDeployContracts(
-        creds, bc, txRootTransferGroup.getVerifier(bc.bcId));
+    crossControlManagerGroup.addBlockchainAndDeployContracts(creds, bc);
+    crossControlManagerGroup.setMessageVerifier(bc.bcId, txRootTransferGroup.getVerifier(bc.bcId));
   }
 }

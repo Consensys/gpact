@@ -26,7 +26,7 @@ import (
 	observerapi "github.com/consensys/gpact/services/relayer/internal/msgobserver/eth/api"
 	relayerapi "github.com/consensys/gpact/services/relayer/internal/msgrelayer/eth/api"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/urfave/cli/v2"
+	cli "github.com/urfave/cli/v2"
 )
 
 func main() {
@@ -208,13 +208,16 @@ func main() {
 						ArgsUsage: "[url chainID contractAddr esAddr]",
 						Action: func(c *cli.Context) error {
 							url := c.Args().Get(0)
-							chainID, err := strconv.ParseUint(c.Args().Get(1), 10, 64)
+							sourceChainID, err := strconv.ParseUint(c.Args().Get(1), 10, 64)
 							if err != nil {
-								return fmt.Errorf("error parsing chain id: %v", err.Error())
+								return fmt.Errorf("error parsing source chain id: %v", err.Error())
 							}
-							contractAddr := c.Args().Get(2)
-							esAddr := c.Args().Get(3)
-							success, err := dispatcherapi.RequestSetVerifierAddr(url, big.NewInt(int64(chainID)), common.HexToAddress(contractAddr), common.HexToAddress(esAddr))
+							targetChainID, err := strconv.ParseUint(c.Args().Get(2), 10, 64)
+							if err != nil {
+								return fmt.Errorf("error parsing target chain id: %v", err.Error())
+							}
+							verifierAddr := c.Args().Get(3)
+							success, err := dispatcherapi.RequestSetVerifierAddr(url, big.NewInt(int64(sourceChainID)), big.NewInt(int64(targetChainID)), common.HexToAddress(verifierAddr))
 							if err != nil {
 								return err
 							}
@@ -229,15 +232,19 @@ func main() {
 					{
 						Name:      "get-ver",
 						Usage:     "Get verifier",
-						ArgsUsage: "[url chainID contractAddr]",
+						ArgsUsage: "[url sourceChainID targetChainID contractAddr]",
 						Action: func(c *cli.Context) error {
 							url := c.Args().Get(0)
-							chainID, err := strconv.ParseUint(c.Args().Get(1), 10, 64)
+							sourceChainID, err := strconv.ParseUint(c.Args().Get(1), 10, 64)
 							if err != nil {
-								return fmt.Errorf("error parsing chain id: %v", err.Error())
+								return fmt.Errorf("error parsing source chain id: %v", err.Error())
 							}
-							contractAddr := c.Args().Get(2)
-							addr, err := dispatcherapi.RequestGetVerifierAddr(url, big.NewInt(int64(chainID)), common.HexToAddress(contractAddr))
+							targetChainID, err := strconv.ParseUint(c.Args().Get(2), 10, 64)
+							if err != nil {
+								return fmt.Errorf("error parsing target chain id: %v", err.Error())
+							}
+							contractAddr := c.Args().Get(3)
+							addr, err := dispatcherapi.RequestGetVerifierAddr(url, big.NewInt(int64(sourceChainID)), big.NewInt(int64(targetChainID)), common.HexToAddress(contractAddr))
 							fmt.Println(addr.String())
 							return nil
 						},

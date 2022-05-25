@@ -20,9 +20,9 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/consensys/gpact/services/relayer/internal/rpc"
-
+	"github.com/consensys/gpact/services/relayer/internal/logging"
 	"github.com/consensys/gpact/services/relayer/internal/msgdispatcher/eth/node"
+	"github.com/consensys/gpact/services/relayer/internal/rpc"
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
@@ -50,7 +50,9 @@ func HandleSetTransactionOpts(data []byte) ([]byte, error) {
 	}
 	chainID, ok := big.NewInt(0).SetString(req.ChainID, 10)
 	if !ok {
-		return nil, fmt.Errorf("fail to decode chain id")
+		errStr := "fail to decode chain id"
+		logging.Error(errStr)
+		return nil, fmt.Errorf(errStr)
 	}
 	// Do a test connection
 	conn, err := ethclient.Dial(req.ChainAP)
@@ -62,6 +64,7 @@ func HandleSetTransactionOpts(data []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	logging.Info("SetTransactionOpts: %v, %v", req.ChainID, req.ChainAP)
 	resp := SetTransactionOptsResp{
 		Success: true,
 	}

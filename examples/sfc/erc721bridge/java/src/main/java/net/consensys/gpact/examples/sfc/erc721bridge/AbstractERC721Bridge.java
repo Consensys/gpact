@@ -96,11 +96,54 @@ public abstract class AbstractERC721Bridge extends AbstractBlockchain {
         .send();
   }
 
+  public void showErc721Balances(Erc721User[] users) throws Exception {
+    LOG.info("{} ERC721 Balances", this.entity);
+    LOG.info(" Total Supply: {}", totalSupply());
+    LOG.info(
+        " ERC721 Bridge Account {}: balance: {}",
+        this.erc721BridgeAddress,
+        getBalance(this.erc721BridgeAddress));
+    for (Erc721User user : users) {
+      LOG.info(
+          " Account {}:{} balance: {}",
+          user.getName(),
+          user.getAddress(),
+          getBalance(user.getAddress()));
+    }
+  }
+
+  public void checkBalance(Erc721User user, int expectedBalance) throws Exception {
+    final int numRetires = 10;
+
+    BigInteger expectedBal = BigInteger.valueOf(expectedBalance);
+    BigInteger actualBal = null;
+
+    // Retry some number of retries. The issue could be that the transaction
+    // that will update the balance hasn't been mined yet.
+    for (int i = 0; i < numRetires; i++) {
+      actualBal = getBalance(user.getAddress());
+      if (expectedBal.compareTo(actualBal) == 0) {
+        return;
+      }
+      pauseWhileTransactionMined();
+    }
+    throw new Exception(
+        this.entity
+            + ", "
+            + user.getName()
+            + ": actual balance "
+            + actualBal
+            + " does not match expected balance "
+            + expectedBal);
+  }
+
   public abstract void giveTokens(final Erc721User user, final int number) throws Exception;
 
-  public abstract void showErc721Balances(Erc721User[] users) throws Exception;
-
   public abstract void showErc721Allowance(String owner, String spender) throws Exception;
+
+  protected abstract BigInteger totalSupply() throws Exception;
+
+  protected abstract BigInteger getBalance(String account) throws Exception;
 
   public abstract BigInteger getTokenId(Erc721User user, int index) throws Exception;
 }

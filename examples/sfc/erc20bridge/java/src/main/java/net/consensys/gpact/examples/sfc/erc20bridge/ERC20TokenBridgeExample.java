@@ -32,7 +32,15 @@ public class ERC20TokenBridgeExample {
 
   public static final boolean BLOCKCHAIN_B_MASS_CONSERVATION = false;
 
-  public static final int NUM_TIMES_EXECUTE = 2;
+  public static final int NUM_TIMES_EXECUTE = 1;
+
+  static final int CHAIN_A_TOKEN_SUPPLY = 1000;
+  static final int CHAIN_B_TOKEN_SUPPLY = 1000;
+  static final int USER1_INITIAL_BALANCE = 500;
+  static final int USER2_INITIAL_BALANCE = 300;
+  static final int TRANSFER1 = 19;
+  static final int TRANSFER2 = 23;
+  static final int TRANSFER3 = 17;
 
   public static void main(String[] args) throws Exception {
     main(args, BLOCKCHAIN_B_MASS_CONSERVATION);
@@ -56,9 +64,6 @@ public class ERC20TokenBridgeExample {
     BlockchainConfig bc2 = exampleManager.getBc2Info();
     CrossControlManagerGroup crossControlManagerGroup =
         exampleManager.getCrossControlManagerGroup();
-
-    final int CHAIN_A_TOKEN_SUPPLY = 1000;
-    final int CHAIN_B_TOKEN_SUPPLY = 1000;
 
     // Set-up classes to manage blockchains.
     Credentials erc20OwnerCreds = CredentialsCreator.createCredentials();
@@ -107,15 +112,6 @@ public class ERC20TokenBridgeExample {
             bc2.bcId,
             chainB.getErc20ContractAddress(),
             chainA.getErc20BridgeContractAddress());
-    Erc20User user3 =
-        new Erc20User(
-            "User3",
-            root.bcId,
-            chainA.getErc20ContractAddress(),
-            chainA.getErc20BridgeContractAddress(),
-            bc2.bcId,
-            chainB.getErc20ContractAddress(),
-            chainA.getErc20BridgeContractAddress());
 
     user1.createCbcManager(
         root,
@@ -131,24 +127,21 @@ public class ERC20TokenBridgeExample {
         bc2,
         crossControlManagerGroup.getCbcAddress(chainBBcId),
         crossControlManagerGroup.getMessageVerification(chainBBcId));
-    user3.createCbcManager(
-        root,
-        crossControlManagerGroup.getCbcAddress(chainABcId),
-        crossControlManagerGroup.getMessageVerification(chainABcId),
-        bc2,
-        crossControlManagerGroup.getCbcAddress(chainBBcId),
-        crossControlManagerGroup.getMessageVerification(chainBBcId));
 
     // Give some balance to the users
-    chainA.giveTokens(user1, 500);
-    chainA.giveTokens(user2, 200);
-    chainA.giveTokens(user3, 300);
+    chainA.giveTokens(user1, USER1_INITIAL_BALANCE);
+    chainA.giveTokens(user2, USER2_INITIAL_BALANCE);
+
+    int balanceUser1ChainA = USER1_INITIAL_BALANCE;
+    int balanceUser1ChainB = 0;
+    int balanceUser2ChainA = USER2_INITIAL_BALANCE;
+    int balanceUser2ChainB = 0;
 
     if (blockchainBIsMassConservation) {
-      chainB.giveTokensToERC20Bridge(1000);
+      chainB.giveTokensToERC20Bridge(CHAIN_B_TOKEN_SUPPLY);
     }
 
-    Erc20User[] users = new Erc20User[] {user1, user2, user3};
+    Erc20User[] users = new Erc20User[] {user1, user2};
 
     chainA.showErc20Balances(users);
     chainB.showErc20Balances(users);
@@ -157,16 +150,27 @@ public class ERC20TokenBridgeExample {
       LOG.info("Execution: {}  *****************", numExecutions);
       StatsHolder.log("Execution: " + numExecutions + " **************************");
 
-      user1.transfer(true, 20);
-      user2.transfer(true, user2.getAddress(), 30);
-      user3.transfer(true, user2.getAddress(), 10);
+      user1.transfer(true, TRANSFER1);
+      balanceUser1ChainA -= TRANSFER1;
+      balanceUser1ChainB += TRANSFER1;
+      chainA.checkBalance(user1, balanceUser1ChainA);
+      chainB.checkBalance(user1, balanceUser1ChainB);
 
-      user2.transfer(false, 39);
-      user1.transfer(false, 18);
+      user2.transfer(true, user2.getAddress(), TRANSFER2);
+      balanceUser2ChainA -= TRANSFER2;
+      balanceUser2ChainB += TRANSFER2;
+      chainA.checkBalance(user2, balanceUser2ChainA);
+      chainB.checkBalance(user2, balanceUser2ChainB);
 
-      chainA.showErc20Balances(users);
-      chainB.showErc20Balances(users);
+      user2.transfer(false, user2.getAddress(), TRANSFER3);
+      balanceUser2ChainA += TRANSFER3;
+      balanceUser2ChainB -= TRANSFER3;
+      chainA.checkBalance(user2, balanceUser2ChainA);
+      chainB.checkBalance(user2, balanceUser2ChainB);
     }
+
+    chainA.showErc20Balances(users);
+    chainB.showErc20Balances(users);
 
     chainA.shutdown();
     chainB.shutdown();

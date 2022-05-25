@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"math/big"
 
+	"github.com/consensys/gpact/services/relayer/internal/logging"
 	"github.com/consensys/gpact/services/relayer/internal/msgdispatcher/eth/node"
 	"github.com/consensys/gpact/services/relayer/internal/rpc"
 	"github.com/ethereum/go-ethereum/common"
@@ -27,9 +28,9 @@ import (
 
 // SetVerifierAddrReq is the request to set verifier addr.
 type SetVerifierAddrReq struct {
-	ChainID      string `json:"chain_id"`
-	ContractAddr string `json:"contract_addr"`
-	EsAddr       string `json:"es_addr"`
+	SourceChainID        string `json:"source_chain_id"`
+	TargetChainID        string `json:"target_chain_id"`
+	VerifierContractAddr string `json:"verifier_contract_addr"`
 }
 
 // SetVerifierAddrResp is the response to set verifier addr.
@@ -47,14 +48,31 @@ func HandleSetVerifierAddr(data []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	chainID, ok := big.NewInt(0).SetString(req.ChainID, 10)
+	sourceChainID, ok := big.NewInt(0).SetString(req.SourceChainID, 10)
 	if !ok {
-		return nil, fmt.Errorf("fail to decode chain id")
+		errStr := fmt.Sprintf("Failed to decode source chain id (%v): Error: %v", req.SourceChainID, err.Error())
+		logging.Error(errStr)
+		return nil, fmt.Errorf(errStr)
 	}
-	err = instance.Verifier.SetVerifierAddr(chainID, common.HexToAddress(req.ContractAddr), common.HexToAddress(req.EsAddr))
+	targetChainID, ok := big.NewInt(0).SetString(req.TargetChainID, 10)
+	if !ok {
+		errStr := fmt.Sprintf("Failed to decode target chain id (%v): Error: %v", req.TargetChainID, err.Error())
+		logging.Error(errStr)
+		return nil, fmt.Errorf(errStr)
+	}
+	if len(req.VerifierContractAddr) == 0 {
+		errStr := fmt.Sprintf("Verifier contract addr not specified")
+		logging.Error(errStr)
+		return nil, fmt.Errorf(errStr)
+	}
+
+	err = instance.Verifier.SetVerifierAddr(sourceChainID, targetChainID, common.HexToAddress(req.VerifierContractAddr))
 	if err != nil {
+		logging.Error("Error setting verifier address: %v", err.Error())
 		return nil, err
 	}
+	logging.Info("SetVerifierAddr: %v, %v, %v", req.SourceChainID, req.TargetChainID, req.VerifierContractAddr)
+
 	resp := SetVerifierAddrResp{
 		Success: true,
 	}
@@ -66,11 +84,11 @@ func HandleSetVerifierAddr(data []byte) ([]byte, error) {
 }
 
 // RequestSetVerifierAddr requests set verifier addr.
-func RequestSetVerifierAddr(addr string, chainID *big.Int, contractAddr common.Address, esAddr common.Address) (bool, error) {
+func RequestSetVerifierAddr(addr string, sourceChainID *big.Int, targetChainID *big.Int, verifierAddr common.Address) (bool, error) {
 	req := SetVerifierAddrReq{
-		ChainID:      chainID.String(),
-		ContractAddr: contractAddr.String(),
-		EsAddr:       esAddr.String(),
+		SourceChainID:        sourceChainID.String(),
+		TargetChainID:        targetChainID.String(),
+		VerifierContractAddr: verifierAddr.String(),
 	}
 	data, err := json.Marshal(req)
 	if err != nil {

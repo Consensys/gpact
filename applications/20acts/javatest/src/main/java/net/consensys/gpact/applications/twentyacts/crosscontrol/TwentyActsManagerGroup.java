@@ -33,10 +33,7 @@ public class TwentyActsManagerGroup implements CrossControlManagerGroup {
   private Map<BlockchainId, BcHolder> blockchains = new HashMap<>();
 
   @Override
-  public void addBlockchainAndDeployContracts(
-      Credentials creds,
-      BlockchainConfig bcInfo,
-      MessagingVerificationInterface messageVerification)
+  public void addBlockchainAndDeployContracts(Credentials creds, BlockchainConfig bcInfo)
       throws Exception {
     BlockchainId blockchainId = bcInfo.bcId;
     if (this.blockchains.containsKey(blockchainId)) {
@@ -48,18 +45,13 @@ public class TwentyActsManagerGroup implements CrossControlManagerGroup {
     holder.cbc = new TwentyActsManager(creds, bcInfo);
     holder.cbc.deployCbcContract();
     holder.cbcContractAddress = holder.cbc.getCbcContractAddress();
-    holder.ver = messageVerification;
 
     this.blockchains.put(blockchainId, holder);
   }
 
   @Override
   public void addBlockchainAndLoadCbcContract(
-      Credentials creds,
-      BlockchainConfig bcInfo,
-      String cbcAddress,
-      MessagingVerificationInterface messageVerification)
-      throws Exception {
+      Credentials creds, BlockchainConfig bcInfo, String cbcAddress) throws Exception {
     BlockchainId blockchainId = bcInfo.bcId;
     if (this.blockchains.containsKey(blockchainId)) {
       return;
@@ -70,9 +62,15 @@ public class TwentyActsManagerGroup implements CrossControlManagerGroup {
 
     holder.cbc.loadCbcContract(cbcAddress);
     holder.cbcContractAddress = cbcAddress;
-    holder.ver = messageVerification;
 
     this.blockchains.put(blockchainId, holder);
+  }
+
+  @Override
+  public void setMessageVerifier(
+      final BlockchainId bcId, final MessagingVerificationInterface messageVerification) {
+    BcHolder holder = this.blockchains.get(bcId);
+    holder.ver = messageVerification;
   }
 
   @Override
