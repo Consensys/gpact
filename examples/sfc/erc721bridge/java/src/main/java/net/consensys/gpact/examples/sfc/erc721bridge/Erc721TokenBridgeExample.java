@@ -27,6 +27,9 @@ import org.web3j.crypto.Credentials;
 public class Erc721TokenBridgeExample {
   static final Logger LOG = LogManager.getLogger(Erc721TokenBridgeExample.class);
 
+  static final int USER1_INITIAL_NUM = 3;
+  static final int USER2_INITIAL_NUM = 2;
+
   public static void main(String[] args) throws Exception {
     StatsHolder.log("Example: SFC: ERC 721 Token Bridge");
     LOG.info("Started");
@@ -82,15 +85,6 @@ public class Erc721TokenBridgeExample {
             bc2.bcId,
             chainB.getErc721ContractAddress(),
             chainA.getErc721BridgeContractAddress());
-    Erc721User user3 =
-        new Erc721User(
-            "User3",
-            root.bcId,
-            chainA.getErc721ContractAddress(),
-            chainA.getErc721BridgeContractAddress(),
-            bc2.bcId,
-            chainB.getErc721ContractAddress(),
-            chainA.getErc721BridgeContractAddress());
 
     user1.createCbcManager(
         root,
@@ -106,20 +100,17 @@ public class Erc721TokenBridgeExample {
         bc2,
         crossControlManagerGroup.getCbcAddress(chainBBcId),
         crossControlManagerGroup.getMessageVerification(chainBBcId));
-    user3.createCbcManager(
-        root,
-        crossControlManagerGroup.getCbcAddress(chainABcId),
-        crossControlManagerGroup.getMessageVerification(chainABcId),
-        bc2,
-        crossControlManagerGroup.getCbcAddress(chainBBcId),
-        crossControlManagerGroup.getMessageVerification(chainBBcId));
 
     // Give some ERC 721 tokens to the users
-    chainA.giveTokens(user1, 2);
-    chainA.giveTokens(user2, 3);
-    chainA.giveTokens(user3, 4);
+    chainA.giveTokens(user1, USER1_INITIAL_NUM);
+    chainA.giveTokens(user2, USER2_INITIAL_NUM);
 
-    Erc721User[] users = new Erc721User[] {user1, user2, user3};
+    int user1ChainATotal = USER1_INITIAL_NUM;
+    int user1ChainBTotal = 0;
+    int user2ChainATotal = USER2_INITIAL_NUM;
+    int user2ChainBTotal = 0;
+
+    Erc721User[] users = new Erc721User[] {user1, user2};
 
     chainA.showErc721Balances(users);
     chainB.showErc721Balances(users);
@@ -127,27 +118,34 @@ public class Erc721TokenBridgeExample {
     // Transfer token to self from home blockchain to remote blockchain.
     BigInteger tokenId = chainA.getTokenId(user1, 1);
     user1.transfer(true, tokenId);
-
-    chainA.showErc721Balances(users);
-    chainB.showErc721Balances(users);
+    user1ChainATotal--;
+    user1ChainBTotal++;
+    chainA.checkBalance(user1, user1ChainATotal);
+    chainB.checkBalance(user1, user1ChainBTotal);
 
     // Transfer token to someone else from home blockchain to remote blockchain.
-    tokenId = chainA.getTokenId(user3, 0);
-    user3.transfer(true, user1.getAddress(), tokenId);
-
-    chainA.showErc721Balances(users);
-    chainB.showErc721Balances(users);
+    tokenId = chainA.getTokenId(user2, 0);
+    user2.transfer(true, user1.getAddress(), tokenId);
+    user2ChainATotal--;
+    user1ChainBTotal++;
+    chainA.checkBalance(user2, user2ChainATotal);
+    chainB.checkBalance(user1, user1ChainBTotal);
 
     // Transfer token to self from remote blockchain to home blockchain.
     tokenId = chainB.getTokenId(user1, 1);
     user1.transfer(false, tokenId);
-
-    chainA.showErc721Balances(users);
-    chainB.showErc721Balances(users);
+    user1ChainATotal++;
+    user1ChainBTotal--;
+    chainA.checkBalance(user1, user1ChainATotal);
+    chainB.checkBalance(user1, user1ChainBTotal);
 
     // Transfer token to someone else from remote blockchain to home blockchain.
     tokenId = chainB.getTokenId(user1, 0);
     user1.transfer(false, user2.getAddress(), tokenId);
+    user2ChainATotal++;
+    user1ChainBTotal--;
+    chainA.checkBalance(user2, user2ChainATotal);
+    chainB.checkBalance(user1, user1ChainBTotal);
 
     chainA.showErc721Balances(users);
     chainB.showErc721Balances(users);

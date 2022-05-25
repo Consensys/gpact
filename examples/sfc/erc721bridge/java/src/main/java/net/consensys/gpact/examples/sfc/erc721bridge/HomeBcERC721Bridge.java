@@ -75,16 +75,12 @@ public class HomeBcERC721Bridge extends AbstractERC721Bridge {
     }
   }
 
-  public void showErc721Balances(Erc721User[] users) throws Exception {
-    LOG.info("{} ERC 721 Balances", this.entity);
-    BigInteger totalSupply = this.erc721.totalSupply().send();
-    LOG.info(" Total Supply: {}", totalSupply);
-    BigInteger bal = this.erc721.balanceOf(this.erc721BridgeAddress).send();
-    LOG.info(" ERC 721 Bridge Account {}: balance: {}", this.erc721BridgeAddress, bal);
-    for (Erc721User user : users) {
-      bal = this.erc721.balanceOf(user.getAddress()).send();
-      LOG.info(" Account {}:{} balance: {}", user.getName(), user.getAddress(), bal);
-    }
+  protected BigInteger totalSupply() throws Exception {
+    return this.erc721.totalSupply().send();
+  }
+
+  protected BigInteger getBalance(String account) throws Exception {
+    return this.erc721.balanceOf(account).send();
   }
 
   public void showErc721Allowance(String owner, String spender) throws Exception {
