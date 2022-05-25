@@ -49,7 +49,7 @@ func TestGetVerifierAddr(t *testing.T) {
 	_, err = verifier.GetVerifierAddr(big.NewInt(1), big.NewInt(4))
 	assert.NotEmpty(t, err)
 
-	addr, err = verifier.GetVerifierAddr(big.NewInt(1), big.NewInt(3))
+	addr, err := verifier.GetVerifierAddr(big.NewInt(1), big.NewInt(3))
 	assert.Empty(t, err)
 	assert.Equal(t, common.BytesToAddress([]byte{2}), addr)
 }
