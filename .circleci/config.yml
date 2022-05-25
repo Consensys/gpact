@@ -427,8 +427,8 @@ jobs:
             echo; git -P reflog --date=iso
             go version
       - run:
-          name: Build production code
-          command: make build
+          name: Build production code and test code
+          command: make test -run=nope ./...
           working_directory: ~/project/services/relayer
 
   relayer-test:
