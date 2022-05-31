@@ -797,11 +797,11 @@ contract CrosschainControl is
             }
             if (!_asRoot && !success) {
                 emit Segment(
-                    _crosschainTxId, 
-                    _hashOfCallGraph, 
-                    _callPath, 
+                    _crosschainTxId,
+                    _hashOfCallGraph,
+                    _callPath,
                     new address[](0),
-                    false, 
+                    false,
                     new bytes(0)
                 );
                 cleanupAfterCallSegment();
