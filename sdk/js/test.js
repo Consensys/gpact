@@ -422,8 +422,115 @@ async function test() {
     }
     console.log("Testing happy case succeed")
 
-    // Test failure case.
-    
+    // Start testing failure cases.
+    res = await nftContract.methods.approve(bridgeAddrA, 2).send({
+        from: sellerAddr,
+        gas: 10000000,
+    });
+    console.log(res.status);
+
+    res = await bridgeContract.methods.startListingNFTWithAsking(nftAddrA, 2, chainB, tokenAddrB, 100, sellerAddr).send({
+        from: sellerAddr,
+        gas: 10000000,
+    });
+    console.log(res.status);
+
+    // Test failure case #1, change approved token amount after simulation.
+    res = await tokenContract.methods.approve(bridgeAddrB, 100).send({
+        from: buyerAddr,
+        gas: 10000000,
+    });
+    console.log(res.status);
+
+    temp = await simulator.simulate(new CrosschainCall(chainA, "bridge", bridgeAddrA, "buyNFTUsingRemoteFunds", buyerAddr, nftAddrA, 2, chainB, tokenAddrB));
+    root = temp[0];
+    // Change approved amount.
+    res = await tokenContract.methods.approve(bridgeAddrB, 90).send({
+        from: buyerAddr,
+        gas: 10000000,
+    });
+    console.log(res.status);
+    console.log(res.status);
+    await executor.crosschainCall(root);
+
+    // Get balance after, should not change
+    nftOwner = await nftContract.methods.ownerOf(2).call();
+    tokenBalanceBuyer = await tokenContract.methods.balanceOf(buyerAddr).call();
+    tokenBalanceSeller = await tokenContract.methods.balanceOf(sellerAddr).call();
+    if (nftOwner != sellerAddr) {
+        throw new Error("nft 1 should belong to seller after failed purchase");
+    }
+    if (tokenBalanceBuyer != BigInt("999999999999999999900")) {
+        throw new Error("buyer should still have 999999999999999999900 tokens after failed purchase");
+    }
+    if (tokenBalanceSeller != BigInt(100)) {
+        throw new Error("seller should have still 100 tokens after failed purchase");
+    }
+    console.log("Testing failure case #1 succeed")
+
+    // Test failure case #2, update asking with higher price
+    res = await tokenContract.methods.approve(bridgeAddrB, 100).send({
+        from: buyerAddr,
+        gas: 10000000,
+    });
+    console.log(res.status);
+
+    temp = await simulator.simulate(new CrosschainCall(chainA, "bridge", bridgeAddrA, "buyNFTUsingRemoteFunds", buyerAddr, nftAddrA, 2, chainB, tokenAddrB));
+    root = temp[0];
+    // Update asking with higher price.
+    res = await bridgeContract.methods.upsertAsking(nftAddrA, 2, chainB, tokenAddrB, 110, sellerAddr).send({
+        from: sellerAddr,
+        gas: 10000000,
+    });
+    console.log(res.status);
+    await executor.crosschainCall(root);
+
+    // Get balance after, should not change
+    nftOwner = await nftContract.methods.ownerOf(2).call();
+    tokenBalanceBuyer = await tokenContract.methods.balanceOf(buyerAddr).call();
+    tokenBalanceSeller = await tokenContract.methods.balanceOf(sellerAddr).call();
+    if (nftOwner != sellerAddr) {
+        throw new Error("nft 1 should belong to seller after failed purchase");
+    }
+    if (tokenBalanceBuyer != BigInt("999999999999999999900")) {
+        throw new Error("buyer should still have 999999999999999999900 tokens after failed purchase");
+    }
+    if (tokenBalanceSeller != BigInt(100)) {
+        throw new Error("seller should have still 100 tokens after failed purchase");
+    }
+    console.log("Testing failure case #2 succeed")
+
+    // Test failure case #3, stop listing after simulation.
+    res = await tokenContract.methods.approve(bridgeAddrB, 110).send({
+        from: buyerAddr,
+        gas: 10000000,
+    });
+    console.log(res.status);
+
+    temp = await simulator.simulate(new CrosschainCall(chainA, "bridge", bridgeAddrA, "buyNFTUsingRemoteFunds", buyerAddr, nftAddrA, 2, chainB, tokenAddrB));
+    root = temp[0];
+    // Stop the listing after a simulation is done.
+    res = await bridgeContract.methods.stopListingNFT(nftAddrA, 2).send({
+        from: sellerAddr,
+        gas: 10000000,
+    });
+    console.log(res.status);
+    await executor.crosschainCall(root);
+
+    // Get balance after, should not change
+    nftOwner = await nftContract.methods.ownerOf(2).call();
+    tokenBalanceBuyer = await tokenContract.methods.balanceOf(buyerAddr).call();
+    tokenBalanceSeller = await tokenContract.methods.balanceOf(sellerAddr).call();
+    if (nftOwner != sellerAddr) {
+        throw new Error("nft 1 should belong to seller after failed purchase");
+    }
+    if (tokenBalanceBuyer != BigInt("999999999999999999900")) {
+        throw new Error("buyer should still have 999999999999999999900 tokens after failed purchase");
+    }
+    if (tokenBalanceSeller != BigInt(100)) {
+        throw new Error("seller should have still 100 tokens after failed purchase");
+    }
+    console.log("Testing failure case #3 succeed")
 }
 await config();
 await test();
