@@ -458,7 +458,7 @@ async function test() {
     tokenBalanceBuyer = await tokenContract.methods.balanceOf(buyerAddr).call();
     tokenBalanceSeller = await tokenContract.methods.balanceOf(sellerAddr).call();
     if (nftOwner != sellerAddr) {
-        throw new Error("nft 1 should belong to seller after failed purchase");
+        throw new Error("nft 2 should belong to seller after failed purchase");
     }
     if (tokenBalanceBuyer != BigInt("999999999999999999900")) {
         throw new Error("buyer should still have 999999999999999999900 tokens after failed purchase");
@@ -490,7 +490,7 @@ async function test() {
     tokenBalanceBuyer = await tokenContract.methods.balanceOf(buyerAddr).call();
     tokenBalanceSeller = await tokenContract.methods.balanceOf(sellerAddr).call();
     if (nftOwner != sellerAddr) {
-        throw new Error("nft 1 should belong to seller after failed purchase");
+        throw new Error("nft 2 should belong to seller after failed purchase");
     }
     if (tokenBalanceBuyer != BigInt("999999999999999999900")) {
         throw new Error("buyer should still have 999999999999999999900 tokens after failed purchase");
@@ -522,7 +522,7 @@ async function test() {
     tokenBalanceBuyer = await tokenContract.methods.balanceOf(buyerAddr).call();
     tokenBalanceSeller = await tokenContract.methods.balanceOf(sellerAddr).call();
     if (nftOwner != sellerAddr) {
-        throw new Error("nft 1 should belong to seller after failed purchase");
+        throw new Error("nft 2 should belong to seller after failed purchase");
     }
     if (tokenBalanceBuyer != BigInt("999999999999999999900")) {
         throw new Error("buyer should still have 999999999999999999900 tokens after failed purchase");

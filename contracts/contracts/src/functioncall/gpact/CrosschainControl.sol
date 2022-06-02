@@ -790,20 +790,19 @@ contract CrosschainControl is
             );
 
             // Fail the root/segment transaction as one of the segments failed.
-            if (_asRoot && !success) {
-                failRootTransaction(_crosschainTxId);
-                cleanupAfterCallSegment();
-                return true;
-            }
-            if (!_asRoot && !success) {
-                emit Segment(
-                    _crosschainTxId,
-                    _hashOfCallGraph,
-                    _callPath,
-                    new address[](0),
-                    false,
-                    new bytes(0)
-                );
+            if (!success) {
+                if (_asRoot) {
+                    failRootTransaction(_crosschainTxId);
+                } else {
+                    emit Segment(
+                        _crosschainTxId,
+                        _hashOfCallGraph,
+                        _callPath,
+                        new address[](0),
+                        false,
+                        new bytes(0)
+                    );
+                }
                 cleanupAfterCallSegment();
                 return true;
             }
