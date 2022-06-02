@@ -54,7 +54,8 @@ public class GpactCrossControlManager extends AbstractBlockchain implements Cros
       Hash.keccak256(Bytes.wrap("Root(uint256,bool)".getBytes())).toArray();
   public static Bytes ROOT_EVENT_SIGNAUTRE_BYTES = Bytes.wrap(ROOT_EVENT_SIGNATURE);
 
-  protected net.consensys.gpact.functioncall.gpact.CrosschainControl crossBlockchainControlContract;
+  protected net.consensys.gpact.functioncall.gpact.GpactCrosschainControl
+      crossBlockchainControlContract;
 
   // TODO put this into a map for the current transaction id, so many transactions can be handled in
   // parallel
@@ -69,7 +70,7 @@ public class GpactCrossControlManager extends AbstractBlockchain implements Cros
 
   protected void deployContract() throws Exception {
     this.crossBlockchainControlContract =
-        net.consensys.gpact.functioncall.gpact.CrosschainControl.deploy(
+        net.consensys.gpact.functioncall.gpact.GpactCrosschainControl.deploy(
                 this.web3j, this.tm, this.gasProvider, this.blockchainId.asBigInt())
             .send();
     LOG.debug(
@@ -79,7 +80,7 @@ public class GpactCrossControlManager extends AbstractBlockchain implements Cros
 
   public void loadContract(String cbcAddress) {
     this.crossBlockchainControlContract =
-        net.consensys.gpact.functioncall.gpact.CrosschainControl.load(
+        net.consensys.gpact.functioncall.gpact.GpactCrosschainControl.load(
             cbcAddress, this.web3j, this.tm, this.gasProvider);
   }
 
@@ -115,9 +116,9 @@ public class GpactCrossControlManager extends AbstractBlockchain implements Cros
     TransactionReceipt txR =
         this.crossBlockchainControlContract.start(transactionId, timeout, callGraph).send();
     StatsHolder.logGas("Start Transaction", txR.getGasUsed());
-    List<net.consensys.gpact.functioncall.gpact.CrosschainControl.StartEventResponse> startEvents =
-        this.crossBlockchainControlContract.getStartEvents(txR);
-    net.consensys.gpact.functioncall.gpact.CrosschainControl.StartEventResponse startEvent =
+    List<net.consensys.gpact.functioncall.gpact.GpactCrosschainControl.StartEventResponse>
+        startEvents = this.crossBlockchainControlContract.getStartEvents(txR);
+    net.consensys.gpact.functioncall.gpact.GpactCrosschainControl.StartEventResponse startEvent =
         startEvents.get(0);
     this.crossBlockchainTransactionTimeout = startEvent._timeout.longValue();
     // LOG.debug("Start Event: {}", new BigInteger(getEventData(txR,
@@ -187,9 +188,9 @@ public class GpactCrossControlManager extends AbstractBlockchain implements Cros
         convertCallResult(this.crossBlockchainControlContract.getCallResultEvents(txR)));
     showDumpEvents(convertDump(this.crossBlockchainControlContract.getDumpEvents(txR)));
 
-    List<net.consensys.gpact.functioncall.gpact.CrosschainControl.SegmentEventResponse>
+    List<net.consensys.gpact.functioncall.gpact.GpactCrosschainControl.SegmentEventResponse>
         segmentEventResponses = this.crossBlockchainControlContract.getSegmentEvents(txR);
-    net.consensys.gpact.functioncall.gpact.CrosschainControl.SegmentEventResponse
+    net.consensys.gpact.functioncall.gpact.GpactCrosschainControl.SegmentEventResponse
         segmentEventResponse = segmentEventResponses.get(0);
 
     return new Tuple<TransactionReceipt, byte[], Boolean>(
@@ -258,10 +259,10 @@ public class GpactCrossControlManager extends AbstractBlockchain implements Cros
         convertCallResult(this.crossBlockchainControlContract.getCallResultEvents(txR)));
     showDumpEvents(this.convertDump(this.crossBlockchainControlContract.getDumpEvents(txR)));
 
-    List<net.consensys.gpact.functioncall.gpact.CrosschainControl.RootEventResponse>
+    List<net.consensys.gpact.functioncall.gpact.GpactCrosschainControl.RootEventResponse>
         rootEventResponses = this.crossBlockchainControlContract.getRootEvents(txR);
-    net.consensys.gpact.functioncall.gpact.CrosschainControl.RootEventResponse rootEventResponse =
-        rootEventResponses.get(0);
+    net.consensys.gpact.functioncall.gpact.GpactCrosschainControl.RootEventResponse
+        rootEventResponse = rootEventResponses.get(0);
     this.rootEventSuccess = rootEventResponse._success;
 
     return new Tuple<TransactionReceipt, byte[], Boolean>(
@@ -302,9 +303,9 @@ public class GpactCrossControlManager extends AbstractBlockchain implements Cros
       throw new Exception("Signalling transaction failed");
     }
 
-    List<net.consensys.gpact.functioncall.gpact.CrosschainControl.SignallingEventResponse>
+    List<net.consensys.gpact.functioncall.gpact.GpactCrosschainControl.SignallingEventResponse>
         sigEventResponses = this.crossBlockchainControlContract.getSignallingEvents(txR);
-    net.consensys.gpact.functioncall.gpact.CrosschainControl.SignallingEventResponse
+    net.consensys.gpact.functioncall.gpact.GpactCrosschainControl.SignallingEventResponse
         sigEventResponse = sigEventResponses.get(0);
     LOG.debug("Signalling Event:");
     LOG.debug(" _rootBlockchainId: {}", sigEventResponse._rootBcId.toString(16));
@@ -611,10 +612,10 @@ public class GpactCrossControlManager extends AbstractBlockchain implements Cros
   }
 
   private List<BadCallEventResponse> convertBadCall(
-      List<net.consensys.gpact.functioncall.gpact.CrosschainControl.BadCallEventResponse>
+      List<net.consensys.gpact.functioncall.gpact.GpactCrosschainControl.BadCallEventResponse>
           callEventResponses) {
     List<BadCallEventResponse> result = new ArrayList<>();
-    for (net.consensys.gpact.functioncall.gpact.CrosschainControl.BadCallEventResponse e :
+    for (net.consensys.gpact.functioncall.gpact.GpactCrosschainControl.BadCallEventResponse e :
         callEventResponses) {
       BadCallEventResponse event =
           new BadCallEventResponse(
@@ -630,10 +631,10 @@ public class GpactCrossControlManager extends AbstractBlockchain implements Cros
   }
 
   private List<CallFailureEventResponse> convertCallFailure(
-      List<net.consensys.gpact.functioncall.gpact.CrosschainControl.CallFailureEventResponse>
+      List<net.consensys.gpact.functioncall.gpact.GpactCrosschainControl.CallFailureEventResponse>
           callFailureEventResponses) {
     List<CallFailureEventResponse> result = new ArrayList<>();
-    for (net.consensys.gpact.functioncall.gpact.CrosschainControl.CallFailureEventResponse e :
+    for (net.consensys.gpact.functioncall.gpact.GpactCrosschainControl.CallFailureEventResponse e :
         callFailureEventResponses) {
       CallFailureEventResponse event = new CallFailureEventResponse(e._revertReason);
       result.add(event);
@@ -642,10 +643,10 @@ public class GpactCrossControlManager extends AbstractBlockchain implements Cros
   }
 
   private List<CallResultEventResponse> convertCallResult(
-      List<net.consensys.gpact.functioncall.gpact.CrosschainControl.CallResultEventResponse>
+      List<net.consensys.gpact.functioncall.gpact.GpactCrosschainControl.CallResultEventResponse>
           callResultEventResponses) {
     List<CallResultEventResponse> result = new ArrayList<>();
-    for (net.consensys.gpact.functioncall.gpact.CrosschainControl.CallResultEventResponse e :
+    for (net.consensys.gpact.functioncall.gpact.GpactCrosschainControl.CallResultEventResponse e :
         callResultEventResponses) {
       CallResultEventResponse event =
           new CallResultEventResponse(e._blockchainId, e._contract, e._functionCall, e._result);
@@ -655,10 +656,10 @@ public class GpactCrossControlManager extends AbstractBlockchain implements Cros
   }
 
   private List<DumpEventResponse> convertDump(
-      List<net.consensys.gpact.functioncall.gpact.CrosschainControl.DumpEventResponse>
+      List<net.consensys.gpact.functioncall.gpact.GpactCrosschainControl.DumpEventResponse>
           dumpEventResponses) {
     List<DumpEventResponse> result = new ArrayList<>();
-    for (net.consensys.gpact.functioncall.gpact.CrosschainControl.DumpEventResponse e :
+    for (net.consensys.gpact.functioncall.gpact.GpactCrosschainControl.DumpEventResponse e :
         dumpEventResponses) {
       DumpEventResponse event = new DumpEventResponse(e._val1, e._val2, e._val3, e._val4);
       result.add(event);
@@ -667,11 +668,13 @@ public class GpactCrossControlManager extends AbstractBlockchain implements Cros
   }
 
   private List<NotEnoughCallsEventResponse> convertNotEnoughCalls(
-      List<net.consensys.gpact.functioncall.gpact.CrosschainControl.NotEnoughCallsEventResponse>
+      List<
+              net.consensys.gpact.functioncall.gpact.GpactCrosschainControl
+                  .NotEnoughCallsEventResponse>
           notEnoughCallsEventResponses) {
     List<NotEnoughCallsEventResponse> result = new ArrayList<>();
-    for (net.consensys.gpact.functioncall.gpact.CrosschainControl.NotEnoughCallsEventResponse e :
-        notEnoughCallsEventResponses) {
+    for (net.consensys.gpact.functioncall.gpact.GpactCrosschainControl.NotEnoughCallsEventResponse
+        e : notEnoughCallsEventResponses) {
       NotEnoughCallsEventResponse event =
           new NotEnoughCallsEventResponse(e._expectedNumberOfCalls, e._actualNumberOfCalls);
       result.add(event);
@@ -680,10 +683,10 @@ public class GpactCrossControlManager extends AbstractBlockchain implements Cros
   }
 
   private List<RootEventResponse> convertRoot(
-      List<net.consensys.gpact.functioncall.gpact.CrosschainControl.RootEventResponse>
+      List<net.consensys.gpact.functioncall.gpact.GpactCrosschainControl.RootEventResponse>
           rootEventResponses) {
     List<RootEventResponse> result = new ArrayList<>();
-    for (net.consensys.gpact.functioncall.gpact.CrosschainControl.RootEventResponse e :
+    for (net.consensys.gpact.functioncall.gpact.GpactCrosschainControl.RootEventResponse e :
         rootEventResponses) {
       RootEventResponse event = new RootEventResponse(e._crossBlockchainTransactionId, e._success);
       result.add(event);
@@ -692,10 +695,10 @@ public class GpactCrossControlManager extends AbstractBlockchain implements Cros
   }
 
   private List<SegmentEventResponse> convertSegment(
-      List<net.consensys.gpact.functioncall.gpact.CrosschainControl.SegmentEventResponse>
+      List<net.consensys.gpact.functioncall.gpact.GpactCrosschainControl.SegmentEventResponse>
           segmentEventResponses) {
     List<SegmentEventResponse> result = new ArrayList<>();
-    for (net.consensys.gpact.functioncall.gpact.CrosschainControl.SegmentEventResponse e :
+    for (net.consensys.gpact.functioncall.gpact.GpactCrosschainControl.SegmentEventResponse e :
         segmentEventResponses) {
       // TODO The code below is a hack to handle the fact that currently Web3J returns a Uint256
       // object, but the type is BigInteger.
