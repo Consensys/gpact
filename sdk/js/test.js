@@ -270,13 +270,13 @@ async function config() {
 
     // Configure relayer components
     let output;
-    output = execSync.execSync('docker exec observer1-js /app/build/admin observer start localhost:9425 ' + chainA + " ws://chainA-js:8546 GPACT " + gpactA.options.address);
+    output = execSync.execSync('docker exec observer1 /app/build/admin observer start localhost:9425 ' + chainA + " ws://bc31node1:8546 GPACT " + gpactA.options.address);
     console.log(output.toString());
-    output = execSync.execSync('docker exec observer2-js /app/build/admin observer start localhost:9425 ' + chainB + " ws://chainB-js:8546 GPACT " + gpactB.options.address);
+    output = execSync.execSync('docker exec observer2 /app/build/admin observer start localhost:9425 ' + chainB + " ws://bc32node1:8546 GPACT " + gpactB.options.address);
     console.log(output.toString());
-    output = execSync.execSync('docker exec relayer-js /app/build/admin relayer set-key localhost:9425 0 0x0000000000000000000000000000000000000000 ' + signerKey);
+    output = execSync.execSync('docker exec relayer /app/build/admin relayer set-key localhost:9425 0 0x0000000000000000000000000000000000000000 ' + signerKey);
     console.log(output.toString());
-    output = execSync.execSync('docker exec dispatcher-js /app/build/admin dispatcher set-msgstore localhost:9425 msgstore-js:8080');
+    output = execSync.execSync('docker exec dispatcher /app/build/admin dispatcher set-msgstore localhost:9425 msgstore:8080');
     console.log(output.toString());
 }
 async function test() {
