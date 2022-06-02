@@ -231,12 +231,23 @@ jobs:
           name: Build and test
           command: ./gradlew intTest
       - run:
-          name: Test JS-SDK
-          working_directory: sdk/js
-          command: npm install && node ./test.js
-      - run:
           name: Stop blockchains
           working_directory: test-blockchains
+          command: docker-compose stop
+          when: always
+      - run:
+          name: Create environment for testing JS-SDK
+          working_directory: sdk/js
+          background: true
+          command: npm install && docker-compose up
+      - run: sleep 30
+      - run:
+          name: Test JS-SDK
+          working_directory: sdk/js
+          command: node ./test.js
+      - run:
+          name: Stop environment for testing JS-SDK
+          working_directory: sdk/js
           command: docker-compose stop
           when: always
       - run:
