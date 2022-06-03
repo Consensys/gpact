@@ -454,8 +454,6 @@ contract CrosschainControl is
                 );
                 activeCallFailed = true;
             }
-        } else {
-            revert("Cross Blockchain Call failed");
         }
     }
 
