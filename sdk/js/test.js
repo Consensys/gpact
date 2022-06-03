@@ -30,12 +30,12 @@ async function config() {
     let vefBIN = fs.readFileSync("../java/build/EventAttestationVerifier.bin", "utf8");
     let gpactABI = JSON.parse(fs.readFileSync("../java/build/CrosschainControl.abi", "utf8"));
     let gpactBIN = fs.readFileSync("../java/build/CrosschainControl.bin", "utf8");
-    let bridgeABI = JSON.parse(fs.readFileSync("./resources/AtomicBridge.abi", "utf8"));
-    let bridgeBIN = fs.readFileSync("./resources/AtomicBridge.bin", "utf8");
-    let tokenABI = JSON.parse(fs.readFileSync("./resources/CoinToken.abi", "utf8"));
-    let tokenBIN = fs.readFileSync("./resources/CoinToken.bin", "utf8");
-    let nftABI = JSON.parse(fs.readFileSync("./resources/GameItem.abi", "utf8"));
-    let nftBIN = fs.readFileSync("./resources/GameItem.bin", "utf8");
+    let bridgeABI = JSON.parse(fs.readFileSync("../../examples/gpact/nft/build/AtomicBridge.abi", "utf8"));
+    let bridgeBIN = fs.readFileSync("../../examples/gpact/nft/build/AtomicBridge.bin", "utf8");
+    let tokenABI = JSON.parse(fs.readFileSync("../../examples/gpact/nft/build/CoinToken.abi", "utf8"));
+    let tokenBIN = fs.readFileSync("../../examples/gpact/nft/build/CoinToken.bin", "utf8");
+    let nftABI = JSON.parse(fs.readFileSync("../../examples/gpact/nft/build/GameItem.abi", "utf8"));
+    let nftBIN = fs.readFileSync("../../examples/gpact/nft/build/GameItem.bin", "utf8");
 
     // Get web3 & create accounts.
     let web3A = new Web3('http://127.0.0.1:8111');
@@ -281,10 +281,10 @@ async function config() {
 }
 async function test() {
     // Get ABIs
-    let bridgeABI = JSON.parse(fs.readFileSync("./resources/AtomicBridge.abi", "utf8"));
-    let tokenABI = JSON.parse(fs.readFileSync("./resources/CoinToken.abi", "utf8"));
-    let nftABI = JSON.parse(fs.readFileSync("./resources/GameItem.abi", "utf8"));
-    let listingABI = JSON.parse(fs.readFileSync("./resources/ListingStorage.abi", "utf8"));
+    let bridgeABI = JSON.parse(fs.readFileSync("../../examples/gpact/nft/build/AtomicBridge.abi", "utf8"));
+    let tokenABI = JSON.parse(fs.readFileSync("../../examples/gpact/nft/build/CoinToken.abi", "utf8"));
+    let nftABI = JSON.parse(fs.readFileSync("../../examples/gpact/nft/build/GameItem.abi", "utf8"));
+    let listingABI = JSON.parse(fs.readFileSync("../../examples/gpact/nft/build/ListingStorage.abi", "utf8"));
 
     // Get web3 & add accounts.
     let web3A_seller = new Web3('http://127.0.0.1:8111');
