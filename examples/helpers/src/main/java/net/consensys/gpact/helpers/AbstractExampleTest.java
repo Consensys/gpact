@@ -16,20 +16,28 @@ public abstract class AbstractExampleTest {
   public static final String MSG_STORE_FROM_DISPATCHER = "msgstore:8080";
   public static final String MSG_STORE_FROM_USER = "127.0.0.1:8080";
 
+  public enum MessagingType {
+    EVENT_SIGNING,
+    TRANSACTION_RECEIPT_SIGNING,
+    EVENT_RELAY
+  }
+
   protected String createPropertiesFile(
       boolean useDirectSigning, boolean serialExecution, boolean oneBlockchain) throws IOException {
+    MessagingType msgType =
+        useDirectSigning ? MessagingType.EVENT_SIGNING : MessagingType.TRANSACTION_RECEIPT_SIGNING;
+    return createPropertiesFile(msgType, serialExecution, oneBlockchain);
+  }
+
+  protected String createPropertiesFile(
+      MessagingType msgType, boolean serialExecution, boolean oneBlockchain) throws IOException {
     File file = File.createTempFile("temp", null);
     //    file.deleteOnExit();
 
     Properties props = new Properties();
 
     props.setProperty("RELAYER_URI", "http://127.0.0.1:9625");
-
-    if (useDirectSigning) {
-      props.setProperty("CONSENSUS_METHODOLOGY", "EVENT_SIGNING");
-    } else {
-      props.setProperty("CONSENSUS_METHODOLOGY", "TRANSACTION_RECEIPT_SIGNING");
-    }
+    props.setProperty("CONSENSUS_METHODOLOGY", msgType.name());
 
     if (serialExecution) {
       props.setProperty("EXECUTION_ENGINE", "SERIAL");

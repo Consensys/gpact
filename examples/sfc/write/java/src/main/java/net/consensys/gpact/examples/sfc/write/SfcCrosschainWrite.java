@@ -30,7 +30,7 @@ public class SfcCrosschainWrite {
   static final Logger LOG = LogManager.getLogger(SfcCrosschainWrite.class);
 
   // Running multiple times will reveal any gas difference due to rerunning.
-  static int NUM_TIMES_EXECUTE = 2;
+  static int NUM_TIMES_EXECUTE = 1;
 
   public static void main(String[] args) throws Exception {
     StatsHolder.log("Example: SFC Write");

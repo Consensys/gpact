@@ -97,11 +97,14 @@ public class EntityTravelAgency extends AbstractBlockchain {
     this.crossControlManagerGroup =
         CrosschainProtocols.getFunctionCallInstance(CrosschainProtocols.GPACT).get();
     this.crossControlManagerGroup.addBlockchainAndLoadCbcContract(
-        this.credentials, bcInfoTravel, cbcContractAddressOnBcTravel, msgVerTravel);
+        this.credentials, bcInfoTravel, cbcContractAddressOnBcTravel);
+    this.crossControlManagerGroup.setMessageVerifier(bcInfoTravel.bcId, msgVerTravel);
     this.crossControlManagerGroup.addBlockchainAndLoadCbcContract(
-        this.credentials, bcInfoHotel, cbcContractAddressOnBcHotel, msgVerHotel);
+        this.credentials, bcInfoHotel, cbcContractAddressOnBcHotel);
+    this.crossControlManagerGroup.setMessageVerifier(bcInfoHotel.bcId, msgVerHotel);
     this.crossControlManagerGroup.addBlockchainAndLoadCbcContract(
-        this.credentials, bcInfoTrain, cbcContractAddressOnBcTrain, msgVerTrain);
+        this.credentials, bcInfoTrain, cbcContractAddressOnBcTrain);
+    this.crossControlManagerGroup.setMessageVerifier(bcInfoTrain.bcId, msgVerTrain);
   }
 
   public BigInteger book(final int dateInt, GpactExampleSystemManager exampleManager)
@@ -149,7 +152,7 @@ public class EntityTravelAgency extends AbstractBlockchain {
 
   public void grantAllowance(EntityBase entity, int amount, String spender) throws Exception {
     TransactionReceiptProcessor txrProcessor =
-        new PollingTransactionReceiptProcessor(entity.web3j, this.pollingInterval, RETRY);
+        new PollingTransactionReceiptProcessor(entity.web3j, this.pollingIntervalMs, RETRY);
     FastTxManager atm =
         TxManagerCache.getOrCreate(
             entity.web3j, this.credentials, entity.getBlockchainId().asLong(), txrProcessor);

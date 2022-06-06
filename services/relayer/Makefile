@@ -1,5 +1,8 @@
 .PHONY: build itest
 
+buildall:
+	go test -run=nope ./...
+
 build:
 	go build -o ./build/relayer cmd/relayer/* 
 	go build -o ./build/observer cmd/observer/* 

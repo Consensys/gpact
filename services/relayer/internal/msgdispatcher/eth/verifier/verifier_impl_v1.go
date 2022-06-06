@@ -23,7 +23,7 @@ import (
 
 	"github.com/consensys/gpact/services/relayer/internal/logging"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ipfs/go-datastore"
+	datastore "github.com/ipfs/go-datastore"
 	badgerds "github.com/ipfs/go-ds-badger"
 )
 
@@ -64,25 +64,25 @@ func (v *VerifierImplV1) Stop() {
 	}
 }
 
-// SetVerifierAddr sets a verifier address with associated chain id and contract address.
-func (v *VerifierImplV1) SetVerifierAddr(chainID *big.Int, contractAddr common.Address, esAddr common.Address) error {
+// SetVerifierAddr sets a verifier contract address on the target chain based on source and target chain.
+func (v *VerifierImplV1) SetVerifierAddr(sourceChainID *big.Int, targetChainID *big.Int, verifierContractAddr common.Address) error {
 	ctx, cancel := context.WithTimeout(context.Background(), dsTimeout)
 	defer cancel()
-	return v.ds.Put(ctx, dsKey(chainID, contractAddr), esAddr.Bytes())
+	return v.ds.Put(ctx, dsKey(sourceChainID, targetChainID), verifierContractAddr.Bytes())
 }
 
-// GetVerifierAddr gets a verifier address for given associated chain id and contract address.
-func (v *VerifierImplV1) GetVerifierAddr(chainID *big.Int, contractAddr common.Address) (common.Address, error) {
+// GetVerifierAddr gets a verifier contract address for given source and target chain combination.
+func (v *VerifierImplV1) GetVerifierAddr(sourceChainID *big.Int, targetChainID *big.Int) (common.Address, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), dsTimeout)
 	defer cancel()
-	val, err := v.ds.Get(ctx, dsKey(chainID, contractAddr))
+	val, err := v.ds.Get(ctx, dsKey(sourceChainID, targetChainID))
 	if err != nil {
 		return common.Address{}, err
 	}
 	return common.BytesToAddress(val), nil
 }
 
-// dsKey gets the datastore key from given chainID and contract address.
-func dsKey(chainID *big.Int, contractAddr common.Address) datastore.Key {
-	return datastore.NewKey(fmt.Sprintf("%v-%v", chainID.String(), contractAddr.String()))
+// dsKey gets the datastore key from given source and target chainID.
+func dsKey(sourceChainID *big.Int, targetChainID *big.Int) datastore.Key {
+	return datastore.NewKey(fmt.Sprintf("%v-%v", sourceChainID.String(), targetChainID.String()))
 }

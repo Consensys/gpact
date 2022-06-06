@@ -20,10 +20,7 @@ public class SimpleCrossControlManagerGroup implements CrossControlManagerGroup 
 
   @Override
   public void addBlockchainAndDeployContracts(
-      final Credentials creds,
-      final BlockchainConfig bcConfig,
-      final MessagingVerificationInterface messageVerification)
-      throws Exception {
+      final Credentials creds, final BlockchainConfig bcConfig) throws Exception {
     BlockchainId blockchainId = bcConfig.bcId;
     if (this.blockchains.containsKey(blockchainId)) {
       return;
@@ -34,18 +31,13 @@ public class SimpleCrossControlManagerGroup implements CrossControlManagerGroup 
     holder.cbc = new SimpleCrossControlManager(creds, bcConfig);
     holder.cbc.deployCbcContract();
     holder.cbcContractAddress = holder.cbc.getCbcContractAddress();
-    holder.ver = messageVerification;
 
     this.blockchains.put(blockchainId, holder);
   }
 
   @Override
   public void addBlockchainAndLoadCbcContract(
-      Credentials creds,
-      BlockchainConfig bcConfig,
-      String cbcAddress,
-      MessagingVerificationInterface messageVerification)
-      throws Exception {
+      Credentials creds, BlockchainConfig bcConfig, String cbcAddress) throws Exception {
     BlockchainId blockchainId = bcConfig.bcId;
     if (this.blockchains.containsKey(blockchainId)) {
       return;
@@ -56,9 +48,15 @@ public class SimpleCrossControlManagerGroup implements CrossControlManagerGroup 
 
     holder.cbc.loadCbcContract(cbcAddress);
     holder.cbcContractAddress = cbcAddress;
-    holder.ver = messageVerification;
 
     this.blockchains.put(blockchainId, holder);
+  }
+
+  @Override
+  public void setMessageVerifier(
+      final BlockchainId bcId, final MessagingVerificationInterface messageVerification) {
+    BcHolder holder = this.blockchains.get(bcId);
+    holder.ver = messageVerification;
   }
 
   @Override

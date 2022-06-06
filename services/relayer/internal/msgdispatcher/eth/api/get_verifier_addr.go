@@ -27,13 +27,13 @@ import (
 
 // GetVerifierAddrReq is the request to get verifier addr.
 type GetVerifierAddrReq struct {
-	ChainID      string `json:"chain_id"`
-	ContractAddr string `json:"contract_addr"`
+	SourceChainID string `json:"source_chain_id"`
+	TargetChainID string `json:"target_chain_id"`
 }
 
 // GetVerifierAddrResp is the response to get verifier addr.
 type GetVerifierAddrResp struct {
-	EsAddr string `json:"es_addr"`
+	VerifierContractAddr string `json:"verifier_contract_addr"`
 }
 
 // HandleGetVerifierAddr handles get verifier addr.
@@ -46,16 +46,20 @@ func HandleGetVerifierAddr(data []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	chainID, ok := big.NewInt(0).SetString(req.ChainID, 10)
+	sourceChainID, ok := big.NewInt(0).SetString(req.SourceChainID, 10)
 	if !ok {
-		return nil, fmt.Errorf("fail to decode chain id")
+		return nil, fmt.Errorf("fail to decode source chain id")
 	}
-	esAddr, err := instance.Verifier.GetVerifierAddr(chainID, common.HexToAddress(req.ContractAddr))
+	targetChainID, ok := big.NewInt(0).SetString(req.TargetChainID, 10)
+	if !ok {
+		return nil, fmt.Errorf("fail to decode target chain id")
+	}
+	verifierContractAddr, err := instance.Verifier.GetVerifierAddr(sourceChainID, targetChainID)
 	if err != nil {
 		return nil, err
 	}
 	resp := GetVerifierAddrResp{
-		EsAddr: esAddr.String(),
+		VerifierContractAddr: verifierContractAddr.String(),
 	}
 	data, err = json.Marshal(resp)
 	if err != nil {
@@ -65,10 +69,10 @@ func HandleGetVerifierAddr(data []byte) ([]byte, error) {
 }
 
 // RequestGetVerifierAddr requests get verifier addr.
-func RequestGetVerifierAddr(addr string, chainID *big.Int, contractAddr common.Address) (common.Address, error) {
+func RequestGetVerifierAddr(addr string, sourceChainID *big.Int, targetChainID *big.Int, contractAddr common.Address) (common.Address, error) {
 	req := GetVerifierAddrReq{
-		ChainID:      chainID.String(),
-		ContractAddr: contractAddr.String(),
+		SourceChainID: sourceChainID.String(),
+		TargetChainID: targetChainID.String(),
 	}
 	data, err := json.Marshal(req)
 	if err != nil {
@@ -83,5 +87,5 @@ func RequestGetVerifierAddr(addr string, chainID *big.Int, contractAddr common.A
 	if err != nil {
 		return common.Address{}, err
 	}
-	return common.HexToAddress(resp.EsAddr), nil
+	return common.HexToAddress(resp.VerifierContractAddr), nil
 }

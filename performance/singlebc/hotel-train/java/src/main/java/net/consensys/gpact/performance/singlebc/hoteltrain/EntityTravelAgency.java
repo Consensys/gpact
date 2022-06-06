@@ -81,7 +81,7 @@ public class EntityTravelAgency extends AbstractBlockchain {
 
   public void grantAllowance(EntityBase entity, int amount) throws Exception {
     TransactionReceiptProcessor txrProcessor =
-        new PollingTransactionReceiptProcessor(entity.web3j, this.pollingInterval, RETRY);
+        new PollingTransactionReceiptProcessor(entity.web3j, this.pollingIntervalMs, RETRY);
     FastTxManager atm =
         TxManagerCache.getOrCreate(
             entity.web3j, this.credentials, entity.getBlockchainId().asLong(), txrProcessor);

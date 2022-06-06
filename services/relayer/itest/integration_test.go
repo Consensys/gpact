@@ -291,8 +291,10 @@ func TestERC20SetupSFC(t *testing.T) {
 	assert.Empty(t, setupObserver("127.0.0.1:9526", big.NewInt(32), "ws://bc32node1:8546", "SFC", sfcAddrB))
 	assert.Empty(t, setupRelayer("127.0.0.1:9625", big.NewInt(31), bridgeAddrA, signer.SECP256K1_KEY_TYPE, relayerKey))
 	assert.Empty(t, setupRelayer("127.0.0.1:9625", big.NewInt(32), bridgeAddrB, signer.SECP256K1_KEY_TYPE, relayerKey))
-	assert.Empty(t, setupDispatcher("127.0.0.1:9725", big.NewInt(31), "ws://bc31node1:8546", dispatcherKey, bridgeAddrA, verifierAddrA))
-	assert.Empty(t, setupDispatcher("127.0.0.1:9725", big.NewInt(32), "ws://bc32node1:8546", dispatcherKey, bridgeAddrB, verifierAddrB))
+	assert.Empty(t, setupDispatcher("127.0.0.1:9725", big.NewInt(31), big.NewInt(32), "ws://bc32node1:8546", dispatcherKey, verifierAddrA))
+	assert.Empty(t, setupDispatcher("127.0.0.1:9725", big.NewInt(32), big.NewInt(32), "ws://bc32node1:8546", dispatcherKey, verifierAddrB))
+	assert.Empty(t, setupDispatcher("127.0.0.1:9725", big.NewInt(31), big.NewInt(31), "ws://bc31node1:8546", dispatcherKey, verifierAddrA))
+	assert.Empty(t, setupDispatcher("127.0.0.1:9725", big.NewInt(32), big.NewInt(31), "ws://bc31node1:8546", dispatcherKey, verifierAddrB))
 
 	t.Log("Setup done")
 }
@@ -908,15 +910,15 @@ func setupRelayer(url string, chainID *big.Int, contractAddr common.Address, key
 }
 
 // setupDispatcher sets up dispatcher.
-func setupDispatcher(url string, chainID *big.Int, chainAP string, key []byte, contractAddr common.Address, esAddr common.Address) error {
-	success, err := dispatcherapi.RequestSetTransactionOpts(url, chainID, chainAP, key)
+func setupDispatcher(url string, sourceChainID *big.Int, targetChainID *big.Int, targetChainAP string, key []byte, verifierAddr common.Address) error {
+	success, err := dispatcherapi.RequestSetTransactionOpts(url, targetChainID, targetChainAP, key)
 	if err != nil {
 		return err
 	}
 	if !success {
 		return fmt.Errorf("failed.")
 	}
-	success, err = dispatcherapi.RequestSetVerifierAddr(url, chainID, contractAddr, esAddr)
+	success, err = dispatcherapi.RequestSetVerifierAddr(url, sourceChainID, targetChainID, verifierAddr)
 	if err != nil {
 		return err
 	}

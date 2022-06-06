@@ -74,6 +74,12 @@ class SimpleCrosschainExecutor {
             cbcManager.getCbcContractAddress(),
             SimpleCrossControlManager.CROSSCALL_EVENT_SIGNATURE);
 
+    if (signedCrossCallEvent == null) {
+      // The messaging protocol will complete the transaction for the user.
+      // There is no more to do.
+      return new CrosschainCallResultImpl(rootCall, true, transactionReceipts, null);
+    }
+
     BlockchainId destBcId = new BlockchainId(crossCallEvent._destBcId);
 
     cbcManager = this.crossControlManagerGroup.getCbcManager(destBcId);

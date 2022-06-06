@@ -16,6 +16,7 @@ package net.consensys.gpact.helpers;
 
 public enum CrossBlockchainConsensusType {
   EVENT_SIGNING,
+  EVENT_RELAY,
   TRANSACTION_RECEIPT_SIGNING,
   COORDINATION_CHAIN_TX_RECEIPT_SIGNING
 }

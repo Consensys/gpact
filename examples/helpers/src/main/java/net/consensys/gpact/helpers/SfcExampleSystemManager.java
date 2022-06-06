@@ -26,7 +26,7 @@ public class SfcExampleSystemManager extends BaseExampleSystemManager {
     super(propertiesFileName);
   }
 
-  protected void loadFunctionPayerProperties(PropertiesLoader propsLoader) {}
+  protected void loadFunctionLayerProperties(PropertiesLoader propsLoader) {}
 
   protected CrossControlManagerGroup getFunctionCallInstance() throws Exception {
     return CrosschainProtocols.getFunctionCallInstance(CrosschainProtocols.SFC).get();

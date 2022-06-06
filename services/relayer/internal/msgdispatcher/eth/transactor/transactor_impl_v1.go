@@ -19,13 +19,14 @@ import (
 	"context"
 	"crypto/ecdsa"
 	"encoding/json"
+	"errors"
 	"math/big"
 	"time"
 
 	"github.com/consensys/gpact/services/relayer/internal/logging"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/crypto/secp256k1"
-	"github.com/ipfs/go-datastore"
+	datastore "github.com/ipfs/go-datastore"
 	badgerds "github.com/ipfs/go-ds-badger"
 )
 
@@ -76,6 +77,15 @@ func (t *TransactorImplV1) Stop() {
 func (t *TransactorImplV1) SetTransactionOpts(chainID *big.Int, chainAP string, key []byte) error {
 	ctx, cancel := context.WithTimeout(context.Background(), dsTimeout)
 	defer cancel()
+
+	zero := big.NewInt(0)
+	keyBigInt := big.NewInt(0)
+	keyBigInt.SetBytes(key)
+	if keyBigInt.Cmp(zero) == 0 {
+		errStr := "SetTransactionOpts: Key is zero"
+		logging.Error(errStr)
+		return errors.New(errStr)
+	}
 
 	data, err := json.Marshal(record{
 		ChainAP: chainAP,

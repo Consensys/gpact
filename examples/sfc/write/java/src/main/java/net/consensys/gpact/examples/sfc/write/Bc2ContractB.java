@@ -51,14 +51,24 @@ public class Bc2ContractB extends AbstractBlockchain {
   }
 
   public void checkValueWritten(BigInteger expectedVal) throws Exception {
-    BigInteger actualVal = this.contractB.getVal().send();
-    LOG.info("ContractB: Value: {}", actualVal);
-    if (expectedVal.compareTo(actualVal) != 0) {
-      throw new Exception(
-          "Value on ContractB not set correctly: Expected: "
-              + expectedVal
-              + ", Actual: "
-              + actualVal);
+    final int numRetires = 10;
+
+    BigInteger actualVal = null;
+
+    // Retry some number of retries. The issue could be that the transaction
+    // that will update the balance hasn't been mined yet.
+    for (int i = 0; i < numRetires; i++) {
+      actualVal = this.contractB.getVal().send();
+      if (expectedVal.compareTo(actualVal) == 0) {
+        LOG.info("ContractB: Value: {}", actualVal);
+        return;
+      }
+      pauseWhileTransactionMined();
     }
+    throw new Exception(
+        "Value on ContractB not set correctly: Expected: "
+            + expectedVal
+            + ", Actual: "
+            + actualVal);
   }
 }

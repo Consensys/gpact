@@ -20,15 +20,9 @@ public interface CrossControlManagerGroup {
    *
    * @param creds Credentials to be used for signing transactions on the specified blockchain.
    * @param bcInfo Information about the blocchain: Blockchain id, URL, gas pricing strategy.
-   * @param messageVerification Implementation used to obtain signed events or proofs of events so
-   *     that the events can be used on remote blockchains.
    * @throws Exception If an issue is encountered deploying the crosschain control contract.
    */
-  void addBlockchainAndDeployContracts(
-      Credentials creds,
-      BlockchainConfig bcInfo,
-      MessagingVerificationInterface messageVerification)
-      throws Exception;
+  void addBlockchainAndDeployContracts(Credentials creds, BlockchainConfig bcInfo) throws Exception;
 
   /**
    * Configure a blockchain for use by the function call layer.
@@ -36,16 +30,17 @@ public interface CrossControlManagerGroup {
    * @param creds Credentials to be used for signing transactions on the specified blockchain.
    * @param bcInfo Information about the blockchain: Blockchain id, URL, gas pricing strategy.
    * @param cbcAddress Address of crosschain control contract.
-   * @param messageVerification Implementation used to obtain signed events or proofs of events so
-   *     that the events can be used on remote blockchains.
    * @throws Exception If an issue is encountered loading the crosschain control contract.
    */
   void addBlockchainAndLoadCbcContract(
-      Credentials creds,
-      BlockchainConfig bcInfo,
-      String cbcAddress,
-      MessagingVerificationInterface messageVerification)
-      throws Exception;
+      Credentials creds, BlockchainConfig bcInfo, String cbcAddress) throws Exception;
+
+  /**
+   * @param bcId Blockchain that message verifier relates to.
+   * @param messageVerification Implementation used to obtain signed events or proofs of events so
+   *     that the events can be used on remote blockchains.
+   */
+  void setMessageVerifier(BlockchainId bcId, MessagingVerificationInterface messageVerification);
 
   /**
    * Execute a crosschain function call.

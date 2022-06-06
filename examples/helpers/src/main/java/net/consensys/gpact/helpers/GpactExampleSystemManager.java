@@ -29,7 +29,7 @@ public class GpactExampleSystemManager extends BaseExampleSystemManager {
     super(propertiesFileName);
   }
 
-  protected void loadFunctionPayerProperties(PropertiesLoader propsLoader) {
+  protected void loadFunctionLayerProperties(PropertiesLoader propsLoader) {
     this.executionEngineType = propsLoader.getExecutionEnngine();
     StatsHolder.log(executionEngineType.name());
   }
