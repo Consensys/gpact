@@ -14,7 +14,7 @@
  */
 pragma solidity >=0.8;
 
-import "./CallPathCallExecutionTree.sol";
+import "../../../../../contracts/contracts/src/functioncall/interface/CrosschainFunctionCallInterface.sol";
 
 contract FailureTest {
     uint256 otherBlockchainId;
@@ -31,20 +31,23 @@ contract FailureTest {
         otherContract = FailureTest(_otherContract);
     }
 
-    function callRemote(uint256 _totalCallDepth, uint256 _whenToFail) external {
-        callRemote1(_totalCallDepth, 0, _whenToFail) external {
-    }
-
-    function callRemote1(uint256 _totalCallDepth, uint256 _currentCallDepth, uint256 _whenToFail) external {
+    function callRemote(
+        uint256 _totalCallDepth,
+        uint256 _currentCallDepth,
+        uint256 _whenToFail
+    ) public {
         if (_currentCallDepth == _whenToFail) {
             revert("Time to Fail!");
+        }
+        if (_currentCallDepth == _totalCallDepth) {
+            return;
         }
 
         CrosschainFunctionCallInterface(address(cbc)).crossBlockchainCall(
             otherBlockchainId,
             address(otherContract),
             abi.encodeWithSelector(
-                otherContract.callRemote1.selector,
+                otherContract.callRemote.selector,
                 _totalCallDepth,
                 _currentCallDepth + 1,
                 _whenToFail

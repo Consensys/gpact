@@ -12,21 +12,11 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package net.consensys.gpact.common.test;
+package net.consensys.gpact.messaging.fake;
 
-import java.util.Random;
-import org.apache.tuweni.bytes.Bytes;
 
-public class DummyAddressGenerator {
+import net.consensys.gpact.messaging.eventattest.AttestorSignerManagerGroup;
 
-  public static String gen() {
-    Random notVeryRandom = new Random();
-    byte[] rAddress = new byte[20];
-    notVeryRandom.nextBytes(rAddress);
-    return Bytes.wrap(rAddress).toHexString();
-  }
-
-  public static String addressZero() {
-    return "0";
-  }
+/** Manage multiple blockchains, each holding a set of registrar and verification contracts */
+public class FakeSignerManagerGroup extends AttestorSignerManagerGroup {
 }

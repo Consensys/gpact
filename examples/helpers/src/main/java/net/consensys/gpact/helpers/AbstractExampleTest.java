@@ -19,7 +19,8 @@ public abstract class AbstractExampleTest {
   public enum MessagingType {
     EVENT_SIGNING,
     TRANSACTION_RECEIPT_SIGNING,
-    EVENT_RELAY
+    EVENT_RELAY,
+    FAKE
   }
 
   protected String createPropertiesFile(
