@@ -187,31 +187,31 @@ public abstract class BaseExampleSystemManager {
         FakeRelayer fakeRelayer = fakeSignerGroup.configureRelayer(globalSigner);
 
         this.messagingManagerGroup =
-                CrosschainProtocols.getMessagingInstance(CrosschainProtocols.FAKE).get();
+            CrosschainProtocols.getMessagingInstance(CrosschainProtocols.FAKE).get();
 
         addBcFakeSign(
-                messagingManagerGroup,
-                crossControlManagerGroup,
-                fakeSignerGroup,
-                creds,
-                this.root,
-                fakeRelayer);
+            messagingManagerGroup,
+            crossControlManagerGroup,
+            fakeSignerGroup,
+            creds,
+            this.root,
+            fakeRelayer);
 
         addBcFakeSign(
-                messagingManagerGroup,
-                crossControlManagerGroup,
-                fakeSignerGroup,
-                creds,
-                this.bc2,
-                fakeRelayer);
+            messagingManagerGroup,
+            crossControlManagerGroup,
+            fakeSignerGroup,
+            creds,
+            this.bc2,
+            fakeRelayer);
         if (numberOfBlockchains == 3) {
           addBcFakeSign(
-                  messagingManagerGroup,
-                  crossControlManagerGroup,
-                  fakeSignerGroup,
-                  creds,
-                  this.bc3,
-                  fakeRelayer);
+              messagingManagerGroup,
+              crossControlManagerGroup,
+              fakeSignerGroup,
+              creds,
+              this.bc3,
+              fakeRelayer);
         }
         break;
 
@@ -312,20 +312,18 @@ public abstract class BaseExampleSystemManager {
   }
 
   private void addBcFakeSign(
-          MessagingManagerGroup messagingManagerGroup,
-          CrossControlManagerGroup crossControlManagerGroup,
-          FakeSignerGroup fakeSignerGroup,
-          Credentials creds,
-          BlockchainConfig bc,
-          FakeRelayer fakeRelayer)
-          throws Exception {
+      MessagingManagerGroup messagingManagerGroup,
+      CrossControlManagerGroup crossControlManagerGroup,
+      FakeSignerGroup fakeSignerGroup,
+      Credentials creds,
+      BlockchainConfig bc,
+      FakeRelayer fakeRelayer)
+      throws Exception {
     crossControlManagerGroup.addBlockchainAndDeployContracts(creds, bc);
     messagingManagerGroup.addBlockchainAndDeployContracts(creds, bc);
     fakeSignerGroup.addBlockchain(bc.bcId, fakeRelayer);
     crossControlManagerGroup.setMessageVerifier(bc.bcId, fakeSignerGroup.getVerifier(bc.bcId));
   }
-
-
 
   private List<AttestorRelayer.Dest> setupDispatcherTargets() throws Exception {
     String txPKeyStr = "59a182023c8bdb02c838288635ac54809528381a3197758fd17a31b166fab85e";

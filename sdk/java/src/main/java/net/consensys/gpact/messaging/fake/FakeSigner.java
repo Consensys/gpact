@@ -14,16 +14,14 @@
  */
 package net.consensys.gpact.messaging.fake;
 
+import java.util.List;
 import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.common.FormatConversion;
 import net.consensys.gpact.messaging.MessagingVerificationInterface;
 import net.consensys.gpact.messaging.SignedEvent;
-import net.consensys.gpact.messaging.common.attestorrelayer.AttestorRelayer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
-
-import java.util.List;
 
 /**
  * Manages the interaction between the application library and attestors for a certain blockchain.

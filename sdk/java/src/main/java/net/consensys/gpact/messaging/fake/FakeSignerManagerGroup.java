@@ -14,9 +14,7 @@
  */
 package net.consensys.gpact.messaging.fake;
 
-
 import net.consensys.gpact.messaging.eventattest.AttestorSignerManagerGroup;
 
 /** Manage multiple blockchains, each holding a set of registrar and verification contracts */
-public class FakeSignerManagerGroup extends AttestorSignerManagerGroup {
-}
+public class FakeSignerManagerGroup extends AttestorSignerManagerGroup {}

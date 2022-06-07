@@ -14,17 +14,13 @@
  */
 package net.consensys.gpact.messaging.fake;
 
+import java.util.HashMap;
+import java.util.Map;
 import net.consensys.gpact.common.AnIdentity;
 import net.consensys.gpact.common.BlockchainId;
-import net.consensys.gpact.common.CrosschainProtocolStackException;
 import net.consensys.gpact.messaging.MessagingVerificationInterface;
-import net.consensys.gpact.messaging.common.attestorrelayer.AttestorRelayer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /** Manages a set of FakeSigners for a set of blockchains. */
 public class FakeSignerGroup {
@@ -32,8 +28,7 @@ public class FakeSignerGroup {
 
   private Map<BlockchainId, FakeSigner> blockchains = new HashMap<>();
 
-  public void addBlockchain(BlockchainId blockchainId, FakeRelayer fakeRelayer)
-      throws Exception {
+  public void addBlockchain(BlockchainId blockchainId, FakeRelayer fakeRelayer) throws Exception {
     if (this.blockchains.containsKey(blockchainId)) {
       return;
     }
@@ -41,9 +36,7 @@ public class FakeSignerGroup {
     this.blockchains.put(blockchainId, new FakeSigner(blockchainId, fakeRelayer));
   }
 
-
-  public FakeRelayer configureRelayer(
-      AnIdentity signingCredentials) {
+  public FakeRelayer configureRelayer(AnIdentity signingCredentials) {
     return new FakeRelayer(signingCredentials);
   }
 
