@@ -17,46 +17,50 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
+	"github.com/ethereum/go-ethereum/common"
+	"math/big"
 
 	"github.com/consensys/gpact/services/relayer/internal/msgobserver/eth/node"
 	"github.com/consensys/gpact/services/relayer/internal/rpc"
 )
 
-// StopObserveReq is the request to stop observe.
-type StopObserveReq struct {
-}
-
-// StopObserveResp is the response to stop observe.
-type StopObserveResp struct {
-	Success bool `json:"success"`
-}
-
-// HandleStopObserve handles the request to stop observe.
-func HandleStopObserve(data []byte) ([]byte, error) {
-	// Get node
+// HandleStopObserver handles the request to stop observe.
+func HandleStopObserver(data []byte) ([]byte, error) {
 	instance := node.GetSingleInstance()
-
-	err := instance.Observer.StopObserve()
-	if err != nil {
-		return nil, err
-	}
-	resp := StopObserveResp{
-		Success: true,
-	}
-	data, err = json.Marshal(resp)
-	if err != nil {
-		return nil, err
-	}
-	return data, nil
+	instance.Observer.Stop()
+	return success()
 }
 
-// RequestStopObserve requests a stop observe.
-func RequestStopObserve(addr string) (bool, error) {
+// HandleStopObservation handles the request to stop observe.
+func HandleStopObservation(rawReq []byte) ([]byte, error) {
+	instance := node.GetSingleInstance()
+	req := &ObservationReq{}
+	err := json.Unmarshal(rawReq, req)
+	if err != nil {
+		return fail(err)
+	}
+
+	chainID, ok := big.NewInt(0).SetString(req.ChainID, 10)
+	if !ok {
+		return fail(fmt.Errorf("failed to decode chain id"))
+	}
+
+	err = instance.Observer.StopObservation(chainID, req.ContractType, common.HexToAddress(req.ContractAddr), req.WatcherType)
+	if err != nil {
+		return fail(err)
+	}
+
+	return success()
+}
+
+// RequestStopObserver requests a stop observe.
+func RequestStopObserver(addr string) (bool, error) {
 	data, err := rpc.Request(addr, StopObserveReqType, []byte{1})
 	if err != nil {
 		return false, err
 	}
-	resp := &StopObserveResp{}
+	resp := &ObserverActionResponse{}
 	err = json.Unmarshal(data, resp)
 	if err != nil {
 		return false, err

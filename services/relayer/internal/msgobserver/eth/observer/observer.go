@@ -34,8 +34,8 @@ type Observer interface {
 	// Stop safely stops the observer.
 	Stop()
 
-	// StartObserve starts a new observe.
-	StartObserve(chainID *big.Int, chainAP string, contractType string, contractAddr common.Address) error
+	// StartObservation starts a new observer for the specified source
+	StartObservation(chainID *big.Int, chainAP string, contractType string, contractAddr common.Address) error
 
 	// StopObserve stops observe.
 	StopObserve() error
@@ -98,10 +98,14 @@ func NewSFCRealtimeObserver(chainId *big.Int, sourceAddr common.Address, contrac
 		return nil, err
 	}
 
-	sourceId := fmt.Sprintf("%s:%s:%s", chainId, sourceAddr.String(), "sfc")
+	sourceId := GetSourceID(chainId, sourceAddr, "sfc", "realtime")
 	return &SingleSourceObserver{SourceId: sourceId, EventWatcher: eventWatcher, EventHandler: eventHandler,
 			SourceNetwork: chainId},
 		nil
+}
+
+func GetSourceID(chainId *big.Int, sourceAddr common.Address, contractType string, watcherType WatcherType) string {
+	return fmt.Sprintf("%s:%s:%s:%s", chainId.String(), sourceAddr.String(), contractType, watcherType)
 }
 
 // NewSFCFinalisedObserver creates an instance of SingleSourceObserver that monitors a simple-function-call
@@ -122,7 +126,10 @@ func NewSFCFinalisedObserver(chainId *big.Int, sourceAddr common.Address, contra
 		return nil, err
 	}
 
-	return &SingleSourceObserver{EventWatcher: eventWatcher, EventHandler: eventHandler, SourceNetwork: chainId}, nil
+	sourceId := GetSourceID(chainId, sourceAddr, "sfc", "finalised")
+	return &SingleSourceObserver{SourceId: sourceId, EventWatcher: eventWatcher, EventHandler: eventHandler,
+			SourceNetwork: chainId},
+		nil
 }
 
 // NewGPACTRealtimeObserver creates an instance of SingleSourceObserver that monitors a GPACT bridge contract.
@@ -140,5 +147,7 @@ func NewGPACTRealtimeObserver(chainId *big.Int, sourceAddr common.Address, contr
 		return nil, err
 	}
 
-	return &SingleSourceObserver{EventWatcher: eventWatcher, EventHandler: eventHandler, SourceNetwork: chainId}, nil
+	sourceId := GetSourceID(chainId, sourceAddr, "gpact", "realtime")
+	return &SingleSourceObserver{SourceId: sourceId, EventWatcher: eventWatcher, EventHandler: eventHandler,
+		SourceNetwork: chainId}, nil
 }

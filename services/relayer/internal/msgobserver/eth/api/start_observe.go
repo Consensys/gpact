@@ -18,6 +18,7 @@ package api
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/consensys/gpact/services/relayer/internal/msgobserver/eth/observer"
 	"math/big"
 
 	"github.com/consensys/gpact/services/relayer/internal/msgobserver/eth/node"
@@ -26,25 +27,42 @@ import (
 	logging "github.com/rs/zerolog/log"
 )
 
-// StartObserveReq is the request to start observe.
-type StartObserveReq struct {
-	ChainID      string `json:"chain_id"`
-	ChainAP      string `json:"chain_ap"`
-	ContractType string `json:"contract_type"`
-	ContractAddr string `json:"contract_addr"`
+// ObservationReq is the request to start observe.
+type ObservationReq struct {
+	ChainID      string               `json:"chain_id"`
+	ChainAP      string               `json:"chain_ap"`
+	ContractType string               `json:"contract_type"`
+	ContractAddr string               `json:"contract_addr"`
+	WatcherType  observer.WatcherType `json:"watcher_type"`
 }
 
-// StartObserveResp is the response to start observe.
-type StartObserveResp struct {
+// ObserverActionResponse is the createResponse to stop observe.
+type ObserverActionResponse struct {
+	Success bool   `json:"success"`
+	Message string `json:"message"`
+}
+
+// StartObservationResp is the createResponse to start observe.
+type StartObservationResp struct {
 	Success bool `json:"success"`
 }
 
-// HandleStartObserve handles start observe request.
-func HandleStartObserve(data []byte) ([]byte, error) {
+// HandleStartObserver handles start observe request.
+func HandleStartObserver(data []byte) ([]byte, error) {
+	instance := node.GetSingleInstance()
+	err := instance.Observer.Start()
+	if err != nil {
+		return fail(err)
+	}
+	return success()
+}
+
+// HandleStartObservation handles start observe request.
+func HandleStartObservation(data []byte) ([]byte, error) {
 	// Get node
 	instance := node.GetSingleInstance()
 
-	req := &StartObserveReq{}
+	req := &ObservationReq{}
 	err := json.Unmarshal(data, req)
 	if err != nil {
 		return nil, err
@@ -56,11 +74,12 @@ func HandleStartObserve(data []byte) ([]byte, error) {
 
 	logging.Info().Msgf("Start Observe: Chain: %v, Contract: %v, ChainAP: %v", chainID, req.ContractAddr, req.ChainAP)
 
-	err = instance.Observer.StartObserve(chainID, req.ChainAP, req.ContractType, common.HexToAddress(req.ContractAddr))
+	err = instance.Observer.StartObservation(chainID, req.ChainAP, req.ContractType,
+		common.HexToAddress(req.ContractAddr), req.WatcherType)
 	if err != nil {
 		return nil, err
 	}
-	resp := StartObserveResp{
+	resp := StartObservationResp{
 		Success: true,
 	}
 	data, err = json.Marshal(resp)
@@ -70,9 +89,9 @@ func HandleStartObserve(data []byte) ([]byte, error) {
 	return data, nil
 }
 
-// RequestStartObserve requests start observe.
-func RequestStartObserve(addr string, chainID *big.Int, chainAP string, contractType string, contractAddr common.Address) (bool, error) {
-	req := StartObserveReq{
+// RequestStartObservation requests start observe.
+func RequestStartObservation(addr string, chainID *big.Int, chainAP string, contractType string, contractAddr common.Address) (bool, error) {
+	req := ObservationReq{
 		ChainID:      chainID.String(),
 		ChainAP:      chainAP,
 		ContractType: contractType,
@@ -82,11 +101,11 @@ func RequestStartObserve(addr string, chainID *big.Int, chainAP string, contract
 	if err != nil {
 		return false, err
 	}
-	data, err = rpc.Request(addr, StartObserveReqType, data)
+	data, err = rpc.Request(addr, StartObserverReqType, data)
 	if err != nil {
 		return false, err
 	}
-	resp := &StartObserveResp{}
+	resp := &StartObservationResp{}
 	err = json.Unmarshal(data, resp)
 	if err != nil {
 		return false, err
