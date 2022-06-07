@@ -1,0 +1,129 @@
+version: "3.8"
+
+x-besu-bootnode-def:
+  &besu-bootnode-def
+  restart: "on-failure"
+  image: hyperledger/besu:${BESU_VERSION:-latest}
+  entrypoint:
+    - /bin/bash
+    - -c
+    - |
+      /opt/besu/bin/besu public-key export --to=/tmp/bootnode_pubkey;
+      /opt/besu/bin/besu \
+      --config-file=/config/config.toml \
+      --genesis-file=/config/genesis.json \
+      --node-private-key-file=/opt/besu/keys/key ;
+
+services:
+  chainA-js:
+    << : *besu-bootnode-def
+    environment:
+      - OTEL_RESOURCE_ATTRIBUTES=service.name=chainA-js,service.version=${BESU_VERSION:-latest}
+    volumes:
+      - ../../test-blockchains/env/blockchains/bc31:/config
+      - ../../test-blockchains/env/blockchains/keys:/opt/besu/keys
+    networks:
+      - shared
+    ports:
+      - 8111:8545
+
+  chainB-js:
+    << : *besu-bootnode-def
+    environment:
+      - OTEL_RESOURCE_ATTRIBUTES=service.name=chainB-js,service.version=${BESU_VERSION:-latest}
+    volumes:
+      - ../../test-blockchains/env/blockchains/bc32:/config
+      - ../../test-blockchains/env/blockchains/keys:/opt/besu/keys
+    networks:
+      - shared
+    ports:
+      - 8222:8545
+
+  rabbitmq:
+    image: rabbitmq:3.9-management
+    container_name: rabbitmq-js
+    networks:
+      - shared
+    ports:
+      - 5672:5672
+      - 15672:15672
+    healthcheck:
+        test: ["CMD", "curl", "-f", "http://localhost:15672"]
+        interval: 30s
+        timeout: 10s
+        retries: 5
+    depends_on:
+      - chainA-js
+      - chainB-js
+
+  observer1-js:
+    image: consensys/gpact/services/relayer
+    container_name: observer1-js
+    networks:
+      - shared
+    ports:
+      - 9525:9425
+    env_file:
+      - ../../services/relayer/env/.env.observer.example
+    command: /app/build/observer
+    depends_on:
+      - rabbitmq
+    restart: on-failure
+
+  observer2-js:
+    image: consensys/gpact/services/relayer
+    container_name: observer2-js
+    networks:
+      - shared
+    ports:
+      - 9526:9425
+    env_file:
+      - ../../services/relayer/env/.env.observer.example
+    command: /app/build/observer
+    depends_on:
+      - rabbitmq
+    restart: on-failure
+  
+  relayer-js:
+    image: consensys/gpact/services/relayer
+    container_name: relayer-js
+    networks:
+      - shared
+    ports:
+      - 9625:9425
+    env_file:
+      - ../../services/relayer/env/.env.relayer.example
+    command: /app/build/relayer
+    depends_on:
+      - rabbitmq
+    restart: on-failure
+
+  dispatcher-js:
+    image: consensys/gpact/services/relayer
+    container_name: dispatcher-js
+    networks:
+      - shared
+    ports:
+      - 9725:9425
+    env_file:
+      - ../../services/relayer/env/.env.dispatcher.example
+    command: /app/build/dispatcher
+    depends_on:
+      - rabbitmq
+    restart: on-failure
+
+  msgstore-js:
+    image: consensys/gpact/services/message-store
+    container_name: msgstore-js
+    networks:
+      - shared
+    ports:
+      - 8080:8080
+    env_file:
+      - ../../services/relayer/env/.env.msgstore.example
+    command: /app/build/api
+
+networks:
+  shared:
+    name: shared
+    external: false
