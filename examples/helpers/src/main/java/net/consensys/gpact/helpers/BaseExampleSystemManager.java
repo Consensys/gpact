@@ -242,7 +242,8 @@ public abstract class BaseExampleSystemManager {
             crosschainControlAddr,
             getFunctionCallImplName(),
             bc.observerUri,
-            bc.blockchainNodeWsUri, watcherType));
+            bc.blockchainNodeWsUri,
+            watcherType));
   }
 
   private void addBcEventRelay(
@@ -265,7 +266,8 @@ public abstract class BaseExampleSystemManager {
             crosschainControlAddr,
             getFunctionCallImplName(),
             bc.observerUri,
-            bc.blockchainNodeWsUri, watcherType));
+            bc.blockchainNodeWsUri,
+            watcherType));
   }
 
   private void addBcTxRootSign(

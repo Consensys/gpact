@@ -1,11 +1,10 @@
 package net.consensys.gpact.helpers;
 
-import net.consensys.gpact.messaging.common.attestorrelayer.AttestorRelayer;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
+import net.consensys.gpact.messaging.common.attestorrelayer.AttestorRelayer;
 
 public abstract class AbstractExampleTest {
   public static final String ROOT_BC_ID = "1F";
@@ -32,12 +31,17 @@ public abstract class AbstractExampleTest {
   }
 
   protected String createPropertiesFile(
-          MessagingType msgType, boolean serialExecution, boolean oneBlockchain) throws IOException {
-    return createPropertiesFile(msgType, serialExecution, oneBlockchain, AttestorRelayer.WatcherType.REALTIME);
+      MessagingType msgType, boolean serialExecution, boolean oneBlockchain) throws IOException {
+    return createPropertiesFile(
+        msgType, serialExecution, oneBlockchain, AttestorRelayer.WatcherType.REALTIME);
   }
 
   protected String createPropertiesFile(
-      MessagingType msgType, boolean serialExecution, boolean oneBlockchain, AttestorRelayer.WatcherType watcherType) throws IOException {
+      MessagingType msgType,
+      boolean serialExecution,
+      boolean oneBlockchain,
+      AttestorRelayer.WatcherType watcherType)
+      throws IOException {
     File file = File.createTempFile("temp", null);
     //    file.deleteOnExit();
 

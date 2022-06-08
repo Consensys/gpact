@@ -32,12 +32,13 @@ public class AttestorRelayer {
     REALTIME("realtime"),
     FINALISED("finalised");
     private String watcherType;
-    WatcherType(String watcherType){
+
+    WatcherType(String watcherType) {
       this.watcherType = watcherType;
     }
 
     @Override
-    public String toString(){
+    public String toString() {
       return this.watcherType;
     }
   }
@@ -55,7 +56,8 @@ public class AttestorRelayer {
         String crosschainControlAddr,
         String contractType,
         String observerUri,
-        String bcWsUri, WatcherType watcherType) {
+        String bcWsUri,
+        WatcherType watcherType) {
       this.bcId = bcId;
       this.crosschainControlAddr = crosschainControlAddr;
       this.contractType = contractType;
@@ -118,9 +120,11 @@ public class AttestorRelayer {
       String crosschainControlAddr,
       String contractType,
       String observerUri,
-      String bcWsUri, WatcherType watcherType)
+      String bcWsUri,
+      WatcherType watcherType)
       throws CrosschainProtocolStackException {
-    addNewSource(new Source(bcId, crosschainControlAddr, contractType, observerUri, bcWsUri, watcherType));
+    addNewSource(
+        new Source(bcId, crosschainControlAddr, contractType, observerUri, bcWsUri, watcherType));
   }
 
   public void addNewSource(Source source) throws CrosschainProtocolStackException {
@@ -133,7 +137,8 @@ public class AttestorRelayer {
         source.bcId,
         source.bcWsUri,
         source.contractType,
-        source.crosschainControlAddr, source.watcherType);
+        source.crosschainControlAddr,
+        source.watcherType);
     AttestorRelayerWebApi.setupRelayer(
         this.relayerUri, source.bcId, source.crosschainControlAddr, this.signingKey);
   }

@@ -99,7 +99,7 @@ public class PropertiesLoader {
     return relayerUri;
   }
 
-  public AttestorRelayer.WatcherType getWatcherType(){
+  public AttestorRelayer.WatcherType getWatcherType() {
     String watcherType = getProperty("WATCHER_TYPE");
     LOG.info(" WATCHER_TYPE: {}", watcherType);
     return AttestorRelayer.WatcherType.valueOf(watcherType.toUpperCase());

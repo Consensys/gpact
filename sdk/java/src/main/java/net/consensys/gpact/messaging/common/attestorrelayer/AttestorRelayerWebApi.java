@@ -36,7 +36,7 @@ public class AttestorRelayerWebApi {
   // Observer API
   public static final byte START_OBSERVER_REQ_TYPE = 1;
   public static final byte STOP_OBSERVER_REQ_TYPE = 2;
-  public static final byte START_OBSERVATION_REQ_TYPE  = 3;
+  public static final byte START_OBSERVATION_REQ_TYPE = 3;
   public static final byte STOP_OBSERVATION_REQ_TYPE = 4;
 
   // Message Dispatcher API
@@ -61,7 +61,8 @@ public class AttestorRelayerWebApi {
       BlockchainId bcId,
       String bcWsUrl,
       String contractType,
-      String crosschainControlAddr, AttestorRelayer.WatcherType watcherType)
+      String crosschainControlAddr,
+      AttestorRelayer.WatcherType watcherType)
       throws CrosschainProtocolStackException {
     LOG.info(
         "SetupObserver: ChainId: {}, ChainAP: {}, ContractType: {}, ContractAddr: {}, ObserverURL: {}",

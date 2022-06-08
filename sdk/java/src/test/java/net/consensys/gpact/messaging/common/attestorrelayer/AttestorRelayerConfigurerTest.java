@@ -12,7 +12,8 @@ public class AttestorRelayerConfigurerTest {
         new BlockchainId(BigInteger.valueOf(31)),
         "ws://bc31node1:8546",
         "GPACT",
-        "1AB401234567722200112233445566778899AB22", AttestorRelayer.WatcherType.REALTIME);
+        "1AB401234567722200112233445566778899AB22",
+        AttestorRelayer.WatcherType.REALTIME);
   }
 
   @Test
