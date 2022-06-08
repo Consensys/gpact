@@ -101,7 +101,7 @@ func RequestStartObservation(addr string, chainID *big.Int, chainAP string, cont
 	if err != nil {
 		return false, err
 	}
-	data, err = rpc.Request(addr, StartObserverReqType, data)
+	data, err = rpc.Request(addr, StartObservationReqType, data)
 	if err != nil {
 		return false, err
 	}

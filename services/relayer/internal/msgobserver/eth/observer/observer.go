@@ -48,11 +48,11 @@ type Observer interface {
 // transforms them into Relayer messages and then enqueues them onto a message queue for further
 // processing by the Relayer core component.
 type SingleSourceObserver struct {
-	SourceId      string
-	SourceNetwork *big.Int
-	EventWatcher  EventWatcher
-	EventHandler  EventHandler
-	running       bool
+	SourceId        string
+	SourceNetworkId *big.Int
+	EventWatcher    EventWatcher
+	EventHandler    EventHandler
+	running         bool
 }
 
 // IsRunning returns true if the observer is running
@@ -100,7 +100,7 @@ func NewSFCRealtimeObserver(chainId *big.Int, sourceAddr common.Address, contrac
 
 	sourceId := GetSourceID(chainId, sourceAddr, "sfc", "realtime")
 	return &SingleSourceObserver{SourceId: sourceId, EventWatcher: eventWatcher, EventHandler: eventHandler,
-			SourceNetwork: chainId},
+			SourceNetworkId: chainId},
 		nil
 }
 
@@ -128,7 +128,7 @@ func NewSFCFinalisedObserver(chainId *big.Int, sourceAddr common.Address, contra
 
 	sourceId := GetSourceID(chainId, sourceAddr, "sfc", "finalised")
 	return &SingleSourceObserver{SourceId: sourceId, EventWatcher: eventWatcher, EventHandler: eventHandler,
-			SourceNetwork: chainId},
+			SourceNetworkId: chainId},
 		nil
 }
 
@@ -149,5 +149,28 @@ func NewGPACTRealtimeObserver(chainId *big.Int, sourceAddr common.Address, contr
 
 	sourceId := GetSourceID(chainId, sourceAddr, "gpact", "realtime")
 	return &SingleSourceObserver{SourceId: sourceId, EventWatcher: eventWatcher, EventHandler: eventHandler,
-		SourceNetwork: chainId}, nil
+		SourceNetworkId: chainId}, nil
+}
+
+// NewGPACTFinalisedObserver creates an instance of SingleSourceObserver that monitors a gpact-function-call
+// bridge contract events. The observer processes events only once they receive a configured number of confirmations.
+func NewGPACTFinalisedObserver(chainId *big.Int, sourceAddr common.Address, contract *functioncall.Gpact,
+	mq mqserver.MessageQueue, confirmationsForFinality uint64, watcherProgressOpts WatcherProgressDsOpts, client BlockHeadProducer) (
+	*SingleSourceObserver,
+	error) {
+	eventTransformer := NewGPACTEventTransformer(chainId, sourceAddr)
+	messageHandler := NewMessageEnqueueHandler(mq, DefaultRetryOptions)
+	eventHandler := NewSimpleEventHandler(eventTransformer, messageHandler)
+
+	// TODO: expose the start option of watcher opts
+	watcherOpts := EventWatcherOpts{Context: context.Background(), EventHandler: eventHandler}
+	eventWatcher, err := NewGPACTFinalisedEventWatcher(watcherOpts, watcherProgressOpts, DefaultRetryOptions,
+		confirmationsForFinality, contract, client)
+	if err != nil {
+		return nil, err
+	}
+
+	sourceId := GetSourceID(chainId, sourceAddr, "gpact", "finalised")
+	return &SingleSourceObserver{SourceId: sourceId, EventWatcher: eventWatcher, EventHandler: eventHandler,
+		SourceNetworkId: chainId}, nil
 }

@@ -3,6 +3,7 @@ package net.consensys.gpact.messaging.common.attestorrelayer;
 import java.math.BigInteger;
 import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.common.test.DummyAddressGenerator;
+import org.apache.logging.log4j.core.util.Watcher;
 import org.junit.jupiter.api.Test;
 
 public class AttestorRelayerTest {
@@ -21,11 +22,11 @@ public class AttestorRelayerTest {
 
     AttestorRelayer relayer = new AttestorRelayer("http://127.0.0.1:9625", signingKey);
     relayer.addNewSource(
-        bcId31, crosschainControlAddr31, "GPACT", "http://127.0.0.1:9525", "ws://bc31node1:8546");
+        bcId31, crosschainControlAddr31, "GPACT", "http://127.0.0.1:9525", "ws://bc31node1:8546", AttestorRelayer.WatcherType.REALTIME);
     relayer.addNewSource(
-        bcId32, crosschainControlAddr32, "GPACT", "http://127.0.0.1:9526", "ws://bc32node1:8546");
+        bcId32, crosschainControlAddr32, "GPACT", "http://127.0.0.1:9526", "ws://bc32node1:8546", AttestorRelayer.WatcherType.REALTIME);
     relayer.addNewSource(
-        bcId33, crosschainControlAddr33, "GPACT", "http://127.0.0.1:9527", "ws://bc33node1:8546");
+        bcId33, crosschainControlAddr33, "GPACT", "http://127.0.0.1:9527", "ws://bc33node1:8546", AttestorRelayer.WatcherType.REALTIME);
     relayer.addMessageStore("http://127.0.0.1:9725", "msgstore:8080", "127.0.0.1:8080");
   }
 }

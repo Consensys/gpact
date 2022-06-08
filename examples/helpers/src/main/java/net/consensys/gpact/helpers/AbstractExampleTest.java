@@ -1,5 +1,7 @@
 package net.consensys.gpact.helpers;
 
+import net.consensys.gpact.messaging.common.attestorrelayer.AttestorRelayer;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -30,7 +32,12 @@ public abstract class AbstractExampleTest {
   }
 
   protected String createPropertiesFile(
-      MessagingType msgType, boolean serialExecution, boolean oneBlockchain) throws IOException {
+          MessagingType msgType, boolean serialExecution, boolean oneBlockchain) throws IOException {
+    return createPropertiesFile(msgType, serialExecution, oneBlockchain, AttestorRelayer.WatcherType.REALTIME);
+  }
+
+  protected String createPropertiesFile(
+      MessagingType msgType, boolean serialExecution, boolean oneBlockchain, AttestorRelayer.WatcherType watcherType) throws IOException {
     File file = File.createTempFile("temp", null);
     //    file.deleteOnExit();
 
@@ -44,6 +51,8 @@ public abstract class AbstractExampleTest {
     } else {
       props.setProperty("EXECUTION_ENGINE", "PARALLEL");
     }
+
+    props.setProperty("WATCHER_TYPE", watcherType.toString());
 
     if (oneBlockchain) {
       setProperties(

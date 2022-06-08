@@ -47,7 +47,7 @@ func HandleSetKey(data []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	//chainID, ok := big.NewInt(0).SetString(req.ChainID, 10)
+	//chainID, ok := big.NewInt(0).SetString(req.ChainId, 10)
 	chainID := big.NewInt(0)
 	//if !ok {
 	//	return nil, fmt.Errorf("fail to decode chain id")
