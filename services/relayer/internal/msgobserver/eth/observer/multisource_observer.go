@@ -57,14 +57,14 @@ const (
 // the observer resumes observation of the persisted sources.
 type MultiSourceObserver struct {
 	dsPath    string
-	mq        *mqserver.MQServer
+	mq        mqserver.MessageQueue
 	ds        datastore.Datastore
 	observers map[string]*SingleSourceObserver
 	running   bool
 }
 
 // NewMultiSourceObserver creates a new MultiSourceObserver instance
-func NewMultiSourceObserver(dsPath string, mq *mqserver.MQServer) *MultiSourceObserver {
+func NewMultiSourceObserver(dsPath string, mq mqserver.MessageQueue) *MultiSourceObserver {
 	return &MultiSourceObserver{dsPath: dsPath, mq: mq, observers: make(map[string]*SingleSourceObserver)}
 }
 
