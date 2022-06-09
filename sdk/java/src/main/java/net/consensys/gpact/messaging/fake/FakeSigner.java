@@ -16,7 +16,6 @@ package net.consensys.gpact.messaging.fake;
 
 import java.util.List;
 import net.consensys.gpact.common.BlockchainId;
-import net.consensys.gpact.common.FormatConversion;
 import net.consensys.gpact.messaging.MessagingVerificationInterface;
 import net.consensys.gpact.messaging.SignedEvent;
 import org.apache.logging.log4j.LogManager;
@@ -42,17 +41,15 @@ public class FakeSigner implements MessagingVerificationInterface {
 
   @Override
   public SignedEvent getSignedEvent(
-      List<BlockchainId> targetBlockchainIds,
-      TransactionReceipt txReceipt,
+      List<BlockchainId> notUsedTargetBlockchainIds,
+      TransactionReceipt notUsedTxReceipt,
       byte[] eventData,
       String contractAddress,
       byte[] eventFunctionSignature) {
 
-    String encodedSignaturesStr =
+    byte[] encodedSignatures =
         this.fakeRelayer.fetchedSignedEvent(
             this.bcId, contractAddress, eventFunctionSignature, eventData);
-
-    byte[] encodedSignatures = FormatConversion.hexStringToByteArray(encodedSignaturesStr);
     return new SignedEvent(
         this.bcId, contractAddress, eventFunctionSignature, eventData, encodedSignatures);
   }

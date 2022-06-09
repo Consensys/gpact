@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 import net.consensys.gpact.common.AnIdentity;
 import net.consensys.gpact.common.BlockchainId;
-import net.consensys.gpact.common.FormatConversion;
 import net.consensys.gpact.messaging.SignedEvent;
 import org.web3j.crypto.Sign;
 
@@ -37,13 +36,13 @@ public class FakeRelayer {
     this.signer = signer;
   }
 
-  public String fetchedSignedEvent(
+  public byte[] fetchedSignedEvent(
       BlockchainId bcId, String contractAddress, byte[] eventFunctionSignature, byte[] eventData) {
     List<AnIdentity> signers = new ArrayList<>();
     signers.add(this.signer);
     SignedEvent signedEvent =
         getSignedEvent(signers, bcId, eventData, contractAddress, eventFunctionSignature);
-    return FormatConversion.byteArrayToString(signedEvent.getEncodedSignatures());
+    return signedEvent.getEncodedSignatures();
   }
 
   public static SignedEvent getSignedEvent(
