@@ -106,135 +106,29 @@ public class FailedGpactCallTreeTest extends AbstractExampleTest {
   }
 
   private void happyCase() throws Exception {
-    LOG.info("****** Happy Case *******");
-
-    BigInteger totalCallDepth = BigInteger.TWO;
     // Specify the call depth for the recursive call to fail to be more than two. This will
     // mean that the code will not get to the point of failure.
-    BigInteger failAtCallDepth = BigInteger.valueOf(5);
-    BigInteger callDepthRoot = BigInteger.ZERO;
-    BigInteger callDepthIntermediate = BigInteger.ONE;
-    BigInteger callDepthLeaf = BigInteger.TWO;
-
-    ArrayList<CallExecutionTree> intermediateCalls = new ArrayList<>();
-    ArrayList<CallExecutionTree> rootCalls = new ArrayList<>();
-    CallExecutionTree leafSeg =
-        new CallExecutionTree(
-            bc3.bcId,
-            leafBlockchain.contractAddress(),
-            intermediateBlockchain.getAbi(totalCallDepth, callDepthLeaf, failAtCallDepth));
-    intermediateCalls.add(leafSeg);
-    CallExecutionTree intermediateSeg =
-        new CallExecutionTree(
-            bc2.bcId,
-            intermediateBlockchain.contractAddress(),
-            intermediateBlockchain.getAbi(totalCallDepth, callDepthIntermediate, failAtCallDepth),
-            intermediateCalls);
-    rootCalls.add(intermediateSeg);
-    CallExecutionTree rootCall =
-        new CallExecutionTree(
-            root.bcId,
-            rootBlockchain.contractAddress(),
-            rootBlockchain.getAbi(totalCallDepth, callDepthRoot, failAtCallDepth),
-            rootCalls);
-
-    CrosschainCallResult result =
-        crossControlManagerGroup.executeCrosschainCall(
-            exampleManager.getExecutionEngine(), rootCall, 300);
-
-    if (!result.isSuccessful()) {
-      throw new Exception("Unexpectedly not successful");
-    }
+    executeTest("Happy Case", 5, true);
   }
 
   private void failLeafSegment() throws Exception {
-    LOG.info("****** Fail Leaf Segment *******");
-
-    BigInteger totalCallDepth = BigInteger.TWO;
-    BigInteger failAtCallDepth =
-        BigInteger.TWO; // Fail after the total call depth, hence don't fail.
-    BigInteger callDepthRoot = BigInteger.ZERO;
-    BigInteger callDepthIntermediate = BigInteger.ONE;
-    BigInteger callDepthLeaf = BigInteger.TWO;
-
-    ArrayList<CallExecutionTree> intermediateCalls = new ArrayList<>();
-    ArrayList<CallExecutionTree> rootCalls = new ArrayList<>();
-    CallExecutionTree leafSeg =
-        new CallExecutionTree(
-            bc3.bcId,
-            leafBlockchain.contractAddress(),
-            intermediateBlockchain.getAbi(totalCallDepth, callDepthLeaf, failAtCallDepth));
-    intermediateCalls.add(leafSeg);
-    CallExecutionTree intermediateSeg =
-        new CallExecutionTree(
-            bc2.bcId,
-            intermediateBlockchain.contractAddress(),
-            intermediateBlockchain.getAbi(totalCallDepth, callDepthIntermediate, failAtCallDepth),
-            intermediateCalls);
-    rootCalls.add(intermediateSeg);
-    CallExecutionTree rootCall =
-        new CallExecutionTree(
-            root.bcId,
-            rootBlockchain.contractAddress(),
-            rootBlockchain.getAbi(totalCallDepth, callDepthRoot, failAtCallDepth),
-            rootCalls);
-
-    CrosschainCallResult result =
-        crossControlManagerGroup.executeCrosschainCall(
-            exampleManager.getExecutionEngine(), rootCall, 300);
-
-    if (result.isSuccessful()) {
-      throw new Exception("FailLeafSegment was unexpectedly successful");
-    }
+    executeTest("Fail Leaf Segment", 2, false);
   }
 
   private void failIntermediateSegment() throws Exception {
-    LOG.info("****** Fail Intermediate Segment *******");
-
-    BigInteger totalCallDepth = BigInteger.TWO;
-    BigInteger failAtCallDepth =
-        BigInteger.ONE; // Fail after the total call depth, hence don't fail.
-    BigInteger callDepthRoot = BigInteger.ZERO;
-    BigInteger callDepthIntermediate = BigInteger.ONE;
-    BigInteger callDepthLeaf = BigInteger.TWO;
-
-    ArrayList<CallExecutionTree> intermediateCalls = new ArrayList<>();
-    ArrayList<CallExecutionTree> rootCalls = new ArrayList<>();
-    CallExecutionTree leafSeg =
-        new CallExecutionTree(
-            bc3.bcId,
-            leafBlockchain.contractAddress(),
-            intermediateBlockchain.getAbi(totalCallDepth, callDepthLeaf, failAtCallDepth));
-    intermediateCalls.add(leafSeg);
-    CallExecutionTree intermediateSeg =
-        new CallExecutionTree(
-            bc2.bcId,
-            intermediateBlockchain.contractAddress(),
-            intermediateBlockchain.getAbi(totalCallDepth, callDepthIntermediate, failAtCallDepth),
-            intermediateCalls);
-    rootCalls.add(intermediateSeg);
-    CallExecutionTree rootCall =
-        new CallExecutionTree(
-            root.bcId,
-            rootBlockchain.contractAddress(),
-            rootBlockchain.getAbi(totalCallDepth, callDepthRoot, failAtCallDepth),
-            rootCalls);
-
-    CrosschainCallResult result =
-        crossControlManagerGroup.executeCrosschainCall(
-            exampleManager.getExecutionEngine(), rootCall, 300);
-
-    if (result.isSuccessful()) {
-      throw new Exception("FailLeafSegment was unexpectedly successful");
-    }
+    executeTest("Fail Intermediate Segment", 1, false);
   }
 
   private void failRoot() throws Exception {
-    LOG.info("****** Fail Root *******");
+    executeTest("Fail Root", 0, false);
+  }
+
+  private void executeTest(String testName, int failAtCallDepth, boolean expectToPass)
+      throws Exception {
+    LOG.info("****** {} *******", testName);
 
     BigInteger totalCallDepth = BigInteger.TWO;
-    BigInteger failAtCallDepth =
-        BigInteger.ZERO; // Fail after the total call depth, hence don't fail.
+    BigInteger failAtCallDepthBigInt = BigInteger.valueOf(failAtCallDepth);
     BigInteger callDepthRoot = BigInteger.ZERO;
     BigInteger callDepthIntermediate = BigInteger.ONE;
     BigInteger callDepthLeaf = BigInteger.TWO;
@@ -245,55 +139,30 @@ public class FailedGpactCallTreeTest extends AbstractExampleTest {
         new CallExecutionTree(
             bc3.bcId,
             leafBlockchain.contractAddress(),
-            intermediateBlockchain.getAbi(totalCallDepth, callDepthLeaf, failAtCallDepth));
+            intermediateBlockchain.getAbi(totalCallDepth, callDepthLeaf, failAtCallDepthBigInt));
     intermediateCalls.add(leafSeg);
     CallExecutionTree intermediateSeg =
         new CallExecutionTree(
             bc2.bcId,
             intermediateBlockchain.contractAddress(),
-            intermediateBlockchain.getAbi(totalCallDepth, callDepthIntermediate, failAtCallDepth),
+            intermediateBlockchain.getAbi(
+                totalCallDepth, callDepthIntermediate, failAtCallDepthBigInt),
             intermediateCalls);
     rootCalls.add(intermediateSeg);
     CallExecutionTree rootCall =
         new CallExecutionTree(
             root.bcId,
             rootBlockchain.contractAddress(),
-            rootBlockchain.getAbi(totalCallDepth, callDepthRoot, failAtCallDepth),
+            rootBlockchain.getAbi(totalCallDepth, callDepthRoot, failAtCallDepthBigInt),
             rootCalls);
 
     CrosschainCallResult result =
         crossControlManagerGroup.executeCrosschainCall(
             exampleManager.getExecutionEngine(), rootCall, 300);
 
-    if (result.isSuccessful()) {
-      throw new Exception("FailLeafSegment was unexpectedly successful");
+    if (result.isSuccessful() != expectToPass) {
+      String successStr = expectToPass ? "successful" : "unsuccessful";
+      throw new Exception(testName + " was unexpectedly " + successStr);
     }
   }
-
-  //  private void showErrors() {
-  //    if (!result.isSuccessful()) {
-  //      TransactionReceipt rootTxr = result.getTransactionReceipt(CrosschainCallResult.ROOT_CALL);
-  //      LOG.info("Root transsuccessful: {}", rootTxr.isStatusOK());
-  //
-  //      List<BigInteger> callPath = new ArrayList<>();
-  //      callPath.add(BigInteger.ONE);
-  //      callPath.add(BigInteger.ZERO);
-  //      TransactionReceipt intermediateTxr = result.getTransactionReceipt(callPath);
-  //      LOG.info("Intermediate successful: {}", intermediateTxr.isStatusOK());
-  //      if (!intermediateTxr.isStatusOK()) {
-  //        LOG.info(" Intermediate revert reason: {}",
-  // RevertReason.decodeRevertReason(intermediateTxr.getRevertReason()));
-  //      }
-  //
-  //      callPath = new ArrayList<>();
-  //      callPath.add(BigInteger.ONE);
-  //      callPath.add(BigInteger.ONE);
-  //      TransactionReceipt leafTxr = result.getTransactionReceipt(callPath);
-  //      LOG.info("Leaf successful: {}", leafTxr.isStatusOK());
-  //      if (!leafTxr.isStatusOK()) {
-  //        LOG.info(" Leaf revert reason: {}",
-  // RevertReason.decodeRevertReason(leafTxr.getRevertReason()));
-  //      }
-  //    }
-
 }
