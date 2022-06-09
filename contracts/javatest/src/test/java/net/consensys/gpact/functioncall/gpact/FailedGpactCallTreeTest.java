@@ -109,8 +109,9 @@ public class FailedGpactCallTreeTest extends AbstractExampleTest {
     LOG.info("****** Happy Case *******");
 
     BigInteger totalCallDepth = BigInteger.TWO;
-    BigInteger failAtCallDepth =
-        BigInteger.valueOf(5); // Fail after the total call depth, hence don't fail.
+    // Specify the call depth for the recursive call to fail to be more than two. This will
+    // mean that the code will not get to the point of failure.
+    BigInteger failAtCallDepth = BigInteger.valueOf(5);
     BigInteger callDepthRoot = BigInteger.ZERO;
     BigInteger callDepthIntermediate = BigInteger.ONE;
     BigInteger callDepthLeaf = BigInteger.TWO;
