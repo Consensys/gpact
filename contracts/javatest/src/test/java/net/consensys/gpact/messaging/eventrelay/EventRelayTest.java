@@ -26,6 +26,8 @@ import net.consensys.gpact.functioncall.sfc.SimpleCrossControlManager;
 import net.consensys.gpact.functioncall.sfc.SimpleCrosschainControl;
 import net.consensys.gpact.messaging.SignedEvent;
 import net.consensys.gpact.messaging.common.MessagingRegistrar;
+import net.consensys.gpact.messaging.fake.FakeRelayer;
+import net.consensys.gpact.messaging.fake.FakeSigner;
 import org.apache.tuweni.bytes.Bytes;
 import org.junit.jupiter.api.Test;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
@@ -111,22 +113,26 @@ public class EventRelayTest extends AbstractWeb3Test {
     String sourceBcCbcAddress =
         "0xF3ce7435e19A4E902e2aF5bfE48a3004DBef0001"; // For the purposes of this test, a random
     // address.
-    EventSigner eventSigner = new EventSigner(sourceBcId);
+
+    AnIdentity newSigner = AnIdentity.createNewRandomIdentity();
+    FakeRelayer fakeRelayer = new FakeRelayer(newSigner);
+    FakeSigner fakeSigner = new FakeSigner(sourceBcId, fakeRelayer);
 
     setupWeb3();
     deployContracts(sourceBcId, sourceBcCbcAddress, destBcId);
-
-    AnIdentity newSigner = AnIdentity.createNewRandomIdentity();
     addBlockchain(sourceBcId, newSigner.getAddress());
-    eventSigner.addSigner(newSigner);
 
     BigInteger val = BigInteger.valueOf(17);
 
     byte[] eventData = createEventData(destBcId, val);
 
     SignedEvent signedEvent =
-        eventSigner.getSignedEvent(
-            eventData, sourceBcCbcAddress, SimpleCrossControlManager.CROSSCALL_EVENT_SIGNATURE);
+        fakeSigner.getSignedEvent(
+            null,
+            null,
+            eventData,
+            sourceBcCbcAddress,
+            SimpleCrossControlManager.CROSSCALL_EVENT_SIGNATURE);
 
     TransactionReceipt txR;
     try {

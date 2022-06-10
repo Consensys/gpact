@@ -71,4 +71,8 @@ public class BlockchainId {
   public Object clone() {
     return new BlockchainId(this.bcId);
   }
+
+  public static BlockchainId empty() {
+    return new BlockchainId(BigInteger.ZERO);
+  }
 }

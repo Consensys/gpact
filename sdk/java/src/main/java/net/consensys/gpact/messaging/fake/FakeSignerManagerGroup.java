@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 ConsenSys Software Inc
+ * Copyright 2022 ConsenSys Software Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -12,21 +12,16 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package net.consensys.gpact.common.test;
+package net.consensys.gpact.messaging.fake;
 
-import java.util.Random;
-import org.apache.tuweni.bytes.Bytes;
+import net.consensys.gpact.messaging.eventattest.AttestorSignerManagerGroup;
 
-public class DummyAddressGenerator {
-
-  public static String gen() {
-    Random notVeryRandom = new Random();
-    byte[] rAddress = new byte[20];
-    notVeryRandom.nextBytes(rAddress);
-    return Bytes.wrap(rAddress).toHexString();
-  }
-
-  public static String addressZero() {
-    return "0";
-  }
-}
+/**
+ * Manage contracts on multiple blockchains, each holding a set of registrar and verification
+ * contracts.
+ *
+ * <p>The fake signer creates a real signature. This real signature can be verified using the event
+ * attestation (attestor signer) contract. As such, this contract just inherits from the
+ * AttestorSignerManagerGroup.
+ */
+public class FakeSignerManagerGroup extends AttestorSignerManagerGroup {}

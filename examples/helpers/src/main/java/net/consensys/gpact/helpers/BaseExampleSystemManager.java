@@ -25,6 +25,8 @@ import net.consensys.gpact.messaging.MessagingManagerGroup;
 import net.consensys.gpact.messaging.common.attestorrelayer.AttestorRelayer;
 import net.consensys.gpact.messaging.eventattest.AttestorSignerGroup;
 import net.consensys.gpact.messaging.eventrelay.EventRelayGroup;
+import net.consensys.gpact.messaging.fake.FakeRelayer;
+import net.consensys.gpact.messaging.fake.FakeSignerGroup;
 import net.consensys.gpact.messaging.txrootrelay.TxRootRelayerGroup;
 import net.consensys.gpact.messaging.txrootrelay.TxRootTransferGroup;
 import net.consensys.gpact.messaging.txrootrelay.TxRootTransferManagerGroup;
@@ -180,6 +182,39 @@ public abstract class BaseExampleSystemManager {
         }
         relayerGroup.addSignerOnAllBlockchains(globalSigner);
         break;
+      case FAKE:
+        FakeSignerGroup fakeSignerGroup = new FakeSignerGroup();
+        FakeRelayer fakeRelayer = fakeSignerGroup.configureRelayer(globalSigner);
+
+        this.messagingManagerGroup =
+            CrosschainProtocols.getMessagingInstance(CrosschainProtocols.FAKE).get();
+
+        addBcFakeSign(
+            messagingManagerGroup,
+            crossControlManagerGroup,
+            fakeSignerGroup,
+            creds,
+            this.root,
+            fakeRelayer);
+
+        addBcFakeSign(
+            messagingManagerGroup,
+            crossControlManagerGroup,
+            fakeSignerGroup,
+            creds,
+            this.bc2,
+            fakeRelayer);
+        if (numberOfBlockchains == 3) {
+          addBcFakeSign(
+              messagingManagerGroup,
+              crossControlManagerGroup,
+              fakeSignerGroup,
+              creds,
+              this.bc3,
+              fakeRelayer);
+        }
+        break;
+
       default:
         throw new Exception("Unknown messaging: " + consensusMethodology);
     }
@@ -274,6 +309,20 @@ public abstract class BaseExampleSystemManager {
         ((TxRootTransferManagerGroup) messagingManagerGroup).getTxRootContractAddress(bc.bcId));
     crossControlManagerGroup.addBlockchainAndDeployContracts(creds, bc);
     crossControlManagerGroup.setMessageVerifier(bc.bcId, txRootTransferGroup.getVerifier(bc.bcId));
+  }
+
+  private void addBcFakeSign(
+      MessagingManagerGroup messagingManagerGroup,
+      CrossControlManagerGroup crossControlManagerGroup,
+      FakeSignerGroup fakeSignerGroup,
+      Credentials creds,
+      BlockchainConfig bc,
+      FakeRelayer fakeRelayer)
+      throws Exception {
+    crossControlManagerGroup.addBlockchainAndDeployContracts(creds, bc);
+    messagingManagerGroup.addBlockchainAndDeployContracts(creds, bc);
+    fakeSignerGroup.addBlockchain(bc.bcId, fakeRelayer);
+    crossControlManagerGroup.setMessageVerifier(bc.bcId, fakeSignerGroup.getVerifier(bc.bcId));
   }
 
   private List<AttestorRelayer.Dest> setupDispatcherTargets() throws Exception {
