@@ -16,6 +16,11 @@ pragma solidity >=0.8;
 
 import "../../../../../contracts/contracts/src/functioncall/interface/CrosschainFunctionCallInterface.sol";
 
+/**
+ * Application contract that iteratively calls itself, with parameter driven failures.
+ * It can be used to test a call trees, selectively failing at a certain call depth or
+ * at the root of a call tree.
+ */
 contract FailureTest {
     uint256 otherBlockchainId;
     FailureTest otherContract;

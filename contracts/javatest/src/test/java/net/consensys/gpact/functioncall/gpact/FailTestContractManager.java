@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 ConsenSys Software Inc
+ * Copyright 2022 ConsenSys Software Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -24,6 +24,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
 
+/**
+ * Manage the FailureTest contract. This is used as part of tests to check that failures in certain
+ * parts of the call tree are handled correctly by the GPACT protocol.
+ */
 public class FailTestContractManager extends AbstractBlockchain {
   static final Logger LOG = LogManager.getLogger(FailTestContractManager.class);
 

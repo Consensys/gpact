@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 ConsenSys Software.
+ * Copyright 2022 ConsenSys Software.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -31,6 +31,14 @@ import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
 import org.web3j.crypto.Credentials;
 
+/**
+ * Test to check that the GPACT Crosschain Control contract handles failures at the leaf segment,
+ * intermediate segment, and root of a call execution tree.
+ *
+ * <p>The call tree is:
+ *
+ * <p>Root -> Intermediate Segment -> Leaf Segment
+ */
 public class FailedGpactCallTreeTest extends AbstractExampleTest {
   static final Logger LOG = LogManager.getLogger(FailedGpactCallTreeTest.class);
 

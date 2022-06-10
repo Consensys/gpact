@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 ConsenSys Software Inc
+ * Copyright 2022 ConsenSys Software Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -23,9 +23,8 @@ import org.apache.logging.log4j.Logger;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
 /**
- * Manages the interaction between the application library and attestors for a certain blockchain.
- * The class asks an attestor to give the threshold signed event data. The attestor should have
- * cooperated with other attestors already to threshold sign the event data.
+ * Fakes the interaction between the application library and attestors for a certain blockchain. The
+ * fake signer uses the FakeRelayer to sign events.
  */
 public class FakeSigner implements MessagingVerificationInterface {
   static final Logger LOG = LogManager.getLogger(FakeSigner.class);
