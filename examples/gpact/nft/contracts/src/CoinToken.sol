@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 ConsenSys Software Inc
+ * Copyright 2022 ConsenSys Software Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -12,21 +12,16 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package net.consensys.gpact.common.test;
+pragma solidity ^0.8.0;
 
-import java.util.Random;
-import org.apache.tuweni.bytes.Bytes;
+import "../../../../../contracts/contracts/src/openzeppelin/token/ERC20/ERC20.sol";
 
-public class DummyAddressGenerator {
+contract CoinToken is ERC20 {
+    constructor(uint256 initialSupply) ERC20("Coin", "C$") {
+        _mint(msg.sender, initialSupply);
+    }
 
-  public static String gen() {
-    Random notVeryRandom = new Random();
-    byte[] rAddress = new byte[20];
-    notVeryRandom.nextBytes(rAddress);
-    return Bytes.wrap(rAddress).toHexString();
-  }
-
-  public static String addressZero() {
-    return "0";
-  }
+    function decimals() public view virtual override returns (uint8) {
+        return 18;
+    }
 }

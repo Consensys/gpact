@@ -1,6 +1,8 @@
 dependencies {
     implementation project(':sdk')
     implementation project(':common-test')
+    implementation project (':examples-helpers')
+
 
     implementation "io.reactivex.rxjava2:rxjava:${rxJavaVersion}"
 

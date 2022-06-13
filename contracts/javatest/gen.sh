@@ -19,6 +19,8 @@ solc $CONTRACTSDIR/application/lockablestorage/TestLockableStorageWrapperAllValu
 solc $CONTRACTSDIR/functioncall/interface/HiddenParamDestTest.sol --allow-paths . --bin --abi --hashes --optimize -o $BUILDDIR --overwrite
 solc $CONTRACTSDIR/functioncall/interface/HiddenParamSourceTest.sol --allow-paths . --bin --abi --hashes --optimize -o $BUILDDIR --overwrite
 
+solc $CONTRACTSDIR/functioncall/gpact/FailureTest.sol --allow-paths . --bin --abi --hashes --optimize -o $BUILDDIR --overwrite
+
 solc $CONTRACTSDIR/messaging/common/MessagingRegistrar.sol --allow-paths . --bin --abi --hashes --optimize -o $BUILDDIR --overwrite
 
 solc $CONTRACTSDIR/messaging/eventrelay/EventRelayVerifier.sol --allow-paths . --bin --abi --hashes --optimize -o $BUILDDIR --overwrite
@@ -28,13 +30,14 @@ solc $CONTRACTSDIR/messaging/txrootrelay/TestReceipts.sol --allow-paths . --bin 
 solc $CONTRACTSDIR/messaging/txrootrelay/TestEvents.sol --allow-paths . --bin --abi --optimize -o $BUILDDIR --overwrite
 
 
-
 $WEB3J solidity generate -a=$BUILDDIR/MockCbcForLockableStorageTest.abi -b=$BUILDDIR/MockCbcForLockableStorageTest.bin -o=$OUTPUTDIR -p=$BASEPACKAGE.application.lockablestorage
 $WEB3J solidity generate -a=$BUILDDIR/TestLockableStorageWrapper.abi -b=$BUILDDIR/TestLockableStorageWrapper.bin -o=$OUTPUTDIR -p=$BASEPACKAGE.application.lockablestorage
 $WEB3J solidity generate -a=$BUILDDIR/TestLockableStorageWrapperAllValues.abi -b=$BUILDDIR/TestLockableStorageWrapperAllValues.bin -o=$OUTPUTDIR -p=$BASEPACKAGE.application.lockablestorage
 
 $WEB3J solidity generate -a=$BUILDDIR/HiddenParamDestTest.abi -b=$BUILDDIR/HiddenParamDestTest.bin -o=$OUTPUTDIR -p=$BASEPACKAGE.functioncall
 $WEB3J solidity generate -a=$BUILDDIR/HiddenParamSourceTest.abi -b=$BUILDDIR/HiddenParamSourceTest.bin -o=$OUTPUTDIR -p=$BASEPACKAGE.functioncall
+
+$WEB3J solidity generate -r -a=$BUILDDIR/FailureTest.abi -b=$BUILDDIR/FailureTest.bin -o=$OUTPUTDIR -p=$BASEPACKAGE.functioncall
 
 $WEB3J solidity generate -a=$BUILDDIR/MessagingRegistrar.abi -b=$BUILDDIR/MessagingRegistrar.bin -o=$OUTPUTDIR -p=$BASEPACKAGE.messaging.common
 

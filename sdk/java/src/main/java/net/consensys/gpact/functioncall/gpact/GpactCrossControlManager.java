@@ -583,7 +583,7 @@ public class GpactCrossControlManager extends AbstractBlockchain implements Cros
     }
     if (segmentEventResponses.size() != 1) {
       throw new RuntimeException(
-          "Undexpected number of segment events: " + segmentEventResponses.size());
+          "Unexpected number of segment events: " + segmentEventResponses.size());
     }
   }
 

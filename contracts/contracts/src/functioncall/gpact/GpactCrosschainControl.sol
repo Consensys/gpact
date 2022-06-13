@@ -203,7 +203,8 @@ contract GpactCrosschainControl is
                     _eventData,
                     _callPath,
                     hashOfCallGraph,
-                    crosschainTransactionId
+                    crosschainTransactionId,
+                    false
                 )
             ) {
                 return;
@@ -328,7 +329,8 @@ contract GpactCrosschainControl is
                 _eventData,
                 callPathForStart,
                 hashOfCallGraph,
-                crosschainTransactionId
+                crosschainTransactionId,
+                true
             )
         ) {
             return;
@@ -710,7 +712,8 @@ contract GpactCrosschainControl is
         bytes[] memory _segmentEvents,
         uint256[] memory _callPath,
         bytes32 _hashOfCallGraph,
-        uint256 _crosschainTxId
+        uint256 _crosschainTxId,
+        bool _asRoot
     ) private returns (bool) {
         // The caller must be a segment that is calling other segments or the
         // root call (which also is calling segments). The call path for the
@@ -784,9 +787,20 @@ contract GpactCrosschainControl is
                 "Segment events array out of order"
             );
 
-            // Fail the root transaction is one of the segments failed.
+            // Fail the root/segment transaction as one of the segments failed.
             if (!success) {
-                failRootTransaction(_crosschainTxId);
+                if (_asRoot) {
+                    failRootTransaction(_crosschainTxId);
+                } else {
+                    emit Segment(
+                        _crosschainTxId,
+                        _hashOfCallGraph,
+                        _callPath,
+                        new address[](0),
+                        false,
+                        new bytes(0)
+                    );
+                }
                 cleanupAfterCallSegment();
                 return true;
             }
