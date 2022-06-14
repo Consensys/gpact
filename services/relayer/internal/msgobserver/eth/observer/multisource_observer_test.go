@@ -15,7 +15,7 @@ import (
 	"time"
 )
 
-func TestMultiSourceObserver_SFCObservation(t *testing.T) {
+func TestMultiSourceObserver_SingleObservation(t *testing.T) {
 	fixSourceID := big.NewInt(1)
 
 	cases := map[string]struct {
@@ -75,6 +75,64 @@ func TestMultiSourceObserver_SFCObservation(t *testing.T) {
 			simBackend)
 		mockMQ.AssertExpectations(t)
 	}
+}
+
+func TestMultiSourceObserver_MultiObservation(t *testing.T) {
+	fixSourceID := big.NewInt(1)
+
+	type TestObservation struct {
+		contractType  string
+		watcherType   WatcherType
+		confirmations int
+		destAddress   string
+		destId        *big.Int
+	}
+
+	testCases := []TestObservation{
+		{"sfc", RealtimeWatcher, 1,
+			"0x8E215D06Ea7EC1Fdb4fC5fD21768F4B34eE92EF4", big.NewInt(2)},
+		{"sfc", FinalisedWatcher, 4,
+			"0x8E215D06Ea7EC1Fdb4fC5fD21768F4B34eE92EF4", big.NewInt(2)},
+		{"gpact", RealtimeWatcher, 1,
+			"", big.NewInt(0)},
+		{"gpact", FinalisedWatcher, 4,
+			"", big.NewInt(0)},
+	}
+	dsPath, cleanupFn := newDSPath(t)
+	defer cleanupFn()
+
+	simBackend, auth := simulatedBackend(t)
+	mockMQ := new(MockMQ)
+	multiObserver, err := NewMultiSourceObserver(dsPath, mockMQ, factoryGenerator(simBackend))
+
+	contracts := make(map[TestObservation]interface{})
+
+	// setup and start multiple different observer
+	for _, testCase := range testCases {
+		var contract interface{}
+		var fixSourceAddress common.Address
+		fixSourceAddress, contract = deployContract(t, testCase.contractType, simBackend, auth)
+		assert.Nil(t, err, "unexpected error creating multisource observer: %v", err)
+		err = multiObserver.StartObservation(fixSourceID, "", testCase.contractType, fixSourceAddress, testCase.watcherType)
+		assert.Nil(t, err, "could not start observation, error: %v", err)
+		mockMQ.On("Request", v1.Version, v1.MessageType, mock.AnythingOfType("*v1.Message")).Return(nil)
+		contracts[testCase] = contract
+	}
+
+	// perform transactions on each source contract/destination
+	for testObservation, contract := range contracts {
+		// perform crosschain calls and simulate the specified number of confirmations
+		transact(t, testObservation.contractType, contract, auth, testObservation.destId, common.HexToAddress(testObservation.destAddress),
+			testObservation.confirmations,
+			simBackend)
+	}
+
+	// verify that the observer detected and processed all contract event
+	mockMQ.AssertNumberOfCalls(t, "Request", 4)
+
+	// ensure the observer is successfully stopped, by checking that subsequent crosschain calls are not detected
+	multiObserver.Stop()
+	assert.False(t, multiObserver.IsRunning(), "multiobserver stop failed")
 }
 
 func transact(t *testing.T, contractType string, contract interface{}, auth *bind.TransactOpts, destId *big.Int,
