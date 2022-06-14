@@ -16,109 +16,88 @@ import (
 )
 
 func TestMultiSourceObserver_SFCObservation(t *testing.T) {
-	fixDesAddress := common.HexToAddress("0x8e215d06ea7ec1fdb4fc5fd21768f4b34ee92ef4")
-	fixDestID := big.NewInt(2)
 	fixSourceID := big.NewInt(1)
 
 	cases := map[string]struct {
 		contractType  string
 		watcherType   WatcherType
 		confirmations int
+		destAddress   string
+		destId        *big.Int
 	}{
-		"Start-Realtime-SFC-Observer":  {"sfc", RealtimeWatcher, 1},
-		"Start-Finalised-SFC-Observer": {"sfc", FinalisedWatcher, 4},
+		"Start-Realtime-SFC-Observer": {"sfc", RealtimeWatcher, 1,
+			"0x8E215D06Ea7EC1Fdb4fC5fD21768F4B34eE92EF4", big.NewInt(2)},
+		"Start-Finalised-SFC-Observer": {"sfc", FinalisedWatcher, 4,
+			"0x8E215D06Ea7EC1Fdb4fC5fD21768F4B34eE92EF4", big.NewInt(2)},
+		"Start-Realtime-GPACT-Observer": {"gpact", RealtimeWatcher, 1,
+			"", big.NewInt(0)},
+		"Start-Finalised-GPACT-Observer": {"gpact", FinalisedWatcher, 4,
+			"", big.NewInt(0)},
 	}
 	dsPath, cleanupFn := newDSPath(t)
 	defer cleanupFn()
 
-	for k, v := range cases {
-		logging.Info("Started testing scenario: '%s'", k)
+	for name, testCase := range cases {
+		logging.Info("Testing scenario: '%s'", name)
 		simBackend, auth := simulatedBackend(t)
-		fixSourceAddress, contract := deploySFCContract(t, simBackend, auth)
+		var contract interface{}
+		var fixSourceAddress common.Address
+		fixSourceAddress, contract = deployContract(t, testCase.contractType, simBackend, auth)
+
 		mockMQ := new(MockMQ)
 
 		multiObserver, err := NewMultiSourceObserver(dsPath, mockMQ, factoryGenerator(simBackend))
 		assert.Nil(t, err, "unexpected error creating multisource observer: %v", err)
 
-		err = multiObserver.StartObservation(fixSourceID, "", v.contractType, fixSourceAddress, v.watcherType)
+		err = multiObserver.StartObservation(fixSourceID, "", testCase.contractType, fixSourceAddress, testCase.watcherType)
 		assert.Nil(t, err, "could not start observation, error: %v", err)
 
 		mockMQ.On("Request", v1.Version, v1.MessageType, mock.AnythingOfType("*v1.Message")).Once().Return(nil)
 
-		// perform crosschain calls and ensure sufficient number of confirmations are performed for the event to be
-		// processed by the observer
-		transactSFC(t, contract, auth, fixDestID, fixDesAddress, v.confirmations, simBackend)
+		// perform crosschain calls and simulate the specified number of confirmations
+		transact(t, testCase.contractType, contract, auth, testCase.destId, common.HexToAddress(testCase.destAddress),
+			testCase.confirmations,
+			simBackend)
 
 		// verify that the observer detected and processed the contract event
 		mockMQ.AssertExpectations(t)
 		sentMsg := mockMQ.LastMessage.(*v1.Message)
-		assert.Equal(t, fixDesAddress.String(), sentMsg.Destination.ContractAddress)
-		assert.Equal(t, fixDestID.String(), sentMsg.Destination.NetworkID)
+		assert.Equal(t, testCase.destAddress, sentMsg.Destination.ContractAddress)
+		assert.Equal(t, testCase.destId.String(), sentMsg.Destination.NetworkID)
 		assert.Equal(t, fixSourceID.String(), sentMsg.Source.NetworkID)
 
 		// ensure the observer is successfully stopped, by checking that subsequent crosschain calls are not detected
 		multiObserver.Stop()
 		assert.False(t, multiObserver.IsRunning(), "multiobserver stop failed")
 		mockMQ.On("Request", v1.Version, v1.MessageType, mock.AnythingOfType("*v1.Message")).Times(0).Return(nil)
-		transactSFC(t, contract, auth, fixDestID, fixDesAddress, v.confirmations, simBackend)
+		transact(t, testCase.contractType, contract, auth, testCase.destId, common.HexToAddress(testCase.destAddress),
+			testCase.confirmations,
+			simBackend)
 		mockMQ.AssertExpectations(t)
-
-		logging.Info("Finished testing scenario: '%s'", k)
 	}
 }
 
-func TestMultiSourceObserver_GPACTObservation(t *testing.T) {
-	fixSourceID := big.NewInt(1)
-
-	cases := map[string]struct {
-		contractType  string
-		watcherType   WatcherType
-		confirmations int
-	}{
-		"Start-Realtime-GPACT-Observer":  {"gpact", RealtimeWatcher, 1},
-		"Start-Finalised-GPACT-Observer": {"gpact", FinalisedWatcher, 4},
-	}
-	dsPath, cleanupFn := newDSPath(t)
-	defer cleanupFn()
-
-	for k, v := range cases {
-		logging.Info("Started testing scenario: '%s'", k)
-		simBackend, auth := simulatedBackend(t)
-		fixSourceAddress, contract := deployGPACTContract(t, simBackend, auth)
-		mockMQ := new(MockMQ)
-
-		multiObserver, err := NewMultiSourceObserver(dsPath, mockMQ, factoryGenerator(simBackend))
-		assert.Nil(t, err, "unexpected error creating multisource observer: %v", err)
-
-		err = multiObserver.StartObservation(fixSourceID, "", v.contractType, fixSourceAddress, v.watcherType)
-		assert.Nil(t, err, "could not start observation, error: %v", err)
-
-		mockMQ.On("Request", v1.Version, v1.MessageType, mock.AnythingOfType("*v1.Message")).Once().Return(nil)
-
-		// perform crosschain calls and ensure sufficient number of confirmations are performed for the event to be
-		// processed by the observer
-		transactGPACT(t, contract, auth, v.confirmations, simBackend)
-
-		// verify that the observer detected and processed the contract event
-		mockMQ.AssertExpectations(t)
-		sentMsg := mockMQ.LastMessage.(*v1.Message)
-		assert.Equal(t, fixSourceID.String(), sentMsg.Source.NetworkID)
-
-		// ensure the observer is successfully stopped, by checking that subsequent crosschain calls are not detected
-		multiObserver.Stop()
-		assert.False(t, multiObserver.IsRunning(), "multiobserver stop failed")
-		mockMQ.On("Request", v1.Version, v1.MessageType, mock.AnythingOfType("*v1.Message")).Times(0).Return(nil)
-
-		transactGPACT(t, contract, auth, v.confirmations, simBackend)
-		mockMQ.AssertExpectations(t)
-
-		logging.Info("Finished testing scenario: '%s'", k)
+func transact(t *testing.T, contractType string, contract interface{}, auth *bind.TransactOpts, destId *big.Int,
+	address common.Address, confirmations int, backend *backends.SimulatedBackend) {
+	if contractType == "gpact" {
+		transactGPACT(t, contract, auth, confirmations, backend)
+	} else {
+		transactSFC(t, contract, auth, destId, address, confirmations, backend)
 	}
 }
 
-func transactSFC(t *testing.T, contract *functioncall.Sfc, auth *bind.TransactOpts, fixDestID *big.Int,
+func deployContract(t *testing.T, contractType string, backend *backends.SimulatedBackend, auth *bind.TransactOpts) (common.Address, interface{}) {
+	if contractType == "gpact" {
+		return deployGPACTContract(t, backend, auth)
+	} else {
+		return deploySFCContract(t, backend, auth)
+	}
+}
+
+func transactSFC(t *testing.T, contract interface{}, auth *bind.TransactOpts, fixDestID *big.Int,
 	fixDesAddress common.Address, confirmations int, simBackend *backends.SimulatedBackend) {
-	_, err := contract.SfcTransactor.CrossBlockchainCall(auth, fixDestID, fixDesAddress, []byte("payload"))
+	c := contract.(*functioncall.Sfc)
+	_, err := c.SfcTransactor.CrossBlockchainCall(auth, fixDestID, fixDesAddress, []byte("payload"))
 	if err != nil {
 		failNow(t, "failed to transact: %v", err)
 	}
@@ -128,15 +107,17 @@ func transactSFC(t *testing.T, contract *functioncall.Sfc, auth *bind.TransactOp
 	time.Sleep(3 * time.Second)
 }
 
-func transactGPACT(t *testing.T, contract *functioncall.Gpact, auth *bind.TransactOpts, confirmations int, simBackend *backends.SimulatedBackend) {
-	_, err := contract.GpactTransactor.Start(auth, big.NewInt(rand.Int63()), big.NewInt(10), []byte("call graph payload"))
+func transactGPACT(t *testing.T, contract interface{}, auth *bind.TransactOpts, confirmations int,
+	simBackend *backends.SimulatedBackend) {
+	c := contract.(*functioncall.Gpact)
+	_, err := c.GpactTransactor.Start(auth, big.NewInt(rand.Int63()), big.NewInt(10), []byte("call graph payload"))
 	if err != nil {
 		failNow(t, "failed to transact: %v", err)
 	}
 	for i := 0; i < confirmations; i++ {
 		simBackend.Commit()
 	}
-	time.Sleep(4 * time.Second)
+	time.Sleep(3 * time.Second)
 }
 
 func factoryGenerator(backend *backends.SimulatedBackend) func(url string) (Backend, error) {
