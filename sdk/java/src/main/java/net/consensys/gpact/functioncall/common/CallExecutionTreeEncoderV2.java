@@ -14,6 +14,8 @@
  */
 package net.consensys.gpact.functioncall.common;
 
+import static net.consensys.gpact.common.crypto.Hash.keccak256;
+
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -22,15 +24,56 @@ import net.consensys.gpact.common.FormatConversion;
 import net.consensys.gpact.common.Tuple;
 import net.consensys.gpact.functioncall.CallExecutionTree;
 import net.consensys.gpact.functioncall.CallExecutionTreeException;
+import org.apache.tuweni.bytes.Bytes;
 
-public class CallExecutionTreeEncoderV1 extends CallExecutionTreeEncoderBase {
+public class CallExecutionTreeEncoderV2 extends CallExecutionTreeEncoderBase {
+  // Call tree with root and called functions.
+  private static final byte SINGLE_LAYER = 0;
+  // Call tree with root, called functions, and function called by the called
+  // functions, to an arbitrary call depth.
+  private static final byte MULTI_LAYER = 1;
 
-  private CallExecutionTreeEncoderV1() {
+  private static final int HASH_SIZE = 32;
+
+  private CallExecutionTreeEncoderV2() {
     // Block instantiation.
   }
 
   public static byte[] encode(final CallExecutionTree callTree) throws CallExecutionTreeException {
+    if (isSingleLayer(callTree)) {
+      return encodeSingleLayer(callTree);
+    }
+    // Encode multi-layer.
     return encodeRecursive(callTree);
+  }
+
+  private static byte[] encodeSingleLayer(CallExecutionTree function)
+      throws CallExecutionTreeException {
+    ByteBuffer buf = ByteBuffer.allocate(MAX_CALL_EX_TREE_SIZE);
+    buf.put(SINGLE_LAYER);
+
+    List<CallExecutionTree> calledFunctions = function.getCalledFunctions();
+
+    List<byte[]> encodedCalledFunctionHashes = new ArrayList<>();
+    encodedCalledFunctionHashes.add(encodeFunctionCallAndHash(function));
+    for (CallExecutionTree func : calledFunctions) {
+      encodedCalledFunctionHashes.add(encodeFunctionCallAndHash(func));
+    }
+
+    // Non-leaf function
+    int numCalledFunctions = calledFunctions.size();
+    if (numCalledFunctions > MAX_CALLED_FUNCTIONS) {
+      throw new CallExecutionTreeException("Too many called functions: " + calledFunctions.size());
+    }
+    buf.put((byte) numCalledFunctions);
+    for (byte[] encodedCalledFuncHash : encodedCalledFunctionHashes) {
+      buf.put(encodedCalledFuncHash);
+    }
+
+    buf.flip();
+    byte[] output = new byte[buf.limit()];
+    buf.get(output);
+    return output;
   }
 
   private static byte[] encodeRecursive(CallExecutionTree function)
@@ -38,12 +81,14 @@ public class CallExecutionTreeEncoderV1 extends CallExecutionTreeEncoderBase {
     List<CallExecutionTree> calledFunctions = function.getCalledFunctions();
 
     ByteBuffer buf = ByteBuffer.allocate(MAX_CALL_EX_TREE_SIZE);
+    buf.put(MULTI_LAYER);
+
     if (function.isLeaf()) {
       buf.put(LEAF_FUNCTION);
-      buf.put(encodeFunctionCall(function));
+      buf.put(encodeFunctionCallAndHash(function));
     } else {
       List<byte[]> encodedCalledFunctions = new ArrayList<>();
-      encodedCalledFunctions.add(encodeFunctionCall(function));
+      encodedCalledFunctions.add(encodeFunctionCallAndHash(function));
       for (CallExecutionTree func : calledFunctions) {
         encodedCalledFunctions.add(encodeRecursive(func));
       }
@@ -69,6 +114,11 @@ public class CallExecutionTreeEncoderV1 extends CallExecutionTreeEncoderBase {
     byte[] output = new byte[buf.limit()];
     buf.get(output);
     return output;
+  }
+
+  private static byte[] encodeFunctionCallAndHash(final CallExecutionTree callTree) {
+    byte[] encodedFunction = encodeFunctionCall(callTree);
+    return keccak256(Bytes.wrap(encodedFunction)).toArray();
   }
 
   /**
@@ -101,7 +151,21 @@ public class CallExecutionTreeEncoderV1 extends CallExecutionTreeEncoderBase {
   private static void process(final byte[] encodedCallExecutionTree, final StringBuilder out)
       throws CallExecutionTreeException {
     ByteBuffer buf = ByteBuffer.wrap(encodedCallExecutionTree);
-    int size = processRecursive(out, buf, 0);
+    int encodingType = uint8(buf.get());
+    int size = 0;
+    switch (encodingType) {
+      case SINGLE_LAYER:
+        size = processSingleLayer(out, buf);
+        break;
+      case MULTI_LAYER:
+        size = processRecursive(out, buf, 0);
+        break;
+      default:
+        out.append("Unknown encoding type: ");
+        out.append(encodingType);
+        return;
+    }
+
     if (buf.remaining() != 0) {
       throw new CallExecutionTreeException(
           "Not all bytes from Call Execution Tree processed: " + buf.remaining() + "remaining",
@@ -111,6 +175,24 @@ public class CallExecutionTreeEncoderV1 extends CallExecutionTreeEncoderBase {
       throw new CallExecutionTreeException(
           "Not all bytes from Call Execution Tree processed: " + size + ", " + buf.capacity(), out);
     }
+  }
+
+  private static int processSingleLayer(StringBuilder out, ByteBuffer buf)
+      throws CallExecutionTreeException {
+    int size = 0;
+    size += NUM_FUNCS_CALLED_SIZE;
+    int numFuncsCalled = uint8(buf.get());
+
+    for (int i = 0; i < numFuncsCalled + 1; i++) {
+      byte[] hash = new byte[HASH_SIZE];
+      buf.get(hash, size, HASH_SIZE);
+      size += HASH_SIZE;
+      String hashStr = FormatConversion.byteArrayToString(hash);
+      out.append("Function Hash: ");
+      out.append(hashStr);
+      out.append("\n");
+    }
+    return size;
   }
 
   private static int processRecursive(StringBuilder out, ByteBuffer buf, int level)
@@ -232,5 +314,20 @@ public class CallExecutionTreeEncoderV1 extends CallExecutionTreeEncoderBase {
     String addr = FormatConversion.byteArrayToString(address);
     String funcData = FormatConversion.byteArrayToString(data);
     return new Tuple<>(bcId, addr, funcData);
+  }
+
+  private static boolean isSingleLayer(CallExecutionTree callTree) {
+    ArrayList<CallExecutionTree> calledFunctions = callTree.getCalledFunctions();
+    if (calledFunctions == null) {
+      // In the situation where there is only a root function call, this can be represented
+      // most simply in the single layer encoding.
+      return true;
+    }
+    for (CallExecutionTree calledFunction : calledFunctions) {
+      if (!calledFunction.isLeaf()) {
+        return false;
+      }
+    }
+    return true;
   }
 }
