@@ -88,7 +88,7 @@ func TestMultiSourceObserver_MultiObservation(t *testing.T) {
 		destId        *big.Int
 	}
 
-	testCases := []TestObservation{
+	testObservations := []TestObservation{
 		{"sfc", RealtimeWatcher, 1,
 			"0x8E215D06Ea7EC1Fdb4fC5fD21768F4B34eE92EF4", big.NewInt(2)},
 		{"sfc", FinalisedWatcher, 4,
@@ -108,7 +108,7 @@ func TestMultiSourceObserver_MultiObservation(t *testing.T) {
 	contracts := make(map[TestObservation]interface{})
 
 	// setup and start multiple different observer
-	for _, testCase := range testCases {
+	for _, testCase := range testObservations {
 		var contract interface{}
 		var fixSourceAddress common.Address
 		fixSourceAddress, contract = deployContract(t, testCase.contractType, simBackend, auth)
@@ -162,7 +162,7 @@ func transactSFC(t *testing.T, contract interface{}, auth *bind.TransactOpts, fi
 	for i := 0; i < confirmations; i++ {
 		simBackend.Commit()
 	}
-	time.Sleep(3 * time.Second)
+	time.Sleep(4 * time.Second)
 }
 
 func transactGPACT(t *testing.T, contract interface{}, auth *bind.TransactOpts, confirmations int,
@@ -175,7 +175,7 @@ func transactGPACT(t *testing.T, contract interface{}, auth *bind.TransactOpts, 
 	for i := 0; i < confirmations; i++ {
 		simBackend.Commit()
 	}
-	time.Sleep(3 * time.Second)
+	time.Sleep(4 * time.Second)
 }
 
 func factoryGenerator(backend *backends.SimulatedBackend) func(url string) (Backend, error) {

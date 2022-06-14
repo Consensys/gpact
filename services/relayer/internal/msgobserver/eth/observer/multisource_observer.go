@@ -60,7 +60,7 @@ const (
 	FinalisedWatcher WatcherType = "finalised"
 )
 
-// MultiSourceObserver is an observer that can observer multiple different event sources.
+// MultiSourceObserver is an observer that can observe multiple different event sources.
 // It creates and manages distinct SingleSourceObserver instances for each event source.
 // The contract persists the list of event sources it tracks. In the event of a restart,
 // the observer resumes observation of the persisted sources.
@@ -96,44 +96,45 @@ func defaultBackendFactory(url string) (Backend, error) {
 	return ethclient.Dial(url)
 }
 
-// Start starts the observer's routine.
+// Start starts the multisource observer. If there are past observations stored in the database,
+// this function creates and starts observers for each of those observations.
 func (o *MultiSourceObserver) Start() error {
 	if o.running {
-		logging.Info("Multi-observer already running. Start request ignored")
+		logging.Info("Multi-source observer already running. Start request ignored.")
 		return nil
 	}
 
-	logging.Info("Querying for saved observations...")
+	logging.Debug("Querying for saved observations.")
 	results, err := o.ds.Query(context.Background(), query.Query{})
 	if err != nil {
 		logging.Error("Error querying datastore for stored observations: %v", err)
 		return err
 	}
 
-	logging.Info("Starting saved observers...")
+	logging.Debug("Starting saved observers.")
 	for r := range results.Next() {
 		data := r.Value
 		obs := observation{}
 		err = json.Unmarshal(data, &obs)
 		if err != nil {
-			logging.Error("Error deserialising saved observer, error: %v", err)
+			logging.Error("Error deserialising saved observer, error: %v.", err)
 			return err
 		}
 		err := o.startNewObservation(obs)
 		if err != nil {
-			logging.Error("Error starting observer for source '%s', error: %v", obs.ObserverId, err)
+			logging.Error("Error starting observer for source '%s', error: %v.", obs.ObserverId, err)
 			return err
 		}
-		logging.Info("Started observer for source '%s'", obs.ObserverId)
+		logging.Info("Started observer for source '%s'.", obs.ObserverId)
 	}
-	logging.Info("Multi-source observer started")
+	logging.Info("Multi-source observer started.")
 	return nil
 }
 
-// Stop all observer that the multi-source observer manages
+// Stop stops all observers that the multi-source observer manages
 func (o *MultiSourceObserver) Stop() {
 	if !o.running {
-		logging.Info("Multi-observer is not running. Stop request ignored")
+		logging.Info("Multi-source observer is not running. Stop request ignored.")
 		return
 	}
 	for k := range o.observers {
@@ -142,7 +143,7 @@ func (o *MultiSourceObserver) Stop() {
 	o.running = false
 	err := o.ds.Close()
 	if err != nil {
-		logging.Error("error closing database connection: %v", err)
+		logging.Error("error closing database connection: %v.", err)
 		return
 	}
 	o.ds = nil
@@ -152,7 +153,8 @@ func (o *MultiSourceObserver) IsRunning() bool {
 	return o.running
 }
 
-// StartObservation starts a new observe.
+// StartObservation starts a new observer for the provided event source
+// If an observer associated with the event source already exists, the method ensures it is started.
 func (o *MultiSourceObserver) StartObservation(chainID *big.Int, chainAP string, contractType string,
 	contractAddr common.Address, watcherType WatcherType) error {
 	// If an observer for the source exists, and is not currently running, start it.
@@ -192,7 +194,7 @@ func (o *MultiSourceObserver) StartObservation(chainID *big.Int, chainAP string,
 	return o.startNewObservation(obs)
 }
 
-// StopObservation stops the observer associated with the given source if one exists and is currently running.
+// StopObservation stops the observer associated with the given event source if one exists and is currently running.
 func (o *MultiSourceObserver) StopObservation(chainID *big.Int, contractType string, contractAddr common.Address,
 	watcherType WatcherType) error {
 	sourceId := GetSourceID(chainID, contractAddr, contractType, watcherType)
