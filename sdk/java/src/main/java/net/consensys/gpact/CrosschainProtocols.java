@@ -23,6 +23,7 @@ import net.consensys.gpact.functioncall.sfc.SimpleCrossControlManagerGroup;
 import net.consensys.gpact.messaging.MessagingManagerGroup;
 import net.consensys.gpact.messaging.eventattest.AttestorSignerManagerGroup;
 import net.consensys.gpact.messaging.eventrelay.EventRelayManagerGroup;
+import net.consensys.gpact.messaging.fake.FakeSignerManagerGroup;
 import net.consensys.gpact.messaging.txrootrelay.TxRootTransferManagerGroup;
 
 /** Entry point class for the Crosschian Protocol Stack SDK. */
@@ -33,6 +34,7 @@ public class CrosschainProtocols {
   public static final String EVENTRELAY = "EVENTRELAY";
   public static final String ATTESTOR = "ATTESTOR";
   public static final String TXROOT = "TXROOT";
+  public static final String FAKE = "FAKE";
 
   // Execution engine tpe
   public static final String SERIAL = "SERIAL";
@@ -50,6 +52,7 @@ public class CrosschainProtocols {
     registerMessagingImpl(EVENTRELAY, EventRelayManagerGroup.class);
     registerMessagingImpl(ATTESTOR, AttestorSignerManagerGroup.class);
     registerMessagingImpl(TXROOT, TxRootTransferManagerGroup.class);
+    registerMessagingImpl(FAKE, FakeSignerManagerGroup.class);
   }
 
   /**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 ConsenSys Software Inc
+ * Copyright 2022 ConsenSys Software Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -12,7 +12,7 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package net.consensys.gpact.messaging.eventrelay;
+package net.consensys.gpact.messaging.fake;
 
 import static net.consensys.gpact.common.FormatConversion.addressStringToBytes;
 
@@ -22,33 +22,38 @@ import java.util.List;
 import net.consensys.gpact.common.AnIdentity;
 import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.messaging.SignedEvent;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Sign;
 
 /**
- * Facilitates testing the Event Signer contract. This functionality is completed by the relayer.
+ * FakeRelayer emulates the relayer configured for event attestation. The relayer has a single
+ * signer that signs events locally with an in-memory private key.
  */
-public class EventSigner {
-  static final Logger LOG = LogManager.getLogger(EventSigner.class);
+public class FakeRelayer {
 
-  List<AnIdentity> signers = new ArrayList<>();
+  AnIdentity signer;
 
-  BlockchainId sourceBcId;
-
-  public EventSigner(BlockchainId sourceBcId) {
-    this.sourceBcId = sourceBcId;
+  public FakeRelayer(final AnIdentity signer) {
+    this.signer = signer;
   }
 
-  public void addSigner(AnIdentity signer) throws Exception {
-    signers.add(signer);
+  public byte[] fetchedSignedEvent(
+      BlockchainId bcId, String contractAddress, byte[] eventFunctionSignature, byte[] eventData) {
+    List<AnIdentity> signers = new ArrayList<>();
+    signers.add(this.signer);
+    SignedEvent signedEvent =
+        getSignedEvent(signers, bcId, eventData, contractAddress, eventFunctionSignature);
+    return signedEvent.getEncodedSignatures();
   }
 
-  public SignedEvent getSignedEvent(
-      byte[] eventData, String contractAddress, byte[] eventFunctionSignature) throws Exception {
+  public static SignedEvent getSignedEvent(
+      List<AnIdentity> signers,
+      BlockchainId bcId,
+      byte[] eventData,
+      String contractAddress,
+      byte[] eventFunctionSignature) {
 
     byte[] encodedEventInformation =
-        abiEncodePackedEvent(this.sourceBcId, contractAddress, eventFunctionSignature, eventData);
+        abiEncodePackedEvent(bcId, contractAddress, eventFunctionSignature, eventData);
 
     // Add the transaction receipt root for the blockchain
     // Sign the txReceiptRoot
@@ -57,7 +62,7 @@ public class EventSigner {
     List<byte[]> sigS = new ArrayList<>();
     List<Byte> sigV = new ArrayList<>();
     //    List<BigInteger> sigV = new ArrayList<>();
-    for (AnIdentity signer : this.signers) {
+    for (AnIdentity signer : signers) {
       Sign.SignatureData signatureData = signer.sign(encodedEventInformation);
       theSigners.add(signer.getAddress());
       sigR.add(signatureData.getR());
@@ -67,7 +72,7 @@ public class EventSigner {
 
     byte[] encodedSignatures = abiEncodePackedSignatures(theSigners, sigR, sigS, sigV);
     return new SignedEvent(
-        this.sourceBcId, contractAddress, eventFunctionSignature, eventData, encodedSignatures);
+        bcId, contractAddress, eventFunctionSignature, eventData, encodedSignatures);
   }
 
   private static byte[] abiEncodePackedEvent(
@@ -97,7 +102,7 @@ public class EventSigner {
     return abiEncodePacked;
   }
 
-  private byte[] abiEncodePackedSignatures(
+  private static byte[] abiEncodePackedSignatures(
       List<String> theSigners, List<byte[]> sigR, List<byte[]> sigS, List<Byte> sigV) {
     final int LEN_OF_LEN = 4;
     final int LEN_OF_SIG = 20 + 32 + 32 + 1;
