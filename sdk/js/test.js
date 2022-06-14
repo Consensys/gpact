@@ -29,7 +29,7 @@ async function config() {
     let vefABI = JSON.parse(fs.readFileSync("../java/build/EventAttestationVerifier.abi", "utf8"));
     let vefBIN = fs.readFileSync("../java/build/EventAttestationVerifier.bin", "utf8");
     let gpactABI = JSON.parse(fs.readFileSync("../java/build/GpactCrosschainControl.abi", "utf8"));
-    let gpactBIN = fs.readFileSync("../java/build/CrosschainControl.bin", "utf8");
+    let gpactBIN = fs.readFileSync("../java/build/GpactCrosschainControl.bin", "utf8");
     let bridgeABI = JSON.parse(fs.readFileSync("../../examples/gpact/nft/build/AtomicBridge.abi", "utf8"));
     let bridgeBIN = fs.readFileSync("../../examples/gpact/nft/build/AtomicBridge.bin", "utf8");
     let tokenABI = JSON.parse(fs.readFileSync("../../examples/gpact/nft/build/CoinToken.abi", "utf8"));
