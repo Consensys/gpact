@@ -16,6 +16,7 @@ package observer
  */
 
 import (
+	"github.com/consensys/gpact/services/relayer/internal/logging"
 	"io/ioutil"
 	"math/big"
 	"os"
@@ -68,32 +69,45 @@ func simulatedBackend(t *testing.T) (*backends.SimulatedBackend, *bind.TransactO
 	return backends.NewSimulatedBackend(genesisAlloc, blockGasLimit), auth
 }
 
-func deploySFCContract(t *testing.T, simBackend *backends.SimulatedBackend, auth *bind.TransactOpts) *functioncall.Sfc {
-	_, _, contract, err := functioncall.DeploySfc(auth, simBackend, big.NewInt(10), big.NewInt(10))
+func deploySFCContract(t *testing.T, simBackend *backends.SimulatedBackend, auth *bind.TransactOpts) (common.Address, *functioncall.Sfc) {
+	address, _, contract, err := functioncall.DeploySfc(auth, simBackend, big.NewInt(10), big.NewInt(10))
 
 	if err != nil {
 		failNow(t, "failed to deploy contract: %v", err)
 	}
 
 	simBackend.Commit()
-	return contract
+	return address, contract
 }
 
-func deployGPACTContract(t *testing.T, simBackend *backends.SimulatedBackend,
-	auth *bind.TransactOpts) *functioncall.Gpact {
-	_, _, contract, err := functioncall.DeployGpact(auth, simBackend, big.NewInt(10))
+func deployGPACTContract(t *testing.T, simBackend *backends.SimulatedBackend, auth *bind.TransactOpts) (common.Address, *functioncall.Gpact) {
+	address, _, contract, err := functioncall.DeployGpact(auth, simBackend, big.NewInt(10))
 
 	if err != nil {
 		failNow(t, "failed to deploy contract: %v", err)
 	}
 
 	simBackend.Commit()
-	return contract
+	return address, contract
 }
 
 func failNow(t *testing.T, message string, args ...interface{}) {
 	t.Errorf(message, args...)
 	t.FailNow()
+}
+func newDSPath(t *testing.T) (string, func()) {
+	dsPath, err := ioutil.TempDir(os.TempDir(), "testing_badger_multi_source_observer")
+	if err != nil {
+		t.Fatal(err)
+	}
+	cleanupFn := func() {
+		err := os.RemoveAll(dsPath)
+		if err != nil {
+			logging.Error("error removing temporary datastore path, error: %v", err)
+		}
+	}
+
+	return dsPath, cleanupFn
 }
 
 func newDS(t *testing.T) (*badger.Datastore, func()) {

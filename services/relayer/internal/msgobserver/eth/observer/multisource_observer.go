@@ -20,7 +20,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/avast/retry-go"
+	"github.com/ethereum/go-ethereum"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ipfs/go-datastore/query"
+	badgerds "github.com/ipfs/go-ds-badger"
 	"math/big"
 	"strings"
 	"time"
@@ -31,7 +34,6 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	datastore "github.com/ipfs/go-datastore"
-	badgerds "github.com/ipfs/go-ds-badger"
 )
 
 // observation stores details about an event source to observe
@@ -46,6 +48,13 @@ type observation struct {
 
 type WatcherType string
 
+type Backend interface {
+	ethereum.ChainReader
+	bind.ContractBackend
+}
+
+type ClientFactory = func(string) (Backend, error)
+
 const (
 	RealtimeWatcher  WatcherType = "realtime"
 	FinalisedWatcher WatcherType = "finalised"
@@ -56,16 +65,35 @@ const (
 // The contract persists the list of event sources it tracks. In the event of a restart,
 // the observer resumes observation of the persisted sources.
 type MultiSourceObserver struct {
-	dsPath    string
-	mq        mqserver.MessageQueue
-	ds        datastore.Datastore
-	observers map[string]*SingleSourceObserver
-	running   bool
+	mq            mqserver.MessageQueue
+	ds            datastore.Datastore
+	observers     map[string]*SingleSourceObserver
+	clientFactory ClientFactory
+	running       bool
 }
 
 // NewMultiSourceObserver creates a new MultiSourceObserver instance
-func NewMultiSourceObserver(dsPath string, mq mqserver.MessageQueue) *MultiSourceObserver {
-	return &MultiSourceObserver{dsPath: dsPath, mq: mq, observers: make(map[string]*SingleSourceObserver)}
+func NewMultiSourceObserver(dsPath string, mq mqserver.MessageQueue, clientFactory ClientFactory) (*MultiSourceObserver, error) {
+	if clientFactory == nil {
+		clientFactory = defaultBackendFactory
+	}
+	observer := &MultiSourceObserver{mq: mq, observers: make(map[string]*SingleSourceObserver),
+		clientFactory: clientFactory}
+
+	dsOpts := badgerds.DefaultOptions
+	dsOpts.SyncWrites = false
+	dsOpts.Truncate = true
+	var err error
+	observer.ds, err = badgerds.NewDatastore(dsPath, &dsOpts)
+	if err != nil {
+		return nil, err
+	}
+
+	return observer, nil
+}
+
+func defaultBackendFactory(url string) (Backend, error) {
+	return ethclient.Dial(url)
 }
 
 // Start starts the observer's routine.
@@ -73,17 +101,6 @@ func (o *MultiSourceObserver) Start() error {
 	if o.running {
 		logging.Info("Multi-observer already running. Start request ignored")
 		return nil
-	}
-
-	var err error
-	if o.ds == nil {
-		dsOpts := badgerds.DefaultOptions
-		dsOpts.SyncWrites = false
-		dsOpts.Truncate = true
-		o.ds, err = badgerds.NewDatastore(o.dsPath, &dsOpts)
-		if err != nil {
-			return err
-		}
 	}
 
 	logging.Info("Querying for saved observations...")
@@ -140,8 +157,10 @@ func (o *MultiSourceObserver) StartObservation(chainID *big.Int, chainAP string,
 	contractAddr common.Address, watcherType WatcherType) error {
 	// If an observer for the source exists, and is not currently running, start it.
 	sourceId := GetSourceID(chainID, contractAddr, contractType, watcherType)
+	logging.Info("Starting observation '%s'", sourceId)
 	if v, ok := o.observers[sourceId]; ok {
 		if !v.IsRunning() {
+			logging.Info("observer with id '%s' already exists. starting existing observer..", sourceId)
 			go func() {
 				err := v.Start()
 				if err != nil {
@@ -212,8 +231,7 @@ func (o *MultiSourceObserver) startNewObservation(obs observation) error {
 
 // startNewSFCObserver starts an observation for an SFC source event
 func (o *MultiSourceObserver) startNewSFCObserver(observerId string, chainId *big.Int, chainAP string, contractAddr common.Address, watcherType WatcherType) {
-
-	observerGen := func(cId *big.Int, addr common.Address, client *ethclient.Client) (*SingleSourceObserver, error) {
+	observerGen := func(cId *big.Int, addr common.Address, client Backend) (*SingleSourceObserver, error) {
 		sfc, err := functioncall.NewSfc(contractAddr, client)
 		if err != nil {
 			return nil, err
@@ -222,8 +240,11 @@ func (o *MultiSourceObserver) startNewSFCObserver(observerId string, chainId *bi
 		if watcherType == FinalisedWatcher {
 			dsProgKey := datastore.NewKey(fmt.Sprintf("/%s/%s/last_finalised_block", chainId, contractAddr))
 			watcherProgOpts := WatcherProgressDsOpts{o.ds, dsProgKey, DefaultRetryOptions}
+			logging.Info("Starting finalised sfc observer '%s'...", observerId)
+			// TODO: number of confirmations to wait for should be configurable
 			return NewSFCFinalisedObserver(chainId, contractAddr, sfc, o.mq, 4, watcherProgOpts, client)
 		} else {
+			logging.Info("Starting realtime sfc observer '%s'...", observerId)
 			return NewSFCRealtimeObserver(chainId, contractAddr, sfc, o.mq)
 		}
 	}
@@ -232,7 +253,7 @@ func (o *MultiSourceObserver) startNewSFCObserver(observerId string, chainId *bi
 
 // startNewGPACTObserver starts an observation for a new GPACT source event
 func (o *MultiSourceObserver) startNewGPACTObserver(observerId string, chainId *big.Int, chainAP string, contractAddr common.Address, watcherType WatcherType) {
-	observerGen := func(cId *big.Int, addr common.Address, client *ethclient.Client) (*SingleSourceObserver, error) {
+	observerGen := func(cId *big.Int, addr common.Address, client Backend) (*SingleSourceObserver, error) {
 		gpact, err := functioncall.NewGpact(addr, client)
 		if err != nil {
 			return nil, err
@@ -240,26 +261,28 @@ func (o *MultiSourceObserver) startNewGPACTObserver(observerId string, chainId *
 		if watcherType == FinalisedWatcher {
 			dsProgKey := datastore.NewKey(fmt.Sprintf("/%s/%s/last_finalised_block", chainId, contractAddr))
 			watcherProgOpts := WatcherProgressDsOpts{o.ds, dsProgKey, DefaultRetryOptions}
+			logging.Info("Starting finalised gpact observer '%s'...", observerId)
 			return NewGPACTFinalisedObserver(chainId, addr, gpact, o.mq, 4, watcherProgOpts, client)
 		} else {
+			logging.Info("Starting realtime gpact observer '%s'...", observerId)
 			return NewGPACTRealtimeObserver(chainId, addr, gpact, o.mq)
 		}
 	}
 	o.startNewObserver(observerId, chainId, chainAP, contractAddr, observerGen)
 }
 
-type observerFactory func(int2 *big.Int, address common.Address, client *ethclient.Client) (*SingleSourceObserver,
+type observerFactory func(int2 *big.Int, address common.Address, client Backend) (*SingleSourceObserver,
 	error)
 
 func (o *MultiSourceObserver) startNewObserver(observerId string, chainID *big.Int, chainAP string,
 	contractAddr common.Address, fnObsFactory observerFactory) {
 	err := withRetryWrapper(
 		func() error {
-			chain, err := ethclient.Dial(chainAP)
+			chain, err := o.clientFactory(chainAP)
 			if err != nil {
+				logging.Error("error creating backend: %v", err)
 				return err
 			}
-			defer chain.Close()
 			observer, err := fnObsFactory(chainID, contractAddr, chain)
 			if err != nil {
 				logging.Error(err.Error())
@@ -270,6 +293,7 @@ func (o *MultiSourceObserver) startNewObserver(observerId string, chainID *big.I
 			if err != nil {
 				return err
 			}
+			logging.Info("successfully started new observer '%s'", observerId)
 			return nil
 		}, fmt.Sprintf("observer id: %s", observerId))
 
