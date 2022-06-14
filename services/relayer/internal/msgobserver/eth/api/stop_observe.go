@@ -25,14 +25,14 @@ import (
 	"github.com/consensys/gpact/services/relayer/internal/rpc"
 )
 
-// HandleStopObserver handles the request to stop observe.
+// HandleStopObserver handles the request to stop the multi-source observer
 func HandleStopObserver(data []byte) ([]byte, error) {
 	instance := node.GetSingleInstance()
 	instance.Observer.Stop()
 	return success()
 }
 
-// HandleStopObservation handles the request to stop observe.
+// HandleStopObservation handles the request to stop a specific observer managed by the multi-source observer
 func HandleStopObservation(rawReq []byte) ([]byte, error) {
 	instance := node.GetSingleInstance()
 	req := &ObservationReq{}
@@ -54,7 +54,7 @@ func HandleStopObservation(rawReq []byte) ([]byte, error) {
 	return success()
 }
 
-// RequestStopObserver requests a stop observe.
+// RequestStopObserver makes a requests a stop the multi-source observer
 func RequestStopObserver(addr string) (bool, error) {
 	data, err := rpc.Request(addr, StopObserveReqType, []byte{1})
 	if err != nil {

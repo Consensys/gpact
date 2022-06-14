@@ -27,7 +27,7 @@ import (
 	logging "github.com/rs/zerolog/log"
 )
 
-// ObservationReq is the request to start observe.
+// ObservationReq is the request to start an observation of an event source
 type ObservationReq struct {
 	ChainID      string               `json:"chain_id"`
 	ChainAP      string               `json:"chain_ap"`
@@ -36,18 +36,13 @@ type ObservationReq struct {
 	WatcherType  observer.WatcherType `json:"watcher_type"`
 }
 
-// ObserverActionResponse is the createResponse to stop observe.
+// ObserverActionResponse encapsulates an API response that indicates success or failure of an API call action
 type ObserverActionResponse struct {
 	Success bool   `json:"success"`
 	Message string `json:"message"`
 }
 
-// StartObservationResp is the createResponse to start observe.
-type StartObservationResp struct {
-	Success bool `json:"success"`
-}
-
-// HandleStartObserver handles start observe request.
+// HandleStartObserver handles request to start multi-source observer
 func HandleStartObserver(data []byte) ([]byte, error) {
 	instance := node.GetSingleInstance()
 	err := instance.Observer.Start()
@@ -57,7 +52,7 @@ func HandleStartObserver(data []byte) ([]byte, error) {
 	return success()
 }
 
-// HandleStartObservation handles start observe request.
+// HandleStartObservation handles request to start a specific observation by the multi-source observer
 func HandleStartObservation(data []byte) ([]byte, error) {
 	// Get node
 	instance := node.GetSingleInstance()
@@ -79,7 +74,7 @@ func HandleStartObservation(data []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	resp := StartObservationResp{
+	resp := ObserverActionResponse{
 		Success: true,
 	}
 	data, err = json.Marshal(resp)
@@ -89,7 +84,7 @@ func HandleStartObservation(data []byte) ([]byte, error) {
 	return data, nil
 }
 
-// RequestStartObservation requests start observe.
+// RequestStartObservation sends a request to start an observation for a specific event source
 func RequestStartObservation(addr string, chainID *big.Int, chainAP string, contractType string, contractAddr common.Address) (bool, error) {
 	req := ObservationReq{
 		ChainID:      chainID.String(),
@@ -105,7 +100,7 @@ func RequestStartObservation(addr string, chainID *big.Int, chainAP string, cont
 	if err != nil {
 		return false, err
 	}
-	resp := &StartObservationResp{}
+	resp := &ObserverActionResponse{}
 	err = json.Unmarshal(data, resp)
 	if err != nil {
 		return false, err
