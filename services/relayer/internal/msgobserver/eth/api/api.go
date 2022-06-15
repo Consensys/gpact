@@ -21,10 +21,10 @@ import (
  */
 
 const (
-	StartObserverReqType    = byte(1)
-	StopObserveReqType      = byte(2)
-	StartObservationReqType = byte(3)
-	StopObservationReqType  = byte(4)
+	StartMultisourceObserverReqType = byte(1)
+	StopMultisourceObserverReqType  = byte(2)
+	StartObservationReqType         = byte(3)
+	StopObservationReqType          = byte(4)
 )
 
 func createResponse(err error) ([]byte, error) {

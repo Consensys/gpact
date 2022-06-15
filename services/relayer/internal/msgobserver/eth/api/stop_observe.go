@@ -56,7 +56,7 @@ func HandleStopObservation(rawReq []byte) ([]byte, error) {
 
 // RequestStopObserver makes a requests a stop the multi-source observer
 func RequestStopObserver(addr string) (bool, error) {
-	data, err := rpc.Request(addr, StopObserveReqType, []byte{1})
+	data, err := rpc.Request(addr, StopMultisourceObserverReqType, []byte{1})
 	if err != nil {
 		return false, err
 	}
