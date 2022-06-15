@@ -1,5 +1,10 @@
 package api
 
+import (
+	"encoding/json"
+	"github.com/consensys/gpact/services/relayer/internal/logging"
+)
+
 /*
  * Copyright 2022 ConsenSys Software Inc
  *
@@ -16,6 +21,37 @@ package api
  */
 
 const (
-	StartObserveReqType = byte(1)
-	StopObserveReqType  = byte(2)
+	StartMultisourceObserverReqType = byte(1)
+	StopMultisourceObserverReqType  = byte(2)
+	StartObservationReqType         = byte(3)
+	StopObservationReqType          = byte(4)
 )
+
+func createResponse(err error) ([]byte, error) {
+	var resp ObserverActionResponse
+	if err != nil {
+		resp = ObserverActionResponse{
+			Success: false,
+			Message: err.Error(),
+		}
+	} else {
+		resp = ObserverActionResponse{
+			Success: true,
+		}
+	}
+
+	rawResp, err := json.Marshal(resp)
+	if err != nil {
+		logging.Error("error serialising createResponse: %v", err)
+		return nil, err
+	}
+	return rawResp, err
+}
+
+func fail(err error) ([]byte, error) {
+	return createResponse(err)
+}
+
+func success() ([]byte, error) {
+	return createResponse(nil)
+}

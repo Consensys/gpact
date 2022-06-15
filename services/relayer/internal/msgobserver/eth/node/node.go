@@ -29,7 +29,7 @@ type Node struct {
 
 	RPC rpc.Server
 
-	Observer observer.Observer
+	Observer *observer.MultiSourceObserver
 }
 
 // Single instance of the gateway

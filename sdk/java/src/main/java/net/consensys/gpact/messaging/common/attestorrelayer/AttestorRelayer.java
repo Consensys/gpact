@@ -28,11 +28,27 @@ public class AttestorRelayer {
   private byte[] signingKey;
   private String msgStoreAddr;
 
+  public enum WatcherType {
+    REALTIME("realtime"),
+    FINALISED("finalised");
+    private String watcherType;
+
+    WatcherType(String watcherType) {
+      this.watcherType = watcherType;
+    }
+
+    @Override
+    public String toString() {
+      return this.watcherType;
+    }
+  }
+
   public static class Source {
     BlockchainId bcId;
     String crosschainControlAddr;
     String observerUri;
     String contractType;
+    WatcherType watcherType;
     String bcWsUri;
 
     public Source(
@@ -40,12 +56,14 @@ public class AttestorRelayer {
         String crosschainControlAddr,
         String contractType,
         String observerUri,
-        String bcWsUri) {
+        String bcWsUri,
+        WatcherType watcherType) {
       this.bcId = bcId;
       this.crosschainControlAddr = crosschainControlAddr;
       this.contractType = contractType;
       this.observerUri = observerUri;
       this.bcWsUri = bcWsUri;
+      this.watcherType = watcherType;
     }
 
     public String getSourceId() {
@@ -102,9 +120,11 @@ public class AttestorRelayer {
       String crosschainControlAddr,
       String contractType,
       String observerUri,
-      String bcWsUri)
+      String bcWsUri,
+      WatcherType watcherType)
       throws CrosschainProtocolStackException {
-    addNewSource(new Source(bcId, crosschainControlAddr, contractType, observerUri, bcWsUri));
+    addNewSource(
+        new Source(bcId, crosschainControlAddr, contractType, observerUri, bcWsUri, watcherType));
   }
 
   public void addNewSource(Source source) throws CrosschainProtocolStackException {
@@ -117,7 +137,8 @@ public class AttestorRelayer {
         source.bcId,
         source.bcWsUri,
         source.contractType,
-        source.crosschainControlAddr);
+        source.crosschainControlAddr,
+        source.watcherType);
     AttestorRelayerWebApi.setupRelayer(
         this.relayerUri, source.bcId, source.crosschainControlAddr, this.signingKey);
   }

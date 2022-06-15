@@ -118,7 +118,12 @@ func handleV1(req messages.Message) {
 
 	logging.Info("Message Destination: %v", msg.Destination.ContractAddress)
 	// Pass message to MQ.
-	go instance.MQ.Request(msg.Version, msg.MsgType, msg)
+	go func() {
+		err := instance.MQ.Request(msg.Version, msg.MsgType, msg)
+		if err != nil {
+			logging.Error("error occurred submitting message to queue: %v", err)
+		}
+	}()
 }
 
 // initV1 inits the handler.

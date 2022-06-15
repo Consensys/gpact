@@ -30,7 +30,7 @@ import (
 
 func TestSFCCrossCallRealtimeEventWatcher(t *testing.T) {
 	simBackend, auth := simulatedBackend(t)
-	contract := deploySFCContract(t, simBackend, auth)
+	_, contract := deploySFCContract(t, simBackend, auth)
 
 	handler := new(MockEventHandler)
 	handler.On("Handle", mock.AnythingOfType("*functioncall.SfcCrossCall")).Once().Return(nil)
@@ -52,7 +52,7 @@ func TestSFCCrossCallRealtimeEventWatcher(t *testing.T) {
 
 func TestSFCCrossCallRealtimeEventWatcher_RemovedEvent(t *testing.T) {
 	simBackend, auth := simulatedBackend(t)
-	contract := deploySFCContract(t, simBackend, auth)
+	_, contract := deploySFCContract(t, simBackend, auth)
 
 	handler := new(MockEventHandler)
 	handler.On("Handle", mock.AnythingOfType("*functioncall.SfcCrossCall")).Once().Return(nil)
@@ -114,7 +114,7 @@ func TestSFCCrossCallFinalisedEventWatcher(t *testing.T) {
 		handler := new(MockEventHandler)
 
 		simBackend, auth := simulatedBackend(t)
-		contract := deploySFCContract(t, simBackend, auth)
+		_, contract := deploySFCContract(t, simBackend, auth)
 
 		opts := EventWatcherOpts{
 			Start:        v.start,
@@ -162,7 +162,7 @@ func TestSFCCrossCallFinalisedEventWatcher_MultipleBlocksFinalised(t *testing.T)
 
 		simBackend, auth := simulatedBackend(t)
 		handler := new(MockEventHandler)
-		contract := deploySFCContract(t, simBackend, auth)
+		_, contract := deploySFCContract(t, simBackend, auth)
 
 		// cross-chain calls before watch instance is started
 		for i := 0; i < v.ccEventsToCommit; i++ {
@@ -193,7 +193,7 @@ func TestSFCCrossCallFinalisedEventWatcher_MultipleBlocksFinalised(t *testing.T)
 
 func TestSFCCrossCallFinalisedEventWatcher_ProgressPersisted(t *testing.T) {
 	simBackend, auth := simulatedBackend(t)
-	contract := deploySFCContract(t, simBackend, auth)
+	_, contract := deploySFCContract(t, simBackend, auth)
 	fixConfirms := uint64(2)
 	fixLastFinalised := uint64(2)
 
@@ -243,7 +243,7 @@ Expectation: the event is not processed at height b3
 func TestSFCCrossCallFinalisedEventWatcher_Reorg(t *testing.T) {
 	simBackend, auth := simulatedBackend(t)
 	handler := new(MockEventHandler)
-	contract := deploySFCContract(t, simBackend, auth)
+	_, contract := deploySFCContract(t, simBackend, auth)
 	opts := EventWatcherOpts{
 		Start:        2,
 		Context:      auth.Context,

@@ -55,7 +55,7 @@ func main() {
 							chainAP := c.Args().Get(2)
 							contractType := c.Args().Get(3)
 							contractAddr := c.Args().Get(4)
-							success, err := observerapi.RequestStartObserve(url, big.NewInt(int64(chainID)), chainAP, contractType, common.HexToAddress(contractAddr))
+							success, err := observerapi.RequestStartObservation(url, big.NewInt(int64(chainID)), chainAP, contractType, common.HexToAddress(contractAddr))
 							if err != nil {
 								return err
 							}
@@ -73,7 +73,7 @@ func main() {
 						ArgsUsage: "[url]",
 						Action: func(c *cli.Context) error {
 							url := c.Args().Get(0)
-							success, err := observerapi.RequestStopObserve(url)
+							success, err := observerapi.RequestStopObserver(url)
 							if err != nil {
 								return err
 							}

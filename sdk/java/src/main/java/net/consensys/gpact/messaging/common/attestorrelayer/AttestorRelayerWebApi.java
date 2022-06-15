@@ -34,8 +34,10 @@ public class AttestorRelayerWebApi {
   static final Logger LOG = LogManager.getLogger(AttestorRelayerWebApi.class);
 
   // Observer API
-  public static final byte START_OBSERVE_REQ_TYPE = 1;
-  public static final byte STOP_OBSERVE_REQ_TYPE = 2;
+  public static final byte START_OBSERVER_REQ_TYPE = 1;
+  public static final byte STOP_OBSERVER_REQ_TYPE = 2;
+  public static final byte START_OBSERVATION_REQ_TYPE = 3;
+  public static final byte STOP_OBSERVATION_REQ_TYPE = 4;
 
   // Message Dispatcher API
   public static final byte SET_TRANSACTION_OPT_REQ_TYPE = 1;
@@ -59,7 +61,8 @@ public class AttestorRelayerWebApi {
       BlockchainId bcId,
       String bcWsUrl,
       String contractType,
-      String crosschainControlAddr)
+      String crosschainControlAddr,
+      AttestorRelayer.WatcherType watcherType)
       throws CrosschainProtocolStackException {
     LOG.info(
         "SetupObserver: ChainId: {}, ChainAP: {}, ContractType: {}, ContractAddr: {}, ObserverURL: {}",
@@ -75,6 +78,7 @@ public class AttestorRelayerWebApi {
     user.put("chain_ap", bcWsUrl);
     user.put("contract_type", contractType);
     user.put("contract_addr", crosschainControlAddr);
+    user.put("watcher_type", watcherType.toString());
     //    String jsonStr1 = mapper.writer().writeValueAsString(user);
     byte[] json;
     try {
@@ -83,7 +87,7 @@ public class AttestorRelayerWebApi {
       throw new CrosschainProtocolStackException("Observer", ex);
     }
 
-    Bytes type = Bytes.of(START_OBSERVE_REQ_TYPE);
+    Bytes type = Bytes.of(START_OBSERVATION_REQ_TYPE);
     Bytes body = Bytes.wrap(json);
     Bytes all = Bytes.concatenate(type, body);
     byte[] requestBody = all.toArray();
@@ -94,7 +98,7 @@ public class AttestorRelayerWebApi {
   public static void stopObserver(String observerUrl) throws CrosschainProtocolStackException {
     LOG.info("StopObserver: ObserverURL: {}", observerUrl);
 
-    Bytes type = Bytes.of(STOP_OBSERVE_REQ_TYPE);
+    Bytes type = Bytes.of(STOP_OBSERVER_REQ_TYPE);
     byte[] requestBody = type.toArray();
 
     config("Observer", observerUrl, requestBody);
