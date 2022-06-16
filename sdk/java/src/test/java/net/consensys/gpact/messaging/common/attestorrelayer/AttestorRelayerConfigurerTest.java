@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 public class AttestorRelayerConfigurerTest {
   @Test
   public void testSetupObserver() throws Exception {
-    AttestorRelayerWebApi.setupObserver(
+    AttestorRelayerWebApi.startNewObservation(
         "http://127.0.0.1:9525",
         new BlockchainId(BigInteger.valueOf(31)),
         "ws://bc31node1:8546",
@@ -18,11 +18,7 @@ public class AttestorRelayerConfigurerTest {
 
   @Test
   public void testSetupRelayer() throws Exception {
-    AttestorRelayerWebApi.setupRelayer(
-        "http://127.0.0.1:9625",
-        new BlockchainId(BigInteger.valueOf(31)),
-        "1AB401234567722200112233445566778899AB22",
-        new byte[32]);
+    AttestorRelayerWebApi.configureSigningKey("http://127.0.0.1:9625", new byte[32]);
   }
 
   @Test

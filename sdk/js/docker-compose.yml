@@ -56,9 +56,9 @@ services:
       - chainA-js
       - chainB-js
 
-  observer1-js:
+  observer-js:
     image: consensys/gpact/services/relayer
-    container_name: observer1-js
+    container_name: observer-js
     networks:
       - shared
     ports:
@@ -70,20 +70,6 @@ services:
       - rabbitmq
     restart: on-failure
 
-  observer2-js:
-    image: consensys/gpact/services/relayer
-    container_name: observer2-js
-    networks:
-      - shared
-    ports:
-      - 9526:9425
-    env_file:
-      - ../../services/relayer/env/.env.observer.example
-    command: /app/build/observer
-    depends_on:
-      - rabbitmq
-    restart: on-failure
-  
   relayer-js:
     image: consensys/gpact/services/relayer
     container_name: relayer-js

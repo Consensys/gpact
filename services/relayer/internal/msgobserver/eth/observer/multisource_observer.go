@@ -141,12 +141,6 @@ func (o *MultiSourceObserver) Stop() {
 		o.observers[k].Stop()
 	}
 	o.running = false
-	err := o.ds.Close()
-	if err != nil {
-		logging.Error("error closing database connection: %v.", err)
-		return
-	}
-	o.ds = nil
 }
 
 func (o *MultiSourceObserver) IsRunning() bool {
@@ -208,7 +202,7 @@ func (o *MultiSourceObserver) StopObservation(chainID *big.Int, contractType str
 		return nil
 	}
 
-	return fmt.Errorf("could not stop observation for source '%s'. An observer for the source was not found",
+	return fmt.Errorf("could not stop observation for source '%s', an observer for the source was not found",
 		sourceId)
 }
 

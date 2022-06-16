@@ -270,9 +270,9 @@ async function config() {
 
     // Configure relayer components
     let output;
-    output = execSync.execSync('docker exec observer1-js /app/build/admin observer start localhost:9425 ' + chainA + " ws://chainA-js:8546 GPACT " + gpactA.options.address);
+    output = execSync.execSync('docker exec observer-js /app/build/admin observer start localhost:9425 ' + chainA + " ws://chainA-js:8546 GPACT " + gpactA.options.address);
     console.log(output.toString());
-    output = execSync.execSync('docker exec observer2-js /app/build/admin observer start localhost:9425 ' + chainB + " ws://chainB-js:8546 GPACT " + gpactB.options.address);
+    output = execSync.execSync('docker exec observer-js /app/build/admin observer start localhost:9425 ' + chainB + " ws://chainB-js:8546 GPACT " + gpactB.options.address);
     console.log(output.toString());
     output = execSync.execSync('docker exec relayer-js /app/build/admin relayer set-key localhost:9425 0 0x0000000000000000000000000000000000000000 ' + signerKey);
     console.log(output.toString());

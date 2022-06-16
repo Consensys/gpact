@@ -34,46 +34,47 @@ func TestMultiSourceObserver_SingleObservation(t *testing.T) {
 		"Start-Finalised-GPACT-Observer": {"gpact", FinalisedWatcher, 4,
 			"", big.NewInt(0)},
 	}
-	dsPath, cleanupFn := newDSPath(t)
-	defer cleanupFn()
-
 	for name, testCase := range cases {
-		logging.Info("Testing scenario: '%s'", name)
-		simBackend, auth := simulatedBackend(t)
-		var contract interface{}
-		var fixSourceAddress common.Address
-		fixSourceAddress, contract = deployContract(t, testCase.contractType, simBackend, auth)
+		func() {
+			dsPath, cleanupFn := newDSPath(t)
+			defer cleanupFn()
+			logging.Info("Testing scenario: '%s'", name)
+			simBackend, auth := simulatedBackend(t)
+			var contract interface{}
+			var fixSourceAddress common.Address
+			fixSourceAddress, contract = deployContract(t, testCase.contractType, simBackend, auth)
 
-		mockMQ := new(MockMQ)
+			mockMQ := new(MockMQ)
 
-		multiObserver, err := NewMultiSourceObserver(dsPath, mockMQ, factoryGenerator(simBackend))
-		assert.Nil(t, err, "unexpected error creating multisource observer: %v", err)
+			multiObserver, err := NewMultiSourceObserver(dsPath, mockMQ, factoryGenerator(simBackend))
+			assert.Nil(t, err, "unexpected error creating multisource observer: %v", err)
 
-		err = multiObserver.StartObservation(fixSourceID, "", testCase.contractType, fixSourceAddress, testCase.watcherType)
-		assert.Nil(t, err, "could not start observation, error: %v", err)
+			err = multiObserver.StartObservation(fixSourceID, "", testCase.contractType, fixSourceAddress, testCase.watcherType)
+			assert.Nil(t, err, "could not start observation, error: %v", err)
 
-		mockMQ.On("Request", v1.Version, v1.MessageType, mock.AnythingOfType("*v1.Message")).Once().Return(nil)
+			mockMQ.On("Request", v1.Version, v1.MessageType, mock.AnythingOfType("*v1.Message")).Once().Return(nil)
 
-		// perform crosschain calls and simulate the specified number of confirmations
-		transact(t, testCase.contractType, contract, auth, testCase.destId, common.HexToAddress(testCase.destAddress),
-			testCase.confirmations,
-			simBackend)
+			// perform crosschain calls and simulate the specified number of confirmations
+			transact(t, testCase.contractType, contract, auth, testCase.destId, common.HexToAddress(testCase.destAddress),
+				testCase.confirmations,
+				simBackend)
 
-		// verify that the observer detected and processed the contract event
-		mockMQ.AssertExpectations(t)
-		sentMsg := mockMQ.LastMessage.(*v1.Message)
-		assert.Equal(t, testCase.destAddress, sentMsg.Destination.ContractAddress)
-		assert.Equal(t, testCase.destId.String(), sentMsg.Destination.NetworkID)
-		assert.Equal(t, fixSourceID.String(), sentMsg.Source.NetworkID)
+			// verify that the observer detected and processed the contract event
+			mockMQ.AssertExpectations(t)
+			sentMsg := mockMQ.LastMessage.(*v1.Message)
+			assert.Equal(t, testCase.destAddress, sentMsg.Destination.ContractAddress)
+			assert.Equal(t, testCase.destId.String(), sentMsg.Destination.NetworkID)
+			assert.Equal(t, fixSourceID.String(), sentMsg.Source.NetworkID)
 
-		// ensure the observer is successfully stopped, by checking that subsequent crosschain calls are not detected
-		multiObserver.Stop()
-		assert.False(t, multiObserver.IsRunning(), "multiobserver stop failed")
-		mockMQ.On("Request", v1.Version, v1.MessageType, mock.AnythingOfType("*v1.Message")).Times(0).Return(nil)
-		transact(t, testCase.contractType, contract, auth, testCase.destId, common.HexToAddress(testCase.destAddress),
-			testCase.confirmations,
-			simBackend)
-		mockMQ.AssertExpectations(t)
+			// ensure the observer is successfully stopped, by checking that subsequent crosschain calls are not detected
+			multiObserver.Stop()
+			assert.False(t, multiObserver.IsRunning(), "multiobserver stop failed")
+			mockMQ.On("Request", v1.Version, v1.MessageType, mock.AnythingOfType("*v1.Message")).Times(0).Return(nil)
+			transact(t, testCase.contractType, contract, auth, testCase.destId, common.HexToAddress(testCase.destAddress),
+				testCase.confirmations,
+				simBackend)
+			mockMQ.AssertExpectations(t)
+		}()
 	}
 }
 

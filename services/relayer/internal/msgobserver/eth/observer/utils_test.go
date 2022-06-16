@@ -96,7 +96,7 @@ func failNow(t *testing.T, message string, args ...interface{}) {
 	t.FailNow()
 }
 func newDSPath(t *testing.T) (string, func()) {
-	dsPath, err := ioutil.TempDir(os.TempDir(), "testing_badger_multi_source_observer")
+	dsPath, err := ioutil.TempDir(os.TempDir(), "testing_badger_multi_source_observer_")
 	if err != nil {
 		t.Fatal(err)
 	}

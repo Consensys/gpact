@@ -49,7 +49,6 @@ func (l *GPACTRealtimeEventWatcher) start(
 	subSegment event.Subscription, segmentEvents <-chan *functioncall.GpactSegment,
 	subRoot event.Subscription, rootEvents <-chan *functioncall.GpactRoot,
 ) error {
-	logging.Info("Start watching GPACT")
 	for {
 		select {
 		case err := <-subStart.Err():
