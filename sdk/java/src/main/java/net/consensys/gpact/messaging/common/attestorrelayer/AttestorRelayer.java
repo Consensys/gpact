@@ -115,7 +115,7 @@ public class AttestorRelayer {
     this.msgStoreAddr = msgStoreAddresses;
   }
 
-  public void addNewSource(
+  public String startNewObservation(
       BlockchainId bcId,
       String crosschainControlAddr,
       String contractType,
@@ -123,27 +123,48 @@ public class AttestorRelayer {
       String bcWsUri,
       WatcherType watcherType)
       throws CrosschainProtocolStackException {
-    addNewSource(
+    return startNewObservation(
         new Source(bcId, crosschainControlAddr, contractType, observerUri, bcWsUri, watcherType));
   }
 
-  public void addNewSource(Source source) throws CrosschainProtocolStackException {
+  public String startNewObservation(Source source) throws CrosschainProtocolStackException {
     this.sources.put(source.getSourceId(), source);
-
-    // AttestorRelayerWebApi.stopObserver(source.observerUri);
-
-    AttestorRelayerWebApi.setupObserver(
+    AttestorRelayerWebApi.startNewObservation(
         source.observerUri,
         source.bcId,
         source.bcWsUri,
         source.contractType,
         source.crosschainControlAddr,
         source.watcherType);
-    AttestorRelayerWebApi.setupRelayer(
-        this.relayerUri, source.bcId, source.crosschainControlAddr, this.signingKey);
+    return source.getSourceId();
   }
 
-  public void addMessageStore(
+  public void stopObservation(String sourceId) throws CrosschainProtocolStackException {
+    if (!sources.containsKey(sourceId)) {
+      throw new IllegalArgumentException("unregistered source: " + sourceId);
+    }
+    stopObservation(this.sources.get(sourceId));
+  }
+
+  public void stopObservation(Source source) throws CrosschainProtocolStackException {
+    AttestorRelayerWebApi.stopObservation(
+        source.observerUri,
+        source.bcId,
+        source.bcWsUri,
+        source.contractType,
+        source.crosschainControlAddr,
+        source.watcherType);
+  }
+
+  public void stopObserver(String observerUrl) throws CrosschainProtocolStackException {
+    AttestorRelayerWebApi.stopObserver(observerUrl);
+  }
+
+  public void configureSigningKey() throws CrosschainProtocolStackException {
+    AttestorRelayerWebApi.configureSigningKey(this.relayerUri, this.signingKey);
+  }
+
+  public void setMessageStore(
       String msgDispatcherUrl, String msgStoreAddrFromDispatcher, String msgStoreAddrFromUser)
       throws CrosschainProtocolStackException {
     AttestorRelayerWebApi.setupDispatcherForMsgStore(msgDispatcherUrl, msgStoreAddrFromDispatcher);
@@ -161,9 +182,10 @@ public class AttestorRelayer {
         dest.targetChainVerifierAddr);
   }
 
-  public void addMessageStoreRoute(String relayerUri, String sourceNetwork, String sourceAddress)
+  public void registerRouteToMessageStore(
+      String relayerUri, String sourceNetwork, String sourceAddress)
       throws CrosschainProtocolStackException {
-    AttestorRelayerWebApi.addMessageStoreRoute(relayerUri, sourceNetwork, sourceAddress);
+    AttestorRelayerWebApi.addRouteToMessageStore(relayerUri, sourceNetwork, sourceAddress);
   }
 
   public String fetchedSignedEvent(

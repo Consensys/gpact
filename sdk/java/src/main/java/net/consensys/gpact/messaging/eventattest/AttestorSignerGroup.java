@@ -54,7 +54,7 @@ public class AttestorSignerGroup {
           String.format(
               "Adding Message Store Route: %s %s",
               source.getBlockchainId().toDecimalString(), source.getCrosschainControlAddr()));
-      relayer.addMessageStoreRoute(
+      relayer.registerRouteToMessageStore(
           relayerUri,
           source.getBlockchainId().toDecimalString(),
           source.getCrosschainControlAddr());
@@ -70,18 +70,19 @@ public class AttestorSignerGroup {
       String msgStoreUriFromUser)
       throws CrosschainProtocolStackException {
     AttestorRelayer relayer = new AttestorRelayer(relayerUri, signingCredentials.getPrivateKey());
+    relayer.configureSigningKey();
     for (AttestorRelayer.Source source : sources) {
-      relayer.addNewSource(source);
+      relayer.startNewObservation(source);
       LOG.info(
           String.format(
               "Adding Message Store Route: %s %s",
               source.getBlockchainId().toDecimalString(), source.getCrosschainControlAddr()));
-      relayer.addMessageStoreRoute(
+      relayer.registerRouteToMessageStore(
           relayerUri,
           source.getBlockchainId().toDecimalString(),
           source.getCrosschainControlAddr());
     }
-    relayer.addMessageStore(dispatcherUri, msgStoreUriFromDispatcher, msgStoreUriFromUser);
+    relayer.setMessageStore(dispatcherUri, msgStoreUriFromDispatcher, msgStoreUriFromUser);
   }
 
   public MessagingVerificationInterface getVerifier(BlockchainId bcId) throws Exception {

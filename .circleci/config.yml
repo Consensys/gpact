@@ -147,22 +147,10 @@ jobs:
             docker container logs test-blockchains_bc33node1_1
           when: always
       - run:
-          name: Logs from observer1
+          name: Logs from observer
           working_directory: test-blockchains
           command: |
-            docker container logs observer1
-          when: always
-      - run:
-          name: Logs from observer2
-          working_directory: test-blockchains
-          command: |
-            docker container logs observer2
-          when: always
-      - run:
-          name: Logs from observer3
-          working_directory: test-blockchains
-          command: |
-            docker container logs observer3
+            docker container logs observer
           when: always
       - run:
           name: Logs from relayer
@@ -269,22 +257,10 @@ jobs:
             docker container logs test-blockchains_bc33node1_1
           when: always
       - run:
-          name: Logs from observer1
+          name: Logs from observer
           working_directory: test-blockchains
           command: |
-            docker container logs observer1
-          when: always
-      - run:
-          name: Logs from observer2
-          working_directory: test-blockchains
-          command: |
-            docker container logs observer2
-          when: always
-      - run:
-          name: Logs from observer3
-          working_directory: test-blockchains
-          command: |
-            docker container logs observer3
+            docker container logs observer
           when: always
       - run:
           name: Logs from relayer
@@ -376,22 +352,10 @@ jobs:
             docker container logs test-blockchains_bc33node1_1
           when: always
       - run:
-          name: Logs from observer1
+          name: Logs from observer
           working_directory: test-blockchains
           command: |
-            docker container logs observer1
-          when: always
-      - run:
-          name: Logs from observer2
-          working_directory: test-blockchains
-          command: |
-            docker container logs observer2
-          when: always
-      - run:
-          name: Logs from observer3
-          working_directory: test-blockchains
-          command: |
-            docker container logs observer3
+            docker container logs observer
           when: always
       - run:
           name: Logs from relayer

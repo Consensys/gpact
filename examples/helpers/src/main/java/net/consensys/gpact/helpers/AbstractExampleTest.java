@@ -146,7 +146,7 @@ public abstract class AbstractExampleTest {
           "ws://bc32node1:8546",
           GAS_STRATEGY_FREE,
           POLL_PERIOD_MS,
-          "http://127.0.0.1:9526",
+          OBSERVER_URI_BC1,
           DISPATCHER_URI,
           MSG_STORE_FROM_DISPATCHER,
           MSG_STORE_FROM_USER);
@@ -159,7 +159,7 @@ public abstract class AbstractExampleTest {
           "ws://bc33node1:8546",
           GAS_STRATEGY_FREE,
           POLL_PERIOD_MS,
-          "http://127.0.0.1:9527",
+          OBSERVER_URI_BC1,
           DISPATCHER_URI,
           MSG_STORE_FROM_DISPATCHER,
           MSG_STORE_FROM_USER);
@@ -172,7 +172,7 @@ public abstract class AbstractExampleTest {
           "ws://bc34node1:8546",
           GAS_STRATEGY_FREE,
           POLL_PERIOD_MS,
-          "http://127.0.0.1:9528",
+          OBSERVER_URI_BC1,
           DISPATCHER_URI,
           MSG_STORE_FROM_DISPATCHER,
           MSG_STORE_FROM_USER);
@@ -185,7 +185,7 @@ public abstract class AbstractExampleTest {
           "ws://bc35node1:8546",
           GAS_STRATEGY_FREE,
           POLL_PERIOD_MS,
-          "http://127.0.0.1:9529",
+          OBSERVER_URI_BC1,
           DISPATCHER_URI,
           MSG_STORE_FROM_DISPATCHER,
           MSG_STORE_FROM_USER);
