@@ -33,7 +33,7 @@ func TestSetVerifierAddr(t *testing.T) {
 	assert.Empty(t, err)
 	defer verifier.Stop()
 
-	err = verifier.SetVerifierAddr(big.NewInt(1), big.NewInt(3), common.BytesToAddress([]byte{2}))
+	err = verifier.SetVerifierAddr(big.NewInt(1), "", big.NewInt(3), common.BytesToAddress([]byte{2}))
 	assert.Empty(t, err)
 }
 
@@ -43,13 +43,13 @@ func TestGetVerifierAddr(t *testing.T) {
 	assert.Empty(t, err)
 	defer verifier.Stop()
 
-	_, err = verifier.GetVerifierAddr(big.NewInt(2), big.NewInt(3))
+	_, err = verifier.GetVerifierAddr(big.NewInt(2), "", big.NewInt(3))
 	assert.NotEmpty(t, err)
 
-	_, err = verifier.GetVerifierAddr(big.NewInt(1), big.NewInt(4))
+	_, err = verifier.GetVerifierAddr(big.NewInt(1), "", big.NewInt(4))
 	assert.NotEmpty(t, err)
 
-	addr, err := verifier.GetVerifierAddr(big.NewInt(1), big.NewInt(3))
+	addr, err := verifier.GetVerifierAddr(big.NewInt(1), "", big.NewInt(3))
 	assert.Empty(t, err)
 	assert.Equal(t, common.BytesToAddress([]byte{2}), addr)
 }

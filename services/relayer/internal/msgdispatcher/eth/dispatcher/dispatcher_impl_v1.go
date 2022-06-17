@@ -111,14 +111,15 @@ func (d *DispatcherImplV1) processRoutine() {
 				continue
 			}
 			logging.Info("Connected to chain %v", item.destID)
-			dispatch(chain, item.auth, item.esAddr, item.srcID, item.srcAddr, item.rawData, item.signature)
+			dispatch(chain, item.id, item.auth, item.esAddr, item.srcID, item.srcAddr, item.rawData, item.signature)
 			chain.Close()
 		}
 	}
 }
 
 // dispatch dispatches the actual message to the chain.
-func dispatch(chain *ethclient.Client, auth *bind.TransactOpts, esAddr common.Address, srcID *big.Int, srcAddr common.Address, rawData []byte, signature []byte) {
+func dispatch(chain *ethclient.Client, id string, auth *bind.TransactOpts, esAddr common.Address, srcID *big.Int,
+	srcAddr common.Address, rawData []byte, signature []byte) {
 	// Load verifier
 	verifier, err := messaging.NewSignedEventStore(esAddr, chain)
 	if err != nil {
@@ -127,7 +128,7 @@ func dispatch(chain *ethclient.Client, auth *bind.TransactOpts, esAddr common.Ad
 	}
 
 	// Dispatching
-	logging.Info("Submitting message to target chain as a transaction")
+	logging.Info("Submitting message '%s' to target chain as a transaction", id)
 	// TODO: Need to estimate the gas involved in the call.
 	auth.GasLimit = uint64(3000000)
 	auth.GasPrice, err = chain.SuggestGasPrice(context.Background())
@@ -147,16 +148,17 @@ func dispatch(chain *ethclient.Client, auth *bind.TransactOpts, esAddr common.Ad
 		var tx *types.Transaction
 		tx, err = verifier.RelayEvent(auth, srcID, srcAddr, rawData, signature)
 		if err == nil {
-			logging.Info("Transaction submitted with hash: %v", tx.Hash().String())
+			logging.Info("Transaction submitted for message %s with hash: %v", id, tx.Hash().String())
 			return
 		}
-		logging.Error("Error submitting transaction, Retry...: %v", err.Error())
+		logging.Error("Error submitting transaction for message %s, Retry...: %v", id, err.Error())
 		time.Sleep(5 * time.Second)
 		auth.GasPrice, err = chain.SuggestGasPrice(context.Background())
 		if err != nil {
 			logging.Error(err.Error())
 			return
 		}
+		logging.Info("Message %s successfully submitted to destination chain", id)
 	}
-	logging.Error("Error submitting transaction, stop retry: %v", err.Error())
+	logging.Error("Error submitting transaction, stop retry: Message: %s, Error: %v", id, err.Error())
 }

@@ -85,7 +85,7 @@ public class SimpleCrossControlManager extends AbstractBlockchain implements Cro
   public Tuple<TransactionReceipt, byte[], SimpleCrosschainControl.CrossCallEventResponse>
       sourceBcCall(CallExecutionTree rootCall) throws Exception {
 
-    LOG.debug("Transaction on source blockchain {}", this.blockchainId);
+    LOG.debug("Transaction on source blockchain {}", this.blockchainId.toDecimalString());
     StatsHolder.log("Source Blockchain call now");
     TransactionReceipt txR;
     try {
@@ -195,6 +195,7 @@ public class SimpleCrossControlManager extends AbstractBlockchain implements Cro
   private void dumpCrossCallEvent(SimpleCrosschainControl.CrossCallEventResponse event) {
     LOG.debug(" Cross Call Event:");
     LOG.debug("   Tx Id: 0x{}", new BigInteger(1, event._txId).toString(16));
+    LOG.debug("   Tx Hash: {}", event.log.getTransactionHash());
     LOG.debug("   Timestamp: {}", event._timestamp);
     LOG.debug("   Caller: {}", event._caller);
     LOG.debug("   Dest BdId: 0x{}", event._destBcId.toString(16));

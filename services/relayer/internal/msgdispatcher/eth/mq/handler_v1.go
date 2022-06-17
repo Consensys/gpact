@@ -93,9 +93,10 @@ func handleV1(req messages.Message) {
 			logging.Error("No auth target chain: %v, %v", destID, err.Error())
 			return
 		}
-		verfierAddr, err := instance.Verifier.GetVerifierAddr(big.NewInt(int64(srcID)), big.NewInt(int64(destID)))
+		verfierAddr, err := instance.Verifier.GetVerifierAddr(big.NewInt(int64(srcID)),srcAddr.String(), big.NewInt(int64(destID)))
 		if err != nil {
-			logging.Error("Issue loading verifier address for source %v, target %v: %v", srcID, destID, err.Error())
+			logging.Error("Issue loading verifier address for source:%v, source address: %v, target: %v. Error: %v",
+				srcID, srcAddr, destID, err.Error())
 			return
 		}
 		logging.Info("loc12")

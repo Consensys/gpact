@@ -158,14 +158,20 @@ public class AttestorRelayerWebApi {
 
   public static void configureSigningKey(String relayerUrl, byte[] pKey)
       throws CrosschainProtocolStackException {
+    configureSigningKey(relayerUrl, "0", "0x0", pKey);
+  }
+
+  public static void configureSigningKey(
+      String relayerUrl, String chainId, String contractAddress, byte[] pKey)
+      throws CrosschainProtocolStackException {
     byte keyType = SECP256K1_KEY_TYPE;
 
     LOG.info("Setup relayer : {}", relayerUrl);
 
     ObjectMapper mapper = new ObjectMapper();
     ObjectNode user = mapper.createObjectNode();
-    user.put("chain_id", "0");
-    user.put("contract_addr", "0x0");
+    user.put("chain_id", chainId);
+    user.put("contract_addr", contractAddress);
     user.put("key_type", keyType);
     user.put("key", pKey);
     byte[] json;
@@ -209,6 +215,7 @@ public class AttestorRelayerWebApi {
   public static void setupDispatcherForRelayingEvents(
       String msgDispatcherUrl,
       BlockchainId sourceChainBcId,
+      String sourceCbcAddress,
       BlockchainId targetChainBcId,
       String targetChainWsUrl,
       byte[] txPKey,
@@ -244,6 +251,7 @@ public class AttestorRelayerWebApi {
     ObjectMapper mapper2 = new ObjectMapper();
     ObjectNode setVerifier = mapper2.createObjectNode();
     setVerifier.put("source_chain_id", sourceChainBcId.toDecimalString());
+    setVerifier.put("source_chain_cbc", sourceCbcAddress);
     setVerifier.put("target_chain_id", targetChainBcId.toDecimalString());
     setVerifier.put("verifier_contract_addr", targetChainVerifierAddr);
     try {

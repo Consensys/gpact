@@ -344,11 +344,19 @@ public abstract class BaseExampleSystemManager {
     Set<BlockchainId> blockchainIds = this.messagingManagerGroup.getSupportedBlockchains();
     for (BlockchainId sourceBcId : blockchainIds) {
       for (BlockchainId targetBcId : blockchainIds) {
+        if (sourceBcId.equals(targetBcId)) continue;
+        String sourceCbcAddress =
+            this.crossControlManagerGroup.getCbcManager(sourceBcId).getCbcContractAddress();
         String targetBcVerifierAddr = this.messagingManagerGroup.getVerifierAddress(targetBcId);
         String targetBcWsUri = this.messagingManagerGroup.getWsUri(targetBcId);
         AttestorRelayer.Dest dest =
             new AttestorRelayer.Dest(
-                sourceBcId, targetBcId, targetBcWsUri, txPKey, targetBcVerifierAddr);
+                sourceBcId,
+                sourceCbcAddress,
+                targetBcId,
+                targetBcWsUri,
+                txPKey,
+                targetBcVerifierAddr);
         targets.add(dest);
       }
     }

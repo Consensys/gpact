@@ -274,7 +274,9 @@ async function config() {
     console.log(output.toString());
     output = execSync.execSync('docker exec observer-js /app/build/admin observer start localhost:9425 ' + chainB + " ws://chainB-js:8546 GPACT " + gpactB.options.address);
     console.log(output.toString());
-    output = execSync.execSync('docker exec relayer-js /app/build/admin relayer set-key localhost:9425 0 0x0000000000000000000000000000000000000000 ' + signerKey);
+    output = execSync.execSync('docker exec relayer-js /app/build/admin relayer set-key localhost:9425 ' + chainA  + ' ' + gpactA.options.address + ' ' + signerKey);
+    console.log(output.toString());
+    output = execSync.execSync('docker exec relayer-js /app/build/admin relayer set-key localhost:9425 ' + chainB  + ' ' + gpactB.options.address + ' ' + signerKey);
     console.log(output.toString());
     output = execSync.execSync('docker exec dispatcher-js /app/build/admin dispatcher set-msgstore localhost:9425 msgstore-js:8080');
     console.log(output.toString());

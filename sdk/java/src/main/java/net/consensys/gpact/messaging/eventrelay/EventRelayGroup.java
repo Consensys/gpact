@@ -43,8 +43,9 @@ public class EventRelayGroup {
       List<AttestorRelayer.Dest> targets)
       throws CrosschainProtocolStackException {
     AttestorRelayer relayer = new AttestorRelayer(relayerUri, signingCredentials.getPrivateKey());
-    relayer.configureSigningKey();
     for (AttestorRelayer.Source source : sources) {
+      relayer.configureSigningKey(
+          source.getBlockchainId().toDecimalString(), source.getCrosschainControlAddr());
       relayer.startNewObservation(source);
     }
 
