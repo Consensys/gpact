@@ -20,7 +20,7 @@ public class AttestorRelayerTest {
     String crosschainControlAddr33 = DummyAddressGenerator.gen();
 
     AttestorRelayer relayer = new AttestorRelayer("http://127.0.0.1:9625", signingKey);
-    relayer.configureSigningKey();
+    relayer.configureSigningKey(bcId31.toDecimalString(), crosschainControlAddr31);
     var observer1 =
         relayer.startNewObservation(
             bcId31,
@@ -29,6 +29,7 @@ public class AttestorRelayerTest {
             "http://127.0.0.1:9525",
             "ws://bc31node1:8546",
             AttestorRelayer.WatcherType.REALTIME);
+    relayer.configureSigningKey(bcId32.toDecimalString(), crosschainControlAddr32);
     var observer2 =
         relayer.startNewObservation(
             bcId32,
@@ -37,6 +38,7 @@ public class AttestorRelayerTest {
             "http://127.0.0.1:9525",
             "ws://bc32node1:8546",
             AttestorRelayer.WatcherType.REALTIME);
+    relayer.configureSigningKey(bcId33.toDecimalString(), crosschainControlAddr33);
     var observer3 =
         relayer.startNewObservation(
             bcId33,
@@ -51,6 +53,6 @@ public class AttestorRelayerTest {
     relayer.stopObservation(observer1);
     relayer.stopObservation(observer2);
     relayer.stopObservation(observer3);
-    relayer.stopObserver("http://127.0.0.1:9525");
+    //    relayer.stopObserver("http://127.0.0.1:9525");
   }
 }

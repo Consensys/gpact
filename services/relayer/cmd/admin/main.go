@@ -205,7 +205,7 @@ func main() {
 					{
 						Name:      "set-ver",
 						Usage:     "Set verifier",
-						ArgsUsage: "[url chainID contractAddr esAddr]",
+						ArgsUsage: "[url chainID sourceCbc verifierAddr esAddr]",
 						Action: func(c *cli.Context) error {
 							url := c.Args().Get(0)
 							sourceChainID, err := strconv.ParseUint(c.Args().Get(1), 10, 64)
@@ -216,8 +216,11 @@ func main() {
 							if err != nil {
 								return fmt.Errorf("error parsing target chain id: %v", err.Error())
 							}
-							verifierAddr := c.Args().Get(3)
-							success, err := dispatcherapi.RequestSetVerifierAddr(url, big.NewInt(int64(sourceChainID)), big.NewInt(int64(targetChainID)), common.HexToAddress(verifierAddr))
+							sourceCbc := c.Args().Get(3)
+							verifierAddr := c.Args().Get(4)
+							success, err := dispatcherapi.RequestSetVerifierAddr(url,
+								big.NewInt(int64(sourceChainID)), sourceCbc, big.NewInt(int64(targetChainID)),
+								common.HexToAddress(verifierAddr))
 							if err != nil {
 								return err
 							}

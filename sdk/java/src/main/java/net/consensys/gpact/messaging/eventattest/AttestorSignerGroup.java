@@ -70,8 +70,9 @@ public class AttestorSignerGroup {
       String msgStoreUriFromUser)
       throws CrosschainProtocolStackException {
     AttestorRelayer relayer = new AttestorRelayer(relayerUri, signingCredentials.getPrivateKey());
-    relayer.configureSigningKey();
     for (AttestorRelayer.Source source : sources) {
+      relayer.configureSigningKey(
+          source.getBlockchainId().toDecimalString(), source.getCrosschainControlAddr());
       relayer.startNewObservation(source);
       LOG.info(
           String.format(

@@ -289,12 +289,16 @@ func TestERC20SetupSFC(t *testing.T) {
 
 	assert.Empty(t, setupObserver("127.0.0.1:9525", big.NewInt(31), "ws://bc31node1:8546", "SFC", sfcAddrA))
 	assert.Empty(t, setupObserver("127.0.0.1:9525", big.NewInt(32), "ws://bc32node1:8546", "SFC", sfcAddrB))
-	assert.Empty(t, setupRelayer("127.0.0.1:9625", big.NewInt(31), bridgeAddrA, signer.SECP256K1_KEY_TYPE, relayerKey))
-	assert.Empty(t, setupRelayer("127.0.0.1:9625", big.NewInt(32), bridgeAddrB, signer.SECP256K1_KEY_TYPE, relayerKey))
-	assert.Empty(t, setupDispatcher("127.0.0.1:9725", big.NewInt(31), big.NewInt(32), "ws://bc32node1:8546", dispatcherKey, verifierAddrA))
-	assert.Empty(t, setupDispatcher("127.0.0.1:9725", big.NewInt(32), big.NewInt(32), "ws://bc32node1:8546", dispatcherKey, verifierAddrB))
-	assert.Empty(t, setupDispatcher("127.0.0.1:9725", big.NewInt(31), big.NewInt(31), "ws://bc31node1:8546", dispatcherKey, verifierAddrA))
-	assert.Empty(t, setupDispatcher("127.0.0.1:9725", big.NewInt(32), big.NewInt(31), "ws://bc31node1:8546", dispatcherKey, verifierAddrB))
+	assert.Empty(t, setupRelayer("127.0.0.1:9625", big.NewInt(31), sfcAddrA, signer.SECP256K1_KEY_TYPE, relayerKey))
+	assert.Empty(t, setupRelayer("127.0.0.1:9625", big.NewInt(32), sfcAddrB, signer.SECP256K1_KEY_TYPE, relayerKey))
+	assert.Empty(t, setupDispatcher("127.0.0.1:9725", big.NewInt(31), sfcAddrA.String(), big.NewInt(32), "ws://bc32node1:8546",
+		dispatcherKey, verifierAddrA))
+	assert.Empty(t, setupDispatcher("127.0.0.1:9725", big.NewInt(32), sfcAddrB.String(), big.NewInt(32), "ws://bc32node1:8546",
+		dispatcherKey, verifierAddrB))
+	assert.Empty(t, setupDispatcher("127.0.0.1:9725", big.NewInt(31), sfcAddrA.String(), big.NewInt(31),
+		"ws://bc31node1:8546", dispatcherKey, verifierAddrA))
+	assert.Empty(t, setupDispatcher("127.0.0.1:9725", big.NewInt(32), sfcAddrB.String(), big.NewInt(31),
+		"ws://bc31node1:8546", dispatcherKey, verifierAddrB))
 
 	t.Log("Setup done")
 }
@@ -669,7 +673,8 @@ func TestERC20SetupGpact(t *testing.T) {
 
 	assert.Empty(t, setupObserver("127.0.0.1:9525", big.NewInt(31), "ws://bc31node1:8546", "GPACT", gpactAddrA))
 	assert.Empty(t, setupObserver("127.0.0.1:9525", big.NewInt(32), "ws://bc32node1:8546", "GPACT", gpactAddrB))
-	assert.Empty(t, setupRelayer("127.0.0.1:9625", big.NewInt(0), common.Address{}, signer.SECP256K1_KEY_TYPE, relayerKey))
+	assert.Empty(t, setupRelayer("127.0.0.1:9625", big.NewInt(31), gpactAddrA, signer.SECP256K1_KEY_TYPE, relayerKey))
+	assert.Empty(t, setupRelayer("127.0.0.1:9625", big.NewInt(32), gpactAddrB, signer.SECP256K1_KEY_TYPE, relayerKey))
 	assert.Empty(t, setupMessageStore("127.0.0.1:9725", "msgstore:8080"))
 
 	t.Log("Setup done")
@@ -910,7 +915,8 @@ func setupRelayer(url string, chainID *big.Int, contractAddr common.Address, key
 }
 
 // setupDispatcher sets up dispatcher.
-func setupDispatcher(url string, sourceChainID *big.Int, targetChainID *big.Int, targetChainAP string, key []byte, verifierAddr common.Address) error {
+func setupDispatcher(url string, sourceChainID *big.Int, sourceAddr string, targetChainID *big.Int,
+	targetChainAP string, key []byte, verifierAddr common.Address) error {
 	success, err := dispatcherapi.RequestSetTransactionOpts(url, targetChainID, targetChainAP, key)
 	if err != nil {
 		return err
@@ -918,7 +924,7 @@ func setupDispatcher(url string, sourceChainID *big.Int, targetChainID *big.Int,
 	if !success {
 		return fmt.Errorf("failed.")
 	}
-	success, err = dispatcherapi.RequestSetVerifierAddr(url, sourceChainID, targetChainID, verifierAddr)
+	success, err = dispatcherapi.RequestSetVerifierAddr(url, sourceChainID, sourceAddr, targetChainID, verifierAddr)
 	if err != nil {
 		return err
 	}

@@ -80,6 +80,7 @@ public class AttestorRelayer {
   }
 
   public static class Dest {
+    final String sourceCbcAddress;
     BlockchainId sourceBcId;
     BlockchainId targetBcId;
     String targetBcWsUri;
@@ -88,11 +89,13 @@ public class AttestorRelayer {
 
     public Dest(
         BlockchainId sourceBcId,
+        String sourceCbcAddress,
         BlockchainId targetBcId,
         String targetBcWsUri,
         byte[] txPKey,
         String targetChainVerifierAddr) {
       this.sourceBcId = sourceBcId;
+      this.sourceCbcAddress = sourceCbcAddress;
       this.targetBcId = targetBcId;
       this.targetBcWsUri = targetBcWsUri;
       this.txPKey = txPKey;
@@ -160,8 +163,10 @@ public class AttestorRelayer {
     AttestorRelayerWebApi.stopObserver(observerUrl);
   }
 
-  public void configureSigningKey() throws CrosschainProtocolStackException {
-    AttestorRelayerWebApi.configureSigningKey(this.relayerUri, this.signingKey);
+  public void configureSigningKey(String chainId, String contractAddress)
+      throws CrosschainProtocolStackException {
+    AttestorRelayerWebApi.configureSigningKey(
+        this.relayerUri, chainId, contractAddress, this.signingKey);
   }
 
   public void setMessageStore(
@@ -176,6 +181,7 @@ public class AttestorRelayer {
     AttestorRelayerWebApi.setupDispatcherForRelayingEvents(
         msgDispatcherUrl,
         dest.sourceBcId,
+        dest.sourceCbcAddress,
         dest.targetBcId,
         dest.targetBcWsUri,
         dest.txPKey,

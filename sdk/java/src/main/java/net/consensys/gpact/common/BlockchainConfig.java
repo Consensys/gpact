@@ -26,7 +26,7 @@ public class BlockchainConfig {
   // Strategy to be used for setting gas prices.
   public DynamicGasProvider.Strategy gasPriceStrategy;
   // How often to poll the blockchain for a response. Typically set to the block period.
-  public int period;
+  public long period;
 
   public String msgStoreUrlFromDispatcher;
   public String msgStoreUrlFromUser;
@@ -35,6 +35,7 @@ public class BlockchainConfig {
 
   public String observerUri;
 
+  public static final long DEFAULT_PERIOD = 2000;
   /**
    * @param bcId Blockchain identifier.
    * @param blockchainNodeRpcUri URI of the blockchain node to be used for connecting to the
@@ -57,7 +58,10 @@ public class BlockchainConfig {
     this.blockchainNodeRpcUri = blockchainNodeRpcUri;
     this.blockchainNodeWsUri = blockchainNodeWsUri;
     this.gasPriceStrategy = DynamicGasProvider.Strategy.valueOf(gasPriceStrategy);
-    this.period = Integer.parseInt(period);
+    this.period =
+        period == null || period.isEmpty()
+            ? BlockchainConfig.DEFAULT_PERIOD
+            : Long.parseLong(period);
     this.msgStoreUrlFromDispatcher = msgStoreUrlFromDispatcher;
     this.msgStoreUrlFromUser = msgStoreUrlFromUser;
     this.dispatcherUri = dispatcherUri;

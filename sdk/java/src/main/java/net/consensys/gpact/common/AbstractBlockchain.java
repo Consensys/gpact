@@ -37,7 +37,7 @@ public abstract class AbstractBlockchain {
   protected String rpcUri;
   protected String wsUri;
   // Polling interval should be equal to the block time.
-  protected int pollingIntervalMs;
+  protected long pollingIntervalMs;
   public DynamicGasProvider gasProvider;
   protected DynamicGasProvider.Strategy gasPriceStrategy;
 
@@ -85,9 +85,9 @@ public abstract class AbstractBlockchain {
 
   public void pauseWhileTransactionMined() {
     try {
-      Thread.sleep((long) this.pollingIntervalMs);
+      Thread.sleep(this.pollingIntervalMs);
     } catch (InterruptedException e) {
-      // Do nothing
+      e.printStackTrace();
     }
   }
 }
