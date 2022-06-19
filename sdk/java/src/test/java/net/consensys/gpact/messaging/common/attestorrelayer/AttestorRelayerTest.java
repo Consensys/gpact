@@ -53,6 +53,6 @@ public class AttestorRelayerTest {
     relayer.stopObservation(observer1);
     relayer.stopObservation(observer2);
     relayer.stopObservation(observer3);
-//    relayer.stopObserver("http://127.0.0.1:9525");
+    //    relayer.stopObserver("http://127.0.0.1:9525");
   }
 }
