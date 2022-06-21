@@ -54,7 +54,10 @@ func main() {
 	instance.MQ = mq
 	defer mq.Stop()
 	// Start the observer
-	observer := observer.NewMultiSourceObserver(conf.ObserverDSPath, mq)
+	observer, err := observer.NewMultiSourceObserver(conf.ObserverDSPath, mq, nil)
+	if err != nil {
+		panic(err)
+	}
 	err = observer.Start()
 	if err != nil {
 		panic(err)
@@ -63,8 +66,10 @@ func main() {
 	defer observer.Stop()
 	// Start the RPC Server
 	rpc := rpc.NewServerImplV1(conf.APIPort).
-		AddHandler(api.StartObserveReqType, api.HandleStartObserve).
-		AddHandler(api.StopObserveReqType, api.HandleStopObserve)
+		AddHandler(api.StartMultisourceObserverReqType, api.HandleStartObserver).
+		AddHandler(api.StopMultisourceObserverReqType, api.HandleStopObserver).
+		AddHandler(api.StartObservationReqType, api.HandleStartObservation).
+		AddHandler(api.StopObservationReqType, api.HandleStopObservation)
 	err = rpc.Start()
 	if err != nil {
 		panic(err)

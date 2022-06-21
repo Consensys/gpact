@@ -17,6 +17,7 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"math/big"
 
 	"github.com/consensys/gpact/services/relayer/internal/msgrelayer/eth/node"
@@ -47,13 +48,11 @@ func HandleSetKey(data []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	//chainID, ok := big.NewInt(0).SetString(req.ChainID, 10)
-	chainID := big.NewInt(0)
-	//if !ok {
-	//	return nil, fmt.Errorf("fail to decode chain id")
-	//}
-	//err = instance.Signer.SetKey(chainID, common.HexToAddress(req.ContractAddr), req.KeyType, req.Key)
-	err = instance.Signer.SetKey(chainID, common.BigToAddress(big.NewInt(0)), req.KeyType, req.Key)
+	chainID, ok := big.NewInt(0).SetString(req.ChainID, 10)
+	if !ok {
+		return nil, fmt.Errorf("fail to decode chain id '%s'", req.ChainID)
+	}
+	err = instance.Signer.SetKey(chainID, common.HexToAddress(req.ContractAddr), req.KeyType, req.Key)
 	if err != nil {
 		return nil, err
 	}

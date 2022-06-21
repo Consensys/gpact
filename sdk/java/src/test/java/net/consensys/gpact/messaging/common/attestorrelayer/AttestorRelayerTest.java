@@ -20,12 +20,39 @@ public class AttestorRelayerTest {
     String crosschainControlAddr33 = DummyAddressGenerator.gen();
 
     AttestorRelayer relayer = new AttestorRelayer("http://127.0.0.1:9625", signingKey);
-    relayer.addNewSource(
-        bcId31, crosschainControlAddr31, "GPACT", "http://127.0.0.1:9525", "ws://bc31node1:8546");
-    relayer.addNewSource(
-        bcId32, crosschainControlAddr32, "GPACT", "http://127.0.0.1:9526", "ws://bc32node1:8546");
-    relayer.addNewSource(
-        bcId33, crosschainControlAddr33, "GPACT", "http://127.0.0.1:9527", "ws://bc33node1:8546");
-    relayer.addMessageStore("http://127.0.0.1:9725", "msgstore:8080", "127.0.0.1:8080");
+    relayer.configureSigningKey(bcId31.toDecimalString(), crosschainControlAddr31);
+    var observer1 =
+        relayer.startNewObservation(
+            bcId31,
+            crosschainControlAddr31,
+            "GPACT",
+            "http://127.0.0.1:9525",
+            "ws://bc31node1:8546",
+            AttestorRelayer.WatcherType.REALTIME);
+    relayer.configureSigningKey(bcId32.toDecimalString(), crosschainControlAddr32);
+    var observer2 =
+        relayer.startNewObservation(
+            bcId32,
+            crosschainControlAddr32,
+            "GPACT",
+            "http://127.0.0.1:9525",
+            "ws://bc32node1:8546",
+            AttestorRelayer.WatcherType.REALTIME);
+    relayer.configureSigningKey(bcId33.toDecimalString(), crosschainControlAddr33);
+    var observer3 =
+        relayer.startNewObservation(
+            bcId33,
+            crosschainControlAddr33,
+            "GPACT",
+            "http://127.0.0.1:9525",
+            "ws://bc33node1:8546",
+            AttestorRelayer.WatcherType.REALTIME);
+    relayer.setMessageStore("http://127.0.0.1:9725", "msgstore:8080", "127.0.0.1:8080");
+
+    Thread.sleep(5000);
+    relayer.stopObservation(observer1);
+    relayer.stopObservation(observer2);
+    relayer.stopObservation(observer3);
+    //    relayer.stopObserver("http://127.0.0.1:9525");
   }
 }

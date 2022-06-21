@@ -20,6 +20,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Properties;
 import net.consensys.gpact.common.BlockchainConfig;
+import net.consensys.gpact.messaging.common.attestorrelayer.AttestorRelayer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -96,5 +97,11 @@ public class PropertiesLoader {
     String relayerUri = getProperty("RELAYER_URI");
     LOG.info(" RELAYER_URI: {}", relayerUri);
     return relayerUri;
+  }
+
+  public AttestorRelayer.WatcherType getWatcherType() {
+    String watcherType = getProperty("WATCHER_TYPE");
+    LOG.info(" WATCHER_TYPE: {}", watcherType);
+    return AttestorRelayer.WatcherType.valueOf(watcherType.toUpperCase());
   }
 }

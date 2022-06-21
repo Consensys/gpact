@@ -27,8 +27,9 @@ import (
 
 // GetVerifierAddrReq is the request to get verifier addr.
 type GetVerifierAddrReq struct {
-	SourceChainID string `json:"source_chain_id"`
-	TargetChainID string `json:"target_chain_id"`
+	SourceChainID  string `json:"source_chain_id"`
+	SourceChainCbc string `json:"source_chain_cbc"`
+	TargetChainID  string `json:"target_chain_id"`
 }
 
 // GetVerifierAddrResp is the response to get verifier addr.
@@ -54,7 +55,7 @@ func HandleGetVerifierAddr(data []byte) ([]byte, error) {
 	if !ok {
 		return nil, fmt.Errorf("fail to decode target chain id")
 	}
-	verifierContractAddr, err := instance.Verifier.GetVerifierAddr(sourceChainID, targetChainID)
+	verifierContractAddr, err := instance.Verifier.GetVerifierAddr(sourceChainID, req.SourceChainCbc, targetChainID)
 	if err != nil {
 		return nil, err
 	}

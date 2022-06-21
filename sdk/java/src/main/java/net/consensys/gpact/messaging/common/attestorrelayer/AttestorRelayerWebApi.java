@@ -34,8 +34,10 @@ public class AttestorRelayerWebApi {
   static final Logger LOG = LogManager.getLogger(AttestorRelayerWebApi.class);
 
   // Observer API
-  public static final byte START_OBSERVE_REQ_TYPE = 1;
-  public static final byte STOP_OBSERVE_REQ_TYPE = 2;
+  public static final byte START_OBSERVER_REQ_TYPE = 1;
+  public static final byte STOP_OBSERVER_REQ_TYPE = 2;
+  public static final byte START_OBSERVATION_REQ_TYPE = 3;
+  public static final byte STOP_OBSERVATION_REQ_TYPE = 4;
 
   // Message Dispatcher API
   public static final byte SET_TRANSACTION_OPT_REQ_TYPE = 1;
@@ -54,28 +56,58 @@ public class AttestorRelayerWebApi {
 
   private AttestorRelayerWebApi() {}
 
-  public static void setupObserver(
+  public static void startNewObservation(
       String observerUrl,
       BlockchainId bcId,
       String bcWsUrl,
       String contractType,
-      String crosschainControlAddr)
+      String crosschainControlAddr,
+      AttestorRelayer.WatcherType watcherType)
       throws CrosschainProtocolStackException {
-    LOG.info(
-        "SetupObserver: ChainId: {}, ChainAP: {}, ContractType: {}, ContractAddr: {}, ObserverURL: {}",
-        bcId.toDecimalString(),
+    updateObservation(
+        START_OBSERVATION_REQ_TYPE,
+        observerUrl,
+        bcId,
         bcWsUrl,
         contractType,
         crosschainControlAddr,
-        observerUrl);
+        watcherType);
+  }
 
+  public static void stopObservation(
+      String observerUrl,
+      BlockchainId bcId,
+      String bcWsUrl,
+      String contractType,
+      String crosschainControlAddr,
+      AttestorRelayer.WatcherType watcherType)
+      throws CrosschainProtocolStackException {
+    updateObservation(
+        STOP_OBSERVATION_REQ_TYPE,
+        observerUrl,
+        bcId,
+        bcWsUrl,
+        contractType,
+        crosschainControlAddr,
+        watcherType);
+  }
+
+  private static void updateObservation(
+      byte actionType,
+      String observerUrl,
+      BlockchainId bcId,
+      String bcWsUrl,
+      String contractType,
+      String crosschainControlAddr,
+      AttestorRelayer.WatcherType watcherType)
+      throws CrosschainProtocolStackException {
     ObjectMapper mapper = new ObjectMapper();
     ObjectNode user = mapper.createObjectNode();
     user.put("chain_id", bcId.toDecimalString());
     user.put("chain_ap", bcWsUrl);
     user.put("contract_type", contractType);
     user.put("contract_addr", crosschainControlAddr);
-    //    String jsonStr1 = mapper.writer().writeValueAsString(user);
+    user.put("watcher_type", watcherType.toString());
     byte[] json;
     try {
       json = mapper.writer().writeValueAsBytes(user);
@@ -83,7 +115,7 @@ public class AttestorRelayerWebApi {
       throw new CrosschainProtocolStackException("Observer", ex);
     }
 
-    Bytes type = Bytes.of(START_OBSERVE_REQ_TYPE);
+    Bytes type = Bytes.of(actionType);
     Bytes body = Bytes.wrap(json);
     Bytes all = Bytes.concatenate(type, body);
     byte[] requestBody = all.toArray();
@@ -94,19 +126,19 @@ public class AttestorRelayerWebApi {
   public static void stopObserver(String observerUrl) throws CrosschainProtocolStackException {
     LOG.info("StopObserver: ObserverURL: {}", observerUrl);
 
-    Bytes type = Bytes.of(STOP_OBSERVE_REQ_TYPE);
+    Bytes type = Bytes.of(STOP_OBSERVER_REQ_TYPE);
     byte[] requestBody = type.toArray();
 
     config("Observer", observerUrl, requestBody);
   }
 
-  public static void addMessageStoreRoute(
+  public static void addRouteToMessageStore(
       String relayerUrl, String sourceNetwork, String sourceContract)
       throws CrosschainProtocolStackException {
 
     ObjectMapper mapper = new ObjectMapper();
     ObjectNode user = mapper.createObjectNode();
-    user.put("network_id", sourceNetwork.toString());
+    user.put("network_id", sourceNetwork);
     user.put("contract_address", sourceContract);
 
     byte[] json;
@@ -124,26 +156,24 @@ public class AttestorRelayerWebApi {
     config("Relayer", relayerUrl, requestBody);
   }
 
-  public static void setupRelayer(
-      String relayerUrl, BlockchainId bcId, String crosschainControlAddr, byte[] pKey)
+  public static void configureSigningKey(String relayerUrl, byte[] pKey)
+      throws CrosschainProtocolStackException {
+    configureSigningKey(relayerUrl, "0", "0x0", pKey);
+  }
+
+  public static void configureSigningKey(
+      String relayerUrl, String chainId, String contractAddress, byte[] pKey)
       throws CrosschainProtocolStackException {
     byte keyType = SECP256K1_KEY_TYPE;
 
-    LOG.info(
-        "SetupRelayer: ChainId: {}, ContractAddr: {}, RelayerURL: {}",
-        bcId.toDecimalString(),
-        crosschainControlAddr,
-        relayerUrl);
+    LOG.info("Setup relayer : {}", relayerUrl);
 
     ObjectMapper mapper = new ObjectMapper();
     ObjectNode user = mapper.createObjectNode();
-    //    user.put("chain_id", bcId.toDecimalString());
-    //    user.put("contract_addr", crosschainControlAddr);
-    user.put("chain_id", "0");
-    user.put("contract_addr", "0x0");
+    user.put("chain_id", chainId);
+    user.put("contract_addr", contractAddress);
     user.put("key_type", keyType);
     user.put("key", pKey);
-    //    String jsonStr1 = mapper.writer().writeValueAsString(user);
     byte[] json;
     try {
       json = mapper.writer().writeValueAsBytes(user);
@@ -185,6 +215,7 @@ public class AttestorRelayerWebApi {
   public static void setupDispatcherForRelayingEvents(
       String msgDispatcherUrl,
       BlockchainId sourceChainBcId,
+      String sourceCbcAddress,
       BlockchainId targetChainBcId,
       String targetChainWsUrl,
       byte[] txPKey,
@@ -220,6 +251,7 @@ public class AttestorRelayerWebApi {
     ObjectMapper mapper2 = new ObjectMapper();
     ObjectNode setVerifier = mapper2.createObjectNode();
     setVerifier.put("source_chain_id", sourceChainBcId.toDecimalString());
+    setVerifier.put("source_chain_cbc", sourceCbcAddress);
     setVerifier.put("target_chain_id", targetChainBcId.toDecimalString());
     setVerifier.put("verifier_contract_addr", targetChainVerifierAddr);
     try {
@@ -248,11 +280,15 @@ public class AttestorRelayerWebApi {
 
     if (response.statusCode() != 200) {
       throw new CrosschainProtocolStackException(
-          component + " config returned HTTP status: " + response.statusCode());
+          String.format(
+              "%s config returned HTTP status '%s'. Error: %s",
+              component, response.statusCode(), response.body()));
     }
     if (!response.body().contains("\"success\":true")) {
       throw new CrosschainProtocolStackException(
-          component + " config did not return success. Status: " + response.body());
+          String.format(
+              "%s config did not return success. HTTP status '%s'. Message: %s",
+              component, response.statusCode(), response.body()));
     }
   }
 

@@ -15,7 +15,7 @@ import (
 
 func TestGPACTRealtimeEventWatcher(t *testing.T) {
 	simBackend, auth := simulatedBackend(t)
-	contract := deployGPACTContract(t, simBackend, auth)
+	_, contract := deployGPACTContract(t, simBackend, auth)
 
 	handler := new(MockEventHandler)
 	handler.On("Handle", mock.AnythingOfType("*functioncall.GpactStart")).Once().Return(nil)
@@ -37,7 +37,7 @@ func TestGPACTRealtimeEventWatcher(t *testing.T) {
 
 func TestGPACTRealtimeEventWatcher_RemovedEvent(t *testing.T) {
 	simBackend, auth := simulatedBackend(t)
-	contract := deployGPACTContract(t, simBackend, auth)
+	_, contract := deployGPACTContract(t, simBackend, auth)
 
 	handler := new(MockEventHandler)
 	handler.On("Handle", mock.AnythingOfType("*functioncall.GpactStart")).Once().Return(nil)
@@ -99,7 +99,7 @@ func TestGPACTFinalisedEventWatcher(t *testing.T) {
 		handler := new(MockEventHandler)
 
 		simBackend, auth := simulatedBackend(t)
-		contract := deployGPACTContract(t, simBackend, auth)
+		_, contract := deployGPACTContract(t, simBackend, auth)
 
 		opts := EventWatcherOpts{
 			Start:        v.start,
@@ -149,7 +149,7 @@ func TestGPACTFinalisedEventWatcher_MultipleBlocksFinalised(t *testing.T) {
 
 		simBackend, auth := simulatedBackend(t)
 		handler := new(MockEventHandler)
-		contract := deployGPACTContract(t, simBackend, auth)
+		_, contract := deployGPACTContract(t, simBackend, auth)
 
 		// cross-chain calls before watch instance is started
 		for i := 0; i < v.ccEventsToCommit; i++ {
@@ -180,7 +180,7 @@ func TestGPACTFinalisedEventWatcher_MultipleBlocksFinalised(t *testing.T) {
 
 func TestGPACTFinalisedEventWatcher_ProgressPersisted(t *testing.T) {
 	simBackend, auth := simulatedBackend(t)
-	contract := deployGPACTContract(t, simBackend, auth)
+	_, contract := deployGPACTContract(t, simBackend, auth)
 	fixConfirms := uint64(2)
 	fixLastFinalised := uint64(2)
 
@@ -230,7 +230,7 @@ Expectation: the event is not processed at height b3
 func TestGPACTFinalisedEventWatcher_Reorg(t *testing.T) {
 	simBackend, auth := simulatedBackend(t)
 	handler := new(MockEventHandler)
-	contract := deployGPACTContract(t, simBackend, auth)
+	_, contract := deployGPACTContract(t, simBackend, auth)
 	opts := EventWatcherOpts{
 		Start:        2,
 		Context:      auth.Context,

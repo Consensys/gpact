@@ -65,24 +65,28 @@ func (v *VerifierImplV1) Stop() {
 }
 
 // SetVerifierAddr sets a verifier contract address on the target chain based on source and target chain.
-func (v *VerifierImplV1) SetVerifierAddr(sourceChainID *big.Int, targetChainID *big.Int, verifierContractAddr common.Address) error {
+func (v *VerifierImplV1) SetVerifierAddr(sourceChainID *big.Int, sourceCbc string, targetChainID *big.Int, verifierContractAddr common.Address) error {
 	ctx, cancel := context.WithTimeout(context.Background(), dsTimeout)
 	defer cancel()
-	return v.ds.Put(ctx, dsKey(sourceChainID, targetChainID), verifierContractAddr.Bytes())
+	logging.Info("setting verifier for chain: %s, source address: %s, verifier: %v", sourceChainID.String(),
+		sourceCbc, verifierContractAddr)
+	return v.ds.Put(ctx, dsKey(sourceChainID, sourceCbc, targetChainID), verifierContractAddr.Bytes())
 }
 
 // GetVerifierAddr gets a verifier contract address for given source and target chain combination.
-func (v *VerifierImplV1) GetVerifierAddr(sourceChainID *big.Int, targetChainID *big.Int) (common.Address, error) {
+func (v *VerifierImplV1) GetVerifierAddr(sourceChainID *big.Int, sourceAddr string,
+	targetChainID *big.Int) (common.Address, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), dsTimeout)
 	defer cancel()
-	val, err := v.ds.Get(ctx, dsKey(sourceChainID, targetChainID))
+	val, err := v.ds.Get(ctx, dsKey(sourceChainID, sourceAddr, targetChainID))
 	if err != nil {
+		logging.Error("Could not find verifier for chain: %v, source address: %s", sourceChainID, sourceAddr)
 		return common.Address{}, err
 	}
 	return common.BytesToAddress(val), nil
 }
 
 // dsKey gets the datastore key from given source and target chainID.
-func dsKey(sourceChainID *big.Int, targetChainID *big.Int) datastore.Key {
-	return datastore.NewKey(fmt.Sprintf("%v-%v", sourceChainID.String(), targetChainID.String()))
+func dsKey(sourceChainID *big.Int, sourceCbc string, targetChainID *big.Int) datastore.Key {
+	return datastore.NewKey(fmt.Sprintf("%v-%x-%v", sourceChainID.String(), common.HexToAddress(sourceCbc).String(), targetChainID.String()))
 }

@@ -48,7 +48,7 @@ public abstract class BaseExampleSystemManager {
 
   public void standardExampleConfig(int numberOfBlockchains) throws Exception {
     // Less than two blockchains doesn't make sense for crosschain.
-    // The test infrasturcture only supports three blockchains at present.
+    // The test infrastructure only supports three blockchains at present.
     if (!(numberOfBlockchains == 2 || numberOfBlockchains == 3)) {
       throw new IllegalArgumentException(
           "Number of blockchains must be two or three. Requested: " + numberOfBlockchains);
@@ -73,6 +73,8 @@ public abstract class BaseExampleSystemManager {
 
     List<AttestorRelayer.Source> sources = new ArrayList<>();
 
+    AttestorRelayer.WatcherType watcherType = propsLoader.getWatcherType();
+
     // Set-up GPACT contracts: Deploy Crosschain Control and Registrar contracts on
     // each blockchain.
     switch (consensusMethodology) {
@@ -87,6 +89,7 @@ public abstract class BaseExampleSystemManager {
             attestorSignerGroup,
             creds,
             this.root,
+            watcherType,
             sources);
 
         addBcAttestorSign(
@@ -95,6 +98,7 @@ public abstract class BaseExampleSystemManager {
             attestorSignerGroup,
             creds,
             this.bc2,
+            watcherType,
             sources);
         if (numberOfBlockchains == 3) {
           addBcAttestorSign(
@@ -103,6 +107,7 @@ public abstract class BaseExampleSystemManager {
               attestorSignerGroup,
               creds,
               this.bc3,
+              watcherType,
               sources);
         }
 
@@ -127,6 +132,7 @@ public abstract class BaseExampleSystemManager {
             eventRelayGroup,
             creds,
             this.root,
+            watcherType,
             sources);
 
         addBcEventRelay(
@@ -135,6 +141,7 @@ public abstract class BaseExampleSystemManager {
             eventRelayGroup,
             creds,
             this.bc2,
+            watcherType,
             sources);
         if (numberOfBlockchains == 3) {
           addBcEventRelay(
@@ -143,6 +150,7 @@ public abstract class BaseExampleSystemManager {
               eventRelayGroup,
               creds,
               this.bc3,
+              watcherType,
               sources);
         }
 
@@ -255,6 +263,7 @@ public abstract class BaseExampleSystemManager {
       AttestorSignerGroup attestorSignerGroup,
       Credentials creds,
       BlockchainConfig bc,
+      AttestorRelayer.WatcherType watcherType,
       List<AttestorRelayer.Source> sources)
       throws Exception {
     crossControlManagerGroup.addBlockchainAndDeployContracts(creds, bc);
@@ -268,7 +277,8 @@ public abstract class BaseExampleSystemManager {
             crosschainControlAddr,
             getFunctionCallImplName(),
             bc.observerUri,
-            bc.blockchainNodeWsUri));
+            bc.blockchainNodeWsUri,
+            watcherType));
   }
 
   private void addBcEventRelay(
@@ -277,6 +287,7 @@ public abstract class BaseExampleSystemManager {
       EventRelayGroup eventRelayGroup,
       Credentials creds,
       BlockchainConfig bc,
+      AttestorRelayer.WatcherType watcherType,
       List<AttestorRelayer.Source> sources)
       throws Exception {
     crossControlManagerGroup.addBlockchainAndDeployContracts(creds, bc);
@@ -290,7 +301,8 @@ public abstract class BaseExampleSystemManager {
             crosschainControlAddr,
             getFunctionCallImplName(),
             bc.observerUri,
-            bc.blockchainNodeWsUri));
+            bc.blockchainNodeWsUri,
+            watcherType));
   }
 
   private void addBcTxRootSign(
@@ -332,11 +344,19 @@ public abstract class BaseExampleSystemManager {
     Set<BlockchainId> blockchainIds = this.messagingManagerGroup.getSupportedBlockchains();
     for (BlockchainId sourceBcId : blockchainIds) {
       for (BlockchainId targetBcId : blockchainIds) {
+        if (sourceBcId.equals(targetBcId)) continue;
+        String sourceCbcAddress =
+            this.crossControlManagerGroup.getCbcManager(sourceBcId).getCbcContractAddress();
         String targetBcVerifierAddr = this.messagingManagerGroup.getVerifierAddress(targetBcId);
         String targetBcWsUri = this.messagingManagerGroup.getWsUri(targetBcId);
         AttestorRelayer.Dest dest =
             new AttestorRelayer.Dest(
-                sourceBcId, targetBcId, targetBcWsUri, txPKey, targetBcVerifierAddr);
+                sourceBcId,
+                sourceCbcAddress,
+                targetBcId,
+                targetBcWsUri,
+                txPKey,
+                targetBcVerifierAddr);
         targets.add(dest);
       }
     }

@@ -34,7 +34,7 @@ func TestSFCBridgeObserver(t *testing.T) {
 	fixSourceAddress := common.HexToAddress("0x8e215d06ea7ec1fdb4fc5fd21768f4b34ee92ef4")
 
 	simBackend, auth := simulatedBackend(t)
-	contract := deploySFCContract(t, simBackend, auth)
+	_, contract := deploySFCContract(t, simBackend, auth)
 	mockMQ := new(MockMQ)
 
 	observer, err := NewSFCRealtimeObserver(fixSourceID, fixSourceAddress, contract, mockMQ)

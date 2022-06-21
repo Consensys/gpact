@@ -102,7 +102,7 @@ func (s *ServerImplV1) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, errStr, 501)
 		return
 	}
-	if len(content) <= 1 {
+	if len(content) == 0 {
 		errStr := fmt.Sprintf("Received content with empty request %v", content)
 		logging.Error(errStr)
 		http.Error(w, errStr, 400)

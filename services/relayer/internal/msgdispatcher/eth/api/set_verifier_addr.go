@@ -29,6 +29,7 @@ import (
 // SetVerifierAddrReq is the request to set verifier addr.
 type SetVerifierAddrReq struct {
 	SourceChainID        string `json:"source_chain_id"`
+	SourceChainCbc       string `json:"source_chain_cbc"`
 	TargetChainID        string `json:"target_chain_id"`
 	VerifierContractAddr string `json:"verifier_contract_addr"`
 }
@@ -66,12 +67,14 @@ func HandleSetVerifierAddr(data []byte) ([]byte, error) {
 		return nil, fmt.Errorf(errStr)
 	}
 
-	err = instance.Verifier.SetVerifierAddr(sourceChainID, targetChainID, common.HexToAddress(req.VerifierContractAddr))
+	err = instance.Verifier.SetVerifierAddr(sourceChainID, req.SourceChainCbc, targetChainID,
+		common.HexToAddress(req.VerifierContractAddr))
 	if err != nil {
 		logging.Error("Error setting verifier address: %v", err.Error())
 		return nil, err
 	}
-	logging.Info("SetVerifierAddr: %v, %v, %v", req.SourceChainID, req.TargetChainID, req.VerifierContractAddr)
+	logging.Info("SetVerifierAddr: Source Chain: %v, Source Contract: %v, Target Chain: %v, Verifier Address: %v",
+		req.SourceChainID, req.SourceChainCbc, req.TargetChainID, req.VerifierContractAddr)
 
 	resp := SetVerifierAddrResp{
 		Success: true,
@@ -84,9 +87,11 @@ func HandleSetVerifierAddr(data []byte) ([]byte, error) {
 }
 
 // RequestSetVerifierAddr requests set verifier addr.
-func RequestSetVerifierAddr(addr string, sourceChainID *big.Int, targetChainID *big.Int, verifierAddr common.Address) (bool, error) {
+func RequestSetVerifierAddr(addr string, sourceChainID *big.Int, sourceCbc string, targetChainID *big.Int,
+	verifierAddr common.Address) (bool, error) {
 	req := SetVerifierAddrReq{
 		SourceChainID:        sourceChainID.String(),
+		SourceChainCbc:       sourceCbc,
 		TargetChainID:        targetChainID.String(),
 		VerifierContractAddr: verifierAddr.String(),
 	}
