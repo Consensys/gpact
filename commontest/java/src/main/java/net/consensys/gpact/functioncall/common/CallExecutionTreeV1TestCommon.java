@@ -1,7 +1,5 @@
 package net.consensys.gpact.functioncall.common;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import java.math.BigInteger;
 import java.util.ArrayList;
 import net.consensys.gpact.common.BlockchainId;
@@ -9,6 +7,7 @@ import net.consensys.gpact.common.Tuple;
 import net.consensys.gpact.common.test.AbstractWeb3Test;
 import net.consensys.gpact.functioncall.CallExecutionTree;
 import net.consensys.gpact.functioncall.CallExecutionTreeException;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 public abstract class CallExecutionTreeTestCommon extends AbstractWeb3Test {
@@ -76,18 +75,18 @@ public abstract class CallExecutionTreeTestCommon extends AbstractWeb3Test {
     ArrayList<CallExecutionTree> rootCalls1 = new ArrayList<>();
     rootCalls1.add(seg);
     CallExecutionTree root = new CallExecutionTree(blockchainId1, contract1, function1, rootCalls1);
-    root.toString();
+    System.out.println(root.toString());
 
     byte[] encoded = root.encode();
     Tuple<BigInteger, String, String> func = extractFunction(encoded, new int[] {0});
-    assertEquals(func.getFirst().toString(16), blockchainId1.toPlainString());
-    assertEquals(func.getSecond(), contract1);
-    assertEquals(func.getThird(), function1);
+    Assertions.assertEquals(func.getFirst().toString(16), blockchainId1.toPlainString());
+    Assertions.assertEquals(func.getSecond(), contract1);
+    Assertions.assertEquals(func.getThird(), function1);
 
     func = extractFunction(encoded, new int[] {1});
-    assertEquals(func.getFirst().toString(16), blockchainId2.toPlainString());
-    assertEquals(func.getSecond(), contract2);
-    assertEquals(func.getThird(), function2);
+    Assertions.assertEquals(func.getFirst().toString(16), blockchainId2.toPlainString());
+    Assertions.assertEquals(func.getSecond(), contract2);
+    Assertions.assertEquals(func.getThird(), function2);
   }
 
   @Test
@@ -102,19 +101,19 @@ public abstract class CallExecutionTreeTestCommon extends AbstractWeb3Test {
 
     byte[] encoded = root.encode();
     Tuple<BigInteger, String, String> func = extractFunction(encoded, new int[] {0});
-    assertEquals(func.getFirst().toString(16), blockchainId1.toPlainString());
-    assertEquals(func.getSecond(), contract1);
-    assertEquals(func.getThird(), function1);
+    Assertions.assertEquals(func.getFirst().toString(16), blockchainId1.toPlainString());
+    Assertions.assertEquals(func.getSecond(), contract1);
+    Assertions.assertEquals(func.getThird(), function1);
 
     func = extractFunction(encoded, new int[] {1});
-    assertEquals(func.getFirst().toString(16), blockchainId2.toPlainString());
-    assertEquals(func.getSecond(), contract2);
-    assertEquals(func.getThird(), function2);
+    Assertions.assertEquals(func.getFirst().toString(16), blockchainId2.toPlainString());
+    Assertions.assertEquals(func.getSecond(), contract2);
+    Assertions.assertEquals(func.getThird(), function2);
 
     func = extractFunction(encoded, new int[] {2});
-    assertEquals(func.getFirst().toString(16), blockchainId3.toPlainString());
-    assertEquals(func.getSecond(), contract3);
-    assertEquals(func.getThird(), function3);
+    Assertions.assertEquals(func.getFirst().toString(16), blockchainId3.toPlainString());
+    Assertions.assertEquals(func.getSecond(), contract3);
+    Assertions.assertEquals(func.getThird(), function3);
   }
 
   @Test
@@ -143,43 +142,43 @@ public abstract class CallExecutionTreeTestCommon extends AbstractWeb3Test {
 
     byte[] encoded = root.encode();
     Tuple<BigInteger, String, String> func = extractFunction(encoded, new int[] {0});
-    assertEquals(func.getFirst().toString(16), blockchainId1.toPlainString());
-    assertEquals(func.getSecond(), contract1);
-    assertEquals(func.getThird(), function1);
+    Assertions.assertEquals(func.getFirst().toString(16), blockchainId1.toPlainString());
+    Assertions.assertEquals(func.getSecond(), contract1);
+    Assertions.assertEquals(func.getThird(), function1);
 
     func = extractFunction(encoded, new int[] {1});
-    assertEquals(func.getFirst().toString(16), blockchainId5.toPlainString());
-    assertEquals(func.getSecond(), contract5);
-    assertEquals(func.getThird(), function5);
+    Assertions.assertEquals(func.getFirst().toString(16), blockchainId5.toPlainString());
+    Assertions.assertEquals(func.getSecond(), contract5);
+    Assertions.assertEquals(func.getThird(), function5);
 
     func = extractFunction(encoded, new int[] {2, 0});
-    assertEquals(func.getFirst().toString(16), blockchainId6.toPlainString());
-    assertEquals(func.getSecond(), contract6);
-    assertEquals(func.getThird(), function6);
+    Assertions.assertEquals(func.getFirst().toString(16), blockchainId6.toPlainString());
+    Assertions.assertEquals(func.getSecond(), contract6);
+    Assertions.assertEquals(func.getThird(), function6);
 
     func = extractFunction(encoded, new int[] {2, 1, 0});
-    assertEquals(func.getFirst().toString(16), blockchainId4.toPlainString());
-    assertEquals(func.getSecond(), contract4);
-    assertEquals(func.getThird(), function4);
+    Assertions.assertEquals(func.getFirst().toString(16), blockchainId4.toPlainString());
+    Assertions.assertEquals(func.getSecond(), contract4);
+    Assertions.assertEquals(func.getThird(), function4);
 
     func = extractFunction(encoded, new int[] {2, 1, 1});
-    assertEquals(func.getFirst().toString(16), blockchainId2.toPlainString());
-    assertEquals(func.getSecond(), contract2);
-    assertEquals(func.getThird(), function2);
+    Assertions.assertEquals(func.getFirst().toString(16), blockchainId2.toPlainString());
+    Assertions.assertEquals(func.getSecond(), contract2);
+    Assertions.assertEquals(func.getThird(), function2);
 
     func = extractFunction(encoded, new int[] {2, 1, 2});
-    assertEquals(func.getFirst().toString(16), blockchainId3.toPlainString());
-    assertEquals(func.getSecond(), contract3);
-    assertEquals(func.getThird(), function3);
+    Assertions.assertEquals(func.getFirst().toString(16), blockchainId3.toPlainString());
+    Assertions.assertEquals(func.getSecond(), contract3);
+    Assertions.assertEquals(func.getThird(), function3);
 
     func = extractFunction(encoded, new int[] {3});
-    assertEquals(func.getFirst().toString(16), blockchainId7.toPlainString());
-    assertEquals(func.getSecond(), contract7);
-    assertEquals(func.getThird(), function7);
+    Assertions.assertEquals(func.getFirst().toString(16), blockchainId7.toPlainString());
+    Assertions.assertEquals(func.getSecond(), contract7);
+    Assertions.assertEquals(func.getThird(), function7);
 
     func = extractFunction(encoded, new int[] {4});
-    assertEquals(func.getFirst().toString(16), blockchainId8.toPlainString());
-    assertEquals(func.getSecond(), contract8);
-    assertEquals(func.getThird(), function8);
+    Assertions.assertEquals(func.getFirst().toString(16), blockchainId8.toPlainString());
+    Assertions.assertEquals(func.getSecond(), contract8);
+    Assertions.assertEquals(func.getThird(), function8);
   }
 }
