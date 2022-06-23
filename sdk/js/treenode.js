@@ -39,7 +39,7 @@ export class TreeNode {
     encoded = encoded.concat(
       hexToBytes(this.callData.length / 2 - 1, this.callData)
     );
-    if (this.children.length == 0) {
+    if (this.children.length === 0) {
       // This is a leaf node.
       // Add number of functions: 0 indicates leaf.
       data = data.concat(longToByteArray(1, 0));
