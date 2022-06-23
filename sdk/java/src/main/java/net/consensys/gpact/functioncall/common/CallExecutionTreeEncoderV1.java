@@ -123,7 +123,8 @@ public class CallExecutionTreeEncoderV1 extends CallExecutionTreeEncoderBase {
       return;
     }
 
-    int size = processRecursive(out, buf, 0);
+    int size =
+        processRecursive(out, buf, 0) + 1; // Add one to account for size of encoding type field
     if (buf.remaining() != 0) {
       throw new CallExecutionTreeException(
           "Not all bytes from Call Execution Tree processed: " + buf.remaining() + "remaining",
