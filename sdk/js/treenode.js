@@ -1,6 +1,7 @@
 import { longToByteArray, hexToBytes } from "./helper.js";
 
 // Constants
+const encodingFormatV1 = 0;
 const numFuncsCalledSize = 1;
 const offsetSize = 4;
 const blockchainIDSize = 32;
@@ -27,6 +28,8 @@ export class TreeNode {
 
   encode() {
     let data = [];
+    // Add encoding format of call tree.
+    data = data.concat(longToByteArray(1, encodingFormatV1));
     // Add number of functions
     data = data.concat(longToByteArray(1, this.children.length));
     // Encoded data of this node
