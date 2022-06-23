@@ -1,15 +1,11 @@
 package net.consensys.gpact.functioncall.common;
 
+import java.math.BigInteger;
 import net.consensys.gpact.common.BlockchainId;
-import net.consensys.gpact.common.Tuple;
 import net.consensys.gpact.common.test.AbstractWeb3Test;
 import net.consensys.gpact.functioncall.CallExecutionTree;
 import net.consensys.gpact.functioncall.CallExecutionTreeException;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
-import java.math.BigInteger;
-import java.util.ArrayList;
 
 public abstract class CallExecutionTreeTestCommon extends AbstractWeb3Test {
   public static byte[] BIG32 =
@@ -49,8 +45,8 @@ public abstract class CallExecutionTreeTestCommon extends AbstractWeb3Test {
   String function7 = "0x410203040a010203040506070809aa05";
   String function8 = "0x410203040a010203040506070809aa09";
 
-  abstract void checkJavaEncodeDecode(final CallExecutionTree seg) throws CallExecutionTreeException;
-
+  abstract void checkJavaEncodeDecode(final CallExecutionTree seg)
+      throws CallExecutionTreeException;
 
   @Test
   public void singleFunc() throws CallExecutionTreeException {
@@ -69,5 +65,4 @@ public abstract class CallExecutionTreeTestCommon extends AbstractWeb3Test {
     CallExecutionTree seg = new CallExecutionTree(blockchainId1, contract1, onlyFunctionSelection);
     checkJavaEncodeDecode(seg);
   }
-
 }

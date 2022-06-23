@@ -52,7 +52,10 @@ contract CallPathCallExecutionTreeV1 is BytesUtil {
         // Go down the call path to the target function
         for (uint256 i = 0; i < _callPath.length; i++) {
             uint256 offset = 0;
-            uint8 numFuncsCalled = BytesUtil.bytesToUint8(_callExecutionTree, index);
+            uint8 numFuncsCalled = BytesUtil.bytesToUint8(
+                _callExecutionTree,
+                index
+            );
             if (numFuncsCalled == 0) {
                 require(
                     i == _callPath.length - 1,
@@ -72,7 +75,10 @@ contract CallPathCallExecutionTreeV1 is BytesUtil {
 
         // Jump over the leaf function indicator / numFuncsCalled = 0 indicator
         if (_callPath[_callPath.length - 1] != 0) {
-            uint8 numFuncsCalled = BytesUtil.bytesToUint8(_callExecutionTree, index);
+            uint8 numFuncsCalled = BytesUtil.bytesToUint8(
+                _callExecutionTree,
+                index
+            );
             if (numFuncsCalled != 0) {
                 // The call path should have included an extra 0 at the end,
                 // for instance [2] rather than [2][0].
@@ -93,12 +99,18 @@ contract CallPathCallExecutionTreeV1 is BytesUtil {
             }
         }
 
-        targetBlockchainId = BytesUtil.bytesToUint256(_callExecutionTree, index);
+        targetBlockchainId = BytesUtil.bytesToUint256(
+            _callExecutionTree,
+            index
+        );
         index += BLOCKCHAIN_ID_SIZE;
         targetContract = BytesUtil.bytesToAddress2(_callExecutionTree, index);
         if (getFunction) {
             index += ADDRESS_SIZE;
-            uint16 functionDataLen = BytesUtil.bytesToUint16(_callExecutionTree, index);
+            uint16 functionDataLen = BytesUtil.bytesToUint16(
+                _callExecutionTree,
+                index
+            );
             index += DATA_LEN_SIZE_SIZE;
             functionCall = BytesUtil.sliceAsm(
                 _callExecutionTree,

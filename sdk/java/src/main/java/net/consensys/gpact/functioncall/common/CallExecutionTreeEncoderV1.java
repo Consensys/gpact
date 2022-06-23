@@ -199,7 +199,6 @@ public class CallExecutionTreeEncoderV1 extends CallExecutionTreeEncoderBase {
   public static Tuple<BigInteger, String, String> extractFunction(
       byte[] callExecutionTree, int[] callPath) throws CallExecutionTreeException {
 
-
     ByteBuffer buf = ByteBuffer.wrap(callExecutionTree);
     byte encodingFormat = buf.get();
     if (encodingFormat != ENCODING_FORMAT_V1) {
@@ -264,7 +263,7 @@ public class CallExecutionTreeEncoderV1 extends CallExecutionTreeEncoderBase {
   }
 
   private static int decodeFunction(StringBuilder out, ByteBuffer buf, int level)
-          throws CallExecutionTreeException {
+      throws CallExecutionTreeException {
     byte[] blockchainId = new byte[BLOCKCHAIN_ID_SIZE];
     buf.get(blockchainId);
 
@@ -275,12 +274,12 @@ public class CallExecutionTreeEncoderV1 extends CallExecutionTreeEncoderBase {
     int len = uint16(buf.getShort());
     if (len > buf.remaining()) {
       throw new CallExecutionTreeException(
-              "Decoded length "
-                      + len
-                      + " bytes, longer than remaining space "
-                      + buf.remaining()
-                      + " bytes",
-              out);
+          "Decoded length "
+              + len
+              + " bytes, longer than remaining space "
+              + buf.remaining()
+              + " bytes",
+          out);
     }
     byte[] data = new byte[len];
     buf.get(data);
@@ -302,7 +301,6 @@ public class CallExecutionTreeEncoderV1 extends CallExecutionTreeEncoderBase {
 
     return BLOCKCHAIN_ID_SIZE + ADDRESS_SIZE + DATA_LEN_SIZE_SIZE + len;
   }
-
 
   public static boolean isV1Encoded(final byte[] encodedCallExecutionTree) {
     ByteBuffer buf = ByteBuffer.wrap(encodedCallExecutionTree);

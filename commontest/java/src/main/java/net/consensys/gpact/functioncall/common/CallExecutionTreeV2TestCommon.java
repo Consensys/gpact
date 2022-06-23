@@ -1,16 +1,14 @@
 package net.consensys.gpact.functioncall.common;
 
+import java.util.ArrayList;
 import net.consensys.gpact.functioncall.CallExecutionTree;
 import net.consensys.gpact.functioncall.CallExecutionTreeException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-
 public abstract class CallExecutionTreeV2TestCommon extends CallExecutionTreeTestCommon {
   abstract byte[] extractFunctionHash(byte[] encodedCallTree, int[] callPath)
-          throws CallExecutionTreeException;
+      throws CallExecutionTreeException;
 
   public void checkJavaEncodeDecode(final CallExecutionTree seg) throws CallExecutionTreeException {
     byte[] encoded = seg.encode(CallExecutionTree.ENCODING_V2);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 ConsenSys Software Inc
+ * Copyright 2022 ConsenSys Software Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -14,17 +14,12 @@
  */
 package net.consensys.gpact.functioncall.common;
 
-import static net.consensys.gpact.common.crypto.Hash.keccak256;
-
-import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import net.consensys.gpact.common.FormatConversion;
-import net.consensys.gpact.common.Tuple;
 import net.consensys.gpact.functioncall.CallExecutionTree;
 import net.consensys.gpact.functioncall.CallExecutionTreeException;
-import org.apache.tuweni.bytes.Bytes;
 
 public class CallExecutionTreeEncoderV2 extends CallExecutionTreeEncoderBase {
 
@@ -74,9 +69,8 @@ public class CallExecutionTreeEncoderV2 extends CallExecutionTreeEncoderBase {
     return output;
   }
 
-
   private static byte[] encodeMultiLayer(CallExecutionTree function)
-          throws CallExecutionTreeException {
+      throws CallExecutionTreeException {
     ByteBuffer buf = ByteBuffer.allocate(MAX_CALL_EX_TREE_SIZE);
     buf.put(ENCODING_FORMAT_V2_MULTI_LAYER);
     buf.put(encodeRecursive(function));
@@ -260,10 +254,43 @@ public class CallExecutionTreeEncoderV2 extends CallExecutionTreeEncoderBase {
    *
    * @param callExecutionTree Call tree to extract function call from
    */
-  public static Tuple<BigInteger, String, String> extractFunction(
-      byte[] callExecutionTree, int[] callPath) throws CallExecutionTreeException {
-    int index = 0;
+  public static byte[] extractFunctionHash(byte[] callExecutionTree, int[] callPath)
+      throws CallExecutionTreeException {
     ByteBuffer buf = ByteBuffer.wrap(callExecutionTree);
+    int encodingType = uint8(buf.get());
+    switch (encodingType) {
+      case ENCODING_FORMAT_V2_SINGLE_LAYER:
+        return extractFunctionHashSingleLayer(buf, callPath);
+      case ENCODING_FORMAT_V2_MULTI_LAYER:
+        return extractFunctionHashMultiLayer(buf, callPath);
+      default:
+        throw new CallExecutionTreeException("Unknown encoding type: " + encodingType);
+    }
+  }
+
+  public static byte[] extractFunctionHashSingleLayer(ByteBuffer buf, int[] callPath)
+      throws CallExecutionTreeException {
+    if (callPath.length != 1) {
+      throw new CallExecutionTreeException("Single layer call path not length 1");
+    }
+
+    int numFuncsCalled = uint8(buf.get());
+    int funcCalled = callPath[0];
+    if (funcCalled > numFuncsCalled) {
+      throw new CallExecutionTreeException("Invalid call path: Call Path offset too high");
+    }
+
+    buf.position(buf.position() + HASH_SIZE * funcCalled);
+
+    byte[] hash = new byte[HASH_SIZE];
+    buf.get(hash);
+    return hash;
+  }
+
+  public static byte[] extractFunctionHashMultiLayer(ByteBuffer buf, int[] callPath)
+      throws CallExecutionTreeException {
+
+    int index = 0;
 
     for (int i = 0; i < callPath.length; i++) {
       buf.position(index);
@@ -295,33 +322,13 @@ public class CallExecutionTreeEncoderV2 extends CallExecutionTreeEncoderBase {
     }
 
     buf.position(index);
-    byte[] blockchainId = new byte[BLOCKCHAIN_ID_SIZE];
-    buf.get(blockchainId);
-
-    byte[] address = new byte[ADDRESS_SIZE];
-    buf.get(address);
-
-    // Length is an unsigned short (uint16)
-    int len = uint16(buf.getShort());
-    if (len > buf.remaining()) {
-      throw new CallExecutionTreeException(
-          "Decoded length "
-              + len
-              + " bytes, longer than remaining space "
-              + buf.remaining()
-              + " bytes");
-    }
-    byte[] data = new byte[len];
-    buf.get(data);
-
-    BigInteger bcId = new BigInteger(1, blockchainId);
-    String addr = FormatConversion.byteArrayToString(address);
-    String funcData = FormatConversion.byteArrayToString(data);
-    return new Tuple<>(bcId, addr, funcData);
+    byte[] hash = new byte[HASH_SIZE];
+    buf.get(hash);
+    return hash;
   }
 
   private static int decodeFunctionHash(StringBuilder out, ByteBuffer buf, int level)
-          throws CallExecutionTreeException {
+      throws CallExecutionTreeException {
     byte[] hash = new byte[HASH_SIZE];
     buf.get(hash);
     String hashStr = FormatConversion.byteArrayToString(hash);
@@ -350,6 +357,7 @@ public class CallExecutionTreeEncoderV2 extends CallExecutionTreeEncoderBase {
     ByteBuffer buf = ByteBuffer.wrap(encodedCallExecutionTree);
 
     byte encodingFormat = buf.get();
-    return (encodingFormat == ENCODING_FORMAT_V2_MULTI_LAYER) || (encodingFormat == ENCODING_FORMAT_V2_SINGLE_LAYER);
+    return (encodingFormat == ENCODING_FORMAT_V2_MULTI_LAYER)
+        || (encodingFormat == ENCODING_FORMAT_V2_SINGLE_LAYER);
   }
 }

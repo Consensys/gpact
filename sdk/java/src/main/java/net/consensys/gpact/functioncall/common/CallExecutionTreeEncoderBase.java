@@ -20,7 +20,6 @@ import static net.consensys.gpact.common.crypto.Hash.keccak256;
 import java.nio.ByteBuffer;
 import net.consensys.gpact.common.FormatConversion;
 import net.consensys.gpact.functioncall.CallExecutionTree;
-import net.consensys.gpact.functioncall.CallExecutionTreeException;
 import org.apache.tuweni.bytes.Bytes;
 
 public class CallExecutionTreeEncoderBase {
@@ -65,7 +64,6 @@ public class CallExecutionTreeEncoderBase {
     byte[] encodedFunction = encodeFunctionCall(callTree);
     return keccak256(Bytes.wrap(encodedFunction)).toArray();
   }
-
 
   protected static void addSpaces(StringBuilder out, int level) {
     for (int j = 0; j < level; j++) {

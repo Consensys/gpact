@@ -2,7 +2,6 @@ package net.consensys.gpact.functioncall.common;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.common.Tuple;
 import net.consensys.gpact.functioncall.CallExecutionTree;
 import net.consensys.gpact.functioncall.CallExecutionTreeException;
@@ -11,14 +10,12 @@ import org.junit.jupiter.api.Test;
 
 public abstract class CallExecutionTreeV1TestCommon extends CallExecutionTreeTestCommon {
   abstract Tuple<BigInteger, String, String> extractFunction(byte[] encodedCallTree, int[] callPath)
-          throws CallExecutionTreeException;
+      throws CallExecutionTreeException;
 
   public void checkJavaEncodeDecode(final CallExecutionTree seg) throws CallExecutionTreeException {
     byte[] encoded = seg.encode(CallExecutionTree.ENCODING_V1);
     CallExecutionTree.dump(encoded);
   }
-
-
 
   @Test
   public void rootOneSeg() throws Exception {

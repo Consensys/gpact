@@ -145,8 +145,7 @@ public class CallExecutionTree {
   public static String dump(byte[] encodedCallExecutionTree) throws CallExecutionTreeException {
     if (CallExecutionTreeEncoderV1.isV1Encoded(encodedCallExecutionTree)) {
       return CallExecutionTreeEncoderV1.dump(encodedCallExecutionTree);
-    }
-    else if (CallExecutionTreeEncoderV2.isV2Encoded(encodedCallExecutionTree)) {
+    } else if (CallExecutionTreeEncoderV2.isV2Encoded(encodedCallExecutionTree)) {
       return CallExecutionTreeEncoderV2.dump(encodedCallExecutionTree);
     }
     return "Unknown Call Execution Tree encoding format";
@@ -161,8 +160,7 @@ public class CallExecutionTree {
   public static void verify(byte[] encodedCallExecutionTree) throws CallExecutionTreeException {
     if (CallExecutionTreeEncoderV1.isV1Encoded(encodedCallExecutionTree)) {
       CallExecutionTreeEncoderV1.verify(encodedCallExecutionTree);
-    }
-    else if (CallExecutionTreeEncoderV2.isV2Encoded(encodedCallExecutionTree)) {
+    } else if (CallExecutionTreeEncoderV2.isV2Encoded(encodedCallExecutionTree)) {
       CallExecutionTreeEncoderV2.verify(encodedCallExecutionTree);
     }
     throw new CallExecutionTreeException("Unknown Call Execution Tree encoding format");

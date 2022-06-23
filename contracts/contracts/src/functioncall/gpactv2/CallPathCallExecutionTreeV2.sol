@@ -66,7 +66,11 @@ contract CallPathCallExecutionTreeV2 is BytesUtil {
                 );
         }
         if (callTreeType == ENCODING_V2_MULTI_LAYER) {
-            extractTargetFromCallGraphMultiLayer(_callExecutionTree, _callPath);
+            return
+                extractTargetFromCallGraphMultiLayer(
+                    _callExecutionTree,
+                    _callPath
+                );
         }
         revert("Unknown call tree type");
     }
