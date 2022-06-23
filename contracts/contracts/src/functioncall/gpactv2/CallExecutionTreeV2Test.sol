@@ -17,10 +17,10 @@ pragma solidity >=0.8;
 import "./CallPathCallExecutionTreeV2.sol";
 
 contract CallExecutionTreeV2Test is CallPathCallExecutionTreeV2 {
-    function extractTargetFromCallGraph1(
+    function extractTargetHashFromCallGraph1(
         bytes memory _callGraph,
         uint256[] memory _callPath
     ) external pure returns (bytes32 functionCallHash) {
-        return extractTargetFromCallGraph(_callGraph, _callPath);
+        return extractTargetHashFromCallGraph(_callGraph, _callPath);
     }
 }

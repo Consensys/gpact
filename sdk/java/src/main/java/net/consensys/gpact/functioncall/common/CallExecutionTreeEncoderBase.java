@@ -15,13 +15,23 @@
 package net.consensys.gpact.functioncall.common;
 
 import static net.consensys.gpact.common.FormatConversion.addressStringToBytes;
+import static net.consensys.gpact.common.crypto.Hash.keccak256;
 
 import java.nio.ByteBuffer;
 import net.consensys.gpact.common.FormatConversion;
 import net.consensys.gpact.functioncall.CallExecutionTree;
 import net.consensys.gpact.functioncall.CallExecutionTreeException;
+import org.apache.tuweni.bytes.Bytes;
 
 public class CallExecutionTreeEncoderBase {
+  protected static final byte ENCODING_FORMAT_V1 = 0;
+
+  // Call tree with root and called functions.
+  protected static final byte ENCODING_FORMAT_V2_SINGLE_LAYER = 1;
+  // Call tree with root, called functions, and function called by the called
+  // functions, to an arbitrary call depth.
+  protected static final byte ENCODING_FORMAT_V2_MULTI_LAYER = 2;
+
   protected static final int NUM_FUNCS_CALLED_SIZE = 1;
   protected static final int OFFSET_SIZE = 4;
   protected static final int BLOCKCHAIN_ID_SIZE = 32;
@@ -51,45 +61,11 @@ public class CallExecutionTreeEncoderBase {
     return output;
   }
 
-  protected static int decodeFunction(StringBuilder out, ByteBuffer buf, int level)
-      throws CallExecutionTreeException {
-    byte[] blockchainId = new byte[BLOCKCHAIN_ID_SIZE];
-    buf.get(blockchainId);
-
-    byte[] address = new byte[ADDRESS_SIZE];
-    buf.get(address);
-
-    // Length is an unsigned short (uint16)
-    int len = uint16(buf.getShort());
-    if (len > buf.remaining()) {
-      throw new CallExecutionTreeException(
-          "Decoded length "
-              + len
-              + "bytes, longer than remaining space "
-              + buf.remaining()
-              + " bytes",
-          out);
-    }
-    byte[] data = new byte[len];
-    buf.get(data);
-
-    if (out != null) {
-      addSpaces(out, level);
-      out.append("Blockchain Id: 0x");
-      out.append(FormatConversion.byteArrayToString(blockchainId));
-      out.append("\n");
-      addSpaces(out, level);
-      out.append("Contract: 0x");
-      out.append(FormatConversion.byteArrayToString(address));
-      out.append("\n");
-      addSpaces(out, level);
-      out.append("Data: 0x");
-      out.append(FormatConversion.byteArrayToString(data));
-      out.append("\n");
-    }
-
-    return BLOCKCHAIN_ID_SIZE + ADDRESS_SIZE + DATA_LEN_SIZE_SIZE + len;
+  public static byte[] encodeFunctionCallAndHash(final CallExecutionTree callTree) {
+    byte[] encodedFunction = encodeFunctionCall(callTree);
+    return keccak256(Bytes.wrap(encodedFunction)).toArray();
   }
+
 
   protected static void addSpaces(StringBuilder out, int level) {
     for (int j = 0; j < level; j++) {

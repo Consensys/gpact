@@ -26,10 +26,10 @@ contract CallPathCallExecutionTreeV2 is BytesUtil {
     // Offset of the type field in the call tree.
     uint256 private constant OFFSET_OF_TYPE = 0;
     // Call tree with root and called functions.
-    uint256 private constant SINGLE_LAYER = 0;
+    uint256 private constant ENCODING_V2_SINGLE_LAYER = 1;
     // Call tree with root, called functions, and function called by the called
     // functions, to an arbitrary call depth.
-    uint256 private constant MULTI_LAYER = 1;
+    uint256 private constant ENCODING_V2_MULTI_LAYER = 2;
 
     // Size of the field indicating the number of called functions.
     uint256 private constant NUM_FUNCS_CALLED_SIZE = 1;
@@ -50,7 +50,7 @@ contract CallPathCallExecutionTreeV2 is BytesUtil {
      * @param _callPath Path of the function hash to be extracted.
      * @return functionCallHash Function call hash of the function represented by the _callPath.
      */
-    function extractTargetFromCallGraph(
+    function extractTargetHashFromCallGraph(
         bytes memory _callExecutionTree,
         uint256[] memory _callPath
     ) internal pure returns (bytes32 functionCallHash) {
@@ -58,14 +58,14 @@ contract CallPathCallExecutionTreeV2 is BytesUtil {
             _callExecutionTree,
             OFFSET_OF_TYPE
         );
-        if (callTreeType == SINGLE_LAYER) {
+        if (callTreeType == ENCODING_V2_SINGLE_LAYER) {
             return
                 extractTargetFromCallGraphSingleLayer(
                     _callExecutionTree,
                     _callPath
                 );
         }
-        if (callTreeType == MULTI_LAYER) {
+        if (callTreeType == ENCODING_V2_MULTI_LAYER) {
             extractTargetFromCallGraphMultiLayer(_callExecutionTree, _callPath);
         }
         revert("Unknown call tree type");

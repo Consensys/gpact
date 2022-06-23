@@ -20,4 +20,7 @@ dependencies {
     implementation group: 'org.apache.tuweni', name: 'tuweni-bytes', version: '1.0.0'
     // https://mvnrepository.com/artifact/org.apache.tuweni/tuweni-units
     implementation group: 'org.apache.tuweni', name: 'tuweni-units', version: '1.0.0'
+
+    implementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: junitVersion
+
 }

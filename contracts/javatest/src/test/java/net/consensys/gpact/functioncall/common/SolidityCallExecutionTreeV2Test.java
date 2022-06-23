@@ -1,23 +1,21 @@
 package net.consensys.gpact.functioncall.common;
 
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
-import net.consensys.gpact.common.FormatConversion;
-import net.consensys.gpact.common.Tuple;
 import net.consensys.gpact.functioncall.CallExecutionTreeException;
-import net.consensys.gpact.functioncall.gpact.CallExecutionTreeTestV1;
+import net.consensys.gpact.functioncall.gpact.CallExecutionTreeV2Test;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeEach;
-import org.web3j.tuples.generated.Tuple3;
 
-public class SolidityCallExecutionTreeV1Test extends CallExecutionTreeV1TestCommon {
-  static final Logger LOG = LogManager.getLogger(SolidityCallExecutionTreeV1Test.class);
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 
-  CallExecutionTreeTestV1 callExecutionTreeContract;
+public class SolidityCallExecutionTreeV2Test extends CallExecutionTreeV2TestCommon {
+  static final Logger LOG = LogManager.getLogger(SolidityCallExecutionTreeV2Test.class);
 
-  Tuple<BigInteger, String, String> extractFunction(byte[] encodedCallTree, int[] callPath)
+  CallExecutionTreeV2Test callExecutionTreeContract;
+
+  byte[] extractFunctionHash(byte[] encodedCallTree, int[] callPath)
       throws CallExecutionTreeException {
     List<BigInteger> callPathB = new ArrayList<>();
     for (int callPathElement : callPath) {
@@ -25,14 +23,10 @@ public class SolidityCallExecutionTreeV1Test extends CallExecutionTreeV1TestComm
     }
 
     try {
-      Tuple3<BigInteger, String, byte[]> result =
+      return
           this.callExecutionTreeContract
-              .extractTargetFromCallGraph1(encodedCallTree, callPathB)
+              .extractTargetHashFromCallGraph1(encodedCallTree, callPathB)
               .send();
-      return new Tuple<BigInteger, String, String>(
-          result.component1(),
-          result.component2(),
-          FormatConversion.byteArrayToString(result.component3()));
     } catch (Exception ex) {
       throw new CallExecutionTreeException(ex.toString());
     }
@@ -42,6 +36,6 @@ public class SolidityCallExecutionTreeV1Test extends CallExecutionTreeV1TestComm
   public void setup() throws Exception {
     setupWeb3();
     this.callExecutionTreeContract =
-        CallExecutionTreeTestV1.deploy(this.web3j, this.tm, this.freeGasProvider).send();
+        CallExecutionTreeV2Test.deploy(this.web3j, this.tm, this.freeGasProvider).send();
   }
 }

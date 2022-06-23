@@ -4,22 +4,18 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import net.consensys.gpact.common.FormatConversion;
-import net.consensys.gpact.common.RevertReason;
 import net.consensys.gpact.common.Tuple;
 import net.consensys.gpact.functioncall.CallExecutionTreeException;
-import net.consensys.gpact.functioncall.gpact.CallExecutionTreeTestV1;
-import net.consensys.gpact.functioncall.gpact.GpactCrosschainExecutor;
+import net.consensys.gpact.functioncall.gpact.CallExecutionTreeV1Test;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeEach;
-import org.web3j.protocol.exceptions.TransactionException;
 import org.web3j.tuples.generated.Tuple3;
-import org.web3j.tx.exceptions.ContractCallException;
 
-public class SolidityCallExecutionTreeTest extends CallExecutionTreeTestCommon {
-  static final Logger LOG = LogManager.getLogger(SolidityCallExecutionTreeTest.class);
+public class SolidityCallExecutionTreeV1Test extends CallExecutionTreeV1TestCommon {
+  static final Logger LOG = LogManager.getLogger(SolidityCallExecutionTreeV1Test.class);
 
-  CallExecutionTreeTestV1 callExecutionTreeContract;
+  CallExecutionTreeV1Test callExecutionTreeContract;
 
   Tuple<BigInteger, String, String> extractFunction(byte[] encodedCallTree, int[] callPath)
       throws CallExecutionTreeException {
@@ -46,6 +42,6 @@ public class SolidityCallExecutionTreeTest extends CallExecutionTreeTestCommon {
   public void setup() throws Exception {
     setupWeb3();
     this.callExecutionTreeContract =
-        CallExecutionTreeTestV1.deploy(this.web3j, this.tm, this.freeGasProvider).send();
+        CallExecutionTreeV1Test.deploy(this.web3j, this.tm, this.freeGasProvider).send();
   }
 }

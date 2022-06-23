@@ -30,7 +30,19 @@ public class CallExecutionTreeEncoderV1 extends CallExecutionTreeEncoderBase {
   }
 
   public static byte[] encode(final CallExecutionTree callTree) throws CallExecutionTreeException {
-    return encodeRecursive(callTree);
+    return encodeV1(callTree);
+  }
+
+  private static byte[] encodeV1(final CallExecutionTree callTree)
+      throws CallExecutionTreeException {
+    ByteBuffer buf = ByteBuffer.allocate(MAX_CALL_EX_TREE_SIZE);
+    buf.put(ENCODING_FORMAT_V1);
+    buf.put(encodeRecursive(callTree));
+
+    buf.flip();
+    byte[] output = new byte[buf.limit()];
+    buf.get(output);
+    return output;
   }
 
   private static byte[] encodeRecursive(CallExecutionTree function)
@@ -101,6 +113,16 @@ public class CallExecutionTreeEncoderV1 extends CallExecutionTreeEncoderBase {
   private static void process(final byte[] encodedCallExecutionTree, final StringBuilder out)
       throws CallExecutionTreeException {
     ByteBuffer buf = ByteBuffer.wrap(encodedCallExecutionTree);
+
+    byte encodingFormat = buf.get();
+    out.append("Encoding Format: ");
+    out.append(encodingFormat);
+    out.append("\n");
+    if (encodingFormat != ENCODING_FORMAT_V1) {
+      out.append("Unable to process encoding format verison");
+      return;
+    }
+
     int size = processRecursive(out, buf, 0);
     if (buf.remaining() != 0) {
       throw new CallExecutionTreeException(
@@ -176,8 +198,15 @@ public class CallExecutionTreeEncoderV1 extends CallExecutionTreeEncoderBase {
    */
   public static Tuple<BigInteger, String, String> extractFunction(
       byte[] callExecutionTree, int[] callPath) throws CallExecutionTreeException {
-    int index = 0;
+
+
     ByteBuffer buf = ByteBuffer.wrap(callExecutionTree);
+    byte encodingFormat = buf.get();
+    if (encodingFormat != ENCODING_FORMAT_V1) {
+      throw new CallExecutionTreeException("Incorrect processor for version: " + encodingFormat);
+    }
+
+    int index = 1;
 
     for (int i = 0; i < callPath.length; i++) {
       buf.position(index);
@@ -232,5 +261,53 @@ public class CallExecutionTreeEncoderV1 extends CallExecutionTreeEncoderBase {
     String addr = FormatConversion.byteArrayToString(address);
     String funcData = FormatConversion.byteArrayToString(data);
     return new Tuple<>(bcId, addr, funcData);
+  }
+
+  private static int decodeFunction(StringBuilder out, ByteBuffer buf, int level)
+          throws CallExecutionTreeException {
+    byte[] blockchainId = new byte[BLOCKCHAIN_ID_SIZE];
+    buf.get(blockchainId);
+
+    byte[] address = new byte[ADDRESS_SIZE];
+    buf.get(address);
+
+    // Length is an unsigned short (uint16)
+    int len = uint16(buf.getShort());
+    if (len > buf.remaining()) {
+      throw new CallExecutionTreeException(
+              "Decoded length "
+                      + len
+                      + " bytes, longer than remaining space "
+                      + buf.remaining()
+                      + " bytes",
+              out);
+    }
+    byte[] data = new byte[len];
+    buf.get(data);
+
+    if (out != null) {
+      addSpaces(out, level);
+      out.append("Blockchain Id: 0x");
+      out.append(FormatConversion.byteArrayToString(blockchainId));
+      out.append("\n");
+      addSpaces(out, level);
+      out.append("Contract: 0x");
+      out.append(FormatConversion.byteArrayToString(address));
+      out.append("\n");
+      addSpaces(out, level);
+      out.append("Data: 0x");
+      out.append(FormatConversion.byteArrayToString(data));
+      out.append("\n");
+    }
+
+    return BLOCKCHAIN_ID_SIZE + ADDRESS_SIZE + DATA_LEN_SIZE_SIZE + len;
+  }
+
+
+  public static boolean isV1Encoded(final byte[] encodedCallExecutionTree) {
+    ByteBuffer buf = ByteBuffer.wrap(encodedCallExecutionTree);
+
+    byte encodingFormat = buf.get();
+    return encodingFormat == ENCODING_FORMAT_V1;
   }
 }

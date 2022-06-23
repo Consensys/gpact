@@ -16,11 +16,14 @@ package net.consensys.gpact.functioncall;
 
 import java.util.ArrayList;
 import net.consensys.gpact.common.BlockchainId;
+import net.consensys.gpact.functioncall.common.CallExecutionTreeEncoderBase;
 import net.consensys.gpact.functioncall.common.CallExecutionTreeEncoderV1;
+import net.consensys.gpact.functioncall.common.CallExecutionTreeEncoderV2;
 
 /** Represents a part or a whole call execution tree. */
 public class CallExecutionTree {
   public static final int ENCODING_V1 = 0;
+  public static final int ENCODING_V2 = 1;
 
   private final BlockchainId blockchainId;
   private final String contractAddress;
@@ -93,6 +96,10 @@ public class CallExecutionTree {
     return this.calledFunctions == null || this.calledFunctions.isEmpty();
   }
 
+  public byte[] getFunctionHash() {
+    return CallExecutionTreeEncoderBase.encodeFunctionCallAndHash(this);
+  }
+
   /**
    * Encode the call execution tree using ENCODING_V1 format.
    *
@@ -111,10 +118,14 @@ public class CallExecutionTree {
    * @throws CallExecutionTreeException If an error occurs processing the call execution tree.
    */
   public byte[] encode(final int encodingVersion) throws CallExecutionTreeException {
-    if (encodingVersion != ENCODING_V1) {
-      throw new CallExecutionTreeException("Unknown encoding version");
+    switch (encodingVersion) {
+      case ENCODING_V1:
+        return CallExecutionTreeEncoderV1.encode(this);
+      case ENCODING_V2:
+        return CallExecutionTreeEncoderV2.encode(this);
+      default:
+        throw new CallExecutionTreeException("Unknown encoding version");
     }
-    return CallExecutionTreeEncoderV1.encode(this);
   }
 
   @Override
@@ -132,8 +143,13 @@ public class CallExecutionTree {
    * @param encodedCallExecutionTree Tree to be processed.
    */
   public static String dump(byte[] encodedCallExecutionTree) throws CallExecutionTreeException {
-    // TODO need to be able to differentiate between v1 and other versions.
-    return CallExecutionTreeEncoderV1.dump(encodedCallExecutionTree);
+    if (CallExecutionTreeEncoderV1.isV1Encoded(encodedCallExecutionTree)) {
+      return CallExecutionTreeEncoderV1.dump(encodedCallExecutionTree);
+    }
+    else if (CallExecutionTreeEncoderV2.isV2Encoded(encodedCallExecutionTree)) {
+      return CallExecutionTreeEncoderV2.dump(encodedCallExecutionTree);
+    }
+    return "Unknown Call Execution Tree encoding format";
   }
 
   /**
@@ -143,7 +159,12 @@ public class CallExecutionTree {
    * @throws CallExecutionTreeException Thrown if the encoded data is invalid.
    */
   public static void verify(byte[] encodedCallExecutionTree) throws CallExecutionTreeException {
-    // TODO need to be able to differentiate between v1 and other versions.
-    CallExecutionTreeEncoderV1.verify(encodedCallExecutionTree);
+    if (CallExecutionTreeEncoderV1.isV1Encoded(encodedCallExecutionTree)) {
+      CallExecutionTreeEncoderV1.verify(encodedCallExecutionTree);
+    }
+    else if (CallExecutionTreeEncoderV2.isV2Encoded(encodedCallExecutionTree)) {
+      CallExecutionTreeEncoderV2.verify(encodedCallExecutionTree);
+    }
+    throw new CallExecutionTreeException("Unknown Call Execution Tree encoding format");
   }
 }

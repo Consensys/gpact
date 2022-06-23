@@ -16,7 +16,7 @@ pragma solidity >=0.8;
 
 import "./CallPathCallExecutionTreeV1.sol";
 
-contract CallExecutionTreeTestV1 is CallPathCallExecutionTreeV1 {
+contract CallExecutionTreeV1Test is CallPathCallExecutionTreeV1 {
     function extractTargetFromCallGraph1(
         bytes memory _callGraph,
         uint256[] memory _callPath
