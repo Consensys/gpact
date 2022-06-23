@@ -290,7 +290,7 @@ public class CallExecutionTreeEncoderV2 extends CallExecutionTreeEncoderBase {
   public static byte[] extractFunctionHashMultiLayer(ByteBuffer buf, int[] callPath)
       throws CallExecutionTreeException {
 
-    int index = 0;
+    int index = 1; // Start at location 1, skipping the encoding format field.
 
     for (int i = 0; i < callPath.length; i++) {
       buf.position(index);
