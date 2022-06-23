@@ -28,10 +28,7 @@ export class TreeNode {
 
   encode() {
     let data = [];
-    // Add encoding format of call tree.
-    data = data.concat(longToByteArray(1, encodingFormatV1));
-    // Add number of functions
-    data = data.concat(longToByteArray(1, this.children.length));
+
     // Encoded data of this node
     let encoded = [];
     encoded = encoded.concat(longToByteArray(blockchainIDSize, this.chainID));
@@ -42,11 +39,19 @@ export class TreeNode {
     encoded = encoded.concat(
       hexToBytes(this.callData.length / 2 - 1, this.callData)
     );
-    if (data[0] == 0) {
+    if (this.children.length == 0) {
       // This is a leaf node.
+      // Add number of functions: 0 indicates leaf.
+      data = data.concat(longToByteArray(1, 0));
+      // Add encoded data of leaf
       data = data.concat(encoded);
     } else {
       // This is a non-leaf node.
+      // Add encoding format of call tree.
+      data = data.concat(longToByteArray(1, encodingFormatV1));
+      // Add number of functions
+      data = data.concat(longToByteArray(1, this.children.length));
+
       let encodedChildren = [];
       encodedChildren.push(encoded);
       for (const child of this.children) {
