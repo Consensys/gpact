@@ -309,7 +309,6 @@ jobs:
           working_directory: test-blockchains
           background: true
           command: docker-compose build && docker-compose up
-      - run: sleep 30
       - run:
           name: Build Solidity code for use with TypeScript compile
           command: ./gradlew build -x test -x intTest -x perfTest
@@ -317,7 +316,7 @@ jobs:
           name: Create environment for testing JS-SDK
           working_directory: sdk/js
           background: true
-          command: npm install && docker-compose up
+          command: npm install
       - run: sleep 30
       - run:
           name: Test JS-SDK
