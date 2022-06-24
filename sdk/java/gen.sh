@@ -16,6 +16,7 @@ solc $CONTRACTSDIR/common/EcdsaSignatureTest.sol --bin --abi --optimize -o $BUIL
 solc $CONTRACTSDIR/functioncall/gpact/GpactCrosschainControl.sol --allow-paths . --bin --abi --hashes --optimize -o $BUILDDIR --overwrite
 solc $CONTRACTSDIR/functioncall/gpact/CallExecutionTreeV1Test.sol --allow-paths . --bin --abi --hashes --optimize -o $BUILDDIR --overwrite
 
+solc $CONTRACTSDIR/functioncall/gpactv2/GpactV2CrosschainControl.sol --allow-paths . --bin --abi --hashes --optimize -o $BUILDDIR --overwrite
 solc $CONTRACTSDIR/functioncall/gpactv2/CallExecutionTreeV2Test.sol --allow-paths . --bin --abi --hashes --optimize -o $BUILDDIR --overwrite
 
 solc $CONTRACTSDIR/functioncall/sfc/SimpleCrosschainControl.sol --allow-paths . --bin --abi --hashes --optimize -o $BUILDDIR --overwrite
@@ -37,6 +38,7 @@ $WEB3J solidity generate -a=$BUILDDIR/EcdsaSignatureTest.abi -b=$BUILDDIR/EcdsaS
 $WEB3J solidity generate -a=$BUILDDIR/GpactCrosschainControl.abi -b=$BUILDDIR/GpactCrosschainControl.bin -o=$OUTPUTDIR -p=$BASEPACKAGE.functioncall.gpact
 $WEB3J solidity generate -a=$BUILDDIR/CallExecutionTreeV1Test.abi -b=$BUILDDIR/CallExecutionTreeV1Test.bin -o=$OUTPUTDIR -p=$BASEPACKAGE.functioncall.gpact
 
+$WEB3J solidity generate -a=$BUILDDIR/GpactV2CrosschainControl.abi -b=$BUILDDIR/GpactV2CrosschainControl.bin -o=$OUTPUTDIR -p=$BASEPACKAGE.functioncall.gpact
 $WEB3J solidity generate -a=$BUILDDIR/CallExecutionTreeV2Test.abi -b=$BUILDDIR/CallExecutionTreeV2Test.bin -o=$OUTPUTDIR -p=$BASEPACKAGE.functioncall.gpact
 
 $WEB3J solidity generate -a=$BUILDDIR/SimpleCrosschainControl.abi -b=$BUILDDIR/SimpleCrosschainControl.bin -o=$OUTPUTDIR -p=$BASEPACKAGE.functioncall.sfc
