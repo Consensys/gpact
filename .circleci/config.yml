@@ -91,7 +91,7 @@ jobs:
           paths:
             - ~/.gradle
 
-  unitTestsMachine:
+  javaUnitTestsMachine:
     machine:
       image: ubuntu-2004:202107-02
     resource_class: large
@@ -186,7 +186,7 @@ jobs:
       - store_artifacts:
           path: ~/test-results/junit
 
-  intTestsMachine:
+  javaIntTestsMachine:
     machine:
       image: ubuntu-2004:202107-02
     resource_class: large
@@ -221,21 +221,6 @@ jobs:
       - run:
           name: Stop blockchains
           working_directory: test-blockchains
-          command: docker-compose stop
-          when: always
-      - run:
-          name: Create environment for testing JS-SDK
-          working_directory: sdk/js
-          background: true
-          command: npm install && docker-compose up
-      - run: sleep 30
-      - run:
-          name: Test JS-SDK
-          working_directory: sdk/js
-          command: node ./test.js
-      - run:
-          name: Stop environment for testing JS-SDK
-          working_directory: sdk/js
           command: docker-compose stop
           when: always
       - run:
@@ -295,6 +280,58 @@ jobs:
           path: ~/test-results
       - store_artifacts:
           path: ~/test-results/junit
+
+  typescriptIntTestsMachine:
+    machine:
+      image: ubuntu-2004:202107-02
+    resource_class: large
+    steps:
+      # The home directory is: /home/circleci/project
+      # gpact is cloned to: /home/circleci/project/.
+      # web3j is cloned to: /home/circleci/web3j-abi
+      - prepare
+      - run:
+          name: Build web3j
+          command: |
+            # Build our Web3j
+            cd ../web3j-abi
+            ./gradlew --parallel --stacktrace --info --build-cache installDist
+      - run:
+          name: Create Relayer containers
+          working_directory: services/relayer
+          command: make docker
+      - run:
+          name: Create Message Store container
+          working_directory: services/message-store
+          command: make docker
+      - run:
+          name: Create and Start blockchains
+          working_directory: sdk/js
+          background: true
+          command: docker-compose build && docker-compose up
+      - run:
+          name: Build Solidity code for use with TypeScript compile
+          command: ./gradlew build -x test -x intTest -x perfTest
+      - run:
+          name: Create environment for testing JS-SDK
+          working_directory: sdk/js
+          background: true
+          command: npm install
+      - run: sleep 30
+      - run:
+          name: Test JS-SDK
+          working_directory: sdk/js
+          command: node ./test.js
+      - run:
+          name: Stop environment for testing JS-SDK
+          working_directory: sdk/js
+          command: docker-compose stop
+          when: always
+      - run:
+          name: Remove blockchains
+          working_directory: sdk/js
+          command: docker-compose down
+          when: always
 
   perfTestsMachine:
     machine:
@@ -465,15 +502,19 @@ workflows:
       - relayer-test:
           requires:
             - relayer-build
-      - unitTestsMachine:
+      - javaUnitTestsMachine:
           requires:
             - relayer-build
             - javasdk-build
-      - intTestsMachine:
+      - javaIntTestsMachine:
           requires:
             - relayer-build
             - javasdk-build
       - perfTestsMachine:
+          requires:
+            - relayer-build
+            - javasdk-build
+      - typescriptIntTestsMachine:
           requires:
             - relayer-build
             - javasdk-build

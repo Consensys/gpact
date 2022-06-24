@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 ConsenSys Software Inc
+ * Copyright 2022 ConsenSys Software Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -14,31 +14,66 @@
  */
 package net.consensys.gpact.functioncall.common;
 
-import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import net.consensys.gpact.common.FormatConversion;
-import net.consensys.gpact.common.Tuple;
 import net.consensys.gpact.functioncall.CallExecutionTree;
 import net.consensys.gpact.functioncall.CallExecutionTreeException;
 
-public class CallExecutionTreeEncoderV1 extends CallExecutionTreeEncoderBase {
+public class CallExecutionTreeEncoderV2 extends CallExecutionTreeEncoderBase {
 
-  private CallExecutionTreeEncoderV1() {
+  private static final int HASH_SIZE = 32;
+
+  private CallExecutionTreeEncoderV2() {
     // Block instantiation.
   }
 
   public static byte[] encode(final CallExecutionTree callTree) throws CallExecutionTreeException {
-    return encodeV1(callTree);
+    if (isSingleLayer(callTree)) {
+      return encodeSingleLayer(callTree);
+    }
+    // Encode multi-layer.
+    return encodeMultiLayer(callTree);
   }
 
-  private static byte[] encodeV1(final CallExecutionTree callTree)
+  private static byte[] encodeSingleLayer(CallExecutionTree function)
       throws CallExecutionTreeException {
     ByteBuffer buf = ByteBuffer.allocate(MAX_CALL_EX_TREE_SIZE);
-    buf.put(ENCODING_FORMAT_V1);
-    buf.put(encodeRecursive(callTree));
+    buf.put(ENCODING_FORMAT_V2_SINGLE_LAYER);
 
+    List<CallExecutionTree> calledFunctions = function.getCalledFunctions();
+
+    List<byte[]> encodedCalledFunctionHashes = new ArrayList<>();
+    encodedCalledFunctionHashes.add(encodeFunctionCallAndHash(function));
+
+    int numCalledFunctions = 0;
+    if (calledFunctions != null) {
+      numCalledFunctions = calledFunctions.size();
+      for (CallExecutionTree func : calledFunctions) {
+        encodedCalledFunctionHashes.add(encodeFunctionCallAndHash(func));
+      }
+    }
+
+    if (numCalledFunctions > MAX_CALLED_FUNCTIONS) {
+      throw new CallExecutionTreeException("Too many called functions: " + calledFunctions.size());
+    }
+    buf.put((byte) numCalledFunctions);
+    for (byte[] encodedCalledFuncHash : encodedCalledFunctionHashes) {
+      buf.put(encodedCalledFuncHash);
+    }
+
+    buf.flip();
+    byte[] output = new byte[buf.limit()];
+    buf.get(output);
+    return output;
+  }
+
+  private static byte[] encodeMultiLayer(CallExecutionTree function)
+      throws CallExecutionTreeException {
+    ByteBuffer buf = ByteBuffer.allocate(MAX_CALL_EX_TREE_SIZE);
+    buf.put(ENCODING_FORMAT_V2_MULTI_LAYER);
+    buf.put(encodeRecursive(function));
     buf.flip();
     byte[] output = new byte[buf.limit()];
     buf.get(output);
@@ -50,12 +85,13 @@ public class CallExecutionTreeEncoderV1 extends CallExecutionTreeEncoderBase {
     List<CallExecutionTree> calledFunctions = function.getCalledFunctions();
 
     ByteBuffer buf = ByteBuffer.allocate(MAX_CALL_EX_TREE_SIZE);
+
     if (function.isLeaf()) {
       buf.put(LEAF_FUNCTION);
-      buf.put(encodeFunctionCall(function));
+      buf.put(encodeFunctionCallAndHash(function));
     } else {
       List<byte[]> encodedCalledFunctions = new ArrayList<>();
-      encodedCalledFunctions.add(encodeFunctionCall(function));
+      encodedCalledFunctions.add(encodeFunctionCallAndHash(function));
       for (CallExecutionTree func : calledFunctions) {
         encodedCalledFunctions.add(encodeRecursive(func));
       }
@@ -113,18 +149,21 @@ public class CallExecutionTreeEncoderV1 extends CallExecutionTreeEncoderBase {
   private static void process(final byte[] encodedCallExecutionTree, final StringBuilder out)
       throws CallExecutionTreeException {
     ByteBuffer buf = ByteBuffer.wrap(encodedCallExecutionTree);
-
-    byte encodingFormat = buf.get();
-    out.append("Encoding Format: ");
-    out.append(encodingFormat);
-    out.append("\n");
-    if (encodingFormat != ENCODING_FORMAT_V1) {
-      out.append("Unable to process encoding format verison");
-      return;
+    int encodingType = uint8(buf.get());
+    int size = 0;
+    switch (encodingType) {
+      case ENCODING_FORMAT_V2_SINGLE_LAYER:
+        size = processSingleLayer(out, buf);
+        break;
+      case ENCODING_FORMAT_V2_MULTI_LAYER:
+        size = processRecursive(out, buf, 0) + 1; // the 1 accounts for the size of the type field
+        break;
+      default:
+        out.append("Unknown encoding type: ");
+        out.append(encodingType);
+        return;
     }
 
-    int size =
-        processRecursive(out, buf, 0) + 1; // Add one to account for size of encoding type field
     if (buf.remaining() != 0) {
       throw new CallExecutionTreeException(
           "Not all bytes from Call Execution Tree processed: " + buf.remaining() + "remaining",
@@ -136,11 +175,29 @@ public class CallExecutionTreeEncoderV1 extends CallExecutionTreeEncoderBase {
     }
   }
 
+  private static int processSingleLayer(StringBuilder out, ByteBuffer buf)
+      throws CallExecutionTreeException {
+    int size = 1;
+    size += NUM_FUNCS_CALLED_SIZE;
+    int numFuncsCalled = uint8(buf.get());
+
+    for (int i = 0; i < numFuncsCalled + 1; i++) {
+      size += decodeFunctionHash(out, buf, 0);
+    }
+    return size;
+  }
+
   private static int processRecursive(StringBuilder out, ByteBuffer buf, int level)
       throws CallExecutionTreeException {
     int size = 0;
     size += NUM_FUNCS_CALLED_SIZE;
     int numFuncsCalled = uint8(buf.get());
+    if (out != null) {
+      addSpaces(out, level);
+      out.append("NumFuncsCalled: ");
+      out.append(numFuncsCalled);
+      out.append("\n");
+    }
 
     if (numFuncsCalled > 0) {
       int[] offsets = new int[numFuncsCalled + 1];
@@ -156,7 +213,7 @@ public class CallExecutionTreeEncoderV1 extends CallExecutionTreeEncoderBase {
         }
       }
 
-      int used = decodeFunction(out, buf, level);
+      int used = decodeFunctionHash(out, buf, level);
       if (used != offsets[1] - offsets[0]) {
         throw new CallExecutionTreeException(
             "Function offsets "
@@ -186,7 +243,7 @@ public class CallExecutionTreeEncoderV1 extends CallExecutionTreeEncoderBase {
         size += used;
       }
     } else {
-      size += decodeFunction(out, buf, level);
+      size += decodeFunctionHash(out, buf, level);
     }
     return size;
   }
@@ -197,16 +254,43 @@ public class CallExecutionTreeEncoderV1 extends CallExecutionTreeEncoderBase {
    *
    * @param callExecutionTree Call tree to extract function call from
    */
-  public static Tuple<BigInteger, String, String> extractFunction(
-      byte[] callExecutionTree, int[] callPath) throws CallExecutionTreeException {
-
+  public static byte[] extractFunctionHash(byte[] callExecutionTree, int[] callPath)
+      throws CallExecutionTreeException {
     ByteBuffer buf = ByteBuffer.wrap(callExecutionTree);
-    byte encodingFormat = buf.get();
-    if (encodingFormat != ENCODING_FORMAT_V1) {
-      throw new CallExecutionTreeException("Incorrect processor for version: " + encodingFormat);
+    int encodingType = uint8(buf.get());
+    switch (encodingType) {
+      case ENCODING_FORMAT_V2_SINGLE_LAYER:
+        return extractFunctionHashSingleLayer(buf, callPath);
+      case ENCODING_FORMAT_V2_MULTI_LAYER:
+        return extractFunctionHashMultiLayer(buf, callPath);
+      default:
+        throw new CallExecutionTreeException("Unknown encoding type: " + encodingType);
+    }
+  }
+
+  public static byte[] extractFunctionHashSingleLayer(ByteBuffer buf, int[] callPath)
+      throws CallExecutionTreeException {
+    if (callPath.length != 1) {
+      throw new CallExecutionTreeException("Single layer call path not length 1");
     }
 
-    int index = 1;
+    int numFuncsCalled = uint8(buf.get());
+    int funcCalled = callPath[0];
+    if (funcCalled > numFuncsCalled) {
+      throw new CallExecutionTreeException("Invalid call path: Call Path offset too high");
+    }
+
+    buf.position(buf.position() + HASH_SIZE * funcCalled);
+
+    byte[] hash = new byte[HASH_SIZE];
+    buf.get(hash);
+    return hash;
+  }
+
+  public static byte[] extractFunctionHashMultiLayer(ByteBuffer buf, int[] callPath)
+      throws CallExecutionTreeException {
+
+    int index = 1; // Start at location 1, skipping the encoding format field.
 
     for (int i = 0; i < callPath.length; i++) {
       buf.position(index);
@@ -238,75 +322,42 @@ public class CallExecutionTreeEncoderV1 extends CallExecutionTreeEncoderBase {
     }
 
     buf.position(index);
-    byte[] blockchainId = new byte[BLOCKCHAIN_ID_SIZE];
-    buf.get(blockchainId);
-
-    byte[] address = new byte[ADDRESS_SIZE];
-    buf.get(address);
-
-    // Length is an unsigned short (uint16)
-    int len = uint16(buf.getShort());
-    if (len > buf.remaining()) {
-      throw new CallExecutionTreeException(
-          "Decoded length "
-              + len
-              + " bytes, longer than remaining space "
-              + buf.remaining()
-              + " bytes");
-    }
-    byte[] data = new byte[len];
-    buf.get(data);
-
-    BigInteger bcId = new BigInteger(1, blockchainId);
-    String addr = FormatConversion.byteArrayToString(address);
-    String funcData = FormatConversion.byteArrayToString(data);
-    return new Tuple<>(bcId, addr, funcData);
+    byte[] hash = new byte[HASH_SIZE];
+    buf.get(hash);
+    return hash;
   }
 
-  private static int decodeFunction(StringBuilder out, ByteBuffer buf, int level)
+  private static int decodeFunctionHash(StringBuilder out, ByteBuffer buf, int level)
       throws CallExecutionTreeException {
-    byte[] blockchainId = new byte[BLOCKCHAIN_ID_SIZE];
-    buf.get(blockchainId);
-
-    byte[] address = new byte[ADDRESS_SIZE];
-    buf.get(address);
-
-    // Length is an unsigned short (uint16)
-    int len = uint16(buf.getShort());
-    if (len > buf.remaining()) {
-      throw new CallExecutionTreeException(
-          "Decoded length "
-              + len
-              + " bytes, longer than remaining space "
-              + buf.remaining()
-              + " bytes",
-          out);
-    }
-    byte[] data = new byte[len];
-    buf.get(data);
-
-    if (out != null) {
-      addSpaces(out, level);
-      out.append("Blockchain Id: 0x");
-      out.append(FormatConversion.byteArrayToString(blockchainId));
-      out.append("\n");
-      addSpaces(out, level);
-      out.append("Contract: 0x");
-      out.append(FormatConversion.byteArrayToString(address));
-      out.append("\n");
-      addSpaces(out, level);
-      out.append("Data: 0x");
-      out.append(FormatConversion.byteArrayToString(data));
-      out.append("\n");
-    }
-
-    return BLOCKCHAIN_ID_SIZE + ADDRESS_SIZE + DATA_LEN_SIZE_SIZE + len;
+    byte[] hash = new byte[HASH_SIZE];
+    buf.get(hash);
+    String hashStr = FormatConversion.byteArrayToString(hash);
+    out.append("Function Hash: ");
+    out.append(hashStr);
+    out.append("\n");
+    return HASH_SIZE;
   }
 
-  public static boolean isV1Encoded(final byte[] encodedCallExecutionTree) {
+  private static boolean isSingleLayer(CallExecutionTree callTree) {
+    ArrayList<CallExecutionTree> calledFunctions = callTree.getCalledFunctions();
+    if (calledFunctions == null) {
+      // In the situation where there is only a root function call, this can be represented
+      // most simply in the single layer encoding.
+      return true;
+    }
+    for (CallExecutionTree calledFunction : calledFunctions) {
+      if (!calledFunction.isLeaf()) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  public static boolean isV2Encoded(final byte[] encodedCallExecutionTree) {
     ByteBuffer buf = ByteBuffer.wrap(encodedCallExecutionTree);
 
     byte encodingFormat = buf.get();
-    return encodingFormat == ENCODING_FORMAT_V1;
+    return (encodingFormat == ENCODING_FORMAT_V2_MULTI_LAYER)
+        || (encodingFormat == ENCODING_FORMAT_V2_SINGLE_LAYER);
   }
 }

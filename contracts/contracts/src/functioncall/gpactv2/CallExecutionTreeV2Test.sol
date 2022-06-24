@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 ConsenSys Software Inc
+ * Copyright 2022 ConsenSys Software Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -14,21 +14,13 @@
  */
 pragma solidity >=0.8;
 
-import "./CallPathCallExecutionTree.sol";
+import "./CallPathCallExecutionTreeV2.sol";
 
-contract CallExecutionTreeTest is CallPathCallExecutionTree {
-    function extractTargetFromCallGraph1(
+contract CallExecutionTreeV2Test is CallPathCallExecutionTreeV2 {
+    function extractTargetHashFromCallGraph1(
         bytes memory _callGraph,
         uint256[] memory _callPath
-    )
-        external
-        pure
-        returns (
-            uint256 targetBlockchainId,
-            address targetContract,
-            bytes memory functionCall
-        )
-    {
-        return extractTargetFromCallGraph(_callGraph, _callPath, true);
+    ) external pure returns (bytes32 functionCallHash) {
+        return extractTargetHashFromCallGraph(_callGraph, _callPath);
     }
 }

@@ -6,13 +6,16 @@ import java.util.List;
 import net.consensys.gpact.common.FormatConversion;
 import net.consensys.gpact.common.Tuple;
 import net.consensys.gpact.functioncall.CallExecutionTreeException;
-import net.consensys.gpact.functioncall.gpact.CallExecutionTreeTest;
+import net.consensys.gpact.functioncall.gpact.CallExecutionTreeV1Test;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeEach;
 import org.web3j.tuples.generated.Tuple3;
 
-public class SolidityCallExecutionTreeTest extends CallExecutionTreeTestCommon {
+public class SolidityCallExecutionTreeV1Test extends CallExecutionTreeV1TestCommon {
+  static final Logger LOG = LogManager.getLogger(SolidityCallExecutionTreeV1Test.class);
 
-  CallExecutionTreeTest callExecutionTreeContract;
+  CallExecutionTreeV1Test callExecutionTreeContract;
 
   Tuple<BigInteger, String, String> extractFunction(byte[] encodedCallTree, int[] callPath)
       throws CallExecutionTreeException {
@@ -39,6 +42,6 @@ public class SolidityCallExecutionTreeTest extends CallExecutionTreeTestCommon {
   public void setup() throws Exception {
     setupWeb3();
     this.callExecutionTreeContract =
-        CallExecutionTreeTest.deploy(this.web3j, this.tm, this.freeGasProvider).send();
+        CallExecutionTreeV1Test.deploy(this.web3j, this.tm, this.freeGasProvider).send();
   }
 }

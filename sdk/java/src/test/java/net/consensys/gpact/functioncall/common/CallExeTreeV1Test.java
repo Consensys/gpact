@@ -1,5 +1,5 @@
 /*
- * Copyright ConsenSys Software Inc
+ * Copyright 2022 ConsenSys Software Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -12,15 +12,16 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
+package net.consensys.gpact.functioncall.common;
 
-dependencies {
-    implementation project (':sdk')
+import java.math.BigInteger;
+import net.consensys.gpact.common.Tuple;
+import net.consensys.gpact.functioncall.CallExecutionTreeException;
 
-    // https://mvnrepository.com/artifact/org.apache.tuweni/tuweni-bytes
-    implementation group: 'org.apache.tuweni', name: 'tuweni-bytes', version: '1.0.0'
-    // https://mvnrepository.com/artifact/org.apache.tuweni/tuweni-units
-    implementation group: 'org.apache.tuweni', name: 'tuweni-units', version: '1.0.0'
+public class CallExeTreeV1Test extends CallExecutionTreeV1TestCommon {
 
-    implementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: junitVersion
-
+  Tuple<BigInteger, String, String> extractFunction(byte[] encodedCallTree, int[] callPath)
+      throws CallExecutionTreeException {
+    return CallExecutionTreeEncoderV1.extractFunction(encodedCallTree, callPath);
+  }
 }

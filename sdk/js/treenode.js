@@ -1,11 +1,13 @@
 import { longToByteArray, hexToBytes } from "./helper.js";
 
 // Constants
-const numFuncsCalledSize = 1;
-const offsetSize = 4;
-const blockchainIDSize = 32;
-const addrSize = 20;
-const dataLenSizeSize = 2;
+const ENCODING_FORMAT_V1 = 0;
+const LEAF_FUNCTION = 0;
+const NUM_FUNCS_CALLED_SIZE = 1;
+const OFFSET_SIZE = 4;
+const BLOCKCHAIN_ID_SIZE = 32;
+const ADDR_SIZE = 20;
+const DATA_LEN_SIZE = 2;
 const MAX_CALL_EX_TREE_SIZE = 1000000;
 const MAX_CALLED_FUNCTIONS = 255;
 
@@ -27,32 +29,38 @@ export class TreeNode {
 
   encode() {
     let data = [];
-    // Add number of functions
-    data = data.concat(longToByteArray(1, this.children.length));
-    // Encoded data of this node
-    let encoded = [];
-    encoded = encoded.concat(longToByteArray(blockchainIDSize, this.chainID));
-    encoded = encoded.concat(hexToBytes(addrSize, this.contractAddr));
-    encoded = encoded.concat(
-      longToByteArray(dataLenSizeSize, this.callData.length / 2 - 1),
-    );
-    encoded = encoded.concat(
-      hexToBytes(this.callData.length / 2 - 1, this.callData)
-    );
-    if (data[0] == 0) {
+    // Add encoding format of call tree.
+    data = data.concat(longToByteArray(1, ENCODING_FORMAT_V1));
+    // Add the call execution tree
+    data = data.concat(this.encodeRecursive());
+    return data;
+  }
+
+  encodeRecursive() {
+    let data = [];
+
+    if (this.children.length === 0) {
       // This is a leaf node.
-      data = data.concat(encoded);
+      // Add number of functions: 0 indicates leaf.
+      data = data.concat(longToByteArray(1, LEAF_FUNCTION));
+      // Add encoded data of leaf
+      data = data.concat(this.encodeFunctionCall());
     } else {
       // This is a non-leaf node.
+
       let encodedChildren = [];
-      encodedChildren.push(encoded);
+      encodedChildren.push(this.encodeFunctionCall());
       for (const child of this.children) {
-        encodedChildren.push(child.encode());
+        encodedChildren.push(child.encodeRecursive());
       }
+
+      // Add number of functions
+      data = data.concat(longToByteArray(1, this.children.length));
+
       // Add offsets
-      let offset = (this.children.length + 1) * offsetSize + numFuncsCalledSize;
+      let offset = (this.children.length + 1) * OFFSET_SIZE + NUM_FUNCS_CALLED_SIZE;
       for (const encodedChild of encodedChildren) {
-        data = data.concat(longToByteArray(offsetSize, offset));
+        data = data.concat(longToByteArray(OFFSET_SIZE, offset));
         offset = offset + encodedChild.length;
       }
       for (const encodedChild of encodedChildren) {
@@ -61,4 +69,18 @@ export class TreeNode {
     }
     return data;
   }
+
+  encodeFunctionCall() {
+    let encoded = [];
+    encoded = encoded.concat(longToByteArray(BLOCKCHAIN_ID_SIZE, this.chainID));
+    encoded = encoded.concat(hexToBytes(ADDR_SIZE, this.contractAddr));
+    encoded = encoded.concat(
+        longToByteArray(DATA_LEN_SIZE, this.callData.length / 2 - 1),
+    );
+    encoded = encoded.concat(
+        hexToBytes(this.callData.length / 2 - 1, this.callData)
+    );
+    return encoded;
+  }
+
 }

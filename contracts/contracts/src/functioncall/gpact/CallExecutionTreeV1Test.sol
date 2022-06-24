@@ -1,5 +1,5 @@
 /*
- * Copyright ConsenSys Software Inc
+ * Copyright 2021 ConsenSys Software Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -12,15 +12,23 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
+pragma solidity >=0.8;
 
-dependencies {
-    implementation project (':sdk')
+import "./CallPathCallExecutionTreeV1.sol";
 
-    // https://mvnrepository.com/artifact/org.apache.tuweni/tuweni-bytes
-    implementation group: 'org.apache.tuweni', name: 'tuweni-bytes', version: '1.0.0'
-    // https://mvnrepository.com/artifact/org.apache.tuweni/tuweni-units
-    implementation group: 'org.apache.tuweni', name: 'tuweni-units', version: '1.0.0'
-
-    implementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: junitVersion
-
+contract CallExecutionTreeV1Test is CallPathCallExecutionTreeV1 {
+    function extractTargetFromCallGraph1(
+        bytes memory _callGraph,
+        uint256[] memory _callPath
+    )
+        external
+        pure
+        returns (
+            uint256 targetBlockchainId,
+            address targetContract,
+            bytes memory functionCall
+        )
+    {
+        return extractTargetFromCallGraph(_callGraph, _callPath, true);
+    }
 }

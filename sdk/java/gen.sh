@@ -13,8 +13,10 @@ WEB3J=../web3j-abi/codegen/build/install/codegen/bin/codegen
 solc $CONTRACTSDIR/common/BlsSignatureTest.sol --bin --abi --optimize -o $BUILDDIR --overwrite
 solc $CONTRACTSDIR/common/EcdsaSignatureTest.sol --bin --abi --optimize -o $BUILDDIR --overwrite
 
-solc $CONTRACTSDIR/functioncall/gpact/CrosschainControl.sol --allow-paths . --bin --abi --hashes --optimize -o $BUILDDIR --overwrite
-solc $CONTRACTSDIR/functioncall/gpact/CallExecutionTreeTest.sol --allow-paths . --bin --abi --hashes --optimize -o $BUILDDIR --overwrite
+solc $CONTRACTSDIR/functioncall/gpact/GpactCrosschainControl.sol --allow-paths . --bin --abi --hashes --optimize -o $BUILDDIR --overwrite
+solc $CONTRACTSDIR/functioncall/gpact/CallExecutionTreeV1Test.sol --allow-paths . --bin --abi --hashes --optimize -o $BUILDDIR --overwrite
+
+solc $CONTRACTSDIR/functioncall/gpactv2/CallExecutionTreeV2Test.sol --allow-paths . --bin --abi --hashes --optimize -o $BUILDDIR --overwrite
 
 solc $CONTRACTSDIR/functioncall/sfc/SimpleCrosschainControl.sol --allow-paths . --bin --abi --hashes --optimize -o $BUILDDIR --overwrite
 
@@ -32,8 +34,10 @@ solc $CONTRACTSDIR/messaging/eventrelay/EventRelayVerifier.sol --allow-paths . -
 $WEB3J solidity generate -a=$BUILDDIR/BlsSignatureTest.abi -b=$BUILDDIR/BlsSignatureTest.bin -o=$OUTPUTDIR -p=$BASEPACKAGE.common
 $WEB3J solidity generate -a=$BUILDDIR/EcdsaSignatureTest.abi -b=$BUILDDIR/EcdsaSignatureTest.bin -o=$OUTPUTDIR -p=$BASEPACKAGE.common
 
-$WEB3J solidity generate -a=$BUILDDIR/CrosschainControl.abi -b=$BUILDDIR/CrosschainControl.bin -o=$OUTPUTDIR -p=$BASEPACKAGE.functioncall.gpact
-$WEB3J solidity generate -a=$BUILDDIR/CallExecutionTreeTest.abi -b=$BUILDDIR/CallExecutionTreeTest.bin -o=$OUTPUTDIR -p=$BASEPACKAGE.functioncall.gpact
+$WEB3J solidity generate -a=$BUILDDIR/GpactCrosschainControl.abi -b=$BUILDDIR/GpactCrosschainControl.bin -o=$OUTPUTDIR -p=$BASEPACKAGE.functioncall.gpact
+$WEB3J solidity generate -a=$BUILDDIR/CallExecutionTreeV1Test.abi -b=$BUILDDIR/CallExecutionTreeV1Test.bin -o=$OUTPUTDIR -p=$BASEPACKAGE.functioncall.gpact
+
+$WEB3J solidity generate -a=$BUILDDIR/CallExecutionTreeV2Test.abi -b=$BUILDDIR/CallExecutionTreeV2Test.bin -o=$OUTPUTDIR -p=$BASEPACKAGE.functioncall.gpact
 
 $WEB3J solidity generate -a=$BUILDDIR/SimpleCrosschainControl.abi -b=$BUILDDIR/SimpleCrosschainControl.bin -o=$OUTPUTDIR -p=$BASEPACKAGE.functioncall.sfc
 
