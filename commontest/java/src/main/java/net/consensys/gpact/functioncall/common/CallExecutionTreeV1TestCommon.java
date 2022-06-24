@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import net.consensys.gpact.common.Tuple;
 import net.consensys.gpact.functioncall.CallExecutionTree;
 import net.consensys.gpact.functioncall.CallExecutionTreeException;
+import org.apache.tuweni.bytes.Bytes;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -127,5 +128,28 @@ public abstract class CallExecutionTreeV1TestCommon extends CallExecutionTreeTes
     Assertions.assertEquals(func.getFirst().toString(16), blockchainId8.toPlainString());
     Assertions.assertEquals(func.getSecond(), contract8);
     Assertions.assertEquals(func.getThird(), function8);
+  }
+
+  @Test
+  public void checkCallTreeFromJs() throws Exception {
+    String callTree =
+        "0x000100000009000000e3000000000000000000000000000000000000000000000000000000000000001fff7f799bd183b3efd57b5a964cb7cbfec4fbd84400a469f36dcf0000000000000000000000009f2758f2e0e9a5c4ba389035c4c2895232d84b460000000000000000000000000e565f77c56e35d812a1f02356d263320012b3d700000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000020000000000000000000000000944bde1f618e8d7caec2ec10861f6a2b1ef092db000000000000000000000000000000000000000000000000000000000000000020705188c0cf57f6890e2fcd5fb6d21e529071fa5a0084123756cd000000000000000000000000944bde1f618e8d7caec2ec10861f6a2b1ef092db00000000000000000000000000000000000000000000000000000000000000640000000000000000000000009f2758f2e0e9a5c4ba389035c4c2895232d84b46000000000000000000000000bb7c00f1dd65bce0e10a6b6228dff430c9c1c871";
+    Bytes callTreeBytes = Bytes.fromHexString(callTree);
+    byte[] callTreeB = callTreeBytes.toArray();
+    System.out.println(CallExecutionTreeEncoderV1.dump(callTreeB));
+
+    Tuple<BigInteger, String, String> root = extractFunction(callTreeB, new int[] {0});
+    Assertions.assertEquals("1f", root.getFirst().toString(16));
+    Assertions.assertEquals("0xff7f799bd183b3efd57b5a964cb7cbfec4fbd844", root.getSecond());
+    Assertions.assertEquals(
+        "0x69f36dcf0000000000000000000000009f2758f2e0e9a5c4ba389035c4c2895232d84b460000000000000000000000000e565f77c56e35d812a1f02356d263320012b3d700000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000020000000000000000000000000944bde1f618e8d7caec2ec10861f6a2b1ef092db",
+        root.getThird());
+
+    Tuple<BigInteger, String, String> seg = extractFunction(callTreeB, new int[] {1});
+    Assertions.assertEquals("20", seg.getFirst().toString(16));
+    Assertions.assertEquals("0x705188c0cf57f6890e2fcd5fb6d21e529071fa5a", seg.getSecond());
+    Assertions.assertEquals(
+        "0x123756cd000000000000000000000000944bde1f618e8d7caec2ec10861f6a2b1ef092db00000000000000000000000000000000000000000000000000000000000000640000000000000000000000009f2758f2e0e9a5c4ba389035c4c2895232d84b46000000000000000000000000bb7c00f1dd65bce0e10a6b6228dff430c9c1c871",
+        seg.getThird());
   }
 }

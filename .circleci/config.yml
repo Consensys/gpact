@@ -306,7 +306,7 @@ jobs:
           command: make docker
       - run:
           name: Create and Start blockchains
-          working_directory: test-blockchains
+          working_directory: sdk/js
           background: true
           command: docker-compose build && docker-compose up
       - run:

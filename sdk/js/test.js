@@ -310,7 +310,7 @@ async function test() {
     simulator.registerABI("bridge", bridgeABI);
     simulator.registerCallLink("bridge", "buyNFTUsingRemoteFunds", async function (cmgr, caller, call) {
         // Parse arguments.
-        if (call.params.length != 5) {
+        if (call.params.length !== 5) {
             throw new Error("invalid parameters");
         }
         let buyer = call.params[0];
@@ -323,7 +323,7 @@ async function test() {
         let bridge = new chain.eth.Contract(bridgeABI, call.contractAddr);
         // ====== START CONTRACT LOGIC ======
         let destBridge = await bridge.methods.remoteBridges(otherBcId).call();
-        if (destBridge == "0x0000000000000000000000000000000000000000") {
+        if (destBridge === "0x0000000000000000000000000000000000000000") {
             throw new Error("Bridge: dest chain not supported");
         }
         // Find listing.
@@ -338,7 +338,7 @@ async function test() {
     });
     simulator.registerCallLink("bridge", "processTokenTransfer", async function (cmgr, caller, call) {
         // Parse arguments.
-        if (call.params.length != 4) {
+        if (call.params.length !== 4) {
             throw new Error("invalid parameters");
         }
         let _tokenContract = call.params[0];
@@ -352,7 +352,7 @@ async function test() {
         let auth = caller.decodeAtomicAuthParameters();
         let sourceBcId = auth[1];
         let sourceContract = auth[2];
-        if (sourceContract != await bridge.methods.remoteBridges(sourceBcId).call()) {
+        if (sourceContract !== await bridge.methods.remoteBridges(sourceBcId).call()) {
             throw new Error("Bridge: Contract does not match");
         }
         let erc20 = new chain.eth.Contract(tokenABI, _tokenContract);
@@ -384,17 +384,20 @@ async function test() {
     });
     console.log(res.status);
 
-    // Get balance before
+    console.log("Balances before transfer");
     let nftOwner = await nftContract.methods.ownerOf(1).call();
     let tokenBalanceBuyer = await tokenContract.methods.balanceOf(buyerAddr).call();
     let tokenBalanceSeller = await tokenContract.methods.balanceOf(sellerAddr).call();
-    if (nftOwner != sellerAddr) {
+    console.log(" NFT owner account: " + nftOwner);
+    if (nftOwner !== sellerAddr) {
         throw new Error("nft 1 should belong to seller before purchase");
     }
-    if (tokenBalanceBuyer != BigInt("1000000000000000000000")) {
+    console.log(" Token Balance Buyer: " + tokenBalanceBuyer);
+    if (tokenBalanceBuyer !== "1000000000000000000000") {
         throw new Error("buyer should have 1000000000000000000000 tokens before purchase");
     }
-    if (tokenBalanceSeller != BigInt(0)) {
+    console.log(" Token Balance Seller: " + tokenBalanceSeller);
+    if (tokenBalanceSeller !== "0") {
         throw new Error("seller should have 0 tokens before purchase");
     }
 
@@ -403,23 +406,29 @@ async function test() {
         from: buyerAddr,
         gas: 10000000,
     });
-    console.log(res.status);
+    console.log("Token contract approve(): " + res.status);
 
+    console.log("Simulate crosschain transaction");
     let temp = await simulator.simulate(new CrosschainCall(chainA, "bridge", bridgeAddrA, "buyNFTUsingRemoteFunds", buyerAddr, nftAddrA, 1, chainB, tokenAddrB));
     let root = temp[0];
+    console.log("Execute crosschain transaction");
     await executor.crosschainCall(root);
+    console.log(" Execute crosschain transaction completed");
 
-    // Get balance after
+    console.log("Balances after transfer");
     nftOwner = await nftContract.methods.ownerOf(1).call();
     tokenBalanceBuyer = await tokenContract.methods.balanceOf(buyerAddr).call();
     tokenBalanceSeller = await tokenContract.methods.balanceOf(sellerAddr).call();
-    if (nftOwner != buyerAddr) {
+    console.log(" NFT owner account: " + nftOwner);
+    if (nftOwner !== buyerAddr) {
         throw new Error("nft 1 should belong to buyer after purchase");
     }
-    if (tokenBalanceBuyer != BigInt("999999999999999999900")) {
+    console.log(" Token Balance Buyer: " + tokenBalanceBuyer);
+    if (tokenBalanceBuyer !== "999999999999999999900") {
         throw new Error("buyer should have 999999999999999999900 tokens after purchase");
     }
-    if (tokenBalanceSeller != BigInt(100)) {
+    console.log(" Token Balance Seller: " + tokenBalanceSeller);
+    if (tokenBalanceSeller !== "100") {
         throw new Error("seller should have 100 tokens after purchase");
     }
     console.log("Testing happy case succeed")

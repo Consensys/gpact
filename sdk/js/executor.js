@@ -533,6 +533,7 @@ export class Executor {
     // Try 5 times, 5 seconds apart.
     for (let i = 0; i < 5; i++) {
       try {
+        console.log("Call execution tree: " + web3.utils.bytesToHex(root.encode()))
         const gasPrice = await web3.eth.getGasPrice();
         const res = await gpact.methods
           .start(transID, BigInt(10000), web3.utils.bytesToHex(root.encode()))
@@ -651,13 +652,14 @@ export class Executor {
         console.log("segment succeed");
         console.log(res);
         segmentEvent = res.events.Segment;
-        if (res.events.CallFailure != undefined) {
+        if (res.events.CallFailure !== undefined) {
           console.log(res.events.CallFailure);
         }
         err = null;
         break;
       } catch (error) {
-        console.log("got error", error, "try again...");
+        console.log("Got error: ", error);
+        console.log("Retrying...");
       }
       await new Promise((r) => setTimeout(r, 5000));
     }
