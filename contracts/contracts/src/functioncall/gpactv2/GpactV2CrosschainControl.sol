@@ -22,7 +22,7 @@ import "../interface/CrosschainFunctionCallReturnInterface.sol";
 import "../interface/AtomicHiddenAuthParameters.sol";
 import "../../common/ResponseProcessUtil.sol";
 
-contract GpactCrosschainControl is
+contract GpactV2CrosschainControl is
     CrosschainFunctionCallReturnInterface,
     CbcDecVer,
     CallPathCallExecutionTreeV2,
