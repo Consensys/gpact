@@ -30,12 +30,17 @@ contract GpactV2CrosschainControl is
     AtomicHiddenAuthParameters,
     ResponseProcessUtil
 {
+    // 	0x77dab611
+    bytes32 internal constant START_EVENT_SIGNATURE =
+        keccak256("Start(uint256,address,uint256,bytes32)");
     event Start(
         uint256 _crossBlockchainTransactionId,
         address _caller,
         uint256 _timeout,
         bytes32 _callTreeHash
     );
+    bytes32 internal constant SEGMENT_EVENT_SIGNATURE =
+        keccak256("Segment(uint256,bytes32,uint256[],address[],bool,bytes)");
     event Segment(
         uint256 _crossBlockchainTransactionId,
         bytes32 _hashOfCallGraph,
@@ -44,6 +49,8 @@ contract GpactV2CrosschainControl is
         bool _success,
         bytes _returnValue
     );
+    bytes32 internal constant ROOT_EVENT_SIGNATURE =
+        keccak256("Root(uint256,bool)");
     event Root(uint256 _crossBlockchainTransactionId, bool _success);
     event Signalling(uint256 _rootBcId, uint256 _crossBlockchainTransactionId);
 
@@ -68,11 +75,15 @@ contract GpactV2CrosschainControl is
     event Dump(uint256 _val1, bytes32 _val2, address _val3, bytes _val4);
 
     struct EventInfo {
+        // Blockchain ids that events were emitted on.
         uint256 blockchainId;
+        // Crosschain control contracts that event was emitted from.
         address cbcAddress;
-        // TODO why is the _eventFunctionSignatures parameter needed? [0] must be start and subsequent must be segment events.
+        // Event function signature of emitted event.
         bytes32 eventFunctionSignature;
+        // Event data for emitted event.
         bytes eventData;
+        // Encoded signatures or proofs proving that the blockchain id, cbc address, and event data can be trusted.
         bytes signatures;
     }
 
@@ -156,57 +167,20 @@ contract GpactV2CrosschainControl is
      * and address and call data for the function to be called.
      *
      * @param _events Array of events. Array offset 0 must be the start event. Other events must be segment events.
-     * @param _callPath    The part of the call tree to be executed.
-     * @param _callExecutionTree The call tree to be executed. The message digest of this must match the call tree hash emitted in the start event.
-     * @param _targetContract The contract to be called. A combination of this blockchain, the tartget contract and the target function call data must match the function call hash in the call tree at the call path.
-     * @param _targetFunctionCallData The call data to be called. A combination of this blockchain, the tartget contract and the target function call data must match the function call hash in the call tree at the call path.
+     * @ param _callPath    The part of the call tree to be executed.
+     * @ param _callExecutionTree The call tree to be executed. The message digest of this must match the call tree hash emitted in the start event.
+     * @ param _targetContract The contract to be called. A combination of this blockchain, the tartget contract and the target function call data must match the function call hash in the call tree at the call path.
+     * @ param _targetFunctionCallData The call data to be called. A combination of this blockchain, the tartget contract and the target function call data must match the function call hash in the call tree at the call path.
      */
-    function segment1(
+    function segment(
         // TODO historically, Web3J didn't support arrays of structs in the Java code generator.
         EventInfo[] calldata _events,
-        uint256[] calldata _callPath,
-        bytes calldata _callExecutionTree,
-        address _targetContract,
-        bytes calldata _targetFunctionCallData
-    ) external {}
-
-    /*
-     * Take an array of events that match the start event and zero or more segment
-     * events, the call path for the function to be executed, plus the call tree,
-     * and address and call data for the function to be called.
-     *
-     * @param _blockchainIds Array of blockchain ids that events were emitted on. Array offset 0 must be the start event.
-     * @param _cbcAddresses  Array of crosschain control contracts that events were emitted from. Array offset 0 must be the start event.
-     * @param _eventFunctionSignatures Function signatures of events emitted. Array offset 0 must be the start event.
-     *        TODO why is the _eventFunctionSignatures parameter needed? [0] must be start and subsequent must be segment events.
-     * @param _eventData   Array of event data for emitted event. Array offset 0 must be the start event.
-     * @param _signatures  Array of signatures or proofs proving that the blockchain ids, cbc addresses, and event data can be trusted.
-     * @param _callPath    The part of the call tree to be executed.
-     * @param _callExecutionTree The call tree to be executed. The message digest of this must match the call tree hash emitted in the start event.
-     * @param _targetContract The contract to be called. A combination of this blockchain, the tartget contract and the target function call data must match the function call hash in the call tree at the call path.
-     * @param _targetFunctionCallData The call data to be called. A combination of this blockchain, the tartget contract and the target function call data must match the function call hash in the call tree at the call path.
-     */
-    // TODO the following fails as there are too many parameters for Solidity to handle
-    function segment() external //        uint256[] calldata _blockchainIds,
-    //        address[] calldata _cbcAddresses,
-    //        bytes32[] calldata _eventFunctionSignatures,
-    //        bytes[] calldata _eventData,
-    //        bytes[] calldata _signatures,
-    //        uint256[] calldata _callPath,
-    //        bytes calldata _callExecutionTree,
-    //        address _targetContract
-
-    //,
-    //        bytes calldata _targetFunctionCallData
-    {
-        //        decodeAndVerifyEvents(
-        //            _blockchainIds,
-        //            _cbcAddresses,
-        //            _eventFunctionSignatures,
-        //            _eventData,
-        //            _signatures,
-        //            true
-        //        );
+        uint256[] calldata, /* _callPath */
+        bytes calldata, /* _callExecutionTree */
+        address, /* _targetContract */
+        bytes calldata /* _targetFunctionCallData */
+    ) external {
+        decodeAndVerifyEvents(_events, true);
         //
         //        uint256 rootBcId = _blockchainIds[0];
         //
@@ -286,12 +260,12 @@ contract GpactV2CrosschainControl is
         //            returnValueEncoded
         //        );
         //
-        //        // Only delete locations used.
-        //        if (_eventData.length > 1) {
-        //            cleanupAfterCallSegment();
-        //        } else {
-        //            cleanupAfterCallLeafSegment();
-        //        }
+        // Only delete locations used.
+        if (_events.length > 1) {
+            cleanupAfterCallSegment();
+        } else {
+            cleanupAfterCallLeafSegment();
+        }
     }
 
     //    function root(
@@ -895,5 +869,41 @@ contract GpactV2CrosschainControl is
         returns (bytes32)
     {
         return keccak256(abi.encodePacked(_rootBcId, _crossTxId));
+    }
+
+    function decodeAndVerifyEvents(
+        EventInfo[] calldata _eventInfo,
+        bool _expectStart
+    ) private view {
+        // The minimum number of events is 1: start and no segment, used to end a timed-out
+        // crosschain transactions.
+        uint256 numEvents = _eventInfo.length;
+        require(numEvents > 0, "Must be at least one event");
+
+        for (uint256 i = 0; i < numEvents; i++) {
+            if (i == 0) {
+                bytes32 eventSig = _expectStart
+                    ? START_EVENT_SIGNATURE
+                    : ROOT_EVENT_SIGNATURE;
+                require(
+                    eventSig == _eventInfo[i].eventFunctionSignature,
+                    "Unexpected first event function signature"
+                );
+            } else {
+                require(
+                    SEGMENT_EVENT_SIGNATURE ==
+                        _eventInfo[i].eventFunctionSignature,
+                    "Event function signature not for a segment"
+                );
+            }
+
+            decodeAndVerifyEvent(
+                _eventInfo[i].blockchainId,
+                _eventInfo[i].cbcAddress,
+                _eventInfo[i].eventFunctionSignature,
+                _eventInfo[i].eventData,
+                _eventInfo[i].signatures
+            );
+        }
     }
 }

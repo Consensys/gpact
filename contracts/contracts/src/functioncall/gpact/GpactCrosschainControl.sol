@@ -31,12 +31,18 @@ contract GpactCrosschainControl is
     AtomicHiddenAuthParameters,
     ResponseProcessUtil
 {
+    // 	0x77dab611
+    bytes32 internal constant START_EVENT_SIGNATURE =
+        keccak256("Start(uint256,address,uint256,bytes)");
     event Start(
         uint256 _crossBlockchainTransactionId,
         address _caller,
         uint256 _timeout,
         bytes _callGraph
     );
+    // 0xb01557f1
+    bytes32 internal constant SEGMENT_EVENT_SIGNATURE =
+        keccak256("Segment(uint256,bytes32,uint256[],address[],bool,bytes)");
     event Segment(
         uint256 _crossBlockchainTransactionId,
         bytes32 _hashOfCallGraph,
@@ -45,6 +51,9 @@ contract GpactCrosschainControl is
         bool _success,
         bytes _returnValue
     );
+    // 0xe6763dd9
+    bytes32 internal constant ROOT_EVENT_SIGNATURE =
+        keccak256("Root(uint256,bool)");
     event Root(uint256 _crossBlockchainTransactionId, bool _success);
     event Signalling(uint256 _rootBcId, uint256 _crossBlockchainTransactionId);
 
@@ -856,5 +865,60 @@ contract GpactCrosschainControl is
         returns (bytes32)
     {
         return keccak256(abi.encodePacked(_rootBcId, _crossTxId));
+    }
+
+    function decodeAndVerifyEvents(
+        uint256[] calldata _blockchainIds,
+        address[] calldata _cbcAddresses,
+        bytes32[] calldata _eventFunctionSignatures,
+        bytes[] calldata _eventData,
+        bytes[] calldata _signatures,
+        bool _expectStart
+    ) private view {
+        // The minimum number of events is 1: start and no segment, used to end a timed-out
+        // crosschain transactions.
+        uint256 numEvents = _blockchainIds.length;
+        require(numEvents > 0, "Must be at least one event");
+        require(
+            numEvents == _cbcAddresses.length,
+            "Number of blockchain Ids and cbcAddresses must match"
+        );
+        require(
+            numEvents == _eventFunctionSignatures.length,
+            "Number of blockchain Ids and event function signatures must match"
+        );
+        require(
+            numEvents == _eventData.length,
+            "Number of blockchain Ids and event data must match"
+        );
+        require(
+            numEvents == _signatures.length,
+            "Number of events and signatures match"
+        );
+
+        for (uint256 i = 0; i < numEvents; i++) {
+            if (i == 0) {
+                bytes32 eventSig = _expectStart
+                    ? START_EVENT_SIGNATURE
+                    : ROOT_EVENT_SIGNATURE;
+                require(
+                    eventSig == _eventFunctionSignatures[i],
+                    "Unexpected first event function signature"
+                );
+            } else {
+                require(
+                    SEGMENT_EVENT_SIGNATURE == _eventFunctionSignatures[i],
+                    "Event function signature not for a segment"
+                );
+            }
+
+            decodeAndVerifyEvent(
+                _blockchainIds[i],
+                _cbcAddresses[i],
+                _eventFunctionSignatures[i],
+                _eventData[i],
+                _signatures[i]
+            );
+        }
     }
 }
