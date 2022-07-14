@@ -51,7 +51,7 @@ contract CallPathCallExecutionTreeV2 is BytesUtil {
      * @return functionCallHash Function call hash of the function represented by the _callPath.
      */
     function extractTargetHashFromCallGraph(
-        bytes memory _callExecutionTree,
+        bytes calldata _callExecutionTree,
         uint256[] memory _callPath
     ) internal pure returns (bytes32 functionCallHash) {
         uint8 callTreeType = BytesUtil.bytesToUint8(
@@ -84,7 +84,7 @@ contract CallPathCallExecutionTreeV2 is BytesUtil {
      * @return functionCallHash Function call hash of the function represented by the _callPath.
      */
     function extractTargetFromCallGraphSingleLayer(
-        bytes memory _callExecutionTree,
+        bytes calldata _callExecutionTree,
         uint256[] memory _callPath
     ) internal pure returns (bytes32 functionCallHash) {
         require(
@@ -114,7 +114,7 @@ contract CallPathCallExecutionTreeV2 is BytesUtil {
      * @return functionCallHash Function call hash of the function represented by the _callPath.
      */
     function extractTargetFromCallGraphMultiLayer(
-        bytes memory _callExecutionTree,
+        bytes calldata _callExecutionTree,
         uint256[] memory _callPath
     ) internal pure returns (bytes32 functionCallHash) {
         uint256 index = 1;

@@ -175,93 +175,126 @@ contract GpactV2CrosschainControl is
     function segment(
         // TODO historically, Web3J didn't support arrays of structs in the Java code generator.
         EventInfo[] calldata _events,
-        uint256[] calldata, /* _callPath */
-        bytes calldata, /* _callExecutionTree */
-        address, /* _targetContract */
-        bytes calldata /* _targetFunctionCallData */
+        uint256[] calldata _callPath,
+        bytes calldata _callExecutionTree,
+        address _targetContract,
+        bytes calldata _targetFunctionCallData
     ) external {
+        uint256[] memory callPathMem = _callPath;
+
         decodeAndVerifyEvents(_events, true);
-        //
-        //        uint256 rootBcId = _blockchainIds[0];
-        //
-        //        // The tx.origin needs to be the same on all blockchains that are party to the
-        //        // cross-blockchain transaction. As such, ensure start is only called from an
-        //        // EOA.
-        //        require(tx.origin == msg.sender, "Segment must be called from an EOA");
-        //
-        //        // Event 0 will be the start event
-        //        // Recall the start event is:
-        //        // Start(uint256 _crossBlockchainTransactionId, address _caller, uint256 _timeout, bytes _callGraph);
-        //        uint256 crosschainTransactionId;
-        //        address startCaller;
-        //        //uint256 timeout;
-        //        bytes memory callGraph;
-        //        (crosschainTransactionId, startCaller, , callGraph) = abi.decode(
-        //            _eventData[0],
-        //            (uint256, address, uint256, bytes)
-        //        );
-        //        require(startCaller == tx.origin, "EOA does not match start event");
-        //
-        //        // Stop replay of transaction segments.
-        //        {
-        //            bytes32 mapKey = keccak256(
-        //                abi.encodePacked(rootBcId, crosschainTransactionId, _callPath)
-        //            );
-        //            require(
-        //                segmentTransactionExecuted[mapKey] == false,
-        //                "Segment transaction already executed"
-        //            );
-        //            segmentTransactionExecuted[mapKey] = true;
-        //        }
-        //        bytes32 hashOfCallGraph = keccak256(callGraph);
-        //
-        //        // No need to store call graph or call path if this is a leaf segment / function
-        //        if (_eventData.length > 1) {
-        //            if (
-        //                verifySegmentEvents(
-        //                    _eventData,
-        //                    _callPath,
-        //                    hashOfCallGraph,
-        //                    crosschainTransactionId,
-        //                    false
-        //                )
-        //            ) {
-        //                return;
-        //            }
-        //
-        //            determineFuncsToBeCalled(
-        //                callGraph,
-        //                _callPath,
-        //                _eventData.length - 1
-        //            );
-        //        }
-        //
-        //        // Set-up root blockchain / crosschain transaction value used for locking.
-        //        activeCallCrosschainRootTxId = calcRootTxId(
-        //            rootBcId,
-        //            crosschainTransactionId
-        //        );
-        //
-        //        bool isSuccess;
-        //        bytes memory returnValueEncoded;
-        //        (isSuccess, returnValueEncoded) = makeCall(
-        //            callGraph,
-        //            _callPath,
-        //            rootBcId
-        //        );
-        //
-        //        // TODO emit segments understanding of root blockhain id
-        //        emit Segment(
-        //            crosschainTransactionId,
-        //            hashOfCallGraph,
-        //            _callPath,
-        //            activeCallLockedContracts,
-        //            isSuccess,
-        //            returnValueEncoded
-        //        );
-        //
+
+        uint256 rootBcId = _events[0].blockchainId;
+
+        // The tx.origin needs to be the same on all blockchains that are party to the
+        // cross-blockchain transaction. As such, ensure segment is only called from an
+        // EOA.
+        require(tx.origin == msg.sender, "Segment must be called from an EOA");
+
+        // Event 0 will be the start event
+        // Recall the start event is:
+        // Start(uint256 _crossBlockchainTransactionId, address _caller, uint256 _timeout, bytes32 _callGraphHash);
+        uint256 crosschainTransactionId;
+        //uint256 timeout;
+        bytes32 callExecutionTreeHash;
+        address startCaller;
+        (crosschainTransactionId, startCaller, , callExecutionTreeHash) = abi
+            .decode(_events[0].eventData, (uint256, address, uint256, bytes32));
+        require(startCaller == tx.origin, "EOA does not match start event");
+
+        // Check that the call execution tree matches the hash form the start event.
+        {
+            // Scope to limit number of local variables compiler has to deal with.
+            bytes32 calcCallExecutionTreeHash = keccak256(_callExecutionTree);
+            require(
+                calcCallExecutionTreeHash == callExecutionTreeHash,
+                "Call execution tree doesn't match start event"
+            );
+        }
+
+        // Check that the the hash of the function call indicated by the call path matches.
+        {
+            // Scope to limit number of local variables compiler has to deal with.
+            bytes32 expectedTargetHash = extractTargetHashFromCallGraph(
+                _callExecutionTree,
+                _callPath
+            );
+            bytes32 calcTargetHash = keccak256(
+                abi.encode(
+                    myBlockchainId,
+                    _targetContract,
+                    _targetFunctionCallData
+                )
+            );
+            require(
+                expectedTargetHash == calcTargetHash,
+                "Function call does not match call execution tree"
+            );
+        }
+
+        // Stop replay of transaction segments.
+        {
+            // Scope to limit number of local variables compiler has to deal with.
+            bytes32 mapKey = keccak256(
+                abi.encodePacked(rootBcId, crosschainTransactionId, _callPath)
+            );
+            require(
+                segmentTransactionExecuted[mapKey] == false,
+                "Segment transaction already executed"
+            );
+            segmentTransactionExecuted[mapKey] = true;
+        }
+
+        // No need to store call graph or call path if this is a leaf segment / function
+        uint256 numSegments = _events.length - 1;
+        if (numSegments > 0) {
+            if (
+                verifySegmentEvents(
+                    _events,
+                    _callPath,
+                    callExecutionTreeHash,
+                    crosschainTransactionId,
+                    false
+                )
+            ) {
+                return;
+            }
+
+            determineFuncsToBeCalled(
+                _callExecutionTree,
+                _callPath,
+                numSegments
+            );
+        }
+
+        // Set-up root blockchain / crosschain transaction value used for locking.
+        activeCallCrosschainRootTxId = calcRootTxId(
+            rootBcId,
+            crosschainTransactionId
+        );
+
+        bool isSuccess;
+        bytes memory returnValueEncoded;
+        (isSuccess, returnValueEncoded) = makeCall(
+            _callExecutionTree,
+            callPathMem,
+            rootBcId,
+            _targetContract,
+            _targetFunctionCallData
+        );
+
+        // TODO emit segments understanding of root blockhain id
+        emit Segment(
+            crosschainTransactionId,
+            callExecutionTreeHash,
+            callPathMem,
+            activeCallLockedContracts,
+            isSuccess,
+            returnValueEncoded
+        );
+
         // Only delete locations used.
-        if (_events.length > 1) {
+        if (numSegments > 0) {
             cleanupAfterCallSegment();
         } else {
             cleanupAfterCallLeafSegment();
@@ -531,11 +564,11 @@ contract GpactV2CrosschainControl is
     // **************************** PRIVATE BELOW HERE ***************************
 
     function makeCall(
-        bytes memory _callTree,
+        bytes calldata _callTree,
         uint256[] memory _callPath,
         uint256 _rootBcId,
         address _targetContract,
-        bytes memory _targetCallData
+        bytes calldata _targetCallData
     ) private returns (bool, bytes memory) {
         bytes32 expectedFunctionCallHash = extractTargetHashFromCallGraph(
             _callTree,
@@ -718,16 +751,16 @@ contract GpactV2CrosschainControl is
      *           Note that offset 0 is the start event, and all other offsets
      *           are segment events.
      * @param _callPath        The call path of of the function being executed.
-     * @param _hashOfCallGraph The message digest of the call execution tree in the
+     * @param _hashOfCallTree The message digest of the call execution tree in the
      *           Start Event.
      * @param _crosschainTxId  The crosschain transaction id of the function being
      *           executed.
      * @return True if all of the segment event information can be verified.
      */
     function verifySegmentEvents(
-        bytes[] memory _segmentEvents,
-        uint256[] memory _callPath,
-        bytes32 _hashOfCallGraph,
+        EventInfo[] calldata _segmentEvents,
+        uint256[] calldata _callPath,
+        bytes32 _hashOfCallTree,
         uint256 _crosschainTxId,
         bool _asRoot
     ) private returns (bool) {
@@ -742,20 +775,20 @@ contract GpactV2CrosschainControl is
             // event Segment(uint256 _crossBlockchainTransactionId, bytes32 _hashOfCallGraph, uint256[] _callPath,
             //        address[] _lockedContracts, bool _success, bytes _returnValue);
             uint256 crossBlockchainTxId;
-            bytes32 hashOfCallGraphFromSegment;
+            bytes32 hashOfCallTreeFromSegment;
             uint256[] memory segCallPath;
             address[] memory lockedContracts;
             bool success;
             bytes memory returnValue;
             (
                 crossBlockchainTxId,
-                hashOfCallGraphFromSegment,
+                hashOfCallTreeFromSegment,
                 segCallPath,
                 lockedContracts,
                 success,
                 returnValue
             ) = abi.decode(
-                _segmentEvents[i],
+                _segmentEvents[i].eventData,
                 (uint256, bytes32, uint256[], address[], bool, bytes)
             );
 
@@ -764,8 +797,8 @@ contract GpactV2CrosschainControl is
                 "Transaction id from segment and root do not match"
             );
             require(
-                _hashOfCallGraph == hashOfCallGraphFromSegment,
-                "Call graph from segment and root do not match"
+                _hashOfCallTree == hashOfCallTreeFromSegment,
+                "Call tree from segment and root do not match"
             );
 
             // The segment will be the same as the call path length of the caller
@@ -810,7 +843,7 @@ contract GpactV2CrosschainControl is
                 } else {
                     emit Segment(
                         _crosschainTxId,
-                        _hashOfCallGraph,
+                        _hashOfCallTree,
                         _callPath,
                         new address[](0),
                         false,
@@ -833,13 +866,13 @@ contract GpactV2CrosschainControl is
      * with the appropriate values, in preparation for the business logic function executing a
      * crosschain coll.
      *
-     * @param _callGraph Call graph to be executed.
+     * @param _callTree Call tree to be executed.
      * @param _callPath Call path to be executed as part of this root or segment function.
      * @param _numCalls The number of calls that the current segment / root is expected to call.
      */
     function determineFuncsToBeCalled(
-        bytes memory _callGraph,
-        uint256[] memory _callPath,
+        bytes calldata _callTree,
+        uint256[] calldata _callPath,
         uint256 _numCalls
     ) private {
         uint256 callPathLen = _callPath.length;
@@ -852,7 +885,7 @@ contract GpactV2CrosschainControl is
             dynamicCallPath[callPathLen - 1] = i;
 
             bytes32 functionCallHash = extractTargetHashFromCallGraph(
-                _callGraph,
+                _callTree,
                 dynamicCallPath
             );
             activeCallTargetFunctionCallHashes.push(functionCallHash);
