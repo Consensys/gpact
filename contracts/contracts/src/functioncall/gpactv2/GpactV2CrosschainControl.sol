@@ -133,6 +133,11 @@ contract GpactV2CrosschainControl is
         myBlockchainId = _myBlockchainId;
     }
 
+    /**
+     * Commit to executing a call execution tree / start a crosschain transaction.
+     *
+     * @param _crossBlockchainTransactionId Id of the
+     */
     function start(
         uint256 _crossBlockchainTransactionId,
         uint256 _timeout,
@@ -163,9 +168,6 @@ contract GpactV2CrosschainControl is
 
     /**
      * Execute a segment of the call execution tree.
-     * Take an array of events that match the start event and zero or more segment
-     * events, the call path for the function to be executed, plus the call tree,
-     * and address and call data for the function to be called.
      *
      * @param _events Array of events. Array offset 0 must be the start event. Other events must be segment events.
      * @ param _callPath    The part of the call tree to be executed.
@@ -304,8 +306,6 @@ contract GpactV2CrosschainControl is
 
     /**
      * Execute the root call of the call execution tree.
-     * Take an array of events that match the start event and zero or more segment
-     * events, the call tree, and address and call data for the function to be called.
      *
      * @param _events Array of events. Array offset 0 must be the start event. Other events must be segment events.
      * @ param _callExecutionTree The call tree to be executed. The message digest of this must match the call tree hash emitted in the start event.
@@ -455,73 +455,65 @@ contract GpactV2CrosschainControl is
         cleanupAfterCallRoot();
     }
 
-    //    /**
-    //     * Signalling call: Commit or ignore updates + unlock any locked contracts.
-    //     **/
-    //    function signalling(
-    //        uint256[] calldata _blockchainIds,
-    //        address[] calldata _cbcAddresses,
-    //        bytes32[] calldata _eventFunctionSignatures,
-    //        bytes[] calldata _eventData,
-    //        bytes[] calldata _signatures
-    //    ) external {
-    //        decodeAndVerifyEvents(
-    //            _blockchainIds,
-    //            _cbcAddresses,
-    //            _eventFunctionSignatures,
-    //            _eventData,
-    //            _signatures,
-    //            false
-    //        );
-    //
-    //        // Extract information from the root event.
-    //        // Recall: Root(uint256 _crossBlockchainTransactionId, bool _success);
-    //        uint256 rootEventCrossBlockchainTxId;
-    //        bool success;
-    //        (rootEventCrossBlockchainTxId, success) = abi.decode(
-    //            _eventData[0],
-    //            (uint256, bool)
-    //        );
-    //
-    //        // Set-up root blockchain / crosschain transaction value for unlocking.
-    //        bytes32 crosschainRootTxId = calcRootTxId(
-    //            _blockchainIds[0],
-    //            rootEventCrossBlockchainTxId
-    //        );
-    //
-    //        // Check that all of the Segment Events are for the same transaction id, and are for this blockchain.
-    //        for (uint256 i = 1; i < _eventData.length; i++) {
-    //            // Recall Segment event is defined as:
-    //            // event Segment(uint256 _crossBlockchainTransactionId, bytes32 _hashOfCallGraph, uint256[] _callPath,
-    //            //        address[] _lockedContracts, bool _success, bytes _returnValue);
-    //            uint256 segmentEventCrossBlockchainTxId;
-    //            address[] memory lockedContracts;
-    //            (segmentEventCrossBlockchainTxId, , , lockedContracts, , ) = abi
-    //                .decode(
-    //                    _eventData[i],
-    //                    (uint256, bytes32, uint256[], address[], bool, bytes)
-    //                );
-    //
-    //            // Check that the cross blockchain transaction id is the same for the root and the segment event.
-    //            require(
-    //                rootEventCrossBlockchainTxId == segmentEventCrossBlockchainTxId
-    //            );
-    //            // TODO check the Root Blockchain id indicated in the segment matches the one from the root transaction.
-    //
-    //            // TODO Check that the cross chain transaction id for the root blockchain id is in use on this blockchain but has not been added to the completed list.
-    //
-    //            // For each address indicated in the Segment Event as being locked, Commit or Ignore updates
-    //            // according to what the Root Event says.
-    //            for (uint256 j = 0; j < lockedContracts.length; j++) {
-    //                LockableStorageInterface lockedContract = LockableStorageInterface(
-    //                        lockedContracts[j]
-    //                    );
-    //                lockedContract.finalise(success, crosschainRootTxId);
-    //            }
-    //        }
-    //
-    //        emit Signalling(_blockchainIds[0], rootEventCrossBlockchainTxId);
-    //    }
+    /**
+     * Signalling call: Commit or ignore updates + unlock any locked contracts.
+     *
+     * @param _events Array of events. Array offset 0 must be the root event. Other events must be segment events.
+     */
+    function signalling(
+        // TODO historically, Web3J didn't support arrays of structs in the Java code generator.
+        EventInfo[] calldata _events
+    ) external {
+        decodeAndVerifyEvents(_events, false);
+
+        // Extract information from the root event.
+        // Recall: Root(uint256 _crossBlockchainTransactionId, bool _success);
+        uint256 rootEventCrossBlockchainTxId;
+        bool success;
+        (rootEventCrossBlockchainTxId, success) = abi.decode(
+            _events[0].eventData,
+            (uint256, bool)
+        );
+
+        // Set-up root blockchain / crosschain transaction value for unlocking.
+        bytes32 crosschainRootTxId = calcRootTxId(
+            _events[0].blockchainId,
+            rootEventCrossBlockchainTxId
+        );
+
+        // Check that all of the Segment Events are for the same transaction id, and are for this blockchain.
+        for (uint256 i = 1; i < _events.length; i++) {
+            // Recall Segment event is defined as:
+            // event Segment(uint256 _crossBlockchainTransactionId, bytes32 _hashOfCallGraph, uint256[] _callPath,
+            //        address[] _lockedContracts, bool _success, bytes _returnValue);
+            uint256 segmentEventCrossBlockchainTxId;
+            address[] memory lockedContracts;
+            (segmentEventCrossBlockchainTxId, , , lockedContracts, , ) = abi
+                .decode(
+                    _events[i].eventData,
+                    (uint256, bytes32, uint256[], address[], bool, bytes)
+                );
+
+            // Check that the cross blockchain transaction id is the same for the root and the segment event.
+            require(
+                rootEventCrossBlockchainTxId == segmentEventCrossBlockchainTxId
+            );
+            // TODO check the Root Blockchain id indicated in the segment matches the one from the root transaction.
+
+            // TODO Check that the cross chain transaction id for the root blockchain id is in use on this blockchain but has not been added to the completed list.
+
+            // For each address indicated in the Segment Event as being locked, Commit or Ignore updates
+            // according to what the Root Event says.
+            for (uint256 j = 0; j < lockedContracts.length; j++) {
+                LockableStorageInterface lockedContract = LockableStorageInterface(
+                        lockedContracts[j]
+                    );
+                lockedContract.finalise(success, crosschainRootTxId);
+            }
+        }
+
+        emit Signalling(_events[0].blockchainId, rootEventCrossBlockchainTxId);
+    }
 
     function crossBlockchainCall(
         uint256 _blockchainId,
