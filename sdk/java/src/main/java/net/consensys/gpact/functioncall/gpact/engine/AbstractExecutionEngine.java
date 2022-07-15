@@ -21,8 +21,8 @@ import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.functioncall.CallExecutionTree;
 import net.consensys.gpact.functioncall.CrosschainCallResult;
 import net.consensys.gpact.functioncall.common.CrosschainCallResultImpl;
-import net.consensys.gpact.functioncall.gpact.GpactCrossControlManager;
 import net.consensys.gpact.functioncall.gpact.GpactCrosschainExecutor;
+import net.consensys.gpact.functioncall.gpact.v1.GpactV1CrossControlManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -38,7 +38,7 @@ public abstract class AbstractExecutionEngine implements ExecutionEngine {
   public CrosschainCallResult execute(CallExecutionTree callGraph, long timeout) throws Exception {
     LOG.info("Start: Begin");
     BigInteger crossBlockchainTransactionId =
-        GpactCrossControlManager.generateRandomCrossBlockchainTransactionId();
+        GpactV1CrossControlManager.generateRandomCrossBlockchainTransactionId();
     BigInteger timeoutBig = BigInteger.valueOf(timeout);
     BlockchainId rootBlockchainId = callRootBlockchainId(callGraph);
     this.executor.init(

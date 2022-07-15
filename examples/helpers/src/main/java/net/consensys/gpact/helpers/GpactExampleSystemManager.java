@@ -35,11 +35,11 @@ public class GpactExampleSystemManager extends BaseExampleSystemManager {
   }
 
   protected CrossControlManagerGroup getFunctionCallInstance() throws Exception {
-    return CrosschainProtocols.getFunctionCallInstance(CrosschainProtocols.GPACT).get();
+    return CrosschainProtocols.getFunctionCallInstance(CrosschainProtocols.GPACT_V1).get();
   }
 
   protected String getFunctionCallImplName() throws Exception {
-    return CrosschainProtocols.GPACT;
+    return CrosschainProtocols.GPACT_V1;
   }
 
   public String getExecutionEngine() {

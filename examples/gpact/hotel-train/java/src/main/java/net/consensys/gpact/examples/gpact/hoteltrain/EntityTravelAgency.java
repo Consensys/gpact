@@ -95,7 +95,7 @@ public class EntityTravelAgency extends AbstractBlockchain {
       MessagingVerificationInterface msgVerTrain)
       throws Exception {
     this.crossControlManagerGroup =
-        CrosschainProtocols.getFunctionCallInstance(CrosschainProtocols.GPACT).get();
+        CrosschainProtocols.getFunctionCallInstance(CrosschainProtocols.GPACT_V1).get();
     this.crossControlManagerGroup.addBlockchainAndLoadCbcContract(
         this.credentials, bcInfoTravel, cbcContractAddressOnBcTravel);
     this.crossControlManagerGroup.setMessageVerifier(bcInfoTravel.bcId, msgVerTravel);
