@@ -28,7 +28,7 @@ import net.consensys.gpact.messaging.txrootrelay.TxRootTransferManagerGroup;
 
 /** Entry point class for the Crosschian Protocol Stack SDK. */
 public class CrosschainProtocols {
-  public static final String GPACT_V1 = "GPACT_V1";
+  public static final String GPACT_V1 = "GPACT";
   public static final String SFC = "SFC";
 
   public static final String EVENTRELAY = "EVENTRELAY";
