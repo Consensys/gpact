@@ -18,7 +18,6 @@ import static net.consensys.gpact.common.FormatConversion.addressStringToBytes;
 import static net.consensys.gpact.common.crypto.Hash.keccak256;
 
 import java.nio.ByteBuffer;
-import net.consensys.gpact.common.FormatConversion;
 import net.consensys.gpact.functioncall.CallExecutionTree;
 import org.apache.tuweni.bytes.Bytes;
 
@@ -51,7 +50,7 @@ public class CallExecutionTreeEncoderBase {
     byte[] address = addressStringToBytes(callTree.getContractAddress());
     buf.put(blockchainIdBytes);
     buf.put(address);
-    byte[] data = FormatConversion.hexStringToByteArray(callTree.getFunctionCallData());
+    byte[] data = callTree.getFunctionCallDataAsBytes();
     buf.putShort((short) data.length);
     buf.put(data);
     buf.flip();

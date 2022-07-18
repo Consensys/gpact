@@ -40,17 +40,29 @@ public abstract class AbstractGpactCrossControlManager extends AbstractBlockchai
       LOG.debug(" None");
     }
     for (BadCallEventResponse badCallEventResponse : badCallEventRespons) {
+      boolean isV1 = badCallEventResponse.ver == GpactCrossControlManagerGroup.GpactVersion.V1;
+
       LOG.debug(" Event:");
-      LOG.debug(
-          "   Expected Blockchain Id: 0x{}",
-          badCallEventResponse._expectedBlockchainId.toString(16));
+      if (isV1) {
+        LOG.debug(
+            "   Expected Function Call Hash: {}",
+            new BigInteger(1, badCallEventResponse._expectedFunctionCallHash).toString(16));
+      } else {
+        LOG.debug(
+            "   Expected Blockchain Id: 0x{}",
+            badCallEventResponse._expectedBlockchainId.toString(16));
+      }
       LOG.debug(
           "   Actual Blockchain Id: 0x{}", badCallEventResponse._actualBlockchainId.toString(16));
-      LOG.debug("   Expected Contract: {}", badCallEventResponse._expectedContract);
+      if (isV1) {
+        LOG.debug("   Expected Contract: {}", badCallEventResponse._expectedContract);
+      }
       LOG.debug("   Actual Contract: {}", badCallEventResponse._actualContract);
-      LOG.debug(
-          "   Expected Function Call: {}",
-          new BigInteger(1, badCallEventResponse._expectedFunctionCall).toString(16));
+      if (isV1) {
+        LOG.debug(
+            "   Expected Function Call: {}",
+            new BigInteger(1, badCallEventResponse._expectedFunctionCall).toString(16));
+      }
       LOG.debug(
           "   Actual Function Call: {}",
           new BigInteger(1, badCallEventResponse._actualFunctionCall).toString(16));

@@ -14,8 +14,11 @@
  */
 package net.consensys.gpact.functioncall;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.List;
 import net.consensys.gpact.common.BlockchainId;
+import net.consensys.gpact.common.FormatConversion;
 import net.consensys.gpact.functioncall.common.CallExecutionTreeEncoderBase;
 import net.consensys.gpact.functioncall.common.CallExecutionTreeEncoderV1;
 import net.consensys.gpact.functioncall.common.CallExecutionTreeEncoderV2;
@@ -81,6 +84,11 @@ public class CallExecutionTree {
     return functionCallData;
   }
 
+  /** @return ABI encoded function selector and parameter data. */
+  public byte[] getFunctionCallDataAsBytes() {
+    return FormatConversion.hexStringToByteArray(this.functionCallData);
+  }
+
   /** @return In order list of functions called from the function represented by this object. */
   public ArrayList<CallExecutionTree> getCalledFunctions() {
     return calledFunctions;
@@ -98,6 +106,30 @@ public class CallExecutionTree {
 
   public byte[] getFunctionHash() {
     return CallExecutionTreeEncoderBase.encodeFunctionCallAndHash(this);
+  }
+
+  /**
+   * Locate the CallExecutionTree object that matches the call path.
+   *
+   * @param callPath Call path of object to fetch.
+   * @return CallExecutionTree object of call path.
+   */
+  public CallExecutionTree fetchFunctionCall(final List<BigInteger> callPath) {
+    List<BigInteger> realCallPath = new ArrayList<>(callPath);
+
+    // If the call path ends in zero, remove the last element. For instance, [3, 4, 0] becomes [3,
+    // 4].
+    int lastElement = realCallPath.size() - 1;
+    if (realCallPath.get(lastElement).compareTo(BigInteger.ZERO) == 0) {
+      realCallPath.remove(lastElement);
+    }
+
+    CallExecutionTree found = this;
+    for (BigInteger callPathElement : realCallPath) {
+      int callPathOffet = callPathElement.intValue() - 1;
+      found = found.calledFunctions.get(callPathOffet);
+    }
+    return found;
   }
 
   /**

@@ -18,6 +18,7 @@ import java.math.BigInteger;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import net.consensys.gpact.common.*;
+import net.consensys.gpact.functioncall.CallExecutionTree;
 import net.consensys.gpact.functioncall.CrossControlManager;
 import net.consensys.gpact.messaging.SignedEvent;
 import org.web3j.protocol.core.methods.response.BaseEventResponse;
@@ -34,10 +35,14 @@ public interface GpactCrossControlManager extends CrossControlManager {
       throws Exception;
 
   Tuple<TransactionReceipt, byte[], Boolean> start(
-      BigInteger transactionId, BigInteger timeout, byte[] callGraph) throws Exception;
+      final BigInteger transactionId,
+      final BigInteger timeout,
+      final CallExecutionTree callExecutionTree)
+      throws Exception;
 
   Tuple<TransactionReceipt, byte[], Boolean> segment(
-      SignedEvent startEvent, SignedEvent segEvents[], List<BigInteger> callPath) throws Exception;
+      final SignedEvent startEvent, final SignedEvent[] segEvents, final List<BigInteger> callPath)
+      throws Exception;
 
   Tuple<TransactionReceipt, byte[], Boolean> root(SignedEvent startEvent, SignedEvent[] segEvents)
       throws Exception;
@@ -52,6 +57,8 @@ public interface GpactCrossControlManager extends CrossControlManager {
   boolean getRootEventSuccess();
 
   class BadCallEventResponse extends BaseEventResponse {
+    public GpactCrossControlManagerGroup.GpactVersion ver;
+    public byte[] _expectedFunctionCallHash;
     public BigInteger _expectedBlockchainId;
     public BigInteger _actualBlockchainId;
     public String _expectedContract;
@@ -66,11 +73,24 @@ public interface GpactCrossControlManager extends CrossControlManager {
         String _actualContract,
         byte[] _expectedFunctionCall,
         byte[] _actualFunctionCall) {
+      this.ver = GpactCrossControlManagerGroup.GpactVersion.V1;
       this._expectedBlockchainId = _expectedBlockchainId;
       this._actualBlockchainId = _actualBlockchainId;
       this._expectedContract = _expectedContract;
       this._actualContract = _actualContract;
       this._expectedFunctionCall = _expectedFunctionCall;
+      this._actualFunctionCall = _actualFunctionCall;
+    }
+
+    public BadCallEventResponse(
+        byte[] expectedFunctionCallHash,
+        BigInteger _actualBlockchainId,
+        String _actualContract,
+        byte[] _actualFunctionCall) {
+      this.ver = GpactCrossControlManagerGroup.GpactVersion.V2;
+      this._expectedFunctionCallHash = expectedFunctionCallHash;
+      this._actualBlockchainId = _actualBlockchainId;
+      this._actualContract = _actualContract;
       this._actualFunctionCall = _actualFunctionCall;
     }
   }

@@ -28,6 +28,7 @@ import java.util.concurrent.ExecutionException;
 import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.common.RevertReason;
 import net.consensys.gpact.common.Tuple;
+import net.consensys.gpact.functioncall.CallExecutionTree;
 import net.consensys.gpact.functioncall.gpact.v1.GpactV1CrossControlManager;
 import net.consensys.gpact.messaging.MessagingVerificationInterface;
 import net.consensys.gpact.messaging.SignedEvent;
@@ -59,7 +60,7 @@ public class GpactCrosschainExecutor {
 
   GpactCrossControlManagerGroup crossControlManagerGroup;
 
-  protected byte[] callGraph;
+  protected CallExecutionTree callExecutionTree;
 
   protected BigInteger timeout;
   protected BigInteger crossBlockchainTransactionId;
@@ -72,8 +73,11 @@ public class GpactCrosschainExecutor {
   }
 
   public void init(
-      byte[] callGraph, BigInteger timeout, BigInteger transactionId, BlockchainId rootBcId) {
-    this.callGraph = callGraph;
+      final CallExecutionTree callExecutionTree,
+      BigInteger timeout,
+      BigInteger transactionId,
+      BlockchainId rootBcId) {
+    this.callExecutionTree = callExecutionTree;
     this.timeout = timeout;
     this.crossBlockchainTransactionId = transactionId;
     this.rootBcId = rootBcId;
@@ -86,7 +90,8 @@ public class GpactCrosschainExecutor {
         this.crossControlManagerGroup.getMessageVerification(this.rootBcId);
 
     Tuple<TransactionReceipt, byte[], Boolean> result =
-        rootCbcContract.start(this.crossBlockchainTransactionId, this.timeout, this.callGraph);
+        rootCbcContract.start(
+            this.crossBlockchainTransactionId, this.timeout, this.callExecutionTree);
     TransactionReceipt txr = result.getFirst();
     byte[] startEventData = result.getSecond();
 

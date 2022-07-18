@@ -312,7 +312,7 @@ contract GpactV2CrosschainControl is
      * @ param _targetContract The contract to be called. A combination of this blockchain, the tartget contract and the target function call data must match the function call hash in the call tree at the call path.
      * @ param _targetFunctionCallData The call data to be called. A combination of this blockchain, the tartget contract and the target function call data must match the function call hash in the call tree at the call path.
      */
-    function segment(
+    function root(
         // TODO historically, Web3J didn't support arrays of structs in the Java code generator.
         EventInfo[] calldata _events,
         bytes calldata _callExecutionTree,

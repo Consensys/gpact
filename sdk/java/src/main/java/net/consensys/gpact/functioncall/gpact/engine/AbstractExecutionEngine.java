@@ -18,16 +18,18 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import net.consensys.gpact.common.BlockchainId;
+import net.consensys.gpact.common.crypto.RandomNumbers;
 import net.consensys.gpact.functioncall.CallExecutionTree;
 import net.consensys.gpact.functioncall.CrosschainCallResult;
 import net.consensys.gpact.functioncall.common.CrosschainCallResultImpl;
 import net.consensys.gpact.functioncall.gpact.GpactCrosschainExecutor;
-import net.consensys.gpact.functioncall.gpact.v1.GpactV1CrossControlManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public abstract class AbstractExecutionEngine implements ExecutionEngine {
   static final Logger LOG = LogManager.getLogger(AbstractExecutionEngine.class);
+
+  private static final int LENGTH_OF_TX_ID_BYTES = 32;
 
   GpactCrosschainExecutor executor;
 
@@ -35,20 +37,24 @@ public abstract class AbstractExecutionEngine implements ExecutionEngine {
     this.executor = executor;
   }
 
-  public CrosschainCallResult execute(CallExecutionTree callGraph, long timeout) throws Exception {
+  public CrosschainCallResult execute(final CallExecutionTree callExecutionTree, final long timeout)
+      throws Exception {
     LOG.info("Start: Begin");
     BigInteger crossBlockchainTransactionId =
-        GpactV1CrossControlManager.generateRandomCrossBlockchainTransactionId();
+        new BigInteger(1, RandomNumbers.generatePublicRandomBytes(LENGTH_OF_TX_ID_BYTES));
     BigInteger timeoutBig = BigInteger.valueOf(timeout);
-    BlockchainId rootBlockchainId = callRootBlockchainId(callGraph);
+    BlockchainId rootBlockchainId = callRootBlockchainId(callExecutionTree);
     this.executor.init(
-        callGraph.encode(), timeoutBig, crossBlockchainTransactionId, rootBlockchainId);
+        callExecutionTree, timeoutBig, crossBlockchainTransactionId, rootBlockchainId);
     this.executor.startCall();
     LOG.info("Start: End");
 
     LOG.info("Segments and Root: Begin");
     callSegmentsAndRoot(
-        callGraph, new ArrayList<>(), rootBlockchainId, callGraph.getNumCalledFunctions());
+        callExecutionTree,
+        new ArrayList<>(),
+        rootBlockchainId,
+        callExecutionTree.getNumCalledFunctions());
     LOG.info("Segments and Root: End");
 
     LOG.info("Signalling: Begin");
@@ -56,7 +62,9 @@ public abstract class AbstractExecutionEngine implements ExecutionEngine {
     LOG.info("Signalling: End");
 
     return new CrosschainCallResultImpl(
-        callGraph, this.executor.getRootEventSuccess(), this.executor.getTransationReceipts());
+        callExecutionTree,
+        this.executor.getRootEventSuccess(),
+        this.executor.getTransationReceipts());
   }
 
   protected void callSegmentsAndRoot(
