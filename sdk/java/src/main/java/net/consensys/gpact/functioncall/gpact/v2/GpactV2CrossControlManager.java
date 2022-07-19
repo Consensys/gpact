@@ -90,13 +90,31 @@ public class GpactV2CrossControlManager extends AbstractGpactCrossControlManager
         this.crossBlockchainControlContract
             .addRemoteCrosschainControl(bcId.asBigInt(), cbcContractAddress)
             .send();
-    assert (txr.isStatusOK());
+    if (!txr.isStatusOK()) {
+      String revertReason = RevertReason.decodeRevertReason(txr.getRevertReason());
+      LOG.warn(
+          "GPACTv2 CrosschainControl addRemoteCrosschainControl failed. My Bc: {}, Bc: {}, Cbc Address: {}, Revert Reason: {}",
+          this.blockchainId.toDecimalString(),
+          bcId.toDecimalString(),
+          cbcContractAddress,
+          revertReason);
+      throw new Exception("GPACTv2 CrosschainControl addVerify failed");
+    }
 
     txr =
         this.crossBlockchainControlContract
             .addVerifier(bcId.asBigInt(), verifierContractAddress)
             .send();
-    assert (txr.isStatusOK());
+    if (!txr.isStatusOK()) {
+      String revertReason = RevertReason.decodeRevertReason(txr.getRevertReason());
+      LOG.warn(
+          "GPACTv2 CrosschainControl addVerify failed. My Bc: {}, Bc: {}, Verifier Address: {}, Revert Reason: {}",
+          this.blockchainId.toDecimalString(),
+          bcId.toDecimalString(),
+          verifierContractAddress,
+          revertReason);
+      throw new Exception("GPACTv2 CrosschainControl addVerify failed");
+    }
   }
 
   public Tuple<TransactionReceipt, byte[], Boolean> start(
@@ -121,7 +139,7 @@ public class GpactV2CrossControlManager extends AbstractGpactCrossControlManager
     this.crossBlockchainTransactionTimeout = startEvent._timeout.longValue();
     // LOG.debug("Start Event: {}", new BigInteger(getEventData(txR,
     // AbstractCbc.START_EVENT_SIGNATURE_BYTES)).toString(16));
-    return new Tuple<TransactionReceipt, byte[], Boolean>(
+    return new Tuple<>(
         txR, getEventData(txR, GpactV2CrossControlManager.START_EVENT_SIGNATURE_BYTES), false);
   }
 
@@ -194,7 +212,7 @@ public class GpactV2CrossControlManager extends AbstractGpactCrossControlManager
     net.consensys.gpact.functioncall.gpact.GpactV2CrosschainControl.SegmentEventResponse
         segmentEventResponse = segmentEventResponses.get(0);
 
-    return new Tuple<TransactionReceipt, byte[], Boolean>(
+    return new Tuple<>(
         txR,
         getEventData(txR, GpactV2CrossControlManager.SEGMENT_EVENT_SIGNATURE_BYTES),
         segmentEventResponse._lockedContracts.isEmpty());
@@ -271,12 +289,12 @@ public class GpactV2CrossControlManager extends AbstractGpactCrossControlManager
         rootEventResponse = rootEventResponses.get(0);
     this.rootEventSuccess = rootEventResponse._success;
 
-    return new Tuple<TransactionReceipt, byte[], Boolean>(
+    return new Tuple<>(
         txR, getEventData(txR, ROOT_EVENT_SIGNAUTRE_BYTES), false);
   }
 
   public CompletableFuture<TransactionReceipt> signallingAsyncPart1(
-      SignedEvent rootEvent, List<SignedEvent> segEvents) throws Exception {
+      SignedEvent rootEvent, List<SignedEvent> segEvents) {
     List<GpactV2CrosschainControl.EventInfo> events = new ArrayList<>();
     events.add(
         new GpactV2CrosschainControl.EventInfo(
