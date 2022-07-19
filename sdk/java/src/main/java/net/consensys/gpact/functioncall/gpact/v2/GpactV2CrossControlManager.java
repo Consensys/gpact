@@ -289,8 +289,7 @@ public class GpactV2CrossControlManager extends AbstractGpactCrossControlManager
         rootEventResponse = rootEventResponses.get(0);
     this.rootEventSuccess = rootEventResponse._success;
 
-    return new Tuple<>(
-        txR, getEventData(txR, ROOT_EVENT_SIGNAUTRE_BYTES), false);
+    return new Tuple<>(txR, getEventData(txR, ROOT_EVENT_SIGNAUTRE_BYTES), false);
   }
 
   public CompletableFuture<TransactionReceipt> signallingAsyncPart1(
