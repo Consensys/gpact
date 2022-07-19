@@ -45,12 +45,12 @@ public abstract class AbstractGpactCrossControlManager extends AbstractBlockchai
       LOG.debug(" Event:");
       if (isV1) {
         LOG.debug(
-            "   Expected Function Call Hash: {}",
-            new BigInteger(1, badCallEventResponse._expectedFunctionCallHash).toString(16));
-      } else {
-        LOG.debug(
             "   Expected Blockchain Id: 0x{}",
             badCallEventResponse._expectedBlockchainId.toString(16));
+      } else {
+        LOG.debug(
+            "   Expected Function Call Hash: {}",
+            new BigInteger(1, badCallEventResponse._expectedFunctionCallHash).toString(16));
       }
       LOG.debug(
           "   Actual Blockchain Id: 0x{}", badCallEventResponse._actualBlockchainId.toString(16));
