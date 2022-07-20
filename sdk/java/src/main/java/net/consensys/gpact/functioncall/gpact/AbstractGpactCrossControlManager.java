@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.List;
 import net.consensys.gpact.common.*;
+import net.consensys.gpact.common.crypto.Hash;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tuweni.bytes.Bytes;
@@ -28,6 +29,15 @@ import org.web3j.protocol.core.methods.response.TransactionReceipt;
 public abstract class AbstractGpactCrossControlManager extends AbstractBlockchain
     implements GpactCrossControlManager {
   private static final Logger LOG = LogManager.getLogger(AbstractGpactCrossControlManager.class);
+
+  private static final byte[] SEGMENT_EVENT_SIGNATURE =
+      Hash.keccak256(
+              Bytes.wrap("Segment(uint256,bytes32,uint256[],address[],bool,bytes)".getBytes()))
+          .toArray();
+  protected static final Bytes SEGMENT_EVENT_SIGNATURE_BYTES = Bytes.wrap(SEGMENT_EVENT_SIGNATURE);
+  private static final byte[] ROOT_EVENT_SIGNATURE =
+      Hash.keccak256(Bytes.wrap("Root(uint256,bool)".getBytes())).toArray();
+  protected static final Bytes ROOT_EVENT_SIGNAUTRE_BYTES = Bytes.wrap(ROOT_EVENT_SIGNATURE);
 
   protected AbstractGpactCrossControlManager(
       final Credentials credentials, final BlockchainConfig bcConfig) throws IOException {
@@ -197,5 +207,13 @@ public abstract class AbstractGpactCrossControlManager extends AbstractBlockchai
       return eventDataBytes.toArray();
     }
     throw new Exception("Event not found in transaction receipt");
+  }
+
+  public byte[] getSegmentEventSignature() {
+    return SEGMENT_EVENT_SIGNATURE;
+  }
+
+  public byte[] getRootEventSignature() {
+    return ROOT_EVENT_SIGNATURE;
   }
 }

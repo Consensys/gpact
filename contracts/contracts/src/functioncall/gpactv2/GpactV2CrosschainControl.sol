@@ -223,12 +223,18 @@ contract GpactV2CrosschainControl is
                 _callPath
             );
             bytes32 calcTargetHash = keccak256(
-                abi.encode(
+                abi.encodePacked(
                     myBlockchainId,
                     _targetContract,
                     _targetFunctionCallData
                 )
             );
+            bytes memory val = abi.encodePacked(
+                myBlockchainId,
+                _targetContract,
+                _targetFunctionCallData
+            );
+
             require(
                 expectedTargetHash == calcTargetHash,
                 "Function call does not match call execution tree"
@@ -394,7 +400,7 @@ contract GpactV2CrosschainControl is
                 callPathForRoot
             );
             bytes32 calcTargetHash = keccak256(
-                abi.encode(
+                abi.encodePacked(
                     myBlockchainId,
                     _targetContract,
                     _targetFunctionCallData

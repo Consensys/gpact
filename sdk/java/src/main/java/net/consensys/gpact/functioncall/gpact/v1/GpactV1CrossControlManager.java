@@ -33,28 +33,27 @@ import org.web3j.crypto.Credentials;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.exceptions.TransactionException;
 
+/**
+ * Deploy and load the Crosschain Control Contract plus call functions in the contract.
+ *
+ * <p>NOTE: Beyond state required to call the contract, this class should not hold any state.
+ */
 public class GpactV1CrossControlManager extends AbstractGpactCrossControlManager {
   private static final Logger LOG = LogManager.getLogger(GpactV1CrossControlManager.class);
 
-  public static byte[] START_EVENT_SIGNATURE =
+  private static final byte[] START_EVENT_SIGNATURE =
       Hash.keccak256(Bytes.wrap("Start(uint256,address,uint256,bytes)".getBytes())).toArray();
-  public static Bytes START_EVENT_SIGNATURE_BYTES = Bytes.wrap(START_EVENT_SIGNATURE);
-  public static byte[] SEGMENT_EVENT_SIGNATURE =
-      Hash.keccak256(
-              Bytes.wrap("Segment(uint256,bytes32,uint256[],address[],bool,bytes)".getBytes()))
-          .toArray();
-  public static Bytes SEGMENT_EVENT_SIGNATURE_BYTES = Bytes.wrap(SEGMENT_EVENT_SIGNATURE);
-  public static byte[] ROOT_EVENT_SIGNATURE =
-      Hash.keccak256(Bytes.wrap("Root(uint256,bool)".getBytes())).toArray();
-  public static Bytes ROOT_EVENT_SIGNAUTRE_BYTES = Bytes.wrap(ROOT_EVENT_SIGNATURE);
+  private static final Bytes START_EVENT_SIGNATURE_BYTES = Bytes.wrap(START_EVENT_SIGNATURE);
 
   protected net.consensys.gpact.functioncall.gpact.GpactCrosschainControl
       crossBlockchainControlContract;
 
-  // TODO put this into a map for the current transaction id, so many transactions can be handled in
-  // parallel
+  // TODO the executor should hold this and pass it in to the root call.
   // The time-out for the current transaction.
   private long crossBlockchainTransactionTimeout;
+
+  // TODO: refactor this such that it is returned by the root call. The executor should hold this
+  // value.
   private boolean rootEventSuccess;
 
   public GpactV1CrossControlManager(final Credentials credentials, final BlockchainConfig bcConfig)
@@ -113,9 +112,9 @@ public class GpactV1CrossControlManager extends AbstractGpactCrossControlManager
   }
 
   public Tuple<TransactionReceipt, byte[], Boolean> start(
+      final CallExecutionTree callExecutionTree,
       final BigInteger transactionId,
-      final BigInteger timeout,
-      final CallExecutionTree callExecutionTree)
+      final BigInteger timeout)
       throws Exception {
     LOG.debug("Start Transaction on blockchain {}", this.blockchainId);
     StatsHolder.log("Start call now");
@@ -136,7 +135,10 @@ public class GpactV1CrossControlManager extends AbstractGpactCrossControlManager
   }
 
   public Tuple<TransactionReceipt, byte[], Boolean> segment(
-      final SignedEvent startEvent, final SignedEvent[] segEvents, final List<BigInteger> callPath)
+      final CallExecutionTree notUsedCallExecutionTree,
+      final SignedEvent startEvent,
+      final SignedEvent[] segEvents,
+      final List<BigInteger> callPath)
       throws Exception {
     List<BigInteger> bcIds = new ArrayList<>();
     List<String> cbcAddresses = new ArrayList<>();
@@ -209,7 +211,10 @@ public class GpactV1CrossControlManager extends AbstractGpactCrossControlManager
   }
 
   public Tuple<TransactionReceipt, byte[], Boolean> root(
-      SignedEvent startEvent, SignedEvent[] segEvents) throws Exception {
+      final CallExecutionTree notUsedCallExecutionTree,
+      final SignedEvent startEvent,
+      final SignedEvent[] segEvents)
+      throws Exception {
     List<BigInteger> bcIds = new ArrayList<>();
     List<String> cbcAddresses = new ArrayList<>();
     List<byte[]> eventFunctionSignatures = new ArrayList<>();
@@ -449,5 +454,9 @@ public class GpactV1CrossControlManager extends AbstractGpactCrossControlManager
       result.add(event);
     }
     return result;
+  }
+
+  public byte[] getStartEventSignature() {
+    return START_EVENT_SIGNATURE;
   }
 }

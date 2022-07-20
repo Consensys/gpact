@@ -38,7 +38,7 @@ public abstract class GpactCrossControlManagerGroup implements CrossControlManag
 
   private final Map<BlockchainId, BcHolder> blockchains = new HashMap<>();
 
-  protected enum GpactVersion {
+  public enum GpactVersion {
     V1,
     V2
   }

@@ -29,7 +29,6 @@ import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.common.RevertReason;
 import net.consensys.gpact.common.Tuple;
 import net.consensys.gpact.functioncall.CallExecutionTree;
-import net.consensys.gpact.functioncall.gpact.v1.GpactV1CrossControlManager;
 import net.consensys.gpact.messaging.MessagingVerificationInterface;
 import net.consensys.gpact.messaging.SignedEvent;
 import org.apache.logging.log4j.LogManager;
@@ -84,14 +83,14 @@ public class GpactCrosschainExecutor {
   }
 
   public void startCall() throws Exception {
-    GpactV1CrossControlManager rootCbcContract =
-        (GpactV1CrossControlManager) this.crossControlManagerGroup.getCbcManager(this.rootBcId);
+    GpactCrossControlManager rootCbcContract =
+        (GpactCrossControlManager) this.crossControlManagerGroup.getCbcManager(this.rootBcId);
     MessagingVerificationInterface messaging =
         this.crossControlManagerGroup.getMessageVerification(this.rootBcId);
 
     Tuple<TransactionReceipt, byte[], Boolean> result =
         rootCbcContract.start(
-            this.crossBlockchainTransactionId, this.timeout, this.callExecutionTree);
+            this.callExecutionTree, this.crossBlockchainTransactionId, this.timeout);
     TransactionReceipt txr = result.getFirst();
     byte[] startEventData = result.getSecond();
 
@@ -101,7 +100,7 @@ public class GpactCrosschainExecutor {
             txr,
             startEventData,
             rootCbcContract.getCbcContractAddress(),
-            GpactV1CrossControlManager.START_EVENT_SIGNATURE);
+            rootCbcContract.getStartEventSignature());
     if (this.signedStartEvent == null) {
       throw new RuntimeException(
           "Messaging layer not configured to return proofs to function call layer");
@@ -124,15 +123,16 @@ public class GpactCrosschainExecutor {
       callPathIndex = (callPath.get(callPath.size() - 2)).intValue();
     }
 
-    GpactV1CrossControlManager segmentCbcContract =
-        (GpactV1CrossControlManager) this.crossControlManagerGroup.getCbcManager(blockchainId);
+    GpactCrossControlManager segmentCbcContract =
+        (GpactCrossControlManager) this.crossControlManagerGroup.getCbcManager(blockchainId);
     MessagingVerificationInterface messaging =
         this.crossControlManagerGroup.getMessageVerification(blockchainId);
 
     SignedEvent signedEvents[] =
         this.signedSegmentEvents.computeIfAbsent(mapKey, k -> new SignedEvent[] {});
     Tuple<TransactionReceipt, byte[], Boolean> result =
-        segmentCbcContract.segment(this.signedStartEvent, signedEvents, callPath);
+        segmentCbcContract.segment(
+            this.callExecutionTree, this.signedStartEvent, signedEvents, callPath);
     TransactionReceipt txr = result.getFirst();
     byte[] segEventData = result.getSecond();
     boolean noLockedContracts = result.getThird();
@@ -143,7 +143,7 @@ public class GpactCrosschainExecutor {
             txr,
             segEventData,
             segmentCbcContract.getCbcContractAddress(),
-            GpactV1CrossControlManager.SEGMENT_EVENT_SIGNATURE);
+            segmentCbcContract.getSegmentEventSignature());
     this.transactionReceipts.put(mapKey, txr);
     if (signedSegEvent == null) {
       throw new RuntimeException(
@@ -169,13 +169,13 @@ public class GpactCrosschainExecutor {
   }
 
   public void root() throws Exception {
-    GpactV1CrossControlManager rootCbcContract =
-        (GpactV1CrossControlManager) this.crossControlManagerGroup.getCbcManager(this.rootBcId);
+    GpactCrossControlManager rootCbcContract =
+        (GpactCrossControlManager) this.crossControlManagerGroup.getCbcManager(this.rootBcId);
     MessagingVerificationInterface messaging =
         this.crossControlManagerGroup.getMessageVerification(this.rootBcId);
     SignedEvent[] signedSegEvents = this.signedSegmentEvents.get(ROOT_CALL_MAP_KEY);
     Tuple<TransactionReceipt, byte[], Boolean> result =
-        rootCbcContract.root(this.signedStartEvent, signedSegEvents);
+        rootCbcContract.root(this.callExecutionTree, this.signedStartEvent, signedSegEvents);
     TransactionReceipt txr = result.getFirst();
     byte[] rootEventData = result.getSecond();
     this.signedRootEvent =
@@ -184,7 +184,7 @@ public class GpactCrosschainExecutor {
             txr,
             rootEventData,
             rootCbcContract.getCbcContractAddress(),
-            GpactV1CrossControlManager.ROOT_EVENT_SIGNATURE);
+            rootCbcContract.getRootEventSignature());
     if (this.signedRootEvent == null) {
       throw new RuntimeException(
           "Messaging layer not configured to return proofs to function call layer");
@@ -211,8 +211,8 @@ public class GpactCrosschainExecutor {
     for (BlockchainId blockchainId : this.signedSegmentEventsWithLockedContracts.keySet()) {
       List<SignedEvent> signedSegEventsLockedContractsCurrentBlockchain =
           this.signedSegmentEventsWithLockedContracts.get(blockchainId);
-      GpactV1CrossControlManager cbcContract =
-          (GpactV1CrossControlManager) this.crossControlManagerGroup.getCbcManager(blockchainId);
+      GpactCrossControlManager cbcContract =
+          (GpactCrossControlManager) this.crossControlManagerGroup.getCbcManager(blockchainId);
       transactionReceiptCompletableFutures[i++] =
           cbcContract.signallingAsyncPart1(
               this.signedRootEvent, signedSegEventsLockedContractsCurrentBlockchain);
@@ -237,8 +237,8 @@ public class GpactCrosschainExecutor {
     for (BlockchainId blockchainId : this.signedSegmentEventsWithLockedContracts.keySet()) {
       TransactionReceipt receipt =
           (TransactionReceipt) transactionReceiptCompletableFutures[i++].get();
-      GpactV1CrossControlManager cbcContract =
-          (GpactV1CrossControlManager) this.crossControlManagerGroup.getCbcManager(blockchainId);
+      GpactCrossControlManager cbcContract =
+          (GpactCrossControlManager) this.crossControlManagerGroup.getCbcManager(blockchainId);
       cbcContract.signallingAsyncPart2(receipt);
     }
   }

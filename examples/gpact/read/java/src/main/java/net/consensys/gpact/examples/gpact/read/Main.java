@@ -23,13 +23,14 @@ import net.consensys.gpact.functioncall.CallExecutionTree;
 import net.consensys.gpact.functioncall.CrossControlManagerGroup;
 import net.consensys.gpact.functioncall.CrosschainCallResult;
 import net.consensys.gpact.helpers.CredentialsCreator;
+import net.consensys.gpact.helpers.GpactExampleBase;
 import net.consensys.gpact.helpers.GpactExampleSystemManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
-public class Main {
+public class Main extends GpactExampleBase {
   static final Logger LOG = LogManager.getLogger(Main.class);
 
   // Running multiple times will reveal any gas difference due to rerunning.
@@ -39,12 +40,7 @@ public class Main {
     StatsHolder.log("Example: Read");
     LOG.info("Started");
 
-    if (args.length != 1) {
-      LOG.info("Usage: [properties file name]");
-      return;
-    }
-
-    GpactExampleSystemManager exampleManager = new GpactExampleSystemManager(args[0]);
+    GpactExampleSystemManager exampleManager = getExampleSystemManager(args);
     exampleManager.standardExampleConfig(2);
 
     BlockchainConfig root = exampleManager.getRootBcInfo();

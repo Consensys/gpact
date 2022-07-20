@@ -14,6 +14,8 @@
  */
 package net.consensys.gpact.functioncall.common;
 
+import static net.consensys.gpact.common.FormatConversion.addressStringToBytes;
+
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -77,6 +79,21 @@ public class CallExecutionTreeEncoderV1 extends CallExecutionTreeEncoderBase {
       }
     }
 
+    buf.flip();
+    byte[] output = new byte[buf.limit()];
+    buf.get(output);
+    return output;
+  }
+
+  private static byte[] encodeFunctionCall(final CallExecutionTree callTree) {
+    ByteBuffer buf = ByteBuffer.allocate(MAX_CALL_EX_TREE_SIZE);
+    byte[] blockchainIdBytes = callTree.getBlockchainId().asBytes();
+    byte[] address = addressStringToBytes(callTree.getContractAddress());
+    buf.put(blockchainIdBytes);
+    buf.put(address);
+    byte[] data = callTree.getFunctionCallDataAsBytes();
+    buf.putShort((short) data.length);
+    buf.put(data);
     buf.flip();
     byte[] output = new byte[buf.limit()];
     buf.get(output);

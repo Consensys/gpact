@@ -22,26 +22,19 @@ import net.consensys.gpact.examples.gpact.conditional.sim.SimRootContract;
 import net.consensys.gpact.functioncall.CallExecutionTree;
 import net.consensys.gpact.functioncall.CrossControlManagerGroup;
 import net.consensys.gpact.functioncall.CrosschainCallResult;
-import net.consensys.gpact.helpers.CredentialsCreator;
-import net.consensys.gpact.helpers.ExecutionEngineType;
-import net.consensys.gpact.helpers.GpactExampleSystemManager;
+import net.consensys.gpact.helpers.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
 
-public class Main {
+public class Main extends GpactExampleBase {
   static final Logger LOG = LogManager.getLogger(Main.class);
 
   public static void main(String[] args) throws Exception {
     StatsHolder.log("Example: Conditional Logic");
     LOG.info("Started");
 
-    if (args.length != 1) {
-      LOG.info("Usage: [properties file name]");
-      return;
-    }
-
-    GpactExampleSystemManager exampleManager = new GpactExampleSystemManager(args[0]);
+    GpactExampleSystemManager exampleManager = getExampleSystemManager(args);
     exampleManager.standardExampleConfig(2);
 
     if (exampleManager.getExecutionEngineType() == ExecutionEngineType.PARALLEL) {

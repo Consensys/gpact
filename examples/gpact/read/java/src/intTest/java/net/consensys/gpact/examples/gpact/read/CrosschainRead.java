@@ -1,5 +1,6 @@
 package net.consensys.gpact.examples.gpact.read;
 
+import net.consensys.gpact.functioncall.gpact.GpactCrossControlManagerGroup;
 import net.consensys.gpact.helpers.AbstractExampleTest;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -10,14 +11,16 @@ public class CrosschainRead extends AbstractExampleTest {
   @Test
   public void directSignSerialSingleBlockchain() throws Exception {
     String tempPropsFile = createPropertiesFile(true, true, true);
-    Main.main(new String[] {tempPropsFile});
+    Main.main(
+        new String[] {GpactCrossControlManagerGroup.GpactVersion.V1.toString(), tempPropsFile});
   }
 
   @Disabled
   @Test
   public void directSignParallelSingleBlockchain() throws Exception {
     String tempPropsFile = createPropertiesFile(true, false, true);
-    Main.main(new String[] {tempPropsFile});
+    Main.main(
+        new String[] {GpactCrossControlManagerGroup.GpactVersion.V1.toString(), tempPropsFile});
   }
 
   @Disabled

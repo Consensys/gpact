@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.common.FormatConversion;
-import net.consensys.gpact.functioncall.common.CallExecutionTreeEncoderBase;
 import net.consensys.gpact.functioncall.common.CallExecutionTreeEncoderV1;
 import net.consensys.gpact.functioncall.common.CallExecutionTreeEncoderV2;
 
@@ -105,7 +104,7 @@ public class CallExecutionTree {
   }
 
   public byte[] getFunctionHash() {
-    return CallExecutionTreeEncoderBase.encodeFunctionCallAndHash(this);
+    return CallExecutionTreeEncoderV2.encodeFunctionCallAndHash(this);
   }
 
   /**

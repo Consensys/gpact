@@ -18,12 +18,13 @@ import java.math.BigInteger;
 import net.consensys.gpact.common.*;
 import net.consensys.gpact.functioncall.CrossControlManagerGroup;
 import net.consensys.gpact.helpers.CredentialsCreator;
+import net.consensys.gpact.helpers.GpactExampleBase;
 import net.consensys.gpact.helpers.GpactExampleSystemManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
 
-public class ERC20TokenBridgeExample {
+public class ERC20TokenBridgeExample extends GpactExampleBase {
   static final Logger LOG = LogManager.getLogger(ERC20TokenBridgeExample.class);
 
   public static final int NUM_TIMES_EXECUTE = 2;
@@ -32,12 +33,7 @@ public class ERC20TokenBridgeExample {
     StatsHolder.log("Example: Token Bridge");
     LOG.info("Started");
 
-    if (args.length != 1) {
-      LOG.info("Usage: [properties file name]");
-      return;
-    }
-
-    GpactExampleSystemManager exampleManager = new GpactExampleSystemManager(args[0]);
+    GpactExampleSystemManager exampleManager = getExampleSystemManager(args);
     exampleManager.standardExampleConfig(2);
 
     BlockchainConfig root = exampleManager.getRootBcInfo();

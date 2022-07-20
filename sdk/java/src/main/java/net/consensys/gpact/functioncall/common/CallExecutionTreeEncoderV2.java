@@ -14,12 +14,16 @@
  */
 package net.consensys.gpact.functioncall.common;
 
+import static net.consensys.gpact.common.FormatConversion.addressStringToBytes;
+import static net.consensys.gpact.common.crypto.Hash.keccak256;
+
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import net.consensys.gpact.common.FormatConversion;
 import net.consensys.gpact.functioncall.CallExecutionTree;
 import net.consensys.gpact.functioncall.CallExecutionTreeException;
+import org.apache.tuweni.bytes.Bytes;
 
 public class CallExecutionTreeEncoderV2 extends CallExecutionTreeEncoderBase {
 
@@ -119,6 +123,26 @@ public class CallExecutionTreeEncoderV2 extends CallExecutionTreeEncoderBase {
     return output;
   }
 
+  // Note: V2 encoding does not put length of data in the encoded function
+  private static byte[] encodeFunctionCall(final CallExecutionTree callTree) {
+    ByteBuffer buf = ByteBuffer.allocate(MAX_CALL_EX_TREE_SIZE);
+    byte[] blockchainIdBytes = callTree.getBlockchainId().asBytes();
+    byte[] address = addressStringToBytes(callTree.getContractAddress());
+    buf.put(blockchainIdBytes);
+    buf.put(address);
+    byte[] data = callTree.getFunctionCallDataAsBytes();
+    buf.put(data);
+    buf.flip();
+    byte[] output = new byte[buf.limit()];
+    buf.get(output);
+    return output;
+  }
+
+  public static byte[] encodeFunctionCallAndHash(final CallExecutionTree callTree) {
+    byte[] encodedFunction = encodeFunctionCall(callTree);
+    return keccak256(Bytes.wrap(encodedFunction)).toArray();
+  }
+
   /**
    * Dump an encoded Call Execution Tree.
    *
@@ -153,9 +177,11 @@ public class CallExecutionTreeEncoderV2 extends CallExecutionTreeEncoderBase {
     int size = 0;
     switch (encodingType) {
       case ENCODING_FORMAT_V2_SINGLE_LAYER:
+        out.append(" Encoding Format: V2 single-layer");
         size = processSingleLayer(out, buf);
         break;
       case ENCODING_FORMAT_V2_MULTI_LAYER:
+        out.append(" Encoding Format: V2 multi-layer");
         size = processRecursive(out, buf, 0) + 1; // the 1 accounts for the size of the type field
         break;
       default:

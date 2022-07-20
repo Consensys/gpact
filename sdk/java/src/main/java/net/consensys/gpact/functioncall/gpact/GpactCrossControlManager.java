@@ -35,16 +35,22 @@ public interface GpactCrossControlManager extends CrossControlManager {
       throws Exception;
 
   Tuple<TransactionReceipt, byte[], Boolean> start(
+      final CallExecutionTree callExecutionTree,
       final BigInteger transactionId,
-      final BigInteger timeout,
-      final CallExecutionTree callExecutionTree)
+      final BigInteger timeout)
       throws Exception;
 
   Tuple<TransactionReceipt, byte[], Boolean> segment(
-      final SignedEvent startEvent, final SignedEvent[] segEvents, final List<BigInteger> callPath)
+      final CallExecutionTree callExecutionTree,
+      final SignedEvent startEvent,
+      final SignedEvent[] segEvents,
+      final List<BigInteger> callPath)
       throws Exception;
 
-  Tuple<TransactionReceipt, byte[], Boolean> root(SignedEvent startEvent, SignedEvent[] segEvents)
+  Tuple<TransactionReceipt, byte[], Boolean> root(
+      final CallExecutionTree callExecutionTree,
+      final SignedEvent startEvent,
+      final SignedEvent[] segEvents)
       throws Exception;
 
   CompletableFuture<TransactionReceipt> signallingAsyncPart1(
@@ -55,6 +61,12 @@ public interface GpactCrossControlManager extends CrossControlManager {
   String getCbcContractAddress();
 
   boolean getRootEventSuccess();
+
+  byte[] getStartEventSignature();
+
+  byte[] getSegmentEventSignature();
+
+  byte[] getRootEventSignature();
 
   class BadCallEventResponse extends BaseEventResponse {
     public GpactCrossControlManagerGroup.GpactVersion ver;
