@@ -30,9 +30,13 @@ import net.consensys.gpact.messaging.fake.FakeSignerGroup;
 import net.consensys.gpact.messaging.txrootrelay.TxRootRelayerGroup;
 import net.consensys.gpact.messaging.txrootrelay.TxRootTransferGroup;
 import net.consensys.gpact.messaging.txrootrelay.TxRootTransferManagerGroup;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
 
 public abstract class BaseExampleSystemManager {
+  static final Logger LOG = LogManager.getLogger(BaseExampleSystemManager.class);
+
   private final String propsFileName;
 
   protected BlockchainConfig root;
@@ -47,6 +51,8 @@ public abstract class BaseExampleSystemManager {
   }
 
   public void standardExampleConfig(int numberOfBlockchains) throws Exception {
+    LOG.info("Function Call Implementation: {}", getFunctionCallImplName());
+
     // Less than two blockchains doesn't make sense for crosschain.
     // The test infrastructure only supports three blockchains at present.
     if (!(numberOfBlockchains == 2 || numberOfBlockchains == 3)) {

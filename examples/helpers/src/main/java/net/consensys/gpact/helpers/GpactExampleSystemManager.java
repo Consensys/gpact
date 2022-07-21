@@ -16,11 +16,10 @@ package net.consensys.gpact.helpers;
 
 import net.consensys.gpact.CrosschainProtocols;
 import net.consensys.gpact.common.StatsHolder;
-import net.consensys.gpact.functioncall.CrossControlManagerGroup;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class GpactExampleSystemManager extends BaseExampleSystemManager {
+public abstract class GpactExampleSystemManager extends BaseExampleSystemManager {
   static final Logger LOG = LogManager.getLogger(GpactExampleSystemManager.class);
 
   private ExecutionEngineType executionEngineType;
@@ -32,14 +31,6 @@ public class GpactExampleSystemManager extends BaseExampleSystemManager {
   protected void loadFunctionLayerProperties(PropertiesLoader propsLoader) {
     this.executionEngineType = propsLoader.getExecutionEnngine();
     StatsHolder.log(executionEngineType.name());
-  }
-
-  protected CrossControlManagerGroup getFunctionCallInstance() throws Exception {
-    return CrosschainProtocols.getFunctionCallInstance(CrosschainProtocols.GPACT).get();
-  }
-
-  protected String getFunctionCallImplName() throws Exception {
-    return CrosschainProtocols.GPACT;
   }
 
   public String getExecutionEngine() {

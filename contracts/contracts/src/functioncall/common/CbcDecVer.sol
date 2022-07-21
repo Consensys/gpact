@@ -18,16 +18,6 @@ import "../../messaging/interface/CrosschainVerifier.sol";
 import "../../openzeppelin/access/Ownable.sol";
 
 abstract contract CbcDecVer is Ownable {
-    // 	0x77dab611
-    bytes32 internal constant START_EVENT_SIGNATURE =
-        keccak256("Start(uint256,address,uint256,bytes)");
-    // 0xb01557f1
-    bytes32 internal constant SEGMENT_EVENT_SIGNATURE =
-        keccak256("Segment(uint256,bytes32,uint256[],address[],bool,bytes)");
-    // 0xe6763dd9
-    bytes32 internal constant ROOT_EVENT_SIGNATURE =
-        keccak256("Root(uint256,bool)");
-
     // Address of verifier contract to be used for a certain blockchain id.
     mapping(uint256 => CrosschainVerifier) private verifiers;
 
@@ -49,61 +39,6 @@ abstract contract CbcDecVer is Ownable {
         onlyOwner
     {
         remoteCrosschainControlContracts[_blockchainId] = _cbc;
-    }
-
-    function decodeAndVerifyEvents(
-        uint256[] calldata _blockchainIds,
-        address[] calldata _cbcAddresses,
-        bytes32[] calldata _eventFunctionSignatures,
-        bytes[] calldata _eventData,
-        bytes[] calldata _signatures,
-        bool _expectStart
-    ) internal view {
-        // The minimum number of events is 1: start and no segment, used to end a timed-out
-        // crosschain transactions.
-        uint256 numEvents = _blockchainIds.length;
-        require(numEvents > 0, "Must be at least one event");
-        require(
-            numEvents == _cbcAddresses.length,
-            "Number of blockchain Ids and cbcAddresses must match"
-        );
-        require(
-            numEvents == _eventFunctionSignatures.length,
-            "Number of blockchain Ids and event function signatures must match"
-        );
-        require(
-            numEvents == _eventData.length,
-            "Number of blockchain Ids and event data must match"
-        );
-        require(
-            numEvents == _signatures.length,
-            "Number of events and signatures match"
-        );
-
-        for (uint256 i = 0; i < numEvents; i++) {
-            if (i == 0) {
-                bytes32 eventSig = _expectStart
-                    ? START_EVENT_SIGNATURE
-                    : ROOT_EVENT_SIGNATURE;
-                require(
-                    eventSig == _eventFunctionSignatures[i],
-                    "Unexpected first event function signature"
-                );
-            } else {
-                require(
-                    SEGMENT_EVENT_SIGNATURE == _eventFunctionSignatures[i],
-                    "Event function signature not for a segment"
-                );
-            }
-
-            decodeAndVerifyEvent(
-                _blockchainIds[i],
-                _cbcAddresses[i],
-                _eventFunctionSignatures[i],
-                _eventData[i],
-                _signatures[i]
-            );
-        }
     }
 
     /**

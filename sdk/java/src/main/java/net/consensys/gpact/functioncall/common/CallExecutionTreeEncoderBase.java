@@ -14,14 +14,6 @@
  */
 package net.consensys.gpact.functioncall.common;
 
-import static net.consensys.gpact.common.FormatConversion.addressStringToBytes;
-import static net.consensys.gpact.common.crypto.Hash.keccak256;
-
-import java.nio.ByteBuffer;
-import net.consensys.gpact.common.FormatConversion;
-import net.consensys.gpact.functioncall.CallExecutionTree;
-import org.apache.tuweni.bytes.Bytes;
-
 public class CallExecutionTreeEncoderBase {
   protected static final byte ENCODING_FORMAT_V1 = 0;
 
@@ -43,26 +35,6 @@ public class CallExecutionTreeEncoderBase {
 
   protected CallExecutionTreeEncoderBase() {
     // Block instantiation.
-  }
-
-  protected static byte[] encodeFunctionCall(final CallExecutionTree callTree) {
-    ByteBuffer buf = ByteBuffer.allocate(MAX_CALL_EX_TREE_SIZE);
-    byte[] blockchainIdBytes = callTree.getBlockchainId().asBytes();
-    byte[] address = addressStringToBytes(callTree.getContractAddress());
-    buf.put(blockchainIdBytes);
-    buf.put(address);
-    byte[] data = FormatConversion.hexStringToByteArray(callTree.getFunctionCallData());
-    buf.putShort((short) data.length);
-    buf.put(data);
-    buf.flip();
-    byte[] output = new byte[buf.limit()];
-    buf.get(output);
-    return output;
-  }
-
-  public static byte[] encodeFunctionCallAndHash(final CallExecutionTree callTree) {
-    byte[] encodedFunction = encodeFunctionCall(callTree);
-    return keccak256(Bytes.wrap(encodedFunction)).toArray();
   }
 
   protected static void addSpaces(StringBuilder out, int level) {

@@ -25,7 +25,7 @@ import net.consensys.gpact.functioncall.CrossControlManagerGroup;
 import net.consensys.gpact.functioncall.CrosschainCallResult;
 import net.consensys.gpact.helpers.AbstractExampleTest;
 import net.consensys.gpact.helpers.CredentialsCreator;
-import net.consensys.gpact.helpers.GpactExampleSystemManager;
+import net.consensys.gpact.helpers.GpactV1ExampleSystemManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
@@ -42,7 +42,7 @@ import org.web3j.crypto.Credentials;
 public class FailedGpactCallTreeTest extends AbstractExampleTest {
   static final Logger LOG = LogManager.getLogger(FailedGpactCallTreeTest.class);
 
-  GpactExampleSystemManager exampleManager;
+  GpactV1ExampleSystemManager exampleManager;
 
   FailTestContractManager rootBlockchain;
   FailTestContractManager intermediateBlockchain;
@@ -84,7 +84,7 @@ public class FailedGpactCallTreeTest extends AbstractExampleTest {
     LOG.info("****** Deploy Contracts *******");
     String tempPropsFile = createPropertiesFile(MessagingType.FAKE, true, false);
 
-    this.exampleManager = new GpactExampleSystemManager(tempPropsFile);
+    this.exampleManager = new GpactV1ExampleSystemManager(tempPropsFile);
     exampleManager.standardExampleConfig(3);
 
     this.root = exampleManager.getRootBcInfo();

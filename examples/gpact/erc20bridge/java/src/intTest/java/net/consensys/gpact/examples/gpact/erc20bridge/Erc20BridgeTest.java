@@ -14,6 +14,7 @@
  */
 package net.consensys.gpact.examples.gpact.erc20bridge;
 
+import net.consensys.gpact.functioncall.gpact.GpactCrossControlManagerGroup;
 import net.consensys.gpact.helpers.AbstractExampleTest;
 import org.junit.jupiter.api.Test;
 
@@ -22,12 +23,14 @@ public class Erc20BridgeTest extends AbstractExampleTest {
   @Test
   public void directSignSerialMultiBlockchain() throws Exception {
     String tempPropsFile = createPropertiesFile(true, true, false);
-    ERC20TokenBridgeExample.main(new String[] {tempPropsFile});
+    ERC20TokenBridgeExample.main(
+        new String[] {GpactCrossControlManagerGroup.GpactVersion.V1.toString(), tempPropsFile});
   }
 
   @Test
   public void transferSignSerialMultiBlockchain() throws Exception {
     String tempPropsFile = createPropertiesFile(false, true, false);
-    ERC20TokenBridgeExample.main(new String[] {tempPropsFile});
+    ERC20TokenBridgeExample.main(
+        new String[] {GpactCrossControlManagerGroup.GpactVersion.V1.toString(), tempPropsFile});
   }
 }

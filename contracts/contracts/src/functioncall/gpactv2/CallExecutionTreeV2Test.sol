@@ -18,9 +18,9 @@ import "./CallPathCallExecutionTreeV2.sol";
 
 contract CallExecutionTreeV2Test is CallPathCallExecutionTreeV2 {
     function extractTargetHashFromCallGraph1(
-        bytes memory _callGraph,
+        bytes calldata _callTree,
         uint256[] memory _callPath
     ) external pure returns (bytes32 functionCallHash) {
-        return extractTargetHashFromCallGraph(_callGraph, _callPath);
+        return extractTargetHashFromCallGraph(_callTree, _callPath);
     }
 }

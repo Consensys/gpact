@@ -18,7 +18,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import net.consensys.gpact.functioncall.CrossControlManagerGroup;
-import net.consensys.gpact.functioncall.gpact.GpactCrossControlManagerGroup;
+import net.consensys.gpact.functioncall.gpact.v1.GpactV1CrossControlManagerGroup;
+import net.consensys.gpact.functioncall.gpact.v2.GpactV2CrossControlManagerGroup;
 import net.consensys.gpact.functioncall.sfc.SimpleCrossControlManagerGroup;
 import net.consensys.gpact.messaging.MessagingManagerGroup;
 import net.consensys.gpact.messaging.eventattest.AttestorSignerManagerGroup;
@@ -28,7 +29,8 @@ import net.consensys.gpact.messaging.txrootrelay.TxRootTransferManagerGroup;
 
 /** Entry point class for the Crosschian Protocol Stack SDK. */
 public class CrosschainProtocols {
-  public static final String GPACT = "GPACT";
+  public static final String GPACT_V1 = "GPACT";
+  public static final String GPACT_V2 = "GPACTV2";
   public static final String SFC = "SFC";
 
   public static final String EVENTRELAY = "EVENTRELAY";
@@ -46,7 +48,8 @@ public class CrosschainProtocols {
 
   static {
     functionCallImpls = new HashMap<>();
-    registerFunctionCallImpl(GPACT, GpactCrossControlManagerGroup.class);
+    registerFunctionCallImpl(GPACT_V1, GpactV1CrossControlManagerGroup.class);
+    registerFunctionCallImpl(GPACT_V2, GpactV2CrossControlManagerGroup.class);
     registerFunctionCallImpl(SFC, SimpleCrossControlManagerGroup.class);
     messagingImpls = new HashMap<>();
     registerMessagingImpl(EVENTRELAY, EventRelayManagerGroup.class);

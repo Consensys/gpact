@@ -14,6 +14,7 @@
  */
 package net.consensys.gpact.functioncall.gpact;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -32,10 +33,21 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
 
-public class GpactCrossControlManagerGroup implements CrossControlManagerGroup {
+public abstract class GpactCrossControlManagerGroup implements CrossControlManagerGroup {
   private static final Logger LOG = LogManager.getLogger(GpactCrossControlManagerGroup.class);
 
   private final Map<BlockchainId, BcHolder> blockchains = new HashMap<>();
+
+  public enum GpactVersion {
+    V1,
+    V2
+  }
+
+  private final GpactVersion gpactVersion;
+
+  protected GpactCrossControlManagerGroup(final GpactVersion ver) {
+    this.gpactVersion = ver;
+  }
 
   @Override
   public void addBlockchainAndDeployContracts(
@@ -47,7 +59,7 @@ public class GpactCrossControlManagerGroup implements CrossControlManagerGroup {
     LOG.debug("Deploying Cross-Blockchain Control contract for blockchain id {}", blockchainId);
 
     BcHolder holder = new BcHolder();
-    holder.cbc = new GpactCrossControlManager(creds, bcConfig);
+    holder.cbc = newGpactCrossControlManager(creds, bcConfig);
     holder.cbc.deployContract();
     holder.cbcContractAddress = holder.cbc.getCbcContractAddress();
 
@@ -64,7 +76,7 @@ public class GpactCrossControlManagerGroup implements CrossControlManagerGroup {
     }
 
     BcHolder holder = new BcHolder();
-    holder.cbc = new GpactCrossControlManager(creds, bcConfig);
+    holder.cbc = newGpactCrossControlManager(creds, bcConfig);
 
     holder.cbc.loadContract(cbcAddress);
     holder.cbcContractAddress = cbcAddress;
@@ -133,6 +145,9 @@ public class GpactCrossControlManagerGroup implements CrossControlManagerGroup {
     bcIds.addAll(this.blockchains.keySet());
     return bcIds;
   }
+
+  protected abstract GpactCrossControlManager newGpactCrossControlManager(
+      final Credentials credentials, final BlockchainConfig bcConfig) throws IOException;
 
   private static class BcHolder {
     GpactCrossControlManager cbc;

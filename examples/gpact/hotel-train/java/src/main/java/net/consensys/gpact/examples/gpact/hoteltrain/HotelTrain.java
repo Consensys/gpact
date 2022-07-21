@@ -17,6 +17,7 @@ package net.consensys.gpact.examples.gpact.hoteltrain;
 import java.math.BigInteger;
 import net.consensys.gpact.common.*;
 import net.consensys.gpact.functioncall.CrossControlManagerGroup;
+import net.consensys.gpact.helpers.GpactExampleBase;
 import net.consensys.gpact.helpers.GpactExampleSystemManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -26,7 +27,7 @@ import org.apache.logging.log4j.Logger;
  *
  * <p>Book a hotel room and a train seat atomically.
  */
-public class HotelTrain {
+public class HotelTrain extends GpactExampleBase {
   private static final Logger LOG = LogManager.getLogger(HotelTrain.class);
 
   static int NUM_TIMES_EXECUTE = 1;
@@ -35,12 +36,7 @@ public class HotelTrain {
     StatsHolder.log("Example: Single Blockchain: Hotel Train");
     LOG.info("Started");
 
-    if (args.length != 1) {
-      LOG.info("Usage: [properties file name]");
-      return;
-    }
-
-    GpactExampleSystemManager exampleManager = new GpactExampleSystemManager(args[0]);
+    GpactExampleSystemManager exampleManager = getExampleSystemManager(args);
     exampleManager.standardExampleConfig(3);
 
     BlockchainConfig root = exampleManager.getRootBcInfo();
