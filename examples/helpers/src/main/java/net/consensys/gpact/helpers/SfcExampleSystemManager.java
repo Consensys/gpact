@@ -28,11 +28,11 @@ public class SfcExampleSystemManager extends BaseExampleSystemManager {
 
   protected void loadFunctionLayerProperties(PropertiesLoader propsLoader) {}
 
-  protected CrossControlManagerGroup getFunctionCallInstance() throws Exception {
+  public CrossControlManagerGroup getFunctionCallInstance() throws Exception {
     return CrosschainProtocols.getFunctionCallInstance(CrosschainProtocols.SFC).get();
   }
 
-  protected String getFunctionCallImplName() throws Exception {
+  public String getFunctionCallImplName() throws Exception {
     return CrosschainProtocols.SFC;
   }
 

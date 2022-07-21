@@ -82,7 +82,8 @@ public class ERC20TokenBridgeExample extends GpactExampleBase {
             chainA.getErc20ContractAddress(),
             bc2.bcId,
             chainB.getBridgeContractAddress(),
-            chainB.getErc20ContractAddress());
+            chainB.getErc20ContractAddress(),
+            exampleManager.getFunctionCallImplName());
     Erc20User user2 =
         new Erc20User(
             "User2",
@@ -91,7 +92,8 @@ public class ERC20TokenBridgeExample extends GpactExampleBase {
             chainA.getErc20ContractAddress(),
             bc2.bcId,
             chainB.getBridgeContractAddress(),
-            chainB.getErc20ContractAddress());
+            chainB.getErc20ContractAddress(),
+            exampleManager.getFunctionCallImplName());
     Erc20User user3 =
         new Erc20User(
             "User3",
@@ -100,7 +102,8 @@ public class ERC20TokenBridgeExample extends GpactExampleBase {
             chainA.getErc20ContractAddress(),
             bc2.bcId,
             chainB.getBridgeContractAddress(),
-            chainB.getErc20ContractAddress());
+            chainB.getErc20ContractAddress(),
+            exampleManager.getFunctionCallImplName());
 
     user1.createCbcManager(
         root,
