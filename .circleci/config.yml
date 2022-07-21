@@ -491,15 +491,6 @@ jobs:
           command: docker-compose down
           when: always
 
-  unitTestsMachine:
-    machine:
-      image: ubuntu-2004:202111-01
-    resource_class: small
-    steps:
-      - run:
-          name: Dummy task that the github side of the CircleCi - Github integration is waiting on
-          command: |
-            ls -al
 
 workflows:
   version: 2
@@ -526,4 +517,3 @@ workflows:
           requires:
             - relayer-build
             - javasdk-build
-      - unitTestsMachine
