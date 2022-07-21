@@ -32,4 +32,11 @@ public class HotelTrainTest extends AbstractExampleTest {
     HotelTrain.main(
         new String[] {GpactCrossControlManagerGroup.GpactVersion.V1.toString(), tempPropsFile});
   }
+
+  @Test
+  public void fakeMessagingParallelMultiBlockchainGpactV2() throws Exception {
+    String tempPropsFile = createPropertiesFile(MessagingType.FAKE, false, false);
+    HotelTrain.main(
+        new String[] {GpactCrossControlManagerGroup.GpactVersion.V2.toString(), tempPropsFile});
+  }
 }

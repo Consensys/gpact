@@ -33,4 +33,11 @@ public class Erc20BridgeTest extends AbstractExampleTest {
     ERC20TokenBridgeExample.main(
         new String[] {GpactCrossControlManagerGroup.GpactVersion.V1.toString(), tempPropsFile});
   }
+
+  @Test
+  public void fakeMessagingSerialMultiBlockchainGpactV2() throws Exception {
+    String tempPropsFile = createPropertiesFile(MessagingType.FAKE, true, false);
+    ERC20TokenBridgeExample.main(
+        new String[] {GpactCrossControlManagerGroup.GpactVersion.V2.toString(), tempPropsFile});
+  }
 }

@@ -73,11 +73,4 @@ public class WriteTest extends AbstractExampleTest {
     GpactCrosschainWrite.main(
         new String[] {GpactCrossControlManagerGroup.GpactVersion.V2.toString(), tempPropsFile});
   }
-
-  @Test
-  public void fakeMessagingParallelMultiBlockchainGpactV1() throws Exception {
-    String tempPropsFile = createPropertiesFile(MessagingType.FAKE, false, false);
-    GpactCrosschainWrite.main(
-        new String[] {GpactCrossControlManagerGroup.GpactVersion.V1.toString(), tempPropsFile});
-  }
 }
