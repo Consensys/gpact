@@ -41,6 +41,7 @@ public class Erc20User {
 
   private BlockchainConfig bcInfoA;
   private BlockchainConfig bcInfoB;
+  private String gpactImplName;
 
   protected Erc20User(
       String name,
@@ -49,7 +50,8 @@ public class Erc20User {
       String erc20AddressA,
       BlockchainId bcIdB,
       String erc20BridgeAddressB,
-      String erc20AddressB)
+      String erc20AddressB,
+      String gpactImplName)
       throws Exception {
 
     this.name = name;
@@ -61,6 +63,8 @@ public class Erc20User {
 
     this.bcIdA = bcIdA;
     this.bcIdB = bcIdB;
+
+    this.gpactImplName = gpactImplName;
   }
 
   public void createCbcManager(
@@ -72,7 +76,7 @@ public class Erc20User {
       MessagingVerificationInterface msgVerB)
       throws Exception {
     this.crossControlManagerGroup =
-        CrosschainProtocols.getFunctionCallInstance(CrosschainProtocols.GPACT_V1).get();
+        CrosschainProtocols.getFunctionCallInstance(this.gpactImplName).get();
     this.crossControlManagerGroup.addBlockchainAndLoadCbcContract(
         this.creds, bcInfoA, cbcContractAddressOnBcA);
     this.crossControlManagerGroup.setMessageVerifier(bcInfoA.bcId, msgVerA);

@@ -16,6 +16,7 @@ package net.consensys.gpact.helpers;
 
 import net.consensys.gpact.CrosschainProtocols;
 import net.consensys.gpact.common.StatsHolder;
+import net.consensys.gpact.functioncall.gpact.GpactCrossControlManagerGroup;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -47,4 +48,6 @@ public abstract class GpactExampleSystemManager extends BaseExampleSystemManager
   public ExecutionEngineType getExecutionEngineType() {
     return executionEngineType;
   }
+
+  public abstract GpactCrossControlManagerGroup.GpactVersion getGpactVersion();
 }

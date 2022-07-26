@@ -2,6 +2,7 @@ package net.consensys.gpact.examples.gpact.hoteltrain;
 
 import net.consensys.gpact.functioncall.gpact.GpactCrossControlManagerGroup;
 import net.consensys.gpact.helpers.AbstractExampleTest;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 public class HotelTrainTest extends AbstractExampleTest {
@@ -31,5 +32,14 @@ public class HotelTrainTest extends AbstractExampleTest {
     String tempPropsFile = createPropertiesFile(true, false, false);
     HotelTrain.main(
         new String[] {GpactCrossControlManagerGroup.GpactVersion.V1.toString(), tempPropsFile});
+  }
+
+  // TODO requires crosschain authentication to work
+  @Disabled
+  @Test
+  public void fakeMessagingParallelMultiBlockchainGpactV2() throws Exception {
+    String tempPropsFile = createPropertiesFile(MessagingType.FAKE, false, false);
+    HotelTrain.main(
+        new String[] {GpactCrossControlManagerGroup.GpactVersion.V2.toString(), tempPropsFile});
   }
 }

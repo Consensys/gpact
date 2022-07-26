@@ -241,9 +241,9 @@ public abstract class BaseExampleSystemManager {
 
   protected abstract void loadFunctionLayerProperties(PropertiesLoader propsLoader);
 
-  protected abstract CrossControlManagerGroup getFunctionCallInstance() throws Exception;
+  public abstract CrossControlManagerGroup getFunctionCallInstance() throws Exception;
 
-  protected abstract String getFunctionCallImplName() throws Exception;
+  public abstract String getFunctionCallImplName() throws Exception;
 
   private void setupCrosschainTrust(
       CrossControlManagerGroup crossControlManagerGroup,

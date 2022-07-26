@@ -81,11 +81,4 @@ public class TradeTest extends AbstractExampleTest {
     Main.main(
         new String[] {GpactCrossControlManagerGroup.GpactVersion.V2.toString(), tempPropsFile});
   }
-
-  @Test
-  public void fakeMessagingParallelMultiBlockchainGpactV1() throws Exception {
-    String tempPropsFile = createPropertiesFile(MessagingType.FAKE, false, false);
-    Main.main(
-        new String[] {GpactCrossControlManagerGroup.GpactVersion.V1.toString(), tempPropsFile});
-  }
 }

@@ -64,6 +64,7 @@ public class HotelTrain extends GpactExampleBase {
         train.getTrainContractAddress());
 
     travelAgency.createCbcManager(
+        exampleManager.getFunctionCallImplName(),
         root,
         crossControlManagerGroup.getCbcAddress(travelBcId),
         crossControlManagerGroup.getMessageVerification(travelBcId),

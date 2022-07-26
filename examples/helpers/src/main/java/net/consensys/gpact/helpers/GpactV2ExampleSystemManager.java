@@ -16,6 +16,7 @@ package net.consensys.gpact.helpers;
 
 import net.consensys.gpact.CrosschainProtocols;
 import net.consensys.gpact.functioncall.CrossControlManagerGroup;
+import net.consensys.gpact.functioncall.gpact.GpactCrossControlManagerGroup;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -26,11 +27,15 @@ public class GpactV2ExampleSystemManager extends GpactExampleSystemManager {
     super(propertiesFileName);
   }
 
-  protected CrossControlManagerGroup getFunctionCallInstance() throws Exception {
+  public CrossControlManagerGroup getFunctionCallInstance() throws Exception {
     return CrosschainProtocols.getFunctionCallInstance(CrosschainProtocols.GPACT_V2).get();
   }
 
-  protected String getFunctionCallImplName() throws Exception {
+  public String getFunctionCallImplName() throws Exception {
     return CrosschainProtocols.GPACT_V2;
+  }
+
+  public GpactCrossControlManagerGroup.GpactVersion getGpactVersion() {
+    return GpactCrossControlManagerGroup.GpactVersion.V2;
   }
 }
