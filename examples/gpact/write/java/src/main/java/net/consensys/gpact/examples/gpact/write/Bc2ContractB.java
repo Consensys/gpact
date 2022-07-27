@@ -55,13 +55,15 @@ public class Bc2ContractB extends AbstractBlockchain {
     }
   }
 
-  public void showValueWritten() throws Exception {
+  public BigInteger showValueWritten() throws Exception {
     boolean isLocked = this.contractB.isLocked(BigInteger.ZERO).send();
     LOG.info("Contract B's lockable storage: locked: {}", isLocked);
     if (isLocked) {
       throw new RuntimeException(
           "Contract B's lockable storage locked after end of crosschain transaction");
     }
-    LOG.info("ContractB: Value: {}", this.contractB.getVal().send());
+    BigInteger val = this.contractB.getVal().send();
+    LOG.info("ContractB: Value: {}", val);
+    return val;
   }
 }

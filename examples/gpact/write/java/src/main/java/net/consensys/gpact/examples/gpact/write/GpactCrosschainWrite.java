@@ -66,11 +66,15 @@ public class GpactCrosschainWrite extends GpactExampleBase {
     SimContractB simContractB = new SimContractB(bc2ContractBBlockchain);
     SimContractA simContractA = new SimContractA(bc1ContractABlockchain, simContractB);
 
+    int value = 7;
+
     for (int numExecutions = 0; numExecutions < NUM_TIMES_EXECUTE; numExecutions++) {
       LOG.info("Execution: {} **************************", numExecutions);
       StatsHolder.log("Execution: " + numExecutions + " **************************");
 
-      BigInteger val = BigInteger.valueOf(7);
+      value += numExecutions;
+
+      BigInteger val = BigInteger.valueOf(value);
 
       simContractA.doCrosschainWrite(val);
 
@@ -95,7 +99,14 @@ public class GpactCrosschainWrite extends GpactExampleBase {
 
       TransactionReceipt txR = result.getTransactionReceipt(CrosschainCallResult.ROOT_CALL);
       bc2ContractBBlockchain.showEvents(txR);
-      bc2ContractBBlockchain.showValueWritten();
+      BigInteger valWritten = bc2ContractBBlockchain.showValueWritten();
+
+      if (!result.isSuccessful()) {
+        throw new Exception("Crosschain call failed");
+      }
+      if (valWritten.intValue() != value) {
+        throw new Exception("Written value not correct");
+      }
     }
 
     bc1ContractABlockchain.shutdown();

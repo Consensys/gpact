@@ -222,17 +222,9 @@ contract GpactV2CrosschainControl is
                 _callExecutionTree,
                 _callPath
             );
+            bytes32 functionHash = keccak256(_targetFunctionCallData);
             bytes32 calcTargetHash = keccak256(
-                abi.encodePacked(
-                    myBlockchainId,
-                    _targetContract,
-                    _targetFunctionCallData
-                )
-            );
-            bytes memory val = abi.encodePacked(
-                myBlockchainId,
-                _targetContract,
-                _targetFunctionCallData
+                abi.encodePacked(myBlockchainId, _targetContract, functionHash)
             );
 
             require(
@@ -399,12 +391,9 @@ contract GpactV2CrosschainControl is
                 _callExecutionTree,
                 callPathForRoot
             );
+            bytes32 functionHash = keccak256(_targetFunctionCallData);
             bytes32 calcTargetHash = keccak256(
-                abi.encodePacked(
-                    myBlockchainId,
-                    _targetContract,
-                    _targetFunctionCallData
-                )
+                abi.encodePacked(myBlockchainId, _targetContract, functionHash)
             );
             require(
                 expectedTargetHash == calcTargetHash,
@@ -609,8 +598,9 @@ contract GpactV2CrosschainControl is
             _callTree,
             _callPath
         );
+        bytes32 functionHash = keccak256(_targetCallData);
         bytes32 actualFunctionCallHash = keccak256(
-            abi.encodePacked(myBlockchainId, _targetContract, _targetCallData)
+            abi.encodePacked(myBlockchainId, _targetContract, functionHash)
         );
         require(
             expectedFunctionCallHash == actualFunctionCallHash,
@@ -742,8 +732,10 @@ contract GpactV2CrosschainControl is
             return (true, bytes(""));
         }
 
+        bytes32 calledFuncCallHash = keccak256(_functionCallData);
+
         bytes32 calledFunctionCallHash = keccak256(
-            abi.encodePacked(_blockchainId, _contract, _functionCallData)
+            abi.encodePacked(_blockchainId, _contract, calledFuncCallHash)
         );
 
         bytes32 targetFunctionCallHash = activeCallTargetFunctionCallHashes[

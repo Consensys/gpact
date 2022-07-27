@@ -139,8 +139,21 @@ public class CallExecutionTreeEncoderV2 extends CallExecutionTreeEncoderBase {
   }
 
   public static byte[] encodeFunctionCallAndHash(final CallExecutionTree callTree) {
-    byte[] encodedFunction = encodeFunctionCall(callTree);
-    return keccak256(Bytes.wrap(encodedFunction)).toArray();
+    byte[] blockchainIdBytes = callTree.getBlockchainId().asBytes();
+    byte[] address = addressStringToBytes(callTree.getContractAddress());
+    byte[] data = callTree.getFunctionCallDataAsBytes();
+
+    byte[] hashOfFunctionCall = keccak256(Bytes.wrap(data)).toArray();
+
+    ByteBuffer buf = ByteBuffer.allocate(MAX_CALL_EX_TREE_SIZE);
+    buf.put(blockchainIdBytes);
+    buf.put(address);
+    buf.put(hashOfFunctionCall);
+    buf.flip();
+    byte[] output = new byte[buf.limit()];
+    buf.get(output);
+
+    return keccak256(Bytes.wrap(output)).toArray();
   }
 
   /**
