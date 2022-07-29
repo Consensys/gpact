@@ -170,10 +170,10 @@ contract GpactV2CrosschainControl is
      * Execute a segment of the call execution tree.
      *
      * @param _events Array of events. Array offset 0 must be the start event. Other events must be segment events.
-     * @ param _callPath    The part of the call tree to be executed.
-     * @ param _callExecutionTree The call tree to be executed. The message digest of this must match the call tree hash emitted in the start event.
-     * @ param _targetContract The contract to be called. A combination of this blockchain, the tartget contract and the target function call data must match the function call hash in the call tree at the call path.
-     * @ param _targetFunctionCallData The call data to be called. A combination of this blockchain, the tartget contract and the target function call data must match the function call hash in the call tree at the call path.
+     * @param _callPath    The part of the call tree to be executed.
+     * @param _callExecutionTree The call tree to be executed. The message digest of this must match the call tree hash emitted in the start event.
+     * @param _targetContract The contract to be called. A combination of this blockchain, the tartget contract and the target function call data must match the function call hash in the call tree at the call path.
+     * @param _targetFunctionCallData The call data to be called. A combination of this blockchain, the tartget contract and the target function call data must match the function call hash in the call tree at the call path.
      */
     function segment(
         // TODO historically, Web3J didn't support arrays of structs in the Java code generator.
@@ -212,24 +212,6 @@ contract GpactV2CrosschainControl is
             require(
                 calcCallExecutionTreeHash == callExecutionTreeHash,
                 "Call execution tree doesn't match start event"
-            );
-        }
-
-        // Check that the the hash of the function call indicated by the call path matches.
-        {
-            // Scope to limit number of local variables compiler has to deal with.
-            bytes32 expectedTargetHash = extractTargetHashFromCallGraph(
-                _callExecutionTree,
-                _callPath
-            );
-            bytes32 functionHash = keccak256(_targetFunctionCallData);
-            bytes32 calcTargetHash = keccak256(
-                abi.encodePacked(myBlockchainId, _targetContract, functionHash)
-            );
-
-            require(
-                expectedTargetHash == calcTargetHash,
-                "Function call does not match call execution tree"
             );
         }
 
@@ -383,23 +365,6 @@ contract GpactV2CrosschainControl is
 
         // The element will be the default, 0.
         uint256[] memory callPathForRoot = new uint256[](1);
-
-        // Check that the the hash of the function call indicated by the call path matches.
-        {
-            // Scope to limit number of local variables compiler has to deal with.
-            bytes32 expectedTargetHash = extractTargetHashFromCallGraph(
-                _callExecutionTree,
-                callPathForRoot
-            );
-            bytes32 functionHash = keccak256(_targetFunctionCallData);
-            bytes32 calcTargetHash = keccak256(
-                abi.encodePacked(myBlockchainId, _targetContract, functionHash)
-            );
-            require(
-                expectedTargetHash == calcTargetHash,
-                "Function call does not match call execution tree"
-            );
-        }
 
         if (
             verifySegmentEvents(
@@ -594,6 +559,7 @@ contract GpactV2CrosschainControl is
         address _targetContract,
         bytes calldata _targetCallData
     ) private returns (bool, bytes memory) {
+        // Check that the the hash of the function call indicated by the call path matches.
         bytes32 expectedFunctionCallHash = extractTargetHashFromCallGraph(
             _callTree,
             _callPath
@@ -733,7 +699,6 @@ contract GpactV2CrosschainControl is
         }
 
         bytes32 calledFuncCallHash = keccak256(_functionCallData);
-
         bytes32 calledFunctionCallHash = keccak256(
             abi.encodePacked(_blockchainId, _contract, calledFuncCallHash)
         );
@@ -756,6 +721,7 @@ contract GpactV2CrosschainControl is
         }
         bytes memory retVal = activeCallReturnValues[returnValuesIndex++];
         activeCallReturnValuesIndex = returnValuesIndex;
+        // TODO CallResult events are not needed and cost gas.
         emit CallResult(_blockchainId, _contract, _functionCallData, retVal);
         return (false, retVal);
     }

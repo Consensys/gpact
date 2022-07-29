@@ -17,6 +17,7 @@ package net.consensys.gpact.examples.gpact.trade;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import net.consensys.gpact.CrosschainProtocols;
 import net.consensys.gpact.common.*;
 import net.consensys.gpact.examples.gpact.trade.sim.*;
 import net.consensys.gpact.functioncall.CallExecutionTree;
@@ -30,8 +31,8 @@ import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
-public class Main extends GpactExampleBase {
-  static final Logger LOG = LogManager.getLogger(Main.class);
+public class TradeExample extends GpactExampleBase {
+  static final Logger LOG = LogManager.getLogger(TradeExample.class);
 
   public static void main(String[] args) throws Exception {
     StatsHolder.log("Example: Trade");
@@ -52,12 +53,12 @@ public class Main extends GpactExampleBase {
         exampleManager.getCrossControlManagerGroup();
 
     // Set-up classes to manage blockchains.
-    Credentials creds = CredentialsCreator.createCredentials();
-    Bc1TradeWallet bc1TradeWalletBlockchain = new Bc1TradeWallet(creds, root);
-    Bc2BusLogic bc2BusLogicBlockchain = new Bc2BusLogic(creds, bc2);
-    Bc3Balances bc3BalancesBlockchain = new Bc3Balances(creds, bc3);
-    Bc4Oracle bc4OracleBlockchain = new Bc4Oracle(creds, bc4);
-    Bc5Stock bc5StockBlockchain = new Bc5Stock(creds, bc5);
+    Credentials appDeployerCreds = CredentialsCreator.createCredentials();
+    Bc1TradeWallet bc1TradeWalletBlockchain = new Bc1TradeWallet(appDeployerCreds, root);
+    Bc2BusLogic bc2BusLogicBlockchain = new Bc2BusLogic(appDeployerCreds, bc2);
+    Bc3Balances bc3BalancesBlockchain = new Bc3Balances(appDeployerCreds, bc3);
+    Bc4Oracle bc4OracleBlockchain = new Bc4Oracle(appDeployerCreds, bc4);
+    Bc5Stock bc5StockBlockchain = new Bc5Stock(appDeployerCreds, bc5);
 
     // Set-up client side and deploy contracts on the blockchains.
     BlockchainId bc3BcId = bc3BalancesBlockchain.getBlockchainId();
@@ -105,7 +106,8 @@ public class Main extends GpactExampleBase {
     // Ensure the simulator is set-up the same way.
     BigInteger buyerInitialBalance = BigInteger.valueOf(10000000);
     BigInteger sellerInitialBalance = BigInteger.valueOf(10);
-    String buyerAddress = creds.getAddress();
+    Credentials buyer = CredentialsCreator.createCredentials();
+    String buyerAddress = buyer.getAddress();
     LOG.info("Buyer address (EOA Account): {}", buyerAddress);
     String sellerAddress = CredentialsCreator.createCredentials().getAddress();
     LOG.info("Seller address: {}", sellerAddress);
@@ -153,8 +155,37 @@ public class Main extends GpactExampleBase {
     CallExecutionTree callGraph =
         new CallExecutionTree(rootBcId, tradeWalletContractAddress, rlpRootExecuteTrade, rootCalls);
 
+    byte[] encoding = callGraph.encode(CallExecutionTree.ENCODING_V2);
+    LOG.info("Call tree: {}", CallExecutionTree.dump(encoding));
+
+    // The crosschain call needs to be executed by the buyer. Hence, create crosschain control
+    // objects for the buyer.
+    CrossControlManagerGroup buyerCrossControlManagerGroup =
+        CrosschainProtocols.getFunctionCallInstance(exampleManager.getFunctionCallImplName()).get();
+    buyerCrossControlManagerGroup.addBlockchainAndLoadCbcContract(
+        buyer, root, crossControlManagerGroup.getCbcManager(rootBcId).getCbcContractAddress());
+    buyerCrossControlManagerGroup.addBlockchainAndLoadCbcContract(
+        buyer, bc2, crossControlManagerGroup.getCbcManager(bc2BcId).getCbcContractAddress());
+    buyerCrossControlManagerGroup.addBlockchainAndLoadCbcContract(
+        buyer, bc3, crossControlManagerGroup.getCbcManager(bc3BcId).getCbcContractAddress());
+    buyerCrossControlManagerGroup.addBlockchainAndLoadCbcContract(
+        buyer, bc4, crossControlManagerGroup.getCbcManager(bc4BcId).getCbcContractAddress());
+    buyerCrossControlManagerGroup.addBlockchainAndLoadCbcContract(
+        buyer, bc5, crossControlManagerGroup.getCbcManager(bc5BcId).getCbcContractAddress());
+
+    buyerCrossControlManagerGroup.setMessageVerifier(
+        root.bcId, crossControlManagerGroup.getMessageVerification(rootBcId));
+    buyerCrossControlManagerGroup.setMessageVerifier(
+        bc2BcId, crossControlManagerGroup.getMessageVerification(bc2BcId));
+    buyerCrossControlManagerGroup.setMessageVerifier(
+        bc3BcId, crossControlManagerGroup.getMessageVerification(bc3BcId));
+    buyerCrossControlManagerGroup.setMessageVerifier(
+        bc4BcId, crossControlManagerGroup.getMessageVerification(bc4BcId));
+    buyerCrossControlManagerGroup.setMessageVerifier(
+        bc5BcId, crossControlManagerGroup.getMessageVerification(bc5BcId));
+
     CrosschainCallResult result =
-        crossControlManagerGroup.executeCrosschainCall(
+        buyerCrossControlManagerGroup.executeCrosschainCall(
             exampleManager.getExecutionEngine(), callGraph, 300);
 
     LOG.info("Success: {}", result.isSuccessful());
@@ -196,5 +227,9 @@ public class Main extends GpactExampleBase {
 
     StatsHolder.log("End");
     StatsHolder.print();
+
+    if (!result.isSuccessful()) {
+      throw new Exception("Crosschain transaction failed");
+    }
   }
 }

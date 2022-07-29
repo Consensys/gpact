@@ -11,7 +11,7 @@ public class ConditionalTest extends AbstractExampleTest {
   @Test
   public void directSignSerialSingleBlockchain() throws Exception {
     String tempPropsFile = createPropertiesFile(true, true, true);
-    Main.main(
+    ConditionalExample.main(
         new String[] {GpactCrossControlManagerGroup.GpactVersion.V1.toString(), tempPropsFile});
   }
 
@@ -19,14 +19,14 @@ public class ConditionalTest extends AbstractExampleTest {
   @Test
   public void transferSerialSingleBlockchain() throws Exception {
     String tempPropsFile = createPropertiesFile(false, true, true);
-    Main.main(
+    ConditionalExample.main(
         new String[] {GpactCrossControlManagerGroup.GpactVersion.V1.toString(), tempPropsFile});
   }
 
   @Test
   public void directSignSerialMultiBlockchain() throws Exception {
     String tempPropsFile = createPropertiesFile(true, true, false);
-    Main.main(
+    ConditionalExample.main(
         new String[] {GpactCrossControlManagerGroup.GpactVersion.V1.toString(), tempPropsFile});
   }
 
@@ -34,14 +34,14 @@ public class ConditionalTest extends AbstractExampleTest {
   @Test
   public void transferSerialMultiBlockchain() throws Exception {
     String tempPropsFile = createPropertiesFile(false, true, false);
-    Main.main(
+    ConditionalExample.main(
         new String[] {GpactCrossControlManagerGroup.GpactVersion.V1.toString(), tempPropsFile});
   }
 
   @Test
   public void fakeMessagingSerialMultiBlockchainGpactV2() throws Exception {
     String tempPropsFile = createPropertiesFile(MessagingType.FAKE, true, false);
-    Main.main(
+    ConditionalExample.main(
         new String[] {GpactCrossControlManagerGroup.GpactVersion.V2.toString(), tempPropsFile});
   }
 }

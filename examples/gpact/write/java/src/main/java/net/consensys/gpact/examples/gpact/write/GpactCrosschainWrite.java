@@ -68,51 +68,54 @@ public class GpactCrosschainWrite extends GpactExampleBase {
 
     int value = 7;
 
-    for (int numExecutions = 0; numExecutions < NUM_TIMES_EXECUTE; numExecutions++) {
-      LOG.info("Execution: {} **************************", numExecutions);
-      StatsHolder.log("Execution: " + numExecutions + " **************************");
+    try {
+      for (int numExecutions = 0; numExecutions < NUM_TIMES_EXECUTE; numExecutions++) {
+        LOG.info("Execution: {} **************************", numExecutions);
+        StatsHolder.log("Execution: " + numExecutions + " **************************");
 
-      value += numExecutions;
+        value += numExecutions;
 
-      BigInteger val = BigInteger.valueOf(value);
+        BigInteger val = BigInteger.valueOf(value);
 
-      simContractA.doCrosschainWrite(val);
+        simContractA.doCrosschainWrite(val);
 
-      LOG.info("Function Calls");
-      String rlpSet = simContractB.getRlpFunctionSignature_Set();
-      LOG.info(" ContractB: Set: {}", rlpSet);
-      String rlpCrosschainWrite = simContractA.getRlpFunctionSignature_DoCrosschainWrite();
-      LOG.info(" ContractA: DoCrosschainWrite: {}", rlpCrosschainWrite);
+        LOG.info("Function Calls");
+        String rlpSet = simContractB.getRlpFunctionSignature_Set();
+        LOG.info(" ContractB: Set: {}", rlpSet);
+        String rlpCrosschainWrite = simContractA.getRlpFunctionSignature_DoCrosschainWrite();
+        LOG.info(" ContractA: DoCrosschainWrite: {}", rlpCrosschainWrite);
 
-      CallExecutionTree getFunction =
-          new CallExecutionTree(bc2BcId, contractBContractAddress, rlpSet);
-      ArrayList<CallExecutionTree> rootCalls = new ArrayList<>();
-      rootCalls.add(getFunction);
-      CallExecutionTree callGraph =
-          new CallExecutionTree(rootBcId, contractAContractAddress, rlpCrosschainWrite, rootCalls);
+        CallExecutionTree getFunction =
+            new CallExecutionTree(bc2BcId, contractBContractAddress, rlpSet);
+        ArrayList<CallExecutionTree> rootCalls = new ArrayList<>();
+        rootCalls.add(getFunction);
+        CallExecutionTree callGraph =
+            new CallExecutionTree(
+                rootBcId, contractAContractAddress, rlpCrosschainWrite, rootCalls);
 
-      CrosschainCallResult result =
-          crossControlManagerGroup.executeCrosschainCall(
-              exampleManager.getExecutionEngine(), callGraph, 300);
+        CrosschainCallResult result =
+            crossControlManagerGroup.executeCrosschainCall(
+                exampleManager.getExecutionEngine(), callGraph, 300);
 
-      LOG.info("Success: {}", result.isSuccessful());
+        LOG.info("Success: {}", result.isSuccessful());
 
-      TransactionReceipt txR = result.getTransactionReceipt(CrosschainCallResult.ROOT_CALL);
-      bc2ContractBBlockchain.showEvents(txR);
-      BigInteger valWritten = bc2ContractBBlockchain.showValueWritten();
+        TransactionReceipt txR = result.getTransactionReceipt(CrosschainCallResult.ROOT_CALL);
+        bc2ContractBBlockchain.showEvents(txR);
+        BigInteger valWritten = bc2ContractBBlockchain.showValueWritten();
 
-      if (!result.isSuccessful()) {
-        throw new Exception("Crosschain call failed");
+        if (!result.isSuccessful()) {
+          throw new Exception("Crosschain call failed");
+        }
+        if (valWritten.intValue() != value) {
+          throw new Exception("Written value not correct");
+        }
       }
-      if (valWritten.intValue() != value) {
-        throw new Exception("Written value not correct");
-      }
+    } finally {
+      bc1ContractABlockchain.shutdown();
+      bc2ContractBBlockchain.shutdown();
+
+      StatsHolder.log("End");
+      StatsHolder.print();
     }
-
-    bc1ContractABlockchain.shutdown();
-    bc2ContractBBlockchain.shutdown();
-
-    StatsHolder.log("End");
-    StatsHolder.print();
   }
 }

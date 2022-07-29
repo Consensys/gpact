@@ -16,21 +16,21 @@ public class HotelTrainTest extends AbstractExampleTest {
   @Test
   public void directSignSerialMultiBlockchain() throws Exception {
     String tempPropsFile = createPropertiesFile(true, true, false);
-    HotelTrain.main(
+    HotelTrainExample.main(
         new String[] {GpactCrossControlManagerGroup.GpactVersion.V1.toString(), tempPropsFile});
   }
 
   @Test
   public void transferSerialMultiBlockchain() throws Exception {
     String tempPropsFile = createPropertiesFile(false, true, false);
-    HotelTrain.main(
+    HotelTrainExample.main(
         new String[] {GpactCrossControlManagerGroup.GpactVersion.V1.toString(), tempPropsFile});
   }
 
   @Test
   public void directParallelMultiBlockchain() throws Exception {
     String tempPropsFile = createPropertiesFile(true, false, false);
-    HotelTrain.main(
+    HotelTrainExample.main(
         new String[] {GpactCrossControlManagerGroup.GpactVersion.V1.toString(), tempPropsFile});
   }
 
@@ -39,7 +39,7 @@ public class HotelTrainTest extends AbstractExampleTest {
   @Test
   public void fakeMessagingParallelMultiBlockchainGpactV2() throws Exception {
     String tempPropsFile = createPropertiesFile(MessagingType.FAKE, false, false);
-    HotelTrain.main(
+    HotelTrainExample.main(
         new String[] {GpactCrossControlManagerGroup.GpactVersion.V2.toString(), tempPropsFile});
   }
 }
