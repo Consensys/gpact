@@ -196,6 +196,7 @@ contract GpactV2CrosschainControl is
         Called calldata _target,
         Caller calldata _caller
     ) external {
+        require(_callPath.length > 0, "Call path length too short");
         uint256[] memory callPathMem = _callPath;
 
         decodeAndVerifyEvents(_events, true);
