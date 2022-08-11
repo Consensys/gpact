@@ -15,17 +15,19 @@
 pragma solidity >=0.8;
 
 import "../common/CbcDecVer.sol";
-import "./CallPathCallExecutionTreeV2.sol";
+import "./CallExecutionTreeV2.sol";
 import "../interface/LockableStorageInterface.sol";
 import "../interface/CrosschainLockingInterface.sol";
 import "../interface/CrosschainFunctionCallReturnInterface.sol";
 import "../interface/AtomicHiddenAuthParameters.sol";
 import "../../common/ResponseProcessUtil.sol";
+import "../common/CallPath.sol";
 
 contract GpactV2CrosschainControl is
     CrosschainFunctionCallReturnInterface,
     CbcDecVer,
-    CallPathCallExecutionTreeV2,
+    CallExecutionTreeV2,
+    CallPath,
     CrosschainLockingInterface,
     AtomicHiddenAuthParameters,
     ResponseProcessUtil
@@ -85,6 +87,18 @@ contract GpactV2CrosschainControl is
         bytes eventData;
         // Encoded signatures or proofs proving that the blockchain id, cbc address, and event data can be trusted.
         bytes signatures;
+    }
+
+    // The entry point function that called this blockchain
+    struct Caller {
+        uint256 blockchainId;
+        address addr;
+        bytes32 funcCallHash;
+    }
+
+    struct Called {
+        address addr;
+        bytes funcCallData;
     }
 
     uint256 public myBlockchainId;
@@ -172,16 +186,15 @@ contract GpactV2CrosschainControl is
      * @param _events Array of events. Array offset 0 must be the start event. Other events must be segment events.
      * @param _callPath    The part of the call tree to be executed.
      * @param _callExecutionTree The call tree to be executed. The message digest of this must match the call tree hash emitted in the start event.
-     * @param _targetContract The contract to be called. A combination of this blockchain, the tartget contract and the target function call data must match the function call hash in the call tree at the call path.
-     * @param _targetFunctionCallData The call data to be called. A combination of this blockchain, the tartget contract and the target function call data must match the function call hash in the call tree at the call path.
+     * @param _target The function to be called.
+     * @param _caller The entry point function that called this segment.
      */
     function segment(
-        // TODO historically, Web3J didn't support arrays of structs in the Java code generator.
         EventInfo[] calldata _events,
         uint256[] calldata _callPath,
         bytes calldata _callExecutionTree,
-        address _targetContract,
-        bytes calldata _targetFunctionCallData
+        Called calldata _target,
+        Caller calldata _caller
     ) external {
         uint256[] memory callPathMem = _callPath;
 
@@ -200,10 +213,19 @@ contract GpactV2CrosschainControl is
         uint256 crosschainTransactionId;
         //uint256 timeout;
         bytes32 callExecutionTreeHash;
-        address startCaller;
-        (crosschainTransactionId, startCaller, , callExecutionTreeHash) = abi
-            .decode(_events[0].eventData, (uint256, address, uint256, bytes32));
-        require(startCaller == tx.origin, "EOA does not match start event");
+        {
+            address startCaller;
+            (
+                crosschainTransactionId,
+                startCaller,
+                ,
+                callExecutionTreeHash
+            ) = abi.decode(
+                _events[0].eventData,
+                (uint256, address, uint256, bytes32)
+            );
+            require(startCaller == tx.origin, "EOA does not match start event");
+        }
 
         // Check that the call execution tree matches the hash form the start event.
         {
@@ -256,14 +278,43 @@ contract GpactV2CrosschainControl is
             crosschainTransactionId
         );
 
+        // Add application authentication information to the end of the call data.
+        // For root transaction have parentBcId and parentContract == 0
+        uint256 parentBcId;
+        address parentContract;
+        {
+            uint256[] memory parentCallPath = determineParentCallPath(
+                _callPath
+            );
+            bytes32 expectedParentFunctionCallHash = extractTargetHashFromCallGraph(
+                    _callExecutionTree,
+                    parentCallPath
+                );
+            bytes32 actualParentFunctionCallHash = keccak256(
+                abi.encodePacked(
+                    _caller.blockchainId,
+                    _caller.addr,
+                    _caller.funcCallHash
+                )
+            );
+
+            require(
+                actualParentFunctionCallHash == expectedParentFunctionCallHash,
+                "Parent call parameters incorrect"
+            );
+            parentBcId = _caller.blockchainId;
+            parentContract = _caller.addr;
+        }
+
         bool isSuccess;
         bytes memory returnValueEncoded;
         (isSuccess, returnValueEncoded) = makeCall(
             _callExecutionTree,
             callPathMem,
             rootBcId,
-            _targetContract,
-            _targetFunctionCallData
+            _target,
+            parentBcId,
+            parentContract
         );
 
         // TODO emit segments understanding of root blockhain id
@@ -288,16 +339,13 @@ contract GpactV2CrosschainControl is
      * Execute the root call of the call execution tree.
      *
      * @param _events Array of events. Array offset 0 must be the start event. Other events must be segment events.
-     * @ param _callExecutionTree The call tree to be executed. The message digest of this must match the call tree hash emitted in the start event.
-     * @ param _targetContract The contract to be called. A combination of this blockchain, the tartget contract and the target function call data must match the function call hash in the call tree at the call path.
-     * @ param _targetFunctionCallData The call data to be called. A combination of this blockchain, the tartget contract and the target function call data must match the function call hash in the call tree at the call path.
+     * @param _callExecutionTree The call tree to be executed. The message digest of this must match the call tree hash emitted in the start event.
+     * @param _target The function to be called.
      */
     function root(
-        // TODO historically, Web3J didn't support arrays of structs in the Java code generator.
         EventInfo[] calldata _events,
         bytes calldata _callExecutionTree,
-        address _targetContract,
-        bytes calldata _targetFunctionCallData
+        Called calldata _target
     ) external {
         decodeAndVerifyEvents(_events, true);
 
@@ -397,8 +445,9 @@ contract GpactV2CrosschainControl is
             _callExecutionTree,
             callPathForRoot,
             rootBcId,
-            _targetContract,
-            _targetFunctionCallData
+            _target,
+            0,
+            address(0)
         );
 
         // Unlock contracts locked by the root transaction.
@@ -556,49 +605,34 @@ contract GpactV2CrosschainControl is
         bytes calldata _callTree,
         uint256[] memory _callPath,
         uint256 _rootBcId,
-        address _targetContract,
-        bytes calldata _targetCallData
+        Called calldata _target,
+        uint256 _parentBcId,
+        address _parentAddress
     ) private returns (bool, bytes memory) {
         // Check that the the hash of the function call indicated by the call path matches.
         bytes32 expectedFunctionCallHash = extractTargetHashFromCallGraph(
             _callTree,
             _callPath
         );
-        bytes32 functionHash = keccak256(_targetCallData);
+        bytes32 functionHash = keccak256(_target.funcCallData);
         bytes32 actualFunctionCallHash = keccak256(
-            abi.encodePacked(myBlockchainId, _targetContract, functionHash)
+            abi.encodePacked(myBlockchainId, _target.addr, functionHash)
         );
         require(
             expectedFunctionCallHash == actualFunctionCallHash,
             "Target function call hash does not match expected"
         );
 
-        // TODO how to do this without leaking information!
-        // Add application authentication information to the end of the call data.
-        // For root transaction have parentBcId and parentContract == 0
-        uint256 parentBcId;
-        address parentContract;
-        //        if (!(_callPath.length == 1 && _callPath[0] == 0)) {
-        //            // If not root transaction
-        //            uint256[] memory parentCallPath = determineParentCallPath(
-        //                _callPath
-        //            );
-        //            (
-        //                parentBcId,
-        //                parentContract, /* bytes memory parentFunctionCall */
-        //
-        //            ) = extractTargetFromCallGraph(_callGraph, parentCallPath, false);
-        //        }
         bytes memory functionCallWithAuth = encodeAtomicAuthParams(
-            _targetCallData,
+            _target.funcCallData,
             _rootBcId,
-            parentBcId,
-            parentContract
+            _parentBcId,
+            _parentAddress
         );
 
         bool isSuccess;
         bytes memory returnValueEncoded;
-        (isSuccess, returnValueEncoded) = _targetContract.call(
+        (isSuccess, returnValueEncoded) = _target.addr.call(
             functionCallWithAuth
         );
 

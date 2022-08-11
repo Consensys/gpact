@@ -156,6 +156,11 @@ public class CallExecutionTreeEncoderV2 extends CallExecutionTreeEncoderBase {
     return keccak256(Bytes.wrap(output)).toArray();
   }
 
+  public static byte[] encodeFunctionDataAndHash(final CallExecutionTree callTree) {
+    byte[] data = callTree.getFunctionCallDataAsBytes();
+    return keccak256(Bytes.wrap(data)).toArray();
+  }
+
   /**
    * Dump an encoded Call Execution Tree.
    *

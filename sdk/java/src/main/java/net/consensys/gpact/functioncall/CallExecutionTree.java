@@ -107,6 +107,10 @@ public class CallExecutionTree {
     return CallExecutionTreeEncoderV2.encodeFunctionCallAndHash(this);
   }
 
+  public byte[] getFunctionDataHash() {
+    return CallExecutionTreeEncoderV2.encodeFunctionDataAndHash(this);
+  }
+
   /**
    * Locate the CallExecutionTree object that matches the call path.
    *

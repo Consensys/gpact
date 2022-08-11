@@ -16,17 +16,19 @@ pragma solidity >=0.7.1;
 pragma experimental ABIEncoderV2;
 
 import "../common/CbcDecVer.sol";
-import "./CallPathCallExecutionTreeV1.sol";
+import "./CallExecutionTreeV1.sol";
 import "../interface/LockableStorageInterface.sol";
 import "../interface/CrosschainLockingInterface.sol";
 import "../interface/CrosschainFunctionCallReturnInterface.sol";
 import "../interface/AtomicHiddenAuthParameters.sol";
 import "../../common/ResponseProcessUtil.sol";
+import "../common/CallPath.sol";
 
 contract GpactCrosschainControl is
     CrosschainFunctionCallReturnInterface,
     CbcDecVer,
-    CallPathCallExecutionTreeV1,
+    CallExecutionTreeV1,
+    CallPath,
     CrosschainLockingInterface,
     AtomicHiddenAuthParameters,
     ResponseProcessUtil

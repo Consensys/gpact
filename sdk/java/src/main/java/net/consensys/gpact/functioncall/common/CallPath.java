@@ -4,6 +4,7 @@ import static net.consensys.gpact.functioncall.CrosschainCallResult.FIRST_CALL;
 import static net.consensys.gpact.functioncall.CrosschainCallResult.ROOT_CALL;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 
 public class CallPath {
@@ -45,5 +46,18 @@ public class CallPath {
 
   public static BigInteger calculateFirstCallMapKey() {
     return callPathToMapKey(FIRST_CALL);
+  }
+
+  // Don't call from root function
+  public static List<BigInteger> parentCallPath(List<BigInteger> callPath) {
+    List<BigInteger> callPathOfParent = new ArrayList<>(callPath);
+    int lastIndex = callPath.size() - 1;
+    if (callPath.get(lastIndex).compareTo(BigInteger.ZERO) != 0) {
+      callPathOfParent.set(lastIndex, BigInteger.ZERO);
+    } else {
+      callPathOfParent.remove(lastIndex);
+      callPathOfParent.set(lastIndex - 1, BigInteger.ZERO);
+    }
+    return callPathOfParent;
   }
 }
