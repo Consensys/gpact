@@ -27,8 +27,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
 
-public class Main extends GpactExampleBase {
-  static final Logger LOG = LogManager.getLogger(Main.class);
+public class ConditionalExample extends GpactExampleBase {
+  static final Logger LOG = LogManager.getLogger(ConditionalExample.class);
 
   public static void main(String[] args) throws Exception {
     StatsHolder.log("Example: Conditional Logic");
@@ -155,5 +155,9 @@ public class Main extends GpactExampleBase {
 
     StatsHolder.log("End");
     StatsHolder.print();
+
+    if (!result.isSuccessful()) {
+      throw new Exception("Crosschain call failed");
+    }
   }
 }

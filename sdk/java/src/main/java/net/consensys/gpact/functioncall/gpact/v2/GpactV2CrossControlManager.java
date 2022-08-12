@@ -24,6 +24,7 @@ import java.util.concurrent.CompletableFuture;
 import net.consensys.gpact.common.*;
 import net.consensys.gpact.functioncall.CallExecutionTree;
 import net.consensys.gpact.functioncall.CrosschainCallResult;
+import net.consensys.gpact.functioncall.common.CallPath;
 import net.consensys.gpact.functioncall.gpact.AbstractGpactCrossControlManager;
 import net.consensys.gpact.functioncall.gpact.GpactV2CrosschainControl;
 import net.consensys.gpact.messaging.SignedEvent;
@@ -172,17 +173,22 @@ public class GpactV2CrossControlManager extends AbstractGpactCrossControlManager
     String targetContract = functionCall.getContractAddress();
     byte[] targetFunctionCallData = functionCall.getFunctionCallDataAsBytes();
 
+    GpactV2CrosschainControl.Called target =
+        new GpactV2CrosschainControl.Called(targetContract, targetFunctionCallData);
+    CallExecutionTree parent =
+        callExecutionTree.fetchFunctionCall(CallPath.parentCallPath(callPath));
+    GpactV2CrosschainControl.Caller caller =
+        new GpactV2CrosschainControl.Caller(
+            parent.getBlockchainId().asBigInt(),
+            parent.getContractAddress(),
+            parent.getFunctionDataHash());
+
     TransactionReceipt txR;
     try {
       LOG.debug("Segment Transaction on blockchain {}", this.blockchainId);
       txR =
           this.crossBlockchainControlContract
-              .segment(
-                  events,
-                  callPath,
-                  callExecutionTreeV2Encoded,
-                  targetContract,
-                  targetFunctionCallData)
+              .segment(events, callPath, callExecutionTreeV2Encoded, target, caller)
               .send();
       StatsHolder.logGas("Segment Transaction", txR.getGasUsed());
     } catch (TransactionException ex) {
@@ -257,12 +263,15 @@ public class GpactV2CrossControlManager extends AbstractGpactCrossControlManager
     String targetContract = functionCall.getContractAddress();
     byte[] targetFunctionCallData = functionCall.getFunctionCallDataAsBytes();
 
+    GpactV2CrosschainControl.Called target =
+        new GpactV2CrosschainControl.Called(targetContract, targetFunctionCallData);
+
     TransactionReceipt txR;
     try {
       LOG.debug("Root Transaction on blockchain {}", this.blockchainId);
       txR =
           this.crossBlockchainControlContract
-              .root(events, callExecutionTreeV2Encoded, targetContract, targetFunctionCallData)
+              .root(events, callExecutionTreeV2Encoded, target)
               .send();
       StatsHolder.logGas("Root Transaction", txR.getGasUsed());
       if (!txR.isStatusOK()) {

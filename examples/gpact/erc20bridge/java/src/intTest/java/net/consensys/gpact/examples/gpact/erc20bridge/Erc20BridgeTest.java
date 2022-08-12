@@ -16,7 +16,6 @@ package net.consensys.gpact.examples.gpact.erc20bridge;
 
 import net.consensys.gpact.functioncall.gpact.GpactCrossControlManagerGroup;
 import net.consensys.gpact.helpers.AbstractExampleTest;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 public class Erc20BridgeTest extends AbstractExampleTest {
@@ -35,8 +34,6 @@ public class Erc20BridgeTest extends AbstractExampleTest {
         new String[] {GpactCrossControlManagerGroup.GpactVersion.V1.toString(), tempPropsFile});
   }
 
-  // TODO: Skip until crosschain application authentication is working
-  @Disabled
   @Test
   public void fakeMessagingSerialMultiBlockchainGpactV2() throws Exception {
     String tempPropsFile = createPropertiesFile(MessagingType.FAKE, true, false);

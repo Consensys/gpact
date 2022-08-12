@@ -21,7 +21,7 @@ import "../../common/BytesUtil.sol";
  *
  * See ../../../../../docs/call-tree-encoding.md for details of the call tree encoding formats.
  */
-contract CallPathCallExecutionTreeV2 is BytesUtil {
+contract CallExecutionTreeV2 is BytesUtil {
     // Call execution tree type related values.
     // Offset of the type field in the call tree.
     uint256 private constant OFFSET_OF_TYPE = 0;

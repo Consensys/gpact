@@ -138,20 +138,22 @@ public class ERC20TokenBridgeExample extends GpactExampleBase {
     chainA.showErc20Balances(users);
     chainB.showErc20Balances(users);
 
-    for (int numExecutions = 0; numExecutions < NUM_TIMES_EXECUTE; numExecutions++) {
-      LOG.info("Execution: {}  *****************", numExecutions);
-      StatsHolder.log("Execution: " + numExecutions + " **************************");
+    try {
+      for (int numExecutions = 0; numExecutions < NUM_TIMES_EXECUTE; numExecutions++) {
+        LOG.info("Execution: {}  *****************", numExecutions);
+        StatsHolder.log("Execution: " + numExecutions + " **************************");
 
-      user1.transfer(true, numExecutions + 7);
+        user1.transfer(true, numExecutions + 7);
 
-      chainA.showErc20Balances(users);
-      chainB.showErc20Balances(users);
+        chainA.showErc20Balances(users);
+        chainB.showErc20Balances(users);
+      }
+    } finally {
+      chainA.shutdown();
+      chainB.shutdown();
+
+      StatsHolder.log("End");
+      StatsHolder.print();
     }
-
-    chainA.shutdown();
-    chainB.shutdown();
-
-    StatsHolder.log("End");
-    StatsHolder.print();
   }
 }

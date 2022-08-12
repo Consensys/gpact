@@ -139,8 +139,26 @@ public class CallExecutionTreeEncoderV2 extends CallExecutionTreeEncoderBase {
   }
 
   public static byte[] encodeFunctionCallAndHash(final CallExecutionTree callTree) {
-    byte[] encodedFunction = encodeFunctionCall(callTree);
-    return keccak256(Bytes.wrap(encodedFunction)).toArray();
+    byte[] blockchainIdBytes = callTree.getBlockchainId().asBytes();
+    byte[] address = addressStringToBytes(callTree.getContractAddress());
+    byte[] data = callTree.getFunctionCallDataAsBytes();
+
+    byte[] hashOfFunctionCall = keccak256(Bytes.wrap(data)).toArray();
+
+    ByteBuffer buf = ByteBuffer.allocate(MAX_CALL_EX_TREE_SIZE);
+    buf.put(blockchainIdBytes);
+    buf.put(address);
+    buf.put(hashOfFunctionCall);
+    buf.flip();
+    byte[] output = new byte[buf.limit()];
+    buf.get(output);
+
+    return keccak256(Bytes.wrap(output)).toArray();
+  }
+
+  public static byte[] encodeFunctionDataAndHash(final CallExecutionTree callTree) {
+    byte[] data = callTree.getFunctionCallDataAsBytes();
+    return keccak256(Bytes.wrap(data)).toArray();
   }
 
   /**
@@ -177,11 +195,11 @@ public class CallExecutionTreeEncoderV2 extends CallExecutionTreeEncoderBase {
     int size = 0;
     switch (encodingType) {
       case ENCODING_FORMAT_V2_SINGLE_LAYER:
-        out.append(" Encoding Format: V2 single-layer");
+        out.append(" Encoding Format: V2 single-layer\n");
         size = processSingleLayer(out, buf);
         break;
       case ENCODING_FORMAT_V2_MULTI_LAYER:
-        out.append(" Encoding Format: V2 multi-layer");
+        out.append(" Encoding Format: V2 multi-layer\n");
         size = processRecursive(out, buf, 0) + 1; // the 1 accounts for the size of the type field
         break;
       default:

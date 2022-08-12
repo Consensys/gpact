@@ -27,8 +27,8 @@ import org.apache.logging.log4j.Logger;
  *
  * <p>Book a hotel room and a train seat atomically.
  */
-public class HotelTrain extends GpactExampleBase {
-  private static final Logger LOG = LogManager.getLogger(HotelTrain.class);
+public class HotelTrainExample extends GpactExampleBase {
+  private static final Logger LOG = LogManager.getLogger(HotelTrainExample.class);
 
   static int NUM_TIMES_EXECUTE = 1;
 
@@ -107,52 +107,54 @@ public class HotelTrain extends GpactExampleBase {
     train.showErc20Allowance(
         travelAgency.getTravelAgencyAccount(), train.getTrainContractAddress());
 
-    for (int numExecutions = 0; numExecutions <= NUM_TIMES_EXECUTE; numExecutions++) {
-      LOG.info("Execution: {}  *****************", numExecutions);
-      StatsHolder.log("Execution: " + numExecutions + " **************************");
+    try {
+      for (int numExecutions = 0; numExecutions <= NUM_TIMES_EXECUTE; numExecutions++) {
+        LOG.info("Execution: {}  *****************", numExecutions);
+        StatsHolder.log("Execution: " + numExecutions + " **************************");
 
-      BigInteger bookingId = travelAgency.book(date, exampleManager);
+        BigInteger bookingId = travelAgency.book(date, exampleManager);
 
-      hotel.showBookingInformation(bookingId);
-      train.showBookingInformation(bookingId);
-      hotel.showErc20Balances(accounts);
-      train.showErc20Balances(accounts);
-      hotel.showErc20Allowance(
-          travelAgency.getTravelAgencyAccount(), hotel.getHotelContractAddress());
-      train.showErc20Allowance(
-          travelAgency.getTravelAgencyAccount(), train.getTrainContractAddress());
+        hotel.showBookingInformation(bookingId);
+        train.showBookingInformation(bookingId);
+        hotel.showErc20Balances(accounts);
+        train.showErc20Balances(accounts);
+        hotel.showErc20Allowance(
+            travelAgency.getTravelAgencyAccount(), hotel.getHotelContractAddress());
+        train.showErc20Allowance(
+            travelAgency.getTravelAgencyAccount(), train.getTrainContractAddress());
 
-      travelAgency.book(date, exampleManager);
-      travelAgency.book(date, exampleManager);
-
-      hotel.showErc20Balances(accounts);
-      train.showErc20Balances(accounts);
-      hotel.showErc20Allowance(
-          travelAgency.getTravelAgencyAccount(), hotel.getHotelContractAddress());
-      train.showErc20Allowance(
-          travelAgency.getTravelAgencyAccount(), train.getTrainContractAddress());
-      try {
         travelAgency.book(date, exampleManager);
-        throw new Exception("Exception now thrown as expected");
-      } catch (Exception ex) {
-        LOG.info("Exception thrown as expected: not enough train seats");
+        travelAgency.book(date, exampleManager);
+
+        hotel.showErc20Balances(accounts);
+        train.showErc20Balances(accounts);
+        hotel.showErc20Allowance(
+            travelAgency.getTravelAgencyAccount(), hotel.getHotelContractAddress());
+        train.showErc20Allowance(
+            travelAgency.getTravelAgencyAccount(), train.getTrainContractAddress());
+        try {
+          travelAgency.book(date, exampleManager);
+          throw new Exception("Exception now thrown as expected");
+        } catch (Exception ex) {
+          LOG.info("Exception thrown as expected: not enough train seats");
+        }
+
+        hotel.showErc20Balances(accounts);
+        train.showErc20Balances(accounts);
+        hotel.showErc20Allowance(
+            travelAgency.getTravelAgencyAccount(), hotel.getHotelContractAddress());
+        train.showErc20Allowance(
+            travelAgency.getTravelAgencyAccount(), train.getTrainContractAddress());
+
+        date++;
       }
+    } finally {
+      hotel.shutdown();
+      train.shutdown();
+      travelAgency.shutdown();
 
-      hotel.showErc20Balances(accounts);
-      train.showErc20Balances(accounts);
-      hotel.showErc20Allowance(
-          travelAgency.getTravelAgencyAccount(), hotel.getHotelContractAddress());
-      train.showErc20Allowance(
-          travelAgency.getTravelAgencyAccount(), train.getTrainContractAddress());
-
-      date++;
+      StatsHolder.log("End");
+      StatsHolder.print();
     }
-
-    hotel.shutdown();
-    train.shutdown();
-    travelAgency.shutdown();
-
-    StatsHolder.log("End");
-    StatsHolder.print();
   }
 }

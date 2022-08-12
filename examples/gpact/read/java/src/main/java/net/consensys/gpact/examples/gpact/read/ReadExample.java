@@ -30,8 +30,8 @@ import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
-public class Main extends GpactExampleBase {
-  static final Logger LOG = LogManager.getLogger(Main.class);
+public class ReadExample extends GpactExampleBase {
+  static final Logger LOG = LogManager.getLogger(ReadExample.class);
 
   // Running multiple times will reveal any gas difference due to rerunning.
   static int NUM_TIMES_EXECUTE = 2;
@@ -72,38 +72,43 @@ public class Main extends GpactExampleBase {
     SimContractA simContractA = new SimContractA(bc1ContractABlockchain);
     SimContractB simContractB = new SimContractB(bc2ContractBBlockchain);
 
-    for (int numExecutions = 0; numExecutions < NUM_TIMES_EXECUTE; numExecutions++) {
-      LOG.info("Execution: {}  *****************", numExecutions);
-      StatsHolder.log("Execution: " + numExecutions + " **************************");
+    try {
+      for (int numExecutions = 0; numExecutions < NUM_TIMES_EXECUTE; numExecutions++) {
+        LOG.info("Execution: {}  *****************", numExecutions);
+        StatsHolder.log("Execution: " + numExecutions + " **************************");
 
-      LOG.info("Function Calls");
-      String rlpGet = simContractB.getRlpFunctionSignature_Get();
-      LOG.info(" ContractB: Get: {}", rlpGet);
-      String rlpCrosschainRead = simContractA.getRlpFunctionSignature_DoCrosschainRead();
-      LOG.info(" ContractA: DoCrosschainRead: {}", rlpCrosschainRead);
+        LOG.info("Function Calls");
+        String rlpGet = simContractB.getRlpFunctionSignature_Get();
+        LOG.info(" ContractB: Get: {}", rlpGet);
+        String rlpCrosschainRead = simContractA.getRlpFunctionSignature_DoCrosschainRead();
+        LOG.info(" ContractA: DoCrosschainRead: {}", rlpCrosschainRead);
 
-      ArrayList<CallExecutionTree> rootCalls = new ArrayList<>();
-      CallExecutionTree getFunction =
-          new CallExecutionTree(bc2BcId, contractBContractAddress, rlpGet);
-      rootCalls.add(getFunction);
-      CallExecutionTree callGraph =
-          new CallExecutionTree(rootBcId, contractAContractAddress, rlpCrosschainRead, rootCalls);
+        ArrayList<CallExecutionTree> rootCalls = new ArrayList<>();
+        CallExecutionTree getFunction =
+            new CallExecutionTree(bc2BcId, contractBContractAddress, rlpGet);
+        rootCalls.add(getFunction);
+        CallExecutionTree callGraph =
+            new CallExecutionTree(rootBcId, contractAContractAddress, rlpCrosschainRead, rootCalls);
 
-      CrosschainCallResult result =
-          crossControlManagerGroup.executeCrosschainCall(
-              exampleManager.getExecutionEngine(), callGraph, 300);
+        CrosschainCallResult result =
+            crossControlManagerGroup.executeCrosschainCall(
+                exampleManager.getExecutionEngine(), callGraph, 300);
 
-      LOG.info("Success: {}", result.isSuccessful());
+        LOG.info("Success: {}", result.isSuccessful());
+        if (!result.isSuccessful()) {
+          throw new Exception("Crosschain transaction failed");
+        }
 
-      TransactionReceipt txR = result.getTransactionReceipt(CrosschainCallResult.ROOT_CALL);
-      bc1ContractABlockchain.showEvents(txR);
-      bc1ContractABlockchain.showValueRead();
+        TransactionReceipt txR = result.getTransactionReceipt(CrosschainCallResult.ROOT_CALL);
+        bc1ContractABlockchain.showEvents(txR);
+        bc1ContractABlockchain.showValueRead();
+      }
+    } finally {
+      bc1ContractABlockchain.shutdown();
+      bc2ContractBBlockchain.shutdown();
+
+      StatsHolder.log("End");
+      StatsHolder.print();
     }
-
-    bc1ContractABlockchain.shutdown();
-    bc2ContractBBlockchain.shutdown();
-
-    StatsHolder.log("End");
-    StatsHolder.print();
   }
 }
