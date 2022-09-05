@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 ConsenSys Software Inc
+ * Copyright 2022 ConsenSys Software Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -12,13 +12,11 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package net.consensys.gpact.examples.gpact.read;
+package net.consensys.gpact.examples.gpact.returnmultivalues;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 import net.consensys.gpact.common.*;
-import net.consensys.gpact.examples.gpact.read.sim.SimContractA;
-import net.consensys.gpact.examples.gpact.read.sim.SimContractB;
 import net.consensys.gpact.functioncall.CallExecutionTree;
 import net.consensys.gpact.functioncall.CrossControlManagerGroup;
 import net.consensys.gpact.functioncall.CrosschainCallResult;
@@ -30,14 +28,14 @@ import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
-public class ReadExample extends GpactExampleBase {
-  static final Logger LOG = LogManager.getLogger(ReadExample.class);
+public class ReturnMultiExample extends GpactExampleBase {
+  static final Logger LOG = LogManager.getLogger(ReturnMultiExample.class);
 
   // Running multiple times will reveal any gas difference due to rerunning.
   static int NUM_TIMES_EXECUTE = 2;
 
   public static void main(String[] args) throws Exception {
-    StatsHolder.log("Example: Read");
+    StatsHolder.log("Example: Return Multi");
     LOG.info("Started");
 
     GpactExampleSystemManager exampleManager = getExampleSystemManager(args);
@@ -67,32 +65,28 @@ public class ReadExample extends GpactExampleBase {
         contractBContractAddress);
     String contractAContractAddress = bc1ContractABlockchain.contractA.getContractAddress();
 
-    // Create simulators
-    // Note that no simulation is needed, as there are no parameter values.
-    SimContractA simContractA = new SimContractA(bc1ContractABlockchain);
-    SimContractB simContractB = new SimContractB(bc2ContractBBlockchain);
-
     try {
       for (int numExecutions = 0; numExecutions < NUM_TIMES_EXECUTE; numExecutions++) {
         LOG.info("Execution: {}  *****************", numExecutions);
         StatsHolder.log("Execution: " + numExecutions + " **************************");
 
         LOG.info("Function Calls");
-        String rlpGet = simContractB.getRlpFunctionSignature_Get();
+        String rlpGet = bc2ContractBBlockchain.getRlpFunctionSignature_Get(val);
         LOG.info(" ContractB: Get: {}", rlpGet);
-        String rlpCrosschainRead = simContractA.getRlpFunctionSignature_DoCrosschainRead();
+        String rlpCrosschainRead =
+            bc1ContractABlockchain.getRlpFunctionSignature_DoCrosschainRead(val);
         LOG.info(" ContractA: DoCrosschainRead: {}", rlpCrosschainRead);
 
         ArrayList<CallExecutionTree> rootCalls = new ArrayList<>();
         CallExecutionTree getFunction =
             new CallExecutionTree(bc2BcId, contractBContractAddress, rlpGet);
         rootCalls.add(getFunction);
-        CallExecutionTree callGraph =
+        CallExecutionTree callTree =
             new CallExecutionTree(rootBcId, contractAContractAddress, rlpCrosschainRead, rootCalls);
 
         CrosschainCallResult result =
             crossControlManagerGroup.executeCrosschainCall(
-                exampleManager.getExecutionEngine(), callGraph, 300);
+                exampleManager.getExecutionEngine(), callTree, 300);
 
         LOG.info("Success: {}", result.isSuccessful());
         if (!result.isSuccessful()) {
@@ -100,8 +94,7 @@ public class ReadExample extends GpactExampleBase {
         }
 
         TransactionReceipt txR = result.getTransactionReceipt(CrosschainCallResult.ROOT_CALL);
-        bc1ContractABlockchain.showEvents(txR);
-        bc1ContractABlockchain.showAndCheckValueRead(val);
+        bc1ContractABlockchain.checkEvents(txR, val.add(BigInteger.ONE));
       }
     } finally {
       bc1ContractABlockchain.shutdown();

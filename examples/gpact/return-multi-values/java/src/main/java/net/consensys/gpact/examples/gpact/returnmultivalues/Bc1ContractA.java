@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 ConsenSys Software Inc
+ * Copyright 2022 ConsenSys Software Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -12,7 +12,7 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-package net.consensys.gpact.examples.gpact.read;
+package net.consensys.gpact.examples.gpact.returnmultivalues;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -52,29 +52,39 @@ public class Bc1ContractA extends AbstractBlockchain {
         this.blockchainId);
   }
 
-  public String getRlpFunctionSignature_DoCrosschainRead() {
-    return this.contractA.getABI_doCrosschainRead();
+  public String getContractAddress() {
+    return this.contractA.getContractAddress();
   }
 
-  public void showEvents(TransactionReceipt txR) {
-    LOG.info("ContractA: Value Read Events");
-    List<ContractA.ValueReadEventResponse> events = this.contractA.getValueReadEvents(txR);
-    for (ContractA.ValueReadEventResponse e : events) {
-      LOG.info(" Value: {}", e._val);
-    }
+  public String getRlpFunctionSignature_DoCrosschainRead(BigInteger val) {
+    return this.contractA.getABI_doCrosschainRead(val);
   }
 
-  public void showAndCheckValueRead(BigInteger expectedVal) throws Exception {
-    boolean isLocked = this.contractA.isLocked(BigInteger.ZERO).send();
-    LOG.info("Contract A's lockable storage: locked: {}", isLocked);
-    if (isLocked) {
-      throw new RuntimeException(
-          "Contract A's lockable storage locked after end of crosschain transaction");
+  public void checkEvents(TransactionReceipt txR, BigInteger expectedVal) throws Exception {
+    LOG.info("ContractA: Value Events");
+    List<ContractA.FailedEventResponse> failedEvents = this.contractA.getFailedEvents(txR);
+    if (!failedEvents.isEmpty()) {
+      LOG.error("Fail Event emitted");
+      throw new Exception("Fail Event emitted");
     }
-    BigInteger actualVal = this.contractA.getVal().send();
-    LOG.info("ContractA: Value: {}", actualVal);
-    if (expectedVal.compareTo(actualVal) != 0) {
-      throw new RuntimeException("Expected " + expectedVal + " but actual was " + actualVal);
+
+    List<ContractA.ReturnValsEventResponse> returnValsEvents =
+        this.contractA.getReturnValsEvents(txR);
+    if (returnValsEvents.size() != 1) {
+      LOG.error("Unexpected number of return values events: {}", returnValsEvents.size());
+      throw new Exception("Unexpected number of return values events");
+    }
+    for (ContractA.ReturnValsEventResponse e : returnValsEvents) {
+      if (e.val1.compareTo(expectedVal) != 0) {
+        LOG.error("Unexpected value returned (Val1): {}", e.val1);
+      }
+      if (e.val3.equalsIgnoreCase(getContractAddress())) {
+        LOG.error("Unexpected value returned (Val3): {}", e.val3);
+      }
+
+      LOG.info(" Val1: {}", e.val1);
+      LOG.info(" Val2: {}", new BigInteger(1, e.val2).toString(16));
+      LOG.info(" Val3: {}", e.val3);
     }
   }
 }
