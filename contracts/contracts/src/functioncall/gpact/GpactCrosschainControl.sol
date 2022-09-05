@@ -495,7 +495,7 @@ contract GpactCrosschainControl is
         if (failed) {
             return uint256(0);
         }
-        return BytesUtil.bytesToUint256(returnValue, 0);
+        return abi.decode(returnValue, (uint256));
     }
 
     /**
