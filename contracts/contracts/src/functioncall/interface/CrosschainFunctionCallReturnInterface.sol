@@ -25,6 +25,30 @@ interface CrosschainFunctionCallReturnInterface is
     CrosschainFunctionCallInterface
 {
     /**
+     * Call a function on another blockchain that returns one or more values. Function call implementations
+     * may implement this function. Implementations that do not support this functionality should revert
+     * with the message, "NOT SUPPORTED: crossBlockchainCallWithReturn".
+     *
+     * Return values are ABI encoded. For instance, if the function returns the values (uint8, bytes32, address),
+     * then the calling code should process the bytes output of this function using the following code:
+     *
+     * (uint8 val1, bytes32 val2, address val3) = abi.decode(returnValue, (uint8, bytes32, address));
+     *
+
+     *
+     * @param _bcId Blockchain identifier of blockchain to be called.
+     * @param _contract The address of the contract to be called.
+     * @param _functionCallData The function selector and parameter data encoded using ABI encoding rules.
+     * @return bool: True if the function executed without reverting.
+     * @return bytes: ABI encoded return result.
+     */
+    function crossBlockchainCallWithReturn(
+        uint256 _bcId,
+        address _contract,
+        bytes calldata _functionCallData
+    ) external returns (bool, bytes memory);
+
+    /**
      * Call a function on another blockchain that returns a uint256 value. Function call implementations
      * may implement this function. Implementations that do not support this functionality should revert
      * with the message, "NOT SUPPORTED: crossBlockchainCallReturnsUint256".
@@ -32,6 +56,7 @@ interface CrosschainFunctionCallReturnInterface is
      * @param _bcId Blockchain identifier of blockchain to be called.
      * @param _contract The address of the contract to be called.
      * @param _functionCallData The function selector and parameter data encoded using ABI encoding rules.
+     * @return UINT256 result of function call.
      */
     function crossBlockchainCallReturnsUint256(
         uint256 _bcId,

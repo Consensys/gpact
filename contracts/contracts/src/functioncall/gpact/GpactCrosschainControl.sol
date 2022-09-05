@@ -468,6 +468,18 @@ contract GpactCrosschainControl is
         }
     }
 
+    function crossBlockchainCallWithReturn(
+        uint256 _blockchainId,
+        address _contract,
+        bytes calldata _functionCallData
+    ) public override returns (bool failed, bytes memory returnValue) {
+        (failed, returnValue) = commonCallProcessing(
+            _blockchainId,
+            _contract,
+            _functionCallData
+        );
+    }
+
     function crossBlockchainCallReturnsUint256(
         uint256 _blockchainId,
         address _contract,
@@ -475,7 +487,7 @@ contract GpactCrosschainControl is
     ) external override returns (uint256) {
         bool failed;
         bytes memory returnValue;
-        (failed, returnValue) = commonCallProcessing(
+        (failed, returnValue) = crossBlockchainCallWithReturn(
             _blockchainId,
             _contract,
             _functionCallData

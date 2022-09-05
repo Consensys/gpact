@@ -13,6 +13,7 @@ include 'examples-gpact-erc20bridge'
 include 'examples-gpact-hoteltrain'
 include 'examples-gpact-nft'
 include 'examples-gpact-read'
+include 'return-multi-values'
 include 'examples-gpact-trade'
 include 'examples-gpact-write'
 
@@ -43,6 +44,7 @@ project(":examples-gpact-erc20bridge").projectDir = file("examples/gpact/erc20br
 project(":examples-gpact-hoteltrain").projectDir = file("examples/gpact/hotel-train/java")
 project(":examples-gpact-nft").projectDir = file("examples/gpact/nft")
 project(":examples-gpact-read").projectDir = file("examples/gpact/read/java")
+project(":return-multi-values").projectDir = file("examples/gpact/return-multi-values/java")
 project(":examples-gpact-trade").projectDir = file("examples/gpact/trade/java")
 project(":examples-gpact-write").projectDir = file("examples/gpact/write/java")
 
