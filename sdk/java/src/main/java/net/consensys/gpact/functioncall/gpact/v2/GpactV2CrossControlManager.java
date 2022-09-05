@@ -207,8 +207,6 @@ public class GpactV2CrossControlManager extends AbstractGpactCrossControlManager
         convertNotEnoughCalls(this.crossBlockchainControlContract.getNotEnoughCallsEvents(txR)));
     showCallFailureEvents(
         convertCallFailure(this.crossBlockchainControlContract.getCallFailureEvents(txR)));
-    showCallResultEvents(
-        convertCallResult(this.crossBlockchainControlContract.getCallResultEvents(txR)));
     showDumpEvents(convertDump(this.crossBlockchainControlContract.getDumpEvents(txR)));
 
     List<net.consensys.gpact.functioncall.gpact.GpactV2CrosschainControl.SegmentEventResponse>
@@ -290,8 +288,6 @@ public class GpactV2CrossControlManager extends AbstractGpactCrossControlManager
         convertNotEnoughCalls(this.crossBlockchainControlContract.getNotEnoughCallsEvents(txR)));
     showCallFailureEvents(
         convertCallFailure(this.crossBlockchainControlContract.getCallFailureEvents(txR)));
-    showCallResultEvents(
-        convertCallResult(this.crossBlockchainControlContract.getCallResultEvents(txR)));
     showDumpEvents(this.convertDump(this.crossBlockchainControlContract.getDumpEvents(txR)));
 
     List<net.consensys.gpact.functioncall.gpact.GpactV2CrosschainControl.RootEventResponse>
@@ -379,19 +375,6 @@ public class GpactV2CrossControlManager extends AbstractGpactCrossControlManager
     for (net.consensys.gpact.functioncall.gpact.GpactV2CrosschainControl.CallFailureEventResponse
         e : callFailureEventResponses) {
       CallFailureEventResponse event = new CallFailureEventResponse(e._revertReason);
-      result.add(event);
-    }
-    return result;
-  }
-
-  private List<CallResultEventResponse> convertCallResult(
-      List<net.consensys.gpact.functioncall.gpact.GpactV2CrosschainControl.CallResultEventResponse>
-          callResultEventResponses) {
-    List<CallResultEventResponse> result = new ArrayList<>();
-    for (net.consensys.gpact.functioncall.gpact.GpactV2CrosschainControl.CallResultEventResponse e :
-        callResultEventResponses) {
-      CallResultEventResponse event =
-          new CallResultEventResponse(e._blockchainId, e._contract, e._functionCall, e._result);
       result.add(event);
     }
     return result;

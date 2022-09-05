@@ -62,12 +62,6 @@ contract GpactV2CrosschainControl is
         address _actualContract,
         bytes _actualFunctionCall
     );
-    event CallResult(
-        uint256 _blockchainId,
-        address _contract,
-        bytes _functionCall,
-        bytes _result
-    );
     event NotEnoughCalls(
         uint256 _expectedNumberOfCalls,
         uint256 _actualNumberOfCalls
@@ -470,10 +464,7 @@ contract GpactV2CrosschainControl is
      *
      * @param _events Array of events. Array offset 0 must be the root event. Other events must be segment events.
      */
-    function signalling(
-        // TODO historically, Web3J didn't support arrays of structs in the Java code generator.
-        EventInfo[] calldata _events
-    ) external {
+    function signalling(EventInfo[] calldata _events) external {
         decodeAndVerifyEvents(_events, false);
 
         // Extract information from the root event.
@@ -768,8 +759,6 @@ contract GpactV2CrosschainControl is
         }
         bytes memory retVal = activeCallReturnValues[returnValuesIndex++];
         activeCallReturnValuesIndex = returnValuesIndex;
-        // TODO CallResult events are not needed and cost gas.
-        emit CallResult(_blockchainId, _contract, _functionCallData, retVal);
         return (false, retVal);
     }
 
