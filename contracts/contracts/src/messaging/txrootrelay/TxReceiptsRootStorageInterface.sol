@@ -28,18 +28,12 @@ interface TxReceiptsRootStorageInterface is ERC165 {
      * * The any signature in the array can not be verified using the corresponding signer address in the _signer array
      *
      * @param _blockchainId Identifier of blockchain that the transaction receipt belongs to
-     * @param _signers Array of addresses that correspond to the public keys of the signers.
-     * @param _sigR Array of R components of the signatures to be verified.
-     * @param _sigS Array of S components of the signatures to be verified.
-     * @param _sigV Array of V components of the signatures to be verified.
+     * @param _signatures signatures to be verified.
      * @param _txReceiptsRoot The transaction receipt root to add to the data store.
      */
     function addTxReceiptRoot(
         uint256 _blockchainId,
-        address[] calldata _signers,
-        bytes32[] calldata _sigR,
-        bytes32[] calldata _sigS,
-        uint8[] calldata _sigV,
+        bytes calldata _signatures,
         bytes32 _txReceiptsRoot
     ) external;
 

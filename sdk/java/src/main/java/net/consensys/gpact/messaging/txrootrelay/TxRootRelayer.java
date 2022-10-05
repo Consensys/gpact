@@ -15,10 +15,10 @@
 package net.consensys.gpact.messaging.txrootrelay;
 
 import java.io.IOException;
-import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import net.consensys.gpact.common.*;
+import net.consensys.gpact.messaging.common.SignatureBlob;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
@@ -51,24 +51,26 @@ public class TxRootRelayer extends AbstractBlockchain {
     signers.add(signer);
   }
 
-  public Signatures sign(byte[] transactionReceiptRoot) {
+  public SignatureBlob sign(byte[] transactionReceiptRoot) {
+    int numSigners = this.signers.size();
     // Sign the txReceiptRoot
-    ArrayList<String> theSigners = new ArrayList<>();
-    ArrayList<byte[]> sigR = new ArrayList<>();
-    ArrayList<byte[]> sigS = new ArrayList<>();
-    ArrayList<BigInteger> sigV = new ArrayList<>();
-    for (AnIdentity signer : signers) {
+    String[] theSigners = new String[numSigners];
+    byte[][] sigR = new byte[numSigners][];
+    byte[][] sigS = new byte[numSigners][];
+    byte[] sigV = new byte[numSigners];
+    for (int i = 0; i < numSigners; i++) {
+      AnIdentity signer = this.signers.get(i);
       Sign.SignatureData signatureData = signer.sign(transactionReceiptRoot);
-      theSigners.add(signer.getAddress());
-      sigR.add(signatureData.getR());
-      sigS.add(signatureData.getS());
-      sigV.add(BigInteger.valueOf(signatureData.getV()[0]));
+      theSigners[i] = signer.getAddress();
+      sigR[i] = signatureData.getR();
+      sigS[i] = signatureData.getS();
+      sigV[i] = signatureData.getV()[0];
     }
-    return new Signatures(theSigners, sigR, sigS, sigV);
+    return new SignatureBlob(theSigners, sigR, sigS, sigV);
   }
 
   public CompletableFuture<TransactionReceipt> addTransactionReceiptRootToBlockchainAsyncPart1(
-      Signatures signed, BlockchainId sourceBlockchainId, byte[] transactionReceiptRoot)
+      SignatureBlob signatures, BlockchainId sourceBlockchainId, byte[] transactionReceiptRoot)
       throws Exception {
     // Add the transaction receipt root for the blockchain
     LOG.debug(
@@ -77,12 +79,7 @@ public class TxRootRelayer extends AbstractBlockchain {
         sourceBlockchainId);
     return this.txReceiptsRootStorage
         .addTxReceiptRoot(
-            sourceBlockchainId.asBigInt(),
-            signed.theSigners,
-            signed.sigR,
-            signed.sigS,
-            signed.sigV,
-            transactionReceiptRoot)
+            sourceBlockchainId.asBigInt(), signatures.encode(), transactionReceiptRoot)
         .sendAsync();
   }
 
