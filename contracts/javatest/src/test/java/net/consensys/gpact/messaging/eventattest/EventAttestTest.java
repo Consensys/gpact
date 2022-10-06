@@ -207,9 +207,20 @@ public class EventAttestTest extends AbstractWeb3Test {
     }
   }
 
-  public void printCall(
-      List<AnIdentity> signersToRegister, List<AnIdentity> signersToSign, int threshold)
-      throws Exception {
+  @Test
+  public void showDebugInfo() throws Exception {
+    final String fixedPrivateKey1 = "1";
+    final String fixedPrivateKey2 = "2";
+    final String fixedPrivateKey3 = "3";
+    List<AnIdentity> signers = new ArrayList<>();
+    signers.add(new AnIdentity(fixedPrivateKey1));
+    signers.add(new AnIdentity(fixedPrivateKey2));
+    signers.add(new AnIdentity(fixedPrivateKey3));
+
+    List<AnIdentity> signersToRegister = signers;
+    List<AnIdentity> signersToSign = signers;
+    int threshold = 2;
+
     setupWeb3();
     deployContracts();
 
@@ -242,18 +253,5 @@ public class EventAttestTest extends AbstractWeb3Test {
         this.verifier.getABI_call_decodeAndVerifyEvent(
             bcId.asBigInt(), eventFunctionSignature, encodedEventData, signature);
     System.out.println(abi);
-  }
-
-  public static void main(String[] args) throws Exception {
-    final String fixedPrivateKey1 = "1";
-    final String fixedPrivateKey2 = "2";
-    final String fixedPrivateKey3 = "3";
-    List<AnIdentity> signers = new ArrayList<>();
-    signers.add(new AnIdentity(fixedPrivateKey1));
-    signers.add(new AnIdentity(fixedPrivateKey2));
-    signers.add(new AnIdentity(fixedPrivateKey3));
-
-    EventAttestTest test = new EventAttestTest();
-    test.printCall(signers, signers, 2);
   }
 }
