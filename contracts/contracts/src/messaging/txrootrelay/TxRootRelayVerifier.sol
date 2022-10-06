@@ -46,7 +46,7 @@ contract TxRootRelayVerifier is CrosschainVerifier, Receipts {
         bytes32 _eventSig,
         bytes calldata _encodedEvent,
         bytes calldata _proof
-    ) external view override {
+    ) external view override returns (bool) {
         EventProof memory eventProof = toEventProof(_proof);
         txReceiptRootStorage.verify(
             eventProof.blockchainId,
@@ -87,6 +87,9 @@ contract TxRootRelayVerifier is CrosschainVerifier, Receipts {
             compare(calculatedEncoded, _encodedEvent),
             "Expected event does not match event in proof"
         );
+
+        // A return value is needed so that Web3J generates a wrapper for this function.
+        return true;
     }
 
     function toEventProof(bytes memory _encodedEventProof)

@@ -22,9 +22,9 @@ solc $CONTRACTSDIR/functioncall/gpactv2/CallExecutionTreeV2Test.sol --allow-path
 solc $CONTRACTSDIR/functioncall/sfc/SimpleCrosschainControl.sol --allow-paths . --bin --abi --hashes --optimize -o $BUILDDIR --overwrite
 
 
-solc $CONTRACTSDIR/messaging/common/MessagingRegistrar.sol --allow-paths . --bin --abi --optimize -o $BUILDDIR --overwrite
+solc $CONTRACTSDIR/messaging/common/MessagingRegistrar.sol --allow-paths . --bin --abi --hashes --optimize -o $BUILDDIR --overwrite
 
-solc $CONTRACTSDIR/messaging/eventattest/EventAttestationVerifier.sol --allow-paths . --bin --abi --optimize -o $BUILDDIR --overwrite
+solc $CONTRACTSDIR/messaging/eventattest/EventAttestationVerifier.sol --allow-paths . --bin --abi --hashes --optimize -o $BUILDDIR --overwrite
 
 solc $CONTRACTSDIR/messaging/txrootrelay/TxRootRelayVerifier.sol --allow-paths . --bin --abi --hashes --optimize -o $BUILDDIR --overwrite
 solc $CONTRACTSDIR/messaging/txrootrelay/TxReceiptsRootStorage.sol --allow-paths . --bin --abi --hashes --optimize -o $BUILDDIR --overwrite
@@ -45,7 +45,9 @@ $WEB3J solidity generate -a=$BUILDDIR/SimpleCrosschainControl.abi -b=$BUILDDIR/S
 
 $WEB3J solidity generate -a=$BUILDDIR/MessagingRegistrar.abi -b=$BUILDDIR/MessagingRegistrar.bin -o=$OUTPUTDIR -p=$BASEPACKAGE.messaging.common
 
-$WEB3J solidity generate -a=$BUILDDIR/EventAttestationVerifier.abi -b=$BUILDDIR/EventAttestationVerifier.bin -o=$OUTPUTDIR -p=$BASEPACKAGE.messaging.eventattest
+# -r to add functions to get ABI encoding of a function call
+# -B to add functions to have transaction functions for view call functions
+$WEB3J solidity generate -B -r -a=$BUILDDIR/EventAttestationVerifier.abi -b=$BUILDDIR/EventAttestationVerifier.bin -o=$OUTPUTDIR -p=$BASEPACKAGE.messaging.eventattest
 
 $WEB3J solidity generate -a=$BUILDDIR/TxRootRelayVerifier.abi -b=$BUILDDIR/TxRootRelayVerifier.bin -o=$OUTPUTDIR -p=$BASEPACKAGE.messaging.txrootrelay
 $WEB3J solidity generate -a=$BUILDDIR/TxReceiptsRootStorage.abi -b=$BUILDDIR/TxReceiptsRootStorage.bin -o=$OUTPUTDIR -p=$BASEPACKAGE.messaging.txrootrelay

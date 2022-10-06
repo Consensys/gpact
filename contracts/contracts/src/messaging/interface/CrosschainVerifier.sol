@@ -29,11 +29,12 @@ interface CrosschainVerifier {
      *    Control contract's address, the event function selector, and the event data.
      * @param _signature Signatures or proof information that an implementation can
      *    use to check that _signedEventInfo is valid.
+     * @return bool which is always true. This return value is so that Web3J generates wrappers correctly.
      */
     function decodeAndVerifyEvent(
         uint256 _blockchainId,
         bytes32 _eventSig,
         bytes calldata _signedEventInfo,
         bytes calldata _signature
-    ) external view;
+    ) external view returns (bool);
 }

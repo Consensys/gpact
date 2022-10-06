@@ -30,11 +30,14 @@ contract EventAttestationVerifier is CrosschainVerifier, SignatureEncoding {
         bytes32, /* _eventSig */
         bytes calldata _encodedEvent,
         bytes calldata _signatures
-    ) external view override {
+    ) external view override returns (bool) {
         registrar.verifyAndCheckThreshold(
             _blockchainId,
             _signatures,
             _encodedEvent
         );
+
+        // A return value is needed so that Web3J generates a wrapper for this function.
+        return true;
     }
 }

@@ -57,13 +57,16 @@ contract EventRelayVerifier is CrosschainVerifier, BytesUtil {
         bytes32, /* _eventSig */
         bytes calldata _encodedEvent,
         bytes calldata /* _signature */
-    ) external view override {
+    ) external view override returns (bool) {
         bytes32 eventDigest = keccak256(_encodedEvent);
         uint256 threshold = registrar.getSigningThreshold(_blockchainId);
         require(
             signedEvents[eventDigest].whoVoted.length >= threshold,
             "Not enough signers"
         );
+
+        // A return value is needed so that Web3J generates a wrapper for this function.
+        return true;
     }
 
     /**

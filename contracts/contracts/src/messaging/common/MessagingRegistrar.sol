@@ -151,7 +151,7 @@ contract MessagingRegistrar is
             // Check that signer is a signer for this blockchain
             require(
                 blockchains[_blockchainId].signers[_signers[i]],
-                "Signer not signer for this blockchain"
+                "Signer not registered for this blockchain"
             );
             // Verify the signature
             require(
@@ -211,6 +211,7 @@ contract MessagingRegistrar is
         }
     }
 
+    // Used by Event Attestation
     function verify1(
         uint256 _blockchainId,
         Signatures memory _sigs,
@@ -220,7 +221,7 @@ contract MessagingRegistrar is
             // Check that signer is a signer for this blockchain
             require(
                 blockchains[_blockchainId].signers[_sigs.signatures[i].by],
-                "Signer not signer for this blockchain"
+                "Signer not registered for this blockchain"
             );
             // Verify the signature
             require(
