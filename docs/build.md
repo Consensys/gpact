@@ -1,4 +1,10 @@
 # Building
+## Introduction
+The instructions below describe the process for building and testing
+the code in this repo. These instructions reflect the steps used in 
+the CircleCI continuous integration system described in the
+[config.yml](../.circleci/config.yml) file. 
+
 ## Tools
 
 * Java: The code was built with Java 11. The code is likely to build with later versions of Java.
@@ -19,17 +25,54 @@ The special version of Web3J needs to end up in the directory `./gpact/..`. To c
 * ./gradlew installDist
 * cd ../gpact
 
-## Building Solidity, Wrapper code and Test Code
-Start blockchain nodes:
+## Build and Run Blockchain and Relayer Nodes
+Build message store container:
+```$xslt
+cd services/message-store
+make docker
+```
+Build relayer container:
+```$xslt
+cd services/relayer
+make docker
+```
+
+Start blockchain nodes, relayer node, and message store node:
 ```$xslt
 cd test-blockchains
 docker compose up
 ```
 
-To build and test:
+## Test Java SDK and Solidity Contracts
+Once the blockchain nodes and relayer node are running, 
+to build and test Java SDK and tests:
 ```$xslt
 ./gradlew test
 ```
+
+## Test JavaScript SDK
+Once the blockchain nodes and relayer node are running,
+the following steps need to be run to build and test the JavaScript SDK.
+
+Build Solidity code for use with JavaScript compile
+```$xslt
+./gradlew build -x test -x intTest -x perfTest
+```
+
+Create environment for testing JS-SDK.
+```$xslt
+cd sdk/js
+npm install
+```
+
+Test JS-SDK.
+```$xslt
+cd sdk/js
+node ./test.js
+```
+
+## Relayer Build and Test 
+If you wish to alter the relayer node code, you need to use these build and test steps.  
 
 To build the relayer:
 ```$xslt
