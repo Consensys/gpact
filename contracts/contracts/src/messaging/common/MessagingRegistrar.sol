@@ -95,13 +95,13 @@ contract MessagingRegistrar is
         );
     }
 
+    // Verify signatures and check the threshold
     function verifyAndCheckThreshold(
         uint256 _blockchainId,
         bytes calldata _signatures,
         bytes calldata _plainText
     ) external view {
         Signatures memory sigs = decodeSignature(_signatures);
-        checkUniqueSigners(sigs);
 
         // Check signing threshold
         require(
@@ -110,7 +110,22 @@ contract MessagingRegistrar is
             "Not enough signers"
         );
 
-        verify1(_blockchainId, sigs, _plainText);
+        checkUniqueSigners(sigs);
+        verifyInternal(_blockchainId, sigs, _plainText);
+    }
+
+    // Version of verify called by Event Relay
+    // Verify a signature
+    function verify(
+        uint256 _blockchainId,
+        bytes calldata _signatures,
+        bytes calldata _plainText
+    ) public view returns (bool) {
+        Signatures memory sigs = decodeSignature(_signatures);
+
+        checkUniqueSigners(sigs);
+        verifyInternal(_blockchainId, sigs, _plainText);
+        return true;
     }
 
     function getSigningThreshold(uint256 _blockchainId)
@@ -131,41 +146,6 @@ contract MessagingRegistrar is
         returns (bool)
     {
         return blockchains[_blockchainId].signers[_mightBeSigner];
-    }
-
-    // Version of verify called by Event Relay
-    function verify(
-        uint256 _blockchainId,
-        address[] calldata _signers,
-        bytes32[] calldata _sigR,
-        bytes32[] calldata _sigS,
-        uint8[] calldata _sigV,
-        bytes calldata _plainText
-    ) public view returns (bool) {
-        uint256 signersLength = _signers.length;
-        require(signersLength == _sigR.length, "sigR length mismatch");
-        require(signersLength == _sigS.length, "sigS length mismatch");
-        require(signersLength == _sigV.length, "sigV length mismatch");
-
-        for (uint256 i = 0; i < signersLength; i++) {
-            // Check that signer is a signer for this blockchain
-            require(
-                blockchains[_blockchainId].signers[_signers[i]],
-                "Signer not registered for this blockchain"
-            );
-            // Verify the signature
-            require(
-                verifySigComponents(
-                    _signers[i],
-                    _plainText,
-                    _sigR[i],
-                    _sigS[i],
-                    _sigV[i]
-                ),
-                "Signature did not verify"
-            );
-        }
-        return true;
     }
 
     /************************************* PRIVATE FUNCTIONS BELOW HERE *************************************/
@@ -211,8 +191,7 @@ contract MessagingRegistrar is
         }
     }
 
-    // Used by Event Attestation
-    function verify1(
+    function verifyInternal(
         uint256 _blockchainId,
         Signatures memory _sigs,
         bytes calldata _plainText
