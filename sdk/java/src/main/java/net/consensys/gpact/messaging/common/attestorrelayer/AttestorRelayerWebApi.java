@@ -302,9 +302,11 @@ public class AttestorRelayerWebApi {
       throws CrosschainProtocolStackException {
     String uriStr = msgStoreURL + "/messages/" + eventId + "/proofs";
 
-    long backOffTime = 1000;
+    // Back off time will be (in ms): 500, 750, 1,125, 1,688, 2,531
+    // Which makes the cumulative back-off time around 7 seconds.
+    long backOffTime = 500;
     final double backOffScale = 1.5;
-    int backOffCountDown = 20;
+    int backOffCountDown = 5;
 
     String body = null;
     boolean done = false;
