@@ -370,9 +370,10 @@ func TestERC20TransferSFC(t *testing.T) {
 	t.Log("Done")
 	balA, _ = ierc20A.BalanceOf(nil, userA.From)
 	balB, _ = ierc20B.BalanceOf(nil, userB.From)
+	t.Log("Balances after transfer: ", balA, balB)
 	assert.Equal(t, 0, balA.Cmp(big.NewInt(90)))
 	assert.Equal(t, 0, balB.Cmp(big.NewInt(10)))
-	t.Log("Balances after transfer: ", balA, balB)
+	t.Log("Balances after transfer correct")
 
 	// Transfer back
 	t.Log("UserB crosschain transfer back to UserA with 5 tokens...")
