@@ -283,6 +283,9 @@ func (exec *ExecutorImplV1) segment(transID *big.Int, startChainID *big.Int, sta
 					lockedSegmentsSigs[node.ChainID().String()] = sigs
 				}
 				return ev, evSig, nil
+			} else {
+				logging.Info().Msgf("Unexpectedly, segment transaction returned event: %v", ev)
+				return nil, nil, fmt.Errorf("Unexpectedly, segment transaction returned event: %v", ev)
 			}
 		}
 	}
