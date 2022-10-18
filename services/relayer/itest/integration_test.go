@@ -780,10 +780,12 @@ func TestERC20TransferGpact(t *testing.T) {
 	})
 
 	// Simulate crosschain call.
+	t.Log("Simulate")
 	root, err := sim.Simulate(big.NewInt(31), "bridge", bridgeA, "transferToOtherBlockchain", big.NewInt(32), erc20A, userB.From, big.NewInt(10))
 	if err != nil {
 		panic(err)
 	}
+	t.Log("Done")
 
 	// Balance before transfer.
 	balA, _ := ierc20A.BalanceOf(nil, userA.From)
@@ -792,30 +794,37 @@ func TestERC20TransferGpact(t *testing.T) {
 	assert.Equal(t, 0, balB.Cmp(big.NewInt(0)))
 
 	// Transfer
+	t.Log("CrosschainCall")
 	_, err = execA.CrosschainCall(root)
 	if err != nil {
 		panic(err)
 	}
 	time.Sleep(1 * time.Second)
+	t.Log("Done")
 
 	// Balance after transfer.
 	balA, _ = ierc20A.BalanceOf(nil, userA.From)
 	balB, _ = ierc20B.BalanceOf(nil, userB.From)
 	assert.Equal(t, 0, balA.Cmp(big.NewInt(90)))
 	assert.Equal(t, 0, balB.Cmp(big.NewInt(10)))
+	t.Log("Balance after transfer correct")
 
 	// Simulate crosschain call.
+	t.Log("Simulate")
 	root, err = sim.Simulate(big.NewInt(31), "bridge", bridgeA, "transferToOtherBlockchain", big.NewInt(32), erc20A, userB.From, big.NewInt(10))
 	if err != nil {
 		panic(err)
 	}
+	t.Log("Done")
 
 	// Transfer
+	t.Log("CrosschainCall")
 	_, err = execA.CrosschainCall(root)
 	if err != nil {
 		panic(err)
 	}
 	time.Sleep(1 * time.Second)
+	t.Log("Done")
 
 	// Balance after transfer.
 	balA, _ = ierc20A.BalanceOf(nil, userA.From)
@@ -839,17 +848,20 @@ func TestERC20TransferGpact(t *testing.T) {
 	}
 
 	// Transfer
+	t.Log("CrosschainCall")
 	_, err = execB.CrosschainCall(root)
 	if err != nil {
 		panic(err)
 	}
 	time.Sleep(1 * time.Second)
+	t.Log("Done")
 
 	// Balance after transfer.
 	balA, _ = ierc20A.BalanceOf(nil, userA.From)
 	balB, _ = ierc20B.BalanceOf(nil, userB.From)
 	assert.Equal(t, 0, balA.Cmp(big.NewInt(85)))
 	assert.Equal(t, 0, balB.Cmp(big.NewInt(15)))
+	t.Log("Balances correct")
 }
 
 // createUser creates a user with random key.
