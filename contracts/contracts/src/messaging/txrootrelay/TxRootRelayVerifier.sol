@@ -14,11 +14,11 @@
  */
 pragma solidity >=0.8;
 
-import "../interface/CrosschainVerifier.sol";
+import "../interface/CrosschainVerifierDefaultImpl.sol";
 import "./Receipts.sol";
 import "./TxReceiptsRootStorageInterface.sol";
 
-contract TxRootRelayVerifier is CrosschainVerifier, Receipts {
+contract TxRootRelayVerifier is CrosschainVerifierDefaultImpl, Receipts {
     TxReceiptsRootStorageInterface private txReceiptRootStorage;
 
     struct EventProof {

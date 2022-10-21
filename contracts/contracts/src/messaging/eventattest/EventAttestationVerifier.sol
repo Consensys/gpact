@@ -14,11 +14,11 @@
  */
 pragma solidity >=0.8;
 
-import "../interface/CrosschainVerifier.sol";
+import "../interface/CrosschainVerifierDefaultImpl.sol";
 import "../common/MessagingRegistrar.sol";
 import "../common/SignatureEncoding.sol";
 
-contract EventAttestationVerifier is CrosschainVerifier, SignatureEncoding {
+contract EventAttestationVerifier is CrosschainVerifierDefaultImpl {
     MessagingRegistrar registrar;
 
     constructor(address _registrar) {
