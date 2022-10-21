@@ -18,308 +18,140 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import net.consensys.gpact.common.AnIdentity;
-import net.consensys.gpact.common.RevertReason;
+import net.consensys.gpact.common.BlockchainId;
+import net.consensys.gpact.common.crypto.Hash;
+import net.consensys.gpact.messaging.fake.FakeRelayer;
+import org.apache.tuweni.bytes.Bytes;
 import org.junit.jupiter.api.Test;
-import org.web3j.crypto.Sign;
-import org.web3j.protocol.exceptions.TransactionException;
+import org.web3j.tx.exceptions.ContractCallException;
 
 public class RegistrarVerifySignatureTest extends AbstractRegistrarTest {
   final byte[] plainText = new byte[] {0x00};
 
   @Test
   public void verifyOneSignature() throws Exception {
-    setupWeb3();
-    deployRegistrarContract();
-    BigInteger blockchainId = BigInteger.TEN;
-    AnIdentity newSigner = AnIdentity.createNewRandomIdentity();
-    addBlockchain(blockchainId, newSigner.getAddress());
+    final String fixedPrivateKey1 = "1";
+    List<AnIdentity> signers = new ArrayList<>();
+    signers.add(new AnIdentity(fixedPrivateKey1));
 
-    Sign.SignatureData signatureData = newSigner.sign(this.plainText);
-    List<String> signers = new ArrayList<>();
-    signers.add(newSigner.getAddress());
-    List<byte[]> sigR = new ArrayList<>();
-    sigR.add(signatureData.getR());
-    List<byte[]> sigS = new ArrayList<>();
-    sigS.add(signatureData.getS());
-    List<BigInteger> sigV = new ArrayList<>();
-    sigV.add(BigInteger.valueOf(signatureData.getV()[0]));
-
-    // This will revert if the signature does not verify
-    this.registrarContract.verify(blockchainId, signers, sigR, sigS, sigV, this.plainText).send();
+    checkVerify(signers, signers, 1);
   }
 
   @Test
   public void verifyTwoSignatures() throws Exception {
-    setupWeb3();
-    deployRegistrarContract();
-    BigInteger blockchainId = BigInteger.TEN;
-    AnIdentity newSigner1 = AnIdentity.createNewRandomIdentity();
-    AnIdentity newSigner2 = AnIdentity.createNewRandomIdentity();
-    List<String> signers = new ArrayList<>();
-    signers.add(newSigner1.getAddress());
-    signers.add(newSigner2.getAddress());
-    addBlockchain(blockchainId, signers);
+    final String fixedPrivateKey1 = "1";
+    final String fixedPrivateKey2 = "2";
+    List<AnIdentity> signers = new ArrayList<>();
+    signers.add(new AnIdentity(fixedPrivateKey1));
+    signers.add(new AnIdentity(fixedPrivateKey2));
 
-    Sign.SignatureData signatureData1 = newSigner1.sign(this.plainText);
-    Sign.SignatureData signatureData2 = newSigner2.sign(this.plainText);
-    List<byte[]> sigR = new ArrayList<>();
-    sigR.add(signatureData1.getR());
-    sigR.add(signatureData2.getR());
-    List<byte[]> sigS = new ArrayList<>();
-    sigS.add(signatureData1.getS());
-    sigS.add(signatureData2.getS());
-    List<BigInteger> sigV = new ArrayList<>();
-    sigV.add(BigInteger.valueOf(signatureData1.getV()[0]));
-    sigV.add(BigInteger.valueOf(signatureData2.getV()[0]));
-
-    // This will revert if the signature does not verify
-    boolean verified =
-        this.registrarContract
-            .verify(blockchainId, signers, sigR, sigS, sigV, this.plainText)
-            .send();
-    assert (verified);
+    checkVerify(signers, signers, 1);
   }
 
   // Put S instead of R. This will give an invalid signature
   @Test
   public void failInvalidSignature() throws Exception {
+    final String fixedPrivateKey1 = "1";
+    final String fixedPrivateKey2 = "2";
+    List<AnIdentity> signers = new ArrayList<>();
+    signers.add(new AnIdentity(fixedPrivateKey1));
+    signers.add(new AnIdentity(fixedPrivateKey2));
+
+    List<AnIdentity> signersToRegister = signers;
+    List<AnIdentity> signersToSign = signers;
+    int threshold = 1;
+
     setupWeb3();
     deployRegistrarContract();
-    BigInteger blockchainId = BigInteger.TEN;
-    AnIdentity newSigner = AnIdentity.createNewRandomIdentity();
-    addBlockchain(blockchainId, newSigner.getAddress());
 
-    Sign.SignatureData signatureData = newSigner.sign(this.plainText);
-    List<String> signers = new ArrayList<>();
-    signers.add(newSigner.getAddress());
-    List<byte[]> sigR = new ArrayList<>();
-    // Put S instead of R. This will give an invalid signature
-    sigR.add(signatureData.getS());
-    List<byte[]> sigS = new ArrayList<>();
-    sigS.add(signatureData.getS());
-    List<BigInteger> sigV = new ArrayList<>();
-    sigV.add(BigInteger.valueOf(signatureData.getV()[0]));
+    BigInteger bcIdB = BigInteger.TEN;
+    BlockchainId bcId = new BlockchainId(bcIdB);
+    List<String> signerAddresses = new ArrayList<>();
+    for (AnIdentity signer : signersToRegister) {
+      signerAddresses.add(signer.getAddress());
+    }
 
-    // This will revert if the signature does not verify
+    this.registrarContract
+        .addSignersSetThreshold(bcIdB, signerAddresses, BigInteger.valueOf(threshold))
+        .send();
+
+    FakeRelayer signatureCreator = new FakeRelayer(signersToSign);
+
+    String contractAddress = "6D1e0220914f4fb73aF954694564e77024de3693";
+    byte[] eventFunctionSignature =
+        Hash.keccak256(Bytes.wrap("FuncEvent(uint256)".getBytes())).toArray();
+    // The actual event data will depend on the event emitted.
+    byte[] rawEventData = new byte[1];
+    byte[] signature =
+        signatureCreator.fetchedSignedEvent(
+            bcId, contractAddress, eventFunctionSignature, rawEventData);
+    byte[] encodedEventData =
+        FakeRelayer.abiEncodePackedEvent(
+            bcId, contractAddress, eventFunctionSignature, rawEventData);
+
+    // Change the signature
+    signature[140] = signature[140] == 0 ? (byte) 1 : 0;
+
     try {
-      boolean verified =
-          this.registrarContract
-              .verify(blockchainId, signers, sigR, sigS, sigV, this.plainText)
-              .send();
-      throw new Exception("Unexpectedly, no error while verifying. Verified: " + verified);
-    } catch (TransactionException ex) {
-      System.err.println(
-          "Revert reason: "
-              + RevertReason.decodeRevertReason(
-                  ex.getTransactionReceipt().get().getRevertReason()));
-      // ignore
-    } catch (org.web3j.tx.exceptions.ContractCallException ex1) {
-      // System.err.println("Exception: " + ex1.getMessage());
+      // Ignore return value. Exception will be thrown if an error
+      this.registrarContract.verify(bcId.asBigInt(), signature, encodedEventData).send();
+      throw new Exception("Did not fail");
+    } catch (ContractCallException callException) {
+      // Ignore expected exception
     }
   }
 
   // newSigner1 is a valid signer, but newSigner2 is not a valid signer
   @Test
   public void failUnregisteredSigner() throws Exception {
-    setupWeb3();
-    deployRegistrarContract();
-    BigInteger blockchainId = BigInteger.TEN;
-    AnIdentity newSigner1 = AnIdentity.createNewRandomIdentity();
-    addBlockchain(blockchainId, newSigner1.getAddress());
-    AnIdentity newSigner2 = AnIdentity.createNewRandomIdentity();
+    final String fixedPrivateKey1 = "1";
+    final String fixedPrivateKey2 = "2";
+    List<AnIdentity> registeredSigners = new ArrayList<>();
+    registeredSigners.add(new AnIdentity(fixedPrivateKey1));
 
-    Sign.SignatureData signatureData2 = newSigner2.sign(this.plainText);
-    List<String> signers = new ArrayList<>();
-    signers.add(newSigner2.getAddress());
-    List<byte[]> sigR = new ArrayList<>();
-    sigR.add(signatureData2.getR());
-    List<byte[]> sigS = new ArrayList<>();
-    sigS.add(signatureData2.getS());
-    List<BigInteger> sigV = new ArrayList<>();
-    sigV.add(BigInteger.valueOf(signatureData2.getV()[0]));
+    List<AnIdentity> signers = new ArrayList<>();
+    signers.add(new AnIdentity(fixedPrivateKey2));
 
-    // This will revert as signer2 is has not been registered for the blockchain
     try {
-      boolean verified =
-          this.registrarContract
-              .verify(blockchainId, signers, sigR, sigS, sigV, this.plainText)
-              .send();
-      throw new Exception("Unexpectedly, no error while verifying. Verified: " + verified);
-    } catch (TransactionException ex) {
-      System.err.println(
-          "Revert reason: "
-              + RevertReason.decodeRevertReason(
-                  ex.getTransactionReceipt().get().getRevertReason()));
-      // ignore
-    } catch (org.web3j.tx.exceptions.ContractCallException ex1) {
-      // System.err.println("Exception: " + ex1.getMessage());
+      checkVerify(registeredSigners, signers, 1);
+      throw new Exception("No exception thrown");
+    } catch (ContractCallException callException) {
+      // Expected exception
     }
   }
 
-  @Test
-  public void failSignersArrayWrongLength() throws Exception {
+  private void checkVerify(
+      List<AnIdentity> signersToRegister, List<AnIdentity> signersToSign, int threshold)
+      throws Exception {
     setupWeb3();
     deployRegistrarContract();
-    BigInteger blockchainId = BigInteger.TEN;
-    AnIdentity newSigner1 = AnIdentity.createNewRandomIdentity();
-    AnIdentity newSigner2 = AnIdentity.createNewRandomIdentity();
-    List<String> signers = new ArrayList<>();
-    signers.add(newSigner1.getAddress());
-    signers.add(newSigner2.getAddress());
-    addBlockchain(blockchainId, signers);
 
-    Sign.SignatureData signatureData1 = newSigner1.sign(this.plainText);
-    Sign.SignatureData signatureData2 = newSigner2.sign(this.plainText);
-    signers = new ArrayList<>();
-    signers.add(newSigner1.getAddress());
-    // signers.add(newSigner2.getAddress());
-    List<byte[]> sigR = new ArrayList<>();
-    sigR.add(signatureData1.getR());
-    sigR.add(signatureData2.getR());
-    List<byte[]> sigS = new ArrayList<>();
-    sigS.add(signatureData1.getS());
-    sigS.add(signatureData2.getS());
-    List<BigInteger> sigV = new ArrayList<>();
-    sigV.add(BigInteger.valueOf(signatureData1.getV()[0]));
-    sigV.add(BigInteger.valueOf(signatureData2.getV()[0]));
-
-    try {
-      boolean verified =
-          this.registrarContract
-              .verify(blockchainId, signers, sigR, sigS, sigV, this.plainText)
-              .send();
-      throw new Exception("Unexpectedly, no error while verifying. Verified: " + verified);
-    } catch (TransactionException ex) {
-      System.err.println(
-          "Revert reason: "
-              + RevertReason.decodeRevertReason(
-                  ex.getTransactionReceipt().get().getRevertReason()));
-      // ignore
-    } catch (org.web3j.tx.exceptions.ContractCallException ex1) {
-      // System.err.println("Exception: " + ex1.getMessage());
+    BigInteger bcIdB = BigInteger.TEN;
+    BlockchainId bcId = new BlockchainId(bcIdB);
+    List<String> signerAddresses = new ArrayList<>();
+    for (AnIdentity signer : signersToRegister) {
+      signerAddresses.add(signer.getAddress());
     }
-  }
 
-  @Test
-  public void failSigRArrayWrongLength() throws Exception {
-    setupWeb3();
-    deployRegistrarContract();
-    BigInteger blockchainId = BigInteger.TEN;
-    AnIdentity newSigner1 = AnIdentity.createNewRandomIdentity();
-    AnIdentity newSigner2 = AnIdentity.createNewRandomIdentity();
-    List<String> signers = new ArrayList<>();
-    signers.add(newSigner1.getAddress());
-    signers.add(newSigner2.getAddress());
-    addBlockchain(blockchainId, signers);
+    this.registrarContract
+        .addSignersSetThreshold(bcIdB, signerAddresses, BigInteger.valueOf(threshold))
+        .send();
 
-    Sign.SignatureData signatureData1 = newSigner1.sign(this.plainText);
-    Sign.SignatureData signatureData2 = newSigner2.sign(this.plainText);
-    List<byte[]> sigR = new ArrayList<>();
-    sigR.add(signatureData1.getR());
-    // sigR.add(signatureData2.getR());
-    List<byte[]> sigS = new ArrayList<>();
-    sigS.add(signatureData1.getS());
-    sigS.add(signatureData2.getS());
-    List<BigInteger> sigV = new ArrayList<>();
-    sigV.add(BigInteger.valueOf(signatureData1.getV()[0]));
-    sigV.add(BigInteger.valueOf(signatureData2.getV()[0]));
+    FakeRelayer signatureCreator = new FakeRelayer(signersToSign);
 
-    try {
-      boolean verified =
-          this.registrarContract
-              .verify(blockchainId, signers, sigR, sigS, sigV, this.plainText)
-              .send();
-      throw new Exception("Unexpectedly, no error while verifying. Verified: " + verified);
-    } catch (TransactionException ex) {
-      System.err.println(
-          "Revert reason: "
-              + RevertReason.decodeRevertReason(
-                  ex.getTransactionReceipt().get().getRevertReason()));
-      // ignore
-    } catch (org.web3j.tx.exceptions.ContractCallException ex1) {
-      // System.err.println("Exception: " + ex1.getMessage());
-    }
-  }
+    String contractAddress = "6D1e0220914f4fb73aF954694564e77024de3693";
+    byte[] eventFunctionSignature =
+        Hash.keccak256(Bytes.wrap("FuncEvent(uint256)".getBytes())).toArray();
+    // The actual event data will depend on the event emitted.
+    byte[] rawEventData = new byte[1];
+    byte[] signature =
+        signatureCreator.fetchedSignedEvent(
+            bcId, contractAddress, eventFunctionSignature, rawEventData);
+    byte[] encodedEventData =
+        FakeRelayer.abiEncodePackedEvent(
+            bcId, contractAddress, eventFunctionSignature, rawEventData);
 
-  @Test
-  public void failSigSArrayWrongLength() throws Exception {
-    setupWeb3();
-    deployRegistrarContract();
-    BigInteger blockchainId = BigInteger.TEN;
-    AnIdentity newSigner1 = AnIdentity.createNewRandomIdentity();
-    AnIdentity newSigner2 = AnIdentity.createNewRandomIdentity();
-    List<String> signers = new ArrayList<>();
-    signers.add(newSigner1.getAddress());
-    signers.add(newSigner2.getAddress());
-    addBlockchain(blockchainId, signers);
-
-    Sign.SignatureData signatureData1 = newSigner1.sign(this.plainText);
-    Sign.SignatureData signatureData2 = newSigner2.sign(this.plainText);
-    List<byte[]> sigR = new ArrayList<>();
-    sigR.add(signatureData1.getR());
-    sigR.add(signatureData2.getR());
-    List<byte[]> sigS = new ArrayList<>();
-    sigS.add(signatureData1.getS());
-    // sigS.add(signatureData2.getS());
-    List<BigInteger> sigV = new ArrayList<>();
-    sigV.add(BigInteger.valueOf(signatureData1.getV()[0]));
-    sigV.add(BigInteger.valueOf(signatureData2.getV()[0]));
-
-    try {
-      boolean verified =
-          this.registrarContract
-              .verify(blockchainId, signers, sigR, sigS, sigV, this.plainText)
-              .send();
-      throw new Exception("Unexpectedly, no error while verifying. Verified: " + verified);
-    } catch (TransactionException ex) {
-      System.err.println(
-          "Revert reason: "
-              + RevertReason.decodeRevertReason(
-                  ex.getTransactionReceipt().get().getRevertReason()));
-      // ignore
-    } catch (org.web3j.tx.exceptions.ContractCallException ex1) {
-      // System.err.println("Exception: " + ex1.getMessage());
-    }
-  }
-
-  @Test
-  public void failSigVArrayWrongLength() throws Exception {
-    setupWeb3();
-    deployRegistrarContract();
-    BigInteger blockchainId = BigInteger.TEN;
-    AnIdentity newSigner1 = AnIdentity.createNewRandomIdentity();
-    AnIdentity newSigner2 = AnIdentity.createNewRandomIdentity();
-    List<String> signers = new ArrayList<>();
-    signers.add(newSigner1.getAddress());
-    signers.add(newSigner2.getAddress());
-    addBlockchain(blockchainId, signers);
-
-    Sign.SignatureData signatureData1 = newSigner1.sign(this.plainText);
-    Sign.SignatureData signatureData2 = newSigner2.sign(this.plainText);
-    List<byte[]> sigR = new ArrayList<>();
-    sigR.add(signatureData1.getR());
-    sigR.add(signatureData2.getR());
-    List<byte[]> sigS = new ArrayList<>();
-    sigS.add(signatureData1.getS());
-    sigS.add(signatureData2.getS());
-    List<BigInteger> sigV = new ArrayList<>();
-    sigV.add(BigInteger.valueOf(signatureData1.getV()[0]));
-    // sigV.add(BigInteger.valueOf(signatureData2.getV()[0]));
-
-    try {
-      boolean verified =
-          this.registrarContract
-              .verify(blockchainId, signers, sigR, sigS, sigV, this.plainText)
-              .send();
-      throw new Exception("Unexpectedly, no error while verifying. Verified: " + verified);
-    } catch (TransactionException ex) {
-      System.err.println(
-          "Revert reason: "
-              + RevertReason.decodeRevertReason(
-                  ex.getTransactionReceipt().get().getRevertReason()));
-      // ignore
-    } catch (org.web3j.tx.exceptions.ContractCallException ex1) {
-      // System.err.println("Exception: " + ex1.getMessage());
-    }
+    // Ignore return value. Exception will be thrown if an error
+    this.registrarContract.verify(bcId.asBigInt(), signature, encodedEventData).send();
   }
 }

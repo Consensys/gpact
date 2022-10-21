@@ -15,11 +15,11 @@
 pragma solidity >=0.8;
 
 import "../interface/CrosschainVerifier.sol";
-import "../../common/BytesUtil.sol";
 import "../common/MessagingRegistrar.sol";
 import "../../functioncall/sfc/SimpleCrosschainControl.sol";
+import "../common/SignatureEncoding.sol";
 
-contract EventRelayVerifier is CrosschainVerifier, BytesUtil {
+contract EventRelayVerifier is CrosschainVerifier, SignatureEncoding {
     MessagingRegistrar registrar;
     SimpleCrosschainControl functionCall;
 
@@ -45,9 +45,6 @@ contract EventRelayVerifier is CrosschainVerifier, BytesUtil {
         functionCall = SimpleCrosschainControl(_functionCall);
     }
 
-    uint256 constant LEN_OF_LEN = 4;
-    uint256 constant LEN_OF_SIG = 20 + 32 + 32 + 1;
-
     /**
      * For this implementation, the signatures have already been checked in the
      * relayEvent function below.
@@ -57,13 +54,16 @@ contract EventRelayVerifier is CrosschainVerifier, BytesUtil {
         bytes32, /* _eventSig */
         bytes calldata _encodedEvent,
         bytes calldata /* _signature */
-    ) external view override {
+    ) external view override returns (bool) {
         bytes32 eventDigest = keccak256(_encodedEvent);
         uint256 threshold = registrar.getSigningThreshold(_blockchainId);
         require(
             signedEvents[eventDigest].whoVoted.length >= threshold,
             "Not enough signers"
         );
+
+        // A return value is needed so that Web3J generates a wrapper for this function.
+        return true;
     }
 
     /**
@@ -75,65 +75,29 @@ contract EventRelayVerifier is CrosschainVerifier, BytesUtil {
         uint256 _sourceBlockchainId,
         address _sourceCbcAddress,
         bytes calldata _eventData,
-        bytes calldata _signature
+        bytes calldata _signatures
     ) external {
         // Step 1: Check the signatures of signers.
-        address[] memory signers;
-        bytes32[] memory sigRs;
-        bytes32[] memory sigSs;
-        uint8[] memory sigVs;
-
-        uint32 len = BytesUtil.bytesToUint32(_signature, 0);
-        {
-            require(
-                _signature.length == LEN_OF_LEN + len * LEN_OF_SIG,
-                "Signature incorrect length"
-            );
-
-            signers = new address[](len);
-            sigRs = new bytes32[](len);
-            sigSs = new bytes32[](len);
-            sigVs = new uint8[](len);
-
-            uint256 offset = LEN_OF_LEN;
-            for (uint256 i = 0; i < len; i++) {
-                signers[i] = BytesUtil.bytesToAddress2(_signature, offset);
-                offset += 20;
-                sigRs[i] = BytesUtil.bytesToBytes32(_signature, offset);
-                offset += 32;
-                sigSs[i] = BytesUtil.bytesToBytes32(_signature, offset);
-                offset += 32;
-                sigVs[i] = BytesUtil.bytesToUint8(_signature, offset);
-                offset += 1;
-            }
-        }
-
         bytes memory encodedEvent = abi.encodePacked(
             _sourceBlockchainId,
             _sourceCbcAddress,
             CROSS_CALL_EVENT_SIGNATURE,
             _eventData
         );
-
-        registrar.verify(
-            _sourceBlockchainId,
-            signers,
-            sigRs,
-            sigSs,
-            sigVs,
-            encodedEvent
-        );
+        registrar.verify(_sourceBlockchainId, _signatures, encodedEvent);
 
         // Step 2: Record who signed the event.
         bytes32 eventDigest = keccak256(encodedEvent);
+        Signatures memory sigs = decodeSignature(_signatures);
 
-        for (uint256 i = 0; i < len; i++) {
-            if (signedEvents[eventDigest].whoVotedMap[signers[i]]) {
+        for (uint256 i = 0; i < sigs.signatures.length; i++) {
+            address signer = sigs.signatures[i].by;
+            if (signedEvents[eventDigest].whoVotedMap[signer]) {
                 // Ignore relayers inadvertently signing a second time.
                 continue;
             }
-            signedEvents[eventDigest].whoVotedMap[signers[i]] = true;
-            signedEvents[eventDigest].whoVoted.push(signers[i]);
+            signedEvents[eventDigest].whoVotedMap[signer] = true;
+            signedEvents[eventDigest].whoVoted.push(signer);
         }
 
         // Action the event if enough relayers have signed.
@@ -145,12 +109,12 @@ contract EventRelayVerifier is CrosschainVerifier, BytesUtil {
         uint256 threshold = registrar.getSigningThreshold(_sourceBlockchainId);
         if (signedEvents[eventDigest].whoVoted.length >= threshold) {
             signedEvents[eventDigest].actioned = true;
-            // NOTE: In the call below, the _signature parameter isn't used. Could be cheaper to pass bytes("")
+            // TODO: In the call below, the _signature parameter isn't used. Could be cheaper to pass bytes("")
             functionCall.crossCallHandler(
                 _sourceBlockchainId,
                 _sourceCbcAddress,
                 _eventData,
-                _signature
+                _signatures
             );
         }
     }

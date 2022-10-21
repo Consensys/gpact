@@ -40,7 +40,7 @@ type Signer interface {
 	// GetAddr gets the associated address for a signing key linked with given chain and given contract addr.
 	GetAddr(chainID *big.Int, contractAddr common.Address) (byte, common.Address, error)
 
-	// Sign signs given message with internal stored key correspdoing to given chainID and given contract addr.
+	// Sign signs given message with internal stored key corresponding to given chainID and given contract addr.
 	Sign(chainID *big.Int, contractAddr common.Address, msg []byte) (byte, []byte, error)
 }
 

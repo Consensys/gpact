@@ -16,8 +16,13 @@ pragma solidity >=0.8;
 
 import "../../common/EcdsaSignatureVerification.sol";
 import "../../openzeppelin/access/Ownable.sol";
+import "./SignatureEncoding.sol";
 
-contract MessagingRegistrar is EcdsaSignatureVerification, Ownable {
+contract MessagingRegistrar is
+    EcdsaSignatureVerification,
+    SignatureEncoding,
+    Ownable
+{
     struct BlockchainRecord {
         uint256 signingThreshold;
         uint256 numSigners;
@@ -90,62 +95,36 @@ contract MessagingRegistrar is EcdsaSignatureVerification, Ownable {
         );
     }
 
+    // Verify signatures and check the threshold
     function verifyAndCheckThreshold(
         uint256 _blockchainId,
-        address[] calldata _signers,
-        bytes32[] calldata _sigR,
-        bytes32[] calldata _sigS,
-        uint8[] calldata _sigV,
+        bytes calldata _signatures,
         bytes calldata _plainText
-    ) external view returns (bool) {
-        checkThreshold(_blockchainId, _signers);
-        return verify(_blockchainId, _signers, _sigR, _sigS, _sigV, _plainText);
-    }
+    ) external view {
+        Signatures memory sigs = decodeSignature(_signatures);
 
-    function verify(
-        uint256 _blockchainId,
-        address[] calldata _signers,
-        bytes32[] calldata _sigR,
-        bytes32[] calldata _sigS,
-        uint8[] calldata _sigV,
-        bytes calldata _plainText
-    ) public view returns (bool) {
-        uint256 signersLength = _signers.length;
-        require(signersLength == _sigR.length, "sigR length mismatch");
-        require(signersLength == _sigS.length, "sigS length mismatch");
-        require(signersLength == _sigV.length, "sigV length mismatch");
-
-        for (uint256 i = 0; i < signersLength; i++) {
-            // Check that signer is a signer for this blockchain
-            require(
-                blockchains[_blockchainId].signers[_signers[i]],
-                "Signer not signer for this blockchain"
-            );
-            // Verify the signature
-            require(
-                verifySigComponents(
-                    _signers[i],
-                    _plainText,
-                    _sigR[i],
-                    _sigS[i],
-                    _sigV[i]
-                ),
-                "Signature did not verify"
-            );
-        }
-        return true;
-    }
-
-    function checkThreshold(uint256 _blockchainId, address[] calldata _signers)
-        public
-        view
-        returns (bool)
-    {
-        uint256 signersLength = _signers.length;
+        // Check signing threshold
         require(
-            signersLength >= blockchains[_blockchainId].signingThreshold,
+            sigs.signatures.length >=
+                blockchains[_blockchainId].signingThreshold,
             "Not enough signers"
         );
+
+        checkUniqueSigners(sigs);
+        verifyInternal(_blockchainId, sigs, _plainText);
+    }
+
+    // Version of verify called by Event Relay
+    // Verify a signature
+    function verify(
+        uint256 _blockchainId,
+        bytes calldata _signatures,
+        bytes calldata _plainText
+    ) public view returns (bool) {
+        Signatures memory sigs = decodeSignature(_signatures);
+
+        checkUniqueSigners(sigs);
+        verifyInternal(_blockchainId, sigs, _plainText);
         return true;
     }
 
@@ -197,5 +176,43 @@ contract MessagingRegistrar is EcdsaSignatureVerification, Ownable {
         );
         require(_newThreshold != 0, "Threshold can not be zero");
         blockchains[_bcId].signingThreshold = _newThreshold;
+    }
+
+    /**
+     * Revert if there is a duplicate signer in the list.
+     */
+    function checkUniqueSigners(Signatures memory _sigs) private pure {
+        for (uint256 i = 0; i < _sigs.signatures.length - 1; i++) {
+            address signer = _sigs.signatures[i].by;
+
+            for (uint256 j = i + 1; j < _sigs.signatures.length; j++) {
+                require(signer != _sigs.signatures[j].by, "Duplicate signer");
+            }
+        }
+    }
+
+    function verifyInternal(
+        uint256 _blockchainId,
+        Signatures memory _sigs,
+        bytes calldata _plainText
+    ) private view {
+        for (uint256 i = 0; i < _sigs.signatures.length; i++) {
+            // Check that signer is a signer for this blockchain
+            require(
+                blockchains[_blockchainId].signers[_sigs.signatures[i].by],
+                "Signer not registered for this blockchain"
+            );
+            // Verify the signature
+            require(
+                verifySigComponents(
+                    _sigs.signatures[i].by,
+                    _plainText,
+                    _sigs.signatures[i].sigR,
+                    _sigs.signatures[i].sigS,
+                    _sigs.signatures[i].sigV
+                ),
+                "Signature did not verify"
+            );
+        }
     }
 }

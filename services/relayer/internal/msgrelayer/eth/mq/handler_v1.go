@@ -99,15 +99,37 @@ func handleV1(req messages.Message) {
 	}
 	logging.Info("Signature generated with type %v: %v", signer.TypeToString(sigType), hex.EncodeToString(signature))
 
-	signature[len(signature)-1] += 27
+	// Pad the one byte V value given the signature is ABI encoded (and not packed encoded)
+	lastByteSig := signature[len(signature)-1] + 27
+	sigV := []byte{
+		0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, lastByteSig}
+	signature[len(signature)-1] = 0
+	signature = append(signature, sigV...)
+
 	// TODO, Add relayer communication to order signatures from different relayers.
-	signature = append([]byte{0, 0, 0, 1}, append(addr.Bytes(), signature...)...)
+
+	ofsSignaturesDynamicType := []byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x20}
+	sigTypeEcdsa := []byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}
+	ofsSignatureDynamicType := []byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x40}
+	numSigs := []byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}
+	ofsFirstSig := []byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x20}
+	ofsMetaDynamicType := []byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xA0}
+	emptyMetaBytes := []byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+
+	addrPadding := []byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+	signerBlob := append(addrPadding, append(addr.Bytes(), append(signature, append(ofsMetaDynamicType, emptyMetaBytes...)...)...)...)
+
+	signatureBlob := append(ofsSignaturesDynamicType, append(sigTypeEcdsa, append(ofsSignatureDynamicType, append(numSigs, append(ofsFirstSig, signerBlob...)...)...)...)...)
 
 	// Add proof
 	msg.Proofs = append(msg.Proofs, v1.Proof{
 		ProofType: signer.TypeToString(sigType),
 		Created:   time.Now().UnixMilli(),
-		Proof:     hex.EncodeToString(signature),
+		Proof:     hex.EncodeToString(signatureBlob),
 	})
 
 	logging.Info("Message Destination: %v", msg.Destination.ContractAddress)

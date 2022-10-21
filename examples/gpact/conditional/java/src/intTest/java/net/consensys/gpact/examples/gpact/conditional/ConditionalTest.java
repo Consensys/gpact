@@ -39,6 +39,13 @@ public class ConditionalTest extends AbstractExampleTest {
   }
 
   @Test
+  public void fakeMessagingSerialMultiBlockchainGpactV1() throws Exception {
+    String tempPropsFile = createPropertiesFile(MessagingType.FAKE, true, false);
+    ConditionalExample.main(
+        new String[] {GpactCrossControlManagerGroup.GpactVersion.V1.toString(), tempPropsFile});
+  }
+
+  @Test
   public void fakeMessagingSerialMultiBlockchainGpactV2() throws Exception {
     String tempPropsFile = createPropertiesFile(MessagingType.FAKE, true, false);
     ConditionalExample.main(

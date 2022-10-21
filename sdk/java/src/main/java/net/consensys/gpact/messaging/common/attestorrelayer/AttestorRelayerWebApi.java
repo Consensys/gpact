@@ -302,30 +302,40 @@ public class AttestorRelayerWebApi {
       throws CrosschainProtocolStackException {
     String uriStr = msgStoreURL + "/messages/" + eventId + "/proofs";
 
-    long backOffTime = 1000;
+    // Back off time will be (in ms): 500, 750, 1,125, 1,688, 2,531
+    // Which makes the cumulative back-off time around 7 seconds.
+    long backOffTime = 500;
     final double backOffScale = 1.5;
-    int backOffCountDown = 10;
+    int backOffCountDown = 5;
 
     String body = null;
     boolean done = false;
+    int statusCode = 0;
+    String reason = "";
     while (!done) {
       try {
         HttpResponse<String> response = httpGet(uriStr);
-        if (response.statusCode() != 200) {
-          throw new CrosschainProtocolStackException(
-              "Fetch signed event returned HTTP status: "
-                  + response.statusCode()
-                  + ", "
-                  + response.body());
+        statusCode = response.statusCode();
+        if (statusCode == 200) {
+          body = response.body();
+          done = true;
         }
-        body = response.body();
+      } catch (InterruptedException | IOException ex1) {
+        reason = ex1.getMessage();
+        // Ignore exceptions
+      }
 
-        done = true;
-      } catch (InterruptedException | IOException | CrosschainProtocolStackException ex1) {
+      if (!done) {
         if (backOffCountDown == 0) {
-          LOG.warn("Error while fetching signed event: {}, Error: {}", uriStr, ex1.toString());
-          throw new CrosschainProtocolStackException("Error while fetching signed event ", ex1);
+          if (statusCode == 0) {
+            throw new CrosschainProtocolStackException("Fetch signed event error: " + reason);
+          } else {
+            throw new CrosschainProtocolStackException(
+                "Fetch signed event returned HTTP status: " + statusCode);
+          }
         }
+
+        // Wait and back-off
         LOG.info(" Fetch signed event failed. Waiting another {} ms", backOffTime);
         try {
           Thread.sleep(backOffTime);

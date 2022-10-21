@@ -19,6 +19,7 @@ import (
 	"context"
 	"crypto/rand"
 	"fmt"
+	"log"
 	"math/big"
 	"time"
 
@@ -176,6 +177,7 @@ func (exec *ExecutorImplV1) start(root *treenode.TreeNode, transID *big.Int) (*f
 				if err != nil {
 					return nil, nil, err
 				}
+				logging.Info().Msgf("TODO REMOVE ME Start EventSig: %x", evSig)
 				return ev, evSig, nil
 			}
 		}
@@ -248,6 +250,25 @@ func (exec *ExecutorImplV1) segment(transID *big.Int, startChainID *big.Int, sta
 		}
 		time.Sleep(retryDelay)
 	}
+
+	// REMOVE ME **************
+	logging.Info().Msgf("TODO REMOVE ME Fetch logs for segment transaction")
+	client, err1 := ethclient.Dial("ws://127.0.0.1:8321")
+	if err1 != nil {
+		log.Fatal(err1)
+	}
+	time.Sleep(5 * time.Second)
+
+	receipt, err1 := client.TransactionReceipt(context.Background(), tx.Hash())
+	if err1 != nil {
+		log.Fatal(err1)
+	}
+	logging.Info().Msgf("TX Receipt Status: %v", receipt.Status)
+	logging.Info().Msgf("TX Receipt Logs: %v", receipt.Logs)
+
+	logging.Info().Msgf("TODO REMOVE ME He6")
+	//**************
+
 	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(eventTimeout))
 	defer cancel()
 	opts := bind.WatchOpts{Start: nil, Context: ctx}
@@ -283,6 +304,9 @@ func (exec *ExecutorImplV1) segment(transID *big.Int, startChainID *big.Int, sta
 					lockedSegmentsSigs[node.ChainID().String()] = sigs
 				}
 				return ev, evSig, nil
+			} else {
+				logging.Info().Msgf("Unexpectedly, segment transaction returned event: %v", ev)
+				return nil, nil, fmt.Errorf("Unexpectedly, segment transaction returned event: %v", ev)
 			}
 		}
 	}

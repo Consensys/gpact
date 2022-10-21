@@ -21,6 +21,7 @@ import net.consensys.gpact.common.AnIdentity;
 import net.consensys.gpact.common.BlockchainConfig;
 import net.consensys.gpact.common.BlockchainId;
 import net.consensys.gpact.common.RevertReason;
+import net.consensys.gpact.messaging.common.SignatureBlob;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.web3j.crypto.Credentials;
@@ -64,10 +65,10 @@ public class TxRootRelayerGroup {
     for (BlockchainId bcId : blockchainsToPublishTo) {
       // TODO handle blockchain id not registered
       TxRootRelayer relayer = this.blockchains.get(bcId);
-      Signatures signed = this.blockchains.get(publishingFrom).sign(transactionReceiptRoot);
+      SignatureBlob signatures = this.blockchains.get(publishingFrom).sign(transactionReceiptRoot);
       transactionReceiptCompletableFutures[i++] =
           relayer.addTransactionReceiptRootToBlockchainAsyncPart1(
-              signed, publishingFrom, transactionReceiptRoot);
+              signatures, publishingFrom, transactionReceiptRoot);
     }
     CompletableFuture<Void> combinedFuture =
         CompletableFuture.allOf(transactionReceiptCompletableFutures);

@@ -22,6 +22,7 @@ solc $CONTRACTSDIR/functioncall/interface/HiddenParamSourceTest.sol --allow-path
 solc $CONTRACTSDIR/functioncall/gpact/FailureTest.sol --allow-paths . --bin --abi --hashes --optimize -o $BUILDDIR --overwrite
 
 solc $CONTRACTSDIR/messaging/common/MessagingRegistrar.sol --allow-paths . --bin --abi --hashes --optimize -o $BUILDDIR --overwrite
+solc $CONTRACTSDIR/messaging/common/SignatureEncodingTest.sol --allow-paths . --bin --abi --optimize -o $BUILDDIR --overwrite
 
 solc $CONTRACTSDIR/messaging/eventrelay/EventRelayVerifier.sol --allow-paths . --bin --abi --hashes --optimize -o $BUILDDIR --overwrite
 solc $CONTRACTSDIR/messaging/eventrelay/EventRelayAppTest.sol --allow-paths . --bin --abi --hashes --optimize -o $BUILDDIR --overwrite
@@ -40,6 +41,7 @@ $WEB3J solidity generate -a=$BUILDDIR/HiddenParamSourceTest.abi -b=$BUILDDIR/Hid
 $WEB3J solidity generate -r -a=$BUILDDIR/FailureTest.abi -b=$BUILDDIR/FailureTest.bin -o=$OUTPUTDIR -p=$BASEPACKAGE.functioncall
 
 $WEB3J solidity generate -a=$BUILDDIR/MessagingRegistrar.abi -b=$BUILDDIR/MessagingRegistrar.bin -o=$OUTPUTDIR -p=$BASEPACKAGE.messaging.common
+$WEB3J solidity generate -r -a=$BUILDDIR/SignatureEncodingTest.abi -b=$BUILDDIR/SignatureEncodingTest.bin -o=$OUTPUTDIR -p=$BASEPACKAGE.messaging.common
 
 $WEB3J solidity generate -a=$BUILDDIR/EventRelayVerifier.abi -b=$BUILDDIR/EventRelayVerifier.bin -o=$OUTPUTDIR -p=$BASEPACKAGE.messaging.eventrelay
 $WEB3J solidity generate -r -a=$BUILDDIR/EventRelayAppTest.abi -b=$BUILDDIR/EventRelayAppTest.bin -o=$OUTPUTDIR -p=$BASEPACKAGE.messaging.eventrelay

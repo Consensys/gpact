@@ -74,6 +74,18 @@ node ./test.js
 ## Relayer Build and Test 
 If you wish to alter the relayer node code, you need to use these build and test steps.  
 
+If any contracts have been altered, the wrappers need to be re-generated. 
+First install abigen using the instruction here:
+```$xslt
+sh services/relayer/genWrappersInstallAbiGen.sh
+```
+and then generate the golang files:
+```$xslt
+sh services/relayer/genWrappers.sh
+```
+
+
+
 To build the relayer:
 ```$xslt
 cd services/relayer
@@ -106,5 +118,4 @@ To apply Java format:
 ```$xslt
 ./gradlew spotlessApply
 ```
-
 

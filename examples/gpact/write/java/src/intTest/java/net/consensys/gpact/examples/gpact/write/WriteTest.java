@@ -68,6 +68,13 @@ public class WriteTest extends AbstractExampleTest {
   }
 
   @Test
+  public void fakeMessagingParallelMultiBlockchainGpactV1() throws Exception {
+    String tempPropsFile = createPropertiesFile(MessagingType.FAKE, false, false);
+    GpactCrosschainWrite.main(
+        new String[] {GpactCrossControlManagerGroup.GpactVersion.V1.toString(), tempPropsFile});
+  }
+
+  @Test
   public void fakeMessagingParallelMultiBlockchainGpactV2() throws Exception {
     String tempPropsFile = createPropertiesFile(MessagingType.FAKE, false, false);
     GpactCrosschainWrite.main(

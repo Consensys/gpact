@@ -31,6 +31,7 @@ import net.consensys.gpact.common.TxManagerCache;
 import net.consensys.gpact.common.crypto.KeyPairGen;
 import net.consensys.gpact.common.test.AbstractWeb3Test;
 import net.consensys.gpact.messaging.common.MessagingRegistrar;
+import net.consensys.gpact.messaging.common.SignatureBlob;
 import net.consensys.gpact.messaging.txrootrelay.besuethereum.core.Hash;
 import net.consensys.gpact.messaging.txrootrelay.besuethereum.core.LogTopic;
 import net.consensys.gpact.messaging.txrootrelay.besuethereum.rlp.RLP;
@@ -115,14 +116,11 @@ public class TxRootAddTest extends AbstractWeb3Test {
 
     // Sign the txReceiptRoot
     Sign.SignatureData signatureData = newSigner.sign(this.txReceiptRoot);
-    List<String> signers = new ArrayList<>();
-    signers.add(newSigner.getAddress());
-    List<byte[]> sigR = new ArrayList<>();
-    sigR.add(signatureData.getR());
-    List<byte[]> sigS = new ArrayList<>();
-    sigS.add(signatureData.getS());
-    List<BigInteger> sigV = new ArrayList<>();
-    sigV.add(BigInteger.valueOf(signatureData.getV()[0]));
+    String[] signers = new String[] {newSigner.getAddress()};
+    byte[][] sigR = new byte[][] {signatureData.getR()};
+    byte[][] sigS = new byte[][] {signatureData.getS()};
+    byte[] sigV = new byte[] {signatureData.getV()[0]};
+    SignatureBlob signatures = new SignatureBlob(signers, sigR, sigS, sigV);
 
     // Check that the receipt root is has been registered.
     boolean containsReceiptRoot =
@@ -135,7 +133,7 @@ public class TxRootAddTest extends AbstractWeb3Test {
     try {
       TransactionReceipt receipt =
           this.txReceiptRootStorageContract
-              .addTxReceiptRoot(blockchainId, signers, sigR, sigS, sigV, this.txReceiptRoot)
+              .addTxReceiptRoot(blockchainId, signatures.encode(), this.txReceiptRoot)
               .send();
       assert (receipt.isStatusOK());
     } catch (TransactionException ex) {
@@ -265,19 +263,16 @@ public class TxRootAddTest extends AbstractWeb3Test {
     // Add the transaction receipt root for the blockchain
     // Sign the txReceiptRoot
     Sign.SignatureData signatureData = newSigner.sign(receiptsRootByte);
-    List<String> signers = new ArrayList<>();
-    signers.add(newSigner.getAddress());
-    List<byte[]> sigR = new ArrayList<>();
-    sigR.add(signatureData.getR());
-    List<byte[]> sigS = new ArrayList<>();
-    sigS.add(signatureData.getS());
-    List<BigInteger> sigV = new ArrayList<>();
-    sigV.add(BigInteger.valueOf(signatureData.getV()[0]));
+    String[] signers = new String[] {newSigner.getAddress()};
+    byte[][] sigR = new byte[][] {signatureData.getR()};
+    byte[][] sigS = new byte[][] {signatureData.getS()};
+    byte[] sigV = new byte[] {signatureData.getV()[0]};
+    SignatureBlob signatures = new SignatureBlob(signers, sigR, sigS, sigV);
 
     // This will revert if the signature does not verify
     TransactionReceipt receipt5 =
         this.txReceiptRootStorageContract
-            .addTxReceiptRoot(sourceBlockchainId, signers, sigR, sigS, sigV, receiptsRootByte)
+            .addTxReceiptRoot(sourceBlockchainId, signatures.encode(), receiptsRootByte)
             .send();
     assert (receipt5.isStatusOK());
 

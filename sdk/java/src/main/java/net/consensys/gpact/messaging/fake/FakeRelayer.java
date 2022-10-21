@@ -16,12 +16,11 @@ package net.consensys.gpact.messaging.fake;
 
 import static net.consensys.gpact.common.FormatConversion.addressStringToBytes;
 
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import net.consensys.gpact.common.AnIdentity;
 import net.consensys.gpact.common.BlockchainId;
-import net.consensys.gpact.messaging.SignedEvent;
+import net.consensys.gpact.messaging.common.SignatureBlob;
 import org.web3j.crypto.Sign;
 
 /**
@@ -29,53 +28,40 @@ import org.web3j.crypto.Sign;
  * signer that signs events locally with an in-memory private key.
  */
 public class FakeRelayer {
-
-  AnIdentity signer;
+  private List<AnIdentity> signers = new ArrayList<>();
 
   public FakeRelayer(final AnIdentity signer) {
-    this.signer = signer;
+    this.signers.add(signer);
+  }
+
+  public FakeRelayer(final List<AnIdentity> signers) {
+    this.signers = signers;
   }
 
   public byte[] fetchedSignedEvent(
       BlockchainId bcId, String contractAddress, byte[] eventFunctionSignature, byte[] eventData) {
-    List<AnIdentity> signers = new ArrayList<>();
-    signers.add(this.signer);
-    SignedEvent signedEvent =
-        getSignedEvent(signers, bcId, eventData, contractAddress, eventFunctionSignature);
-    return signedEvent.getEncodedSignatures();
-  }
-
-  public static SignedEvent getSignedEvent(
-      List<AnIdentity> signers,
-      BlockchainId bcId,
-      byte[] eventData,
-      String contractAddress,
-      byte[] eventFunctionSignature) {
 
     byte[] encodedEventInformation =
         abiEncodePackedEvent(bcId, contractAddress, eventFunctionSignature, eventData);
 
-    // Add the transaction receipt root for the blockchain
-    // Sign the txReceiptRoot
-    List<String> theSigners = new ArrayList<>();
-    List<byte[]> sigR = new ArrayList<>();
-    List<byte[]> sigS = new ArrayList<>();
-    List<Byte> sigV = new ArrayList<>();
-    //    List<BigInteger> sigV = new ArrayList<>();
-    for (AnIdentity signer : signers) {
+    int numSigners = this.signers.size();
+    String[] theSigners = new String[numSigners];
+    byte[][] sigR = new byte[numSigners][];
+    byte[][] sigS = new byte[numSigners][];
+    byte[] sigV = new byte[numSigners];
+    for (int i = 0; i < numSigners; i++) {
+      AnIdentity signer = this.signers.get(i);
       Sign.SignatureData signatureData = signer.sign(encodedEventInformation);
-      theSigners.add(signer.getAddress());
-      sigR.add(signatureData.getR());
-      sigS.add(signatureData.getS());
-      sigV.add(signatureData.getV()[0]);
+      theSigners[i] = signer.getAddress();
+      sigR[i] = signatureData.getR();
+      sigS[i] = signatureData.getS();
+      sigV[i] = signatureData.getV()[0];
     }
-
-    byte[] encodedSignatures = abiEncodePackedSignatures(theSigners, sigR, sigS, sigV);
-    return new SignedEvent(
-        bcId, contractAddress, eventFunctionSignature, eventData, encodedSignatures);
+    SignatureBlob signatures = new SignatureBlob(theSigners, sigR, sigS, sigV);
+    return signatures.encode();
   }
 
-  private static byte[] abiEncodePackedEvent(
+  public static byte[] abiEncodePackedEvent(
       BlockchainId blockchainId, String contractAddress, byte[] eventSignature, byte[] eventData) {
     byte[] blockchainIdBytes = blockchainId.asBytes();
 
@@ -100,24 +86,5 @@ public class FakeRelayer {
         eventData.length);
 
     return abiEncodePacked;
-  }
-
-  private static byte[] abiEncodePackedSignatures(
-      List<String> theSigners, List<byte[]> sigR, List<byte[]> sigS, List<Byte> sigV) {
-    final int LEN_OF_LEN = 4;
-    final int LEN_OF_SIG = 20 + 32 + 32 + 1;
-
-    int len = theSigners.size();
-
-    ByteBuffer bb = ByteBuffer.allocate(LEN_OF_LEN + LEN_OF_SIG * len);
-    bb.putInt(len);
-
-    for (int i = 0; i < len; i++) {
-      bb.put(addressStringToBytes(theSigners.get(i)));
-      bb.put(sigR.get(i));
-      bb.put(sigS.get(i));
-      bb.put(sigV.get(i));
-    }
-    return bb.array();
   }
 }

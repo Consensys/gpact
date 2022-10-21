@@ -22,6 +22,7 @@ import "../../common/BytesUtil.sol";
 contract TxReceiptsRootStorage is
     TxReceiptsRootStorageInterface,
     ERC165MappingImplementation,
+    SignatureEncoding,
     BytesUtil
 {
     MessagingRegistrar registrar;
@@ -40,19 +41,13 @@ contract TxReceiptsRootStorage is
 
     function addTxReceiptRoot(
         uint256 _blockchainId,
-        address[] calldata _signers,
-        bytes32[] calldata _sigR,
-        bytes32[] calldata _sigS,
-        uint8[] calldata _sigV,
+        bytes calldata _signatures,
         bytes32 _txReceiptsRoot
     ) external override(TxReceiptsRootStorageInterface) {
         bytes memory txReceiptsRootBytes = abi.encodePacked(_txReceiptsRoot);
         registrar.verifyAndCheckThreshold(
             _blockchainId,
-            _signers,
-            _sigR,
-            _sigS,
-            _sigV,
+            _signatures,
             txReceiptsRootBytes
         );
         txReceiptsRoots[_blockchainId][_txReceiptsRoot] = true;
