@@ -249,9 +249,14 @@ public class EventAttestTest extends AbstractWeb3Test {
         FakeRelayer.abiEncodePackedEvent(
             bcId, contractAddress, eventFunctionSignature, rawEventData);
 
+    System.out.println("BcId: " + bcId.toString());
+    System.out.println("EventFuncSig: " + Bytes.wrap(eventFunctionSignature).toHexString());
+    System.out.println("EncodedEventData: " + Bytes.wrap(encodedEventData).toHexString());
+    System.out.println("Signature: " + Bytes.wrap(signature).toHexString());
+
     String abi =
         this.verifier.getABI_call_decodeAndVerifyEvent(
             bcId.asBigInt(), eventFunctionSignature, encodedEventData, signature);
-    System.out.println(abi);
+    System.out.println("ABI: " + abi);
   }
 }
