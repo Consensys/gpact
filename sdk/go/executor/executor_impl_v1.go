@@ -213,7 +213,6 @@ func (exec *ExecutorImplV1) segment(transID *big.Int, startChainID *big.Int, sta
 			cbcAddrs = append(cbcAddrs, childSegEvent.Raw.Address)
 			eventFuncSigs = append(eventFuncSigs, segmentFuncSig)
 			eventDatas = append(eventDatas, childSegEvent.Raw.Data)
-			// TODO this method of accumulating event signatures won't work given the new structured approach.
 			eventSigs = append(eventSigs, childSegSig)
 		}
 	}
@@ -307,7 +306,6 @@ func (exec *ExecutorImplV1) segment(transID *big.Int, startChainID *big.Int, sta
 				return ev, evSig, nil
 			} else {
 				logging.Info().Msgf("Unexpectedly, segment transaction returned event: %v", ev)
-				logging.Info().Msgf("TODO REMOVE ME Here13")
 				return nil, nil, fmt.Errorf("Unexpectedly, segment transaction returned event: %v", ev)
 			}
 		}
