@@ -14,12 +14,12 @@
  */
 pragma solidity >=0.8;
 
-import "../interface/CrosschainVerifier.sol";
+import "../interface/CrosschainVerifierDefaultImpl.sol";
 import "../common/MessagingRegistrar.sol";
 import "../../functioncall/sfc/SimpleCrosschainControl.sol";
 import "../common/SignatureEncoding.sol";
 
-contract EventRelayVerifier is CrosschainVerifier, SignatureEncoding {
+contract EventRelayVerifier is CrosschainVerifierDefaultImpl {
     MessagingRegistrar registrar;
     SimpleCrosschainControl functionCall;
 

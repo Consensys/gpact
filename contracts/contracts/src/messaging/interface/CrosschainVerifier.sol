@@ -37,4 +37,27 @@ interface CrosschainVerifier {
         bytes calldata _signedEventInfo,
         bytes calldata _signature
     ) external view returns (bool);
+
+    /**
+     * Return the list of signers for a blockchain.
+     * Implementation of this function is optional.
+     *
+     * @param _blockchainId The blockchain that the signers are valid for.
+     * @return list of addresses that are the signers for events from a blockchain.
+     */
+    function getSignerList(uint256 _blockchainId)
+        external
+        view
+        returns (address[] memory);
+
+    /**
+     * Return the signing algorithm supported by signers of events from a blockchain.
+     *
+     * @param _blockchainId The blockchain that is the source of events being validated.
+     * @return Signature algorithm identifier.
+     */
+    function supportedSigningAlgorithm(uint256 _blockchainId)
+        external
+        view
+        returns (uint256);
 }

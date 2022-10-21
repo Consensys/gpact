@@ -19,7 +19,7 @@ pragma solidity ^0.8;
  * https://entethalliance.github.io/crosschain-interoperability/draft_crosschain_techspec_messaging.html
  */
 contract SignatureEncoding {
-    uint16 constant ECDSA_SIGNATURE = 1;
+    uint256 public constant ECDSA_SIGNATURE = 1;
 
     struct Signature {
         address by;
@@ -48,8 +48,8 @@ contract SignatureEncoding {
         (
             ,
             /* Skip offset of dynamic type */
-            uint16 sigType
-        ) = abi.decode(_signatures, (uint256, uint16));
+            uint256 sigType
+        ) = abi.decode(_signatures, (uint256, uint256));
         require(sigType == ECDSA_SIGNATURE, "Signature unknown type");
 
         Signatures memory sigs = abi.decode(_signatures, (Signatures));
