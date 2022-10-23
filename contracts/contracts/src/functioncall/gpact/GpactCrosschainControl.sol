@@ -242,7 +242,10 @@ contract GpactCrosschainControl is
             rootBcId
         );
 
-        // TODO emit segments understanding of root blockhain id
+        // The root blockchain id does not need to be emitted as part of the Segment event
+        // as it is indirectly included in the callExecutionTreeHash. That is, the root
+        // function call hash will include the root blockchain id, which then feeds into the
+        // callExecutionTreeHash.
         emit Segment(
             crosschainTransactionId,
             hashOfCallGraph,
