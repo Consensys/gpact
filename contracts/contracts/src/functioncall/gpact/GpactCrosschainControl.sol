@@ -42,10 +42,13 @@ contract GpactCrosschainControl is
         uint256 _timeout,
         bytes _callGraph
     );
-    // 0xb01557f1
+
     bytes32 internal constant SEGMENT_EVENT_SIGNATURE =
-        keccak256("Segment(uint256,bytes32,uint256[],address[],bool,bytes)");
+        keccak256(
+            "Segment(uint256,uint256,bytes32,uint256[],address[],bool,bytes)"
+        );
     event Segment(
+        uint256 _rootBlockchainId,
         uint256 _crossBlockchainTransactionId,
         bytes32 _hashOfCallGraph,
         uint256[] _callPath,
@@ -211,6 +214,7 @@ contract GpactCrosschainControl is
         if (_eventData.length > 1) {
             if (
                 verifySegmentEvents(
+                    rootBcId,
                     _eventData,
                     _callPath,
                     hashOfCallGraph,
@@ -247,6 +251,7 @@ contract GpactCrosschainControl is
         // function call hash will include the root blockchain id, which then feeds into the
         // callExecutionTreeHash.
         emit Segment(
+            rootBcId,
             crosschainTransactionId,
             hashOfCallGraph,
             _callPath,
@@ -340,6 +345,7 @@ contract GpactCrosschainControl is
 
         if (
             verifySegmentEvents(
+                rootBcId,
                 _eventData,
                 callPathForStart,
                 hashOfCallGraph,
@@ -409,6 +415,7 @@ contract GpactCrosschainControl is
         );
 
         // Set-up root blockchain / crosschain transaction value for unlocking.
+        uint256 rootBcId = _blockchainIds[0];
         bytes32 crosschainRootTxId = calcRootTxId(
             _blockchainIds[0],
             rootEventCrossBlockchainTxId
@@ -417,23 +424,31 @@ contract GpactCrosschainControl is
         // Check that all of the Segment Events are for the same transaction id, and are for this blockchain.
         for (uint256 i = 1; i < _eventData.length; i++) {
             // Recall Segment event is defined as:
-            // event Segment(uint256 _crossBlockchainTransactionId, bytes32 _hashOfCallGraph, uint256[] _callPath,
+            // event Segment(uint256 rootBcId, uint256 _crossBlockchainTransactionId, bytes32 _hashOfCallGraph, uint256[] _callPath,
             //        address[] _lockedContracts, bool _success, bytes _returnValue);
+            uint256 segmentRootBcId;
             uint256 segmentEventCrossBlockchainTxId;
             address[] memory lockedContracts;
-            (segmentEventCrossBlockchainTxId, , , lockedContracts, , ) = abi
-                .decode(
-                    _eventData[i],
-                    (uint256, bytes32, uint256[], address[], bool, bytes)
-                );
+            (
+                segmentRootBcId,
+                segmentEventCrossBlockchainTxId,
+                ,
+                ,
+                lockedContracts,
+                ,
+
+            ) = abi.decode(
+                _eventData[i],
+                (uint256, uint256, bytes32, uint256[], address[], bool, bytes)
+            );
 
             // Check that the cross blockchain transaction id is the same for the root and the segment event.
             require(
-                rootEventCrossBlockchainTxId == segmentEventCrossBlockchainTxId
+                rootEventCrossBlockchainTxId == segmentEventCrossBlockchainTxId,
+                "Incorrect CrosschainTxId"
             );
-            // TODO check the Root Blockchain id indicated in the segment matches the one from the root transaction.
-
-            // TODO Check that the cross chain transaction id for the root blockchain id is in use on this blockchain but has not been added to the completed list.
+            // Check the Root Blockchain id indicated in the segment matches the one from the root transaction.
+            require(rootBcId == segmentRootBcId, "Incorrect Root BcId");
 
             // For each address indicated in the Segment Event as being locked, Commit or Ignore updates
             // according to what the Root Event says.
@@ -735,6 +750,7 @@ contract GpactCrosschainControl is
      * @return True if all of the segment event information can be verified.
      */
     function verifySegmentEvents(
+        uint256 _rootBcId,
         bytes[] memory _segmentEvents,
         uint256[] memory _callPath,
         bytes32 _hashOfCallGraph,
@@ -758,6 +774,8 @@ contract GpactCrosschainControl is
             bool success;
             bytes memory returnValue;
             (
+                ,
+                /* rootBlockchainId not used */
                 crossBlockchainTxId,
                 hashOfCallGraphFromSegment,
                 segCallPath,
@@ -766,7 +784,7 @@ contract GpactCrosschainControl is
                 returnValue
             ) = abi.decode(
                 _segmentEvents[i],
-                (uint256, bytes32, uint256[], address[], bool, bytes)
+                (uint256, uint256, bytes32, uint256[], address[], bool, bytes)
             );
 
             require(
@@ -819,6 +837,7 @@ contract GpactCrosschainControl is
                     failRootTransaction(_crosschainTxId);
                 } else {
                     emit Segment(
+                        _rootBcId,
                         _crosschainTxId,
                         _hashOfCallGraph,
                         _callPath,
