@@ -43,17 +43,29 @@ contract GpactCrosschainControl is
         bytes _callGraph
     );
 
+    // Segment event indicates that a function call has executed on a blockchain other than the
+    // root blockchain. As well as executing logic, Segment events can be used to cascade errors
+    // from leave of the call tree to the root blockchain.
     bytes32 internal constant SEGMENT_EVENT_SIGNATURE =
         keccak256(
             "Segment(uint256,uint256,bytes32,uint256[],address[],bool,bytes)"
         );
     event Segment(
+        // The segment function's understanding of the root blockchain. This is needed
+        // for the signalling function.
         uint256 _rootBlockchainId,
+        // Transaction id in conjunction with the Hash of the Call Tree are used to
+        // ensure that this segment function's understanding of the call tree matches
+        // that of other segments and the root.
         uint256 _crossBlockchainTransactionId,
         bytes32 _hashOfCallGraph,
+        // The part of the call tree that this segment relates to.
         uint256[] _callPath,
+        // List of contracts locked as a result of the execution of this function.
         address[] _lockedContracts,
+        // Whether this function executed correctly or not.
         bool _success,
+        // Value returns by the application function called by this segment.
         bytes _returnValue
     );
     // 0xe6763dd9
