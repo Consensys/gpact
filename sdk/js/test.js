@@ -412,7 +412,10 @@ async function test() {
     let temp = await simulator.simulate(new CrosschainCall(chainA, "bridge", bridgeAddrA, "buyNFTUsingRemoteFunds", buyerAddr, nftAddrA, 1, chainB, tokenAddrB));
     let root = temp[0];
     console.log("Execute crosschain transaction");
-    await executor.crosschainCall(root);
+    res = await executor.crosschainCall(root);
+    if (res != null) {
+        throw new Error("Crosschain Transaction Failed");
+    }
     console.log(" Execute crosschain transaction completed");
 
     console.log("Balances after transfer");

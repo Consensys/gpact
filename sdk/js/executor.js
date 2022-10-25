@@ -1,7 +1,7 @@
 const startFuncSig =
   "0x77dab611ad9a24b763e2742f57749a0227393e0da76212d74fceb326b0661424";
 const segmentFuncSig =
-  "0xb01557f1f634b7c5072ab5e36d07a2355ef819faca5a3d321430d71987155b8f";
+  "0x86df4889cc0714742f804eb411c54569f17daedfcf415d5c81a12999948267a7";
 const rootFuncSig =
   "0xe6763dd99bf894d72f3499dd572aa42876eae7ae028c32fff21654e1bbc4c807";
 const gpactABI = [
@@ -175,6 +175,12 @@ const gpactABI = [
   {
     anonymous: false,
     inputs: [
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "_rootBlockchainId",
+        type: "uint256",
+      },
       {
         indexed: false,
         internalType: "uint256",

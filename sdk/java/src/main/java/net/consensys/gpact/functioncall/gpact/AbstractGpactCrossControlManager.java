@@ -32,12 +32,18 @@ public abstract class AbstractGpactCrossControlManager extends AbstractBlockchai
 
   private static final byte[] SEGMENT_EVENT_SIGNATURE =
       Hash.keccak256(
-              Bytes.wrap("Segment(uint256,bytes32,uint256[],address[],bool,bytes)".getBytes()))
+              Bytes.wrap(
+                  "Segment(uint256,uint256,bytes32,uint256[],address[],bool,bytes)".getBytes()))
           .toArray();
   protected static final Bytes SEGMENT_EVENT_SIGNATURE_BYTES = Bytes.wrap(SEGMENT_EVENT_SIGNATURE);
   private static final byte[] ROOT_EVENT_SIGNATURE =
       Hash.keccak256(Bytes.wrap("Root(uint256,bool)".getBytes())).toArray();
   protected static final Bytes ROOT_EVENT_SIGNAUTRE_BYTES = Bytes.wrap(ROOT_EVENT_SIGNATURE);
+
+  // Use the code below to print out the segment event signature hash.
+  //  static {
+  //    System.out.println("Segment sig: " + SEGMENT_EVENT_SIGNATURE_BYTES.toHexString());
+  //  }
 
   protected AbstractGpactCrossControlManager(
       final Credentials credentials, final BlockchainConfig bcConfig) throws IOException {
